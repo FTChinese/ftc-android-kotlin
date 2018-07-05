@@ -2,19 +2,43 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/colorWheat</item>
+        <item name="colorPrimaryDark">@color/colorBlack30</item>
+        <item name="colorAccent">@color/colorClaret</item>
     </style>
+
 
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="Origami" parent="AppTheme.NoActionBar">
+
+
+        <!-- Window colors -->
+        <item name="android:windowBackground">@color/colorPaper</item>
+
+        <!-- Button Style -->
+        <item name="buttonStyle">@style/OrigamiButton</item>
+
+        <!-- Toolbar styles -->
+        <item name="toolbarStyle">@style/OrigamiToolbar</item>
+
+    </style>
+
+    <style name="OrigamiButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@color/colorTeal</item>
+    </style>
+
+    <style name="OrigamiToolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">@color/colorWheat</item>
+    </style>
+
 
 </resources>

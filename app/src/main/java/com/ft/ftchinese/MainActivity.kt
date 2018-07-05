@@ -16,10 +16,16 @@ import android.view.*
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 
 val newsChannels = arrayOf("首页", "中国", "全球", "经济", "金融市场", "商业", "创新经济", "教育", "观点", "管理", "生活时尚")
+val englishChannels = arrayOf("英语电台", "金融英语速读", "双语阅读", "原声视频")
+val ftaChannels = arrayOf("商学院观察", "热点观察", "MBA训练营", "互动小测", "深度阅读")
+val videoChannels = arrayOf("最新", "政经", "商业", "秒懂", "金融", "文化", "高端视点", "有色眼镜")
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, ContentFragment.OnDataLoadListener {
 
     private val tag = "MainActivity"
 
@@ -29,21 +35,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when (item.itemId) {
             R.id.nav_news -> {
                 supportActionBar?.setTitle(R.string.app_name)
+                container.adapter = SectionsPagerAdapter(newsChannels, supportFragmentManager)
 
             }
 
             R.id.nav_english -> {
                 supportActionBar?.setTitle(R.string.nav_english)
+                container.adapter = SectionsPagerAdapter(englishChannels, supportFragmentManager)
 
             }
 
             R.id.nav_ftacademy -> {
                 supportActionBar?.setTitle(R.string.nav_ftacademy)
+                container.adapter = SectionsPagerAdapter(ftaChannels, supportFragmentManager)
 
             }
 
             R.id.nav_video -> {
                 supportActionBar?.setTitle(R.string.nav_video)
+                container.adapter = SectionsPagerAdapter(videoChannels, supportFragmentManager)
 
             }
 
@@ -71,14 +81,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Set a listener that will be notified when a menu item is selected.
         nav_view.setNavigationItemSelectedListener(this)
 
-        container.adapter = SectionsPagerAdapter(supportFragmentManager)
+        container.adapter = SectionsPagerAdapter(newsChannels, supportFragmentManager)
 
         // Link ViewPager and TabLayout
         tab_layout.setupWithViewPager(container)
 
+        // Bottom navigation listener
         bottom_nav.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)
         bottom_nav.setOnNavigationItemReselectedListener(bottomNavItemReseletedListener)
+
+        Log.i(tag, "fileList: ${fileList()}")
+
     }
+
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
@@ -134,11 +149,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
+    override fun onDataLoaded() {
+        progress_bar.visibility = View.GONE
+    }
+
+    override fun onDataLoading() {
+        progress_bar.visibility = View.VISIBLE
+    }
+
     /**
      * A [FragmentPagerAdapter] that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+    inner class SectionsPagerAdapter(private val channels: Array<String>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
         override fun getItem(position: Int): Fragment {
             // getItem is called to instantiate the fragment for the given page.
@@ -148,44 +171,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         override fun getCount(): Int {
             // Show 3 total pages.
-            return newsChannels.size
+            return channels.size
         }
 
         override fun getPageTitle(position: Int): CharSequence? {
-            return newsChannels[position]
+            return channels[position]
         }
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-//    class PlaceholderFragment : Fragment() {
-//
-//        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-//                                  savedInstanceState: Bundle?): View? {
-//            val rootView = inflater.inflate(R.layout.fragment_main, container, false)
-////            rootView.section_label.text = getString(R.string.section_format, arguments?.getInt(ARG_SECTION_NUMBER))
-//            return rootView
-//        }
-//
-//        companion object {
-//            /**
-//             * The fragment argument representing the section number for this
-//             * fragment.
-//             */
-//            private val ARG_SECTION_NUMBER = "section_number"
-//
-//            /**
-//             * Returns a new instance of this fragment for the given section
-//             * number.
-//             */
-//            fun newInstance(sectionNumber: Int): PlaceholderFragment {
-//                val fragment = PlaceholderFragment()
-////                val args = Bundle()
-////                args.putInt(ARG_SECTION_NUMBER, sectionNumber)
-////                fragment.arguments = args
-//                return fragment
-//            }
-//        }
-//    }
 }
