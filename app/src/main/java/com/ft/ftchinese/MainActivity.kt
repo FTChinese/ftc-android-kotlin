@@ -1,6 +1,7 @@
 package com.ft.ftchinese
 
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.NavigationView
@@ -14,16 +15,43 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.*
 import android.widget.Toast
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
-val newsChannels = arrayOf("首页", "中国", "全球", "经济", "金融市场", "商业", "创新经济", "教育", "观点", "管理", "生活时尚")
-val englishChannels = arrayOf("英语电台", "金融英语速读", "双语阅读", "原声视频")
-val ftaChannels = arrayOf("商学院观察", "热点观察", "MBA训练营", "互动小测", "深度阅读")
-val videoChannels = arrayOf("最新", "政经", "商业", "秒懂", "金融", "文化", "高端视点", "有色眼镜")
+val httpClient = OkHttpClient()
+val gson = Gson()
+
+suspend fun requestData(url: String): String? {
+    try {
+        val request = Request.Builder()
+                .url(url)
+                .build()
+        val response = httpClient.newCall(request).execute()
+        return response.body()?.string()
+    } catch (e: Exception) {
+        Log.e("requestData", e.toString())
+    }
+
+    return null
+}
+
+suspend fun readHtml(resources: Resources, resId: Int): String? {
+
+    try {
+        val input = resources.openRawResource(resId)
+        return input.bufferedReader().use { it.readText() }
+
+    } catch (e: ExceptionInInitializerError) {
+        Log.e("readHtml", e.toString())
+    }
+    return null
+}
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, ContentFragment.OnDataLoadListener {
 
@@ -161,12 +189,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * A [FragmentPagerAdapter] that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    inner class SectionsPagerAdapter(private val channels: Array<String>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+    inner class SectionsPagerAdapter(private val channels: Array<Channel>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
         override fun getItem(position: Int): Fragment {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            return ContentFragment.newInstance()
+            Log.i(tag, "Fragment data: ${channels[position]}")
+            return ContentFragment.newInstance(gson.toJson(channels[position]))
         }
 
         override fun getCount(): Int {
@@ -175,7 +204,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
 
         override fun getPageTitle(position: Int): CharSequence? {
-            return channels[position]
+            return channels[position].title
         }
     }
 

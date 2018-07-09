@@ -1,6 +1,8 @@
 package com.ft.ftchinese
 
 import android.content.Context
+import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -26,6 +28,7 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
     private lateinit var webView: WebView
     private val TAG = "ContentFragment"
     private lateinit var listener: OnDataLoadListener
+    private lateinit var channel: Channel
 
     interface OnDataLoadListener {
         fun onDataLoaded()
@@ -33,17 +36,35 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         fun onDataLoading()
     }
 
+    companion object {
+        /**
+         * The fragment argument representing the section number for this
+         * fragment.
+         */
+        private val ARG_SECTION_CHANNEL = "section_chanel"
+
+        /**
+         * Returns a new instance of this fragment for the given section
+         * number.
+         */
+        fun newInstance(channel: String): ContentFragment {
+            val fragment = ContentFragment()
+            val args = Bundle()
+            args.putString(ARG_SECTION_CHANNEL, channel)
+            fragment.arguments = args
+            return fragment
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         swipeRefreshLayout = inflater.inflate(R.layout.fragment_main, container, false) as SwipeRefreshLayout
-//        progressBar = swipeRefreshLayout.findViewById(R.id.progress_bar)
 
         swipeRefreshLayout.setOnRefreshListener(this)
 
         Log.i(TAG, "Children: ${swipeRefreshLayout.childCount}")
 //            rootView.section_label.text = getString(R.string.section_format, arguments?.getInt(ARG_SECTION_NUMBER))
-        webView = swipeRefreshLayout.findViewById<WebView>(R.id.webview)
+        webView = swipeRefreshLayout.findViewById(R.id.webview)
         webView.setBackgroundColor(Color.TRANSPARENT)
         webView.settings.apply {
             javaScriptEnabled = true
@@ -52,7 +73,11 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         webView.webViewClient = MyWebViewClient(activity!!)
 
-        init()
+        val channelData = arguments?.getString(ARG_SECTION_CHANNEL)
+
+        channel = gson.fromJson<Channel>(channelData, Channel::class.java)
+
+        init(channel)
 
         return swipeRefreshLayout
     }
@@ -62,68 +87,50 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         listener = context as OnDataLoadListener
     }
 
-    companion object {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private val ARG_SECTION_NUMBER = "section_number"
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        fun newInstance(): ContentFragment {
-            val fragment = ContentFragment()
-//                val args = Bundle()
-//                args.putInt(ARG_SECTION_NUMBER, sectionNumber)
-//                fragment.arguments = args
-            return fragment
-        }
-    }
 
     override fun onRefresh() {
         Toast.makeText(context, "Refreshing", Toast.LENGTH_SHORT).show()
-        init()
+        init(channel)
     }
 
-    private fun init() {
-//        webView.loadUrl("file:///android_res/raw/home.html")
+
+    private fun init(channel: Channel) {
 
         // Only show progress icon if this is not a refreshing action
         if (!swipeRefreshLayout.isRefreshing) {
             listener.onDataLoading()
         }
 
+        if (channel.listUrl != null ) {
 
-        launch (UI) {
-            val html = readHtml(R.raw.home)
-            if (html != null) {
-                webView.loadDataWithBaseURL("http://www.ftchinese.com", html, "text/html", null, null)
+            launch (UI) {
+                val templateFile = async { readHtml(resources, R.raw.list) }
+                val htmlFragment = async { requestData(channel.listUrl)}
+                var localHtml = templateFile.await()
+                val remoteHtml = htmlFragment.await()
+                if (localHtml != null) {
+                    if (remoteHtml != null) {
+                        localHtml = localHtml.replace("{list-content}", remoteHtml)
+                    }
+                    webView.loadDataWithBaseURL("http://www.ftchinese.com", localHtml, "text/html", null, null)
+
+
+
+                } else {
+                    webView.loadData("<h1>Error loading data</h1>", "text/html", null)
+                }
 
                 listener.onDataLoaded()
-
-            } else {
-                webView.loadData("<h1>Error loading data</h1>", "text/html", null)
-            }
-
-            // If this is refresh action, hide refreshing icon
-            if (swipeRefreshLayout.isRefreshing) {
                 swipeRefreshLayout.isRefreshing = false
             }
+        } else if (channel.webUrl != null) {
+            webView.loadUrl(channel.webUrl)
+
+            listener.onDataLoaded()
+            swipeRefreshLayout.isRefreshing = false
         }
-    }
 
-    private fun readHtml(resId: Int): String? {
 
-        try {
-            val input = resources.openRawResource(resId)
-            return input.bufferedReader().use { it.readText() }
-
-        } catch (e: ExceptionInInitializerError) {
-            Log.e(TAG, e.toString())
-        }
-        return null
     }
 }
 
@@ -133,15 +140,18 @@ class MyWebViewClient(private val context: Context) : WebViewClient() {
 
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
         super.onReceivedError(view, request, error)
-        Toast.makeText(context, "Oh no!", Toast.LENGTH_SHORT).show()
-        Log.i(tag, "Request method: ${request?.method}")
-        Log.i(tag, "Request URL: ${request?.url}")
-        Log.i(tag, error.toString())
+        Toast.makeText(context, "Web resource loading error!", Toast.LENGTH_SHORT).show()
+        Log.e(tag, "Request method: ${request?.method}")
+        Log.e(tag, "Request URL: ${request?.url}")
+        Log.e(tag, error.toString())
     }
 
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
         Toast.makeText(context, "You clicked a link: $url", Toast.LENGTH_SHORT).show()
-        Log.i(tag, "Load url: ${url}")
-        return false
+        Log.i(tag, "Load url: $url")
+
+        val intent = Intent(context, ContentActivity::class.java)
+        context.startActivity(intent)
+        return true
     }
 }
