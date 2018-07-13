@@ -3,8 +3,10 @@ package com.ft.ftchinese
 import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.NavigationView
+import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
@@ -53,7 +55,9 @@ suspend fun readHtml(resources: Resources, resId: Int): String? {
     return null
 }
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, ContentFragment.OnDataLoadListener {
+const val TAB_INDEX_KEY = "tab_index"
+
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, TabLayout.OnTabSelectedListener, ContentFragment.OnDataLoadListener {
 
     private val tag = "MainActivity"
 
@@ -101,6 +105,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
         drawer_layout.addDrawerListener(toggle)
@@ -109,19 +114,68 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         // Set a listener that will be notified when a menu item is selected.
         nav_view.setNavigationItemSelectedListener(this)
 
+        // Set ViewPager adapter
         container.adapter = SectionsPagerAdapter(newsChannels, supportFragmentManager)
 
         // Link ViewPager and TabLayout
         tab_layout.setupWithViewPager(container)
+        tab_layout.addOnTabSelectedListener(this)
 
         // Bottom navigation listener
         bottom_nav.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)
         bottom_nav.setOnNavigationItemReselectedListener(bottomNavItemReseletedListener)
 
-        Log.i(tag, "fileList: ${fileList()}")
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        Log.i(tag, "Activity start")
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        Log.i(tag, "Activity resume")
+    }
+
+    override fun onPause() {
+        super.onPause()
+
+        Log.i(tag, "Activity pause")
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        Log.i(tag, "Activity stop")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+
+        Log.i(tag, "Activity restart")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        Log.i(tag, "Activity destroy")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+
+        Log.i(tag, "Saving instance state: selected tab position is ${tab_layout.selectedTabPosition}")
 
     }
 
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+
+        super.onRestoreInstanceState(savedInstanceState)
+
+        Log.i(tag, "Restoring instance state")
+    }
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
@@ -175,6 +229,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    override fun onTabSelected(tab: TabLayout.Tab?) {
+        Log.i(tag, "Tab position: ${tab?.position}")
+        Log.i(tag, "Tab selected: ${tab_layout.selectedTabPosition}")
+    }
+
+    override fun onTabReselected(tab: TabLayout.Tab?) {
+        Log.i(tag, "Tab reselected: ${tab?.position}")
+    }
+
+    override fun onTabUnselected(tab: TabLayout.Tab?) {
+        Log.i(tag, "Tab unselected: ${tab?.position}")
     }
 
     override fun onDataLoaded() {

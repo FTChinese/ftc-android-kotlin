@@ -1,12 +1,10 @@
 package com.ft.ftchinese
 
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.View
-import android.webkit.WebView
 import android.widget.Toast
 
 import kotlinx.android.synthetic.main.activity_content.*
@@ -15,6 +13,9 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 
 class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
+
+    private val TAG = "ContentActivity"
+    private lateinit var item: ListTarget
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,22 +28,66 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
 
         swipe_refresh.setOnRefreshListener(this)
 
+        val targetContent = intent.getStringExtra(EXTRA_LIST_TARGET)
 
-        init()
+        Log.i(TAG, targetContent)
+
+        item = gson.fromJson<ListTarget>(targetContent, ListTarget::class.java)
+
+
+        init(item)
 
     }
 
-    private fun init() {
+    private fun init(item: ListTarget) {
         if (!swipe_refresh.isRefreshing) {
             progress_bar.visibility = View.VISIBLE
         }
+
+        val activity = this;
         launch(UI) {
+
+            val url = "https://api.ftmailbox.com/index.php/jsapi/get_story_more_info/${item.id}"
+
             val templateFile = async { readHtml(resources, R.raw.story) }
+            val jsonRequest = async { requestData(url) }
 
-            val html = templateFile.await()
+            var html = templateFile.await()
+            val jsonData = jsonRequest.await()
 
-            if (html != null) {
+            if (html != null && jsonData != null) {
+
+                val article = gson.fromJson<ArticleDetail>(jsonData, ArticleDetail::class.java)
+
+
+                html = html.replace("{story-body}", article.bodyXML.cn)
+                        .replace("{story-headline}", article.titleCn)
+                        .replace("{story-byline}", article.byline)
+                        .replace("{story-time}", article.createdAt)
+                        .replace("{story-lead}", article.standfirst)
+                        .replace("{story-theme}", article.htmlForTheme())
+                        .replace("{story-tag}", article.tag)
+                        .replace("{story-id}", item.id)
+                        .replace("{story-image}", article.htmlForCoverImage())
+                        .replace("{related-stories}", article.htmlForRelatedStories())
+                        .replace("{related-topics}", article.htmlForRelatedTopics())
+//                        .replace("{comments-order}", "")
+//                        .replace("{story-container-style}", "")
+//                        .replace("['{follow-tags}']", "")
+//                        .replace("['{follow-topics}']", "")
+//                        .replace("['{follow-industries}']", "")
+//                        .replace("['{follow-areas}']", "")
+//                        .replace("['{follow-authors}']", "")
+//                        .replace("['{follow-columns}']", "")
+//                        .replace("{adchID}", "")
+//                        .replace("{ad-banner}", "")
+//                        .replace("{ad-mpu}", "")
+//                        .replace("{font-class}", "")
+                        .replace("{comments-id}", item.id)
+
                 webview.loadDataWithBaseURL("http://www.ftchinese.com", html, "text/html", null, null)
+            } else {
+                Toast.makeText(activity, "Timeout", Toast.LENGTH_SHORT).show()
             }
 
             swipe_refresh.isRefreshing = false
@@ -52,6 +97,6 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
 
     override fun onRefresh() {
         Toast.makeText(this, "Refreshing", Toast.LENGTH_SHORT).show()
-        init()
+        init(item)
     }
 }
