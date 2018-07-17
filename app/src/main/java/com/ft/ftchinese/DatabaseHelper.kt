@@ -4,15 +4,37 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 import android.widget.Toast
 
+/**
+ * try {
+    db = dbHelper?.readableDatabase
+
+    val retrieveResult = async { DatabaseHelper.queryStory(db, item.id) }
+
+    val storyData = retrieveResult.await()
+
+    if (storyData != null) {
+    webview.loadDataWithBaseURL("http://www.ftchinese.com", storyData.body, "text/html", null, null)
+    stopProgress()
+
+    db?.close()
+    return@launch
+    }
+
+    } catch (e: SQLiteException) {
+    Log.e(TAG, e.toString())
+    }
+    async { DatabaseHelper.insertStory(db, item.id, html) }
+ */
 class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DB_NAME, null, DB_VERSION) {
     override fun onCreate(db: SQLiteDatabase?) {
-
+        updateDatabase(db, 0, DB_VERSION)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-
+        updateDatabase(db, oldVersion, newVersion)
     }
 
     private fun updateDatabase(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
@@ -20,7 +42,7 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DB_NAME, 
             db?.execSQL(CREATE_STORY)
             Toast.makeText(context, "Created db", Toast.LENGTH_SHORT).show()
 
-            insertStory(db, "001078513", "中国总理李克强在与欧洲领导人会晤后表示，在努力维护全球贸易体系之际，中国既不愿将美国，也不愿将俄罗斯排除在外。")
+            Log.i(TAG, "Created database $DB_VERSION")
         }
 
         if (oldVersion < 2) {
@@ -29,31 +51,56 @@ class DatabaseHelper(val context: Context) : SQLiteOpenHelper(context, DB_NAME, 
     }
 
     companion object {
+        private const val TAG = "DatabaseHelper"
         private const val DB_NAME = "article"
         private const val DB_VERSION = 1
         private const val TABLE_STORY = "story"
+        private var INSTANCE: DatabaseHelper? = null
 
         private val CREATE_STORY = """
         CREATE TABLE IF NOT EXISTS story (
             _id INTEGER PRIMARY KEY AUTOINCREMENT,
             id TEXT NOT NULL UNIQUE ON CONFLICT REPLACE,
-            body TEXT,
+            body TEXT
         );
         """.trimIndent()
 
-        private fun insertStory(db: SQLiteDatabase?, id: String, body: String) {
+        fun getInstance(context: Context): DatabaseHelper? {
+            if (INSTANCE == null) {
+                synchronized(DatabaseHelper::class) {
+                    INSTANCE = DatabaseHelper(context)
+                }
+            }
+            return INSTANCE
+        }
+
+        fun insertStory(db: SQLiteDatabase?, id: String, body: String) {
             val storyValues = ContentValues()
             storyValues.put("id", id)
             storyValues.put("body", body)
             db?.insert(TABLE_STORY, null, storyValues)
         }
 
-        private fun updateStory(db: SQLiteDatabase?, id: String, body: String) {
+        fun queryStory(db: SQLiteDatabase?, id: String): StoryData? {
+            val cursor = db?.query(TABLE_STORY, arrayOf("id", "body"), "id = ?", arrayOf(id), null, null, null, "1")
 
+            if (cursor != null && cursor.moveToFirst()) {
+                val id = cursor.getString(0)
+                val body = cursor.getString(1)
+                cursor.close()
+                return StoryData(id, body)
+            }
+            return null
+        }
+
+        fun updateStory(db: SQLiteDatabase?, id: String, body: String) {
+            val storyValues = ContentValues()
+            storyValues.put("body", body)
+            db?.update(TABLE_STORY, storyValues, "id = ?", arrayOf(id))
         }
 
         // Delete all rows in a table
-        private fun deleteAll(db: SQLiteDatabase?, table: String) {
+        fun deleteAll(db: SQLiteDatabase?, table: String) {
             db?.delete(table, null, null)
         }
     }

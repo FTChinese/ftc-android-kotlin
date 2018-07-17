@@ -1,9 +1,7 @@
 package com.ft.ftchinese
 
-import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.NavigationView
 import android.support.design.widget.TabLayout
@@ -19,10 +17,6 @@ import android.view.*
 import android.widget.Toast
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.app_bar_main.*
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
@@ -57,7 +51,7 @@ suspend fun readHtml(resources: Resources, resId: Int): String? {
 
 const val TAB_INDEX_KEY = "tab_index"
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, TabLayout.OnTabSelectedListener, ContentFragment.OnDataLoadListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, TabLayout.OnTabSelectedListener, SectionFragment.OnDataLoadListener {
 
     private val tag = "MainActivity"
 
@@ -262,7 +256,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
             Log.i(tag, "Fragment data: ${channels[position]}")
-            return ContentFragment.newInstance(gson.toJson(channels[position]))
+            return SectionFragment.newInstance(gson.toJson(channels[position]))
         }
 
         override fun getCount(): Int {

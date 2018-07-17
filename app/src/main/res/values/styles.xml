@@ -1,24 +1,17 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorWheat</item>
         <item name="colorPrimaryDark">@color/colorBlack30</item>
         <item name="colorAccent">@color/colorClaret</item>
-    </style>
-
-
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
-    <style name="Origami" parent="AppTheme.NoActionBar">
+    <style name="Origami" parent="AppTheme">
 
 
         <!-- Window colors -->

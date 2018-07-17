@@ -16,15 +16,16 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 
-const val EXTRA_LIST_TARGET = "list_target"
+const val EXTRA_SECTION_ITEM = "section_item"
+const val EXTRA_DIRECT_OPEN = "article_direct_open"
 
-class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
+class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var webView: WebView
     private lateinit var listener: OnDataLoadListener
 
-    private val TAG = "ContentFragment"
+    private val TAG = "SectionFragment"
     private var channel: Channel? = null
 
     interface OnDataLoadListener {
@@ -44,8 +45,8 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        fun newInstance(channel: String): ContentFragment {
-            val fragment = ContentFragment()
+        fun newInstance(channel: String): SectionFragment {
+            val fragment = SectionFragment()
             val args = Bundle()
             args.putString(ARG_SECTION_CHANNEL, channel)
             fragment.arguments = args
@@ -60,7 +61,7 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
         swipeRefreshLayout.setOnRefreshListener(this)
 
 //            rootView.section_label.text = getString(R.string.section_format, arguments?.getInt(ARG_SECTION_NUMBER))
-        webView = swipeRefreshLayout.findViewById(R.id.webview)
+        webView = swipeRefreshLayout.findViewById(R.id.web_view)
         webView.visibility = View.INVISIBLE
         webView.settings.apply {
             javaScriptEnabled = true
@@ -88,14 +89,7 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onRefresh() {
         Toast.makeText(context, "Refreshing", Toast.LENGTH_SHORT).show()
-        refresh()
-    }
-
-
-    private fun refresh() {
-        launch {
-
-        }
+        init()
     }
 
     private fun init() {
@@ -203,9 +197,15 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             Toast.makeText(context, "You clicked a link: $url", Toast.LENGTH_SHORT).show()
             Log.i(tag, "Load url: $url")
 
-            val intent = Intent(context, ContentActivity::class.java)
-            context.startActivity(intent)
-            return true
+
+            if (url != null) {
+                val intent = Intent(context, ContentActivity::class.java)
+                intent.putExtra(EXTRA_DIRECT_OPEN, url)
+                context.startActivity(intent)
+                return true
+            }
+
+            return false
         }
     }
 
@@ -216,7 +216,7 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
             Log.i("WebChromeClient", "Click event: $message")
 
             val intent = Intent(activity, ContentActivity::class.java)
-            intent.putExtra(EXTRA_LIST_TARGET, message)
+            intent.putExtra(EXTRA_SECTION_ITEM, message)
             activity?.startActivity(intent)
         }
     }
