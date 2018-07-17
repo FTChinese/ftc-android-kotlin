@@ -22,9 +22,10 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
     private lateinit var webView: WebView
-    private val TAG = "ContentFragment"
     private lateinit var listener: OnDataLoadListener
-    private lateinit var channel: Channel
+
+    private val TAG = "ContentFragment"
+    private var channel: Channel? = null
 
     interface OnDataLoadListener {
         fun onDataLoaded()
@@ -58,7 +59,6 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         swipeRefreshLayout.setOnRefreshListener(this)
 
-        Log.i(TAG, "Children: ${swipeRefreshLayout.childCount}")
 //            rootView.section_label.text = getString(R.string.section_format, arguments?.getInt(ARG_SECTION_NUMBER))
         webView = swipeRefreshLayout.findViewById(R.id.webview)
         webView.visibility = View.INVISIBLE
@@ -75,7 +75,7 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
         channel = gson.fromJson<Channel>(channelData, Channel::class.java)
 
-        init(channel)
+        init()
 
         return swipeRefreshLayout
     }
@@ -88,50 +88,87 @@ class ContentFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener {
 
     override fun onRefresh() {
         Toast.makeText(context, "Refreshing", Toast.LENGTH_SHORT).show()
-        init(channel)
+        refresh()
     }
 
 
-    private fun init(channel: Channel) {
+    private fun refresh() {
+        launch {
+
+        }
+    }
+
+    private fun init() {
 
         // Only show progress icon if this is not a refreshing action
         if (!swipeRefreshLayout.isRefreshing) {
             listener.onDataLoading()
         }
 
-        if (channel.listUrl != null ) {
+        if (channel?.listUrl != null ) {
 
             launch (UI) {
-                val templateFile = async { readHtml(resources, R.raw.list) }
-                val htmlFragment = async { requestData(channel.listUrl)}
-                var localHtml = templateFile.await()
-                val remoteHtml = htmlFragment.await()
-                if (localHtml != null) {
-                    if (remoteHtml != null) {
-                        Log.i(TAG, "Remote html: $remoteHtml")
-                        localHtml = localHtml.replace("{list-content}", remoteHtml)
+                if (!swipeRefreshLayout.isRefreshing && channel?.name != null) {
+                    val readCacheResult = async { Store.load(context, "${channel?.name}.html") }
+                    val cachedHtml = readCacheResult.await()
 
-                        // Save file
-                        async { Store.save(context, "${channel.name}.html") }
+                    if (cachedHtml != null) {
+                        Log.i(TAG, "Using cached for ${channel?.name}")
+                        webView.loadDataWithBaseURL("http://www.ftchinese.com", cachedHtml, "text/html", null, null)
+                        stopProgress()
 
+                        return@launch
                     }
-                    webView.loadDataWithBaseURL("http://www.ftchinese.com", localHtml, "text/html", null, null)
-
-                } else {
-                    webView.loadData("<h1>Error loading data</h1>", "text/html", null)
                 }
 
-                listener.onDataLoaded()
-                swipeRefreshLayout.isRefreshing = false
-            }
-        } else if (channel.webUrl != null) {
-            webView.loadUrl(channel.webUrl)
+                val templateHtmlResult = async { readHtml(resources, R.raw.list) }
+                val requestDataResult = async { requestData(channel?.listUrl!!)}
 
-            listener.onDataLoaded()
-            swipeRefreshLayout.isRefreshing = false
+                val templateHtml = templateHtmlResult.await()
+                val remoteHtml = requestDataResult.await()
+
+                if (templateHtml == null) {
+                    webView.loadData("<h1>Error loading data</h1>", "text/html", null)
+                    stopProgress()
+                    return@launch
+                }
+
+
+                if (remoteHtml == null) {
+                    webView.loadData("<h1>Error loading data</h1>", "text/html", null)
+                    stopProgress()
+                    return@launch
+
+                }
+
+                val htmlString = templateHtml.replace("{list-content}", remoteHtml)
+
+                webView.loadDataWithBaseURL("http://www.ftchinese.com", htmlString, "text/html", null, null)
+
+                stopProgress()
+
+                // Cache file
+
+                if (channel?.name != null) {
+                    async { Store.save(context, "${channel?.name}.html", htmlString) }
+                }
+
+            }
+
+            return
         }
 
+        if (channel?.webUrl != null) {
+            webView.loadUrl(channel?.webUrl)
 
+            stopProgress()
+        }
+
+    }
+
+    private fun stopProgress() {
+        listener.onDataLoaded()
+        swipeRefreshLayout.isRefreshing = false
     }
 
     inner class MyWebViewClient(private val context: Context) : WebViewClient() {

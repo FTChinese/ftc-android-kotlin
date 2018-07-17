@@ -20,6 +20,7 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_content)
+
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -44,55 +45,68 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
             progress_bar.visibility = View.VISIBLE
         }
 
-        val activity = this;
+        val activity = this
         launch(UI) {
+
 
             val url = "https://api.ftmailbox.com/index.php/jsapi/get_story_more_info/${item.id}"
 
-            val templateFile = async { readHtml(resources, R.raw.story) }
-            val jsonRequest = async { requestData(url) }
+            val readTemplateResult = async { readHtml(resources, R.raw.story) }
+            val htmlTemplate = readTemplateResult.await()
 
-            var html = templateFile.await()
-            val jsonData = jsonRequest.await()
-
-            if (html != null && jsonData != null) {
-
-                val article = gson.fromJson<ArticleDetail>(jsonData, ArticleDetail::class.java)
-
-
-                html = html.replace("{story-body}", article.bodyXML.cn)
-                        .replace("{story-headline}", article.titleCn)
-                        .replace("{story-byline}", article.byline)
-                        .replace("{story-time}", article.createdAt)
-                        .replace("{story-lead}", article.standfirst)
-                        .replace("{story-theme}", article.htmlForTheme())
-                        .replace("{story-tag}", article.tag)
-                        .replace("{story-id}", item.id)
-                        .replace("{story-image}", article.htmlForCoverImage())
-                        .replace("{related-stories}", article.htmlForRelatedStories())
-                        .replace("{related-topics}", article.htmlForRelatedTopics())
-//                        .replace("{comments-order}", "")
-//                        .replace("{story-container-style}", "")
-//                        .replace("['{follow-tags}']", "")
-//                        .replace("['{follow-topics}']", "")
-//                        .replace("['{follow-industries}']", "")
-//                        .replace("['{follow-areas}']", "")
-//                        .replace("['{follow-authors}']", "")
-//                        .replace("['{follow-columns}']", "")
-//                        .replace("{adchID}", "")
-//                        .replace("{ad-banner}", "")
-//                        .replace("{ad-mpu}", "")
-//                        .replace("{font-class}", "")
-                        .replace("{comments-id}", item.id)
-
-                webview.loadDataWithBaseURL("http://www.ftchinese.com", html, "text/html", null, null)
-            } else {
-                Toast.makeText(activity, "Timeout", Toast.LENGTH_SHORT).show()
+            if (htmlTemplate == null) {
+                Toast.makeText(activity, "Cannot read html template!", Toast.LENGTH_SHORT).show()
+                stopProgress()
+                return@launch
             }
 
-            swipe_refresh.isRefreshing = false
-            progress_bar.visibility = View.GONE
+            val jsonRequestResult = async { requestData(url) }
+            val jsonData = jsonRequestResult.await()
+
+            if (jsonData == null) {
+                Toast.makeText(activity, "Fetch API failed", Toast.LENGTH_SHORT).show()
+                stopProgress()
+                return@launch
+            }
+
+            val article = gson.fromJson<ArticleDetail>(jsonData, ArticleDetail::class.java)
+
+            val html = htmlTemplate.replace("{story-body}", article.bodyXML.cn)
+                    .replace("{story-headline}", article.titleCn)
+                    .replace("{story-byline}", article.byline)
+                    .replace("{story-time}", article.createdAt)
+                    .replace("{story-lead}", article.standfirst)
+                    .replace("{story-theme}", article.htmlForTheme())
+                    .replace("{story-tag}", article.tag)
+                    .replace("{story-id}", item.id)
+                    .replace("{story-image}", article.htmlForCoverImage())
+                    .replace("{related-stories}", article.htmlForRelatedStories())
+                    .replace("{related-topics}", article.htmlForRelatedTopics())
+    //                        .replace("{comments-order}", "")
+    //                        .replace("{story-container-style}", "")
+    //                        .replace("['{follow-tags}']", "")
+    //                        .replace("['{follow-topics}']", "")
+    //                        .replace("['{follow-industries}']", "")
+    //                        .replace("['{follow-areas}']", "")
+    //                        .replace("['{follow-authors}']", "")
+    //                        .replace("['{follow-columns}']", "")
+    //                        .replace("{adchID}", "")
+    //                        .replace("{ad-banner}", "")
+    //                        .replace("{ad-mpu}", "")
+    //                        .replace("{font-class}", "")
+                    .replace("{comments-id}", item.id)
+
+            webview.loadDataWithBaseURL("http://www.ftchinese.com", html, "text/html", null, null)
+
+            stopProgress()
+
+
         }
+    }
+
+    private fun stopProgress() {
+        swipe_refresh.isRefreshing = false
+        progress_bar.visibility = View.GONE
     }
 
     override fun onRefresh() {

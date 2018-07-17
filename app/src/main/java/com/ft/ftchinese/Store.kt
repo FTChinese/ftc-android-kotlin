@@ -9,12 +9,14 @@ class Store {
     companion object {
         private val TAG = "Store"
 
-        suspend fun save(context: Context?, filename: String) {
+        suspend fun save(context: Context?, filename: String, text: String) {
 
             if (context == null) {
                 return
             }
             val file = File(context.filesDir, filename)
+
+            file.writeText(text)
 
             Log.i(TAG, "Absolute path: ${file.absolutePath}")
             Log.i(TAG, "Canonical path: ${file.canonicalPath}")
@@ -24,8 +26,11 @@ class Store {
             Log.i(TAG, "Usable space: ${file.usableSpace}")
         }
 
-        suspend fun load(context: Context, filename: String): String? {
+        suspend fun load(context: Context?, filename: String): String? {
             Log.i(TAG, "Reading file: $filename")
+            if (context == null) {
+                return null
+            }
             try {
                 return context.openFileInput(filename).bufferedReader().readText()
             } catch (e: Exception) {
