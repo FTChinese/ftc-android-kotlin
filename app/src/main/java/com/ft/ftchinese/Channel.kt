@@ -1,15 +1,68 @@
 package com.ft.ftchinese
 
-//val newsChannels = arrayOf("首页", "中国", "全球", "经济", "金融市场", "商业", "创新经济", "教育", "观点", "管理", "生活时尚")
-//val englishChannels = arrayOf("英语电台", "金融英语速读", "双语阅读", "原声视频")
-//val ftaChannels = arrayOf("商学院观察", "热点观察", "MBA训练营", "互动小测", "深度阅读")
-//val videoChannels = arrayOf("最新", "政经", "商业", "秒懂", "金融", "文化", "高端视点", "有色眼镜")
-
+/**
+ * Channel contains data used by a tab in TabLayout
+ */
 data class Channel(
+        val title: String, // Human-readable title
+        val name: String,  // Cache filename
+        val listUrl: String? = null, // Incomplete HTML
+        val webUrl: String? = null // A complete html page
+)
+
+data class ChannelMeta(
         val title: String,
-        val name: String,
-        val listUrl: String? = null,
-        val webUrl: String? = null
+        val description: String,
+        val theme: String,
+        val adid: String
+
+)
+
+/**
+ * This is the data type passed to ContentActivity so that it know what kind of data to load.
+ * iOS equivalent might be Page/Layouts/Content/ContentItem.swift#ContentItem
+ */
+data class ChannelItem(
+        val id: String,
+        val type: String,
+        val headline: String,
+        val shortlead: String
+) {
+    var adId: String = ""
+
+    val commentsId: String
+        get() {
+            return when(type) {
+                "interactive" -> "r_interactive_$id"
+                "video" -> "r_video_$id"
+                "story" -> id
+                "photo", "photonews" -> "r_photo_$id"
+                else -> "r_${type}_$id"
+            }
+        }
+
+    // See Page/FTChinese/Main/APIs.swift
+    val apiUrl: String?
+        get() {
+            return when(type) {
+                "story", "premium" -> "https://api.ftmailbox.com/index.php/jsapi/get_story_more_info/$id"
+                "interactive", "gym", "special" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
+                "video" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&004"
+                "radio" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&exclusive"
+                else -> null
+            }
+        }
+}
+
+data class ChannelList(
+        val items: Array<ChannelItem>
+)
+data class ChannelSection(
+        val lists: Array<ChannelList>
+)
+data class ChannelContent(
+        val meta: ChannelMeta,
+        val sections: Array<ChannelSection>
 )
 
 val newsChannels = arrayOf(
@@ -42,10 +95,10 @@ val englishChannels = arrayOf(
 
 val ftaChannels = arrayOf(
         Channel(title = "商学院观察", name = "fta_story", listUrl =  "https://api003.ftmailbox.com/m/corp/preview.html?pageid=mbastory&webview=ftcapp&bodyonly=yes"),
-        Channel("热点观察", name = "fta_hot", listUrl =   "https://api003.ftmailbox.com/m/corp/preview.html?pageid=hotcourse&webview=ftcapp&bodyonly=yes"),
-        Channel("MBA训练营", name = "fta_gym", listUrl =  "https://api003.ftmailbox.com/channel/mbagym.html?webview=ftcapp&bodyonly=yes"),
-        Channel("互动小测", name = "fta_quiz", listUrl =  "https://api003.ftmailbox.com/m/corp/preview.html?pageid=quizplus&webview=ftcapp&bodyonly=yes"),
-        Channel("深度阅读", name = "fta_reading", listUrl =  "https://api003.ftmailbox.com/m/corp/preview.html?pageid=mbaread&webview=ftcapp&bodyonly=yes")
+        Channel(title = "热点观察", name = "fta_hot", listUrl =   "https://api003.ftmailbox.com/m/corp/preview.html?pageid=hotcourse&webview=ftcapp&bodyonly=yes"),
+        Channel(title = "MBA训练营", name = "fta_gym", listUrl =  "https://api003.ftmailbox.com/channel/mbagym.html?webview=ftcapp&bodyonly=yes"),
+        Channel(title = "互动小测", name = "fta_quiz", listUrl =  "https://api003.ftmailbox.com/m/corp/preview.html?pageid=quizplus&webview=ftcapp&bodyonly=yes"),
+        Channel(title = "深度阅读", name = "fta_reading", listUrl =  "https://api003.ftmailbox.com/m/corp/preview.html?pageid=mbaread&webview=ftcapp&bodyonly=yes")
 )
 
 val videoChannels = arrayOf(

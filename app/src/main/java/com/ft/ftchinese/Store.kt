@@ -9,9 +9,9 @@ class Store {
     companion object {
         private val TAG = "Store"
 
-        suspend fun save(context: Context?, filename: String, text: String) {
+        fun save(context: Context?, filename: String?, text: String) {
 
-            if (context == null) {
+            if (context == null || filename == null) {
                 return
             }
             val file = File(context.filesDir, filename)
@@ -26,9 +26,9 @@ class Store {
             Log.i(TAG, "Usable space: ${file.usableSpace}")
         }
 
-        suspend fun load(context: Context?, filename: String): String? {
+        fun load(context: Context?, filename: String?): String? {
             Log.i(TAG, "Reading file: $filename")
-            if (context == null) {
+            if (context == null || filename == null) {
                 return null
             }
             try {

@@ -124,43 +124,35 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onStart() {
         super.onStart()
 
-        Log.i(tag, "Activity start")
     }
 
     override fun onResume() {
         super.onResume()
 
-        Log.i(tag, "Activity resume")
     }
 
     override fun onPause() {
         super.onPause()
 
-        Log.i(tag, "Activity pause")
     }
 
     override fun onStop() {
         super.onStop()
 
-        Log.i(tag, "Activity stop")
     }
 
     override fun onRestart() {
         super.onRestart()
 
-        Log.i(tag, "Activity restart")
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        Log.i(tag, "Activity destroy")
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-
-        Log.i(tag, "Saving instance state: selected tab position is ${tab_layout.selectedTabPosition}")
 
     }
 
@@ -168,7 +160,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         super.onRestoreInstanceState(savedInstanceState)
 
-        Log.i(tag, "Restoring instance state")
     }
 
     override fun onBackPressed() {

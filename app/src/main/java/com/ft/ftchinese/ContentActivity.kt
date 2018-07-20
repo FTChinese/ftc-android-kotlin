@@ -1,21 +1,53 @@
 package com.ft.ftchinese
 
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
+import android.support.customtabs.CustomTabsIntent
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
+import android.webkit.*
 import android.widget.Toast
 
 import kotlinx.android.synthetic.main.activity_content.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.error
+import org.jetbrains.anko.info
+import org.jetbrains.anko.warn
 
-class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener {
+/**
+ * This is used to show the content of an article.
+ */
+class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
 
-    private val TAG = "ContentActivity"
-    private lateinit var sectionItem: SectionItem
+    private var channelItem: ChannelItem? = null
+    private var cacheFilename: String? = null
+    private var isLoadUrl: Boolean = false
+
+    companion object {
+        private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
+        private const val EXTRA_LOAD_URL = "extra_load_url"
+
+        fun start(context: Context?, channelItem: ChannelItem) {
+            val intent = Intent(context, ContentActivity::class.java)
+            intent.putExtra(EXTRA_CHANNEL_ITEM, gson.toJson(channelItem))
+            context?.startActivity(intent)
+        }
+
+        fun start(context: Context?, url: String) {
+            val intent = Intent(context, ContentActivity::class.java)
+            intent.putExtra(EXTRA_LOAD_URL, url)
+            context?.startActivity(intent)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,99 +61,139 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
 
         swipe_refresh.setOnRefreshListener(this)
 
-        val extraUrl = intent.getStringExtra(EXTRA_DIRECT_OPEN)
+        web_view.settings.apply {
+            javaScriptEnabled = true
+            loadsImagesAutomatically = true
+        }
 
-        if (extraUrl != null) {
-            web_view.loadUrl(extraUrl)
+        web_view.apply {
+
+            addJavascriptInterface(WebAppInterface(), "Android")
+
+            webViewClient = ContentWebViewClient()
+            webChromeClient = MyChromeClient()
+
+            setOnKeyListener { v, keyCode, event ->
+                if (keyCode == KeyEvent.KEYCODE_BACK && web_view.canGoBack()) {
+                    web_view.goBack()
+                    return@setOnKeyListener true
+                }
+
+                false
+            }
+        }
+
+        // Load a URL directly into web view
+        val url = intent.getStringExtra(EXTRA_LOAD_URL)
+
+        if (url != null) {
+            isLoadUrl = true
+            web_view.loadUrl(url)
             return
         }
 
-        val extraContent = intent.getStringExtra(EXTRA_SECTION_ITEM)
-
-        Log.i(TAG, extraContent)
+        // If JS intercepted a click event in WebView and passed back data, parse the data to SectionItem
+        val extraContent = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
         // It contain the information to retrieve an article
-        sectionItem = gson.fromJson<SectionItem>(extraContent, SectionItem::class.java)
+        channelItem = gson.fromJson(extraContent, ChannelItem::class.java)
+        cacheFilename = "${channelItem?.type}_${channelItem?.id}.html"
 
         // Start retrieving data from cache or server
         init()
 
     }
 
-    private fun init() {
-        // If this is not a user initiated refresh action, it must be triggered by the system. Show the progress bar
-        if (!swipe_refresh.isRefreshing) {
-            progress_bar.visibility = View.VISIBLE
+    override fun onRefresh() {
+        Toast.makeText(this, "Refreshing", Toast.LENGTH_SHORT).show()
+
+        // If the page is directly loaded with url, call WebView's reload method.
+        if (isLoadUrl) {
+            web_view.reload()
+            return
         }
 
-        val filename = "${sectionItem.type}_${sectionItem.id}.json"
+        // Otherwise use WebView.loadDataWithBaseUrl
         launch(UI) {
-            val readTemplateResult = async { readHtml(resources, R.raw.story) }
-            val htmlTemplate = readTemplateResult.await()
-
-            // If html template is not read
-            if (htmlTemplate == null) {
-                Toast.makeText(this@ContentActivity, "Cannot read html template!", Toast.LENGTH_SHORT).show()
-                stopProgress()
-                return@launch
-            }
-
-            // If this is not a refreshing action, use cached data first.
-            if (!swipe_refresh.isRefreshing) {
-                val readCacheResult = async { Store.load(this@ContentActivity, filename) }
-
-                val cachedJson = readCacheResult.await()
-
-                // If cached data is found, use it first.
-                if (cachedJson != null) {
-                    Log.i(TAG, "Using cached data for $filename")
-                    // Use the cached data to render UI
-                    updateUi(htmlTemplate, cachedJson)
-                    return@launch
-                }
-            }
-
-            // Fetch data from server
-            val url = "https://api.ftmailbox.com/index.php/jsapi/get_story_more_info/${sectionItem.id}"
-
-
-
-            // Begin to fetch data from server
-            val jsonRequestResult = async { requestData(url) }
-            val jsonData = jsonRequestResult.await()
-
-            // Cannot fetch data from server
-            if (jsonData == null) {
-                Toast.makeText(this@ContentActivity, "Fetch API failed", Toast.LENGTH_SHORT).show()
-                stopProgress()
-                return@launch
-            }
-
-            // Data fetched
-
-            updateUi(htmlTemplate, jsonData)
-
-            async { Store.save(this@ContentActivity, filename, jsonData) }
+            fetchAndUpdate()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        Log.i(TAG, "Activity destroyed")
+        info("Activity destroyed")
     }
 
-    private fun updateUi(htmlTemplate: String, jsonData: String) {
-        val article = gson.fromJson<ArticleDetail>(jsonData, ArticleDetail::class.java)
+    private fun init() {
 
-        val html = htmlTemplate.replace("{story-body}", article.bodyXML.cn)
+        showProgress()
+
+        launch(UI) {
+
+            // Load from cache
+            val readResult = async { Store.load(this@ContentActivity, cacheFilename) }
+            val cachedData = readResult.await()
+
+            if (cachedData != null) {
+                Toast.makeText(this@ContentActivity, "Using cache", Toast.LENGTH_SHORT).show()
+                updateUi(cachedData)
+
+                return@launch
+            }
+
+            // Cache is not found.
+            fetchAndUpdate()
+        }
+    }
+
+    private suspend fun fetchAndUpdate() {
+        when (channelItem?.type) {
+            "story", "premium" -> fetchJSON()
+            else -> loadUrl()
+        }
+    }
+
+    // Use local HTML template and remote JSON to generate a complete HTML file
+    private suspend fun fetchJSON() {
+        // Fetch data from server
+        val url = channelItem?.apiUrl ?: return
+
+        val readResult = async { readHtml(resources, R.raw.story) }
+        val fetchResult = async { requestData(url) }
+
+        val template = readResult.await()
+        val jsonData = fetchResult.await()
+
+        // Cannot fetch data from server
+        if (jsonData == null || template == null) {
+            Toast.makeText(this@ContentActivity, "Error! Failed to load data", Toast.LENGTH_SHORT).show()
+            stopProgress()
+            return
+        }
+
+        val data = renderTemplate(template, jsonData)
+
+        updateUi(data)
+
+        async { Store.save(this@ContentActivity, cacheFilename, data) }
+    }
+
+
+    /**
+     * See: Page/Helpers/WebView/WebViewHelper.swift#renderStory
+     */
+    private fun renderTemplate(template: String, data: String): String {
+        val article = gson.fromJson<ArticleDetail>(data, ArticleDetail::class.java)
+
+        return template.replace("{story-body}", article.bodyXML.cn)
                 .replace("{story-headline}", article.titleCn)
                 .replace("{story-byline}", article.byline)
                 .replace("{story-time}", article.createdAt)
                 .replace("{story-lead}", article.standfirst)
                 .replace("{story-theme}", article.htmlForTheme())
                 .replace("{story-tag}", article.tag)
-                .replace("{story-id}", sectionItem.id)
+                .replace("{story-id}", article.id)
                 .replace("{story-image}", article.htmlForCoverImage())
                 .replace("{related-stories}", article.htmlForRelatedStories())
                 .replace("{related-topics}", article.htmlForRelatedTopics())
@@ -133,15 +205,33 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
                 //                        .replace("['{follow-areas}']", "")
                 //                        .replace("['{follow-authors}']", "")
                 //                        .replace("['{follow-columns}']", "")
-                //                        .replace("{adchID}", "")
+                .replace("{adchID}", channelItem?.adId!!)
                 //                        .replace("{ad-banner}", "")
                 //                        .replace("{ad-mpu}", "")
                 //                        .replace("{font-class}", "")
-                .replace("{comments-id}", sectionItem.id)
+                .replace("{comments-id}", channelItem?.commentsId!!)
+    }
 
-        web_view.loadDataWithBaseURL("http://www.ftchinese.com", html, "text/html", null, null)
+    private fun updateUi(data: String) {
+
+        web_view.loadDataWithBaseURL("http://www.ftchinese.com", data, "text/html", null, null)
 
         stopProgress()
+    }
+
+    // Directly load a url
+    private fun loadUrl() {
+        val url = channelItem?.apiUrl ?: return
+
+        info("loadUrl: $url")
+
+        web_view.loadUrl(url)
+    }
+
+
+
+    private fun showProgress() {
+        progress_bar.visibility = View.VISIBLE
     }
 
     private fun stopProgress() {
@@ -149,8 +239,77 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
         progress_bar.visibility = View.GONE
     }
 
-    override fun onRefresh() {
-        Toast.makeText(this, "Refreshing", Toast.LENGTH_SHORT).show()
-        init()
+
+    inner class ContentWebViewClient : WebViewClient(), AnkoLogger {
+
+
+        override fun onLoadResource(view: WebView?, url: String?) {
+            super.onLoadResource(view, url)
+        }
+
+        override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+            super.onPageStarted(view, url, favicon)
+            showProgress()
+        }
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+            super.onPageFinished(view, url)
+            stopProgress()
+        }
+
+
+        override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+            super.onReceivedError(view, request, error)
+
+            info("Failed to ${request?.method}: ${request?.url}")
+            warn(error.toString())
+        }
+
+        override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+            info("Override url: $url")
+
+            if (url == null) {
+                return false
+            }
+
+            val uri = Uri.parse(url)
+            if (uri.host == "www.ftchinese.com") {
+                return handleInSiteLink(uri)
+            }
+
+            return handleExternalLink(uri)
+        }
+
+        private fun handleInSiteLink(uri: Uri): Boolean {
+            val newUrl = uri.buildUpon()
+                    .scheme("https")
+                    .authority("api003.ftmailbox.com")
+                    .appendQueryParameter("bodyonly", "yes")
+                    .appendQueryParameter("webview", "ftcapp")
+                    .build()
+                    .toString()
+            ContentActivity.start(this@ContentActivity, newUrl)
+            return true
+        }
+
+        private fun handleExternalLink(uri: Uri): Boolean {
+            // This opens an external browser
+            val customTabsInt = CustomTabsIntent.Builder().build()
+            customTabsInt.launchUrl(this@ContentActivity, uri)
+
+            return true
+        }
+    }
+
+    inner class WebAppInterface {
+
+        @JavascriptInterface
+        fun postMessage(message: String) {
+            Log.i("WebChromeClient", "Click event: $message")
+
+            val intent = Intent(this@ContentActivity, ContentActivity::class.java)
+            intent.putExtra(EXTRA_SECTION_ITEM, message)
+            startActivity(intent)
+        }
     }
 }

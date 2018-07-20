@@ -8583,6 +8583,7 @@
 
 
   function getJSON() {
+    console.log("Executing getJSON")
     if (!(window.location.href.indexOf("keeplinks=yes") > 0)) {
       for (var e = document.querySelectorAll(".item-container-app"), t = window.adchID || "1000", i = {
           meta: {
@@ -8637,11 +8638,14 @@
           removeLink(n), removeLink(e[a].querySelector(".image")), e[a].onclick = function (e) {
             tapOnEle(e, this)
           }
-
-
       }
       try {
+
+        Android.postItems(JSON.stringify(i));
+
         webkit.messageHandlers.items.postMessage(i)
+
+
       } catch (e) {}
       specialReportsData()
     }
@@ -8650,12 +8654,9 @@
   function tapOnEle(e, t) {
     if (!isInLink(e.target)) {
       var i = t.getAttribute("data-row");
-      var data = {
-        id: t.getAttribute('data-id'),
-        type: t.getAttribute('data-type')
-      };
 
-      Android.postMessage(JSON.stringify(data));
+      Android.selectItem(i);
+
       webkit.messageHandlers.selectItem.postMessage(i)
     }
   }

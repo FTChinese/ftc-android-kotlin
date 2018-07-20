@@ -8,6 +8,8 @@
     <string name="nav_video">视频</string>
     <string name="nav_myft">我的FT</string>
 
+    <string name="news_editor_choice">编辑精选</string>
+
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">Android Studio</string>
