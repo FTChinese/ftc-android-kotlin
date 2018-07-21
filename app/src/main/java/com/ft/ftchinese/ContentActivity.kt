@@ -264,7 +264,7 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
         }
 
         override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-            info("Override url: $url")
+            info("shouldOverrideUrlLoading: $url")
 
             if (url == null) {
                 return false
@@ -279,6 +279,14 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
         }
 
         private fun handleInSiteLink(uri: Uri): Boolean {
+            val pathSegments = uri.pathSegments
+
+            if (pathSegments.size >= 2 && pathSegments[0] == "story") {
+                val channelItem = ChannelItem(id = pathSegments[1], type = pathSegments[0], headline = "", shortlead = "")
+                ContentActivity.start(this@ContentActivity, channelItem)
+                return true
+            }
+
             val newUrl = uri.buildUpon()
                     .scheme("https")
                     .authority("api003.ftmailbox.com")

@@ -268,12 +268,6 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         private fun handleInSiteLink(uri: Uri): Boolean {
             val pathSegments = uri.pathSegments
 
-            if (pathSegments.size >= 2 && pathSegments[0] == "story") {
-                val channelItem = ChannelItem(id = pathSegments[1], type = pathSegments[0], headline = "", shortlead = "")
-                ContentActivity.start(activity, channelItem)
-                return true
-            }
-
             val newUrl = uri.buildUpon()
                     .scheme("https")
                     .authority("api003.ftmailbox.com")
@@ -281,6 +275,29 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                     .appendQueryParameter("webview", "ftcapp")
                     .build()
                     .toString()
+
+            if (pathSegments.size >= 2) {
+                when (pathSegments[0]) {
+                    "story" -> {
+                        val channelItem = ChannelItem(id = pathSegments[1], type = pathSegments[0], headline = "", shortlead = "")
+                        ContentActivity.start(activity, channelItem)
+                    }
+
+                    "tag" -> {
+                        val channel = Channel(
+                                title = pathSegments[1],
+                                name = "${pathSegments[0]}_${pathSegments[1]}",
+                                listUrl = newUrl
+                        )
+
+                        ChannelActivity.start(activity, channel)
+                    }
+                }
+
+                return true
+            }
+
+
             when (uri.lastPathSegment) {
                 "editorchoice-issue.html" -> {
                     info("Clicked editor's choice channel. Will load data from $newUrl")
