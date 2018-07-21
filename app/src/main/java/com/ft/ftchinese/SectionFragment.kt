@@ -24,13 +24,14 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
 
 const val EXTRA_SECTION_ITEM = "section_item"
-const val EXTRA_DIRECT_OPEN = "article_direct_open"
-const val EXTRA_CHANNEL_ITEM = "channel_item"
-const val EXTRA_CHANNEL_AD_ID = "channel_ad_id"
 
+/**
+ * SectionFragment serves two purposes:
+ * As part of TabLayout in MainActivity;
+ * As part of ChannelActitity. For example, if you panned to Editor's Choice tab, them items lead to another layer of a list page, not content. You need to use `SectionFragment` again to render a list page.
+ */
 class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
 
-    private val TAG = "SectionFragment"
     private lateinit var listener: OnDataLoadListener
 
     // Specify what kind of data to use for current tab, retrieved from fragment arguments.
@@ -75,7 +76,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     }
 
     override fun onAttach(context: Context?) {
-        Log.i(TAG, "onAttach fragment")
+        info("onAttach fragment")
         super.onAttach(context)
         listener = context as OnDataLoadListener
     }
@@ -128,11 +129,11 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             false
         }
 
-        Log.i(TAG, "Initiating data...")
+        info("Initiating data...")
 
         init()
 
-        Log.i(TAG, "Finish onCreateView")
+        info("Finish onCreateView")
     }
 
 
@@ -156,7 +157,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                     val cachedHtml = readCacheResult.await()
 
                     if (cachedHtml != null) {
-                        Log.i(TAG, "Using cached data for ${channel?.name}")
+                        info("Using cached data for ${channel?.name}")
 
                         updateUi(cachedHtml)
 
@@ -232,7 +233,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         override fun onPageFinished(view: WebView?, url: String?) {
             super.onPageFinished(view, url)
-//            info("Page finished loading: $url")
+
         }
 
         override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
@@ -254,6 +255,8 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             }
             val uri = Uri.parse(url)
 
+            info("Path segments: ${uri.pathSegments}")
+
             if (uri.host == "www.ftchinese.com") {
 
                 return handleInSiteLink(uri)
@@ -263,6 +266,14 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         }
 
         private fun handleInSiteLink(uri: Uri): Boolean {
+            val pathSegments = uri.pathSegments
+
+            if (pathSegments.size >= 2 && pathSegments[0] == "story") {
+                val channelItem = ChannelItem(id = pathSegments[1], type = pathSegments[0], headline = "", shortlead = "")
+                ContentActivity.start(activity, channelItem)
+                return true
+            }
+
             val newUrl = uri.buildUpon()
                     .scheme("https")
                     .authority("api003.ftmailbox.com")
@@ -315,6 +326,16 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                     val channel = Channel(
                             title = "中国商业案例精选",
                             name = "business_case",
+                            listUrl = newUrl
+                    )
+                    ChannelActivity.start(activity, channel)
+                }
+
+                "weekly.html" -> {
+                    info("Clicked weekly. Will fetch data from $newUrl")
+                    val channel = Channel(
+                            title = "热门文章",
+                            name = "news_weekly",
                             listUrl = newUrl
                     )
                     ChannelActivity.start(activity, channel)

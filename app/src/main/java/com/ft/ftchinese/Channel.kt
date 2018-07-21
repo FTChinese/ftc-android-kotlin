@@ -1,13 +1,13 @@
 package com.ft.ftchinese
 
 /**
- * Channel contains data used by a tab in TabLayout
+ * Channel represents a tab in TabLayout
  */
 data class Channel(
-        val title: String, // Human-readable title
-        val name: String,  // Cache filename
-        val listUrl: String? = null, // Incomplete HTML
-        val webUrl: String? = null // A complete html page
+        val title: String, // A Tab's title
+        val name: String,  // Cache filename used by this tab
+        val listUrl: String? = null, // Where to fetch data to be loaded in WebView.loadDataWith
+        val webUrl: String? = null // A complete html page to be loaded directly into a WebView
 )
 
 data class ChannelMeta(

@@ -226,9 +226,8 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
         info("loadUrl: $url")
 
         web_view.loadUrl(url)
+        stopProgress()
     }
-
-
 
     private fun showProgress() {
         progress_bar.visibility = View.VISIBLE
@@ -249,12 +248,11 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
 
         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
             super.onPageStarted(view, url, favicon)
-            showProgress()
         }
 
         override fun onPageFinished(view: WebView?, url: String?) {
             super.onPageFinished(view, url)
-            stopProgress()
+
         }
 
 
