@@ -28,17 +28,27 @@ const val EXTRA_SECTION_ITEM = "section_item"
 /**
  * SectionFragment serves two purposes:
  * As part of TabLayout in MainActivity;
- * As part of ChannelActitity. For example, if you panned to Editor's Choice tab, them items lead to another layer of a list page, not content. You need to use `SectionFragment` again to render a list page.
+ * As part of ChannelActivity. For example, if you panned to Editor's Choice tab, the items lead to another layer of a list page, not content. You need to use `SectionFragment` again to render a list page.
  */
 class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
 
     private lateinit var listener: OnDataLoadListener
 
-    // Specify what kind of data to use for current tab, retrieved from fragment arguments.
+    /**
+     * Meta data about current channel page: the tab's title, where to load data, etc.
+     */
     private var channel: Channel? = null
 
-    // iOS equivalent might be defined Page/Layouts/Pages/Content/DetailModelController.swift#pageData
+    /**
+     * iOS equivalent might be defined Page/Layouts/Pages/Content/DetailModelController.swift#pageData
+     * This is a list of articles on each channel.
+     * Its value if set when WebView finished loading a web page
+     */
     private var channelItems: Array<ChannelItem>? = null
+
+    /**
+     * Hold advertisement id passed from WebView
+     */
     private var adId: String? = null
 
     // Containing activity should implement this interface to show progress state
@@ -265,16 +275,17 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             return handleExternalLink(uri)
         }
 
-        private fun handleInSiteLink(uri: Uri): Boolean {
-            val pathSegments = uri.pathSegments
-
-            val newUrl = uri.buildUpon()
+        private fun buildUrl(uri: Uri): String {
+            return uri.buildUpon()
                     .scheme("https")
                     .authority("api003.ftmailbox.com")
                     .appendQueryParameter("bodyonly", "yes")
                     .appendQueryParameter("webview", "ftcapp")
                     .build()
                     .toString()
+        }
+        private fun handleInSiteLink(uri: Uri): Boolean {
+            val pathSegments = uri.pathSegments
 
             if (pathSegments.size >= 2) {
                 when (pathSegments[0]) {
@@ -287,16 +298,26 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                         val channel = Channel(
                                 title = pathSegments[1],
                                 name = "${pathSegments[0]}_${pathSegments[1]}",
-                                listUrl = newUrl
+                                listUrl = buildUrl(uri)
                         )
 
                         ChannelActivity.start(activity, channel)
+                    }
+
+                    else -> {
+                        return handleInSiteChannelOrContent(uri)
                     }
                 }
 
                 return true
             }
 
+            return handleInSiteChannelOrContent(uri)
+        }
+
+        private fun handleInSiteChannelOrContent(uri: Uri): Boolean {
+
+            val newUrl = buildUrl(uri)
 
             when (uri.lastPathSegment) {
                 "editorchoice-issue.html" -> {
@@ -367,6 +388,9 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             return true
         }
 
+        /**
+         * Deal with advertisement. Open link in external browser. It seems Android does not have in-app browser
+         */
         private fun handleExternalLink(uri: Uri): Boolean {
             // This opens an external browser
             val customTabsInt = CustomTabsIntent.Builder().build()
@@ -377,6 +401,9 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     }
 
     inner class WebAppInterface : AnkoLogger {
+        /**
+         * Method injected to WebView to receive a list of articles in a channel page upon finished loading.
+         */
         @JavascriptInterface
         fun postItems(message: String) {
             info("Posted items: $message")

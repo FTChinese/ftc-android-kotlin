@@ -10,17 +10,34 @@ data class Channel(
         val webUrl: String? = null // A complete html page to be loaded directly into a WebView
 )
 
+/**
+ * The following data types is used to parse JSON data passed from WebView by WebAppInterface.postItems methods.
+ * Most of them are useless, serving as placeholders so that we can extract the deep nested JSON values.
+ * `ChannelMeta` represent the `meta` filed in JSON data.
+ */
 data class ChannelMeta(
         val title: String,
         val description: String,
         val theme: String,
         val adid: String
-
 )
 
 /**
  * This is the data type passed to ContentActivity so that it know what kind of data to load.
  * iOS equivalent might be Page/Layouts/Content/ContentItem.swift#ContentItem
+ * The fields are collected from all HTML elements `div.item-container-app`.
+ * See https://github.com/FTChinese/android-client/app/scripts/list.js.
+ * In short it used those attributes:
+ * `data-id` for `id`
+ * `data-type` for type. Possible values: `story`, `interactive`,
+ * The content of `a.item-headline-link` inside `div.item-container-app` for `headline`
+ * `data-audio` for `shortlead`
+ * `data-caudio` for `caudio`
+ * `data-eaudio` for `eaudio`
+ * `data-sub-type` for `subType`
+ * `data-date` for `timeStamp`
+ *
+ * NOTE: This is a terrible way of handling data. In the future we will provide a unified JSON API with clear naming style.
  */
 data class ChannelItem(
         val id: String,

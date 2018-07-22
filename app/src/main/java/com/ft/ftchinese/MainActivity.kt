@@ -14,16 +14,19 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.*
+import android.support.v7.widget.SearchView
 import android.widget.Toast
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 val httpClient = OkHttpClient()
 val gson = Gson()
 
-suspend fun requestData(url: String): String? {
+fun requestData(url: String): String? {
     try {
         val request = Request.Builder()
                 .url(url)
@@ -31,13 +34,13 @@ suspend fun requestData(url: String): String? {
         val response = httpClient.newCall(request).execute()
         return response.body()?.string()
     } catch (e: Exception) {
-        Log.e("requestData", e.toString())
+        Log.w("requestData", e.toString())
     }
 
     return null
 }
 
-suspend fun readHtml(resources: Resources, resId: Int): String? {
+fun readHtml(resources: Resources, resId: Int): String? {
 
     try {
         val input = resources.openRawResource(resId)
@@ -49,14 +52,11 @@ suspend fun readHtml(resources: Resources, resId: Int): String? {
     return null
 }
 
-const val TAB_INDEX_KEY = "tab_index"
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, TabLayout.OnTabSelectedListener, SectionFragment.OnDataLoadListener {
-
-    private val tag = "MainActivity"
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, TabLayout.OnTabSelectedListener, SectionFragment.OnDataLoadListener, AnkoLogger {
 
     private val bottomNavItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-        Log.i(tag, "Selected bottom nav item ${item.title}")
+       info("Selected bottom nav item ${item.title}")
 
         when (item.itemId) {
             R.id.nav_news -> {
@@ -84,14 +84,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
 
             R.id.nav_myft -> {
-                Log.i(tag, "Selected bottom nav item ${item.title}")
+                info("Selected bottom nav item ${item.title}")
             }
         }
         true
     }
 
     private val bottomNavItemReseletedListener = BottomNavigationView.OnNavigationItemReselectedListener { item ->
-        Log.i(tag, "Reselected bottom nav item: ${item.title}")
+        info("Reselected bottom nav item: ${item.title}")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -172,19 +172,44 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
+
         menuInflater.inflate(R.menu.main, menu)
-        return true
+
+        val expandListener = object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                info("Menu item action collapse")
+                return true
+            }
+
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                info("Menu item action expand")
+                return true
+            }
+        }
+
+        // Configure action view.
+        // See https://developer.android.com/training/appbar/action-views
+        val searchItem = menu.findItem(R.id.action_search)
+        searchItem.setOnActionExpandListener(expandListener)
+
+        val searchView = searchItem.actionView as SearchView
+
+        // Handle search. See
+        // guide https://developer.android.com/guide/topics/search/
+        // API https://developer.android.com/reference/android/support/v7/widget/SearchView
+
+        return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        when (item.itemId) {
-            R.id.action_settings -> return true
-            else -> return super.onOptionsItemSelected(item)
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+            R.id.action_search -> {
+                info("Clicked search")
+                super.onOptionsItemSelected(item)
+            }
+            else -> {
+                super.onOptionsItemSelected(item)
+            }
         }
-    }
 
     // Implements NavigationView.OnNavigationItemSelectedListener
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -217,16 +242,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     override fun onTabSelected(tab: TabLayout.Tab?) {
-        Log.i(tag, "Tab position: ${tab?.position}")
-        Log.i(tag, "Tab selected: ${tab_layout.selectedTabPosition}")
+        info("Tab position: ${tab?.position}")
+        info("Tab selected: ${tab_layout.selectedTabPosition}")
     }
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
-        Log.i(tag, "Tab reselected: ${tab?.position}")
+        info("Tab reselected: ${tab?.position}")
     }
 
     override fun onTabUnselected(tab: TabLayout.Tab?) {
-        Log.i(tag, "Tab unselected: ${tab?.position}")
+        info("Tab unselected: ${tab?.position}")
     }
 
     override fun onDataLoaded() {
@@ -246,7 +271,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         override fun getItem(position: Int): Fragment {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            Log.i(tag, "Fragment data: ${channels[position]}")
+            info("Fragment data: ${channels[position]}")
             return SectionFragment.newInstance(gson.toJson(channels[position]))
         }
 

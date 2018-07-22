@@ -6,10 +6,15 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.support.customtabs.CustomTabsIntent
+import android.support.v4.view.MenuItemCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.ShareActionProvider
+import android.text.Html
 import android.util.Log
 import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.webkit.*
 import android.widget.Toast
@@ -19,7 +24,6 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.error
 import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
 
@@ -31,6 +35,7 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
     private var channelItem: ChannelItem? = null
     private var cacheFilename: String? = null
     private var isLoadUrl: Boolean = false
+    private var shareActionProvider: ShareActionProvider? = null
 
     companion object {
         private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
@@ -47,6 +52,47 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
             intent.putExtra(EXTRA_LOAD_URL, url)
             context?.startActivity(intent)
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        info("Create options menu")
+        menuInflater.inflate(R.menu.share, menu)
+
+        /**
+         * Warning: On its doc (https://developer.android.com/reference/android/support/v4/view/ActionProvider), they say:
+         *
+         * > If you're developing your app for API level 14 and higher only, you should instead use the framework ActionProvider class
+         *
+         * This expression is misleading. As long as you are using `AppCompatActivity`, you could only use the support library's version.
+         */
+        val shareItem = menu.findItem(R.id.action_share)
+        /**
+         * `MenuItem` has a similar method `getActionProvider()`. It used for the platform's version of `ShareActionProvider`.
+         * For support library you must use `MenuItemCompat`'s static method.
+         */
+        shareActionProvider = MenuItemCompat.getActionProvider(shareItem) as ShareActionProvider
+
+        val intent = Intent(Intent.ACTION_SEND, Uri.parse("http://www.ftchinese.com/story/${channelItem?.id}"))
+        intent.type = "text/plain"
+//        intent.putExtra(Intent.EXTRA_TEXT, Html.fromHtml("<p>This is the text shared.</p>"))
+        intent.putExtra(Intent.EXTRA_TEXT, "[FT中文网] ${channelItem?.headline} - http://www.ftchinese.com/story/${channelItem?.id}")
+
+        setShareIntent(intent)
+
+
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    private fun setShareIntent(shareIntent: Intent) {
+
+        shareActionProvider?.setShareIntent(shareIntent)
+    }
+
+    // Handle app bar items selected
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        info("Options item selected: ${item?.itemId}")
+
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
