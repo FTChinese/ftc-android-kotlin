@@ -135,6 +135,7 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
         if (url != null) {
             isLoadUrl = true
             web_view.loadUrl(url)
+            stopProgress()
             return
         }
 
@@ -156,6 +157,7 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
         // If the page is directly loaded with url, call WebView's reload method.
         if (isLoadUrl) {
             web_view.reload()
+            stopProgress()
             return
         }
 

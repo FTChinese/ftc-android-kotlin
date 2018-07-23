@@ -53,8 +53,11 @@ fun readHtml(resources: Resources, resId: Int): String? {
 }
 
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, TabLayout.OnTabSelectedListener, SectionFragment.OnDataLoadListener, AnkoLogger {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, TabLayout.OnTabSelectedListener, SectionFragment.OnDataLoadListener, SectionFragment.OnInAppNavigate, AnkoLogger {
 
+    /**
+     * Implementation of BottomNavigationView.OnNavigationItemSelectedListener
+     */
     private val bottomNavItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
        info("Selected bottom nav item ${item.title}")
 
@@ -90,6 +93,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         true
     }
 
+    /**
+     * Implementation of OnNavigationItemReselectedListener.
+     * Currently do nothing.
+     */
     private val bottomNavItemReseletedListener = BottomNavigationView.OnNavigationItemReselectedListener { item ->
         info("Reselected bottom nav item: ${item.title}")
     }
@@ -170,6 +177,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    /**
+     * Create menus on toolbar
+     */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
 
@@ -201,6 +211,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return super.onCreateOptionsMenu(menu)
     }
 
+    /**
+     * Respond to menu item on the toolbar being selected
+     */
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
             R.id.action_search -> {
                 info("Clicked search")
@@ -211,7 +224,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
         }
 
-    // Implements NavigationView.OnNavigationItemSelectedListener
+    /**
+     * Implements NavigationView.OnNavigationItemSelectedListener
+     */
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         Toast.makeText(this, "You selected navigation item ${item.itemId}", Toast.LENGTH_SHORT).show()
 
@@ -241,6 +256,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
+    /**
+     * Implementation of TabLayout.OnTabSelectedListener
+     */
     override fun onTabSelected(tab: TabLayout.Tab?) {
         info("Tab position: ${tab?.position}")
         info("Tab selected: ${tab_layout.selectedTabPosition}")
@@ -254,12 +272,38 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         info("Tab unselected: ${tab?.position}")
     }
 
+    /**
+     * Implementation of SectionFragment.OnDataLoadListener.
+     * This is used to handle the state of progress bar.
+     */
     override fun onDataLoaded() {
         progress_bar.visibility = View.GONE
     }
 
     override fun onDataLoading() {
         progress_bar.visibility = View.VISIBLE
+    }
+
+    /**
+     * Implementation of SectionFragment.OnInAppNavigate.
+     * Use cases:
+     * When user clicked links on the frontpage like `每日英语`,
+     * the app should actually jump to the second item in bottom navigation instead of opening a separate activity.
+     */
+    override fun selectBottomNavItem(itemId: Int) {
+        val item = bottom_nav.menu.findItem(itemId)
+
+        if (item != null) {
+            item.isChecked = true
+            // You should also call this method to make view visible.
+            // Set `isChecked` only changes the menu item's own state
+            bottomNavItemSelectedListener.onNavigationItemSelected(item)
+        }
+
+    }
+
+    override fun selectTabLayoutTab(tabIndex: Int) {
+        tab_layout.getTabAt(tabIndex)?.select()
     }
 
     /**
