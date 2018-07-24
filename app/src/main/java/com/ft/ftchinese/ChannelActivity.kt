@@ -25,9 +25,21 @@ class ChannelActivity : AppCompatActivity(), SectionFragment.OnDataLoadListener,
             setDisplayShowTitleEnabled(false)
         }
 
-        val extraChannel = intent.getStringExtra(EXTRA_CHANNEL_META)
+        /**
+         * Get the metadata for this page of articles
+         */
+        val pageMeta = intent.getStringExtra(EXTRA_LIST_PAGE_META)
+        val listPage = gson.fromJson<ListPage>(pageMeta, ListPage::class.java)
 
-        val sectionFragment = SectionFragment.newInstance(extraChannel)
+        /**
+         * Set toolbar's title so that reader know where he is now.
+         */
+        toolbar.title = listPage.title
+
+        /**
+         * Begin to attach SectionFragment to this activity
+         */
+        val sectionFragment = SectionFragment.newInstance(listPage)
 
         supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, sectionFragment)
@@ -58,11 +70,11 @@ class ChannelActivity : AppCompatActivity(), SectionFragment.OnDataLoadListener,
      * Launch this activity with intent
      */
     companion object {
-        private const val EXTRA_CHANNEL_META = "channel_metadata"
+        private const val EXTRA_LIST_PAGE_META = "extra_list_page_metadata"
 
-        fun start(context: Context?, channel: Channel) {
+        fun start(context: Context?, page: ListPage) {
             val intent = Intent(context, ChannelActivity::class.java)
-            intent.putExtra(EXTRA_CHANNEL_META, gson.toJson(channel))
+            intent.putExtra(EXTRA_LIST_PAGE_META, gson.toJson(page))
             context?.startActivity(intent)
         }
     }

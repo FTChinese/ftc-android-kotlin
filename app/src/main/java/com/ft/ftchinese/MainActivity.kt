@@ -64,25 +64,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when (item.itemId) {
             R.id.nav_news -> {
                 supportActionBar?.setTitle(R.string.app_name)
-                container.adapter = SectionsPagerAdapter(newsChannels, supportFragmentManager)
+                container.adapter = SectionsPagerAdapter(ListPage.newsPages, supportFragmentManager)
 
             }
 
             R.id.nav_english -> {
                 supportActionBar?.setTitle(R.string.nav_english)
-                container.adapter = SectionsPagerAdapter(englishChannels, supportFragmentManager)
+                container.adapter = SectionsPagerAdapter(ListPage.englishPages, supportFragmentManager)
 
             }
 
             R.id.nav_ftacademy -> {
                 supportActionBar?.setTitle(R.string.nav_ftacademy)
-                container.adapter = SectionsPagerAdapter(ftaChannels, supportFragmentManager)
+                container.adapter = SectionsPagerAdapter(ListPage.ftaPages, supportFragmentManager)
 
             }
 
             R.id.nav_video -> {
                 supportActionBar?.setTitle(R.string.nav_video)
-                container.adapter = SectionsPagerAdapter(videoChannels, supportFragmentManager)
+                container.adapter = SectionsPagerAdapter(ListPage.videoPages, supportFragmentManager)
 
             }
 
@@ -116,7 +116,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nav_view.setNavigationItemSelectedListener(this)
 
         // Set ViewPager adapter
-        container.adapter = SectionsPagerAdapter(newsChannels, supportFragmentManager)
+        container.adapter = SectionsPagerAdapter(ListPage.newsPages, supportFragmentManager)
 
         // Link ViewPager and TabLayout
         tab_layout.setupWithViewPager(container)
@@ -310,22 +310,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
      * A [FragmentPagerAdapter] that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    inner class SectionsPagerAdapter(private val channels: Array<Channel>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+    inner class SectionsPagerAdapter(private val pages: Array<ListPage>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
         override fun getItem(position: Int): Fragment {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            info("Fragment data: ${channels[position]}")
-            return SectionFragment.newInstance(gson.toJson(channels[position]))
+            info("Fragment data: ${pages[position]}")
+            return SectionFragment.newInstance(pages[position])
         }
 
         override fun getCount(): Int {
             // Show 3 total pages.
-            return channels.size
+            return pages.size
         }
 
         override fun getPageTitle(position: Int): CharSequence? {
-            return channels[position].title
+            return pages[position].title
         }
     }
 

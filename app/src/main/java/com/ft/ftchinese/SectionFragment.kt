@@ -34,21 +34,18 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     private lateinit var navigateListener: OnInAppNavigate
 
     /**
-     * Meta data about current currentChannel page: the tab's title, where to load data, etc.
+     * Meta data about current page: the tab's title, where to load data, etc.
+     * Passed in when the fragment is created.
      */
-    private var currentChannel: Channel? = null
+    private var currentPage: ListPage? = null
 
     /**
      * iOS equivalent might be defined Page/Layouts/Pages/Content/DetailModelController.swift#pageData
-     * This is a list of articles on each currentChannel.
+     * This is a list of articles on each currentPage.
      * Its value if set when WebView finished loading a web page
      */
     private var channelItems: Array<ChannelItem>? = null
-
-    /**
-     * Hold advertisement id passed from WebView
-     */
-    private var adId: String? = null
+    private var channelMeta: ChannelMeta? = null
 
     // Containing activity should implement this interface to show progress state
     interface OnDataLoadListener {
@@ -68,11 +65,13 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     }
 
     companion object {
+
+        private const val WEBVIEV_BASE_URL = "http://www.ftchinese.com"
         /**
          * The fragment argument representing the section number for this
          * fragment.
          */
-        private val ARG_SECTION_CHANNEL = "section_chanel"
+        private const val ARG_SECTION_PAGE = "arg_section_page"
         private val HTML_PLACEHOLDER = """
             <html>
                 <body>
@@ -85,10 +84,10 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        fun newInstance(channel: String): SectionFragment {
+        fun newInstance(page: ListPage): SectionFragment {
             val fragment = SectionFragment()
             val args = Bundle()
-            args.putString(ARG_SECTION_CHANNEL, channel)
+            args.putString(ARG_SECTION_PAGE, gson.toJson(page))
             fragment.arguments = args
             return fragment
         }
@@ -104,9 +103,9 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val channelData = arguments?.getString(ARG_SECTION_CHANNEL)
+        val pageMetadata = arguments?.getString(ARG_SECTION_PAGE)
 
-        currentChannel = gson.fromJson<Channel>(channelData, Channel::class.java)
+        currentPage = gson.fromJson<ListPage>(pageMetadata, ListPage::class.java)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -169,15 +168,15 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         showProgress()
 
-        if (currentChannel?.listUrl != null ) {
+        if (currentPage?.listUrl != null ) {
 
             launch (UI) {
-                if (currentChannel?.name != null) {
-                    val readCacheResult = async { Store.load(context, "${currentChannel?.name}.html") }
+                if (currentPage?.name != null) {
+                    val readCacheResult = async { Store.load(context, "${currentPage?.name}.html") }
                     val cachedHtml = readCacheResult.await()
 
                     if (cachedHtml != null) {
-                        info("Using cached data for ${currentChannel?.name}")
+                        info("Using cached data for ${currentPage?.name}")
 
                         updateUi(cachedHtml)
 
@@ -191,8 +190,8 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             return
         }
 
-        if (currentChannel?.webUrl != null) {
-            web_view.loadUrl(currentChannel?.webUrl)
+        if (currentPage?.webUrl != null) {
+            web_view.loadUrl(currentPage?.webUrl)
 
             stopProgress()
         }
@@ -201,9 +200,9 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
     private suspend fun fetchAndUpdate() {
         val readResult = async { readHtml(resources, R.raw.list) }
-        info("Fetch currentChannel data ${currentChannel?.listUrl}")
+        info("Fetch currentPage data ${currentPage?.listUrl}")
 
-        val fetchResult = async { requestData(currentChannel?.listUrl!!) }
+        val fetchResult = async { requestData(currentPage?.listUrl!!) }
 
         val templateHtml = readResult.await()
         val remoteHtml = fetchResult.await()
@@ -220,13 +219,13 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         // Cache file
 
-        if (currentChannel?.name != null) {
-            async { Store.save(context, "${currentChannel?.name}.html", htmlString) }
+        if (currentPage?.name != null) {
+            async { Store.save(context, "${currentPage?.name}.html", htmlString) }
         }
     }
 
     private fun updateUi(data: String) {
-        web_view.loadDataWithBaseURL("http://www.ftchinese.com", data, "text/html", null, null)
+        web_view.loadDataWithBaseURL(WEBVIEV_BASE_URL, data, "text/html", null, null)
         stopProgress()
     }
 
@@ -289,27 +288,33 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
             val pathSegments = uri.pathSegments
 
-            /**
-             * There's a problem with each channel's pagination: they used relative urls.
-             * When loaded in WebView with base url `http://www.ftchinese.com`,
-             * the url will become something `http://www.ftchinese.com/china.html?page=2`,
-             * which should actually be `http://www.ftchiese.com/channel/china.html?page=2`
-             */
+
             if (pathSegments.size < 2) {
-                // handle channel pagination first.
-                // It might not be accurate.
+                /**
+                 * Handle the pagination link of each channel
+                 * There's a problem with each channel's pagination: they used relative urls.
+                 * When loaded in WebView with base url `http://www.ftchinese.com`,
+                 * the url will become something `http://www.ftchinese.com/china.html?page=2`,
+                 * which should actually be `http://www.ftchiese.com/channel/china.html?page=2`
+                 */
                 val queryPage = uri.getQueryParameter("page")
                 if (queryPage != null) {
-                    val channel = Channel(
-                            title = currentChannel?.title ?: "",
+                    val page = ListPage(
+                            title = currentPage?.title ?: "",
                             name = "channel_p${queryPage}_${uri.lastPathSegment}",
                             listUrl = buildUrl(uri, "/channel/${uri.path}")
                     )
 
-                    ChannelActivity.start(context, channel)
+                    /**
+                     * Start a new page of article list.
+                     */
+                    ChannelActivity.start(context, page)
                     return true
                 }
 
+                /**
+                 * Assume this is a content page and load the url directly.
+                 */
                 ContentActivity.start(context, buildUrl(uri))
                 return true
             }
@@ -331,15 +336,19 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                     ContentActivity.start(activity, channelItem)
                 }
 
-                // If the path looks like `/tag/中美贸易战`
+                //
+                /**
+                 * If the path looks like `/tag/中美贸易战`,
+                 * start a new page listing articles
+                 */
                 "tag" -> {
-                    val channel = Channel(
+                    val page = ListPage(
                             title = pathSegments[1],
                             name = "${pathSegments[0]}_${pathSegments[1]}",
                             listUrl = buildUrl(uri)
                     )
 
-                    ChannelActivity.start(activity, channel)
+                    ChannelActivity.start(activity, page)
                 }
 
                 else -> {
@@ -354,64 +363,120 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         private fun handleChannel(uri: Uri): Boolean {
 
-            when (uri.lastPathSegment) {
-                // If the path is `/currentChannel/english.html`, navigate to the second bottom nav item.
+            val lastPathSegment = uri.lastPathSegment
+
+            if (lastPathSegment == null) {
+                val page = ListPage(
+                        title = "",
+                        name = "",
+                        listUrl = buildUrl(uri)
+                )
+
+                ChannelActivity.start(activity, page)
+                return true
+            }
+
+            when (lastPathSegment) {
+            /**
+             * If the path is `/channel/english.html`, navigate to the second bottom nav item.
+             */
                 "english.html" -> {
                     navigateListener.selectBottomNavItem(R.id.nav_english)
                 }
 
 
-                // If the path is `currentChannel/mba.html`, navigate to the third bottom nav item
+            /**
+             * If the path is `/channel/mba.html`, navigate to the third bottom nav item
+             */
                 "mba.html" -> {
                     navigateListener.selectBottomNavItem(R.id.nav_ftacademy)
                 }
 
 
-                // If the path is `/currentChannel/weekly.html`
+            /**
+             * If the path is `/channel/weekly.html`
+             */
                 "weekly.html" -> {
 
-                    val tabIndex = newsChannels.indexOfFirst { it.name == "news_top_stories" }
+                    val tabIndex = ListPage.newsPages.indexOfFirst { it.name == "news_top_stories" }
 
                     navigateListener.selectTabLayoutTab(tabIndex)
                 }
 
-                // If the path is `/currentChannel/editorchoice-issue.html?issue=EditorChoice-xxx`,
-                // you need to open ChannelActivity to show another layer of article list.
-                "editorchoice-issue.html" -> {
+                "markets.html" -> {
+                    val tabIndex = ListPage.newsPages.indexOfFirst { it.name == "news_markets" }
 
-                    val channel = Channel(
-                            title = "编辑精选",
-                            name = "news_editor_choice_channel",
-                            listUrl = buildUrl(uri)
-                    )
-                    ChannelActivity.start(activity, channel)
+                    navigateListener.selectTabLayoutTab(tabIndex)
                 }
 
-                // If this is a pagination url like `/currentChannel/china.html?page=2`
+            /**
+             * Handle paths like:
+             * `/channel/editorchoice-issue.html?issue=EditorChoice-xxx`,
+             * `/channel/chinabusinesswatch.html`
+             * `/channel/viewtop.html`
+             * `/channel/teawithft.html`
+             * `/channel/markets.html`
+             * `/channel/money.html`
+             */
+                else -> {
+                    val issue = uri.getQueryParameter("issue")
+                    val name = issue ?: "channel_$lastPathSegment"
+
+                    val page = ListPage(
+                            title = pathToTitle[lastPathSegment] ?: "",
+                            name = name,
+                            listUrl = buildUrl(uri)
+                    )
+                    ChannelActivity.start(activity, page)
+                }
             }
 
             return true
         }
 
         private fun handleMarketing(uri: Uri): Boolean {
-            when (uri.lastPathSegment) {
-                // If the path is `/m/marketing/intelligence.html`
-                "intelligence.html" -> {
-                    val tabIndex = newsChannels.indexOfFirst { it.name == "news_fta" }
+            if (uri.pathSegments[1] == "marketing") {
+                when (uri.lastPathSegment) {
 
-                    navigateListener.selectTabLayoutTab(tabIndex)
+                /**
+                 * If the path is `/m/marketing/intelligence.html`,
+                 * navigate to the tab titled FT研究院
+                 */
+                    "intelligence.html" -> {
+                        val tabIndex = ListPage.newsPages.indexOfFirst { it.name == "news_fta" }
+
+                        navigateListener.selectTabLayoutTab(tabIndex)
+                    }
+
+                /**
+                 * If the path looks like `/m/marketing/businesscase.html`
+                 */
+                    else -> {
+                        val name = uri.lastPathSegment ?: ""
+
+                        val page = ListPage(
+                                title = pathToTitle[name] ?: "",
+                                name = "marketing_$name",
+                                listUrl = buildUrl(uri)
+                        )
+                        ChannelActivity.start(activity, page)
+                    }
                 }
 
-                // If the path is `/m/marketing/businesscase.html`
-                "businesscase.html" -> {
-                    val channel = Channel(
-                            title = "中国商业案例精选",
-                            name = "business_case",
-                            listUrl = buildUrl(uri)
-                    )
-                    ChannelActivity.start(activity, channel)
-                }
+                return true
             }
+
+
+            /**
+             * There URLs looks like: `/m/corp/preview.html?pageid=we2016&isad=1`.
+             * Don't bother with them
+             */
+            val page = ListPage(
+                    title = "",
+                    name = "",
+                    listUrl = buildUrl(uri)
+            )
+            ChannelActivity.start(activity, page)
 
             return true
         }
@@ -444,7 +509,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
     inner class WebAppInterface : AnkoLogger {
         /**
-         * Method injected to WebView to receive a list of articles in a currentChannel page upon finished loading.
+         * Method injected to WebView to receive a list of articles in a currentPage page upon finished loading.
          */
         @JavascriptInterface
         fun postItems(message: String) {
@@ -453,31 +518,68 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             val channelContent = gson.fromJson<ChannelContent>(message, ChannelContent::class.java)
 
             channelItems = channelContent.sections[0].lists[0].items
-            adId = channelContent.meta.adid
+            channelMeta = channelContent.meta
         }
 
-        // See Page/Layouts/Page/SuperDataViewController.swift#SuperDataViewController what kind of data structure is passed back from web view.
-        // The JSON data is parsed into SectionItem type in ContentActivity
-        // iOS equiavalent might be here: Page/Layouts/Pages/Content/DetailModelController.swift
+        /**
+         * See Page/Layouts/Page/SuperDataViewController.swift#SuperDataViewController what kind of data structure is passed back from web view.
+         * The JSON data is parsed into SectionItem type in ContentActivity
+         * iOS equivalent might be here: Page/Layouts/Pages/Content/DetailModelController.swift
+         * @param index is the number of article user clicked in current page. The value is extracted from `data-row` attribute of `div.item-container-app`.
+         * In most cases when you clicked, an article should be loaded.
+         * In a few exceptions, like `/channel/column.html`, an item in the list should open another page of article list.
+         * It seems the only way to distinguish those cases is using `ChannelMeta.title` field.
+         */
         @JavascriptInterface
         fun selectItem(index: String) {
             info("WebView click event: $index")
 
             Toast.makeText(activity, "Selected item $index", Toast.LENGTH_SHORT).show()
 
-            val i = index.toInt()
 
-            if (channelItems == null) {
+            if (channelMeta == null && channelItems == null) {
                 return
             }
 
+            val i = index.toInt()
             val channelItem = channelItems?.getOrNull(i) ?: return
 
-            channelItem.adId = adId ?: ""
+            /**
+             * For `column`, start a new ChannelActivity
+             */
+            when (channelMeta?.title) {
+                "专栏" -> {
+                    val listPage = ListPage(
+                            title = channelItem.headline,
+                            name = "${channelItem.type}_${channelItem.id}",
+                            listUrl = buildUrl("/${channelItem.type}/${channelItem.id}")
+                    )
+
+                    ChannelActivity.start(context, listPage)
+                    return
+                }
+            }
+
+
+            /**
+             * Now assuming this is a plain article
+             */
+            channelItem.adId = channelMeta?.adid ?: ""
 
             ContentActivity.start(activity, channelItem)
         }
 
+
+        private fun buildUrl(path: String): String {
+            return Uri.Builder()
+                .scheme("https")
+                .authority("api003.ftmailbox.com")
+                .path(path)
+                .appendQueryParameter("bodyonly", "yes")
+                .appendQueryParameter("webview", "ftcapp")
+                .build()
+                .toString()
+        }
     }
 }
 
