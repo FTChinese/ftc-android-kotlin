@@ -84,7 +84,7 @@ data class ChannelMeta(
  * `data-audio` for `shortlead`
  * `data-caudio` for `caudio`
  * `data-eaudio` for `eaudio`
- * `data-sub-type` for `subType`
+ * `data-sub-type` for `subType`. Possible values: `radio`
  * `data-date` for `timeStamp`
  *
  * NOTE: This is a terrible way of handling data. In the future we will provide a unified JSON API with clear naming style.
@@ -92,6 +92,7 @@ data class ChannelMeta(
 data class ChannelItem(
         val id: String,
         val type: String,
+        val subType: String? = null,
         val headline: String,
         val shortlead: String
 ) {
@@ -99,13 +100,18 @@ data class ChannelItem(
 
     val commentsId: String
         get() {
-            return when(type) {
+            return when(subType) {
                 "interactive" -> "r_interactive_$id"
                 "video" -> "r_video_$id"
                 "story" -> id
                 "photo", "photonews" -> "r_photo_$id"
                 else -> "r_${type}_$id"
             }
+        }
+
+    val commentsOrder: String
+        get() {
+            return "story"
         }
 
     // See Page/FTChinese/Main/APIs.swift

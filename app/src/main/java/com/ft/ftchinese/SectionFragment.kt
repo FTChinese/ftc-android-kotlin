@@ -532,7 +532,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          */
         @JavascriptInterface
         fun selectItem(index: String) {
-            info("WebView click event: $index")
+            info("Channel list click event: $index")
 
             Toast.makeText(activity, "Selected item $index", Toast.LENGTH_SHORT).show()
 

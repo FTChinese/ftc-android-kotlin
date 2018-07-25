@@ -10,8 +10,6 @@ import android.support.v4.view.MenuItemCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.ShareActionProvider
-import android.text.Html
-import android.util.Log
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -149,6 +147,7 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
         // Start retrieving data from cache or server
         init()
 
+        followPref()
     }
 
     override fun onRefresh() {
@@ -245,19 +244,34 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
                 .replace("{story-image}", article.htmlForCoverImage())
                 .replace("{related-stories}", article.htmlForRelatedStories())
                 .replace("{related-topics}", article.htmlForRelatedTopics())
-                //                        .replace("{comments-order}", "")
-                //                        .replace("{story-container-style}", "")
-                //                        .replace("['{follow-tags}']", "")
-                //                        .replace("['{follow-topics}']", "")
-                //                        .replace("['{follow-industries}']", "")
-                //                        .replace("['{follow-areas}']", "")
-                //                        .replace("['{follow-authors}']", "")
-                //                        .replace("['{follow-columns}']", "")
-                .replace("{adchID}", channelItem?.adId!!)
+                .replace("{comments-order}", channelItem?.commentsOrder ?: "")
+                .replace("{story-container-style}", "")
+                .replace("{follow-tags}", "")
+                .replace("{follow-topics}", "")
+                .replace("{follow-industries}", "")
+                .replace("{follow-areas}", "")
+                .replace("{follow-authors}", "")
+                .replace("{follow-columns}", "")
+                .replace("{adchID}", channelItem?.adId ?: "")
                 //                        .replace("{ad-banner}", "")
                 //                        .replace("{ad-mpu}", "")
                 //                        .replace("{font-class}", "")
-                .replace("{comments-id}", channelItem?.commentsId!!)
+                .replace("{comments-id}", channelItem?.commentsId ?: "")
+    }
+
+    private fun followPref() {
+        val sharedPrefs = getSharedPreferences("following", Context.MODE_PRIVATE)
+
+//
+
+        val follows = FollowMessage.followingTypes.fold(mutableMapOf()) { acc: MutableMap<String, String>, s ->
+            val hs = sharedPrefs.getStringSet(s, setOf())
+
+            acc[s] = hs.joinToString()
+            acc
+        }
+
+        info("Following: $follows")
     }
 
     private fun updateUi(data: String) {
@@ -355,15 +369,43 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
         }
     }
 
-    inner class WebAppInterface {
+    inner class WebAppInterface : AnkoLogger {
 
+        /**
+         * Usage in JS: Android.follow(message)
+         */
         @JavascriptInterface
-        fun postMessage(message: String) {
-            Log.i("WebChromeClient", "Click event: $message")
+        fun follow(message: String) {
+            info("Clicked a follow button")
+            info("Received follow message: $message")
 
-            val intent = Intent(this@ContentActivity, ContentActivity::class.java)
-            intent.putExtra(EXTRA_SECTION_ITEM, message)
-            startActivity(intent)
+            val msg = gson.fromJson<FollowMessage>(message, FollowMessage::class.java)
+            followOrUnfollow(msg)
+        }
+
+        private fun followOrUnfollow(msg: FollowMessage) {
+            val sharedPrefs = getSharedPreferences("following", Context.MODE_PRIVATE)
+            val hs = sharedPrefs.getStringSet(msg.type, HashSet<String>())
+            info("Current shared prefernce: $hs")
+            val newHs = HashSet(hs)
+
+            when (msg.action) {
+                "follow" -> {
+                    newHs.add(msg.tag)
+                }
+
+                "unfollow" -> {
+                    newHs.remove(msg.tag)
+                }
+            }
+
+            info("New set: $newHs")
+
+            val editor = sharedPrefs.edit()
+//                    editor.putString(msg.type, msg.tag)
+            editor.putStringSet(msg.type, newHs)
+            val result = editor.commit()
+            info("Commit result: $result")
         }
     }
 }
