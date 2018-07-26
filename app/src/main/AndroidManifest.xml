@@ -36,6 +36,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+        <activity android:name=".StoryActivity" />
+        <activity android:name=".WebContentActivity"></activity>
     </application>
 
 </manifest>

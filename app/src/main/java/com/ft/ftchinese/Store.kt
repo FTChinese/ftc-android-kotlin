@@ -1,7 +1,10 @@
 package com.ft.ftchinese
 
 import android.content.Context
+import android.content.res.Resources
 import android.util.Log
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import java.io.File
 
 class Store {
@@ -9,21 +12,16 @@ class Store {
     companion object {
         private val TAG = "Store"
 
-        fun save(context: Context?, filename: String?, text: String) {
+        fun save(context: Context?, filename: String?, text: String?) {
 
-            if (context == null || filename == null) {
+            if (context == null || filename == null || text == null) {
                 return
             }
             val file = File(context.filesDir, filename)
 
             file.writeText(text)
 
-            Log.i(TAG, "Absolute path: ${file.absolutePath}")
-            Log.i(TAG, "Canonical path: ${file.canonicalPath}")
-            Log.i(TAG, "Saved file: ${file.name}")
-            Log.i(TAG, "Free space: ${file.freeSpace}")
-            Log.i(TAG, "Total space: ${file.totalSpace}")
-            Log.i(TAG, "Usable space: ${file.usableSpace}")
+            Log.i(TAG, "Saved file: ${file.name}. Canonical path: ${file.canonicalPath}")
         }
 
         fun load(context: Context?, filename: String?): String? {
@@ -36,6 +34,43 @@ class Store {
             } catch (e: Exception) {
                 Log.i(TAG, e.toString())
             }
+            return null
+        }
+
+        fun readRawFile(resources: Resources, resId: Int): String? {
+
+            try {
+                Log.i(TAG, "Reading raw file")
+                val input = resources.openRawResource(resId)
+                return input.bufferedReader().use { it.readText() }
+
+            } catch (e: ExceptionInInitializerError) {
+                Log.w("readHtml", e.toString())
+            }
+            return null
+        }
+
+
+    }
+}
+
+class Request {
+
+    companion object {
+
+        private val httpClient = OkHttpClient()
+
+        fun get(url: String): String? {
+            try {
+                val request = Request.Builder()
+                        .url(url)
+                        .build()
+                val response = httpClient.newCall(request).execute()
+                return response.body()?.string()
+            } catch (e: Exception) {
+                Log.w("requestData", e.toString())
+            }
+
             return null
         }
     }

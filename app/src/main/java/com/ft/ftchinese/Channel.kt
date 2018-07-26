@@ -84,7 +84,7 @@ data class ChannelMeta(
  * `data-audio` for `shortlead`
  * `data-caudio` for `caudio`
  * `data-eaudio` for `eaudio`
- * `data-sub-type` for `subType`. Possible values: `radio`
+ * `data-sub-type` for `subType`. Possible values: `radio`, `speedreading`
  * `data-date` for `timeStamp`
  *
  * NOTE: This is a terrible way of handling data. In the future we will provide a unified JSON API with clear naming style.
@@ -115,11 +115,13 @@ data class ChannelItem(
         }
 
     // See Page/FTChinese/Main/APIs.swift
+    // https://api003.ftmailbox.com/interactive/12339?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24
     val apiUrl: String?
         get() {
             return when(type) {
                 "story", "premium" -> "https://api.ftmailbox.com/index.php/jsapi/get_story_more_info/$id"
-                "interactive", "gym", "special" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
+                "interactive" -> "https://api003.ftmailbox.com/interactive/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
+                "gym", "special" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp"
                 "video" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&004"
                 "radio" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&exclusive"
                 else -> null

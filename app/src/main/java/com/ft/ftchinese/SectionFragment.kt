@@ -202,7 +202,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         val readResult = async { readHtml(resources, R.raw.list) }
         info("Fetch currentPage data ${currentPage?.listUrl}")
 
-        val fetchResult = async { requestData(currentPage?.listUrl!!) }
+        val fetchResult = async { Request.get(currentPage?.listUrl!!) }
 
         val templateHtml = readResult.await()
         val remoteHtml = fetchResult.await()

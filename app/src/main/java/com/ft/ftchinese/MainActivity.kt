@@ -18,27 +18,10 @@ import android.support.v7.widget.SearchView
 import android.widget.Toast
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-val httpClient = OkHttpClient()
 val gson = Gson()
-
-fun requestData(url: String): String? {
-    try {
-        val request = Request.Builder()
-                .url(url)
-                .build()
-        val response = httpClient.newCall(request).execute()
-        return response.body()?.string()
-    } catch (e: Exception) {
-        Log.w("requestData", e.toString())
-    }
-
-    return null
-}
 
 fun readHtml(resources: Resources, resId: Int): String? {
 

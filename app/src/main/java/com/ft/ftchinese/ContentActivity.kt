@@ -34,6 +34,7 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
     private var cacheFilename: String? = null
     private var isLoadUrl: Boolean = false
     private var shareActionProvider: ShareActionProvider? = null
+    private var template: String? = null
 
     companion object {
         private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
@@ -128,6 +129,7 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
         }
 
         // Load a URL directly into web view
+        // This usually used to handle HTML link.
         val url = intent.getStringExtra(EXTRA_LOAD_URL)
 
         if (url != null) {
@@ -142,28 +144,26 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
 
         // It contain the information to retrieve an article
         channelItem = gson.fromJson(extraContent, ChannelItem::class.java)
-        cacheFilename = "${channelItem?.type}_${channelItem?.id}.html"
+        cacheFilename = "${channelItem?.type}_${channelItem?.id}.json"
 
         // Start retrieving data from cache or server
         init()
-
-        followPref()
     }
 
     override fun onRefresh() {
         Toast.makeText(this, "Refreshing", Toast.LENGTH_SHORT).show()
 
-        // If the page is directly loaded with url, call WebView's reload method.
-        if (isLoadUrl) {
-            web_view.reload()
-            stopProgress()
-            return
-        }
-
-        // Otherwise use WebView.loadDataWithBaseUrl
-        launch(UI) {
-            fetchAndUpdate()
-        }
+//        // If the page is directly loaded with url, call WebView's reload method.
+//        if (isLoadUrl) {
+//            web_view.reload()
+//            stopProgress()
+//            return
+//        }
+//
+//        // Otherwise use WebView.loadDataWithBaseUrl
+//        launch(UI) {
+//            fetchAndUpdate()
+//        }
     }
 
     override fun onDestroy() {
@@ -176,40 +176,52 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
 
         showProgress()
 
+        when (channelItem?.type) {
+            "story", "premium" -> fetchAndUpdate()
+            else -> loadUrl()
+        }
+
+    }
+
+    private fun fetchAndUpdate() {
         launch(UI) {
 
-            // Load from cache
-            val readResult = async { Store.load(this@ContentActivity, cacheFilename) }
-            val cachedData = readResult.await()
+            /**
+             * Try to load template file and cached json from local file system first
+             */
+            val readCacheResult = async { Store.load(this@ContentActivity, cacheFilename) }
+            val readTemplateResult = async { Store.readRawFile(resources, R.raw.story) }
 
-            if (cachedData != null) {
-                Toast.makeText(this@ContentActivity, "Using cache", Toast.LENGTH_SHORT).show()
-                updateUi(cachedData)
+            val cachedJson = readCacheResult.await()
+            val htmlTemplate = readTemplateResult.await()
+
+            if (htmlTemplate == null) {
+                Toast.makeText(this@ContentActivity, "Data not found", Toast.LENGTH_SHORT).show()
 
                 return@launch
             }
 
-            // Cache is not found.
-            fetchAndUpdate()
-        }
-    }
+            info("Found html template")
+            template = htmlTemplate
 
-    private suspend fun fetchAndUpdate() {
-        when (channelItem?.type) {
-            "story", "premium" -> fetchJSON()
-            else -> loadUrl()
+            if (cachedJson != null) {
+                info("Found cached json")
+                val html = renderTemplate(template, cachedJson)
+                updateUi(html)
+                return@launch
+            }
+            // Cache is not found.
+            useRemoteJson()
         }
     }
 
     // Use local HTML template and remote JSON to generate a complete HTML file
-    private suspend fun fetchJSON() {
+    private suspend fun useRemoteJson() {
         // Fetch data from server
         val url = channelItem?.apiUrl ?: return
 
-        val readResult = async { readHtml(resources, R.raw.story) }
-        val fetchResult = async { requestData(url) }
+        val fetchResult = async { Request.get(url) }
 
-        val template = readResult.await()
         val jsonData = fetchResult.await()
 
         // Cannot fetch data from server
@@ -223,62 +235,89 @@ class ContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListene
 
         updateUi(data)
 
-        async { Store.save(this@ContentActivity, cacheFilename, data) }
+        async { Store.save(this@ContentActivity, cacheFilename, jsonData) }
+
     }
 
 
     /**
      * See: Page/Helpers/WebView/WebViewHelper.swift#renderStory
      */
-    private fun renderTemplate(template: String, data: String): String {
+    private fun renderTemplate(template: String?, data: String): String? {
+        info("Render html with json")
+
         val article = gson.fromJson<ArticleDetail>(data, ArticleDetail::class.java)
 
-        return template.replace("{story-body}", article.bodyXML.cn)
-                .replace("{story-headline}", article.titleCn)
-                .replace("{story-byline}", article.byline)
-                .replace("{story-time}", article.createdAt)
-                .replace("{story-lead}", article.standfirst)
-                .replace("{story-theme}", article.htmlForTheme())
-                .replace("{story-tag}", article.tag)
-                .replace("{story-id}", article.id)
-                .replace("{story-image}", article.htmlForCoverImage())
-                .replace("{related-stories}", article.htmlForRelatedStories())
-                .replace("{related-topics}", article.htmlForRelatedTopics())
-                .replace("{comments-order}", channelItem?.commentsOrder ?: "")
-                .replace("{story-container-style}", "")
-                .replace("{follow-tags}", "")
-                .replace("{follow-topics}", "")
-                .replace("{follow-industries}", "")
-                .replace("{follow-areas}", "")
-                .replace("{follow-authors}", "")
-                .replace("{follow-columns}", "")
-                .replace("{adchID}", channelItem?.adId ?: "")
+        val follows = followPref()
+        info("Follow maps: $follows")
+
+        val followTags = follows[FollowMessage.followingTypes[0]]
+        val followTopics = follows[FollowMessage.followingTypes[1]]
+        val followAreas = follows[FollowMessage.followingTypes[2]]
+        val followIndustries = follows[FollowMessage.followingTypes[3]]
+        val followAuthors = follows[FollowMessage.followingTypes[4]]
+        val followColumns = follows[FollowMessage.followingTypes[5]]
+
+        return template?.replace("{story-body}", article.bodyXML.cn)
+                ?.replace("{story-headline}", article.titleCn)
+                ?.replace("{story-byline}", article.byline)
+                ?.replace("{story-time}", article.createdAt)
+                ?.replace("{story-lead}", article.standfirst)
+                ?.replace("{story-theme}", article.htmlForTheme())
+                ?.replace("{story-tag}", article.tag)
+                ?.replace("{story-id}", article.id)
+                ?.replace("{story-image}", article.htmlForCoverImage())
+                ?.replace("{related-stories}", article.htmlForRelatedStories())
+                ?.replace("{related-topics}", article.htmlForRelatedTopics())
+                ?.replace("{comments-order}", channelItem?.commentsOrder ?: "")
+                ?.replace("{story-container-style}", "")
+                ?.replace("'{follow-tags}'", followTags ?: "")
+                ?.replace("'{follow-topics}'", followTopics ?: "")
+                ?.replace("'{follow-industries}'", followIndustries ?: "")
+                ?.replace("'{follow-areas}'", followAreas ?: "")
+                ?.replace("'{follow-authors}'", followAuthors ?: "")
+                ?.replace("'{follow-columns}'", followColumns ?: "")
+                ?.replace("{adchID}", channelItem?.adId ?: "")
                 //                        .replace("{ad-banner}", "")
                 //                        .replace("{ad-mpu}", "")
                 //                        .replace("{font-class}", "")
-                .replace("{comments-id}", channelItem?.commentsId ?: "")
+                ?.replace("{comments-id}", channelItem?.commentsId ?: "")
     }
 
-    private fun followPref() {
-        val sharedPrefs = getSharedPreferences("following", Context.MODE_PRIVATE)
+    private fun followPref(): Map<String, String> {
+        val sharedPrefs = getSharedPreferences(FollowMessage.PREF_FILENAME, Context.MODE_PRIVATE)
 
 //
+        return FollowMessage.followingTypes.associate {
+            val ss = sharedPrefs.getStringSet(it, setOf())
 
-        val follows = FollowMessage.followingTypes.fold(mutableMapOf()) { acc: MutableMap<String, String>, s ->
-            val hs = sharedPrefs.getStringSet(s, setOf())
+            val v = ss.joinToString {
+                "'$it'"
+            }
 
-            acc[s] = hs.joinToString()
-            acc
+            Pair(it, v)
         }
-
-        info("Following: $follows")
     }
 
-    private fun updateUi(data: String) {
+    private fun updateUi(data: String?) {
+
+        info("Updating UI")
 
         web_view.loadDataWithBaseURL("http://www.ftchinese.com", data, "text/html", null, null)
 
         stopProgress()
+
+
+        cacheHtml(data)
+    }
+
+    private fun cacheHtml(data: String?) {
+
+        val name = "${channelItem?.type}_${channelItem?.id}.html"
+
+        info("Cache rendered HTML")
+
+        async { Store.save(this@ContentActivity, name, data) }
     }
 
     // Directly load a url
