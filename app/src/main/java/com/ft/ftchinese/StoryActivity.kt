@@ -29,8 +29,11 @@ class StoryActivity : AbstractContentActivity() {
     companion object {
         private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
 
+        /**
+         * Start this activity
+         */
         fun start(context: Context?, channelItem: ChannelItem) {
-            val intent = Intent(context, ContentActivity::class.java)
+            val intent = Intent(context, StoryActivity::class.java)
             intent.putExtra(EXTRA_CHANNEL_ITEM, gson.toJson(channelItem))
             context?.startActivity(intent)
         }

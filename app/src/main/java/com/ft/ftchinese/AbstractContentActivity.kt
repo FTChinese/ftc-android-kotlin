@@ -12,7 +12,9 @@ import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-abstract class AbstractContentActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
+abstract class AbstractContentActivity : AppCompatActivity(),
+        SwipeRefreshLayout.OnRefreshListener,
+        AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_content)

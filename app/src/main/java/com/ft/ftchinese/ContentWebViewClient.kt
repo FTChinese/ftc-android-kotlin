@@ -16,16 +16,18 @@ class ContentWebViewClient(private val context: Context?) : AbstractWebViewClien
             return true
         }
 
-        val newUrl = uri.buildUpon()
+        WebContentActivity.start(context, buildUrl(uri))
+
+        return true
+    }
+
+    private fun buildUrl(uri: Uri): String {
+        return uri.buildUpon()
                 .scheme("https")
                 .authority("api003.ftmailbox.com")
                 .appendQueryParameter("bodyonly", "yes")
                 .appendQueryParameter("webview", "ftcapp")
                 .build()
                 .toString()
-
-        WebContentActivity.start(context, newUrl)
-
-        return true
     }
 }

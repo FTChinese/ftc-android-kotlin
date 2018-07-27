@@ -36,7 +36,12 @@ fun readHtml(resources: Resources, resId: Int): String? {
 }
 
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, TabLayout.OnTabSelectedListener, SectionFragment.OnDataLoadListener, SectionFragment.OnInAppNavigate, AnkoLogger {
+class MainActivity : AppCompatActivity(),
+        NavigationView.OnNavigationItemSelectedListener,
+        TabLayout.OnTabSelectedListener,
+        SectionFragment.OnDataLoadListener,
+        ChannelWebViewClient.OnInAppNavigate,
+        AnkoLogger {
 
     /**
      * Implementation of BottomNavigationView.OnNavigationItemSelectedListener

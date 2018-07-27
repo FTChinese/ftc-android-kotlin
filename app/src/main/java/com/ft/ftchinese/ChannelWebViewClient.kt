@@ -4,7 +4,24 @@ import android.content.Context
 import android.net.Uri
 import org.jetbrains.anko.info
 
-class ChannelWebVIewClient(private val context: Context?) : AbstractWebViewClient(context) {
+class ChannelWebViewClient(private val context: Context?, private val currentPage: ListPage?) : AbstractWebViewClient(context) {
+
+    private lateinit var mListener: OnInAppNavigate
+    /**
+     * Jump to another bottom navigation item or another tab in hte same bottom navigation item when certain links are clicked.
+     */
+    interface OnInAppNavigate {
+        // Jump to a new bottom navigation item
+        fun selectBottomNavItem(itemId: Int)
+
+        // Go to another tab
+        fun selectTabLayoutTab(tabIndex: Int)
+    }
+
+    fun setOnInAppNavigateListener(listener: OnInAppNavigate) {
+        mListener = listener
+    }
+
     override fun handleInSiteLink(uri: Uri): Boolean {
         val pathSegments = uri.pathSegments
 
@@ -21,9 +38,9 @@ class ChannelWebVIewClient(private val context: Context?) : AbstractWebViewClien
             if (queryPage != null) {
                 val page = ListPage(
                         title = currentPage?.title ?: "",
-                        name = "channel_p${queryPage}_${uri.lastPathSegment}",
-                        listUrl = buildUrl(uri, "/channel/${uri.path}")
-                )
+                        // Pagination should not be cached since it always dynamic
+                        name = "",
+                        listUrl = buildUrl(uri, "/channel/${uri.path}"))
 
                 /**
                  * Start a new page of article list.
@@ -35,28 +52,42 @@ class ChannelWebVIewClient(private val context: Context?) : AbstractWebViewClien
             /**
              * Assume this is a content page and load the url directly.
              */
-            ContentActivity.start(context, buildUrl(uri))
+            WebContentActivity.start(context, buildUrl(uri))
             return true
         }
 
-
+        /**
+         * Path segments have two or more parts
+         */
         when (pathSegments[0]) {
 
+        /**
+         * If the path looks like `/channel/english.html`
+         */
             "channel" -> {
                 return handleChannel(uri)
             }
 
+        /**
+         * If the path looks like `/m/marketing/intelligence.html`
+         */
             "m" -> {
                 return handleMarketing(uri)
             }
 
-        // If the path looks like `/story/001078593`
+        /**
+         * If the path looks like `/story/001078593`
+         */
             "story" -> {
-                val channelItem = ChannelItem(id = pathSegments[1], type = pathSegments[0], headline = "", shortlead = "")
-                ContentActivity.start(activity, channelItem)
+                val channelItem = ChannelItem(
+                        id = pathSegments[1],
+                        type = pathSegments[0],
+                        headline = "",
+                        shortlead = "")
+                StoryActivity.start(context, channelItem)
             }
 
-        //
+
         /**
          * If the path looks like `/tag/中美贸易战`,
          * start a new page listing articles
@@ -65,25 +96,30 @@ class ChannelWebVIewClient(private val context: Context?) : AbstractWebViewClien
                 val page = ListPage(
                         title = pathSegments[1],
                         name = "${pathSegments[0]}_${pathSegments[1]}",
-                        listUrl = buildUrl(uri)
-                )
+                        listUrl = buildUrl(uri))
 
-                ChannelActivity.start(activity, page)
+                ChannelActivity.start(context, page)
             }
 
             else -> {
-                info("Open a content link directly. Original url is: $uri. API url is ${buildUrl(uri)}")
-                ContentActivity.start(context, buildUrl(uri))
+                info("Open a web page directly. Original url is: $uri. API url is ${buildUrl(uri)}")
+                WebContentActivity.start(context, buildUrl(uri))
             }
         }
 
         return true
     }
 
+    /**
+     * Handle urls whose path start with `/channel/...`
+     */
     private fun handleChannel(uri: Uri): Boolean {
 
         val lastPathSegment = uri.lastPathSegment
 
+        /**
+         * Just a precaution to handle any unexpected url.
+         */
         if (lastPathSegment == null) {
             val page = ListPage(
                     title = "",
@@ -91,7 +127,7 @@ class ChannelWebVIewClient(private val context: Context?) : AbstractWebViewClien
                     listUrl = buildUrl(uri)
             )
 
-            ChannelActivity.start(activity, page)
+            ChannelActivity.start(context, page)
             return true
         }
 
@@ -100,7 +136,7 @@ class ChannelWebVIewClient(private val context: Context?) : AbstractWebViewClien
          * If the path is `/channel/english.html`, navigate to the second bottom nav item.
          */
             "english.html" -> {
-                navigateListener.selectBottomNavItem(R.id.nav_english)
+                mListener.selectBottomNavItem(R.id.nav_english)
             }
 
 
@@ -108,7 +144,7 @@ class ChannelWebVIewClient(private val context: Context?) : AbstractWebViewClien
          * If the path is `/channel/mba.html`, navigate to the third bottom nav item
          */
             "mba.html" -> {
-                navigateListener.selectBottomNavItem(R.id.nav_ftacademy)
+                mListener.selectBottomNavItem(R.id.nav_ftacademy)
             }
 
 
@@ -119,13 +155,13 @@ class ChannelWebVIewClient(private val context: Context?) : AbstractWebViewClien
 
                 val tabIndex = ListPage.newsPages.indexOfFirst { it.name == "news_top_stories" }
 
-                navigateListener.selectTabLayoutTab(tabIndex)
+                mListener.selectTabLayoutTab(tabIndex)
             }
 
             "markets.html" -> {
                 val tabIndex = ListPage.newsPages.indexOfFirst { it.name == "news_markets" }
 
-                navigateListener.selectTabLayoutTab(tabIndex)
+                mListener.selectTabLayoutTab(tabIndex)
             }
 
         /**
@@ -144,9 +180,9 @@ class ChannelWebVIewClient(private val context: Context?) : AbstractWebViewClien
                 val page = ListPage(
                         title = pathToTitle[lastPathSegment] ?: "",
                         name = name,
-                        listUrl = buildUrl(uri)
-                )
-                ChannelActivity.start(activity, page)
+                        listUrl = buildUrl(uri))
+
+                ChannelActivity.start(context, page)
             }
         }
 
@@ -164,7 +200,7 @@ class ChannelWebVIewClient(private val context: Context?) : AbstractWebViewClien
                 "intelligence.html" -> {
                     val tabIndex = ListPage.newsPages.indexOfFirst { it.name == "news_fta" }
 
-                    navigateListener.selectTabLayoutTab(tabIndex)
+                    mListener.selectTabLayoutTab(tabIndex)
                 }
 
             /**
@@ -178,7 +214,7 @@ class ChannelWebVIewClient(private val context: Context?) : AbstractWebViewClien
                             name = "marketing_$name",
                             listUrl = buildUrl(uri)
                     )
-                    ChannelActivity.start(activity, page)
+                    ChannelActivity.start(context, page)
                 }
             }
 
@@ -195,7 +231,7 @@ class ChannelWebVIewClient(private val context: Context?) : AbstractWebViewClien
                 name = "",
                 listUrl = buildUrl(uri)
         )
-        ChannelActivity.start(activity, page)
+        ChannelActivity.start(context, page)
 
         return true
     }

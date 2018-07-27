@@ -13,7 +13,7 @@ import org.jetbrains.anko.info
  * This is used to show a channel page, which consists of a list of article summaries.
  * It is similar to `MainActivity` execpt that it does not wrap a TabLayout.
  */
-class ChannelActivity : AppCompatActivity(), SectionFragment.OnDataLoadListener, SectionFragment.OnInAppNavigate, AnkoLogger {
+class ChannelActivity : AppCompatActivity(), SectionFragment.OnDataLoadListener, ChannelWebViewClient.OnInAppNavigate, AnkoLogger {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
