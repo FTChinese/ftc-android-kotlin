@@ -302,8 +302,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
 
             if (channelItem.type == "interactive" && channelItem.subType == "radio") {
-//                RadioActivity.start(context, channelItem)
-                WebContentActivity.start(activity, channelItem?.apiUrl)
+                RadioActivity.start(context, channelItem)
                 return
             }
 

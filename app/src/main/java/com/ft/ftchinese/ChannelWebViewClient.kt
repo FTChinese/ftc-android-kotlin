@@ -33,7 +33,7 @@ class ChannelWebViewClient(
     }
 
     override fun openChannelPagination(uri: Uri): Boolean {
-        val queryPage = uri.getQueryParameter("page") ?: return false
+//        val queryPage = uri.getQueryParameter("page") ?: return false
 
         val page = ListPage(
                 title = currentPage?.title ?: "",

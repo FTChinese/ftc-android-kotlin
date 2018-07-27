@@ -58,6 +58,8 @@ class RadioActivity : AppCompatActivity(), AnkoLogger {
         channelItem = gson.fromJson(itemData, ChannelItem::class.java)
         info("Creating radio activity for $channelItem")
 
+        val audioUrl = channelItem?.shortlead
+
         loadUrl(channelItem?.apiUrl)
     }
 
