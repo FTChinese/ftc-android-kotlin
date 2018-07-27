@@ -1,5 +1,13 @@
 package com.ft.ftchinese
 
+class Endpoints{
+    companion object {
+        const val HOST_FTC = "www.ftchinese.com"
+        const val HOST_MAILBOX = "api003.ftmailbox.com"
+        val hosts = arrayOf(HOST_FTC, HOST_MAILBOX)
+    }
+}
+
 /**
  * ListPage contains the data used by a page in ViewPager
  */

@@ -22,13 +22,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!--<activity-->
-            <!--android:name=".ContentActivity"-->
-            <!--android:parentActivityName=".MainActivity">-->
-            <!--<meta-data-->
-                <!--android:name="android.support.PARENT_ACTIVITY"-->
-                <!--android:value=".MainActivity" />-->
-        <!--</activity>-->
+        <!-- <activity -->
+        <!-- android:name=".ContentActivity" -->
+        <!-- android:parentActivityName=".MainActivity"> -->
+        <!-- <meta-data -->
+        <!-- android:name="android.support.PARENT_ACTIVITY" -->
+        <!-- android:value=".MainActivity" /> -->
+        <!-- </activity> -->
         <activity
             android:name=".ChannelActivity"
             android:parentActivityName=".MainActivity">
@@ -36,13 +36,22 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".StoryActivity"
+        <activity
+            android:name=".StoryActivity"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".WebContentActivity"
+        <activity
+            android:name=".WebContentActivity"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
+            android:name=".RadioActivity"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

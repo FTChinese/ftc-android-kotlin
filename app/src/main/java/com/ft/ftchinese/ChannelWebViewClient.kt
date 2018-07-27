@@ -4,8 +4,18 @@ import android.content.Context
 import android.net.Uri
 import org.jetbrains.anko.info
 
-class ChannelWebViewClient(private val context: Context?, private val currentPage: ListPage?) : AbstractWebViewClient(context) {
+/**
+ * A WebViewClient used by a SectionFragment
+ */
+class ChannelWebViewClient(
+        private val context: Context?,
+        private val currentPage: ListPage?
+) : BaseWebViewClient(context) {
 
+    /**
+     * Callback used by ChannelWebViewClient.
+     * When certain links in web view is clicked, the event is passed to parent activity to open a bottom navigation item or a tab.
+     */
     private lateinit var mListener: OnInAppNavigate
     /**
      * Jump to another bottom navigation item or another tab in hte same bottom navigation item when certain links are clicked.
@@ -22,98 +32,27 @@ class ChannelWebViewClient(private val context: Context?, private val currentPag
         mListener = listener
     }
 
-    override fun handleInSiteLink(uri: Uri): Boolean {
-        val pathSegments = uri.pathSegments
+    override fun openChannelPagination(uri: Uri): Boolean {
+        val queryPage = uri.getQueryParameter("page") ?: return false
 
-
-        if (pathSegments.size < 2) {
-            /**
-             * Handle the pagination link of each channel
-             * There's a problem with each channel's pagination: they used relative urls.
-             * When loaded in WebView with base url `http://www.ftchinese.com`,
-             * the url will become something `http://www.ftchinese.com/china.html?page=2`,
-             * which should actually be `http://www.ftchiese.com/channel/china.html?page=2`
-             */
-            val queryPage = uri.getQueryParameter("page")
-            if (queryPage != null) {
-                val page = ListPage(
-                        title = currentPage?.title ?: "",
-                        // Pagination should not be cached since it always dynamic
-                        name = "",
-                        listUrl = buildUrl(uri, "/channel/${uri.path}"))
-
-                /**
-                 * Start a new page of article list.
-                 */
-                ChannelActivity.start(context, page)
-                return true
-            }
-
-            /**
-             * Assume this is a content page and load the url directly.
-             */
-            WebContentActivity.start(context, buildUrl(uri))
-            return true
-        }
+        val page = ListPage(
+                title = currentPage?.title ?: "",
+                // Pagination should not be cached since it always dynamic
+                name = "",
+                listUrl = buildUrl(uri, "/channel/${uri.path}"))
 
         /**
-         * Path segments have two or more parts
+         * Start a new page of article list.
          */
-        when (pathSegments[0]) {
-
-        /**
-         * If the path looks like `/channel/english.html`
-         */
-            "channel" -> {
-                return handleChannel(uri)
-            }
-
-        /**
-         * If the path looks like `/m/marketing/intelligence.html`
-         */
-            "m" -> {
-                return handleMarketing(uri)
-            }
-
-        /**
-         * If the path looks like `/story/001078593`
-         */
-            "story" -> {
-                val channelItem = ChannelItem(
-                        id = pathSegments[1],
-                        type = pathSegments[0],
-                        headline = "",
-                        shortlead = "")
-                StoryActivity.start(context, channelItem)
-            }
-
-
-        /**
-         * If the path looks like `/tag/中美贸易战`,
-         * start a new page listing articles
-         */
-            "tag" -> {
-                val page = ListPage(
-                        title = pathSegments[1],
-                        name = "${pathSegments[0]}_${pathSegments[1]}",
-                        listUrl = buildUrl(uri))
-
-                ChannelActivity.start(context, page)
-            }
-
-            else -> {
-                info("Open a web page directly. Original url is: $uri. API url is ${buildUrl(uri)}")
-                WebContentActivity.start(context, buildUrl(uri))
-            }
-        }
-
+        ChannelActivity.start(context, page)
         return true
+
     }
 
     /**
      * Handle urls whose path start with `/channel/...`
      */
-    private fun handleChannel(uri: Uri): Boolean {
+    override fun openChannelLink(uri: Uri): Boolean {
 
         val lastPathSegment = uri.lastPathSegment
 
@@ -189,7 +128,7 @@ class ChannelWebViewClient(private val context: Context?, private val currentPag
         return true
     }
 
-    private fun handleMarketing(uri: Uri): Boolean {
+    override fun openMarketingLink(uri: Uri): Boolean {
         if (uri.pathSegments[1] == "marketing") {
             when (uri.lastPathSegment) {
 
@@ -234,20 +173,6 @@ class ChannelWebViewClient(private val context: Context?, private val currentPag
         ChannelActivity.start(context, page)
 
         return true
-    }
-
-    private fun buildUrl(uri: Uri, path: String? = null): String {
-        val builder =  uri.buildUpon()
-                .scheme("https")
-                .authority("api003.ftmailbox.com")
-                .appendQueryParameter("bodyonly", "yes")
-                .appendQueryParameter("webview", "ftcapp")
-
-        if (path != null) {
-            builder.path(path)
-        }
-
-        return builder.build().toString()
     }
 
 }

@@ -12,7 +12,11 @@ class WebContentActivity : AbstractContentActivity() {
     companion object {
         private const val EXTRA_WEB_URL = "extra_web_url"
 
-        fun start(context: Context?, url: String) {
+        fun start(context: Context?, url: String?) {
+            if (url == null) {
+                Toast.makeText(context, "Cannot load data", Toast.LENGTH_SHORT).show()
+                return
+            }
             val intent = Intent(context, WebContentActivity::class.java)
             intent.putExtra(EXTRA_WEB_URL, url)
             context?.startActivity(intent)

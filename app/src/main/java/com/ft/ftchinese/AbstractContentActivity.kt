@@ -36,7 +36,7 @@ abstract class AbstractContentActivity : AppCompatActivity(),
 
             addJavascriptInterface(WebAppInterface(), "Android")
 
-            webViewClient = ContentWebViewClient(this@AbstractContentActivity)
+            webViewClient = BaseWebViewClient(this@AbstractContentActivity)
 
             webChromeClient = MyChromeClient()
 
@@ -60,7 +60,7 @@ abstract class AbstractContentActivity : AppCompatActivity(),
 
     fun loadData(data: String?) {
 
-        info("Load string into web view: $data")
+        info("Load HTML string into web view")
 
         web_view.loadDataWithBaseURL("http://www.ftchinese.com", data, "text/html", null, null)
 
