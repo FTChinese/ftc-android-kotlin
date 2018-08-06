@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity(),
             }
 
             R.id.nav_myft -> {
-                info("Selected bottom nav item ${item.title}")
+                LoginActivity.start(this)
             }
         }
         true
@@ -116,45 +116,48 @@ class MainActivity : AppCompatActivity(),
 
     }
 
-    override fun onStart() {
-        super.onStart()
-
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-    }
-
-    override fun onStop() {
-        super.onStop()
-
-    }
-
     override fun onRestart() {
         super.onRestart()
-
+        info("onRestart finished")
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-
-    }
-
-    override fun onSaveInstanceState(outState: Bundle?) {
-        super.onSaveInstanceState(outState)
-
+    override fun onStart() {
+        super.onStart()
+        info("onStart finished")
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
 
         super.onRestoreInstanceState(savedInstanceState)
 
+        info("onRestoreInstanceSate finished")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        info("onResume finished")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        info("onPause finished")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        info("onStop finished")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        info("onDestroy finished")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+
+        info("onSaveInstanceSate finished")
     }
 
     override fun onBackPressed() {

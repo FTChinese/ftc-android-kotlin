@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import org.jetbrains.anko.info
 
 class WebContentActivity : AbstractContentActivity() {
 
@@ -30,6 +31,12 @@ class WebContentActivity : AbstractContentActivity() {
         urlToLoad = intent.getStringExtra(EXTRA_WEB_URL)
 
         init()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        info("Activity destroyed")
     }
 
     override fun onRefresh() {

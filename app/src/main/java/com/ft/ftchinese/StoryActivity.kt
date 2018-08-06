@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -25,6 +26,8 @@ class StoryActivity : AbstractContentActivity() {
     // HTML template used to render a complete web page.
     // The first time the template file is read, it is cached into this variable so that no IO is performed in cases like refreshing.
     private var template: String? = null
+
+    private var job: Job? = null
 
     companion object {
         private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
@@ -54,18 +57,24 @@ class StoryActivity : AbstractContentActivity() {
         init()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        job?.cancel()
+    }
+
     override fun onRefresh() {
         super.onRefresh()
 
         // This is based on the assumption that `temaplte` is not null.
         // Since refresh action should definitely happen after init() is called, `template` should never be null by this point.
-        launch(UI) {
+        job = launch(UI) {
             useRemoteJson()
         }
     }
 
     override fun init() {
-        launch(UI) {
+        job = launch(UI) {
             val readCacheResult = async { Store.load(this@StoryActivity, cacheFilename) }
             val readTemplateResult = async { Store.readRawFile(resources, R.raw.story) }
 

@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.webkit.*
 import android.widget.Toast
 import kotlinx.android.synthetic.main.fragment_section.*
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -46,6 +47,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
      */
     private var channelItems: Array<ChannelItem>? = null
     private var channelMeta: ChannelMeta? = null
+    private var job: Job? = null
 
     // Containing activity should implement this interface to show progress state
     interface OnDataLoadListener {
@@ -111,7 +113,9 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         currentPage = gson.fromJson<ListPage>(pageMetadata, ListPage::class.java)
 
+        // Set WebViewClient for current page
         mWebViewClient = ChannelWebViewClient(context, currentPage)
+        // Set navigate listener to enable in-app navigation when clicked a url which should to another tab.
         mWebViewClient.setOnInAppNavigateListener(navigateListener)
     }
 
@@ -156,18 +160,25 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             false
         }
 
-        info("Initiating data...")
+        info("Initiating current page with data: $currentPage")
 
         init()
 
-        info("Finish onCreateView")
+        info("onCreateView finished")
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        val result = job?.cancel()
+
+        info("Job cancelled: $result")
+    }
 
     override fun onRefresh() {
         Toast.makeText(context, "Refreshing", Toast.LENGTH_SHORT).show()
 
-        launch(UI) {
+        job = launch(UI) {
             fetchAndUpdate()
         }
     }
@@ -178,7 +189,9 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         if (currentPage?.listUrl != null ) {
 
-            launch (UI) {
+            info("This page use server's HTML fragment")
+
+            job = launch (UI) {
                 if (currentPage?.name != null) {
                     val readCacheResult = async { Store.load(context, "${currentPage?.name}.html") }
                     val cachedHtml = readCacheResult.await()
@@ -199,6 +212,8 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         }
 
         if (currentPage?.webUrl != null) {
+            info("This is complete web page that can be loaded directly into a web view")
+
             web_view.loadUrl(currentPage?.webUrl)
 
             stopProgress()

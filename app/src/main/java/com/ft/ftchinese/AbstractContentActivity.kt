@@ -22,7 +22,7 @@ abstract class AbstractContentActivity : AppCompatActivity(),
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
-            setDisplayShowTitleEnabled(false)
+//            setDisplayShowTitleEnabled(false)
         }
 
         swipe_refresh.setOnRefreshListener(this)
