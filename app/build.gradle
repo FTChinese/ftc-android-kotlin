@@ -23,6 +23,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -44,6 +47,7 @@ dependencies {
 
 //  ORM
     implementation "android.arch.persistence.room:runtime:$room_version"
+    implementation 'com.android.support:support-v4:27.1.1'
     annotationProcessor "android.arch.persistence.room:compiler:$room_version"
 
 //    Test

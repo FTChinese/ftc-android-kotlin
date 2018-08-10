@@ -52,30 +52,30 @@ class MainActivity : AppCompatActivity(),
         when (item.itemId) {
             R.id.nav_news -> {
                 supportActionBar?.setTitle(R.string.app_name)
-                container.adapter = SectionsPagerAdapter(ListPage.newsPages, supportFragmentManager)
+                view_pager.adapter = SectionsPagerAdapter(ListPage.newsPages, supportFragmentManager)
 
             }
 
             R.id.nav_english -> {
                 supportActionBar?.setTitle(R.string.nav_english)
-                container.adapter = SectionsPagerAdapter(ListPage.englishPages, supportFragmentManager)
+                view_pager.adapter = SectionsPagerAdapter(ListPage.englishPages, supportFragmentManager)
 
             }
 
             R.id.nav_ftacademy -> {
                 supportActionBar?.setTitle(R.string.nav_ftacademy)
-                container.adapter = SectionsPagerAdapter(ListPage.ftaPages, supportFragmentManager)
+                view_pager.adapter = SectionsPagerAdapter(ListPage.ftaPages, supportFragmentManager)
 
             }
 
             R.id.nav_video -> {
                 supportActionBar?.setTitle(R.string.nav_video)
-                container.adapter = SectionsPagerAdapter(ListPage.videoPages, supportFragmentManager)
+                view_pager.adapter = SectionsPagerAdapter(ListPage.videoPages, supportFragmentManager)
 
             }
 
             R.id.nav_myft -> {
-                LoginActivity.start(this)
+                view_pager.adapter = MyftPagerAdapter(supportFragmentManager)
             }
         }
         true
@@ -104,10 +104,10 @@ class MainActivity : AppCompatActivity(),
         nav_view.setNavigationItemSelectedListener(this)
 
         // Set ViewPager adapter
-        container.adapter = SectionsPagerAdapter(ListPage.newsPages, supportFragmentManager)
+        view_pager.adapter = SectionsPagerAdapter(ListPage.newsPages, supportFragmentManager)
 
         // Link ViewPager and TabLayout
-        tab_layout.setupWithViewPager(container)
+        tab_layout.setupWithViewPager(view_pager)
         tab_layout.addOnTabSelectedListener(this)
 
         // Bottom navigation listener
@@ -223,22 +223,25 @@ class MainActivity : AppCompatActivity(),
 
         // Handle navigation view item clicks here.
         when (item.itemId) {
-            R.id.nav_camera -> {
-                // Handle the camera action
-            }
-            R.id.nav_gallery -> {
+//            R.id.myft_email -> {
+//                // Handle the camera action
+//            }
+            R.id.myft_security -> {
 
             }
-            R.id.nav_slideshow -> {
+            R.id.myft_membership -> {
 
             }
-            R.id.nav_manage -> {
+            R.id.myft_help -> {
 
             }
-            R.id.nav_share -> {
+            R.id.myft_feedback -> {
 
             }
-            R.id.nav_send -> {
+            R.id.settings -> {
+
+            }
+            R.id.myft_logout -> {
 
             }
         }
@@ -305,13 +308,11 @@ class MainActivity : AppCompatActivity(),
 
         override fun getItem(position: Int): Fragment {
             // getItem is called to instantiate the fragment for the given page.
-            // Return a PlaceholderFragment (defined as a static inner class below).
             info("Fragment data: ${pages[position]}")
             return SectionFragment.newInstance(pages[position])
         }
 
         override fun getCount(): Int {
-            // Show 3 total pages.
             return pages.size
         }
 
@@ -320,4 +321,28 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    inner class MyftPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+        private val pages = arrayOf(
+                MyftTab(id = "reading_history", title = "阅读历史"),
+                MyftTab(id = "starred_articles", title = "收藏文章"),
+                MyftTab(id = "following", title = "关注")
+        )
+        override fun getItem(position: Int): Fragment {
+            return MyftFragment.newInstance(pages[position].id, pages[position].title)
+        }
+
+        override fun getCount(): Int {
+            return pages.size
+        }
+
+        override fun getPageTitle(position: Int): CharSequence? {
+            return pages[position].title
+        }
+    }
 }
+
+
+data class MyftTab(
+        val id: String,
+        val title: String
+)

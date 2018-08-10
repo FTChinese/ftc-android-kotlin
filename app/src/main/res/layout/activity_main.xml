@@ -14,8 +14,7 @@
         <!--android:layout_height="match_parent" />-->
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:theme="@style/Origami">
+        android:layout_height="match_parent">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
@@ -26,7 +25,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <android.support.v4.view.ViewPager
-            android:id="@+id/container"
+            android:id="@+id/view_pager"
             android:layout_width="0dp"
             android:layout_height="0dp"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"

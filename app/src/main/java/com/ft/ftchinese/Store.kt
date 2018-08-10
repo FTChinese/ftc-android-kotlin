@@ -3,8 +3,6 @@ package com.ft.ftchinese
 import android.content.Context
 import android.content.res.Resources
 import android.util.Log
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import java.io.File
 
 class Store {
@@ -54,24 +52,3 @@ class Store {
     }
 }
 
-class Request {
-
-    companion object {
-
-        private val httpClient = OkHttpClient()
-
-        fun get(url: String): String? {
-            try {
-                val request = Request.Builder()
-                        .url(url)
-                        .build()
-                val response = httpClient.newCall(request).execute()
-                return response.body()?.string()
-            } catch (e: Exception) {
-                Log.w("requestData", e.toString())
-            }
-
-            return null
-        }
-    }
-}

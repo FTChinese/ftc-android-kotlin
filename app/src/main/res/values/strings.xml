@@ -9,6 +9,20 @@
     <string name="nav_myft">我的FT</string>
 
     <string name="news_editor_choice">编辑精选</string>
+    
+    <string name="myft_email">修改邮箱</string>
+    <string name="myft_security">账号安全</string>
+    <string name="myft_membership">会员订阅</string>
+    <string name="myft_help">帮助</string>
+    <string name="myft_feedback">反馈</string>
+    <string name="myft_logout">退出登录</string>
+
+
+    <string name="myft_reading_history">阅读历史</string>
+    <string name="myft_starred_articles">收藏文章</string>
+    <string name="myft_following">关注</string>
+
+    <string name="settings">设置</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -28,8 +42,11 @@
     <string name="error_invalid_email">邮箱地址无效</string>
     <string name="error_invalid_password">密码无效</string>
     <string name="error_incorrect_password">密码错误</string>
-    <string name="error_field_required">This field is required</string>
+    <string name="error_field_required">请填写此项</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

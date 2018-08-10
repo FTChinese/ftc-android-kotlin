@@ -3,36 +3,44 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
+    <group android:checkableBehavior="single"
+        android:id="@+id/drawer_group1">
+        <!--<item-->
+            <!--android:id="@+id/myft_email"-->
+            <!--android:icon="@drawable/ic_email_black_24dp"-->
+            <!--android:title="@string/myft_email" />-->
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
+            android:id="@+id/myft_security"
+            android:icon="@drawable/ic_security_black_24dp"
+            android:title="@string/myft_security" />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
-        <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:id="@+id/myft_membership"
+            android:icon="@drawable/ic_card_membership_black_24dp"
+            android:title="@string/myft_membership" />
     </group>
 
-    <item android:title="Communicate">
-        <menu>
-            <item
-                android:id="@+id/nav_share"
-                android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
-            <item
-                android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Send" />
-        </menu>
-    </item>
+    <group android:checkableBehavior="single"
+        android:id="@+id/drawer_group2">
+        <item
+            android:id="@+id/myft_help"
+            android:icon="@drawable/ic_help_black_24dp"
+            android:title="@string/myft_help"/>
+        <item
+            android:id="@+id/myft_feedback"
+            android:icon="@drawable/ic_feedback_black_24dp"
+            android:title="@string/myft_feedback"/>
+        <item
+            android:id="@+id/settings"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/settings"/>
+    </group>
 
+    <group
+        android:id="@+id/drawer_group3"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/myft_logout"
+            android:icon="@drawable/ic_exit_to_app_black_24dp"
+            android:title="@string/myft_logout" />
+    </group>
 </menu>

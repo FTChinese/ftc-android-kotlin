@@ -169,7 +169,7 @@ class StoryActivity : AbstractContentActivity() {
                 ?.replace("{comments-id}", channelItem?.commentsId ?: "")
     }
 
-    // Get the tags use is following.
+    // Get the tags user is following.
     private fun followPref(): Map<String, String> {
         val sharedPrefs = getSharedPreferences(FollowMessage.PREF_FILENAME, Context.MODE_PRIVATE)
 

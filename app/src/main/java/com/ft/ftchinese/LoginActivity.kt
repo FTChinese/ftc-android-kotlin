@@ -25,13 +25,24 @@ import java.util.ArrayList
 import android.Manifest.permission.READ_CONTACTS
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
+import com.ft.ftchinese.com.ft.ftchinese.models.Account
+import com.ft.ftchinese.com.ft.ftchinese.models.User
 
 import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
+import java.io.IOException
 
 /**
  * A login screen that offers login via email/password.
+ * LoginActivity might appear in an place.
+ * It's better to convert to a fragment.
  */
-class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
+class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -42,6 +53,7 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
         setContentView(R.layout.activity_login)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
+            // This should be conditionally true depending on from where this activity is launched.
             setDisplayHomeAsUpEnabled(true)
             setTitle(R.string.title_activity_login)
         }
@@ -149,6 +161,54 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
         }
     }
 
+    private fun authenticate(email: String, password: String) {
+        launch(UI) {
+
+            val account = Account(email, password)
+            val authResult = async {
+                Request.post(ENDPOINT, gson.toJson(account))
+            }
+
+            val response = authResult.await()
+
+            info("Response code: ${response.code()}")
+            info("Response message: ${response.message()}")
+
+            info("Is successful: ${response.isSuccessful}")
+
+            if (!response.isSuccessful) {
+                Toast.makeText(this@LoginActivity, "Login failed", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            var body: String? = null
+            try {
+                body = response.body()?.string()
+            } catch (e: IOException) {
+                info("Cannot get response body")
+                Toast.makeText(this@LoginActivity, "Login failed", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            if (body == null) {
+                Toast.makeText(this@LoginActivity, "Login failed", Toast.LENGTH_SHORT).show()
+                return@launch
+            }
+
+            val user = gson.fromJson<User>(body, User::class.java)
+
+            // Save user's data. This is similar to set cookie in an web app.
+            user.save(context = this@LoginActivity)
+
+            // After successful login, notify parent activity which step to do next.
+            // If this fragment is accessed via `MyFT`, next show user's profile;
+            // If this fragment is accessed via PayWall, next show subscription;
+            // If this fragment is accessed via Comment section, next show the original article.
+            // if this fragment is accessed via Drawer, ...
+//            MyftActivity.start(this@LoginActivity)
+        }
+    }
+
     private fun isEmailValid(email: String): Boolean {
         //TODO: Replace this with your own logic
         return email.contains("@")
@@ -243,6 +303,8 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
         val IS_PRIMARY = 1
     }
 
+
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -293,6 +355,8 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor> {
          * Id to identity READ_CONTACTS permission request.
          */
         private val REQUEST_READ_CONTACTS = 0
+        private const val ENDPOINT = "http://api.ftchinese.com/v1/users/auth"
+        const val PREFERENCE_NAME = "user"
 
         /**
          * A dummy authentication store containing known user names and passwords.
