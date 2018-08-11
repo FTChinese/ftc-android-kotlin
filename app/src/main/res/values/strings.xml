@@ -9,6 +9,10 @@
     <string name="nav_myft">我的FT</string>
 
     <string name="news_editor_choice">编辑精选</string>
+
+    <string name="titlebar_cn">中文</string>
+    <string name="titlebar_en">英文</string>
+    <string name="titlebar_bilingual">对照</string>
     
     <string name="myft_email">修改邮箱</string>
     <string name="myft_security">账号安全</string>

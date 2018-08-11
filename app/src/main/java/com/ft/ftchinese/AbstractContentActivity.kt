@@ -22,7 +22,8 @@ abstract class AbstractContentActivity : AppCompatActivity(),
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
-//            setDisplayShowTitleEnabled(false)
+            // Do not show title on the toolbar for any content.
+            setDisplayShowTitleEnabled(false)
         }
 
         swipe_refresh.setOnRefreshListener(this)

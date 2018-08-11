@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:color="@color/colorWhite"
+        android:state_checked="true"/>
+
+    <!-- You must put the default one at the end. If you put it at top, none the other state will be picked. -->
+    <item android:color="@color/colorTeal"/>
+</selector>
