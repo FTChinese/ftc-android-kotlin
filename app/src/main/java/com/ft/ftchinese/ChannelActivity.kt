@@ -5,6 +5,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import com.ft.ftchinese.models.ListPage
 import kotlinx.android.synthetic.main.activity_chanel.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info

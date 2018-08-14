@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.KeyEvent
+import com.ft.ftchinese.models.ChannelItem
 
 import kotlinx.android.synthetic.main.activity_radio.*
 import org.jetbrains.anko.AnkoLogger

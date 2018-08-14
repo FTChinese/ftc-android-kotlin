@@ -1,8 +1,7 @@
 package com.ft.ftchinese
 
-import com.ft.ftchinese.com.ft.ftchinese.models.Account
-import com.ft.ftchinese.com.ft.ftchinese.models.User
-import org.junit.Assert.*
+import com.ft.ftchinese.models.Account
+import com.ft.ftchinese.models.User
 import org.junit.Test
 
 class RequestTest {

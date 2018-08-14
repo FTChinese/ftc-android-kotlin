@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import com.ft.ftchinese.models.ArticleDetail
+import com.ft.ftchinese.models.ChannelItem
+import com.ft.ftchinese.models.FollowMessage
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async

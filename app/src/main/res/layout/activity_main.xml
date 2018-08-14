@@ -72,11 +72,13 @@
     </android.support.constraint.ConstraintLayout>
 
     <android.support.design.widget.NavigationView
-        android:id="@+id/nav_view"
+        android:id="@+id/drawer_nav"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        android:background="@color/colorWhite"
+        app:itemTextColor="@color/drawer_item_state"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
 

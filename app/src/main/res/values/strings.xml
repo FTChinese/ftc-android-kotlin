@@ -2,6 +2,8 @@
     <string name="app_name">FTChinese</string>
     <string name="action_search">搜索</string>
     <string name="action_share">分享本文</string>
+
+    <!-- Bottom navigation tabs -->
     <string name="nav_news">新闻</string>
     <string name="nav_english">每日英语</string>
     <string name="nav_ftacademy">FT商学院</string>
@@ -13,35 +15,37 @@
     <string name="titlebar_cn">中文</string>
     <string name="titlebar_en">英文</string>
     <string name="titlebar_bilingual">对照</string>
-    
-    <string name="myft_email">修改邮箱</string>
-    <string name="myft_security">账号安全</string>
-    <string name="myft_membership">会员订阅</string>
-    <string name="myft_help">帮助</string>
-    <string name="myft_feedback">反馈</string>
-    <string name="myft_logout">退出登录</string>
 
+    <!-- Drawer -->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">FT中文网</string>
+    <string name="nav_header_subtitle">您尚未登录</string>
+    <string name="nav_header_desc">导航栏头部</string>
 
+    <string name="action_registration">注册</string>
+    <string name="action_security">账号安全</string>
+    <string name="action_subscription">会员订阅</string>
+    <string name="aciton_help">帮助</string>
+    <string name="action_feedback">反馈</string>
+    <string name="action_logout">退出登录</string>
+    <string name="action_settings">设置</string>
+    <string name="action_reset_password">忘记密码？</string>
+
+    <!-- Myft tabs -->
     <string name="myft_reading_history">阅读历史</string>
     <string name="myft_starred_articles">收藏文章</string>
     <string name="myft_following">关注</string>
 
-    <string name="settings">设置</string>
 
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
-    <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">Settings</string>
-    <string name="title_activity_content">ContentActivity</string>
-    <string name="title_activity_radio">RadioActivity</string>
-    <string name="title_activity_login">登录FT中文网</string>
+    <string name="title_login">登录FT中文网</string>
+    <string name="title_create_account">创建FT中文网账号</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">邮箱</string>
     <string name="prompt_password">密码</string>
     <string name="action_sign_in">登录</string>
+    <string name="action_create_account">创建</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">邮箱地址无效</string>
     <string name="error_invalid_password">密码无效</string>

@@ -1,10 +1,8 @@
 package com.ft.ftchinese
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.support.customtabs.CustomTabsIntent
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.KeyEvent
@@ -13,6 +11,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
 import android.widget.Toast
+import com.ft.ftchinese.models.ChannelContent
+import com.ft.ftchinese.models.ChannelItem
+import com.ft.ftchinese.models.ChannelMeta
+import com.ft.ftchinese.models.ListPage
 import kotlinx.android.synthetic.main.fragment_section.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -20,7 +22,6 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.jetbrains.anko.warn
 
 
 /**

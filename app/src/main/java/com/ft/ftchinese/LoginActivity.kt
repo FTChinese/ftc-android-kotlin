@@ -7,8 +7,6 @@ import android.content.pm.PackageManager
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.app.LoaderManager.LoaderCallbacks
-import android.content.CursorLoader
-import android.content.Loader
 import android.database.Cursor
 import android.net.Uri
 import android.os.AsyncTask
@@ -23,13 +21,14 @@ import android.widget.TextView
 
 import java.util.ArrayList
 import android.Manifest.permission.READ_CONTACTS
-import android.content.Context
-import android.content.Intent
+import android.app.Activity
+import android.content.*
 import android.widget.Toast
-import com.ft.ftchinese.com.ft.ftchinese.models.Account
-import com.ft.ftchinese.com.ft.ftchinese.models.User
+import com.ft.ftchinese.models.Account
+import com.ft.ftchinese.models.User
 
 import kotlinx.android.synthetic.main.activity_login.*
+import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -46,7 +45,7 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private var mAuthTask: UserLoginTask? = null
+//    private var mAuthTask: UserLoginTask? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +54,7 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
         supportActionBar?.apply {
             // This should be conditionally true depending on from where this activity is launched.
             setDisplayHomeAsUpEnabled(true)
-            setTitle(R.string.title_activity_login)
+            setTitle(R.string.title_login)
         }
 
         // Set up the login form.
@@ -115,9 +114,11 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
      * errors are presented and no actual login attempt is made.
      */
     private fun attemptLogin() {
-        if (mAuthTask != null) {
-            return
-        }
+//        if (mAuthTask != null) {
+//            return
+//        }
+
+        info("Clicked login button")
 
         // Reset errors.
         email.error = null
@@ -156,8 +157,9 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true)
-            mAuthTask = UserLoginTask(emailStr, passwordStr)
-            mAuthTask!!.execute(null as Void?)
+            authenticate(emailStr, passwordStr)
+//            mAuthTask = UserLoginTask(emailStr, passwordStr)
+//            mAuthTask!!.execute(null as Void?)
         }
     }
 
@@ -178,6 +180,8 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
 
             if (!response.isSuccessful) {
                 Toast.makeText(this@LoginActivity, "Login failed", Toast.LENGTH_SHORT).show()
+                info("${response.body().toString()}")
+                showProgress(false)
                 return@launch
             }
 
@@ -206,54 +210,26 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
             // If this fragment is accessed via Comment section, next show the original article.
             // if this fragment is accessed via Drawer, ...
 //            MyftActivity.start(this@LoginActivity)
+            setResult(Activity.RESULT_OK)
+            finish()
         }
     }
 
     private fun isEmailValid(email: String): Boolean {
-        //TODO: Replace this with your own logic
         return email.contains("@")
     }
 
     private fun isPasswordValid(password: String): Boolean {
-        //TODO: Replace this with your own logic
         return password.length > 4
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private fun showProgress(show: Boolean) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            val shortAnimTime = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
-
-            login_form.visibility = if (show) View.GONE else View.VISIBLE
-            login_form.animate()
-                    .setDuration(shortAnimTime)
-                    .alpha((if (show) 0 else 1).toFloat())
-                    .setListener(object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator) {
-                            login_form.visibility = if (show) View.GONE else View.VISIBLE
-                        }
-                    })
-
-            login_progress.visibility = if (show) View.VISIBLE else View.GONE
-            login_progress.animate()
-                    .setDuration(shortAnimTime)
-                    .alpha((if (show) 1 else 0).toFloat())
-                    .setListener(object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator) {
-                            login_progress.visibility = if (show) View.VISIBLE else View.GONE
-                        }
-                    })
+        if (show) {
+            login_progress.visibility = View.VISIBLE
+            email_sign_in_button.isEnabled = false
         } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            login_progress.visibility = if (show) View.VISIBLE else View.GONE
-            login_form.visibility = if (show) View.GONE else View.VISIBLE
+            login_progress.visibility = View.GONE
+            email_sign_in_button.isEnabled = true
         }
     }
 
@@ -304,51 +280,6 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
     }
 
 
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    inner class UserLoginTask internal constructor(private val mEmail: String, private val mPassword: String) : AsyncTask<Void, Void, Boolean>() {
-
-        override fun doInBackground(vararg params: Void): Boolean? {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000)
-            } catch (e: InterruptedException) {
-                return false
-            }
-
-            return DUMMY_CREDENTIALS
-                    .map { it.split(":") }
-                    .firstOrNull { it[0] == mEmail }
-                    ?.let {
-                        // Account exists, return true if the password matches.
-                        it[1] == mPassword
-                    }
-                    ?: true
-        }
-
-        override fun onPostExecute(success: Boolean?) {
-            mAuthTask = null
-            showProgress(false)
-
-            if (success!!) {
-                finish()
-            } else {
-                password.error = getString(R.string.error_incorrect_password)
-                password.requestFocus()
-            }
-        }
-
-        override fun onCancelled() {
-            mAuthTask = null
-            showProgress(false)
-        }
-    }
-
     companion object {
 
         /**
@@ -356,18 +287,110 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
          */
         private val REQUEST_READ_CONTACTS = 0
         private const val ENDPOINT = "http://api.ftchinese.com/v1/users/auth"
-        const val PREFERENCE_NAME = "user"
 
         /**
          * A dummy authentication store containing known user names and passwords.
-         * TODO: remove after connecting to a real authentication system.
          */
-        private val DUMMY_CREDENTIALS = arrayOf("foo@example.com:hello", "bar@example.com:world")
+//        private val DUMMY_CREDENTIALS = arrayOf("foo@example.com:hello", "bar@example.com:world")
 
         fun start(context: Context?) {
             val intent = Intent(context, LoginActivity::class.java)
 
             context?.startActivity(intent)
         }
+
+        fun startForResult(activity: Activity, requestCode: Int) {
+            val intent = Intent(activity, LoginActivity::class.java)
+
+            try {
+                activity.startActivityForResult(intent, requestCode)
+
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(activity, "Cannot launch login", Toast.LENGTH_SHORT).show()
+            }
+
+        }
     }
+
+    /**
+     * Shows the progress UI and hides the login form.
+     */
+//    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+//    private fun showProgress(show: Boolean) {
+//        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+//        // for very easy animations. If available, use these APIs to fade-in
+//        // the progress spinner.
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+//            val shortAnimTime = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
+//
+//            login_form.visibility = if (show) View.GONE else View.VISIBLE
+//            login_form.animate()
+//                    .setDuration(shortAnimTime)
+//                    .alpha((if (show) 0 else 1).toFloat())
+//                    .setListener(object : AnimatorListenerAdapter() {
+//                        override fun onAnimationEnd(animation: Animator) {
+//                            login_form.visibility = if (show) View.GONE else View.VISIBLE
+//                        }
+//                    })
+//
+//            login_progress.visibility = if (show) View.VISIBLE else View.GONE
+//            login_progress.animate()
+//                    .setDuration(shortAnimTime)
+//                    .alpha((if (show) 1 else 0).toFloat())
+//                    .setListener(object : AnimatorListenerAdapter() {
+//                        override fun onAnimationEnd(animation: Animator) {
+//                            login_progress.visibility = if (show) View.VISIBLE else View.GONE
+//                        }
+//                    })
+//        } else {
+//            // The ViewPropertyAnimator APIs are not available, so simply show
+//            // and hide the relevant UI components.
+//            login_progress.visibility = if (show) View.VISIBLE else View.GONE
+//            login_form.visibility = if (show) View.GONE else View.VISIBLE
+//        }
+//    }
+
+    /**
+     * Represents an asynchronous login/registration task used to authenticate
+     * the user.
+     */
+//    inner class UserLoginTask internal constructor(private val mEmail: String, private val mPassword: String) : AsyncTask<Void, Void, Boolean>() {
+//
+//        override fun doInBackground(vararg params: Void): Boolean? {
+//            //
+//
+//            try {
+//                // Simulate network access.
+//                Thread.sleep(2000)
+//            } catch (e: InterruptedException) {
+//                return false
+//            }
+//
+//            return DUMMY_CREDENTIALS
+//                    .map { it.split(":") }
+//                    .firstOrNull { it[0] == mEmail }
+//                    ?.let {
+//                        // Account exists, return true if the password matches.
+//                        it[1] == mPassword
+//                    }
+//                    ?: true
+//        }
+//
+//        override fun onPostExecute(success: Boolean?) {
+//            mAuthTask = null
+////            showProgress(false)
+//
+//            if (success!!) {
+//                finish()
+//            } else {
+//                password.error = getString(R.string.error_incorrect_password)
+//                password.requestFocus()
+//            }
+//        }
+//
+//        override fun onCancelled() {
+//            mAuthTask = null
+////            showProgress(false)
+//        }
+//    }
 }

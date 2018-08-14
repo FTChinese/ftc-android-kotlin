@@ -1,5 +1,7 @@
 package com.ft.ftchinese
 
+import android.app.Activity
+import android.content.Intent
 import android.content.res.Resources
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
@@ -15,7 +17,10 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.*
 import android.support.v7.widget.SearchView
+import android.widget.TextView
 import android.widget.Toast
+import com.ft.ftchinese.models.ListPage
+import com.ft.ftchinese.models.User
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.AnkoLogger
@@ -101,7 +106,7 @@ class MainActivity : AppCompatActivity(),
         toggle.syncState()
 
         // Set a listener that will be notified when a menu item is selected.
-        nav_view.setNavigationItemSelectedListener(this)
+        drawer_nav.setNavigationItemSelectedListener(this)
 
         // Set ViewPager adapter
         view_pager.adapter = SectionsPagerAdapter(ListPage.newsPages, supportFragmentManager)
@@ -124,6 +129,7 @@ class MainActivity : AppCompatActivity(),
     override fun onStart() {
         super.onStart()
         info("onStart finished")
+        updateUIForCookie()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
@@ -132,6 +138,56 @@ class MainActivity : AppCompatActivity(),
 
         info("onRestoreInstanceSate finished")
     }
+
+    /**
+     * Deal with the cases that an activity lunched by this activity exits.
+     * For example, the LoginActvity will automatically finish when it successfully logged in,
+     * and then it should inform the MainActivity to update UI for a logged in user.
+     * `requestCode` is used to identify who this result cam from.
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show()
+
+        info("onActivityResult: requestCode $requestCode, resultCode $resultCode")
+
+        when (resultCode) {
+            Activity.RESULT_OK -> {
+                updateUIForCookie()
+            }
+        }
+    }
+
+    /**
+     * Update UI dpending user's login/logout state
+     */
+    private fun updateUIForCookie() {
+        val user = User.loadFromPref(this)
+
+        val menu = drawer_nav.menu
+        val header = drawer_nav.getHeaderView(0)
+
+        if (user == null) {
+
+            // If seems this is the only way to get the header view.
+            // You cannot user `import kotlinx.android.synthetic.main.nav_header_main.*`,
+            // which will give you null pointer exception.
+            header.findViewById<TextView>(R.id.nav_header_subtitle).setText(R.string.nav_header_subtitle)
+
+
+            // If user is logged in, how login menu and hide logout menu
+            menu.setGroupVisible(R.id.drawer_group0, true)
+            menu.setGroupVisible(R.id.drawer_group3, false)
+            return
+        }
+
+        header.findViewById<TextView>(R.id.nav_header_subtitle).text = user.email
+
+        menu.setGroupVisible(R.id.drawer_group0, false)
+        menu.setGroupVisible(R.id.drawer_group3, true)
+    }
+
 
     override fun onResume() {
         super.onResume()
@@ -216,6 +272,7 @@ class MainActivity : AppCompatActivity(),
         }
 
     /**
+     * Listener for drawer menu selection
      * Implements NavigationView.OnNavigationItemSelectedListener
      */
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -223,26 +280,31 @@ class MainActivity : AppCompatActivity(),
 
         // Handle navigation view item clicks here.
         when (item.itemId) {
-//            R.id.myft_email -> {
-//                // Handle the camera action
-//            }
-            R.id.myft_security -> {
+            R.id.action_login -> {
+                LoginActivity.startForResult(this, FROM_LOGIN_ACTIVITY)
+            }
+            R.id.action_registration -> {
 
             }
-            R.id.myft_membership -> {
+            R.id.action_security -> {
 
             }
-            R.id.myft_help -> {
+            R.id.action_subscription -> {
 
             }
-            R.id.myft_feedback -> {
+            R.id.action_help -> {
 
             }
-            R.id.settings -> {
+            R.id.action_feedback -> {
 
             }
-            R.id.myft_logout -> {
+            R.id.action_settings -> {
 
+            }
+            R.id.action_logout -> {
+                // Delete user data from shared preference and update UI.
+                User.removeFromPref(this)
+                updateUIForCookie()
             }
         }
 
@@ -298,6 +360,10 @@ class MainActivity : AppCompatActivity(),
 
     override fun selectTabLayoutTab(tabIndex: Int) {
         tab_layout.getTabAt(tabIndex)?.select()
+    }
+
+    companion object {
+        private const val FROM_LOGIN_ACTIVITY = 1
     }
 
     /**

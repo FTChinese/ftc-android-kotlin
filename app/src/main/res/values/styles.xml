@@ -2,9 +2,9 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/colorWheat</item>
-        <item name="colorPrimaryDark">@color/colorBlack30</item>
-        <item name="colorAccent">@color/colorClaret</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
@@ -13,6 +13,9 @@
 
     <style name="Origami" parent="AppTheme">
 
+        <item name="colorPrimary">@color/colorWheat</item>
+        <item name="colorPrimaryDark">@color/colorBlack30</item>
+        <item name="colorAccent">@color/colorClaret</item>
 
         <!-- Window colors -->
         <item name="android:windowBackground">@color/colorPaper</item>
@@ -27,6 +30,7 @@
 
     <style name="OrigamiButton" parent="Widget.AppCompat.Button">
         <item name="android:background">@color/colorTeal</item>
+        <item name="android:textColor">@color/colorWhite</item>
     </style>
 
     <style name="OrigamiToolbar" parent="Widget.AppCompat.Toolbar">

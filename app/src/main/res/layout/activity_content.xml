@@ -58,13 +58,7 @@
                 android:textColor="@color/title_bar_text"/>
         </RadioGroup>
 
-        <!--<android.support.design.widget.NavigationView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--app:menu="@menu/activity_content_titlebar"/>-->
     </android.support.v7.widget.Toolbar>
-
-
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"

@@ -2,7 +2,8 @@ package com.ft.ftchinese
 
 import android.content.Context
 import android.net.Uri
-import org.jetbrains.anko.info
+import com.ft.ftchinese.models.ListPage
+import com.ft.ftchinese.models.pathToTitle
 
 /**
  * A WebViewClient used by a SectionFragment
