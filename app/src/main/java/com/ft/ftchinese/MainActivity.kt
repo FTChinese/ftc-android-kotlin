@@ -21,12 +21,10 @@ import android.widget.TextView
 import android.widget.Toast
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.User
-import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-val gson = Gson()
 
 fun readHtml(resources: Resources, resId: Int): String? {
 

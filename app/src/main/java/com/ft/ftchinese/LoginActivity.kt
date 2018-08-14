@@ -26,6 +26,9 @@ import android.content.*
 import android.widget.Toast
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.User
+import com.ft.ftchinese.utils.ApiEndpoint
+import com.ft.ftchinese.utils.Fetch
+import com.ft.ftchinese.utils.gson
 
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -167,8 +170,10 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
         launch(UI) {
 
             val account = Account(email, password)
+
+
             val authResult = async {
-                Request.post(ENDPOINT, gson.toJson(account))
+                Fetch.post(ApiEndpoint.LOGIN, gson.toJson(account))
             }
 
             val response = authResult.await()
@@ -180,7 +185,7 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
 
             if (!response.isSuccessful) {
                 Toast.makeText(this@LoginActivity, "Login failed", Toast.LENGTH_SHORT).show()
-                info("${response.body().toString()}")
+                info("Failure response: ${response.body().toString()}")
                 showProgress(false)
                 return@launch
             }
@@ -286,7 +291,7 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
          * Id to identity READ_CONTACTS permission request.
          */
         private val REQUEST_READ_CONTACTS = 0
-        private const val ENDPOINT = "http://api.ftchinese.com/v1/users/auth"
+        private const val ENDPOINT = "http://c06e62eb.ngrok.io/users/auth"
 
         /**
          * A dummy authentication store containing known user names and passwords.

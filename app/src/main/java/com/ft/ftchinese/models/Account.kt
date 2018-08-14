@@ -1,7 +1,54 @@
 package com.ft.ftchinese.models
 
+import android.util.Log
+import com.ft.ftchinese.utils.ApiEndpoint
+import com.ft.ftchinese.utils.Fetch
+import com.ft.ftchinese.utils.gson
+import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.experimental.async
+import java.io.IOException
+
 data class Account(
         val email: String,
-        val password: String,
-        val ip: String? = null
-)
+        val password: String
+) {
+    suspend fun login(): User? {
+        val job = async {
+            Fetch.post(ApiEndpoint.LOGIN, gson.toJson(this@Account))
+        }
+        val response = job.await()
+
+        Log.i(TAG,"Response code: ${response.code()}")
+        Log.i(TAG,"Response message: ${response.message()}")
+
+        Log.i(TAG,"Is successful: ${response.isSuccessful}")
+
+        val body: String?
+        try {
+            body = response.body()?.string()
+        } catch (e: IOException) {
+            Log.i(TAG, "Cannot get response body")
+            return null
+        }
+        if (!response.isSuccessful) {
+            try {
+                val err = gson.fromJson<ErrorResponse>(body, ErrorResponse::class.java)
+                throw err
+            } catch (e: JsonSyntaxException) {
+                Log.i(TAG, "Parse ErrorResponse error")
+                return null
+            }
+        }
+
+        return try {
+            gson.fromJson<User>(body, User::class.java)
+        } catch (e: JsonSyntaxException) {
+            Log.i(TAG, "Parse JSON error")
+            null
+        }
+    }
+
+    companion object {
+        private const val TAG = "Account"
+    }
+}

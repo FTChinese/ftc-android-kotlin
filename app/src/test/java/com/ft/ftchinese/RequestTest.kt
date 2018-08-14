@@ -2,6 +2,8 @@ package com.ft.ftchinese
 
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.User
+import com.ft.ftchinese.utils.Fetch
+import com.ft.ftchinese.utils.gson
 import org.junit.Test
 
 class RequestTest {
@@ -9,7 +11,7 @@ class RequestTest {
     fun loginTest() {
         val account = Account(email = "weiguo.ni@ftchinese.com", password = "12345678")
 
-        val response = Request.post("http://localhost:8000/users/auth", gson.toJson(account))
+        val response = Fetch.post("http://localhost:8000/users/auth", gson.toJson(account))
 
         System.out.println("Response code: ${response.code()}")
         System.out.println("Response message: ${response.message()}")

@@ -1,14 +1,25 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.utils
 
 import android.util.Log
+import com.google.gson.Gson
 import okhttp3.*
 import okhttp3.Request
 
-class Request {
+val gson = Gson()
+
+class Fetch {
 
     companion object {
 
         private val client = OkHttpClient()
+
+        val jsonType = MediaType.parse("application/json")
+
+        val baseRequest = Request.Builder()
+                .header("X-Client-Type", "android")
+                .header("X-Client-Version", "0.0.1")
+                .cacheControl(CacheControl.Builder().noCache().noStore().noTransform().build())
+                .build()
 
         fun get(url: String): String? {
             try {
@@ -25,14 +36,13 @@ class Request {
         }
 
         fun post(url: String, content: String): Response {
-            val body = RequestBody.create(MediaType.parse("application/json"), content)
-            val request = Request.Builder()
+            val body = RequestBody.create(jsonType, content)
+            val request = baseRequest
+                    .newBuilder()
                     .url(url)
-                    .header("X-Client-Type", "android")
-                    .header("X-Client-Version", "0.0.1")
-                    .cacheControl(CacheControl.Builder().noCache().noStore().noTransform().build())
                     .post(body)
                     .build()
+
             return client.newCall(request).execute()
         }
     }

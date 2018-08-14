@@ -7,6 +7,9 @@ import android.widget.Toast
 import com.ft.ftchinese.models.ArticleDetail
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.FollowMessage
+import com.ft.ftchinese.utils.Fetch
+import com.ft.ftchinese.utils.Store
+import com.ft.ftchinese.utils.gson
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -109,7 +112,7 @@ class StoryActivity : AbstractContentActivity() {
         // Try to find the server endpoint for this story
         val url = channelItem?.apiUrl ?: return
 
-        val fetchResult = async { Request.get(url) }
+        val fetchResult = async { Fetch.get(url) }
 
         val jsonData = fetchResult.await()
 

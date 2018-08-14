@@ -15,6 +15,9 @@ import com.ft.ftchinese.models.ChannelContent
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.ChannelMeta
 import com.ft.ftchinese.models.ListPage
+import com.ft.ftchinese.utils.Fetch
+import com.ft.ftchinese.utils.Store
+import com.ft.ftchinese.utils.gson
 import kotlinx.android.synthetic.main.fragment_section.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -226,7 +229,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         val readResult = async { readHtml(resources, R.raw.list) }
         info("Fetch currentPage data ${currentPage?.listUrl}")
 
-        val fetchResult = async { Request.get(currentPage?.listUrl!!) }
+        val fetchResult = async { Fetch.get(currentPage?.listUrl!!) }
 
         val templateHtml = readResult.await()
         val remoteHtml = fetchResult.await()

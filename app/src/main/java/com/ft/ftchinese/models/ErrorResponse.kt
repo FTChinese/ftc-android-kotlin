@@ -1,9 +1,9 @@
 package com.ft.ftchinese.models
 
-data class ErrorResponse(
-        val message: String,
+data class ErrorResponse (
+        override val message: String,
         val error: ErrorDetail
-)
+) : Exception(message)
 
 data class ErrorDetail(
         val field: String,

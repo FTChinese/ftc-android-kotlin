@@ -9,6 +9,7 @@ import android.view.View
 import android.webkit.*
 import android.widget.Toast
 import com.ft.ftchinese.models.FollowMessage
+import com.ft.ftchinese.utils.gson
 import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
