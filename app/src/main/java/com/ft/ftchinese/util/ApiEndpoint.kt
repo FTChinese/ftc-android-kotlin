@@ -1,4 +1,4 @@
-package com.ft.ftchinese.utils
+package com.ft.ftchinese.util
 
 class ApiEndpoint {
     companion object {

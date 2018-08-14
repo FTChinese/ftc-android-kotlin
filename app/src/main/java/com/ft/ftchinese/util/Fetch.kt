@@ -1,4 +1,4 @@
-package com.ft.ftchinese.utils
+package com.ft.ftchinese.util
 
 import android.util.Log
 import com.google.gson.Gson
@@ -14,12 +14,6 @@ class Fetch {
         private val client = OkHttpClient()
 
         val jsonType = MediaType.parse("application/json")
-
-        val baseRequest = Request.Builder()
-                .header("X-Client-Type", "android")
-                .header("X-Client-Version", "0.0.1")
-                .cacheControl(CacheControl.Builder().noCache().noStore().noTransform().build())
-                .build()
 
         fun get(url: String): String? {
             try {
@@ -37,8 +31,10 @@ class Fetch {
 
         fun post(url: String, content: String): Response {
             val body = RequestBody.create(jsonType, content)
-            val request = baseRequest
-                    .newBuilder()
+            val request = Request.Builder()
+                    .header("X-Client-Type", "android")
+                    .header("X-Client-Version", "0.0.1")
+                    .cacheControl(CacheControl.Builder().noCache().noStore().noTransform().build())
                     .url(url)
                     .post(body)
                     .build()

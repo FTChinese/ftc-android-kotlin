@@ -2,7 +2,7 @@ package com.ft.ftchinese.models
 
 import android.content.Context
 import android.util.Log
-import com.ft.ftchinese.gson
+import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
 
 data class User(

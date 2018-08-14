@@ -1,15 +1,11 @@
 package com.ft.ftchinese
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.annotation.TargetApi
 import android.content.pm.PackageManager
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.app.LoaderManager.LoaderCallbacks
 import android.database.Cursor
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.provider.ContactsContract
@@ -25,10 +21,12 @@ import android.app.Activity
 import android.content.*
 import android.widget.Toast
 import com.ft.ftchinese.models.Account
+import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.User
-import com.ft.ftchinese.utils.ApiEndpoint
-import com.ft.ftchinese.utils.Fetch
-import com.ft.ftchinese.utils.gson
+import com.ft.ftchinese.util.ApiEndpoint
+import com.ft.ftchinese.util.Fetch
+import com.ft.ftchinese.util.gson
+import com.google.gson.JsonSyntaxException
 
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -171,52 +169,30 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
 
             val account = Account(email, password)
 
-
-            val authResult = async {
-                Fetch.post(ApiEndpoint.LOGIN, gson.toJson(account))
-            }
-
-            val response = authResult.await()
-
-            info("Response code: ${response.code()}")
-            info("Response message: ${response.message()}")
-
-            info("Is successful: ${response.isSuccessful}")
-
-            if (!response.isSuccessful) {
-                Toast.makeText(this@LoginActivity, "Login failed", Toast.LENGTH_SHORT).show()
-                info("Failure response: ${response.body().toString()}")
+            try {
+                val user = account.login()
+                showProgress(false)
+                if (user == null) {
+                    Toast.makeText(this@LoginActivity, "Login failed", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+                user.save(context = this@LoginActivity)
+                setResult(Activity.RESULT_OK)
+                finish()
+            } catch (e: ErrorResponse) {
+                info("ErrorResponse: $e")
+                showProgress(false)
+                return@launch
+            } catch (e: JsonSyntaxException) {
+                info("JsonSyntaxException: $e")
+                showProgress(false)
+                return@launch
+            } catch (e: IOException) {
+                info("Request IO error: $e")
                 showProgress(false)
                 return@launch
             }
 
-            var body: String? = null
-            try {
-                body = response.body()?.string()
-            } catch (e: IOException) {
-                info("Cannot get response body")
-                Toast.makeText(this@LoginActivity, "Login failed", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-
-            if (body == null) {
-                Toast.makeText(this@LoginActivity, "Login failed", Toast.LENGTH_SHORT).show()
-                return@launch
-            }
-
-            val user = gson.fromJson<User>(body, User::class.java)
-
-            // Save user's data. This is similar to set cookie in an web app.
-            user.save(context = this@LoginActivity)
-
-            // After successful login, notify parent activity which step to do next.
-            // If this fragment is accessed via `MyFT`, next show user's profile;
-            // If this fragment is accessed via PayWall, next show subscription;
-            // If this fragment is accessed via Comment section, next show the original article.
-            // if this fragment is accessed via Drawer, ...
-//            MyftActivity.start(this@LoginActivity)
-            setResult(Activity.RESULT_OK)
-            finish()
         }
     }
 

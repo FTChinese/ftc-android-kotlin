@@ -1,4 +1,4 @@
-package com.ft.ftchinese.utils
+package com.ft.ftchinese.util
 
 import android.content.Context
 import android.content.res.Resources

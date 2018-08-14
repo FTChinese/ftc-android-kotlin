@@ -15,9 +15,9 @@ import com.ft.ftchinese.models.ChannelContent
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.ChannelMeta
 import com.ft.ftchinese.models.ListPage
-import com.ft.ftchinese.utils.Fetch
-import com.ft.ftchinese.utils.Store
-import com.ft.ftchinese.utils.gson
+import com.ft.ftchinese.util.Fetch
+import com.ft.ftchinese.util.Store
+import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.fragment_section.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI

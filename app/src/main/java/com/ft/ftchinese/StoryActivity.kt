@@ -7,9 +7,9 @@ import android.widget.Toast
 import com.ft.ftchinese.models.ArticleDetail
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.FollowMessage
-import com.ft.ftchinese.utils.Fetch
-import com.ft.ftchinese.utils.Store
-import com.ft.ftchinese.utils.gson
+import com.ft.ftchinese.util.Fetch
+import com.ft.ftchinese.util.Store
+import com.ft.ftchinese.util.gson
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async

@@ -2,8 +2,8 @@ package com.ft.ftchinese
 
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.User
-import com.ft.ftchinese.utils.Fetch
-import com.ft.ftchinese.utils.gson
+import com.ft.ftchinese.util.Fetch
+import com.ft.ftchinese.util.gson
 import org.junit.Test
 
 class RequestTest {
