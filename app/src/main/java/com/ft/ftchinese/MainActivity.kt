@@ -274,15 +274,14 @@ class MainActivity : AppCompatActivity(),
      * Implements NavigationView.OnNavigationItemSelectedListener
      */
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        Toast.makeText(this, "You selected navigation item ${item.itemId}", Toast.LENGTH_SHORT).show()
 
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.action_login -> {
                 LoginActivity.startForResult(this, FROM_LOGIN_ACTIVITY)
             }
-            R.id.action_registration -> {
-
+            R.id.action_sign_up -> {
+                SignupActivity.startForResult(this, FROM_SIGNUP_ACTCITITY)
             }
             R.id.action_security -> {
 
@@ -303,6 +302,7 @@ class MainActivity : AppCompatActivity(),
                 // Delete user data from shared preference and update UI.
                 User.removeFromPref(this)
                 updateUIForCookie()
+                Toast.makeText(this, "账号已登出", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -362,6 +362,7 @@ class MainActivity : AppCompatActivity(),
 
     companion object {
         private const val FROM_LOGIN_ACTIVITY = 1
+        private const val FROM_SIGNUP_ACTCITITY = 2
     }
 
     /**

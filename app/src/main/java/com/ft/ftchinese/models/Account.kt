@@ -12,9 +12,9 @@ data class Account(
         val email: String,
         val password: String
 ) {
-    suspend fun login(): User? {
+    suspend fun send (url: String): User? {
         val job = async {
-            Fetch.post(ApiEndpoint.LOGIN, gson.toJson(this@Account))
+            Fetch.post(url, gson.toJson(this@Account))
         }
         val response = job.await()
 
@@ -46,6 +46,14 @@ data class Account(
             Log.i(TAG, "Parse JSON error")
             null
         }
+    }
+
+    suspend fun login(): User? {
+        return send(ApiEndpoint.LOGIN)
+    }
+
+    suspend fun create(): User? {
+        return send(ApiEndpoint.NEW_ACCOUNT)
     }
 
     companion object {

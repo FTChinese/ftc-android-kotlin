@@ -57,12 +57,12 @@
     </android.support.design.widget.TextInputLayout>
 
     <TextView
-        android:id="@+id/registration"
+        android:id="@+id/sign_up"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="@string/action_registration"
+        android:text="@string/action_sign_up"
         android:textColor="@color/colorTeal"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -74,7 +74,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
-        android:text="@string/action_reset_password"
+        android:text="@string/link_reset_password"
         android:textColor="@color/colorTeal"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -98,7 +98,7 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:text="@string/action_sign_in"
+        android:text="@string/action_login"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

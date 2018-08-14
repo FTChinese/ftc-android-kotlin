@@ -23,30 +23,40 @@
     <string name="nav_header_subtitle">您尚未登录</string>
     <string name="nav_header_desc">导航栏头部</string>
 
-    <string name="action_registration">注册</string>
+
     <string name="action_security">账号安全</string>
     <string name="action_subscription">会员订阅</string>
     <string name="aciton_help">帮助</string>
     <string name="action_feedback">反馈</string>
     <string name="action_logout">退出登录</string>
     <string name="action_settings">设置</string>
-    <string name="action_reset_password">忘记密码？</string>
+
 
     <!-- Myft tabs -->
     <string name="myft_reading_history">阅读历史</string>
     <string name="myft_starred_articles">收藏文章</string>
     <string name="myft_following">关注</string>
 
-
-    <string name="title_login">登录FT中文网</string>
-    <string name="title_create_account">创建FT中文网账号</string>
-
     <!-- Strings related to login -->
+    <string name="title_login">登录FT中文网</string>
+    <string name="title_sign_up">创建FT中文网账号</string>
+    <string name="title_reset_password">找回密码</string>
+
     <string name="prompt_email">邮箱</string>
     <string name="prompt_password">密码</string>
-    <string name="action_sign_in">登录</string>
-    <string name="action_create_account">创建</string>
+    <string name="prompt_password_letter">请输入您的登录FT中文网所用的电子邮箱，我们会向该邮箱发送邮件，帮您重置密码</string>
+    <string name="prompt_letter_sent">请检查您的邮件，点击邮件中的“重置密码”链接，在所打开的网页中修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</string>
+
+    <string name="action_login">登录</string>
+    <string name="action_sign_up">注册</string>
     <string name="action_sign_in_short">Sign in</string>
+    <string name="action_password_letter">发送邮件</string>
+
+    <string name="link_reset_password">忘记密码?</string>
+    <string name="link_sign_up">注册账号</string>
+    <string name="link_login">已有账号?登录</string>
+
+    <!-- Form error message -->
     <string name="error_invalid_email">邮箱地址无效</string>
     <string name="error_invalid_password">密码无效</string>
     <string name="error_incorrect_password">密码错误</string>

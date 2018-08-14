@@ -22,16 +22,11 @@ import android.content.*
 import android.widget.Toast
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.ErrorResponse
-import com.ft.ftchinese.models.User
-import com.ft.ftchinese.util.ApiEndpoint
-import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
 
 import kotlinx.android.synthetic.main.activity_login.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -53,9 +48,8 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
         setContentView(R.layout.activity_login)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
-            // This should be conditionally true depending on from where this activity is launched.
             setDisplayHomeAsUpEnabled(true)
-            setTitle(R.string.title_login)
+            setDisplayShowTitleEnabled(true)
         }
 
         // Set up the login form.
@@ -69,6 +63,9 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
         })
 
         email_sign_in_button.setOnClickListener { attemptLogin() }
+
+        reset_password.setOnClickListener { ForgotPasswordActivity.start(this) }
+        sign_up.setOnClickListener { SignupActivity.start(this) }
     }
 
     private fun populateAutoComplete() {
@@ -267,7 +264,6 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
          * Id to identity READ_CONTACTS permission request.
          */
         private val REQUEST_READ_CONTACTS = 0
-        private const val ENDPOINT = "http://c06e62eb.ngrok.io/users/auth"
 
         /**
          * A dummy authentication store containing known user names and passwords.
