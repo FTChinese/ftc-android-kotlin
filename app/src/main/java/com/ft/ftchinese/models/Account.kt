@@ -16,35 +16,21 @@ data class Account(
         val job = async {
             Fetch.post(url, gson.toJson(this@Account))
         }
-        val response = job.await()
-
-        Log.i(TAG,"Response code: ${response.code()}")
-        Log.i(TAG,"Response message: ${response.message()}")
-
-        Log.i(TAG,"Is successful: ${response.isSuccessful}")
-
-        val body: String?
-        try {
-            body = response.body()?.string()
-        } catch (e: IOException) {
-            Log.i(TAG, "Cannot get response body")
-            return null
-        }
-        if (!response.isSuccessful) {
-            try {
-                val err = gson.fromJson<ErrorResponse>(body, ErrorResponse::class.java)
-                throw err
-            } catch (e: JsonSyntaxException) {
-                Log.i(TAG, "Parse ErrorResponse error")
-                return null
-            }
-        }
 
         return try {
+            val response = job.await() ?: return null
+
+            val body = response.body()?.string()
+
             gson.fromJson<User>(body, User::class.java)
-        } catch (e: JsonSyntaxException) {
-            Log.i(TAG, "Parse JSON error")
+        } catch (e: IOException) {
+            Log.w(TAG, "Response error: $e")
             null
+        } catch (e: JsonSyntaxException) {
+            Log.w(TAG, "JSON parse error: $e")
+            null
+        } catch (e: ErrorResponse) {
+            throw e
         }
     }
 

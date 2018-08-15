@@ -193,20 +193,17 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         if (currentPage?.listUrl != null ) {
 
-            info("This page use server's HTML fragment")
-
             job = launch (UI) {
-                if (currentPage?.name != null) {
-                    val readCacheResult = async { Store.load(context, "${currentPage?.name}.html") }
-                    val cachedHtml = readCacheResult.await()
 
-                    if (cachedHtml != null) {
-                        info("Using cached data for ${currentPage?.name}")
+                val cachedHtml = currentPage?.htmlFromCache(context)
 
-                        updateUi(cachedHtml)
+                if (cachedHtml != null) {
 
-                        return@launch
-                    }
+                    Toast.makeText(context, "Using cache", Toast.LENGTH_SHORT).show()
+
+                    updateUi(cachedHtml)
+
+                    return@launch
                 }
 
                 fetchAndUpdate()
@@ -226,29 +223,17 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     }
 
     private suspend fun fetchAndUpdate() {
-        val readResult = async { readHtml(resources, R.raw.list) }
-        info("Fetch currentPage data ${currentPage?.listUrl}")
 
-        val fetchResult = async { Fetch.get(currentPage?.listUrl!!) }
+        val htmlString = currentPage?.htmlFromFragment(resources)
 
-        val templateHtml = readResult.await()
-        val remoteHtml = fetchResult.await()
-
-        if (templateHtml == null || remoteHtml == null) {
+        if (htmlString == null) {
             updateUi(HTML_PLACEHOLDER)
             return
         }
 
-
-        val htmlString = templateHtml.replace("{list-content}", remoteHtml)
-
         updateUi(htmlString)
 
-        // Cache file
-
-        if (currentPage?.name != null) {
-            async { Store.save(context, "${currentPage?.name}.html", htmlString) }
-        }
+        currentPage?.cache(context, htmlString)
     }
 
     private fun updateUi(data: String) {

@@ -26,19 +26,6 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
 
-fun readHtml(resources: Resources, resId: Int): String? {
-
-    try {
-        val input = resources.openRawResource(resId)
-        return input.bufferedReader().use { it.readText() }
-
-    } catch (e: ExceptionInInitializerError) {
-        Log.e("readHtml", e.toString())
-    }
-    return null
-}
-
-
 class MainActivity : AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
         TabLayout.OnTabSelectedListener,

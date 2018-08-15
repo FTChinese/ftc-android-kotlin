@@ -5,6 +5,8 @@ import android.util.Log
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
 
+const val PREFERENCE_NAME_USER = "user"
+
 data class User(
         val id: String,
         val name: String?,
@@ -15,21 +17,20 @@ data class User(
         val membership: Membership
 ) {
     fun save(context: Context) {
-        val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
+        val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
 
         val editor = sharedPreferences.edit()
-        editor.putString("cookie", gson.toJson(this))
+        editor.putString(PREF_KEY_COOKIE, gson.toJson(this))
                 .apply()
     }
 
     companion object {
-        private const val PREFERENCE_NAME = "user"
-        private const val USER_COOKIE_KEY = "cookie"
+        private const val PREF_KEY_COOKIE = "cookie"
         private const val TAG = "User"
 
         fun loadFromPref(context: Context): User? {
-            val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
-            val cookie = sharedPreferences.getString(USER_COOKIE_KEY, null) ?: return null
+            val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
+            val cookie = sharedPreferences.getString(PREF_KEY_COOKIE, null) ?: return null
 
             return try { gson.fromJson<User>(cookie, User::class.java) }
             catch (e: JsonSyntaxException) {
@@ -40,16 +41,11 @@ data class User(
         }
 
         fun removeFromPref(context: Context) {
-            val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME, Context.MODE_PRIVATE)
+            val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
 
             val editor = sharedPreferences.edit()
-            editor.remove(USER_COOKIE_KEY).apply()
+            editor.remove(PREF_KEY_COOKIE).apply()
         }
     }
 }
 
-data class Membership(
-        val type: String,
-        val startAt: String?,
-        val expireAt: String?
-)
