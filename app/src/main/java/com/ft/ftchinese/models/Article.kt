@@ -1,21 +1,9 @@
 package com.ft.ftchinese.models
 
+import android.content.Context
 import android.text.format.DateFormat
 
-/**
- * Used to parse messages passed from JS when user clicked `FOLLOW` button.
- * Those data are stored locally.
- */
-data class FollowMessage(
-        var tag: String, // This is the string show along with the FOLLOW button
-        var type: String, // JS uses this value. Possible values: `tag`, `topic`, `industry`, `area`, `augthor`, `column`. `augthor` is a typo in JS code, but you have to keep that typo on.
-        var action: String // `follow` or `unfollow`. Used to determine if user if follow or unfollow something.
-) {
-    companion object {
-        val followingTypes = arrayOf("tag", "topic", "area", "industry", "author", "column")
-        const val PREF_FILENAME = "following"
-    }
-}
+
 
 data class Bilingual(
         var cn: String,

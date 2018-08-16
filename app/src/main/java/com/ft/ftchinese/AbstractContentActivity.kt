@@ -8,7 +8,7 @@ import android.view.KeyEvent
 import android.view.View
 import android.webkit.*
 import android.widget.Toast
-import com.ft.ftchinese.models.FollowMessage
+import com.ft.ftchinese.models.Following
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.AnkoLogger
@@ -97,33 +97,8 @@ abstract class AbstractContentActivity : AppCompatActivity(),
             info("Clicked a follow button")
             info("Received follow message: $message")
 
-            val msg = gson.fromJson<FollowMessage>(message, FollowMessage::class.java)
-            followOrUnfollow(msg)
-        }
-
-        private fun followOrUnfollow(msg: FollowMessage) {
-            val sharedPrefs = getSharedPreferences("following", Context.MODE_PRIVATE)
-            val hs = sharedPrefs.getStringSet(msg.type, HashSet<String>())
-            info("Current shared prefernce: $hs")
-            val newHs = HashSet(hs)
-
-            when (msg.action) {
-                "follow" -> {
-                    newHs.add(msg.tag)
-                }
-
-                "unfollow" -> {
-                    newHs.remove(msg.tag)
-                }
-            }
-
-            info("New set: $newHs")
-
-            val editor = sharedPrefs.edit()
-//                    editor.putString(msg.type, msg.tag)
-            editor.putStringSet(msg.type, newHs)
-            val result = editor.commit()
-            info("Commit result: $result")
+            val following = gson.fromJson<Following>(message, Following::class.java)
+            following.save(this@AbstractContentActivity)
         }
     }
 }
