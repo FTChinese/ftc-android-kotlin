@@ -24,13 +24,13 @@
     <string name="nav_header_desc">导航栏头部</string>
 
 
-    <string name="action_security">账号安全</string>
+    <string name="action_title_account">账号与安全</string>
     <string name="action_subscription">会员订阅</string>
     <string name="aciton_help">帮助</string>
     <string name="action_feedback">反馈</string>
     <string name="action_logout">退出登录</string>
     <string name="action_settings">设置</string>
-
+    <string name="action_about">关于我们</string>
 
     <!-- Myft tabs -->
     <string name="myft_reading_history">阅读历史</string>
@@ -41,6 +41,11 @@
     <string name="title_login">登录FT中文网</string>
     <string name="title_sign_up">创建FT中文网账号</string>
     <string name="title_reset_password">找回密码</string>
+    <string name="title_activity_profile">我的资料</string>
+    <string name="title_change_password">修改密码</string>
+    <string name="title_change_email">修改登录邮箱</string>
+    <string name="title_change_username">修改用户名</string>
+
 
     <string name="prompt_email">邮箱</string>
     <string name="prompt_password">密码</string>
@@ -67,4 +72,36 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string-array name="profile_gender_entries">
+        <item>男</item>
+        <item>女</item>
+    </string-array>
+    <string-array name="profile_gender_values">
+        <item>M</item>
+        <item>F</item>
+    </string-array>
+
+    <string-array name="settings_font_entries">
+        <item>最小</item>
+        <item>较小</item>
+        <item>默认</item>
+        <item>较大</item>
+        <item>最大</item>
+    </string-array>
+    <string-array name="settings_font_values">
+        <item>xs</item>
+        <item>s</item>
+        <item>m</item>
+        <item>l</item>
+        <item>xl</item>
+    </string-array>
+    <string-array name="settings_language_entries">
+        <item>简体</item>
+        <item>繁体</item>
+    </string-array>
+    <string-array name="settings_language_values">
+        <item>sc</item>
+        <item>tc</item>
+    </string-array>
 </resources>

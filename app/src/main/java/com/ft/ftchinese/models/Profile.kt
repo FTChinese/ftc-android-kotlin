@@ -27,8 +27,8 @@ data class Profile(
     val membership: Membership
 ) {
     /**
-     * Save user's profile to shared preferences so that we do not need to hit API every time user open's profile page.
-     * Note if user edited profile data, you must re-save it to shared preferences and sync it to server.
+     * Save user's profile to shared preferences_profile so that we do not need to hit API every time user open's profile page.
+     * Note if user edited profile data, you must re-save it to shared preferences_profile and sync it to server.
      */
     fun save(context: Context) {
         val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
@@ -43,7 +43,7 @@ data class Profile(
         private const val PREF_KEY_PROFILE = "profile"
 
         /**
-         * Try to load user's profile from shared preferences.
+         * Try to load user's profile from shared preferences_profile.
          * If returns null, you should request user's profile data from server.
          */
         fun loadFromPref(context: Context): Profile? {
@@ -52,14 +52,14 @@ data class Profile(
 
             return try { gson.fromJson<Profile>(profile, Profile::class.java) }
             catch (e: JsonSyntaxException) {
-                Log.i(TAG, "Cannot parse JSON data from preferences: $e")
+                Log.i(TAG, "Cannot parse JSON data from preferences_profile: $e")
                 null
             }
 
         }
 
         /**
-         * Delete user's profile from share preferences.
+         * Delete user's profile from share preferences_profile.
          */
         fun removeFromPref(context: Context) {
             val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)

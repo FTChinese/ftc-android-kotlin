@@ -11,6 +11,11 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="Drawer" parent="AppTheme">
+        <item name="colorPrimary">@color/colorTeal</item>
+        <item name="colorAccent">@color/colorClaret</item>
+    </style>
+
     <style name="Origami" parent="AppTheme">
 
         <item name="colorPrimary">@color/colorWheat</item>
@@ -21,24 +26,60 @@
         <item name="android:windowBackground">@color/colorPaper</item>
 
         <!-- Button Style -->
-        <item name="buttonStyle">@style/OrigamiButton</item>
+        <item name="buttonStyle">@style/OrigamiButton.Primary</item>
 
         <!-- Toolbar styles -->
         <item name="toolbarStyle">@style/OrigamiToolbar</item>
 
+        <item name="preferenceTheme">@style/PrefTheme</item>
     </style>
 
-    <style name="OrigamiButton" parent="Widget.AppCompat.Button">
+    <style name="PrefTheme" parent="PreferenceThemeOverlay">
+
+    </style>
+
+    <style name="OrigamiButton" parent="Widget.AppCompat.Button"/>
+
+    <!-- This is the default Widget.AppCompat.Button style. You override them.-->
+    <!-- See https://chromium.googlesource.com/android_tools/+/HEAD/sdk/extras/android/support/v7/appcompat/res/values/styles_base.xml -->
+    <!--<item name="android:background">@drawable/abc_btn_default_mtrl_shape</item>-->
+    <!--<item name="android:textAppearance">?android:attr/textAppearanceButton</item>-->
+    <!--<item name="android:minHeight">48dip</item>-->
+    <!--<item name="android:minWidth">88dip</item>-->
+    <!--<item name="android:focusable">true</item>-->
+    <!--<item name="android:clickable">true</item>-->
+    <!--<item name="android:gravity">center_vertical|center_horizontal</item>-->
+
+    <style name="OrigamiButton.Primary">
         <item name="android:background">@color/colorTeal</item>
         <item name="android:textColor">@color/colorWhite</item>
+    </style>
+
+    <style name="OrigamiButton.Secondary">
+        <item name="android:background">@drawable/button_border</item>
+        <item name="android:textColor">@color/colorTeal</item>
+    </style>
+
+    <style name="OrigamiButton.Primary.Small">
+        <item name="android:minHeight">0dip</item>
+        <item name="android:minWidth">0dip</item>
+        <item name="android:padding">8dp</item>
+    </style>
+
+    <style name="OrigamiButton.Secondary.Small">
+        <item name="android:minHeight">0dip</item>
+        <item name="android:minWidth">0dip</item>
+        <item name="android:padding">8dp</item>
     </style>
 
     <style name="OrigamiToolbar" parent="Widget.AppCompat.Toolbar">
         <item name="android:background">@color/colorWheat</item>
     </style>
 
-    <style name="OrigamiRadio" parent="Widget.AppCompat.CompoundButton.RadioButton">
-        <item name="android:background">@color/colorTeal</item>
+    <style name="TitleBarButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:background">@drawable/button_state</item>
+        <item name="android:textColor">@color/title_bar_text</item>
+        <item name="android:padding">8dp</item>
     </style>
 
     <style name="Origami.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

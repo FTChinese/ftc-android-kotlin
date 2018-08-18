@@ -127,7 +127,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                               savedInstanceState: Bundle?): View? {
 
 //        val rootView = inflater.inflate(R.layout.fragment_section, container, false)
-//        You need to import kotlinx.android.synthetic.main.fragment_section.view.* if you want to access child view here:
+//        You need to import kotlinx.android.synthetic.search.fragment_section.view.* if you want to access child view here:
 //        rootView.section_label.text = getString(R.string.section_format, arguments?.getInt(ARG_SECTION_NUMBER))
 //        return rootView
 

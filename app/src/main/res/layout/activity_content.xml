@@ -22,40 +22,34 @@
             android:orientation="horizontal"
             tools:layout_editor_absoluteX="126dp"
             tools:layout_editor_absoluteY="11dp"
-            android:divider="@drawable/titlebar_divider"
+            android:divider="@drawable/divider"
             android:showDividers="middle"
-            android:background="@drawable/title_bar_border"
+            android:background="@drawable/button_border"
             android:checkedButton="@id/titlebar_cn">
 
             <RadioButton
                 android:id="@+id/titlebar_cn"
+                style="@style/TitleBarButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:button="@null"
-                android:padding="8dp"
-                android:text="@string/titlebar_cn"
-                android:background="@drawable/title_bar_state"
-                android:textColor="@color/title_bar_text"/>
+                android:text="@string/titlebar_cn" />
 
             <RadioButton
                 android:id="@+id/titlebar_en"
+                style="@style/TitleBarButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:button="@null"
-                android:padding="8dp"
-                android:text="@string/titlebar_en"
-                android:background="@drawable/title_bar_state"
-                android:textColor="@color/title_bar_text"/>
+                android:text="@string/titlebar_en"/>
 
             <RadioButton
                 android:id="@+id/titlebar_bi"
+                style="@style/TitleBarButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:button="@null"
-                android:padding="8dp"
-                android:text="@string/titlebar_bilingual"
-                android:background="@drawable/title_bar_state"
-                android:textColor="@color/title_bar_text"/>
+                android:text="@string/titlebar_bilingual"/>
         </RadioGroup>
 
     </android.support.v7.widget.Toolbar>

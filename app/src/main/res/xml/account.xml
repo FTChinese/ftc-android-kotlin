@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="账号"
+        android:key="pref_key_storage_account">
+
+        <Preference
+            android:summary="neefrankie@gmail.com"
+            android:title="@string/prompt_email">
+            <intent
+                android:targetPackage="com.ft.ftchinese"
+                android:targetClass="com.ft.ftchinese.ChangeEmailActivity" />
+        </Preference>
+
+
+        <Preference
+            android:summary="abc"
+            android:title="用户名">
+            <intent
+                android:targetPackage="com.ft.ftchinese"
+                android:targetClass="com.ft.ftchinese.ChangeUsernameActivity" />
+        </Preference>
+
+        <Preference
+            android:title="@string/prompt_password"
+            android:summary="@string/title_change_password">
+
+            <intent
+                android:targetPackage="com.ft.ftchinese"
+                android:targetClass="com.ft.ftchinese.ChangePasswordActivity" />
+        </Preference>
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:title="社交账号">
+
+        <Preference
+            android:title="微信"
+            android:summary="尚未绑定">
+
+            <!--<intent-->
+                <!--android:targetPackage="com.ft.ftchinese"-->
+                <!--android:targetClass="com.ft.ftchinese.ChangePasswordActivity" />-->
+        </Preference>
+
+
+    </PreferenceCategory>
+</PreferenceScreen>

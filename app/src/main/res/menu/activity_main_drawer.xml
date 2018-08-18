@@ -16,9 +16,9 @@
     <group android:checkableBehavior="single"
         android:id="@+id/drawer_group1">
         <item
-            android:id="@+id/action_security"
+            android:id="@+id/action_account"
             android:icon="@drawable/ic_security_black_24dp"
-            android:title="@string/action_security" />
+            android:title="@string/action_title_account" />
         <item
             android:id="@+id/action_subscription"
             android:icon="@drawable/ic_card_membership_black_24dp"
@@ -35,6 +35,9 @@
             android:id="@+id/action_feedback"
             android:icon="@drawable/ic_feedback_black_24dp"
             android:title="@string/action_feedback"/>
+        <item
+            android:id="@+id/action_about"
+            android:title="@string/action_about"/>
         <item
             android:id="@+id/action_settings"
             android:icon="@drawable/ic_settings_black_24dp"

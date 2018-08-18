@@ -2,7 +2,6 @@ package com.ft.ftchinese
 
 import android.app.Activity
 import android.content.Intent
-import android.content.res.Resources
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.NavigationView
@@ -14,9 +13,9 @@ import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.*
 import android.support.v7.widget.SearchView
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import com.ft.ftchinese.models.ListPage
@@ -90,9 +89,6 @@ class MainActivity : AppCompatActivity(),
         drawer_layout.addDrawerListener(toggle)
         toggle.syncState()
 
-        // Set a listener that will be notified when a menu item is selected.
-        drawer_nav.setNavigationItemSelectedListener(this)
-
         // Set ViewPager adapter
         view_pager.adapter = SectionsPagerAdapter(ListPage.newsPages, supportFragmentManager)
 
@@ -104,6 +100,8 @@ class MainActivity : AppCompatActivity(),
         bottom_nav.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)
         bottom_nav.setOnNavigationItemReselectedListener(bottomNavItemReseletedListener)
 
+        // Set a listener that will be notified when a menu item is selected.
+        drawer_nav.setNavigationItemSelectedListener(this)
     }
 
     override fun onRestart() {
@@ -156,7 +154,7 @@ class MainActivity : AppCompatActivity(),
         if (user == null) {
 
             // If seems this is the only way to get the header view.
-            // You cannot user `import kotlinx.android.synthetic.main.nav_header_main.*`,
+            // You cannot user `import kotlinx.android.synthetic.search.nav_header_main.*`,
             // which will give you null pointer exception.
             header.findViewById<TextView>(R.id.nav_header_subtitle).setText(R.string.nav_header_subtitle)
 
@@ -215,7 +213,7 @@ class MainActivity : AppCompatActivity(),
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
 
-        menuInflater.inflate(R.menu.main, menu)
+        menuInflater.inflate(R.menu.search, menu)
 
         val expandListener = object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
@@ -270,8 +268,9 @@ class MainActivity : AppCompatActivity(),
             R.id.action_sign_up -> {
                 SignupActivity.startForResult(this, FROM_SIGNUP_ACTCITITY)
             }
-            R.id.action_security -> {
-
+            R.id.action_account -> {
+                AccountActivity.start(this)
+//                ProfileActivity.start(this)
             }
             R.id.action_subscription -> {
 
@@ -283,7 +282,7 @@ class MainActivity : AppCompatActivity(),
 
             }
             R.id.action_settings -> {
-
+                SettingsActivity.start(this)
             }
             R.id.action_logout -> {
                 // Delete user data from shared preference and update UI.
