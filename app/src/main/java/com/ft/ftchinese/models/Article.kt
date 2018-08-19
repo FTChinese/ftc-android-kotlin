@@ -3,8 +3,6 @@ package com.ft.ftchinese.models
 import android.content.Context
 import android.text.format.DateFormat
 
-
-
 data class Bilingual(
         var cn: String,
         var en: String?

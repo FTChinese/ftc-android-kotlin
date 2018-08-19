@@ -18,8 +18,8 @@ import android.util.Log
  * ```
  */
 data class Following(
-        var tag: String, // This is the string show along with the FOLLOW button
         var type: String, // JS uses this value. Possible values: `tag`, `topic`, `industry`, `area`, `augthor`, `column`. `augthor` is a typo in JS code, but you have to keep that typo on.
+        var tag: String, // This is the string show along with the FOLLOW button
         var action: String // `follow` or `unfollow`. Used to determine if user if follow or unfollow something.
 ) {
     fun save(context: Context) {
@@ -32,11 +32,11 @@ data class Following(
         val newHs = HashSet(hs)
 
         when (action) {
-            "follow" -> {
+            FOLLOWING_ACTION_ADD -> {
                 newHs.add(tag)
             }
 
-            "unfollow" -> {
+            FOLLOWING_ACTION_REMOVE -> {
                 newHs.remove(tag)
             }
         }
@@ -50,6 +50,8 @@ data class Following(
 
     companion object {
         private const val TAG = "Following"
+        const val FOLLOWING_ACTION_ADD = "follow"
+        const val FOLLOWING_ACTION_REMOVE = "unfollow"
 
         // Keys used in shared preferences
         val keys = arrayOf("tag", "topic", "area", "industry", "author", "column")
@@ -62,7 +64,7 @@ data class Following(
          * The value is a string join from a Set.
          * The value will be passed to a JS object in HTML file.
          */
-        fun loadFromPref(context: Context): Map<String, String> {
+        fun loadAsMap(context: Context): Map<String, String> {
             val sharedPreferences = context.getSharedPreferences(PREF_NAME_FOLLOWING, Context.MODE_PRIVATE)
 
             return keys.associate {
@@ -74,6 +76,20 @@ data class Following(
 
                 Pair(it, v)
             }
+        }
+
+        fun loadAsList(context: Context?): MutableList<Following>? {
+            val sharedPreferences = context?.getSharedPreferences(PREF_NAME_FOLLOWING, Context.MODE_PRIVATE) ?: return null
+
+            val result = mutableListOf<Following>()
+            for (key in keys) {
+                val ss = sharedPreferences.getStringSet(key, setOf())
+                for (elem in ss) {
+                    result.add(Following(type = key, tag = elem, action = FOLLOWING_ACTION_REMOVE))
+                }
+            }
+
+            return result
         }
     }
 }

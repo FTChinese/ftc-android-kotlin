@@ -2,6 +2,7 @@ package com.ft.ftchinese
 
 import android.app.Activity
 import android.content.Intent
+import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.NavigationView
@@ -15,12 +16,16 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.*
 import android.support.v7.widget.SearchView
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import com.ft.ftchinese.database.ArticleBaseHelper
+import com.ft.ftchinese.database.ReadingHistory
+import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.ListPage
+import com.ft.ftchinese.models.MyftTab
 import com.ft.ftchinese.models.User
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -28,10 +33,12 @@ import org.jetbrains.anko.info
 class MainActivity : AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
         TabLayout.OnTabSelectedListener,
-        SectionFragment.OnDataLoadListener,
+        SectionFragment.OnFragmentInteractionListener,
         ChannelWebViewClient.OnInAppNavigate,
         AnkoLogger {
 
+    private var dbHelper: ArticleBaseHelper? = null
+    private var readingHistory: ReadingHistory? = null
     /**
      * Implementation of BottomNavigationView.OnNavigationItemSelectedListener
      */
@@ -64,7 +71,7 @@ class MainActivity : AppCompatActivity(),
             }
 
             R.id.nav_myft -> {
-                view_pager.adapter = MyftPagerAdapter(supportFragmentManager)
+                view_pager.adapter = MyftPagerAdapter(MyftTab.pages, supportFragmentManager)
             }
         }
         true
@@ -102,6 +109,8 @@ class MainActivity : AppCompatActivity(),
 
         // Set a listener that will be notified when a menu item is selected.
         drawer_nav.setNavigationItemSelectedListener(this)
+
+        dbHelper = ArticleBaseHelper(this)
     }
 
     override fun onRestart() {
@@ -316,12 +325,27 @@ class MainActivity : AppCompatActivity(),
      * Implementation of SectionFragment.OnDataLoadListener.
      * This is used to handle the state of progress bar.
      */
-    override fun onDataLoaded() {
-        progress_bar.visibility = View.GONE
+    override fun onProgress(show: Boolean) {
+        if (show) {
+            progress_bar.visibility = View.VISIBLE
+        } else {
+            progress_bar.visibility = View.GONE
+        }
     }
 
-    override fun onDataLoading() {
-        progress_bar.visibility = View.VISIBLE
+    override fun onStartReading(item: ChannelItem) {
+
+        val db = dbHelper?.writableDatabase ?: return
+
+        launch {
+            if (readingHistory == null) {
+                readingHistory = ReadingHistory(db)
+            }
+
+            readingHistory?.add(item)
+        }
+
+        Toast.makeText(this, "Saving reading history", Toast.LENGTH_SHORT).show()
     }
 
     /**
@@ -372,14 +396,10 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    inner class MyftPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
-        private val pages = arrayOf(
-                MyftTab(id = "reading_history", title = "阅读历史"),
-                MyftTab(id = "starred_articles", title = "收藏文章"),
-                MyftTab(id = "following", title = "关注")
-        )
+    inner class MyftPagerAdapter(private val pages: Array<MyftTab>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+
         override fun getItem(position: Int): Fragment {
-            return MyftFragment.newInstance(pages[position].id, pages[position].title)
+            return MyftFragment.newInstance(pages[position].id)
         }
 
         override fun getCount(): Int {
@@ -393,7 +413,3 @@ class MainActivity : AppCompatActivity(),
 }
 
 
-data class MyftTab(
-        val id: String,
-        val title: String
-)

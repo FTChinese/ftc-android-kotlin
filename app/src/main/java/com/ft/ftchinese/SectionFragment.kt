@@ -34,7 +34,7 @@ import org.jetbrains.anko.info
  */
 class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
 
-    private lateinit var listener: OnDataLoadListener
+    private var listener: OnFragmentInteractionListener? = null
     private lateinit var navigateListener: ChannelWebViewClient.OnInAppNavigate
     private lateinit var mWebViewClient: ChannelWebViewClient
 
@@ -54,10 +54,27 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     private var job: Job? = null
 
     // Containing activity should implement this interface to show progress state
-    interface OnDataLoadListener {
-        fun onDataLoaded()
+//    interface OnDataLoadListener {
+//        fun onDataLoaded()
+//
+//        fun onDataLoading()
+//    }
 
-        fun onDataLoading()
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     *
+     *
+     * See the Android Training lesson [Communicating with Other Fragments]
+     * (http://developer.android.com/training/basics/fragments/communicating.html)
+     * for more information.
+     */
+    interface OnFragmentInteractionListener {
+        fun onProgress(show: Boolean)
+
+        fun onStartReading(item: ChannelItem)
     }
 
     /**
@@ -106,8 +123,12 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         info("onAttach fragment")
         super.onAttach(context)
         // Cast parent activity
-        listener = context as OnDataLoadListener
+//        listener = context as OnDataLoadListener
         navigateListener = context as ChannelWebViewClient.OnInAppNavigate
+
+        if (context is OnFragmentInteractionListener) {
+            listener = context
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -189,7 +210,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
     private fun init() {
 
-        showProgress()
+        showProgress(true)
 
         if (currentPage?.listUrl != null ) {
 
@@ -217,7 +238,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
             web_view.loadUrl(currentPage?.webUrl)
 
-            stopProgress()
+            showProgress(false)
         }
 
     }
@@ -238,16 +259,14 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
     private fun updateUi(data: String) {
         web_view.loadDataWithBaseURL(WEBVIEV_BASE_URL, data, "text/html", null, null)
-        stopProgress()
+        showProgress(false)
     }
 
-    private fun showProgress() {
-        listener.onDataLoading()
-    }
-
-    private fun stopProgress() {
-        listener.onDataLoaded()
-        swipe_refresh_layout.isRefreshing = false
+    private fun showProgress(show: Boolean) {
+        listener?.onProgress(show)
+        if (!show) {
+            swipe_refresh_layout.isRefreshing = false
+        }
     }
 
     inner class WebAppInterface : AnkoLogger {
@@ -265,6 +284,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         }
 
         /**
+         * Handle click event on an item of article list.
          * See Page/Layouts/Page/SuperDataViewController.swift#SuperDataViewController what kind of data structure is passed back from web view.
          * The JSON data is parsed into SectionItem type in ContentActivity
          * iOS equivalent might be here: Page/Layouts/Pages/Content/DetailModelController.swift
@@ -321,6 +341,8 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             when (channelItem.type) {
                 "story", "premium" -> {
                     info("Start story activity")
+                    // Save reading history
+                    listener?.onStartReading(channelItem)
                     StoryActivity.start(activity, channelItem)
                     return
                 }

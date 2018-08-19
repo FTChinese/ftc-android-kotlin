@@ -5,6 +5,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.activity_chanel.*
@@ -15,7 +16,7 @@ import org.jetbrains.anko.info
  * This is used to show a channel page, which consists of a list of article summaries.
  * It is similar to `MainActivity` execpt that it does not wrap a TabLayout.
  */
-class ChannelActivity : AppCompatActivity(), SectionFragment.OnDataLoadListener, ChannelWebViewClient.OnInAppNavigate, AnkoLogger {
+class ChannelActivity : AppCompatActivity(), SectionFragment.OnFragmentInteractionListener, ChannelWebViewClient.OnInAppNavigate, AnkoLogger {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,12 +49,16 @@ class ChannelActivity : AppCompatActivity(), SectionFragment.OnDataLoadListener,
                 .commit()
     }
 
-    override fun onDataLoading() {
-        progress_bar.visibility = View.VISIBLE
+    override fun onProgress(show: Boolean) {
+        if (show) {
+            progress_bar.visibility = View.VISIBLE
+        } else {
+            progress_bar.visibility = View.GONE
+        }
     }
 
-    override fun onDataLoaded() {
-        progress_bar.visibility = View.GONE
+    override fun onStartReading(item: ChannelItem) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     /**

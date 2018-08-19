@@ -147,7 +147,7 @@ data class ChannelItem(
 
     fun render(context: Context, template: String, article: ArticleDetail): String {
 
-        val follows = Following.loadFromPref(context)
+        val follows = Following.loadAsMap(context)
 
         val followTags = follows[Following.keys[0]]
         val followTopics = follows[Following.keys[1]]
@@ -180,6 +180,10 @@ data class ChannelItem(
                 //                        .replace("{ad-mpu}", "")
                 //                        .replace("{font-class}", "")
                 .replace("{comments-id}", commentsId)
+    }
+
+    fun saveHistory() {
+
     }
 
     companion object {
@@ -219,22 +223,3 @@ val pathToTitle = mapOf(
         "hxxf2016.html" to "透视中国PPP模式",
         "money.html" to "理财"
 )
-
-//val sepcailUrl = mapOf(
-//        "12073" to "http://www.ftchinese.com/channel/chinabusinesswatch.html",
-//        "11977" to "http://www.ftchinese.com/tag/新经济公司IPO",
-//        "11869" to "http://www.ftchinese.com/tag/引领变局之势",
-//        "11041" to "http://www.ftchinese.com/channel/viewtop.html",
-//        "11452" to "http://www.ftchinese.com/tag/2018中国女性力量",
-//        "11364" to "http://www.ftchinese.com/m/marketing/Emotech2017.html",
-//        "11205" to "https://api003.ftmailbox.com/tag/创新经济-物流4.0",
-//        "11075" to "https://api003.ftmailbox.com/tag/经济发展新动力",
-//        "10719" to "https://api003.ftmailbox.com/tag/2017年度报告",
-//        "10399" to "https://api003.ftmailbox.com/tag/交通银行记账式原油",
-//        "10295" to "http://www.ftchinese.com/m/marketing/antfinancial.html",
-//        "10089" to "http://www.ftchinese.com/channel/teawithft.html",
-//        "9911" to "https://api003.ftmailbox.com/tag/金砖五国峰会",
-//        "9378" to "https://api003.ftmailbox.com/tag/智慧城市群",
-//        "9355" to "http://www.ftchinese.com/m/marketing/creditease.html",
-//        "9209" to "http://www.ftchinese.com/m/marketing/Emotech2017.html"
-//)
