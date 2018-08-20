@@ -1,5 +1,8 @@
 package com.ft.ftchinese.models
 
+import android.arch.persistence.room.ColumnInfo
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.Ignore
 import android.content.Context
 import android.content.res.Resources
 import android.util.Log
@@ -48,13 +51,16 @@ data class ChannelMeta(
  *
  * NOTE: This is a terrible way of handling data. In the future we will provide a unified JSON API with clear naming style.
  */
-data class ChannelItem(
-        val id: String,
-        val type: String,
-        val subType: String? = null,
-        val headline: String,
-        val shortlead: String
+@Entity(tableName = "reading_history", primaryKeys = ["id", "type"])
+class ChannelItem(
+        var id: String,
+        var type: String,
+        @ColumnInfo(name = "sub_type") var subType: String? = null,
+        @ColumnInfo(name = "title") var headline: String,
+        @ColumnInfo(name = "standfirst") var shortlead: String
 ) {
+//    constructor(): this("", "", null, "", "")
+
     private val filename: String
         get() = "${type}_$id.json"
 

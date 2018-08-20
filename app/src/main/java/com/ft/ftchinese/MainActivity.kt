@@ -18,7 +18,8 @@ import android.view.*
 import android.support.v7.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
-import com.ft.ftchinese.database.ArticleBaseHelper
+//import com.ft.ftchinese.database.ArticleBaseHelper
+import com.ft.ftchinese.database.ArticleDatabase
 import com.ft.ftchinese.database.ReadingHistory
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.ListPage
@@ -37,7 +38,6 @@ class MainActivity : AppCompatActivity(),
         ChannelWebViewClient.OnInAppNavigate,
         AnkoLogger {
 
-    private var dbHelper: ArticleBaseHelper? = null
     private var readingHistory: ReadingHistory? = null
     /**
      * Implementation of BottomNavigationView.OnNavigationItemSelectedListener
@@ -110,7 +110,13 @@ class MainActivity : AppCompatActivity(),
         // Set a listener that will be notified when a menu item is selected.
         drawer_nav.setNavigationItemSelectedListener(this)
 
-        dbHelper = ArticleBaseHelper(this)
+        launch {
+            val db = ArticleDatabase.getInstance(this@MainActivity)
+            if (readingHistory == null) {
+                readingHistory = db?.readingHistory()
+            }
+        }
+
     }
 
     override fun onRestart() {
@@ -335,14 +341,9 @@ class MainActivity : AppCompatActivity(),
 
     override fun onStartReading(item: ChannelItem) {
 
-        val db = dbHelper?.writableDatabase ?: return
-
         launch {
-            if (readingHistory == null) {
-                readingHistory = ReadingHistory(db)
-            }
 
-            readingHistory?.add(item)
+            readingHistory?.insertOne(item)
         }
 
         Toast.makeText(this, "Saving reading history", Toast.LENGTH_SHORT).show()
