@@ -9,10 +9,15 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import com.ft.ftchinese.database.ReadingHistory
+import com.ft.ftchinese.database.ReadingHistoryDbHelper
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.Following
 import com.ft.ftchinese.models.MyftTab
 import kotlinx.android.synthetic.main.fragment_myft.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.find
 import org.jetbrains.anko.info
@@ -34,12 +39,19 @@ private const val ARG_TAB_ID = "tab_id"
 class MyftFragment : Fragment(), AnkoLogger {
     // TODO: Rename and change keys of parameters
     private var tabId: Int? = null
+    private var dbHelper: ReadingHistoryDbHelper? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             tabId = it.getInt(ARG_TAB_ID)
         }
+
+        if (context != null) {
+            dbHelper = ReadingHistoryDbHelper.getInstance(context!!)
+            ReadingHistory.dbHelper = dbHelper
+        }
+
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -78,10 +90,25 @@ class MyftFragment : Fragment(), AnkoLogger {
 
 
     private  fun initArticles() {
+        info("Initializing article list")
+
         recycler_view.apply {
             layoutManager = LinearLayoutManager(context)
 
-            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+//            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+        }
+
+        launch(UI) {
+            val job = async {
+                ReadingHistory.loadAll()
+            }
+
+            val items = job.await()
+            info("Reading history: $items")
+
+            if (items != null) {
+                recycler_view.adapter = MyArticleAdapter(items)
+            }
         }
     }
 
@@ -108,7 +135,7 @@ class MyftFragment : Fragment(), AnkoLogger {
         val tagText: TextView? = itemView.findViewById(R.id.tag_text)
     }
 
-    inner class FollowingAdapter(val items: MutableList<Following>) : RecyclerView.Adapter<FollowingViewHolder>() {
+    inner class FollowingAdapter(val items: List<Following>) : RecyclerView.Adapter<FollowingViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FollowingViewHolder {
 
@@ -154,7 +181,7 @@ class MyftFragment : Fragment(), AnkoLogger {
         override fun onBindViewHolder(holder: MyArticleViewHolder, position: Int) {
             val item = items[position]
             holder.titleText.text = item.headline
-            holder.standfirstText.text = item.shortlead
+            holder.standfirstText.text = item.standfirst
         }
 
     }

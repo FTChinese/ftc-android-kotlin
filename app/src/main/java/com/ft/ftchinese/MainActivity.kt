@@ -2,7 +2,6 @@ package com.ft.ftchinese
 
 import android.app.Activity
 import android.content.Intent
-import android.database.sqlite.SQLiteDatabase
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.NavigationView
@@ -18,17 +17,15 @@ import android.view.*
 import android.support.v7.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
-//import com.ft.ftchinese.database.ArticleBaseHelper
-import com.ft.ftchinese.database.ArticleDatabase
-import com.ft.ftchinese.database.ReadingHistory
+import com.ft.ftchinese.database.ReadingHistoryDbHelper
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.MyftTab
 import com.ft.ftchinese.models.User
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.jetbrains.anko.toast
 
 
 class MainActivity : AppCompatActivity(),
@@ -38,7 +35,9 @@ class MainActivity : AppCompatActivity(),
         ChannelWebViewClient.OnInAppNavigate,
         AnkoLogger {
 
-    private var readingHistory: ReadingHistory? = null
+
+    private var dbHelper: ReadingHistoryDbHelper? = null
+
     /**
      * Implementation of BottomNavigationView.OnNavigationItemSelectedListener
      */
@@ -110,13 +109,7 @@ class MainActivity : AppCompatActivity(),
         // Set a listener that will be notified when a menu item is selected.
         drawer_nav.setNavigationItemSelectedListener(this)
 
-        launch {
-            val db = ArticleDatabase.getInstance(this@MainActivity)
-            if (readingHistory == null) {
-                readingHistory = db?.readingHistory()
-            }
-        }
-
+        dbHelper = ReadingHistoryDbHelper.getInstance(this)
     }
 
     override fun onRestart() {
@@ -205,6 +198,7 @@ class MainActivity : AppCompatActivity(),
     override fun onDestroy() {
         super.onDestroy()
 
+        dbHelper?.close()
         info("onDestroy finished")
     }
 
@@ -340,13 +334,11 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onStartReading(item: ChannelItem) {
+//        launch {
+//            ReadingHistory.insert(item)
+//        }
 
-        launch {
-
-            readingHistory?.insertOne(item)
-        }
-
-        Toast.makeText(this, "Saving reading history", Toast.LENGTH_SHORT).show()
+        toast("Starting reading $item")
     }
 
     /**

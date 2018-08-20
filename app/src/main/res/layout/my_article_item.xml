@@ -6,21 +6,18 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:layout_margin="8dp"
-    card_view:cardCornerRadius="0dp"
-    card_view:contentPadding="8dp">
+    card_view:cardBackgroundColor="@color/colorPaper"
+    card_view:cardCornerRadius="0dp">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/title_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:padding="8dp"
             android:text="Title"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
             card_view:layout_constraintEnd_toEndOf="parent"
@@ -31,10 +28,11 @@
             android:id="@+id/standfirst_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
+            android:lineSpacingExtra="8sp"
             android:text="Body"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            card_view:layout_constraintBottom_toBottomOf="parent"
             card_view:layout_constraintEnd_toEndOf="@+id/title_text"
             card_view:layout_constraintStart_toStartOf="@+id/title_text"
             card_view:layout_constraintTop_toBottomOf="@+id/title_text" />

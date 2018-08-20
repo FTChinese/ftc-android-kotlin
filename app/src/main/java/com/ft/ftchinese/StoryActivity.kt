@@ -4,12 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import com.ft.ftchinese.database.ReadingHistory
+import com.ft.ftchinese.database.ReadingHistoryDbHelper
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.util.gson
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.info
+import org.jetbrains.anko.toast
 
 /**
  * StoryActivity is used to show a story whose has a JSON api on server.
@@ -21,6 +24,7 @@ class StoryActivity : AbstractContentActivity() {
     // Hold metadata on where and how to find data for this page.
     private var channelItem: ChannelItem? = null
     private var job: Job? = null
+    private var dbHelper: ReadingHistoryDbHelper? = null
 
     companion object {
         private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
@@ -41,14 +45,16 @@ class StoryActivity : AbstractContentActivity() {
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
         channelItem = gson.fromJson(itemData, ChannelItem::class.java)
-        info("Creating activity for type ${channelItem?.type}")
+
+        dbHelper = ReadingHistoryDbHelper.getInstance(this)
+
+        ReadingHistory.dbHelper = dbHelper
 
         init()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
         job?.cancel()
     }
 
@@ -72,6 +78,8 @@ class StoryActivity : AbstractContentActivity() {
 
                 loadData(html)
 
+                saveHistory()
+
                 return@launch
             }
 
@@ -94,5 +102,16 @@ class StoryActivity : AbstractContentActivity() {
 
         // Load the HTML string into web view.
         loadData(html)
+
+        saveHistory()
+    }
+
+    private fun saveHistory() {
+        launch {
+            if (channelItem != null) {
+                info("Save reading history")
+                ReadingHistory.insert(channelItem!!)
+            }
+        }
     }
 }
