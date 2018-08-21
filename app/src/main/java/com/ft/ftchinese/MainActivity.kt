@@ -162,7 +162,7 @@ class MainActivity : AppCompatActivity(),
         if (user == null) {
 
             // If seems this is the only way to get the header view.
-            // You cannot user `import kotlinx.android.synthetic.search.nav_header_main.*`,
+            // You cannot user `import kotlinx.android.synthetic.activity_main_search.nav_header_main.*`,
             // which will give you null pointer exception.
             header.findViewById<TextView>(R.id.nav_header_subtitle).setText(R.string.nav_header_subtitle)
 
@@ -222,7 +222,7 @@ class MainActivity : AppCompatActivity(),
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
 
-        menuInflater.inflate(R.menu.search, menu)
+        menuInflater.inflate(R.menu.activity_main_search, menu)
 
         val expandListener = object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
@@ -243,7 +243,7 @@ class MainActivity : AppCompatActivity(),
 
         val searchView = searchItem.actionView as SearchView
 
-        // Handle search. See
+        // Handle activity_main_search. See
         // guide https://developer.android.com/guide/topics/search/
         // API https://developer.android.com/reference/android/support/v7/widget/SearchView
 
@@ -255,7 +255,7 @@ class MainActivity : AppCompatActivity(),
      */
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
             R.id.action_search -> {
-                info("Clicked search")
+                info("Clicked activity_main_search")
                 super.onOptionsItemSelected(item)
             }
             else -> {

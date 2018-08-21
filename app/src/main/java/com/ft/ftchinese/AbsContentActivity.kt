@@ -13,6 +13,11 @@ import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
+/**
+ * This is used to show the contents of an article in web view.
+ * Subclass must implement `init` method to handle data fetching.
+ * Subclass must call `onCreate`.
+ */
 abstract class AbsContentActivity : AppCompatActivity(),
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
@@ -89,7 +94,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
             swipe_refresh.isRefreshing = false
             progress_bar.visibility = View.GONE
         }
-
     }
 
     // Methods injected to JavaScript in WebView
