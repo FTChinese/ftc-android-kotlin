@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">FTChinese</string>
     <string name="action_search">搜索</string>
-    <string name="action_share">分享本文</string>
+    <string name="action_share">分享</string>
+    <string name="action_favorite">收藏</string>
 
     <!-- Bottom navigation tabs -->
     <string name="nav_news">新闻</string>

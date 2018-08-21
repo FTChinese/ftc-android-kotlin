@@ -51,6 +51,9 @@ dependencies {
 //    implementation "android.arch.persistence.room:runtime:$room_version"
 //    kapt "android.arch.persistence.room:compiler:$room_version"
 
+    // Wechat
+    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:5.1.4'
+
     //    Test
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

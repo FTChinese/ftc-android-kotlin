@@ -1,9 +1,15 @@
 package com.ft.ftchinese
 
+import android.content.Intent
 import android.os.Bundle
+import android.support.design.widget.BottomSheetDialog
+import android.support.v4.view.MenuItemCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.ShareActionProvider
 import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.webkit.*
 import android.widget.Toast
@@ -21,6 +27,9 @@ import org.jetbrains.anko.info
 abstract class AbsContentActivity : AppCompatActivity(),
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
+
+    private var mShareActionProvider: ShareActionProvider? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_content)
@@ -62,10 +71,57 @@ abstract class AbsContentActivity : AppCompatActivity(),
             }
         }
 
+        action_share.setOnClickListener {
+            val dialog = BottomSheetDialog(this)
+            val sheetView = layoutInflater.inflate(R.layout.fragment_bottom_sheet, null)
+            dialog.setContentView(sheetView)
+            dialog.show()
+        }
+
+        action_favourite.setOnClickListener {
+            action_favourite.setCompoundDrawables()
+        }
     }
 
     override fun onRefresh() {
         Toast.makeText(this, "Refreshing", Toast.LENGTH_SHORT).show()
+    }
+
+    // Create options menu
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.activity_content_list, menu)
+
+        /**
+         * Docs on share:
+         * https://developer.android.com/training/appbar/action-views
+         * https://developer.android.com/training/sharing/shareaction
+         * https://developer.android.com/reference/android/support/v7/widget/ShareActionProvider
+         * How to set intent: https://developer.android.com/training/sharing/send
+         */
+//        menu?.findItem(R.id.action_share).also { menuItem ->
+//            mShareActionProvider = MenuItemCompat.getActionProvider(menuItem) as ShareActionProvider
+//        }
+
+        return true
+    }
+
+    fun setShareIntent(shareIntent: Intent) {
+        mShareActionProvider?.setShareIntent(Intent.createChooser(shareIntent, "分享到"))
+    }
+
+    // Handle menu click events
+    override fun onOptionsItemSelected(item: MenuItem?) = when (item?.itemId) {
+        R.id.action_listen -> {
+
+            true
+        }
+//        R.id.action_favorite -> {
+//            true
+//        }
+        else -> {
+            super.onOptionsItemSelected(item)
+        }
     }
 
     abstract fun init()

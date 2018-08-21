@@ -4,6 +4,6 @@
     <item android:color="@color/colorWhite"
         android:state_checked="true"/>
 
-    <!-- You must put the default one at the end. If you put it at top, none the other state will be picked. -->
+    <!-- You must put the default one at the end. If you put it at top, none of the other state will be picked. -->
     <item android:color="@color/colorTeal"/>
 </selector>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true"
+        android:drawable="@drawable/ic_favorite_teal_24dp"/>
+
+    <!-- You cannot simply put a default one at the end. It won't work here. Yut must explicitly say this is used for 'not checked'. Very weired. -->
+    <item android:state_checked="false"
+        android:drawable="@drawable/ic_favorite_border_teal_24dp"/>
+</selector>

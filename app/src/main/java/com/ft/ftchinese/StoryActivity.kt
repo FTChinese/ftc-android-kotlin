@@ -77,6 +77,7 @@ class StoryActivity : AbsContentActivity() {
 
                 loadData(html)
 
+                setShareIntent(createIntent())
                 saveHistory()
 
                 return@launch
@@ -102,7 +103,17 @@ class StoryActivity : AbsContentActivity() {
         // Load the HTML string into web view.
         loadData(html)
 
+        setShareIntent(createIntent())
+
         saveHistory()
+    }
+
+    private fun createIntent(): Intent {
+        return Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, channelItem?.headline)
+            type = "text/plain"
+        }
     }
 
     private fun saveHistory() {
