@@ -12,14 +12,13 @@ import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.info
-import org.jetbrains.anko.toast
 
 /**
  * StoryActivity is used to show a story whose has a JSON api on server.
  * The remote JSON is fetched and concatenated with local HTML template in `res/raw/story.html`.
  * For those articles that do not have a JSON api, do not use this activity. Load the a web page directly into web view.
  */
-class StoryActivity : AbstractContentActivity() {
+class StoryActivity : AbsContentActivity() {
 
     // Hold metadata on where and how to find data for this page.
     private var channelItem: ChannelItem? = null
@@ -96,7 +95,7 @@ class StoryActivity : AbstractContentActivity() {
         if (html == null) {
             Toast.makeText(this, "Error! Failed to load data", Toast.LENGTH_SHORT).show()
 
-            stopProgress()
+            showProgress(false)
             return
         }
 

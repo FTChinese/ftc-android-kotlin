@@ -18,7 +18,7 @@ import org.jetbrains.anko.warn
 
 /**
  * A base WebViewClient that can be used directly or subclassed.
- * AbstractContentActivity uses it directly.
+ * AbsContentActivity uses it directly.
  */
 open class BaseWebViewClient(
         private val context: Context?

@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.widget.Toast
 import org.jetbrains.anko.info
 
-class WebContentActivity : AbstractContentActivity() {
+class WebContentActivity : AbsContentActivity() {
 
     private var urlToLoad: String? = null
 

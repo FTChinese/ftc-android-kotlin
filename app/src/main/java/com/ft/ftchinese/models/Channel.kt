@@ -32,7 +32,7 @@ data class ChannelMeta(
 
 /**
  * ChannelItem represents an item in a page of ViewPager.
- * This is the data type passed to AbstractContentActivity so that it know what kind of data to load.
+ * This is the data type passed to AbsContentActivity so that it know what kind of data to load.
  * iOS equivalent might be Page/Layouts/Content/ContentItem.swift#ContentItem
  * The fields are collected from all HTML elements `div.item-container-app`.
  * See https://github.com/FTChinese/android-client/app/scripts/list.js.
