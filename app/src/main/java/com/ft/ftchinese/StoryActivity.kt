@@ -20,7 +20,16 @@ import org.jetbrains.anko.info
  */
 class StoryActivity : AbsContentActivity() {
 
-    // Hold metadata on where and how to find data for this page.
+    override val articleWebUrl: String
+        get() = channelItem?.canonicalUrl ?: ""
+
+    override val articleTitle: String
+        get() = channelItem?.headline ?: ""
+
+    override val articleStandfirst: String
+        get() = channelItem?.standfirst ?: ""
+
+        // Hold metadata on where and how to find data for this page.
     private var channelItem: ChannelItem? = null
     private var job: Job? = null
     private var dbHelper: ReadingHistoryDbHelper? = null
@@ -77,7 +86,7 @@ class StoryActivity : AbsContentActivity() {
 
                 loadData(html)
 
-                setShareIntent(createIntent())
+
                 saveHistory()
 
                 return@launch
@@ -103,17 +112,7 @@ class StoryActivity : AbsContentActivity() {
         // Load the HTML string into web view.
         loadData(html)
 
-        setShareIntent(createIntent())
-
         saveHistory()
-    }
-
-    private fun createIntent(): Intent {
-        return Intent().apply {
-            action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, channelItem?.headline)
-            type = "text/plain"
-        }
     }
 
     private fun saveHistory() {

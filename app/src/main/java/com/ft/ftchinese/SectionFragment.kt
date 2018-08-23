@@ -347,9 +347,11 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                     return
                 }
 
+                // Article types other than `story` and `premium` do not have JSON API.
+                // Load theme directly
                 else -> {
                     info("Start web content activity")
-                    WebContentActivity.start(activity, channelItem?.apiUrl)
+                    WebContentActivity.start(activity, Uri.parse(channelItem.canonicalUrl))
                 }
             }
 

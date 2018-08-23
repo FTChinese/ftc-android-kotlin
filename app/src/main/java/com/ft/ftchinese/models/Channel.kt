@@ -61,6 +61,9 @@ data class ChannelItem(
 
     var standfirst: String = ""
 
+    val canonicalUrl: String
+        get() = "http://www.ftchinese.com/$type/$id"
+
     private val filename: String
         get() = "${type}_$id.json"
 

@@ -43,6 +43,7 @@ open class BaseWebViewClient(
         warn(error.toString())
     }
 
+    // Handle clicks on a link in a web page loaded into url
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
         info("shouldOverrideUrlLoading: $url")
 
@@ -53,8 +54,14 @@ open class BaseWebViewClient(
         val uri = Uri.parse(url)
 
         /**
-         * If you load content using `StoryActivity`, the base url in web view is `www.ftchinese.com`.
+         * If the clicked url is of the pattern `.../story/xxxxxx`, you should use `StoryActivity`
+         * and fetch JSON from server and concatenate it with a html bundle into the package `raw/story.html`,
+         * then call `WebView.loadDataWithBaseUrl()` to load the string into WebView.
+         * In such a case, you need to provide a base url so that contents in the WebView know where to fetch resources (like advertisement).
+         * The base url for such contents should be `www.ftchinese.com`.
          * If you load a url directly into, the host might be something else, like `api003.ftmailbox.com`, depending your url you use.
+         * Here we check origin or the clicked URL: for "www.ftchinese.com" or "api003.ftmailbox.com", we load them directly into the app.
+         * For external links (mostly ads), open in external browser.
          */
         if (Endpoints.hosts.contains(uri.host)) {
             return handleInSiteLink(uri)
@@ -67,6 +74,11 @@ open class BaseWebViewClient(
         val pathSegments = uri.pathSegments
 
 
+        /**
+         * Determine if the link is a channel's pagination link.
+         * `page` query parameter is used for each channel's pagination.
+         * For unknown reasons, the pagination url uses relative links, you have to handle it separately.
+         */
         if (pathSegments.size < 2 && uri.getQueryParameter("page") != null) {
             return openChannelPagination(uri)
         }
@@ -76,29 +88,44 @@ open class BaseWebViewClient(
          */
         return when (pathSegments[0]) {
 
-        /**
-         * If the path looks like `/channel/english.html`
-         */
+            /**
+             * If the path looks like `/channel/english.html`
+             */
             "channel" -> openChannelLink(uri)
 
-        /**
-         * If the path looks like `/m/marketing/intelligence.html`
-         */
+            /**
+             * If the path looks like `/m/marketing/intelligence.html`
+             */
             "m" -> openMarketingLink(uri)
 
-        /**
-         * If the path looks like `/story/001078593`
-         */
+            /**
+             * If the path looks like `/story/001078593`
+             */
             "story", "premium" -> openStoryLink(uri)
 
 
-        /**
-         * If the path looks like `/tag/中美贸易战`,
-         * start a new page listing articles
-         */
+            /**
+             * If the path looks like `/tag/中美贸易战`,
+             * start a new page listing articles
+             */
             "tag" -> openTagLink(uri)
 
-            else -> openWebContent(uri)
+            /**
+             * Loads an article that do not have JSON api and load it directly into the WebView.
+             * WebContentActivity accepts a String url.
+             * Example:
+             * `FT研究院` is a web page loaded directly into WebView. You could only click a title's link to read this an article.
+             * The link is actually pointing to somewhere like `http://www.ftchinese.com/interactive/12376`.
+             * But you want it to load a stripped HTML web page on `https://api003.ftmailbox.com/interactive/12376?bodyonly=no&webview=ftcapp&i=3&0=01&exclusive`.
+             * To to this, you have to transform the URL using `buildUrl`.
+             */
+
+            else -> {
+                info("Open a web page directly. Original url is: $uri")
+                WebContentActivity.start(context, uri)
+
+                true
+            }
         }
     }
 
@@ -114,7 +141,7 @@ open class BaseWebViewClient(
     }
 
     /**
-     * Placeholder implementation
+     * A list of articles
      */
     open fun openChannelLink(uri: Uri): Boolean {
 
@@ -131,7 +158,7 @@ open class BaseWebViewClient(
     }
 
     /**
-     * Placeholder implementation
+     * This kind of page is a list of articles
      */
     open fun openMarketingLink(uri: Uri): Boolean {
         val lastPathSegment = uri.lastPathSegment
@@ -146,6 +173,10 @@ open class BaseWebViewClient(
         return true
     }
 
+    /**
+     * Loads a story page who has JSON api on server
+     * StoryActivity accepts a ChannelItem parameter.
+     */
     private fun openStoryLink(uri: Uri): Boolean {
         val channelItem = ChannelItem(
                 id = uri.pathSegments[1],
@@ -157,6 +188,14 @@ open class BaseWebViewClient(
         return true
     }
 
+    private fun handleExternalLink(uri: Uri): Boolean {
+        // This opens an external browser
+        val customTabsInt = CustomTabsIntent.Builder().build()
+        customTabsInt.launchUrl(context, uri)
+
+        return true
+    }
+
     private fun openTagLink(uri: Uri): Boolean {
         val page = ListPage(
                 title = uri.pathSegments[1],
@@ -164,21 +203,6 @@ open class BaseWebViewClient(
                 listUrl = buildUrl(uri))
 
         ChannelActivity.start(context, page)
-
-        return true
-    }
-
-    private fun openWebContent(uri: Uri): Boolean {
-        info("Open a web page directly. Original url is: $uri. API url is ${buildUrl(uri)}")
-        WebContentActivity.start(context, buildUrl(uri))
-
-        return true
-    }
-
-    private fun handleExternalLink(uri: Uri): Boolean {
-        // This opens an external browser
-        val customTabsInt = CustomTabsIntent.Builder().build()
-        customTabsInt.launchUrl(context, uri)
 
         return true
     }
