@@ -7,6 +7,13 @@ apply plugin: 'kotlin-android-extensions'
 // NOTE: this does not work in Android Studio, although Google and Kotlin all says it works.
 //apply plugin: 'kotlin-kapt'
 
+// See:
+// https://stackoverflow.com/questions/37101589/how-to-read-a-properties-files-and-use-the-values-in-project-gradle-script/37101792
+// https://stackoverflow.com/questions/45586839/android-read-build-gradle-properties-inside-class
+// https://medium.com/@abhi007tyagi/storing-api-keys-using-android-ndk-6abb0adcadad
+def props = new Properties()
+file("$rootDir/keystore.properties").withInputStream { props.load(it) }
+
 android {
     compileSdkVersion 27
     defaultConfig {
@@ -16,6 +23,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "WECAHT_APP_ID", props.getProperty("wechat.appId")
     }
     buildTypes {
         release {

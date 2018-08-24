@@ -22,6 +22,8 @@ import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.MyftTab
 import com.ft.ftchinese.models.User
+import com.tencent.mm.opensdk.openapi.IWXAPI
+import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -84,6 +86,8 @@ class MainActivity : AppCompatActivity(),
         info("Reselected bottom nav item: ${item.title}")
     }
 
+    lateinit var api: IWXAPI
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -110,6 +114,9 @@ class MainActivity : AppCompatActivity(),
         drawer_nav.setNavigationItemSelectedListener(this)
 
         dbHelper = ReadingHistoryDbHelper.getInstance(this)
+
+        api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false)
+        api.registerApp(BuildConfig.WECAHT_APP_ID)
     }
 
     override fun onRestart() {

@@ -3,6 +3,9 @@ package com.ft.ftchinese
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
@@ -18,13 +21,17 @@ import android.widget.TextView
 import android.widget.Toast
 import com.ft.ftchinese.models.Following
 import com.ft.ftchinese.util.gson
+import com.tencent.mm.opensdk.diffdev.a.e
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
 import com.tencent.mm.opensdk.modelmsg.WXWebpageObject
+import com.tencent.mm.opensdk.openapi.IWXAPI
+import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
+import java.io.ByteArrayOutputStream
 
 /**
  * This is used to show the contents of an article in web view.
@@ -215,10 +222,12 @@ abstract class AbsContentActivity : AppCompatActivity(),
 
         private val apps = arrayOf(
                 ShareItem("好友", R.drawable.wechat, ShareItem.WECHAT_FRIEND),
-                ShareItem("朋友圈", R.drawable.moments, ShareItem.WECHAT_FRIEND),
+                ShareItem("朋友圈", R.drawable.moments, ShareItem.WECHAT_MOMOMENTS),
                 ShareItem("打开链接", R.drawable.chrome, ShareItem.OPEN_IN_BROWSER),
                 ShareItem("更多", R.drawable.ic_more_horiz_black_24dp, ShareItem.MORE_OPTIONS)
         )
+
+        private var api: IWXAPI = WXAPIFactory.createWXAPI(this@AbsContentActivity, BuildConfig.WECAHT_APP_ID, false)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(this@AbsContentActivity)
@@ -240,10 +249,8 @@ abstract class AbsContentActivity : AppCompatActivity(),
             holder.itemView.setOnClickListener {
 
                 when (app.id) {
-                    ShareItem.WECHAT_FRIEND -> {
+                    ShareItem.WECHAT_FRIEND, ShareItem.WECHAT_MOMOMENTS -> {
 
-                    }
-                    ShareItem.WECHAT_MOMOMENTS -> {
                         val webpage = WXWebpageObject()
                         webpage.webpageUrl = articleWebUrl
 
@@ -251,13 +258,20 @@ abstract class AbsContentActivity : AppCompatActivity(),
                         msg.title = articleTitle
                         msg.description = articleStandfirst
 
-                        val req = SendMessageToWX.Req()
-                        req.transaction = ""
-                        req.message = msg
-                        req.scene = SendMessageToWX.Req.WXSceneTimeline
+                        val bmp = BitmapFactory.decodeResource(resources, R.drawable.ftc_logo_square)
+                        val thumbBmp = Bitmap.createScaledBitmap(bmp, 150, 150, true)
+                        bmp.recycle()
+                        msg.thumbData = bmpToByteArray(thumbBmp, true)
 
-                        
+                        val req = SendMessageToWX.Req()
+                        req.transaction = System.currentTimeMillis().toString()
+                        req.message = msg
+                        req.scene = if (app.id == ShareItem.WECHAT_FRIEND) SendMessageToWX.Req.WXSceneSession else SendMessageToWX.Req.WXSceneTimeline
+
+                        val ok = api.sendReq(req)
+                        toast("Send result: $ok")
                     }
+
                     ShareItem.OPEN_IN_BROWSER -> {
                         val webpage = Uri.parse(articleWebUrl)
                         val intent = Intent(Intent.ACTION_VIEW, webpage)
@@ -265,6 +279,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
                             startActivity(intent)
                         }
                     }
+
                     ShareItem.MORE_OPTIONS -> {
                         val shareString = getString(R.string.share_template, articleTitle, articleWebUrl)
 
@@ -274,9 +289,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
                             type = "text/plain"
                         }
                         startActivity(Intent.createChooser(sendIntent, "分享到"))
-                    }
-                    else -> {
-                        toast("${app.appName}")
                     }
                 }
 
@@ -322,3 +334,20 @@ data class ShareItem(
         const val MORE_OPTIONS = 4
     }
 }
+
+fun bmpToByteArray(bmp: Bitmap, needRecycle: Boolean): ByteArray {
+		val output = ByteArrayOutputStream();
+		bmp.compress(Bitmap.CompressFormat.PNG, 100, output);
+		if (needRecycle) {
+			bmp.recycle()
+		}
+
+		val result = output.toByteArray()
+		try {
+			output.close();
+		} catch (e: Exception) {
+			e.printStackTrace()
+		}
+
+		return result
+	}
