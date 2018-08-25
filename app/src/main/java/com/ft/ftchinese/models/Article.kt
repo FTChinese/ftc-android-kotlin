@@ -45,8 +45,11 @@ class ArticleDetail(
 ) {
     private val TAG = "ArticleDetail"
 
-    val titleCn: String
-        get() = cheadline
+    val title: Bilingual
+        get() = Bilingual(cheadline, eheadline)
+
+    val isBilingual: Boolean
+        get() = ebody.isNotBlank()
 
     val standfirst: String
         get() = clongleadbody
@@ -56,6 +59,15 @@ class ArticleDetail(
 
     val bodyXML: Bilingual
         get() = Bilingual(cbody, ebody)
+
+    val bodyAlignedXML: String
+        get() {
+            val alignedBody = alignBody()
+
+            return alignedBody.joinToString("") {
+                "${it.cn}${it.en}"
+            }
+        }
 
     val tags: List<String>
         get() = tag.split(",")
@@ -115,5 +127,40 @@ class ArticleDetail(
                 <button class="myft-follow plus" data-tag="${firstTag}" data-type="tag">关注</button>
             </div>
         """.trimIndent()
+    }
+
+    private fun alignBody(): List<Bilingual> {
+        val cnArray = cbody.split("\r\n")
+        val enArray = ebody.split("\r\n")
+
+        val bi = mutableListOf<Bilingual>()
+
+        var cIndex = 0
+        var eIndex = 0
+
+        val cLen = cnArray.size
+        val eLen = enArray.size
+
+
+        while (cIndex < cLen && eIndex < eLen) {
+            val pair = Bilingual(cn = cnArray[cIndex], en = enArray[eIndex])
+            bi.add(pair)
+            cIndex++
+            eIndex++
+        }
+
+        while (cIndex < cLen) {
+            val pair = Bilingual(cn = cnArray[cIndex], en = "")
+            bi.add(pair)
+            cIndex++
+        }
+
+        while (eIndex < eLen) {
+            val pair = Bilingual(cn = "", en = enArray[eIndex])
+            bi.add(pair)
+            eIndex++
+        }
+
+        return bi
     }
 }

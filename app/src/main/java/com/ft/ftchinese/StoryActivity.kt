@@ -3,15 +3,21 @@ package com.ft.ftchinese
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import com.ft.ftchinese.database.ReadingHistory
 import com.ft.ftchinese.database.ReadingHistoryDbHelper
+import com.ft.ftchinese.models.ArticleDetail
 import com.ft.ftchinese.models.ChannelItem
+import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
+import kotlinx.android.synthetic.main.activity_content.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.info
+import org.jetbrains.anko.toast
 
 /**
  * StoryActivity is used to show a story whose has a JSON api on server.
@@ -29,23 +35,22 @@ class StoryActivity : AbsContentActivity() {
     override val articleStandfirst: String
         get() = channelItem?.standfirst ?: ""
 
+    private var currentLanguage: Int = ChannelItem.LANGUAGE_CN
+
         // Hold metadata on where and how to find data for this page.
     private var channelItem: ChannelItem? = null
     private var job: Job? = null
     private var dbHelper: ReadingHistoryDbHelper? = null
 
-    companion object {
-        private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
+    private var template: String? = null
+    private var articleDetail: ArticleDetail? = null
 
-        /**
-         * Start this activity
-         */
-        fun start(context: Context?, channelItem: ChannelItem) {
-            val intent = Intent(context, StoryActivity::class.java)
-            intent.putExtra(EXTRA_CHANNEL_ITEM, gson.toJson(channelItem))
-            context?.startActivity(intent)
+    private var isFavoring: Boolean
+        get() = channelItem?.isFavouring(this) ?: false
+        set(value) {
+            channelItem?.favour(this)
+            changeFavouriteIcon(value)
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,11 +59,38 @@ class StoryActivity : AbsContentActivity() {
 
         channelItem = gson.fromJson(itemData, ChannelItem::class.java)
 
+        if (channelItem?.isFavouring(this) == true) {
+            changeFavouriteIcon(true)
+        }
+
         dbHelper = ReadingHistoryDbHelper.getInstance(this)
 
         ReadingHistory.dbHelper = dbHelper
 
+        action_favourite.setOnClickListener {
+            isFavoring = !isFavoring
+        }
+
+        titlebar_cn.setOnClickListener {
+            currentLanguage = ChannelItem.LANGUAGE_CN
+            init()
+        }
+
+        titlebar_en.setOnClickListener {
+            currentLanguage = ChannelItem.LANGUAGE_EN
+            init()
+        }
+
+        titlebar_bi.setOnClickListener {
+            currentLanguage = ChannelItem.LANGUAGE_BI
+            init()
+        }
+
         init()
+    }
+
+    private fun changeFavouriteIcon(isFavouring: Boolean) {
+        action_favourite.setImageResource(if (isFavouring) R.drawable.ic_favorite_teal_24dp else R.drawable.ic_favorite_border_teal_24dp )
     }
 
     override fun onDestroy() {
@@ -72,6 +104,9 @@ class StoryActivity : AbsContentActivity() {
         // This is based on the assumption that `temaplte` is not null.
         // Since refresh action should definitely happen after init() is called, `template` should never be null by this point.
         job = launch(UI) {
+            if (template == null) {
+                template = readTemplate()
+            }
             useRemoteJson()
         }
     }
@@ -79,13 +114,25 @@ class StoryActivity : AbsContentActivity() {
     override fun init() {
         job = launch(UI) {
 
-            val html = channelItem?.renderFromCache(this@StoryActivity)
+            if (template == null) {
+                template = readTemplate()
+            }
 
-            if (html != null) {
-                Toast.makeText(this@StoryActivity, "Using cache", Toast.LENGTH_SHORT).show()
+            if (template == null) {
+                return@launch
+            }
+
+            articleDetail = channelItem?.jsonFromCache(this@StoryActivity)
+
+            // Use cached data to render template
+            if (articleDetail != null) {
+                toast("Using cache")
+
+                showLanguageSwitch()
+
+                val html = channelItem?.render(this@StoryActivity, currentLanguage, template, articleDetail)
 
                 loadData(html)
-
 
                 saveHistory()
 
@@ -97,13 +144,22 @@ class StoryActivity : AbsContentActivity() {
         }
     }
 
+    private fun showLanguageSwitch() {
+        language_group.visibility = if (articleDetail?.isBilingual == true) View.VISIBLE else View.GONE
+    }
+
     private suspend fun useRemoteJson() {
 
-        val html = channelItem?.renderFromServer(this)
+        toast("Fetching data from server")
+        articleDetail = channelItem?.jsonFromServer(this@StoryActivity)
+
+        showLanguageSwitch()
+
+        val html = channelItem?.render(this, currentLanguage, template, articleDetail)
 
         // If remote json does not exist, or template file is not found, stop and return
         if (html == null) {
-            Toast.makeText(this, "Error! Failed to load data", Toast.LENGTH_SHORT).show()
+            toast("Error! Failed to load data")
 
             showProgress(false)
             return
@@ -115,12 +171,33 @@ class StoryActivity : AbsContentActivity() {
         saveHistory()
     }
 
+    private suspend fun readTemplate(): String? {
+        val job = async {
+            Store.readRawFile(resources, R.raw.story)
+        }
+
+        return job.await()
+    }
+
     private fun saveHistory() {
         launch {
             if (channelItem != null) {
                 info("Save reading history")
                 ReadingHistory.insert(channelItem!!)
             }
+        }
+    }
+
+    companion object {
+        private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
+
+        /**
+         * Start this activity
+         */
+        fun start(context: Context?, channelItem: ChannelItem) {
+            val intent = Intent(context, StoryActivity::class.java)
+            intent.putExtra(EXTRA_CHANNEL_ITEM, gson.toJson(channelItem))
+            context?.startActivity(intent)
         }
     }
 }

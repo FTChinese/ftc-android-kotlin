@@ -13,8 +13,10 @@ import com.ft.ftchinese.database.ReadingHistory
 import com.ft.ftchinese.database.ReadingHistoryDbHelper
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.Following
+import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.MyftTab
 import kotlinx.android.synthetic.main.fragment_myft.*
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
@@ -40,6 +42,7 @@ class MyftFragment : Fragment(), AnkoLogger {
     // TODO: Rename and change keys of parameters
     private var tabId: Int? = null
     private var dbHelper: ReadingHistoryDbHelper? = null
+    private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,14 +67,43 @@ class MyftFragment : Fragment(), AnkoLogger {
         super.onViewCreated(view, savedInstanceState)
 
         when (tabId) {
-            MyftTab.READING_HISTORY, MyftTab.STARRED_ARTICLE -> {
-                initArticles()
+            MyftTab.READING_HISTORY -> {
+                recycler_view.layoutManager = LinearLayoutManager(context)
+
+                job = launch(UI) {
+                    val job = async {
+                        ReadingHistory.loadAll()
+                    }
+
+                    val items = job.await()
+                    info("Reading history: $items")
+
+                    if (items != null) {
+                        recycler_view.adapter = MyArticleAdapter(items)
+                    }
+                }
+            }
+
+            MyftTab.STARRED_ARTICLE -> {
+                recycler_view.layoutManager = LinearLayoutManager(context)
+
+                val items = ChannelItem.loadFavourites(context)
+
+                if (items != null) {
+                    recycler_view.adapter = MyArticleAdapter(items)
+                }
             }
 
             MyftTab.FOLLOWING -> {
                 initFollowing()
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        job?.cancel()
     }
 
     private fun initFollowing() {
@@ -84,30 +116,6 @@ class MyftFragment : Fragment(), AnkoLogger {
                 adapter = FollowingAdapter(tags)
             } else {
                 Toast.makeText(context, "You have not followed anything", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-
-    private  fun initArticles() {
-        info("Initializing article list")
-
-        recycler_view.apply {
-            layoutManager = LinearLayoutManager(context)
-
-//            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        }
-
-        launch(UI) {
-            val job = async {
-                ReadingHistory.loadAll()
-            }
-
-            val items = job.await()
-            info("Reading history: $items")
-
-            if (items != null) {
-                recycler_view.adapter = MyArticleAdapter(items)
             }
         }
     }
@@ -152,6 +160,16 @@ class MyftFragment : Fragment(), AnkoLogger {
             val item = items[position]
 
             holder.tagText?.text = item.tag
+
+            holder.itemView.setOnClickListener {
+                val channelMeta = ListPage(
+                        title = item.tag,
+                        name = "${item.type}_${item.tag}",
+                        listUrl = item.bodyUrl
+                )
+
+                ChannelActivity.start(context, channelMeta)
+            }
         }
 
 
@@ -182,6 +200,10 @@ class MyftFragment : Fragment(), AnkoLogger {
             val item = items[position]
             holder.titleText.text = item.headline
             holder.standfirstText.text = item.standfirst
+
+            holder.itemView.setOnClickListener {
+                StoryActivity.start(context, item)
+            }
         }
 
     }

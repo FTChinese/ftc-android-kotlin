@@ -60,12 +60,16 @@ data class ChannelItem(
 ) {
 
     var standfirst: String = ""
+    var favouredAt: Long = 0
 
     val canonicalUrl: String
         get() = "http://www.ftchinese.com/$type/$id"
 
     private val filename: String
         get() = "${type}_$id.json"
+
+    private val prefKey: String
+        get() = "${type}_$id"
 
     var adId: String = ""
 
@@ -99,24 +103,24 @@ data class ChannelItem(
             }
         }
 
-    suspend fun renderFromCache(context: Context): String? {
-        val template = readTemplate(context.resources) ?: return null
-
-        val articleDetail = jsonFromCache(context) ?: return null
-
-        standfirst = articleDetail.clongleadbody
-
-        return render(context, template, articleDetail)
-    }
-
-    suspend fun renderFromServer(context: Context): String? {
-        val template = readTemplate(context.resources) ?: return null
-
-        val articleDetail = jsonFromServer(context) ?: return null
-        standfirst = articleDetail.clongleadbody
-
-        return render(context, template, articleDetail)
-    }
+//    suspend fun renderFromCache(context: Context): String? {
+//        val template = readTemplate(context.resources) ?: return null
+//
+//        val articleDetail = jsonFromCache(context) ?: return null
+//
+//        standfirst = articleDetail.clongleadbody
+//
+//        return render(context, template, articleDetail)
+//    }
+//
+//    suspend fun renderFromServer(context: Context): String? {
+//        val template = readTemplate(context.resources) ?: return null
+//
+//        val articleDetail = jsonFromServer(context) ?: return null
+//        standfirst = articleDetail.clongleadbody
+//
+//        return render(context, template, articleDetail)
+//    }
 
     suspend fun jsonFromCache(context: Context?): ArticleDetail? {
         val job = async {
@@ -150,14 +154,21 @@ data class ChannelItem(
 
     private fun parseJson(jsonData: String?): ArticleDetail? {
         return try {
-            gson.fromJson<ArticleDetail>(jsonData, ArticleDetail::class.java)
+            val article = gson.fromJson<ArticleDetail>(jsonData, ArticleDetail::class.java)
+            standfirst = article.clongleadbody
+
+            article
         } catch (e: JsonSyntaxException) {
             Log.w(TAG, "Cannot parse json: $e")
             null
         }
     }
 
-    fun render(context: Context, template: String, article: ArticleDetail): String {
+    fun render(context: Context, language: Int, template: String?, article: ArticleDetail?): String? {
+
+        if (template == null || article == null) {
+            return null
+        }
 
         val follows = Following.loadAsMap(context)
 
@@ -168,8 +179,26 @@ data class ChannelItem(
         val followAuthors = follows[Following.keys[4]]
         val followColumns = follows[Following.keys[5]]
 
-        return template.replace("{story-body}", article.bodyXML.cn)
-                .replace("{story-headline}", article.titleCn)
+        var body = ""
+        var title = ""
+
+        when (language) {
+            LANGUAGE_CN -> {
+                body = article.bodyXML.cn
+                title = article.title.cn
+            }
+            LANGUAGE_EN -> {
+                body = article.bodyXML.en ?: ""
+                title = article.title.en ?: ""
+            }
+            LANGUAGE_BI -> {
+                body = article.bodyAlignedXML
+                title = "${article.title.cn}<br>${article.title.en}"
+            }
+        }
+
+        return template.replace("{story-body}", body)
+                .replace("{story-headline}", title)
                 .replace("{story-byline}", article.byline)
                 .replace("{story-time}", article.createdAt)
                 .replace("{story-lead}", article.standfirst)
@@ -198,8 +227,29 @@ data class ChannelItem(
 
     }
 
+    fun favour(context: Context) {
+        val sharedPreferences = context.getSharedPreferences(PREF_NAME_FAVOURITE, Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        if (sharedPreferences.contains(prefKey)) {
+            editor.remove(prefKey)
+        } else {
+            favouredAt = System.currentTimeMillis()
+            editor.putString(prefKey, gson.toJson(this))
+        }
+
+        editor.apply()
+    }
+
+    fun isFavouring(context: Context): Boolean {
+        return context.getSharedPreferences(PREF_NAME_FAVOURITE, Context.MODE_PRIVATE).contains(prefKey)
+    }
+
     companion object {
         private const val TAG = "ChannelItem"
+        private const val PREF_NAME_FAVOURITE = "favourite"
+        const val LANGUAGE_CN = 0
+        const val LANGUAGE_EN = 1
+        const val LANGUAGE_BI = 2
 
         suspend fun readTemplate(resources: Resources): String? {
             val job = async {
@@ -207,6 +257,36 @@ data class ChannelItem(
             }
 
             return job.await()
+        }
+
+        fun loadFavourites(context: Context?): MutableList<ChannelItem>? {
+            if (context == null) return null
+
+            val sharedPreferences = context.getSharedPreferences(PREF_NAME_FAVOURITE, Context.MODE_PRIVATE)
+
+            val values = sharedPreferences.all.values.toList()
+
+            val items = mutableListOf<ChannelItem>()
+
+            for (v in values) {
+                if (v !is String) {
+                    continue
+                }
+
+                try {
+                    val item = gson.fromJson<ChannelItem>(v, ChannelItem::class.java)
+
+                    items.add(item)
+                } catch (e: JsonSyntaxException) {
+                    continue
+                }
+            }
+
+            items.sortByDescending {
+                it.favouredAt
+            }
+
+            return items
         }
     }
 }

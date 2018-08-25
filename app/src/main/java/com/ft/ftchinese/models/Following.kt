@@ -22,6 +22,9 @@ data class Following(
         var tag: String, // This is the string show along with the FOLLOW button
         var action: String // `follow` or `unfollow`. Used to determine if user if follow or unfollow something.
 ) {
+    val bodyUrl: String
+        get() = "https://api003.ftmailbox.com/$type/$tag?bodyonly=yes&webviewftcapp"
+
     fun save(context: Context) {
         val sharedPreferences = context.getSharedPreferences(PREF_NAME_FOLLOWING, Context.MODE_PRIVATE)
 

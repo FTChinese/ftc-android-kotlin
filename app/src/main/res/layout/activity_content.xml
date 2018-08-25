@@ -16,12 +16,12 @@
         app:layout_constraintTop_toTopOf="parent" >
 
         <RadioGroup
+            android:id="@+id/language_group"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:orientation="horizontal"
-            tools:layout_editor_absoluteX="126dp"
-            tools:layout_editor_absoluteY="11dp"
+            android:visibility="gone"
             android:divider="@drawable/divider"
             android:showDividers="middle"
             android:background="@drawable/button_border"

@@ -1,5 +1,6 @@
 package com.ft.ftchinese
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
@@ -47,6 +48,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
     abstract val articleWebUrl: String
     abstract val articleTitle: String
     abstract val articleStandfirst: String
+//    var isFavouring: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,18 +108,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
             }
 
             mBottomDialog?.show()
-        }
-
-        var isFavourite = false
-
-        action_favourite.setOnClickListener {
-            if (!isFavourite) {
-                action_favourite.setImageResource(R.drawable.ic_favorite_teal_24dp)
-                isFavourite = true
-            } else {
-                action_favourite.setImageResource(R.drawable.ic_favorite_border_teal_24dp)
-                isFavourite = false
-            }
         }
     }
 
