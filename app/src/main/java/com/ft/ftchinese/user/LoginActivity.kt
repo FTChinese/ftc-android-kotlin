@@ -19,6 +19,9 @@ import java.util.ArrayList
 import android.Manifest.permission.READ_CONTACTS
 import android.app.Activity
 import android.content.*
+import android.support.v4.app.Fragment
+import android.view.LayoutInflater
+import android.view.ViewGroup
 import android.widget.Toast
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Account
@@ -372,3 +375,4 @@ class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {
 //        }
 //    }
 }
+

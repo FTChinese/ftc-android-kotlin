@@ -55,6 +55,7 @@
     <string name="prompt_letter_sent">请检查您的邮件，点击邮件中的“重置密码”链接，在所打开的网页中修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</string>
 
     <string name="action_login">登录</string>
+    <string name="action_wx_login">微信登录</string>
     <string name="action_sign_up">注册</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="action_password_letter">发送邮件</string>
@@ -71,9 +72,6 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <string-array name="profile_gender_entries">
         <item>男</item>

@@ -51,12 +51,12 @@
     <!--<item name="android:gravity">center_vertical|center_horizontal</item>-->
 
     <style name="OrigamiButton.Primary">
-        <item name="android:background">@color/colorTeal</item>
+        <item name="android:background">@drawable/button_primary</item>
         <item name="android:textColor">@color/colorWhite</item>
     </style>
 
     <style name="OrigamiButton.Secondary">
-        <item name="android:background">@drawable/button_border</item>
+        <item name="android:background">@drawable/button_secondary</item>
         <item name="android:textColor">@color/colorTeal</item>
     </style>
 
@@ -77,9 +77,13 @@
     </style>
 
     <style name="TitleBarButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
-        <item name="android:background">@drawable/button_state</item>
-        <item name="android:textColor">@color/title_bar_text</item>
-        <item name="android:padding">8dp</item>
+        <item name="android:background">@drawable/radio_button_background</item>
+        <item name="android:textColor">@color/radio_button_text</item>
+        <!--<item name="android:padding">8dp</item>-->
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">4dp</item>
     </style>
 
     <style name="Origami.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />

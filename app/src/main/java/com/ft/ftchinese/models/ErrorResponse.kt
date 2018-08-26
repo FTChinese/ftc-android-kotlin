@@ -1,9 +1,11 @@
 package com.ft.ftchinese.models
 
 data class ErrorResponse (
+        var statusCode: Int,
         override val message: String,
         val error: ErrorDetail
 ) : Exception(message) {
+
     override fun toString(): String {
         return "API error message: $message, field: ${error.field}, code: ${error.code}"
     }

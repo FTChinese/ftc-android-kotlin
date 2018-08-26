@@ -24,7 +24,7 @@
             android:visibility="gone"
             android:divider="@drawable/divider"
             android:showDividers="middle"
-            android:background="@drawable/button_border"
+            android:background="@drawable/button_secondary"
             android:checkedButton="@id/titlebar_cn">
 
             <RadioButton
@@ -76,7 +76,7 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:background="@drawable/bottom_menu_border"
+        android:background="@drawable/bottom_menu_background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">

@@ -22,10 +22,7 @@ import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.MyftTab
 import com.ft.ftchinese.models.User
-import com.ft.ftchinese.user.AccountActivity
-import com.ft.ftchinese.user.LoginActivity
-import com.ft.ftchinese.user.SettingsActivity
-import com.ft.ftchinese.user.SignupActivity
+import com.ft.ftchinese.user.*
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -142,7 +139,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     /**
-     * Deal with the cases that an activity lunched by this activity exits.
+     * Deal with the cases that an activity launched by this activity exits.
      * For example, the LoginActvity will automatically finish when it successfully logged in,
      * and then it should inform the MainActivity to update UI for a logged in user.
      * `requestCode` is used to identify who this result cam from.
@@ -283,7 +280,7 @@ class MainActivity : AppCompatActivity(),
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.action_login -> {
-                LoginActivity.startForResult(this, FROM_LOGIN_ACTIVITY)
+                SignInActivity.startForResult(this, FROM_LOGIN_ACTIVITY)
             }
             R.id.action_sign_up -> {
                 SignupActivity.startForResult(this, FROM_SIGNUP_ACTCITITY)

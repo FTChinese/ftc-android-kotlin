@@ -16,12 +16,12 @@ data class User(
         val verified: Boolean,
         val membership: Membership
 ) {
-    fun save(context: Context) {
-        val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
+    fun save(context: Context?) {
+        val sharedPreferences = context?.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
 
-        val editor = sharedPreferences.edit()
-        editor.putString(PREF_KEY_COOKIE, gson.toJson(this))
-                .apply()
+        val editor = sharedPreferences?.edit()
+        editor?.putString(PREF_KEY_COOKIE, gson.toJson(this))
+                ?.apply()
     }
 
     companion object {

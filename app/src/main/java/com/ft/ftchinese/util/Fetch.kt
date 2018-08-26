@@ -69,20 +69,18 @@ class Fetch {
         }
 
         /**
-         * There are 3 possible results:
-         * 1. Response is not null. This must be a normal response from API;
-         * 2. Response is null. There must be something wrong with network;
-         * 3. Throws ErrorResponse. API responds but the response is a restful error. The error message is wrapped into ErrorResponse.
+         * @return okhttp3.Response or null if there is any error thrown
+         * @throws ErrorResponse If HTTP response status is above 400.
          */
         private fun execute(builder: Request.Builder): Response? {
             val response = try {
                 client.newCall(builder.build()).execute()
             } catch (e: IllegalStateException) {
-                // Request.build() error
+                // Thrown by Request.build()
                 Log.w(TAG, "Empty url: $e")
                 return null
             } catch (e: IOException) {
-                // Call.execute() error
+                // Thrown by Call.execute()
                 Log.w(TAG, "OkHttpClient execute error: $e")
                 return null
             } catch (e: Exception) {
@@ -102,7 +100,11 @@ class Fetch {
             val errResp = try {
                 val body = response.body()?.string()
 
-                gson.fromJson<ErrorResponse>(body, ErrorResponse::class.java)
+                val errResp = gson.fromJson<ErrorResponse>(body, ErrorResponse::class.java)
+
+                errResp.statusCode = response.code()
+
+                errResp
             } catch (e: IOException) {
                 Log.w(TAG, "Read response error: $e")
                 return null
