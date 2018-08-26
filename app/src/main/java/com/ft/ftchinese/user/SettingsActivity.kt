@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.user
 
 import android.content.Context
 import android.content.Intent
@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.preference.PreferenceFragmentCompat
 import android.view.View
+import com.ft.ftchinese.R
 
 class SettingsActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {

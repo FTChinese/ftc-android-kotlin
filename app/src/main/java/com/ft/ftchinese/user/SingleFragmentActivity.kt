@@ -1,8 +1,9 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.user
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
+import com.ft.ftchinese.R
 import kotlinx.android.synthetic.main.simple_toolbar.*
 
 abstract class SingleFragmentActivity : AppCompatActivity() {

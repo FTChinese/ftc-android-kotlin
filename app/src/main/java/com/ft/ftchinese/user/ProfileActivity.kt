@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.user
 
 import android.content.Context
 import android.content.Intent
@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.ft.ftchinese.R
 import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger

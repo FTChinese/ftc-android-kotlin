@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.user
 
 import android.content.pm.PackageManager
 import android.support.design.widget.Snackbar
@@ -20,6 +20,7 @@ import android.Manifest.permission.READ_CONTACTS
 import android.app.Activity
 import android.content.*
 import android.widget.Toast
+import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.ErrorResponse
 import com.google.gson.JsonSyntaxException
@@ -34,7 +35,7 @@ import java.io.IOException
 
 /**
  * A login screen that offers login via email/password.
- * LoginActivity might appear in an place.
+ * LoginActivity might appear in any place.
  * It's better to convert to a fragment.
  */
 class LoginActivity : AppCompatActivity(), LoaderCallbacks<Cursor>, AnkoLogger {

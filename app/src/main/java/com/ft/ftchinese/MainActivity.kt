@@ -22,6 +22,10 @@ import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.MyftTab
 import com.ft.ftchinese.models.User
+import com.ft.ftchinese.user.AccountActivity
+import com.ft.ftchinese.user.LoginActivity
+import com.ft.ftchinese.user.SettingsActivity
+import com.ft.ftchinese.user.SignupActivity
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*

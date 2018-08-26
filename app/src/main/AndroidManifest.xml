@@ -66,7 +66,7 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name=".user.LoginActivity"
             android:label="@string/title_login"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="adjustResize">
@@ -75,7 +75,7 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".SignupActivity"
+            android:name=".user.SignupActivity"
             android:label="@string/title_sign_up"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="adjustResize">
@@ -84,7 +84,7 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".ForgotPasswordActivity"
+            android:name=".user.ForgotPasswordActivity"
             android:label="@string/title_reset_password"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="adjustResize">
@@ -93,7 +93,7 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".AccountActivity"
+            android:name=".user.AccountActivity"
             android:label="@string/action_title_account"
             android:parentActivityName=".MainActivity">
             <meta-data
@@ -101,32 +101,32 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".ChangeEmailActivity"
+            android:name=".user.ChangeEmailActivity"
             android:label="@string/title_change_email"
-            android:parentActivityName=".AccountActivity">
+            android:parentActivityName=".user.AccountActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".ChangeUsernameActivity"
+            android:name=".user.ChangeUsernameActivity"
             android:label="@string/title_change_username"
-            android:parentActivityName=".AccountActivity">
+            android:parentActivityName=".user.AccountActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".ChangePasswordActivity"
+            android:name=".user.ChangePasswordActivity"
             android:label="@string/title_change_password"
-            android:parentActivityName=".AccountActivity">
+            android:parentActivityName=".user.AccountActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
 
         <activity
-            android:name=".SettingsActivity"
+            android:name=".user.SettingsActivity"
             android:label="@string/action_settings"
             android:parentActivityName=".MainActivity">
             <meta-data

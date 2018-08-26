@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.user
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -7,6 +7,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import com.ft.ftchinese.R
 import kotlinx.android.synthetic.main.simple_toolbar.*
 
 class SignupActivity : AppCompatActivity() {
