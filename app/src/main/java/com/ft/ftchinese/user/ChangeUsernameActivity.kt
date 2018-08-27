@@ -11,10 +11,9 @@ class ChangeUsernameActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {
         return ChangeUsernameFragment.newInstance()
     }
-
 }
 
-class ChangeUsernameFragment : Fragment() {
+internal class ChangeUsernameFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)

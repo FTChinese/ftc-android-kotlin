@@ -73,19 +73,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
      */
     interface OnFragmentInteractionListener {
         fun onProgress(show: Boolean)
-
-        fun onStartReading(item: ChannelItem)
     }
-
-    /**
-     * Trigger a menu item in bottom navigation to be selected.
-     * This is used to handle links on front page which actually should jump to a bottom navigation item.
-     */
-//    interface OnInAppNavigate {
-//        fun selectBottomNavItem(itemId: Int)
-//
-//        fun selectTabLayoutTab(tabIndex: Int)
-//    }
 
     companion object {
 
@@ -342,7 +330,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                 "story", "premium" -> {
                     info("Start story activity")
                     // Save reading history
-                    listener?.onStartReading(channelItem)
+
                     StoryActivity.start(activity, channelItem)
                     return
                 }

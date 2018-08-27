@@ -1,9 +1,11 @@
 package com.ft.ftchinese.user
 
-import android.Manifest.permission.READ_CONTACTS
+import android.Manifest
 import android.app.Activity
-import android.app.LoaderManager.LoaderCallbacks
-import android.content.*
+import android.app.LoaderManager
+import android.content.Context
+import android.content.CursorLoader
+import android.content.Loader
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
@@ -18,41 +20,31 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
-import android.widget.Toast
+import com.ft.ftchinese.MainActivity
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.ErrorResponse
-import kotlinx.android.synthetic.main.fragment_login.*
+import com.ft.ftchinese.models.User
+import com.google.gson.JsonSyntaxException
+import kotlinx.android.synthetic.main.fragment_sign_in_or_up.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
+import java.io.IOException
 
-class SignInActivity : SingleFragmentActivity() {
-
-    override fun createFragment(): Fragment {
-        return SignInFragment.newInstance()
-    }
-
-    companion object {
-        /**
-         * When launching SignInActivity, you usually should notify the caller activity login result.
-         * @param activity The activity that launched this activity.
-         * @param requestCode returned to the calling activity's onActivityResult()
-         */
-        fun startForResult(activity: Activity, requestCode: Int) {
-            val intent = Intent(activity, SignInActivity::class.java)
-
-            activity.startActivityForResult(intent, requestCode)
-        }
-    }
-}
-class SignInFragment : Fragment(), LoaderCallbacks<Cursor>, AnkoLogger {
+internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, AnkoLogger {
 
     private var job: Job? = null
     private var listener: OnFragmentInteractionListener? = null
-
+    private var isInProgress: Boolean
+        get() = !email_sign_in_button.isEnabled
+        set(value) {
+            listener?.onProgress(value)
+            email_sign_in_button.isEnabled = !value
+        }
+    private var usedFor: Int? = null
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -64,16 +56,31 @@ class SignInFragment : Fragment(), LoaderCallbacks<Cursor>, AnkoLogger {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        usedFor = arguments?.getInt(ARG_FRAGMENT_USAGE)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
 
-        return inflater.inflate(R.layout.fragment_login, container, false)
+        return inflater.inflate(R.layout.fragment_sign_in_or_up, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        when (usedFor) {
+            USED_FOR_LOGIN -> {
+                email_sign_up_button.visibility = View.GONE
+                sign_in.visibility = View.GONE
+            }
+            USED_FOR_SIGN_UP -> {
+                email_sign_in_button.visibility = View.GONE
+                wechat_sign_in_button.visibility = View.GONE
+                reset_password.visibility = View.GONE
+                sign_up.visibility = View.GONE
+            }
+        }
 
         password.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
@@ -85,6 +92,10 @@ class SignInFragment : Fragment(), LoaderCallbacks<Cursor>, AnkoLogger {
             false
         }
 
+        email_sign_up_button.setOnClickListener {
+            attemptLogin()
+        }
+
         email_sign_in_button.setOnClickListener {
             attemptLogin()
         }
@@ -94,7 +105,11 @@ class SignInFragment : Fragment(), LoaderCallbacks<Cursor>, AnkoLogger {
         }
 
         sign_up.setOnClickListener {
-            SignupActivity.start(context)
+            Registration.startForResult(activity, MainActivity.REQUEST_CODE_SIGN_UP)
+        }
+
+        sign_in.setOnClickListener {
+            LoginActivity.startForResult(activity, MainActivity.REQUEST_CODE_SIGN_IN)
         }
     }
 
@@ -111,17 +126,17 @@ class SignInFragment : Fragment(), LoaderCallbacks<Cursor>, AnkoLogger {
             return true
         }
 
-        if (context?.checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+        if (context?.checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
             return true
         }
 
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
+        if (shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS)) {
             Snackbar.make(email, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
                     .setAction(android.R.string.ok) {
-                        requestPermissions(arrayOf(READ_CONTACTS), REQUEST_READ_CONTACTS)
+                        requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS), REQUEST_READ_CONTACTS)
                     }
         } else {
-            requestPermissions(arrayOf(READ_CONTACTS), REQUEST_READ_CONTACTS)
+            requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS), REQUEST_READ_CONTACTS)
         }
 
         return false
@@ -166,8 +181,7 @@ class SignInFragment : Fragment(), LoaderCallbacks<Cursor>, AnkoLogger {
         if (cancel) {
             focusView?.requestFocus()
         } else {
-            listener?.onProgress(true)
-            email_sign_in_button.isEnabled = false
+            isInProgress = true
 
             authenticate(emailStr, passwordStr)
         }
@@ -177,21 +191,39 @@ class SignInFragment : Fragment(), LoaderCallbacks<Cursor>, AnkoLogger {
         job = launch(UI) {
             val account = Account(email = email, password = password)
             try {
-                val user = account.login()
-                listener?.onProgress(false)
+                var user: User? = null
+
+                when (usedFor) {
+                    USED_FOR_LOGIN -> {
+                        user = account.login()
+                    }
+                    USED_FOR_SIGN_UP -> {
+                        user = account.create()
+                    }
+                }
+
+                isInProgress = false
 
                 if (user == null) {
-                    toast("登录失败！请重试")
-                    email_sign_in_button.isEnabled = true
                     return@launch
                 }
+
                 user.save(context)
+
                 activity?.setResult(Activity.RESULT_OK)
                 activity?.finish()
 
+            } catch (e: IllegalStateException) {
+                isInProgress = false
+                toast("请求地址错误")
+            } catch (e: IOException) {
+                isInProgress = false
+                toast("网络错误")
+            } catch (e: JsonSyntaxException) {
+                isInProgress = false
+                toast("无法解析JSON")
             } catch (e: ErrorResponse) {
-                listener?.onProgress(false)
-                email_sign_in_button.isEnabled = true
+                isInProgress = false
 
                 when (e.statusCode) {
                     404 -> {
@@ -203,24 +235,16 @@ class SignInFragment : Fragment(), LoaderCallbacks<Cursor>, AnkoLogger {
                     422 -> {
                         toast("用户名或密码非法")
                     }
+                    429 -> {
+                        toast("创建账号过于频繁，请稍后再试")
+                    }
                 }
-
-
             } catch (e: Exception) {
-                listener?.onProgress(false)
-                email_sign_in_button.isEnabled = true
+                isInProgress = false
 
-                toast("Error!")
+                toast(e.toString())
             }
         }
-    }
-
-    private fun isEmailValid(email: String): Boolean {
-        return email.contains("@")
-    }
-
-    private fun isPasswordValid(password: String): Boolean {
-        return password.length > 4
     }
 
     override fun onDestroy() {
@@ -270,9 +294,17 @@ class SignInFragment : Fragment(), LoaderCallbacks<Cursor>, AnkoLogger {
 
     companion object {
         private const val REQUEST_READ_CONTACTS = 0
+        private const val ARG_FRAGMENT_USAGE = "arg_fragment_usage"
+        const val USED_FOR_LOGIN = 1
+        const val USED_FOR_SIGN_UP = 2
 
-        fun newInstance(): SignInFragment {
-            return SignInFragment()
+        fun newInstance(usedFor: Int): SignInOrUpFragment {
+            val fragment = SignInOrUpFragment()
+            fragment.arguments = Bundle().apply {
+                putInt(ARG_FRAGMENT_USAGE, usedFor)
+            }
+
+            return fragment
         }
     }
 }

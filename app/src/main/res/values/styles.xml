@@ -53,6 +53,7 @@
     <style name="OrigamiButton.Primary">
         <item name="android:background">@drawable/button_primary</item>
         <item name="android:textColor">@color/colorWhite</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="OrigamiButton.Secondary">

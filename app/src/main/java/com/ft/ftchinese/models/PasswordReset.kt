@@ -8,34 +8,25 @@ import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.experimental.async
 import java.io.IOException
 
-data class Account(
-        val email: String,
-        val password: String
+data class PasswordReset(
+        val email: String
 ) {
     /**
-     * @return User or null if request failed, or the response cannot be parsed
+     * @return nothing if proceeded successfully
      * @throws ErrorResponse If HTTP response status is above 400.
      * @throws IllegalStateException If request url is empty.
      * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON, regardless of if response is successful or not
      */
-    suspend fun send (url: String): User {
+    suspend fun send() {
         val job = async {
-            Fetch.post(url, gson.toJson(this@Account))
+            Fetch.post(ApiEndpoint.PASSWORD_RESET, gson.toJson(this@PasswordReset))
         }
 
         val response = job.await()
 
         val body = response.body()?.string()
 
-        return gson.fromJson<User>(body, User::class.java)
-    }
-
-    suspend fun login(): User {
-        return send(ApiEndpoint.LOGIN)
-    }
-
-    suspend fun create(): User {
-        return send(ApiEndpoint.NEW_ACCOUNT)
+        Log.i("PasswordReset", body)
     }
 }

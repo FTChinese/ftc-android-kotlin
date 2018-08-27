@@ -57,10 +57,6 @@ class ChannelActivity : AppCompatActivity(), SectionFragment.OnFragmentInteracti
         }
     }
 
-    override fun onStartReading(item: ChannelItem) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     /**
      * This is just a placeholder implementation to prevent `cannot cast` error
      * If user enters this activity, there's no BottomNavigationView

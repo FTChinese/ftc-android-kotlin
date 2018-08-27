@@ -14,7 +14,7 @@ class ChangeEmailActivity : SingleFragmentActivity() {
 
 }
 
-class ChangeEmailFragment : Fragment() {
+internal class ChangeEmailFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

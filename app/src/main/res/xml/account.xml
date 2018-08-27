@@ -2,11 +2,10 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="账号"
-        android:key="pref_key_storage_account">
+        android:title="账号">
 
         <Preference
-            android:summary="neefrankie@gmail.com"
+            android:key="account_email"
             android:title="@string/prompt_email">
             <intent
                 android:targetPackage="com.ft.ftchinese"
@@ -15,7 +14,7 @@
 
 
         <Preference
-            android:summary="abc"
+            android:key="account_user_name"
             android:title="用户名">
             <intent
                 android:targetPackage="com.ft.ftchinese"
@@ -23,6 +22,7 @@
         </Preference>
 
         <Preference
+            android:key="account_change_password"
             android:title="@string/prompt_password"
             android:summary="@string/title_change_password">
 
@@ -38,6 +38,7 @@
         android:title="社交账号">
 
         <Preference
+            android:key="account_bind_wechat"
             android:title="微信"
             android:summary="尚未绑定">
 

@@ -41,7 +41,7 @@ class Fetch {
             }
         }
 
-        fun get(url: String, uuid: String? = null): Response? {
+        fun get(url: String, uuid: String? = null): Response {
             val builder = Request.Builder()
                     .url(url)
                     .get()
@@ -52,7 +52,7 @@ class Fetch {
             return execute(builder)
         }
 
-        fun post(url: String, content: String, uuid: String? = null): Response? {
+        fun post(url: String, content: String, uuid: String? = null): Response {
             val body = RequestBody.create(jsonType, content)
             val builder = Request.Builder()
                     .header("X-Client-Type", "android")
@@ -71,47 +71,32 @@ class Fetch {
         /**
          * @return okhttp3.Response or null if there is any error thrown
          * @throws ErrorResponse If HTTP response status is above 400.
+         * @throws IllegalStateException If request url is empty
+         * @throws IOException If network request failed, or API returned error response but the response body could not be turned into string.
+         * @throws JsonSyntaxException If API returned error response and the response body is decoced into a string, but the string could not be parsed into valid JSON.
          */
-        private fun execute(builder: Request.Builder): Response? {
-            val response = try {
-                client.newCall(builder.build()).execute()
-            } catch (e: IllegalStateException) {
-                // Thrown by Request.build()
-                Log.w(TAG, "Empty url: $e")
-                return null
-            } catch (e: IOException) {
-                // Thrown by Call.execute()
-                Log.w(TAG, "OkHttpClient execute error: $e")
-                return null
-            } catch (e: Exception) {
-                Log.w(TAG, e.toString())
-                return null
-            }
+        private fun execute(builder: Request.Builder): Response {
 
-            Log.i(TAG,"Response code: ${response.code()}")
-            Log.i(TAG,"Response message: ${response.message()}")
+            // If url is null, `build()` throws IllegalStateException
+            // `execute()` throws IOException and IllegalStateException
+            val response = client.newCall(builder.build()).execute()
 
-            Log.i(TAG,"Is successful: ${response.isSuccessful}")
-
+            // If response is successful, return the response so that response body could be processed by the caller.
             if (response.isSuccessful) {
                 return response
             }
 
-            val errResp = try {
-                val body = response.body()?.string()
+            // If the response if not successful (status code >= 400), API returns body containing error details.
+            // Wrap the response body and rethrow it.
+            Log.w(TAG, "Request $builder failed")
 
-                val errResp = gson.fromJson<ErrorResponse>(body, ErrorResponse::class.java)
+            // `string()` throws IOException
+            val body = response.body()?.string()
 
-                errResp.statusCode = response.code()
+            // `fromJson()` throws JsonSyntaxException
+            val errResp = gson.fromJson<ErrorResponse>(body, ErrorResponse::class.java)
 
-                errResp
-            } catch (e: IOException) {
-                Log.w(TAG, "Read response error: $e")
-                return null
-            } catch (e: JsonSyntaxException) {
-                Log.w(TAG, "JSON parse error: $e")
-                return null
-            }
+            errResp.statusCode = response.code()
 
             throw errResp
         }

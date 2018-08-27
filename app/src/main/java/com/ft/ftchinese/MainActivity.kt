@@ -2,6 +2,7 @@ package com.ft.ftchinese
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.NavigationView
@@ -13,12 +14,13 @@ import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
-import android.view.*
 import android.support.v7.widget.SearchView
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.ft.ftchinese.database.ReadingHistoryDbHelper
-import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.MyftTab
 import com.ft.ftchinese.models.User
@@ -142,50 +144,25 @@ class MainActivity : AppCompatActivity(),
      * Deal with the cases that an activity launched by this activity exits.
      * For example, the LoginActvity will automatically finish when it successfully logged in,
      * and then it should inform the MainActivity to update UI for a logged in user.
-     * `requestCode` is used to identify who this result cam from.
+     * `requestCode` is used to identify who this result cam from. We are using it to identify if the result came from LoginActivity or SignupActivity.
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        Toast.makeText(this, "登录成功", Toast.LENGTH_SHORT).show()
-
         info("onActivityResult: requestCode $requestCode, resultCode $resultCode")
 
-        when (resultCode) {
-            Activity.RESULT_OK -> {
-                updateUIForCookie()
+        when (requestCode) {
+            // If the result come from SignIn or SignUp, update UI to show user login state.
+            REQUEST_CODE_SIGN_IN, REQUEST_CODE_SIGN_UP -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    toast("登录成功")
+                    updateUIForCookie()
+                }
             }
         }
     }
 
-    /**
-     * Update UI dpending user's login/logout state
-     */
-    private fun updateUIForCookie() {
-        val user = User.loadFromPref(this)
 
-        val menu = drawer_nav.menu
-        val header = drawer_nav.getHeaderView(0)
-
-        if (user == null) {
-
-            // If seems this is the only way to get the header view.
-            // You cannot user `import kotlinx.android.synthetic.activity_main_search.nav_header_main.*`,
-            // which will give you null pointer exception.
-            header.findViewById<TextView>(R.id.nav_header_subtitle).setText(R.string.nav_header_subtitle)
-
-
-            // If user is logged in, how login menu and hide logout menu
-            menu.setGroupVisible(R.id.drawer_group0, true)
-            menu.setGroupVisible(R.id.drawer_group3, false)
-            return
-        }
-
-        header.findViewById<TextView>(R.id.nav_header_subtitle).text = user.email
-
-        menu.setGroupVisible(R.id.drawer_group0, false)
-        menu.setGroupVisible(R.id.drawer_group3, true)
-    }
 
 
     override fun onResume() {
@@ -280,14 +257,15 @@ class MainActivity : AppCompatActivity(),
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.action_login -> {
-                SignInActivity.startForResult(this, FROM_LOGIN_ACTIVITY)
+                LoginActivity.startForResult(this, REQUEST_CODE_SIGN_IN)
             }
             R.id.action_sign_up -> {
-                SignupActivity.startForResult(this, FROM_SIGNUP_ACTCITITY)
+//                SignupActivity.startForResult(this, REQUEST_CODE_SIGN_UP)
+
+                Registration.startForResult(this, REQUEST_CODE_SIGN_UP)
             }
             R.id.action_account -> {
                 AccountActivity.start(this)
-//                ProfileActivity.start(this)
             }
             R.id.action_subscription -> {
 
@@ -296,7 +274,7 @@ class MainActivity : AppCompatActivity(),
 
             }
             R.id.action_feedback -> {
-
+                feedbackEmail()
             }
             R.id.action_settings -> {
                 SettingsActivity.start(this)
@@ -341,16 +319,8 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    override fun onStartReading(item: ChannelItem) {
-//        launch {
-//            ReadingHistory.insert(item)
-//        }
-
-        toast("Starting reading $item")
-    }
-
     /**
-     * Implementation of SectionFragment.OnInAppNavigate.
+     * Implementation of ChannelWebViewClient.OnInAppNavigate
      * Use cases:
      * When user clicked links on the frontpage like `每日英语`,
      * the app should actually jump to the second item in bottom navigation instead of opening a separate activity.
@@ -371,9 +341,50 @@ class MainActivity : AppCompatActivity(),
         tab_layout.getTabAt(tabIndex)?.select()
     }
 
+    /**
+     * Update UI dpending user's login/logout state
+     */
+    private fun updateUIForCookie() {
+        val user = User.loadFromPref(this)
+
+        val menu = drawer_nav.menu
+        val header = drawer_nav.getHeaderView(0)
+
+        if (user == null) {
+
+            // If seems this is the only way to get the header view.
+            // You cannot user `import kotlinx.android.synthetic.activity_main_search.nav_header_main.*`,
+            // which will give you null pointer exception.
+            header.findViewById<TextView>(R.id.nav_header_subtitle).setText(R.string.nav_header_subtitle)
+
+
+            // If user is logged in, how login menu and hide logout menu
+            menu.setGroupVisible(R.id.drawer_group0, true)
+            menu.setGroupVisible(R.id.drawer_group3, false)
+            return
+        }
+
+        header.findViewById<TextView>(R.id.nav_header_subtitle).text = user.email
+
+        menu.setGroupVisible(R.id.drawer_group0, false)
+        menu.setGroupVisible(R.id.drawer_group3, true)
+    }
+
+    private fun feedbackEmail() {
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:")
+            putExtra(Intent.EXTRA_EMAIL, "ftchinese.feedback@gmail.com")
+            putExtra(Intent.EXTRA_SUBJECT, "Feedback on FTC Android App")
+        }
+
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        }
+    }
+
     companion object {
-        private const val FROM_LOGIN_ACTIVITY = 1
-        private const val FROM_SIGNUP_ACTCITITY = 2
+        const val REQUEST_CODE_SIGN_IN = 1
+        const val REQUEST_CODE_SIGN_UP = 2
     }
 
     /**

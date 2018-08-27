@@ -14,7 +14,7 @@ class ChangePasswordActivity : SingleFragmentActivity() {
 
 }
 
-class ChangePasswordFragment : Fragment() {
+internal class ChangePasswordFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
