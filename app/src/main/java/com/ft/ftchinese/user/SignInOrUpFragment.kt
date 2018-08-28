@@ -31,6 +31,7 @@ import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 import java.io.IOException
 
@@ -84,7 +85,7 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
 
         password.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_NULL) {
-                attemptLogin()
+                validate()
 
                 return@setOnEditorActionListener true
             }
@@ -93,11 +94,11 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         }
 
         email_sign_up_button.setOnClickListener {
-            attemptLogin()
+            validate()
         }
 
         email_sign_in_button.setOnClickListener {
-            attemptLogin()
+            validate()
         }
 
         reset_password.setOnClickListener {
@@ -152,7 +153,7 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
             }
         }
     }
-    private fun attemptLogin() {
+    private fun validate() {
         email.error = null
         password.error = null
 
@@ -205,8 +206,11 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
                 isInProgress = false
 
                 if (user == null) {
+                    info("Failed to get user data. Stop")
                     return@launch
                 }
+
+                info("User $user")
 
                 user.save(context)
 
@@ -217,12 +221,15 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
                 isInProgress = false
                 toast("请求地址错误")
             } catch (e: IOException) {
+                info(e.message)
                 isInProgress = false
                 toast("网络错误")
             } catch (e: JsonSyntaxException) {
+                info(e.message)
                 isInProgress = false
                 toast("无法解析JSON")
             } catch (e: ErrorResponse) {
+                info(e.message)
                 isInProgress = false
 
                 when (e.statusCode) {
@@ -240,6 +247,7 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
                     }
                 }
             } catch (e: Exception) {
+                info(e.message)
                 isInProgress = false
 
                 toast(e.toString())

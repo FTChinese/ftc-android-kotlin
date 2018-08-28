@@ -53,6 +53,6 @@ abstract class SingleFragmentActivity : AppCompatActivity(), OnFragmentInteracti
  * (http://developer.android.com/training/basics/fragments/communicating.html)
  * for more information.
  */
-interface OnFragmentInteractionListener {
+internal interface OnFragmentInteractionListener {
     fun onProgress(show: Boolean)
 }

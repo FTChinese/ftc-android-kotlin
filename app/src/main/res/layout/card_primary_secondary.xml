@@ -18,7 +18,7 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/title_text"
+            android:id="@+id/primary_text_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Title"
@@ -28,7 +28,7 @@
             card_view:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/standfirst_text"
+            android:id="@+id/secondary_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -36,9 +36,9 @@
             android:text="Body"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             card_view:layout_constraintBottom_toBottomOf="parent"
-            card_view:layout_constraintEnd_toEndOf="@+id/title_text"
-            card_view:layout_constraintStart_toStartOf="@+id/title_text"
-            card_view:layout_constraintTop_toBottomOf="@+id/title_text" />
+            card_view:layout_constraintEnd_toEndOf="@+id/primary_text_view"
+            card_view:layout_constraintStart_toStartOf="@+id/primary_text_view"
+            card_view:layout_constraintTop_toBottomOf="@+id/primary_text_view" />
 
     </android.support.constraint.ConstraintLayout>
 

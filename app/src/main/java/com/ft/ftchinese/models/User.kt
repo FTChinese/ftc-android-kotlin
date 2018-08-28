@@ -7,15 +7,21 @@ import com.google.gson.JsonSyntaxException
 
 const val PREFERENCE_NAME_USER = "user"
 
+/**
+ * A user's essential data.
+ * All fields should be declared as `var` except `id` which should never be changed.
+ * When user changes data like email, user name, verified email, purchased subscription, the corresponding fields should be updated and saved to shared preferences.
+ */
 data class User(
         val id: String,
-        val name: String?,
-        val email: String,
-        val avatar: String?,
-        val isVip: Boolean,
-        val verified: Boolean,
-        val membership: Membership
+        var name: String,
+        var email: String,
+        var avatar: String,
+        var isVip: Boolean = false,
+        var verified: Boolean = false,
+        var membership: Membership
 ) {
+
     fun save(context: Context?) {
         val sharedPreferences = context?.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
 
@@ -28,7 +34,10 @@ data class User(
         private const val PREF_KEY_COOKIE = "cookie"
         private const val TAG = "User"
 
-        fun loadFromPref(context: Context): User? {
+        fun loadFromPref(context: Context?): User? {
+            if (context == null) {
+                return null
+            }
             val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
             val cookie = sharedPreferences.getString(PREF_KEY_COOKIE, null) ?: return null
 

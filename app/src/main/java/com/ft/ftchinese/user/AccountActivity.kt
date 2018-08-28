@@ -11,8 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.ft.ftchinese.R
-import com.ft.ftchinese.util.ApiEndpoint
-import kotlinx.android.synthetic.main.activity_profile.*
+import com.ft.ftchinese.models.User
+import kotlinx.android.synthetic.main.fragment_account.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -47,6 +47,17 @@ internal class AccountFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val user = User.loadFromPref(context)
+
+        val accountItems = arrayOf(
+                AccountItem(label = "账号", viewType = VIEW_TYPE_TITLE),
+                AccountItem(label = "邮箱", value = user?.email, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_EMAIL),
+                AccountItem(label = "用户名", value = user?.name, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_USER_NAME),
+                AccountItem(label = "密码", value = "修改密码", viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_PASSWORD),
+                AccountItem(label = "账号绑定", viewType = VIEW_TYPE_TITLE),
+                AccountItem(label = "微信", value = "尚未绑定", viewType = VIEW_TYPE_ITEM)
+        )
+
         recycler_view.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
@@ -62,8 +73,8 @@ internal class AccountFragment : Fragment(), AnkoLogger {
     }
 
     inner class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val labelView: TextView? = itemView.findViewById(R.id.label_view)
-        val valueView: TextView? = itemView.findViewById(R.id.value_view)
+        val labelView: TextView? = itemView.findViewById(R.id.primary_text_view)
+        val valueView: TextView? = itemView.findViewById(R.id.secondary_text_view)
     }
 
     inner class TitleViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -82,7 +93,7 @@ internal class AccountFragment : Fragment(), AnkoLogger {
                 }
                 else -> {
                     val view = LayoutInflater.from(parent.context)
-                            .inflate(R.layout.account_item, parent, false)
+                            .inflate(R.layout.card_primary_secondary, parent, false)
                     ItemViewHolder(view)
                 }
             }
@@ -96,16 +107,16 @@ internal class AccountFragment : Fragment(), AnkoLogger {
             val item = items[position]
 
             if (holder is ItemViewHolder) {
+
+                info(item)
+
                 holder.labelView?.text = item.label
-                holder.valueView?.text = item.value
+                holder.valueView?.text = if (item.value.isNullOrBlank()) "未设置" else item.value
 
                 holder.itemView.setOnClickListener {
-                    if (item.apiUrl == null) {
-                        return@setOnClickListener
-                    }
                     when (item.id) {
                         AccountItem.ID_EMAIL -> {
-
+                            ChangeEmailActivity.start(context)
                         }
                         AccountItem.ID_USER_NAME -> {
 
@@ -126,8 +137,6 @@ internal class AccountFragment : Fragment(), AnkoLogger {
 
         override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
             super.onViewAttachedToWindow(holder)
-
-            info("View attached to window: $holder")
         }
     }
 }
@@ -136,8 +145,7 @@ internal data class AccountItem(
         val label: String,
         var value: String? = null,
         val viewType: Int,
-        val id: Int? = null,
-        val apiUrl: String? = null
+        val id: Int? = null
 ) {
     companion object {
         const val ID_EMAIL = 1
@@ -145,12 +153,3 @@ internal data class AccountItem(
         const val ID_PASSWORD = 3
     }
 }
-
-internal val accountItems = arrayOf(
-        AccountItem(label = "账号", viewType = VIEW_TYPE_TITLE),
-        AccountItem(label = "邮箱", value = "未设置", viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_EMAIL, apiUrl = ApiEndpoint.UPDATE_EMAIL),
-        AccountItem(label = "用户名", value = "未设置", viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_USER_NAME, apiUrl = ApiEndpoint.UPDATE_USER_NAME),
-        AccountItem(label = "密码", value = "修改密码", viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_PASSWORD, apiUrl = ApiEndpoint.UPDATE_PASSWORD),
-        AccountItem(label = "账号绑定", viewType = VIEW_TYPE_TITLE),
-        AccountItem(label = "微信", value = "尚未绑定", viewType = VIEW_TYPE_ITEM)
-)

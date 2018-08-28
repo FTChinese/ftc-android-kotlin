@@ -103,7 +103,8 @@
         <activity
             android:name=".user.ChangeEmailActivity"
             android:label="@string/title_change_email"
-            android:parentActivityName=".user.AccountActivity">
+            android:parentActivityName=".user.AccountActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
@@ -111,7 +112,8 @@
         <activity
             android:name=".user.ChangeUsernameActivity"
             android:label="@string/title_change_username"
-            android:parentActivityName=".user.AccountActivity">
+            android:parentActivityName=".user.AccountActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
@@ -119,7 +121,8 @@
         <activity
             android:name=".user.ChangePasswordActivity"
             android:label="@string/title_change_password"
-            android:parentActivityName=".user.AccountActivity">
+            android:parentActivityName=".user.AccountActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />

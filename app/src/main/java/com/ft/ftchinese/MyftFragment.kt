@@ -6,7 +6,6 @@ import android.support.v7.widget.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import com.ft.ftchinese.database.ReadingHistory
@@ -21,7 +20,6 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.find
 import org.jetbrains.anko.info
 
 
@@ -181,14 +179,14 @@ class MyftFragment : Fragment(), AnkoLogger {
     }
 
     inner class MyArticleViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val titleText: TextView = itemView.findViewById(R.id.title_text)
-        val standfirstText: TextView = itemView.findViewById(R.id.standfirst_text)
+        val titleText: TextView = itemView.findViewById(R.id.primary_text_view)
+        val standfirstText: TextView = itemView.findViewById(R.id.secondary_text_view)
     }
 
     inner class MyArticleAdapter(val items: List<ChannelItem>) : RecyclerView.Adapter<MyArticleViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyArticleViewHolder {
             val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.my_article_item, parent, false)
+                    .inflate(R.layout.card_primary_secondary, parent, false)
             return MyArticleViewHolder(view)
         }
 

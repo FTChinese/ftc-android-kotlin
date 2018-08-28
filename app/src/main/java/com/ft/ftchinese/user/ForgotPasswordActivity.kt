@@ -40,13 +40,31 @@ internal class ForgotPasswordFragment : Fragment() {
     private var isInProgress: Boolean
         get() = !reset_letter_button.isEnabled
         set(value) {
-            reset_letter_button.isEnabled = !value
-            email.isEnabled = !value
+            listener?.onProgress(value)
 
-            if (!value) {
+            // If in progress, hide the message telling what to do next.
+            if (value) {
                 letter_sent_feedback.visibility = View.GONE
             }
         }
+    private var isInputAllowed: Boolean
+        get() = reset_letter_button.isEnabled
+        set(value) {
+            reset_letter_button.isEnabled = value
+            email.isEnabled = value
+        }
+
+    private fun failureState() {
+        isInProgress = false
+        isInputAllowed = true
+        letter_sent_feedback.visibility = View.GONE
+    }
+
+    private fun successState() {
+        isInProgress = true
+        isInputAllowed = false
+        letter_sent_feedback.visibility = View.VISIBLE
+    }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -105,19 +123,22 @@ internal class ForgotPasswordFragment : Fragment() {
             try {
                 passwordReset.send()
 
-                letter_sent_feedback.visibility = View.VISIBLE
+                successState()
 
             } catch (e: IllegalStateException) {
-                isInProgress = false
+                failureState()
+
                 toast("请求地址错误")
             } catch (e: IOException) {
-                isInProgress = false
+                failureState()
+
                 toast("网络错误")
             } catch (e: JsonSyntaxException) {
-                isInProgress = false
+                failureState()
+
                 toast("无法解析数据")
             } catch (e: ErrorResponse) {
-                isInProgress = false
+                failureState()
 
                 when (e.statusCode) {
                     422 -> {
@@ -132,7 +153,7 @@ internal class ForgotPasswordFragment : Fragment() {
                 }
 
             } catch (e: Exception) {
-                isInProgress = false
+                failureState()
 
                 toast(e.toString())
             }
