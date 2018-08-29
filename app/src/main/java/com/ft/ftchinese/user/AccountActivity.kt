@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -13,6 +14,9 @@ import android.widget.TextView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.User
 import kotlinx.android.synthetic.main.fragment_account.*
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -33,7 +37,27 @@ class AccountActivity : SingleFragmentActivity() {
     }
 }
 
-internal class AccountFragment : Fragment(), AnkoLogger {
+internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
+
+    private var user: User? = null
+    private var job: Job? = null
+    /**
+     * Update refresh retrieve user data from API, save it and update ui.
+     */
+    override fun onRefresh() {
+        job = launch(UI) {
+            val newUser = user?.refresh()
+            val accountItems = AccountItem.create(newUser)
+            recycler_view.adapter = Adapter(accountItems)
+
+            newUser?.save(context)
+
+            user = newUser
+
+            swipe_refresh_layout.isRefreshing = false
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
@@ -47,23 +71,27 @@ internal class AccountFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val user = User.loadFromPref(context)
+        // Set refresh listener
+        swipe_refresh_layout.setOnRefreshListener(this)
 
-        val accountItems = arrayOf(
-                AccountItem(label = "账号", viewType = VIEW_TYPE_TITLE),
-                AccountItem(label = "邮箱", value = user?.email, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_EMAIL),
-                AccountItem(label = "用户名", value = user?.name, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_USER_NAME),
-                AccountItem(label = "密码", value = "修改密码", viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_PASSWORD),
-                AccountItem(label = "账号绑定", viewType = VIEW_TYPE_TITLE),
-                AccountItem(label = "微信", value = "尚未绑定", viewType = VIEW_TYPE_ITEM)
-        )
+        // Load user data from share preferences
+        user = User.loadFromPref(context)
 
+        val accountItems = AccountItem.create(user)
+
+        // Set up recycler view.
         recycler_view.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
             adapter = Adapter(accountItems)
 //            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        job?.cancel()
     }
 
     companion object {
@@ -114,17 +142,13 @@ internal class AccountFragment : Fragment(), AnkoLogger {
                 holder.valueView?.text = if (item.value.isNullOrBlank()) "未设置" else item.value
 
                 holder.itemView.setOnClickListener {
-                    when (item.id) {
-                        AccountItem.ID_EMAIL -> {
-                            ChangeEmailActivity.start(context)
-                        }
-                        AccountItem.ID_USER_NAME -> {
 
-                        }
-                        AccountItem.ID_PASSWORD -> {
-
-                        }
+                    if (item.id == null) {
+                        return@setOnClickListener
                     }
+
+                    AccountUpdateActivity.start(context, item.id)
+
                 }
             } else if (holder is TitleViewHolder) {
                 holder.titleView?.text = item.label
@@ -151,5 +175,16 @@ internal data class AccountItem(
         const val ID_EMAIL = 1
         const val ID_USER_NAME = 2
         const val ID_PASSWORD = 3
+
+        fun create(user: User?): Array<AccountItem> {
+            return arrayOf(
+                    AccountItem(label = "账号", viewType = VIEW_TYPE_TITLE),
+                    AccountItem(label = "邮箱", value = user?.email, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_EMAIL),
+                    AccountItem(label = "用户名", value = user?.name, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_USER_NAME),
+                    AccountItem(label = "密码", value = "修改密码", viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_PASSWORD),
+                    AccountItem(label = "账号绑定", viewType = VIEW_TYPE_TITLE),
+                    AccountItem(label = "微信", value = "尚未绑定", viewType = VIEW_TYPE_ITEM)
+            )
+        }
     }
 }

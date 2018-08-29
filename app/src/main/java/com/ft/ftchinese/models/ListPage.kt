@@ -34,7 +34,7 @@ data class ListPage (
         }
 
         val fetchJob = async {
-            Fetch.simpleGet(listUrl)
+            Fetch().get(listUrl).string()
         }
 
         val template = readJob.await()

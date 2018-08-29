@@ -20,7 +20,11 @@ data class PasswordReset(
      */
     suspend fun send() {
         val job = async {
-            Fetch.post(ApiEndpoint.PASSWORD_RESET, gson.toJson(this@PasswordReset))
+
+            Fetch().post(ApiEndpoint.PASSWORD_RESET)
+                    .noCache()
+                    .body(this@PasswordReset)
+                    .end()
         }
 
         val response = job.await()

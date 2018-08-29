@@ -196,9 +196,13 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
 
                 when (usedFor) {
                     USED_FOR_LOGIN -> {
+                        info("Start loggin in")
+
                         user = account.login()
                     }
                     USED_FOR_SIGN_UP -> {
+                        info("Start signing up")
+
                         user = account.create()
                     }
                 }
@@ -218,14 +222,18 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
                 activity?.finish()
 
             } catch (e: IllegalStateException) {
+                e.printStackTrace()
                 isInProgress = false
+
                 toast("请求地址错误")
             } catch (e: IOException) {
-                info(e.message)
+                e.printStackTrace()
+
                 isInProgress = false
                 toast("网络错误")
             } catch (e: JsonSyntaxException) {
-                info(e.message)
+                e.printStackTrace()
+
                 isInProgress = false
                 toast("无法解析JSON")
             } catch (e: ErrorResponse) {
@@ -247,7 +255,8 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
                     }
                 }
             } catch (e: Exception) {
-                info(e.message)
+                e.printStackTrace()
+
                 isInProgress = false
 
                 toast(e.toString())

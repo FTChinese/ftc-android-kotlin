@@ -15,7 +15,7 @@ data class Account(
         val password: String
 ) : AnkoLogger {
     /**
-     * @return User or null if request failed, or the response cannot be parsed
+     * @return User
      * @throws ErrorResponse If HTTP response status is above 400.
      * @throws IllegalStateException If request url is empty.
      * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.

@@ -67,32 +67,6 @@ data class Profile(
             val editor = sharedPreferences.edit()
             editor.remove(PREF_KEY_PROFILE).apply()
         }
-
-        /**
-         * Request a user's profile from API.
-         * @param id UUID of a user
-         */
-        suspend fun loadFromApi(id: String): Profile? {
-            val job = async {
-                Fetch.get(ApiEndpoint.PROFILE, id)
-            }
-
-            return try {
-                val response = job.await() ?: return null
-                val body = response.body()?.string()
-
-                gson.fromJson<Profile>(body, Profile::class.java)
-
-            } catch (e: IOException) {
-                Log.w(TAG, "Response error: $e")
-                null
-            } catch (e: JsonSyntaxException) {
-                Log.w(TAG, "JSON parse error: $e")
-                null
-            } catch (e: ErrorResponse) {
-                throw e
-            }
-        }
     }
 }
 

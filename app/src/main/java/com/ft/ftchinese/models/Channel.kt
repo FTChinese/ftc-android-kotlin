@@ -140,7 +140,7 @@ data class ChannelItem(
         val url = apiUrl ?: return null
 
         val job = async {
-            Fetch.simpleGet(url)
+            Fetch().get(url).string()
         }
 
         val jsonData = job.await() ?: return null
