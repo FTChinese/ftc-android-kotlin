@@ -103,25 +103,6 @@ data class ChannelItem(
             }
         }
 
-//    suspend fun renderFromCache(context: Context): String? {
-//        val template = readTemplate(context.resources) ?: return null
-//
-//        val articleDetail = jsonFromCache(context) ?: return null
-//
-//        standfirst = articleDetail.clongleadbody
-//
-//        return render(context, template, articleDetail)
-//    }
-//
-//    suspend fun renderFromServer(context: Context): String? {
-//        val template = readTemplate(context.resources) ?: return null
-//
-//        val articleDetail = jsonFromServer(context) ?: return null
-//        standfirst = articleDetail.clongleadbody
-//
-//        return render(context, template, articleDetail)
-//    }
-
     suspend fun jsonFromCache(context: Context?): ArticleDetail? {
         val job = async {
             Store.load(context, filename)
@@ -227,10 +208,11 @@ data class ChannelItem(
 
     }
 
-    fun favour(context: Context) {
+    fun star(context: Context): Boolean {
         val sharedPreferences = context.getSharedPreferences(PREF_NAME_FAVOURITE, Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
-        if (sharedPreferences.contains(prefKey)) {
+        val isStarring = sharedPreferences.contains(prefKey)
+        if (isStarring) {
             editor.remove(prefKey)
         } else {
             favouredAt = System.currentTimeMillis()
@@ -238,9 +220,11 @@ data class ChannelItem(
         }
 
         editor.apply()
+
+        return !isStarring
     }
 
-    fun isFavouring(context: Context): Boolean {
+    fun isStarring(context: Context): Boolean {
         return context.getSharedPreferences(PREF_NAME_FAVOURITE, Context.MODE_PRIVATE).contains(prefKey)
     }
 

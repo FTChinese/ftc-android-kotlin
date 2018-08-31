@@ -12,5 +12,6 @@ class ApiEndpoint {
         const val REQUEST_VERIFICATION = "$BASE/user/email/request-verification"
         const val UPDATE_USER_NAME = "$BASE/user/name"
         const val UPDATE_PASSWORD = "$BASE/user/password"
+        const val STARRED = "$BASE/user/starred"
     }
 }

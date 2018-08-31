@@ -26,9 +26,9 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
-private const val VIEW_TYPE_TITLE = 0x01
+private const val VIEW_TYPE_SEPARATOR = 0x01
 private const val VIEW_TYPE_ITEM = 0x02
-private const val VIEW_TYPE_REMINDER = 0x03
+private const val VIEW_TYPE_TEXT = 0x03
 
 class AccountActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {
@@ -49,7 +49,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     private var user: User? = null
     private var job: Job? = null
     private var listener: OnFragmentInteractionListener? = null
-    private var accountItems: Array<AccountItem>? = null
+    private var accountItems: List<AccountItem>? = null
     private var mAdapter: Adapter? = null
 
     private var isInProgress: Boolean = false
@@ -121,6 +121,8 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         recycler_view.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
+
+            // Add divider
 //            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
         }
 
@@ -136,8 +138,6 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
     private fun updateUI() {
         info("updateUI")
-//        val accountStore = AccountStore.getInstance(user)
-//        val items = accountStore.items
 
         accountItems = AccountItem.create(user)
 
@@ -162,39 +162,37 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         }
     }
 
-    inner class ReminderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class TextViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val messageView: TextView? = itemView.findViewById(R.id.message_view)
         val actionButton: Button? = itemView.findViewById(R.id.action_button)
     }
 
     inner class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val labelView: TextView? = itemView.findViewById(R.id.primary_text_view)
-        val valueView: TextView? = itemView.findViewById(R.id.secondary_text_view)
+        val labelView: TextView? = itemView.findViewById(R.id.label_text)
+        val valueView: TextView? = itemView.findViewById(R.id.value_text)
     }
 
-    inner class TitleViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val titleView: TextView? = view as TextView
-    }
+    inner class SeparatorViewHolder(view: View) : RecyclerView.ViewHolder(view)
 
-    inner class Adapter(val items: Array<AccountItem>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    inner class Adapter(val items: List<AccountItem>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
             return when (viewType) {
-                VIEW_TYPE_REMINDER -> {
+                VIEW_TYPE_TEXT -> {
                     val view = LayoutInflater.from(parent.context)
-                            .inflate(R.layout.card_reminder, parent, false)
+                            .inflate(R.layout.list_item_text, parent, false)
 
-                    ReminderViewHolder(view)
+                    TextViewHolder(view)
                 }
-                VIEW_TYPE_TITLE -> {
+                VIEW_TYPE_SEPARATOR -> {
                     val view = LayoutInflater.from(parent.context)
-                            .inflate(R.layout.account_title, parent, false)
-                    TitleViewHolder(view)
+                            .inflate(R.layout.list_item_separator, parent, false)
+                    SeparatorViewHolder(view)
                 }
                 else -> {
                     val view = LayoutInflater.from(parent.context)
-                            .inflate(R.layout.card_primary_secondary, parent, false)
+                            .inflate(R.layout.list_item_single_row, parent, false)
                     ItemViewHolder(view)
                 }
             }
@@ -208,7 +206,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
             val item = items[position]
 
             when (holder) {
-                is ReminderViewHolder -> {
+                is TextViewHolder -> {
                     holder.messageView?.text = item.label
                     holder.actionButton?.text = item.value
 
@@ -230,9 +228,6 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
                     }
                 }
-                is TitleViewHolder -> {
-                    holder.titleView?.text = item.label
-                }
             }
         }
 
@@ -250,7 +245,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
         isInProgress = true
 
-        val job = launch(UI) {
+        job = launch(UI) {
             try {
                 sendRequest(uuid)
 
@@ -308,16 +303,21 @@ internal data class AccountItem(
         const val ID_USER_NAME = 2
         const val ID_PASSWORD = 3
 
-        fun create(user: User?): Array<AccountItem> {
-            return arrayOf(
-                    AccountItem(label = "您的邮箱尚未验证，为保障您的账号安全，请及时验证邮箱。我们已经给您的登录邮箱发送了验证邮件，点击邮件中的链接即可。", value = "重新发送验证邮件", viewType = VIEW_TYPE_REMINDER),
-                    AccountItem(label = "账号", viewType = VIEW_TYPE_TITLE),
+        fun create(user: User?): List<AccountItem> {
+            val items = mutableListOf(
+                    AccountItem(label = "您的邮箱尚未验证，为保障您的账号安全，请及时验证邮箱。我们已经给您的登录邮箱发送了验证邮件，点击邮件中的链接即可。", value = "重新发送验证邮件", viewType = VIEW_TYPE_TEXT),
+                    AccountItem(label = "账号", viewType = VIEW_TYPE_SEPARATOR),
                     AccountItem(label = "邮箱", value = user?.email, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_EMAIL),
                     AccountItem(label = "用户名", value = user?.name, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_USER_NAME),
                     AccountItem(label = "密码", value = "修改密码", viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_PASSWORD),
-                    AccountItem(label = "账号绑定", viewType = VIEW_TYPE_TITLE),
+                    AccountItem(label = "账号绑定", viewType = VIEW_TYPE_SEPARATOR),
                     AccountItem(label = "微信", value = "尚未绑定", viewType = VIEW_TYPE_ITEM)
             )
+
+            if (user?.verified == true) {
+                items.removeAt(0)
+            }
+            return items
         }
     }
 }

@@ -39,6 +39,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
 
     private var mBottomDialog: BottomSheetDialog? = null
 
+    // Used for share
     abstract val articleWebUrl: String
     abstract val articleTitle: String
     abstract val articleStandfirst: String

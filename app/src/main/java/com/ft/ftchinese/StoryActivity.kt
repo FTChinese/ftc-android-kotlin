@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import com.ft.ftchinese.database.ReadingHistory
 import com.ft.ftchinese.database.ReadingHistoryDbHelper
 import com.ft.ftchinese.models.ArticleDetail
 import com.ft.ftchinese.models.ChannelItem
+import com.ft.ftchinese.models.User
 import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.activity_content.*
@@ -37,7 +37,7 @@ class StoryActivity : AbsContentActivity() {
 
     private var currentLanguage: Int = ChannelItem.LANGUAGE_CN
 
-        // Hold metadata on where and how to find data for this page.
+    // Hold metadata on where and how to find data for this page.
     private var channelItem: ChannelItem? = null
     private var job: Job? = null
     private var dbHelper: ReadingHistoryDbHelper? = null
@@ -45,30 +45,31 @@ class StoryActivity : AbsContentActivity() {
     private var template: String? = null
     private var articleDetail: ArticleDetail? = null
 
-    private var isFavoring: Boolean
-        get() = channelItem?.isFavouring(this) ?: false
-        set(value) {
-            channelItem?.favour(this)
-            changeFavouriteIcon(value)
-        }
+    // Flag to indicate is user is starring an article
+    private var isFavouring: Boolean = false
+
+    // Used to star/unstar an article
+    private var user: User? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Load user data
+        user = User.loadFromPref(this)
+
+        // Meta data about current article
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
         channelItem = gson.fromJson(itemData, ChannelItem::class.java)
-
-        if (channelItem?.isFavouring(this) == true) {
-            changeFavouriteIcon(true)
-        }
+        isFavouring = channelItem?.isStarring(this) ?: false
 
         dbHelper = ReadingHistoryDbHelper.getInstance(this)
-
         ReadingHistory.dbHelper = dbHelper
 
         action_favourite.setOnClickListener {
-            isFavoring = !isFavoring
+            isFavouring = channelItem?.star(this) ?: false
+
+            updateFavouriteIcon()
         }
 
         titlebar_cn.setOnClickListener {
@@ -86,10 +87,14 @@ class StoryActivity : AbsContentActivity() {
             init()
         }
 
+        updateFavouriteIcon()
+
         init()
+
+        info("onCreate finished")
     }
 
-    private fun changeFavouriteIcon(isFavouring: Boolean) {
+    private fun updateFavouriteIcon() {
         action_favourite.setImageResource(if (isFavouring) R.drawable.ic_favorite_teal_24dp else R.drawable.ic_favorite_border_teal_24dp )
     }
 
@@ -112,6 +117,7 @@ class StoryActivity : AbsContentActivity() {
     }
 
     override fun init() {
+        info("Initializing content")
         job = launch(UI) {
 
             if (template == null) {
@@ -157,7 +163,6 @@ class StoryActivity : AbsContentActivity() {
             toast(e.toString())
             return
         }
-
 
         showLanguageSwitch()
 

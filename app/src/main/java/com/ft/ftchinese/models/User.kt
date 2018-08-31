@@ -5,6 +5,7 @@ import android.util.Log
 import com.ft.ftchinese.util.ApiEndpoint
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
+import com.github.kittinunf.fuel.Fuel
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.experimental.async
 import java.io.IOException
@@ -53,6 +54,59 @@ data class User(
         val body = response.body()?.string()
 
         return gson.fromJson<User>(body, User::class.java)
+    }
+
+    suspend fun starArticle(articleId: String): Boolean {
+        val job = async {
+            Fetch().put("${ApiEndpoint.STARRED}/$articleId")
+                    .noCache()
+                    .body(null)
+                    .setUserId(this@User.id)
+                    .end()
+        }
+
+        val response = job.await()
+
+        if (response.code() == 204) {
+            return true
+        }
+
+        return false
+    }
+
+    suspend fun unstarArticle(articleId: String): Boolean {
+        val job = async {
+            Fetch().delete("${ApiEndpoint.STARRED}/$articleId")
+                    .noCache()
+                    .setUserId(this@User.id)
+                    .body(null)
+                    .end()
+        }
+
+        val response = job.await()
+
+        if (response.code() == 204) {
+            return true
+        }
+
+        return false
+    }
+
+    suspend fun isStarring(articleId: String): Boolean {
+        val job = async {
+            Fetch().get("${ApiEndpoint.STARRED}/$articleId")
+                    .noCache()
+                    .setUserId(this@User.id)
+                    .end()
+        }
+
+        val response = job.await()
+
+        if (response.code() == 204) {
+            return true
+        }
+
+        return false
     }
 
     companion object {

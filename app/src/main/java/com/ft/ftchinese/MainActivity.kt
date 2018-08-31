@@ -295,7 +295,7 @@ class MainActivity : AppCompatActivity(),
                 AccountActivity.start(this)
             }
             R.id.action_subscription -> {
-
+                MembershipActivity.start(this)
             }
             R.id.action_help -> {
 

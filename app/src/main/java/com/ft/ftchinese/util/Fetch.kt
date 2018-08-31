@@ -34,6 +34,12 @@ class Fetch : AnkoLogger {
         return this
     }
 
+    fun put(url: String): Fetch {
+        reqBuilder.url(url)
+        method = "PUT"
+        return this
+    }
+
     fun patch(url: String): Fetch {
         reqBuilder.url(url)
         method = "PATCH"
@@ -73,9 +79,14 @@ class Fetch : AnkoLogger {
         return this
     }
 
-    fun body(o: Any): Fetch {
-        reqBody = RequestBody.create(contentType, gson.toJson(o))
-        return  this
+    fun body(o: Any?): Fetch {
+        reqBody = if (o == null) {
+            RequestBody.create(null, "")
+        } else {
+            RequestBody.create(contentType, gson.toJson(o))
+        }
+
+        return this
     }
 
     /**
