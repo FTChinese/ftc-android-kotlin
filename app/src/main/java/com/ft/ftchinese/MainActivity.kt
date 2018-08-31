@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
+import android.support.design.widget.BottomSheetDialog
 import android.support.design.widget.NavigationView
 import android.support.design.widget.TabLayout
 import android.support.v4.app.Fragment
@@ -15,11 +16,8 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.SearchView
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.widget.TextView
-import android.widget.Toast
 import com.ft.ftchinese.database.ReadingHistoryDbHelper
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.MyftTab
@@ -40,8 +38,9 @@ class MainActivity : AppCompatActivity(),
         ChannelWebViewClient.OnInAppNavigate,
         AnkoLogger {
 
-
     private var dbHelper: ReadingHistoryDbHelper? = null
+    private var mBottomDialog: BottomSheetDialog? = null
+    private var user: User? = null
 
     /**
      * Implementation of BottomNavigationView.OnNavigationItemSelectedListener
@@ -81,6 +80,31 @@ class MainActivity : AppCompatActivity(),
         true
     }
 
+    private val logoutListener = View.OnClickListener {
+        User.removeFromPref(this)
+        updateUIForCookie()
+        mBottomDialog?.dismiss()
+        toast("账号已登出")
+    }
+
+    private val drawerHeaderTitleListener = View.OnClickListener {
+        // If user is not logged in, show login.
+        if (user == null) {
+            LoginActivity.startForResult(this, REQUEST_CODE_SIGN_IN)
+            return@OnClickListener
+        }
+
+        // If user already logged in, show logout.
+        if (mBottomDialog == null) {
+            mBottomDialog = BottomSheetDialog(this)
+            mBottomDialog?.setContentView(R.layout.fragment_logout)
+        }
+
+        mBottomDialog?.findViewById<TextView>(R.id.action_logout)?.setOnClickListener(logoutListener)
+
+        mBottomDialog?.show()
+    }
+
     /**
      * Implementation of OnNavigationItemReselectedListener.
      * Currently do nothing.
@@ -113,8 +137,16 @@ class MainActivity : AppCompatActivity(),
         bottom_nav.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)
         bottom_nav.setOnNavigationItemReselectedListener(bottomNavItemReseletedListener)
 
+        // Check user login status
+        updateUIForCookie()
+
         // Set a listener that will be notified when a menu item is selected.
         drawer_nav.setNavigationItemSelectedListener(this)
+
+        // Set listener on the title text inside drawer's header view
+        drawer_nav.getHeaderView(0)
+                ?.findViewById<TextView>(R.id.nav_header_title)
+                ?.setOnClickListener(drawerHeaderTitleListener)
 
         dbHelper = ReadingHistoryDbHelper.getInstance(this)
 
@@ -161,9 +193,6 @@ class MainActivity : AppCompatActivity(),
             }
         }
     }
-
-
-
 
     override fun onResume() {
         super.onResume()
@@ -260,8 +289,6 @@ class MainActivity : AppCompatActivity(),
                 LoginActivity.startForResult(this, REQUEST_CODE_SIGN_IN)
             }
             R.id.action_sign_up -> {
-//                SignupActivity.startForResult(this, REQUEST_CODE_SIGN_UP)
-
                 Registration.startForResult(this, REQUEST_CODE_SIGN_UP)
             }
             R.id.action_account -> {
@@ -283,7 +310,7 @@ class MainActivity : AppCompatActivity(),
                 // Delete user data from shared preference and update UI.
                 User.removeFromPref(this)
                 updateUIForCookie()
-                Toast.makeText(this, "账号已登出", Toast.LENGTH_SHORT).show()
+                toast("账号已登出")
             }
         }
 
@@ -345,29 +372,25 @@ class MainActivity : AppCompatActivity(),
      * Update UI dpending user's login/logout state
      */
     private fun updateUIForCookie() {
-        val user = User.loadFromPref(this)
+        user = User.loadFromPref(this)
+        val isLoggedIn = (user != null)
 
         val menu = drawer_nav.menu
         val header = drawer_nav.getHeaderView(0)
 
-        if (user == null) {
-
-            // If seems this is the only way to get the header view.
-            // You cannot user `import kotlinx.android.synthetic.activity_main_search.nav_header_main.*`,
-            // which will give you null pointer exception.
-            header.findViewById<TextView>(R.id.nav_header_subtitle).setText(R.string.nav_header_subtitle)
-
-
-            // If user is logged in, how login menu and hide logout menu
-            menu.setGroupVisible(R.id.drawer_group0, true)
-            menu.setGroupVisible(R.id.drawer_group3, false)
-            return
+        // If seems this is the only way to get the header view.
+        // You cannot user `import kotlinx.android.synthetic.activity_main_search.nav_header_main.*`,
+        // which will give you null pointer exception.
+        header.findViewById<TextView>(R.id.nav_header_title).text = if (!user?.name.isNullOrBlank()) {
+            user?.name
+        } else if (!user?.email.isNullOrBlank()) {
+            user?.email
+        } else {
+            getString(R.string.nav_not_logged_in)
         }
 
-        header.findViewById<TextView>(R.id.nav_header_subtitle).text = user.email
-
-        menu.setGroupVisible(R.id.drawer_group0, false)
-        menu.setGroupVisible(R.id.drawer_group3, true)
+        menu.setGroupVisible(R.id.drawer_group_sign_in_up, !isLoggedIn)
+        menu.findItem(R.id.action_account).isVisible = isLoggedIn
     }
 
     private fun feedbackEmail() {

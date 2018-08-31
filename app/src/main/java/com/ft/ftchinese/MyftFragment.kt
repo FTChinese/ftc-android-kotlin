@@ -137,27 +137,25 @@ class MyftFragment : Fragment(), AnkoLogger {
                 }
     }
 
-    inner class FollowingViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val tagText: TextView? = itemView.findViewById(R.id.tag_text)
-    }
+    inner class FollowingAdapter(val items: List<Following>) : RecyclerView.Adapter<ViewHolder>() {
 
-    inner class FollowingAdapter(val items: List<Following>) : RecyclerView.Adapter<FollowingViewHolder>() {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FollowingViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
             val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.following_item, parent, false)
-            return FollowingViewHolder(view)
+                    .inflate(R.layout.card_primary_secondary, parent, false)
+            return ViewHolder(view)
         }
 
         override fun getItemCount(): Int {
             return items.size
         }
 
-        override fun onBindViewHolder(holder: FollowingViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = items[position]
 
-            holder.tagText?.text = item.tag
+//            holder.tagText?.text = item.tag
+            holder.titleText?.text = item.tag
+            holder.standfirstText?.visibility = View.GONE
 
             holder.itemView.setOnClickListener {
                 val channelMeta = ListPage(
@@ -169,32 +167,25 @@ class MyftFragment : Fragment(), AnkoLogger {
                 ChannelActivity.start(context, channelMeta)
             }
         }
-
-
-        override fun onViewAttachedToWindow(holder: FollowingViewHolder) {
-            super.onViewAttachedToWindow(holder)
-
-            info("View attached to window: $holder")
-        }
     }
 
-    inner class MyArticleViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val titleText: TextView = itemView.findViewById(R.id.primary_text_view)
         val standfirstText: TextView = itemView.findViewById(R.id.secondary_text_view)
     }
 
-    inner class MyArticleAdapter(val items: List<ChannelItem>) : RecyclerView.Adapter<MyArticleViewHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyArticleViewHolder {
+    inner class MyArticleAdapter(val items: List<ChannelItem>) : RecyclerView.Adapter<ViewHolder>() {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.card_primary_secondary, parent, false)
-            return MyArticleViewHolder(view)
+            return ViewHolder(view)
         }
 
         override fun getItemCount(): Int {
             return items.size
         }
 
-        override fun onBindViewHolder(holder: MyArticleViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = items[position]
             holder.titleText.text = item.headline
             holder.standfirstText.text = item.standfirst

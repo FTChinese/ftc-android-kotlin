@@ -22,7 +22,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">FT中文网</string>
-    <string name="nav_header_subtitle">您尚未登录</string>
+    <string name="nav_not_logged_in">您尚未登录</string>
     <string name="nav_header_desc">导航栏头部</string>
 
 
@@ -68,7 +68,10 @@
     <string name="action_sign_in_short">Sign in</string>
     <string name="action_password_letter">发送邮件</string>
     <string name="action_save">保存</string>
-    <string name="success_saved">保存成功！</string>
+    <string name="success_saved">保存成功!</string>
+    <string name="success_updated">更新成功!</string>
+    <string name="success_letter_sent">邮件已发送</string>
+    <string name="action_updating">更新数据...</string>
 
     <string name="link_reset_password">忘记密码?</string>
     <string name="link_sign_up">注册账号</string>
@@ -85,6 +88,12 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+
+    <string name="api_empty_url">请求地址错误</string>
+    <string name="api_network_failure">网络错误</string>
+    <string name="api_io_error">无法读取数据</string>
+    <string name="api_json_syntax">无法解析数据</string>
+    <string name="api_empty_response">API没有响应</string>
 
     <string-array name="profile_gender_entries">
         <item>男</item>

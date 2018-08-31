@@ -37,10 +37,8 @@ data class User(
 
     /**
      * @return User. Always returns a new one rather than modifying the existing one to make it immutable.
-     * @throws ErrorResponse If HTTP response status is above 400.
-     * @throws IllegalStateException If request url is empty.
-     * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.
-     * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON, regardless of if response is successful or not
+     * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON
+     * See Fetch#exectue for other exceptions
      */
     suspend fun refresh(): User {
         val job = async {

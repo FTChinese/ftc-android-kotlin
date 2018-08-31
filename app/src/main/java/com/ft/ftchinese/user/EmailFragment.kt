@@ -124,18 +124,6 @@ internal class EmailFragment : Fragment(), AnkoLogger {
 
                 toast(R.string.success_saved)
 
-            } catch (e: IllegalStateException) {
-                isInProgress = false
-                isInputAllowed = true
-                toast("请求地址错误")
-            } catch (e: IOException) {
-                isInProgress = false
-                isInputAllowed = true
-                toast("网络错误")
-            } catch (e: JsonSyntaxException) {
-                isInProgress = false
-                isInputAllowed = true
-                toast("无法解析数据")
             } catch (e: ErrorResponse) {
                 isInProgress = false
                 isInputAllowed = true
@@ -157,7 +145,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
                 isInProgress = false
                 isInputAllowed = true
 
-                toast(e.toString())
+                handleException(e)
             }
         }
     }

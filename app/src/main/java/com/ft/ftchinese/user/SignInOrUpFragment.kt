@@ -45,6 +45,16 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
             listener?.onProgress(value)
             email_sign_in_button.isEnabled = !value
         }
+
+    private var isInputAllowed: Boolean
+        get() = email.isEnabled
+        set(value) {
+            email.isEnabled = value
+            password.isEnabled = value
+            email_sign_in_button.isEnabled = value
+            email_sign_up_button.isEnabled = value
+        }
+
     private var usedFor: Int? = null
 
     override fun onAttach(context: Context?) {
@@ -181,14 +191,17 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
 
         if (cancel) {
             focusView?.requestFocus()
-        } else {
-            isInProgress = true
 
-            authenticate(emailStr, passwordStr)
+            return
         }
+
+        authenticate(emailStr, passwordStr)
     }
 
     private fun authenticate(email: String, password: String) {
+        isInProgress = true
+        isInputAllowed = false
+
         job = launch(UI) {
             val account = Account(email = email, password = password)
             try {
@@ -221,24 +234,10 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
                 activity?.setResult(Activity.RESULT_OK)
                 activity?.finish()
 
-            } catch (e: IllegalStateException) {
-                e.printStackTrace()
-                isInProgress = false
-
-                toast("请求地址错误")
-            } catch (e: IOException) {
-                e.printStackTrace()
-
-                isInProgress = false
-                toast("网络错误")
-            } catch (e: JsonSyntaxException) {
-                e.printStackTrace()
-
-                isInProgress = false
-                toast("无法解析JSON")
             } catch (e: ErrorResponse) {
                 info(e.message)
                 isInProgress = false
+                isInputAllowed = true
 
                 when (e.statusCode) {
                     404 -> {
@@ -255,11 +254,10 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
-
                 isInProgress = false
+                isInputAllowed = true
 
-                toast(e.toString())
+                handleException(e)
             }
         }
     }

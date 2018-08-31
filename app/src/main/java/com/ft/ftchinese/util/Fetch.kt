@@ -1,6 +1,6 @@
 package com.ft.ftchinese.util
 
-import android.util.Log
+import android.accounts.NetworkErrorException
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.models.ErrorResponse
 import com.google.gson.Gson
@@ -92,7 +92,7 @@ class Fetch : AnkoLogger {
 
         val response = client.newCall(reqBuilder.build()).execute()
 
-        info("Reponse code: ${response.code()}. Message: ${response.message()}")
+        info("Response code: ${response.code()}. Message: ${response.message()}")
 
         if (response.isSuccessful) {
             return response.body()?.string()
@@ -118,24 +118,39 @@ class Fetch : AnkoLogger {
     }
 
     /**
-     * @return okhttp3.Response or null if there is any error thrown
-     * @throws ErrorResponse If HTTP response status is above 400.
+     * @return okhttp3.Response
      * @throws IllegalStateException If request url is empty
-     * @throws IOException If network request failed, or API returned error response but the response body could not be turned into string.
-     * @throws JsonSyntaxException If API returned error response and the response body is decoced into a string, but the string could not be parsed into valid JSON.
+     * @throws NetworkException if there's network failure. Use this show network failed on UI.
+     * @throws EmptyResponseException if http response status is above 400 but no response body is returned.
+     * @throws ErrorResponse If HTTP response status is above 400.
+     * @throws IOException If API returned error response but the response body could not be turned into string.
+     * @throws JsonSyntaxException If API returned error response and the response body is not valid JSON.
      */
     private fun execute(builder: Request.Builder): Response {
 
         // If url is null, `build()` throws IllegalStateException
-        // `execute()` throws IOException and IllegalStateException
+
+        /**
+         * @throws IllegalStateException if url is null
+         */
         val request = builder.build()
 
         info("URL: ${request.url()}. Method: ${request.method()}. Headers: ${request.headers()}")
 
-        val response = client.newCall(builder.build()).execute()
+        /**
+         * @throws IOException if the request could not be executed due to cancellation, a connectivity
+         * problem or timeout. Because networks can fail during an exchange, it is possible that the
+         * remote server accepted the request before the failure.
+         * @throws IllegalStateException when the call has already been executed.
+         */
+        val response = try {
+            client.newCall(request).execute()
+        } catch (e: IOException) {
+            throw NetworkErrorException()
+        }
 
 
-        info("Reponse code: ${response.code()}. Message: ${response.message()}")
+        info("Response code: ${response.code()}. Message: ${response.message()}")
 
         // If response is successful, return the response so that response body could be processed by the caller.
         if (response.isSuccessful) {
@@ -143,12 +158,24 @@ class Fetch : AnkoLogger {
         }
 
         // If the response if not successful (status code >= 400), API returns body containing error details.
+        // Error response could also be empty, check it!
         // Wrap the response body and rethrow it.
 
-        // `string()` throws IOException
+        /**
+         * Pay attention to `body(): ResponseBody?`. It's nullable. So `body` is an optional.
+         * @throws IOException when turning to string.
+         */
         val body = response.body()?.string()
 
-        // `fromJson()` throws JsonSyntaxException
+        if (body.isNullOrBlank()) {
+            throw EmptyResponseException()
+        }
+
+        /**
+         * @throws JsonSyntaxException if json is not a valid representation for an object of type
+         * classOfT
+         * `errResp` is null if body is null or if body is empty
+         */
         val errResp = gson.fromJson<ErrorResponse>(body, ErrorResponse::class.java)
 
         errResp.statusCode = response.code()
@@ -160,3 +187,7 @@ class Fetch : AnkoLogger {
         private val client = OkHttpClient()
     }
 }
+
+class EmptyResponseException : RuntimeException()
+
+class NetworkException : IOException()

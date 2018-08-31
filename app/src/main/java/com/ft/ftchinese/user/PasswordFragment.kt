@@ -10,6 +10,8 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.PasswordUpdate
 import com.ft.ftchinese.models.User
+import com.ft.ftchinese.util.EmptyResponseException
+import com.ft.ftchinese.util.NetworkException
 import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.fragment_password.*
 import kotlinx.coroutines.experimental.Job
@@ -62,6 +64,7 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
         super.onViewCreated(view, savedInstanceState)
 
         password_save_button.setOnClickListener {
+            info("Saving password...")
             attemptSave()
         }
     }
@@ -75,7 +78,7 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
         val newPassword = new_password.text.toString().trim()
         val confirmPassword = confirm_password.text.toString().trim()
 
-        var cancel = true
+        var cancel = false
         var focusView: View? = null
 
         if (oldPassword.isBlank()) {
@@ -126,20 +129,10 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
 
                 passwordUpdate.send(uuid)
 
+                isInProgress = false
                 toast(R.string.success_saved)
-            } catch (e: IllegalStateException) {
-                isInProgress = false
-                isInputAllowed = true
-                toast("请求地址错误")
-            } catch (e: IOException) {
-                isInProgress = false
-                isInputAllowed = true
-                toast("网络错误")
-            } catch (e: JsonSyntaxException) {
-                isInProgress = false
-                isInputAllowed = true
-                toast("无法解析数据")
             } catch (e: ErrorResponse) {
+                e.printStackTrace()
                 isInProgress = false
                 isInputAllowed = true
 
@@ -157,14 +150,12 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
                     403 -> {
                         toast("当前密码未通过验证")
                     }
-
                 }
-
             } catch (e: Exception) {
                 isInProgress = false
                 isInputAllowed = true
 
-                toast(e.toString())
+                handleException(e)
             }
         }
     }

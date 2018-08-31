@@ -10,6 +10,8 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.User
 import com.ft.ftchinese.models.UserNameUpdate
+import com.ft.ftchinese.util.EmptyResponseException
+import com.ft.ftchinese.util.NetworkException
 import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.fragment_username.*
 import kotlinx.coroutines.experimental.Job
@@ -112,18 +114,6 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
                 userUpdated.save(context)
 
                 toast(R.string.success_saved)
-            } catch (e: IllegalStateException) {
-                isInProgress = false
-                isInputAllowed = true
-                toast("请求地址错误")
-            } catch (e: IOException) {
-                isInProgress = false
-                isInputAllowed = true
-                toast("网络错误")
-            } catch (e: JsonSyntaxException) {
-                isInProgress = false
-                isInputAllowed = true
-                toast("无法解析数据")
             } catch (e: ErrorResponse) {
                 isInProgress = false
                 isInputAllowed = true
@@ -140,12 +130,11 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
                         toast("提交了非法的JSON")
                     }
                 }
-
             } catch (e: Exception) {
                 isInProgress = false
                 isInputAllowed = true
 
-                toast(e.toString())
+                handleException(e)
             }
         }
     }

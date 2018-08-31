@@ -151,7 +151,13 @@ class StoryActivity : AbsContentActivity() {
     private suspend fun useRemoteJson() {
 
         toast("Fetching data from server")
-        articleDetail = channelItem?.jsonFromServer(this@StoryActivity)
+        try {
+            articleDetail = channelItem?.jsonFromServer(this)
+        } catch (e: Exception) {
+            toast(e.toString())
+            return
+        }
+
 
         showLanguageSwitch()
 

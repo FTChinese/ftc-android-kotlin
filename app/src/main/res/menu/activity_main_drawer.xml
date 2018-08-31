@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:id="@+id/drawer_group0"
+    <group android:id="@+id/drawer_group_sign_in_up"
         android:checkableBehavior="single">
         <item
             android:id="@+id/action_login"
@@ -14,10 +14,10 @@
     </group>
 
     <group android:checkableBehavior="single"
-        android:id="@+id/drawer_group1">
+        android:id="@+id/drawer_group_account">
         <item
             android:id="@+id/action_account"
-            android:icon="@drawable/ic_security_black_24dp"
+            android:icon="@drawable/ic_account_box_black_24dp"
             android:title="@string/action_title_account" />
         <item
             android:id="@+id/action_subscription"
@@ -26,7 +26,7 @@
     </group>
 
     <group android:checkableBehavior="single"
-        android:id="@+id/drawer_group2">
+        android:id="@+id/drawer_group_setting">
         <item
             android:id="@+id/action_help"
             android:icon="@drawable/ic_help_black_24dp"
@@ -45,12 +45,12 @@
             android:title="@string/action_settings"/>
     </group>
 
-    <group
-        android:id="@+id/drawer_group3"
-        android:checkableBehavior="single">
-        <item
-            android:id="@+id/action_logout"
-            android:icon="@drawable/ic_exit_to_app_black_24dp"
-            android:title="@string/action_logout" />
-    </group>
+    <!--<group-->
+        <!--android:id="@+id/drawer_group3"-->
+        <!--android:checkableBehavior="single">-->
+        <!--<item-->
+            <!--android:id="@+id/action_logout"-->
+            <!--android:icon="@drawable/ic_exit_to_app_black_24dp"-->
+            <!--android:title="@string/action_logout" />-->
+    <!--</group>-->
 </menu>

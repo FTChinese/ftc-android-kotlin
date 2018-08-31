@@ -109,34 +109,27 @@ internal class ForgotPasswordFragment : Fragment() {
 
         if (cancel) {
             email.requestFocus()
-        } else {
-            isInProgress = true
 
-            sendPasswordResetLetter(emailStr)
+            return
         }
+
+        sendPasswordResetLetter(emailStr)
     }
 
     private fun sendPasswordResetLetter(emailStr: String) {
+        isInProgress = true
+        isInputAllowed = false
+
         job = launch(UI) {
             val passwordReset = PasswordReset(emailStr)
 
             try {
                 passwordReset.send()
 
+                toast(R.string.success_letter_sent)
+
                 successState()
 
-            } catch (e: IllegalStateException) {
-                failureState()
-
-                toast("请求地址错误")
-            } catch (e: IOException) {
-                failureState()
-
-                toast("网络错误")
-            } catch (e: JsonSyntaxException) {
-                failureState()
-
-                toast("无法解析数据")
             } catch (e: ErrorResponse) {
                 failureState()
 
@@ -151,11 +144,10 @@ internal class ForgotPasswordFragment : Fragment() {
                         toast("提交了非法的JSON")
                     }
                 }
-
             } catch (e: Exception) {
                 failureState()
 
-                toast(e.toString())
+                handleException(e)
             }
         }
     }

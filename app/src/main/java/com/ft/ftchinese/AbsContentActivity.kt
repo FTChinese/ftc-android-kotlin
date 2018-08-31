@@ -1,13 +1,8 @@
 package com.ft.ftchinese
 
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.support.design.widget.BottomSheetDialog
@@ -22,7 +17,6 @@ import android.widget.TextView
 import android.widget.Toast
 import com.ft.ftchinese.models.Following
 import com.ft.ftchinese.util.gson
-import com.tencent.mm.opensdk.diffdev.a.e
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
 import com.tencent.mm.opensdk.modelmsg.WXWebpageObject
@@ -94,7 +88,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
         action_share.setOnClickListener {
             if (mBottomDialog == null) {
                 mBottomDialog = BottomSheetDialog(this)
-                mBottomDialog?.setContentView(R.layout.fragment_bottom_sheet)
+                mBottomDialog?.setContentView(R.layout.fragment_share_menu)
 
                 val shareRecyclerView: RecyclerView? = mBottomDialog?.findViewById(R.id.share_recycler_view)
 
@@ -221,7 +215,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(this@AbsContentActivity)
-                    .inflate(R.layout.share_item, parent, false)
+                    .inflate(R.layout.list_item_share, parent, false)
 
             return ViewHolder(view)
         }
