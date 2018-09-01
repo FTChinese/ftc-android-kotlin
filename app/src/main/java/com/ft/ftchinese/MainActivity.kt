@@ -297,8 +297,11 @@ class MainActivity : AppCompatActivity(),
             R.id.action_subscription -> {
                 MembershipActivity.start(this)
             }
-            R.id.action_help -> {
-
+//            R.id.action_help -> {
+//
+//            }
+            R.id.action_about -> {
+                AboutUsActivity.start(this)
             }
             R.id.action_feedback -> {
                 feedbackEmail()
@@ -402,6 +405,8 @@ class MainActivity : AppCompatActivity(),
 
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
+        } else {
+            toast("您的设备上没有安装邮件程序，无法发送反馈邮件")
         }
     }
 

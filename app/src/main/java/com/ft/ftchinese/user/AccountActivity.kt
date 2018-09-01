@@ -181,7 +181,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
             return when (viewType) {
                 VIEW_TYPE_TEXT -> {
                     val view = LayoutInflater.from(parent.context)
-                            .inflate(R.layout.list_item_text, parent, false)
+                            .inflate(R.layout.list_item_text_button, parent, false)
 
                     TextViewHolder(view)
                 }
@@ -192,7 +192,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
                 }
                 else -> {
                     val view = LayoutInflater.from(parent.context)
-                            .inflate(R.layout.list_item_single_row, parent, false)
+                            .inflate(R.layout.list_item_table_row, parent, false)
                     ItemViewHolder(view)
                 }
             }

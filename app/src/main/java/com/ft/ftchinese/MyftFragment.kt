@@ -14,7 +14,7 @@ import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.Following
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.MyftTab
-import kotlinx.android.synthetic.main.fragment_myft.*
+import kotlinx.android.synthetic.main.fragment_recycler.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -58,7 +58,7 @@ class MyftFragment : Fragment(), AnkoLogger {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_myft, container, false)
+        return inflater.inflate(R.layout.fragment_recycler, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

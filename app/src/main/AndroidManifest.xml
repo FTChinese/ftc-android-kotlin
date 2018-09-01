@@ -65,6 +65,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+        <activity android:name=".AboutUsActivity"
+            android:label="@string/title_about_us">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
         <activity
             android:name=".user.LoginActivity"
             android:label="@string/title_login"
