@@ -30,7 +30,7 @@ import org.jetbrains.anko.info
 /**
  * SectionFragment serves two purposes:
  * As part of TabLayout in MainActivity;
- * As part of ChannelActivity. For example, if you panned to Editor's Choice tab, the items lead to another layer of a list page, not content. You need to use `SectionFragment` again to render a list page.
+ * As part of ChannelActivity. For example, if you panned to Editor's Choice tab, the mFollows lead to another layer of a list page, not content. You need to use `SectionFragment` again to render a list page.
  */
 class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
 
@@ -263,7 +263,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          */
         @JavascriptInterface
         fun postItems(message: String) {
-            info("Posted items: $message")
+            info("Posted mFollows: $message")
 
             val channelContent = gson.fromJson<ChannelContent>(message, ChannelContent::class.java)
 

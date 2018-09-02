@@ -49,7 +49,7 @@ data class ChannelMeta(
  * The fields in ChannelItem are also persisted to SQLite when user clicked on it.
  * It seems the Room library does not work well with Kotlin data class. Use a plain class works.
  *
- * The data type is also used to record reading history. `standfirst` is used only for this purpose. Do not use `subType` and `shortlead` should not be used for this purpose. ReadingHistory could only recored `type==story`.
+ * The data type is also used to record reading history. `standfirst` is used only for this purpose. Do not use `subType` and `shortlead` should not be used for this purpose. ArticleStore could only recored `type==story`.
  */
 data class ChannelItem(
         val id: String,
@@ -60,8 +60,8 @@ data class ChannelItem(
 ) {
 
     var standfirst: String = ""
-    var favouredAt: Long = 0
 
+    // Used for sharing
     val canonicalUrl: String
         get() = "http://www.ftchinese.com/$type/$id"
 
@@ -204,29 +204,6 @@ data class ChannelItem(
                 .replace("{comments-id}", commentsId)
     }
 
-    fun saveHistory() {
-
-    }
-
-    fun star(context: Context): Boolean {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME_FAVOURITE, Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        val isStarring = sharedPreferences.contains(prefKey)
-        if (isStarring) {
-            editor.remove(prefKey)
-        } else {
-            favouredAt = System.currentTimeMillis()
-            editor.putString(prefKey, gson.toJson(this))
-        }
-
-        editor.apply()
-
-        return !isStarring
-    }
-
-    fun isStarring(context: Context): Boolean {
-        return context.getSharedPreferences(PREF_NAME_FAVOURITE, Context.MODE_PRIVATE).contains(prefKey)
-    }
 
     companion object {
         private const val TAG = "ChannelItem"
@@ -241,36 +218,6 @@ data class ChannelItem(
             }
 
             return job.await()
-        }
-
-        fun loadFavourites(context: Context?): MutableList<ChannelItem>? {
-            if (context == null) return null
-
-            val sharedPreferences = context.getSharedPreferences(PREF_NAME_FAVOURITE, Context.MODE_PRIVATE)
-
-            val values = sharedPreferences.all.values.toList()
-
-            val items = mutableListOf<ChannelItem>()
-
-            for (v in values) {
-                if (v !is String) {
-                    continue
-                }
-
-                try {
-                    val item = gson.fromJson<ChannelItem>(v, ChannelItem::class.java)
-
-                    items.add(item)
-                } catch (e: JsonSyntaxException) {
-                    continue
-                }
-            }
-
-            items.sortByDescending {
-                it.favouredAt
-            }
-
-            return items
         }
     }
 }

@@ -192,7 +192,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
 //            val launcherClassName = info.activityInfo.name
 //            val appName = info.loadLabel(packageManager)
 //            val icon = info.loadIcon(packageManager)
-//            apps.add(AppInfo(pkgName, launcherClassName, appName, icon))
+//            apps.addHistory(AppInfo(pkgName, launcherClassName, appName, icon))
 //        }
 //
 //        return apps

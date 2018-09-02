@@ -81,10 +81,11 @@ data class Following(
             }
         }
 
-        fun loadAsList(context: Context?): MutableList<Following>? {
-            val sharedPreferences = context?.getSharedPreferences(PREF_NAME_FOLLOWING, Context.MODE_PRIVATE) ?: return null
-
+        fun loadAsList(context: Context?): MutableList<Following> {
             val result = mutableListOf<Following>()
+
+            val sharedPreferences = context?.getSharedPreferences(PREF_NAME_FOLLOWING, Context.MODE_PRIVATE) ?: return result
+
             for (key in keys) {
                 val ss = sharedPreferences.getStringSet(key, setOf())
                 for (elem in ss) {

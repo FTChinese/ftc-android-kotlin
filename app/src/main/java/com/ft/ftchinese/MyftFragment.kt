@@ -7,20 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.Toast
-import com.ft.ftchinese.database.ReadingHistory
-import com.ft.ftchinese.database.ReadingHistoryDbHelper
+import com.ft.ftchinese.database.ArticleCursorWrapper
+import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.models.Following
-import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.MyftTab
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 
 // TODO: Rename parameter arguments, choose names that match
@@ -39,8 +32,9 @@ private const val ARG_TAB_ID = "tab_id"
 class MyftFragment : Fragment(), AnkoLogger {
     // TODO: Rename and change keys of parameters
     private var tabId: Int? = null
-    private var dbHelper: ReadingHistoryDbHelper? = null
     private var job: Job? = null
+    private var cursor: ArticleCursorWrapper? = null
+    private var mCursorAdapter: CursorAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,11 +42,15 @@ class MyftFragment : Fragment(), AnkoLogger {
             tabId = it.getInt(ARG_TAB_ID)
         }
 
-        if (context != null) {
-            dbHelper = ReadingHistoryDbHelper.getInstance(context!!)
-            ReadingHistory.dbHelper = dbHelper
+        val ctx = context ?: return
+        when (tabId) {
+            MyftTab.READING_HISTORY -> {
+                cursor = ArticleStore.getInstance(ctx).queryHistory()
+            }
+            MyftTab.STARRED_ARTICLE -> {
+                cursor = ArticleStore.getInstance(ctx).queryStarred()
+            }
         }
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -64,37 +62,20 @@ class MyftFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        when (tabId) {
-            MyftTab.READING_HISTORY -> {
-                recycler_view.layoutManager = LinearLayoutManager(context)
+        recycler_view.layoutManager = LinearLayoutManager(context)
 
-                job = launch(UI) {
-                    val job = async {
-                        ReadingHistory.loadAll()
-                    }
+        updateUI()
+    }
 
-                    val items = job.await()
-                    info("Reading history: $items")
+    private fun updateUI() {
 
-                    if (items != null) {
-                        recycler_view.adapter = MyArticleAdapter(items)
-                    }
-                }
-            }
-
-            MyftTab.STARRED_ARTICLE -> {
-                recycler_view.layoutManager = LinearLayoutManager(context)
-
-                val items = ChannelItem.loadFavourites(context)
-
-                if (items != null) {
-                    recycler_view.adapter = MyArticleAdapter(items)
-                }
-            }
-
-            MyftTab.FOLLOWING -> {
-                initFollowing()
-            }
+        val c = cursor ?: return
+        if (mCursorAdapter == null) {
+            mCursorAdapter = CursorAdapter(c)
+            recycler_view.adapter = mCursorAdapter
+        } else {
+            mCursorAdapter?.setCursor(c)
+            mCursorAdapter?.notifyDataSetChanged()
         }
     }
 
@@ -102,20 +83,7 @@ class MyftFragment : Fragment(), AnkoLogger {
         super.onDestroy()
 
         job?.cancel()
-    }
-
-    private fun initFollowing() {
-        val tags = Following.loadAsList(context)
-
-        recycler_view.apply {
-            layoutManager = GridLayoutManager(context, 3)
-
-            if (tags != null) {
-                adapter = FollowingAdapter(tags)
-            } else {
-                Toast.makeText(context, "You have not followed anything", Toast.LENGTH_SHORT).show()
-            }
-        }
+        cursor?.close()
     }
 
     companion object {
@@ -137,44 +105,12 @@ class MyftFragment : Fragment(), AnkoLogger {
                 }
     }
 
-    inner class FollowingAdapter(val items: List<Following>) : RecyclerView.Adapter<ViewHolder>() {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-
-            val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.card_primary_secondary, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun getItemCount(): Int {
-            return items.size
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = items[position]
-
-//            holder.tagText?.text = item.tag
-            holder.titleText?.text = item.tag
-            holder.standfirstText?.visibility = View.GONE
-
-            holder.itemView.setOnClickListener {
-                val channelMeta = ListPage(
-                        title = item.tag,
-                        name = "${item.type}_${item.tag}",
-                        listUrl = item.bodyUrl
-                )
-
-                ChannelActivity.start(context, channelMeta)
-            }
-        }
-    }
-
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val titleText: TextView = itemView.findViewById(R.id.primary_text_view)
-        val standfirstText: TextView = itemView.findViewById(R.id.secondary_text_view)
+        val primaryText: TextView = itemView.findViewById(R.id.primary_text_view)
+        val secondaryText: TextView = itemView.findViewById(R.id.secondary_text_view)
     }
 
-    inner class MyArticleAdapter(val items: List<ChannelItem>) : RecyclerView.Adapter<ViewHolder>() {
+    inner class CursorAdapter(var mCursor: ArticleCursorWrapper) : RecyclerView.Adapter<ViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.card_primary_secondary, parent, false)
@@ -182,18 +118,26 @@ class MyftFragment : Fragment(), AnkoLogger {
         }
 
         override fun getItemCount(): Int {
-            return items.size
+            return mCursor.count
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = items[position]
-            holder.titleText.text = item.headline
-            holder.standfirstText.text = item.standfirst
+            mCursor.moveToPosition(position)
+            val item = mCursor.loadItem()
+
+            holder.primaryText.text = item.headline
+            holder.secondaryText.text = item.standfirst
 
             holder.itemView.setOnClickListener {
                 StoryActivity.start(context, item)
             }
         }
 
+        fun setCursor(cursor: ArticleCursorWrapper) {
+            if (!mCursor.isClosed) {
+                mCursor.close()
+            }
+            mCursor = cursor
+        }
     }
 }

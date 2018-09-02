@@ -4,10 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.support.design.widget.BottomNavigationView
-import android.support.design.widget.BottomSheetDialog
-import android.support.design.widget.NavigationView
-import android.support.design.widget.TabLayout
+import android.support.design.widget.*
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
@@ -18,7 +15,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.SearchView
 import android.view.*
 import android.widget.TextView
-import com.ft.ftchinese.database.ReadingHistoryDbHelper
+import com.ft.ftchinese.database.ArticleDbHelper
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.MyftTab
 import com.ft.ftchinese.models.User
@@ -27,6 +24,7 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
@@ -38,7 +36,6 @@ class MainActivity : AppCompatActivity(),
         ChannelWebViewClient.OnInAppNavigate,
         AnkoLogger {
 
-    private var dbHelper: ReadingHistoryDbHelper? = null
     private var mBottomDialog: BottomSheetDialog? = null
     private var user: User? = null
 
@@ -148,8 +145,6 @@ class MainActivity : AppCompatActivity(),
                 ?.findViewById<TextView>(R.id.nav_header_title)
                 ?.setOnClickListener(drawerHeaderTitleListener)
 
-        dbHelper = ReadingHistoryDbHelper.getInstance(this)
-
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false)
         api.registerApp(BuildConfig.WECAHT_APP_ID)
     }
@@ -212,7 +207,6 @@ class MainActivity : AppCompatActivity(),
     override fun onDestroy() {
         super.onDestroy()
 
-        dbHelper?.close()
         info("onDestroy finished")
     }
 
@@ -234,7 +228,7 @@ class MainActivity : AppCompatActivity(),
      * Create menus on toolbar
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // Inflate the menu; this adds mFollows to the action bar if it is present.
 
         menuInflater.inflate(R.menu.activity_main_search, menu)
 
@@ -439,7 +433,12 @@ class MainActivity : AppCompatActivity(),
     inner class MyftPagerAdapter(private val pages: Array<MyftTab>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
         override fun getItem(position: Int): Fragment {
-            return MyftFragment.newInstance(pages[position].id)
+            val page = pages[position]
+            return if (page.id == MyftTab.FOLLOWING) {
+                FollowingFragment.newInstance()
+            } else {
+                MyftFragment.newInstance(page.id)
+            }
         }
 
         override fun getCount(): Int {

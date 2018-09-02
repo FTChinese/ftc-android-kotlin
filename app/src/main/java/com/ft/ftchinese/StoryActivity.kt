@@ -4,14 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import com.ft.ftchinese.database.ReadingHistory
-import com.ft.ftchinese.database.ReadingHistoryDbHelper
+import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.models.ArticleDetail
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.User
 import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.activity_content.*
+import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -40,16 +40,14 @@ class StoryActivity : AbsContentActivity() {
     // Hold metadata on where and how to find data for this page.
     private var channelItem: ChannelItem? = null
     private var job: Job? = null
-    private var dbHelper: ReadingHistoryDbHelper? = null
 
     private var template: String? = null
     private var articleDetail: ArticleDetail? = null
 
-    // Flag to indicate is user is starring an article
-    private var isFavouring: Boolean = false
-
-    // Used to star/unstar an article
+    // Used to star/unstar an article remotely
     private var user: User? = null
+
+    private var isStarring: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,15 +59,18 @@ class StoryActivity : AbsContentActivity() {
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
         channelItem = gson.fromJson(itemData, ChannelItem::class.java)
-        isFavouring = channelItem?.isStarring(this) ?: false
-
-        dbHelper = ReadingHistoryDbHelper.getInstance(this)
-        ReadingHistory.dbHelper = dbHelper
+//        isFavouring = channelItem?.isStarring(this) ?: false
 
         action_favourite.setOnClickListener {
-            isFavouring = channelItem?.star(this) ?: false
+            isStarring = !isStarring
 
             updateFavouriteIcon()
+
+            if (isStarring) {
+                ArticleStore.getInstance(this).addStarred(channelItem)
+            } else {
+                ArticleStore.getInstance(this).deleteStarred(channelItem)
+            }
         }
 
         titlebar_cn.setOnClickListener {
@@ -87,15 +88,13 @@ class StoryActivity : AbsContentActivity() {
             init()
         }
 
-        updateFavouriteIcon()
-
         init()
 
         info("onCreate finished")
     }
 
     private fun updateFavouriteIcon() {
-        action_favourite.setImageResource(if (isFavouring) R.drawable.ic_favorite_teal_24dp else R.drawable.ic_favorite_border_teal_24dp )
+        action_favourite.setImageResource(if (isStarring) R.drawable.ic_favorite_teal_24dp else R.drawable.ic_favorite_border_teal_24dp )
     }
 
     override fun onDestroy() {
@@ -118,6 +117,10 @@ class StoryActivity : AbsContentActivity() {
 
     override fun init() {
         info("Initializing content")
+
+        isStarring = ArticleStore.getInstance(this).isStarring(channelItem)
+        updateFavouriteIcon()
+
         job = launch(UI) {
 
             if (template == null) {
@@ -146,6 +149,7 @@ class StoryActivity : AbsContentActivity() {
             }
 
             // Cache not found, fetch data from server
+            showProgress(true)
             useRemoteJson()
         }
     }
@@ -191,11 +195,11 @@ class StoryActivity : AbsContentActivity() {
     }
 
     private fun saveHistory() {
-        launch {
-            if (channelItem != null) {
-                info("Save reading history")
-                ReadingHistory.insert(channelItem!!)
-            }
+        val item = channelItem ?: return
+        launch(CommonPool) {
+
+            info("Save reading history")
+            ArticleStore.getInstance(context = this@StoryActivity).addHistory(item)
         }
     }
 
