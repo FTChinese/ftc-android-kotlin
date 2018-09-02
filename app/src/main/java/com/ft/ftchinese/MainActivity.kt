@@ -28,6 +28,8 @@ import org.jetbrains.anko.alert
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
+const val REQUEST_CODE_SIGN_IN = 1
+const val REQUEST_CODE_SIGN_UP = 2
 
 class MainActivity : AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
@@ -402,11 +404,6 @@ class MainActivity : AppCompatActivity(),
         } else {
             toast("您的设备上没有安装邮件程序，无法发送反馈邮件")
         }
-    }
-
-    companion object {
-        const val REQUEST_CODE_SIGN_IN = 1
-        const val REQUEST_CODE_SIGN_UP = 2
     }
 
     /**

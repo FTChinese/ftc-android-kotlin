@@ -22,6 +22,8 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import com.ft.ftchinese.MainActivity
 import com.ft.ftchinese.R
+import com.ft.ftchinese.REQUEST_CODE_SIGN_IN
+import com.ft.ftchinese.REQUEST_CODE_SIGN_UP
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.User
@@ -116,11 +118,11 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         }
 
         sign_up.setOnClickListener {
-            Registration.startForResult(activity, MainActivity.REQUEST_CODE_SIGN_UP)
+            Registration.startForResult(activity, REQUEST_CODE_SIGN_UP)
         }
 
         sign_in.setOnClickListener {
-            LoginActivity.startForResult(activity, MainActivity.REQUEST_CODE_SIGN_IN)
+            LoginActivity.startForResult(activity, REQUEST_CODE_SIGN_IN)
         }
     }
 

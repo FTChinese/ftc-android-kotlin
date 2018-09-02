@@ -16,6 +16,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import com.ft.ftchinese.models.Following
+import com.ft.ftchinese.models.User
 import com.ft.ftchinese.util.gson
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
@@ -45,6 +46,8 @@ abstract class AbsContentActivity : AppCompatActivity(),
     abstract val articleStandfirst: String
 //    var isFavouring: Boolean = false
 
+    var user: User? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_content)
@@ -55,6 +58,8 @@ abstract class AbsContentActivity : AppCompatActivity(),
             // Do not show title on the toolbar for any content.
             setDisplayShowTitleEnabled(false)
         }
+
+        user = User.loadFromPref(this)
 
         swipe_refresh.setOnRefreshListener(this)
 
@@ -152,6 +157,13 @@ abstract class AbsContentActivity : AppCompatActivity(),
     fun loadData(data: String?) {
 
         info("Load HTML string into web view")
+
+        CookieManager.getInstance().apply {
+            setAcceptCookie(true)
+            setCookie("http://www.ftchinese.com", "username=${user?.name}")
+            setCookie("http://www.ftchinese.com", "userId=${user?.id}")
+            setCookie("http://www.ftchinese.com", "uniqueVisitorId=${user?.id}")
+        }
 
         web_view.loadDataWithBaseURL("http://www.ftchinese.com", data, "text/html", null, null)
 
@@ -287,7 +299,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
     inner class WebAppInterface : AnkoLogger {
 
         /**
-         * Usage in JS: Android.follow(message)
+         * Usage in JS: Android.follow(message: String)
          */
         @JavascriptInterface
         fun follow(message: String) {
@@ -296,6 +308,15 @@ abstract class AbsContentActivity : AppCompatActivity(),
 
             val following = gson.fromJson<Following>(message, Following::class.java)
             following.save(this@AbsContentActivity)
+        }
+
+        /**
+         * Handle login in webview. Usage: Android.login(message: String)
+         */
+        @JavascriptInterface
+        fun login(message: String) {
+            info("Login data from webview")
+            toast("WebView login: $message")
         }
     }
 }

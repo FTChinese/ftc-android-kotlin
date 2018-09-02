@@ -5521,6 +5521,7 @@
       "" !== i && (e.paywall = i), "" !== n && (e.paywallExpire = n);
       try {
         webkit.messageHandlers.user.postMessage(e)
+        Android.login(JSON.stringify(e))
       } catch (e) {}
     }
     var w = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,

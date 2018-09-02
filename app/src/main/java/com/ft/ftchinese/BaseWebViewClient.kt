@@ -1,6 +1,6 @@
 package com.ft.ftchinese
 
-import android.content.Context
+import android.app.Activity
 import android.graphics.Bitmap
 import android.net.Uri
 import android.support.customtabs.CustomTabsIntent
@@ -12,6 +12,7 @@ import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.Endpoints
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.pathToTitle
+import com.ft.ftchinese.user.Registration
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
@@ -21,7 +22,7 @@ import org.jetbrains.anko.warn
  * AbsContentActivity uses it directly.
  */
 open class BaseWebViewClient(
-        private val context: Context?
+        val activity: Activity?
 ) : WebViewClient(), AnkoLogger {
     override fun onLoadResource(view: WebView?, url: String?) {
         super.onLoadResource(view, url)
@@ -36,11 +37,19 @@ open class BaseWebViewClient(
 
     }
 
+    /**
+     * Error code: -1, net::ERR_INCOMPLETE_CHUNKED_ENCODING
+     */
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
         super.onReceivedError(view, request, error)
 
-        info("Failed to ${request?.method}: ${request?.url}")
-        warn(error.toString())
+        info("onReceivedError: Failed to ${request?.method}: ${request?.url}")
+        warn("Error code: ${error?.errorCode}, ${error?.description}")
+    }
+
+    override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
+        super.onReceivedError(view, errorCode, description, failingUrl)
+        info("onReceivedError: $errorCode, $description, $failingUrl")
     }
 
     // Handle clicks on a link in a web page loaded into url
@@ -53,6 +62,31 @@ open class BaseWebViewClient(
 
         val uri = Uri.parse(url)
 
+        // At the comment section of story page there is a login form.
+        // Handle login in web view.
+        // the login button calls js `bower_components/ftcnext/app/scripts/user-login-native.js`
+        // It sends data:
+        // username: String,
+        // userId: String,
+        // uniqueVisitorId: String,
+        // paywall: String,
+        // paywallExpire: String
+        // The data structure is not compatible with our restful API. After we get this message in Java, it might be better send a request to API with `userId` so that native app always use API data.
+        when (uri.scheme) {
+            // The `免费注册` button is wrapped in a link with url set to `ftcregister://www.ftchinese.com/`
+            "ftcregister" -> {
+                Registration.startForResult(activity, REQUEST_CODE_SIGN_IN)
+                return true
+            }
+            // The `微信登录` button is wrapped in a link with url set to `weixinlogin://www.ftchinese.com/`
+            /**
+             * @TODO Call wechat
+             */
+            "weixinlogin" -> {
+                info("Request wechat login")
+                return true
+            }
+        }
         /**
          * If the clicked url is of the pattern `.../story/xxxxxx`, you should use `StoryActivity`
          * and fetch JSON from server and concatenate it with a html bundle into the package `raw/story.html`,
@@ -122,7 +156,7 @@ open class BaseWebViewClient(
 
             else -> {
                 info("Open a web page directly. Original url is: $uri")
-                WebContentActivity.start(context, uri)
+                WebContentActivity.start(activity, uri)
 
                 true
             }
@@ -152,7 +186,7 @@ open class BaseWebViewClient(
                 name = "",
                 listUrl = buildUrl(uri))
 
-        ChannelActivity.start(context, page)
+        ChannelActivity.start(activity, page)
 
         return true
     }
@@ -168,7 +202,7 @@ open class BaseWebViewClient(
                 name = "",
                 listUrl = buildUrl(uri))
 
-        ChannelActivity.start(context, page)
+        ChannelActivity.start(activity, page)
 
         return true
     }
@@ -183,7 +217,7 @@ open class BaseWebViewClient(
                 type = uri.pathSegments[0],
                 headline = "",
                 shortlead = "")
-        StoryActivity.start(context, channelItem)
+        StoryActivity.start(activity, channelItem)
 
         return true
     }
@@ -191,7 +225,7 @@ open class BaseWebViewClient(
     private fun handleExternalLink(uri: Uri): Boolean {
         // This opens an external browser
         val customTabsInt = CustomTabsIntent.Builder().build()
-        customTabsInt.launchUrl(context, uri)
+        customTabsInt.launchUrl(activity, uri)
 
         return true
     }
@@ -202,7 +236,7 @@ open class BaseWebViewClient(
                 name = "${uri.pathSegments[0]}_${uri.pathSegments[1]}",
                 listUrl = buildUrl(uri))
 
-        ChannelActivity.start(context, page)
+        ChannelActivity.start(activity, page)
 
         return true
     }

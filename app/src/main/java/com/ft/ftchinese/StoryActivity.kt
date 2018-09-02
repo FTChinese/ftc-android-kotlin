@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.webkit.CookieSyncManager
 import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.models.ArticleDetail
 import com.ft.ftchinese.models.ChannelItem
@@ -18,6 +19,7 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
+import java.net.CookieManager
 
 /**
  * StoryActivity is used to show a story whose has a JSON api on server.
@@ -44,22 +46,15 @@ class StoryActivity : AbsContentActivity() {
     private var template: String? = null
     private var articleDetail: ArticleDetail? = null
 
-    // Used to star/unstar an article remotely
-    private var user: User? = null
-
     private var isStarring: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Load user data
-        user = User.loadFromPref(this)
-
         // Meta data about current article
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
         channelItem = gson.fromJson(itemData, ChannelItem::class.java)
-//        isFavouring = channelItem?.isStarring(this) ?: false
 
         action_favourite.setOnClickListener {
             isStarring = !isStarring

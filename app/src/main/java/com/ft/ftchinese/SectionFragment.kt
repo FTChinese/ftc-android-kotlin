@@ -127,7 +127,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         currentPage = gson.fromJson<ListPage>(pageMetadata, ListPage::class.java)
 
         // Set WebViewClient for current page
-        mWebViewClient = ChannelWebViewClient(context, currentPage)
+        mWebViewClient = ChannelWebViewClient(activity, currentPage)
         // Set navigate listener to enable in-app navigation when clicked a url which should to another tab.
         mWebViewClient.setOnInAppNavigateListener(navigateListener)
     }

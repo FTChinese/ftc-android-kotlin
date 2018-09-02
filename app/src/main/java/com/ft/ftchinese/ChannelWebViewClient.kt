@@ -1,5 +1,6 @@
 package com.ft.ftchinese
 
+import android.app.Activity
 import android.content.Context
 import android.net.Uri
 import com.ft.ftchinese.models.ListPage
@@ -9,9 +10,9 @@ import com.ft.ftchinese.models.pathToTitle
  * A WebViewClient used by a SectionFragment
  */
 class ChannelWebViewClient(
-        private val context: Context?,
+        activity: Activity?,
         private val currentPage: ListPage?
-) : BaseWebViewClient(context) {
+) : BaseWebViewClient(activity) {
 
     /**
      * Callback used by ChannelWebViewClient.
@@ -45,7 +46,7 @@ class ChannelWebViewClient(
         /**
          * Start a new page of article list.
          */
-        ChannelActivity.start(context, page)
+        ChannelActivity.start(activity, page)
         return true
 
     }
@@ -67,7 +68,7 @@ class ChannelWebViewClient(
                     listUrl = buildUrl(uri)
             )
 
-            ChannelActivity.start(context, page)
+            ChannelActivity.start(activity, page)
             return true
         }
 
@@ -122,7 +123,7 @@ class ChannelWebViewClient(
                         name = name,
                         listUrl = buildUrl(uri))
 
-                ChannelActivity.start(context, page)
+                ChannelActivity.start(activity, page)
             }
         }
 
@@ -154,7 +155,7 @@ class ChannelWebViewClient(
                             name = "marketing_$name",
                             listUrl = buildUrl(uri)
                     )
-                    ChannelActivity.start(context, page)
+                    ChannelActivity.start(activity, page)
                 }
             }
 
@@ -171,7 +172,7 @@ class ChannelWebViewClient(
                 name = "",
                 listUrl = buildUrl(uri)
         )
-        ChannelActivity.start(context, page)
+        ChannelActivity.start(activity, page)
 
         return true
     }
