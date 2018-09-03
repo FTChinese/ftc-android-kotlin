@@ -59,4 +59,6 @@
     <color name="colorCrimson">#cc0000</color>
     <color name="colorCandy">#ff7faa</color>
     <color name="wasabi">#ff7faa</color>
+
+    <color name="black_overlay">#66000000</color>
 </resources>

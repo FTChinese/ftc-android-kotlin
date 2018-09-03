@@ -11,10 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
 import android.widget.Toast
-import com.ft.ftchinese.models.ChannelContent
-import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.models.ChannelMeta
-import com.ft.ftchinese.models.ListPage
+import com.ft.ftchinese.models.*
+import com.ft.ftchinese.user.MembershipActivity
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
@@ -52,13 +50,7 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     private var channelItems: Array<ChannelItem>? = null
     private var channelMeta: ChannelMeta? = null
     private var job: Job? = null
-
-    // Containing activity should implement this interface to show progress state
-//    interface OnDataLoadListener {
-//        fun onDataLoaded()
-//
-//        fun onDataLoading()
-//    }
+    private var user: User? = null
 
     /**
      * This interface must be implemented by activities that contain this
@@ -121,6 +113,8 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        user = User.loadFromPref(context)
 
         val pageMetadata = arguments?.getString(ARG_SECTION_PAGE)
 
@@ -327,9 +321,19 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
              * Start different activity according to ChannelItem#type
              */
             when (channelItem.type) {
-                "story", "premium" -> {
+                ChannelItem.TYPE_STORY -> {
                     info("Start story activity")
                     // Save reading history
+
+                    StoryActivity.start(activity, channelItem)
+                    return
+                }
+
+                ChannelItem.TYPE_PREMIUM -> {
+                    if (user == null || user?.membership?.type == Membership.TYPE_FREE ) {
+                        MembershipActivity.start(context)
+                        return
+                    }
 
                     StoryActivity.start(activity, channelItem)
                     return

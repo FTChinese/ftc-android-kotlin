@@ -4,11 +4,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -23,6 +21,17 @@
         android:supportsRtl="true"
         android:theme="@style/Origami">
         <activity
+            android:name=".AdActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_ad"
+            android:theme="@style/FullscreenTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".MainActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
@@ -33,9 +42,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".wxapi.WXEntryActivity"
-            android:label="@string/app_name"
-            android:exported="true"/>
+        <activity
+            android:name=".wxapi.WXEntryActivity"
+            android:exported="true"
+            android:label="@string/app_name" />
         <activity
             android:name=".ChannelActivity"
             android:parentActivityName=".MainActivity">
@@ -65,7 +75,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".AboutUsActivity"
+        <activity
+            android:name=".AboutUsActivity"
             android:label="@string/title_about_us">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -114,30 +125,13 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".user.MembershipActivity"
+        <activity
+            android:name=".user.MembershipActivity"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <!--<activity-->
-            <!--android:name=".user.ChangeUsernameActivity"-->
-            <!--android:label="@string/title_change_username"-->
-            <!--android:parentActivityName=".user.AccountActivity"-->
-            <!--android:windowSoftInputMode="adjustResize">-->
-            <!--<meta-data-->
-                <!--android:name="android.support.PARENT_ACTIVITY"-->
-                <!--android:value=".MainActivity" />-->
-        <!--</activity>-->
-        <!--<activity-->
-            <!--android:name=".user.ChangePasswordActivity"-->
-            <!--android:label="@string/title_change_password"-->
-            <!--android:parentActivityName=".user.AccountActivity"-->
-            <!--android:windowSoftInputMode="adjustResize">-->
-            <!--<meta-data-->
-                <!--android:name="android.support.PARENT_ACTIVITY"-->
-                <!--android:value=".MainActivity" />-->
-        <!--</activity>-->
 
         <activity
             android:name=".user.SettingsActivity"
@@ -147,6 +141,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
+
     </application>
 
 </manifest>

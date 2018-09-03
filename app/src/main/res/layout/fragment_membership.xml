@@ -19,24 +19,32 @@
             android:layout_margin="16dp">
 
             <TextView
+                android:id="@+id/membership_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="我的订阅"
+                style="@style/FTCTitle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
                 android:id="@+id/member_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="会员类型"
-                android:textAppearance="@style/TextAppearance.AppCompat"
-                android:textSize="18sp"
+                style="@style/FTCText"
                 app:layout_constraintEnd_toStartOf="@id/member_value"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/membership_title"/>
 
             <TextView
                 android:id="@+id/member_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="标准"
-                android:textAppearance="@style/TextAppearance.AppCompat"
-                android:textSize="18sp"
+                style="@style/FTCText"
                 app:layout_constraintBaseline_toBaselineOf="@+id/member_label"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/member_label" />
@@ -47,8 +55,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="会员期限"
-                android:textAppearance="@style/TextAppearance.AppCompat"
-                android:textSize="18sp"
+                style="@style/FTCText"
                 app:layout_constraintEnd_toStartOf="@id/duration_value"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
                 app:layout_constraintStart_toStartOf="parent"
@@ -59,23 +66,61 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="期限"
-                android:textAppearance="@style/TextAppearance.AppCompat"
-                android:textSize="18sp"
+                style="@style/FTCText"
                 app:layout_constraintBaseline_toBaselineOf="@id/duration_label"
                 app:layout_constraintEnd_toEndOf="@+id/member_value"
                 app:layout_constraintStart_toEndOf="@id/duration_label" />
 
 
             <Button
+                android:id="@+id/upgrade_to_premium"
                 style="@style/OrigamiButton.Primary.Small"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:text="我要升级"
+                android:text="升级成高级会员"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="@+id/duration_value"
                 app:layout_constraintStart_toStartOf="@+id/duration_label"
                 app:layout_constraintTop_toBottomOf="@+id/duration_label" />
+
         </android.support.constraint.ConstraintLayout>
+
+        <TextView
+            android:id="@+id/paywall_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="购买会员服务，阅读FT独家内容"
+            android:textAlignment="center"
+            style="@style/FTCText" />
+
+        <LinearLayout
+            android:id="@+id/paywall_login_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/paywall_login_prompt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="已经购买过？"
+                style="@style/FTCText" />
+
+            <Button
+                android:id="@+id/paywall_login_button"
+                style="@style/OrigamiButton.Inline.NoPadding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/action_login" />
+        </LinearLayout>
 
         <android.support.v7.widget.CardView
             android:id="@+id/subscription_standard"
@@ -95,8 +140,7 @@
                     android:background="@drawable/bottom_border"
                     android:layout_marginBottom="8dp"
                     android:text="@string/membership_standard"
-                    android:textAlignment="center"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+                    style="@style/FTCTitle" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -104,8 +148,7 @@
                     android:layout_marginBottom="8dp"
                     android:lineSpacingExtra="8sp"
                     android:text="@string/subscribe_description_standard"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textSize="18sp" />
+                    style="@style/FTCText" />
 
                 <Button
                     style="@style/OrigamiButton.Primary.Small"
@@ -144,8 +187,7 @@
                     android:layout_marginBottom="8dp"
                     android:background="@drawable/bottom_border"
                     android:text="@string/membership_premium"
-                    android:textAlignment="center"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+                    style="@style/FTCTitle" />
 
 
                 <TextView
@@ -154,8 +196,7 @@
                     android:layout_marginBottom="8dp"
                     android:lineSpacingExtra="8sp"
                     android:text="@string/subscribe_description_premium"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-                    android:textSize="18sp" />
+                    style="@style/FTCText" />
 
                 <TextView
                     android:layout_width="match_parent"

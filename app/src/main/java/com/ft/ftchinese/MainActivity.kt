@@ -1,6 +1,7 @@
 package com.ft.ftchinese
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -378,7 +379,7 @@ class MainActivity : AppCompatActivity(),
         val header = drawer_nav.getHeaderView(0)
 
         // If seems this is the only way to get the header view.
-        // You cannot user `import kotlinx.android.synthetic.activity_main_search.nav_header_main.*`,
+        // You cannot user `import kotlinx.android.synthetic.activity_main_search.drawer_nav_header.*`,
         // which will give you null pointer exception.
         header.findViewById<TextView>(R.id.nav_header_title).text = if (!user?.name.isNullOrBlank()) {
             user?.name
@@ -403,6 +404,13 @@ class MainActivity : AppCompatActivity(),
             startActivity(intent)
         } else {
             toast("您的设备上没有安装邮件程序，无法发送反馈邮件")
+        }
+    }
+
+    companion object {
+        fun start(context: Context?) {
+            val intent = Intent(context, MainActivity::class.java)
+            context?.startActivity(intent)
         }
     }
 

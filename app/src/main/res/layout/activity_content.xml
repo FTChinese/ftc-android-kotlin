@@ -71,6 +71,7 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
+
     <!-- See https://medium.com/@nomanr/constraintlayout-chains-4f3b58ea15bb on how to evenly distribute child views inside ConstraintLayout -->
     <!-- Also refer to Chains section in https://developer.android.com/reference/android/support/constraint/ConstraintLayout -->
     <android.support.constraint.ConstraintLayout

@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.ft.ftchinese.R
+import com.ft.ftchinese.models.Membership
 import com.ft.ftchinese.models.User
 import kotlinx.android.synthetic.main.fragment_membership.*
 
@@ -65,8 +66,19 @@ class MembershipFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        member_value.text = user?.membership?.type
-        duration_value.text = user?.membership?.expireAt
+        if (user == null) {
+            membership_container.visibility = View.GONE
+        } else {
+            member_value.text = user?.membership?.type
+            duration_value.text = user?.membership?.expireAt
+
+            paywall_login_container.visibility = View.GONE
+
+            // Show a button to let standard member to upgrade to premium. Disabled for now.
+//            if (user?.membership?.type == Membership.TYPE_STANDARD) {
+//                upgrade_to_premium.visibility = View.VISIBLE
+//            }
+        }
     }
 
     override fun onDetach() {

@@ -211,6 +211,10 @@ data class ChannelItem(
         const val LANGUAGE_CN = 0
         const val LANGUAGE_EN = 1
         const val LANGUAGE_BI = 2
+        const val TYPE_STORY = "story"
+        const val TYPE_PREMIUM = "premium"
+        const val TYPE_INTERACTIVE = "interactive"
+        const val SUB_TYPE_RADIO = "radio"
 
         suspend fun readTemplate(resources: Resources): String? {
             val job = async {

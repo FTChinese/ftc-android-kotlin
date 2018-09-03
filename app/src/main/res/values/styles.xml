@@ -38,7 +38,7 @@
 
     </style>
 
-    <style name="OrigamiButton" parent="Widget.AppCompat.Button"/>
+    <style name="OrigamiButton" parent="Widget.AppCompat.Button" />
 
     <!-- This is the default Widget.AppCompat.Button style. You override them.-->
     <!-- See https://chromium.googlesource.com/android_tools/+/HEAD/sdk/extras/android/support/v7/appcompat/res/values/styles_base.xml -->
@@ -73,6 +73,19 @@
         <item name="android:padding">8dp</item>
     </style>
 
+    <style name="OrigamiButton.Inline">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:textColor">@color/colorTeal</item>
+        <item name="android:minHeight">0dip</item>
+        <item name="android:minWidth">0dip</item>
+        <item name="android:padding">4dp</item>
+    </style>
+
+    <style name="OrigamiButton.Inline.NoPadding">
+        <item name="android:padding">0dp</item>
+    </style>
+
+
     <style name="OrigamiToolbar" parent="Widget.AppCompat.Toolbar">
         <item name="android:background">@color/colorWheat</item>
     </style>
@@ -90,5 +103,22 @@
     <style name="Origami.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Origami.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="FTCText">
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body1</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="FTCTitle">
+        <item name="android:textAlignment">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Headline</item>
+    </style>
+
+    <style name="FullscreenTheme" parent="AppTheme">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@null</item>
+    </style>
 
 </resources>
