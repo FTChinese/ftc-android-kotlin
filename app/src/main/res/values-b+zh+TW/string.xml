@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FTChinese</string>
+    <string name="action_search">搜索</string>
+    <string name="action_share">分享</string>
+    <string name="action_favorite">收藏</string>
+
+    <string name="share_template">[FT中文網]%1$s - %2$s</string>
+    <!-- Bottom navigation tabs -->
+    <string name="nav_news">新聞</string>
+    <string name="nav_english">每日英語</string>
+    <string name="nav_ftacademy">FT商學院</string>
+    <string name="nav_video">視頻</string>
+    <string name="nav_myft">我的FT</string>
+
+    <string name="news_editor_choice">編輯精選</string>
+
+    <string name="titlebar_cn">中文</string>
+    <string name="titlebar_en">英文</string>
+    <string name="titlebar_bilingual">對照</string>
+
+    <!-- Drawer -->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_not_logged_in">您尚未登錄</string>
+    <string name="nav_header_desc">导航栏头部</string>
+
+    <string name="subscribe_description_standard">\u2714 精選深度分析\n\u2714 中英雙語內容\n\u2714 金融英語速讀訓練\n\u2714 英語原聲電台\n\u2714 無限瀏覽7日前所有歷史文章（近8萬篇）</string>
+    <string name="subscribe_description_premium">\u2714 享受“標準會員”所有權益\n\u2714 編輯精選，總編/各版塊主編每週五為您推薦本週必讀資訊，分享他們的思考與觀點\n\u2714 FT中文網2019年度論壇門票2張</string>
+    <string name="subscribe_description_note">注：所有活動門票不可折算現金、不能轉讓、不含差旅與食宿</string>
+    <string name="subscribe_now">立即訂閱</string>
+
+    <string name="price_standard">¥198.00/年</string>
+    <string name="price_premium">¥1,998.00/年</string>
+    <string name="membership_standard">標準會員</string>
+    <string name="membership_premium">高級會員</string>
+
+    <string name="action_title_account">帳號與安全</string>
+    <string name="action_subscription">會員訂閱</string>
+    <string name="aciton_help">幫助</string>
+    <string name="action_feedback">反饋</string>
+    <string name="action_logout">退出登錄</string>
+    <string name="action_settings">設置</string>
+    <string name="action_about">關於我們</string>
+
+    <!-- Myft tabs -->
+    <string name="myft_reading_history">閱讀歷史</string>
+    <string name="myft_starred_articles">收藏文章</string>
+    <string name="myft_following">關注</string>
+
+    <!-- Strings related to login -->
+    <string name="title_login">登錄FT中文網</string>
+    <string name="title_sign_up">創建FT中文網帳號</string>
+    <string name="title_reset_password">找回密碼</string>
+    <string name="title_activity_profile">我的資料</string>
+    <string name="title_change_password">修改密碼</string>
+    <string name="title_change_email">修改登錄郵箱</string>
+    <string name="title_change_username">修改用戶名</string>
+    <string name="title_about_us">關於我們</string>
+
+    <string name="about_title1">關於FT中文網(FTChinese.com)</string>
+    <string name="about_text1">FT中文網(http://www.FTChinese.com) 是英國《金融時報》集團旗下唯一的中文商業財經網站，旨在為中國商業菁英和決策者們提供每日不可或缺的商業財經新聞、深度分析以及評論。憑借英國《金融時報》遍布全球的豐富報道資源，FT中文網深入分析對中國經濟和全球商業具有影響力的重大事件，並揭示事件的來龍去脈，以真正富有國際視野的權威報道成為中國高級管理人員“必讀”的商業財經資訊網站。FT中文網目前擁有逾270 萬註冊用戶，移動產品已覆蓋iOS、Android和Windows系統。2018年4月，FT中文網正式推出付費訂閱業務，為專屬會員提供精選資訊與個性化服務。</string>
+    <string name="about_title2">關於英國《金融時報》</string>
+    <string name="about_text2">英國《金融時報》是一家世界領先的商業新聞機構，以其內容報道的權威性、真實性、準確性享譽世界。2018年，英國《金融時報》迎來130周年，創造歷史最高的付費訂閱記錄，擁有逾910,000位付費讀者。現在，英國《金融時報》已成為一家以數字內容出版為主營業務的新聞機構，數字訂閱增長達10%，擁有逾714,000位付費讀者, 並在所有付費讀者中占比超過75%。其來自內容的收入增長迅速，約占總營收的2/3，與五年前相比實現翻番。</string>
+
+    <string name="prompt_email">郵箱</string>
+    <string name="prompt_new_email">新郵箱</string>
+    <string name="prompt_current_email">当前郵箱</string>
+    <string name="prompt_current_name">当前用户名</string>
+    <string name="prompt_new_name">新用户名</string>
+    <string name="prompt_password">密碼</string>
+    <string name="prompt_old_password">当前密碼</string>
+    <string name="prompt_new_password">新密碼</string>
+    <string name="prompt_confirm_password">确认新密碼</string>
+    <string name="prompt_password_letter">請輸入您的登錄FT中文網所用的電子郵箱，我們會向該郵箱發送郵件，幫您重置密碼</string>
+    <string name="prompt_letter_sent">請檢查您的郵件，點擊郵件中的“重置密碼”鏈接，在所打開的網頁中修改您的密碼。如果幾分鐘內沒有看到郵件，請檢查是否被放進了垃圾郵件列表。</string>
+    <string name="prompt_not_logged_in">您尚未登錄，登錄後可以查看</string>
+
+    <string name="action_login">登錄</string>
+    <string name="action_wx_login">微信登錄</string>
+    <string name="action_sign_up">註冊</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="action_password_letter">发送郵件</string>
+    <string name="action_save">保存</string>
+    <string name="success_saved">保存成功!</string>
+    <string name="success_updated">更新成功!</string>
+    <string name="success_letter_sent">郵件已發送</string>
+    <string name="action_updating">更新數據...</string>
+
+    <string name="link_reset_password">忘记密碼?</string>
+    <string name="link_sign_up">註冊帳號</string>
+    <string name="link_login">已有帳號?登錄</string>
+
+    <!-- Form error message -->
+    <string name="error_invalid_email">郵箱地址無效</string>
+    <string name="error_email_unchanged">您已经在使用该郵箱</string>
+    <string name="error_name_unchanged">不能与当前用户名相同</string>
+    <string name="error_invalid_password">密碼无效</string>
+    <string name="error_mismatched_confirm_password">两次输入的新密碼不匹配</string>
+    <string name="error_incorrect_password">密碼錯誤</string>
+    <string name="error_field_required">請填寫此項</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+
+    <string name="api_empty_url">請求地址錯誤</string>
+    <string name="api_network_failure">網絡錯誤</string>
+    <string name="api_io_error">無法讀取數據</string>
+    <string name="api_json_syntax">無法解析數據</string>
+    <string name="api_empty_response">服務器沒有響應</string>
+
+    <string name="pref_language">語言偏好</string>
+    <string name="pref_clear_cache">清除緩存</string>
+    <string name="pref_clear_history">清空閱讀歷史</string>
+    <string name="summary_articles_read">已閱讀 %1$d 篇文章</string>
+
+    <string-array name="profile_gender_entries">
+        <item>男</item>
+        <item>女</item>
+    </string-array>
+    <string-array name="profile_gender_values">
+        <item>M</item>
+        <item>F</item>
+    </string-array>
+
+    <string-array name="settings_font_entries">
+        <item>最小</item>
+        <item>较小</item>
+        <item>默認</item>
+        <item>較大</item>
+        <item>最大</item>
+    </string-array>
+    <string-array name="settings_font_values">
+        <item>xs</item>
+        <item>s</item>
+        <item>m</item>
+        <item>l</item>
+        <item>xl</item>
+    </string-array>
+    <string-array name="settings_language_entries">
+        <item>簡體</item>
+        <item>繁體</item>
+    </string-array>
+    <string-array name="settings_language_values">
+        <item>sc</item>
+        <item>tc</item>
+    </string-array>
+</resources>

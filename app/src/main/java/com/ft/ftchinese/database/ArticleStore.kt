@@ -6,8 +6,10 @@ import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
 import android.util.Log
 import com.ft.ftchinese.models.ChannelItem
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
-class ArticleStore private constructor(context: Context){
+class ArticleStore private constructor(context: Context) : AnkoLogger {
 
     private val mDatabase: SQLiteDatabase = ArticleDbHelper.getInstance(context)
             .writableDatabase
@@ -33,6 +35,22 @@ class ArticleStore private constructor(context: Context){
         )
 
         return ArticleCursorWrapper(cursor)
+    }
+
+    fun countHistory(): Int {
+        val cursor = queryHistory()
+        val count = cursor.count
+        cursor.close()
+        return count
+    }
+
+    fun dropHistory() {
+        try {
+            mDatabase.execSQL(HistoryTable.SQL_DELETE_TABLE)
+            mDatabase.execSQL(HistoryTable.SQL_CREATE_TABLE)
+        } catch (e: Exception) {
+            info("Drop reading_history table error: $e")
+        }
     }
 
     fun addStarred(item: ChannelItem?) {

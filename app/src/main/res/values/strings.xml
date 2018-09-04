@@ -21,7 +21,6 @@
     <!-- Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">FT中文网</string>
     <string name="nav_not_logged_in">您尚未登录</string>
     <string name="nav_header_desc">导航栏头部</string>
 
@@ -107,7 +106,12 @@
     <string name="api_network_failure">网络错误</string>
     <string name="api_io_error">无法读取数据</string>
     <string name="api_json_syntax">无法解析数据</string>
-    <string name="api_empty_response">API没有响应</string>
+    <string name="api_empty_response">服务器没有响应</string>
+
+    <string name="pref_language">语言偏好</string>
+    <string name="pref_clear_cache">清除缓存</string>
+    <string name="pref_clear_history">清空阅读历史</string>
+    <string name="summary_articles_read">已阅读 %1$d 篇文章</string>
 
     <string-array name="profile_gender_entries">
         <item>男</item>
