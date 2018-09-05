@@ -1,11 +1,12 @@
 package com.ft.ftchinese
 
-import com.ft.ftchinese.models.Account
-import com.ft.ftchinese.models.EmailUpdate
-import com.ft.ftchinese.models.UserNameUpdate
+import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.Fetch
 import com.github.javafaker.Faker
+import kotlinx.coroutines.experimental.runBlocking
 import okhttp3.Response
+import org.joda.time.LocalDate
+import org.joda.time.format.ISODateTimeFormat
 import org.junit.Test
 
 class RequestTest {
@@ -69,6 +70,48 @@ class RequestTest {
                 .end()
 
         print(response)
+    }
+
+    @Test
+    fun ad() = runBlocking {
+
+        val prefSchedule = mutableMapOf<String, MutableSet<LaunchAd>>()
+
+        val schedule = LaunchSchedule.getData() ?: return@runBlocking
+
+        val today = LocalDate.now()
+
+        for (item in schedule.sections) {
+            if (item.android != "yes") {
+                continue
+            }
+
+            for (date in item.scheduledOn) {
+                if (date.isNullOrBlank()) {
+                    continue
+                }
+                try {
+                    val planned = LocalDate.parse(date, ISODateTimeFormat.basicDate())
+                    if (today.isAfter(planned)) {
+                        continue
+                    }
+
+                    if (prefSchedule.containsKey(date)) {
+                        prefSchedule[date]?.add(item)
+                    } else {
+                        prefSchedule[date] = mutableSetOf(item)
+                    }
+
+                } catch (e: Exception) {
+                    continue
+                }
+            }
+        }
+
+        for ((key, value) in prefSchedule) {
+            System.out.println(key)
+            System.out.println(value)
+        }
     }
 }
 

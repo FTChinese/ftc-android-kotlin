@@ -17,3 +17,17 @@ values-b+zh+TW
 values-b+zh+HK
 values-b+zh+MO
 ```
+
+## Server-side App Launch Ad API
+
+* It should use HTTP header (like etag) to tell client whether the resource is outdated and client should update local data;
+
+* Use JSON. Use meaningful JSON.
+
+DO NOT USE strings `yes` or `no` to indicate Boolean values! Use `true` or `false` please.
+
+DO NOT USE strings for numeric values! Use number as number. Why convert numbers to strings and force client to do the conversion back?
+
+DO NOT USE strings for array. If you mean an array, use an array. DO NOT USE a dot/comma...-separated string as array.
+
+JSON keys should indicated the meaning of their value.

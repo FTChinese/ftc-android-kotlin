@@ -18,6 +18,7 @@ import android.support.v7.widget.SearchView
 import android.view.*
 import android.widget.TextView
 import com.ft.ftchinese.database.ArticleDbHelper
+import com.ft.ftchinese.models.LaunchSchedule
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.MyftTab
 import com.ft.ftchinese.models.User
@@ -25,6 +26,7 @@ import com.ft.ftchinese.user.*
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.info
@@ -151,6 +153,14 @@ class MainActivity : AppCompatActivity(),
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false)
         api.registerApp(BuildConfig.WECAHT_APP_ID)
 
+        checkAd()
+    }
+
+    private fun checkAd() {
+        launch {
+            val schedules = LaunchSchedule.getData()
+            schedules?.save(this@MainActivity)
+        }
     }
 
     override fun onRestart() {

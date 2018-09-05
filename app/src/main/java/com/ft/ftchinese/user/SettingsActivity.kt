@@ -21,8 +21,6 @@ class SettingsActivity : SingleFragmentActivity() {
     }
 
     companion object {
-        const val PREF_KEY_LANGUAGE = "pref_key_language"
-
         fun start(context: Context) {
             val intent = Intent(context, SettingsActivity::class.java)
             context.startActivity(intent)
