@@ -5,7 +5,6 @@ import android.util.Log
 import com.ft.ftchinese.util.ApiEndpoint
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
-import com.github.kittinunf.fuel.Fuel
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.experimental.async
 import java.io.IOException

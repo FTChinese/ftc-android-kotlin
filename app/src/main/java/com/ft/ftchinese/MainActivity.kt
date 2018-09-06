@@ -3,7 +3,7 @@ package com.ft.ftchinese
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.graphics.PixelFormat
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.support.customtabs.CustomTabsIntent
@@ -21,21 +21,20 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.*
+import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.koushikdutta.ion.Ion
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import org.joda.time.LocalDate
 import org.joda.time.format.ISODateTimeFormat
+import java.nio.file.FileSystem
 
 const val REQUEST_CODE_SIGN_IN = 1
 const val REQUEST_CODE_SIGN_UP = 2
@@ -190,23 +189,13 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun showAd() {
-        val localDate = LocalDate.now()
-        val today = ISODateTimeFormat.basicDate().print(localDate)
+        val todaySchedules = LaunchSchedule.loadFromPref(this)
 
-        val sharedPreferences = getSharedPreferences(LaunchSchedule.PREF_AD_SCHEDULE, Context.MODE_PRIVATE)
+        val ad = todaySchedules[0]
 
-        val scheduleSet = sharedPreferences.getStringSet(today, null)
-
-        // If there's not schedule for today, stop.
-        if (scheduleSet == null || scheduleSet.isEmpty()) {
-            showSystemUI()
+        if (!Store.exists(this, ad.imageName)) {
             return
         }
-
-        // Parse JSON
-        val todaySchedules = scheduleSet.map {
-                    gson.fromJson(it, LaunchAd::class.java)
-                }
 
         // Read this article on how inflate works:
         // https://www.bignerdranch.com/blog/understanding-androids-layoutinflater-inflate/
@@ -214,21 +203,6 @@ class MainActivity : AppCompatActivity(),
         root_container.addView(adView)
         val adImage = adView.findViewById<ImageView>(R.id.ad_image)
         val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
-
-        val ad = todaySchedules[0]
-
-        Ion.with(adImage)
-                .load(ad.imageUrl)
-
-        timerJob = launch(UI) {
-            for (i in 5 downTo 1) {
-                adTimer.text = "跳过 ${i}"
-                delay(1000)
-            }
-
-            root_container.removeView(adView)
-//            showSystemUI()
-        }
 
         adTimer.setOnClickListener {
             toast("Clicked timer")
@@ -244,12 +218,40 @@ class MainActivity : AppCompatActivity(),
             timerJob?.cancel()
             info("Clicked ads")
         }
+
+        timerJob = launch(UI) {
+            val result = async {
+                Drawable.createFromStream(openFileInput(ad.imageName), ad.imageName)
+            }
+
+            val drawable = result.await()
+
+            adImage.setImageDrawable(drawable)
+
+            for (i in 5 downTo 1) {
+                adTimer.text = getString(R.string.prompt_ad_timer, i)
+                delay(1000)
+            }
+
+            root_container.removeView(adView)
+//            showSystemUI()
+        }
     }
 
     private fun checkAd() {
-        launch {
-            val schedules = LaunchSchedule.getData()
+        launch(CommonPool) {
+            val schedules = LaunchSchedule.fetchData()
             schedules?.save(this@MainActivity)
+
+            downloadAdImage()
+        }
+    }
+
+    private fun downloadAdImage() {
+        val adsToDownload = LaunchSchedule.loadFromPref(this, days = 1)
+
+        for (ad in adsToDownload) {
+            ad.cacheImage(this)
         }
     }
 

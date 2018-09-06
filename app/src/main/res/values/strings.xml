@@ -19,6 +19,7 @@
     <string name="titlebar_bilingual">对照</string>
 
     <string name="double_click_exit">再按一次退出程序</string>
+    <string name="prompt_ad_timer">跳过 %1$d</string>
 
     <!-- Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>

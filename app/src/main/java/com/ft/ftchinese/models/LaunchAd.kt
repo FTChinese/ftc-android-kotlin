@@ -6,8 +6,13 @@ import com.ft.ftchinese.util.gson
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.experimental.async
 import android.net.Uri
+import com.ft.ftchinese.util.Store
+import com.koushikdutta.ion.Ion
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import org.joda.time.LocalDate
 import org.joda.time.format.ISODateTimeFormat
+import java.io.File
 
 data class LaunchMeta(
     val title: String,
@@ -27,7 +32,7 @@ data class LaunchAd(
         val ipad: String,
         val dates: String,
         val weight: String
-) {
+) : AnkoLogger {
     val scheduledOn: List<String>
         get() = dates.split(",")
 
@@ -37,6 +42,19 @@ data class LaunchAd(
             val segments = uri.pathSegments
             return segments[segments.size - 1]
         }
+
+    fun cacheImage(context: Context) {
+        if (Store.exists(context, imageName)) {
+            return
+        }
+
+        Ion.with(context)
+                .load(imageUrl)
+                .write(File(context.filesDir, imageName))
+                .setCallback { e, result ->
+                    info("Download complete: ${result.absolutePath}")
+                }
+    }
 }
 
 class LaunchSchedule(
@@ -69,6 +87,9 @@ class LaunchSchedule(
         editor.apply()
     }
 
+    /**
+     * Use date as key. For example: 20180906
+     */
     fun formatData(): Map<String, Set<LaunchAd>> {
         val prefSchedule = mutableMapOf<String, MutableSet<LaunchAd>>()
 
@@ -110,7 +131,7 @@ class LaunchSchedule(
         const val PREF_AD_SCHEDULE = "ad_schedule"
         private const val PREF_KEY_LASTED_MODIFIED = "last_modified"
 
-        suspend fun getData(): LaunchSchedule? {
+        suspend fun fetchData(): LaunchSchedule? {
             return try {
                 val job = async {
                     Fetch().get("https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule")
@@ -128,6 +149,28 @@ class LaunchSchedule(
 
                 null
             }
+        }
+
+        /**
+         * @param days specify how many days' data you want to retrieve, starting from today.
+         */
+        fun loadFromPref(context: Context, days: Int = 0): List<LaunchAd> {
+            val sharedPreferences = context.getSharedPreferences(LaunchSchedule.PREF_AD_SCHEDULE, Context.MODE_PRIVATE)
+
+            val localDate = LocalDate.now()
+            val formatter = ISODateTimeFormat.basicDate()
+
+            val today = formatter.print(localDate)
+
+            val ads = sharedPreferences.getStringSet(today, mutableSetOf())
+
+            for (i in 0..days) {
+                val key = formatter.print(localDate.plusDays(i))
+                val adData = sharedPreferences.getStringSet(key, setOf())
+                ads.union(adData)
+            }
+
+            return ads.map { gson.fromJson(it, LaunchAd::class.java) }
         }
     }
 }

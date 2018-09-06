@@ -22,6 +22,14 @@ object Store {
         Log.i(TAG, "Saved file: ${file.name}. Canonical path: ${file.canonicalPath}")
     }
 
+    fun exists(context: Context, filename: String): Boolean {
+        return try {
+            File(context.filesDir, filename).exists()
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     fun load(context: Context?, filename: String?): String? {
         Log.i(TAG, "Reading file: $filename")
         if (context == null || filename == null) {
