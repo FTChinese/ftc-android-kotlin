@@ -19,6 +19,8 @@
     <string name="titlebar_en">英文</string>
     <string name="titlebar_bilingual">對照</string>
 
+    <string name="double_click_exit">再按一次退出程序</string>
+
     <!-- Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

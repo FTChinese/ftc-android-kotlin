@@ -3,9 +3,10 @@ package com.ft.ftchinese
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.PixelFormat
 import android.net.Uri
 import android.os.Bundle
-import android.preference.PreferenceManager
+import android.support.customtabs.CustomTabsIntent
 import android.support.design.widget.*
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
@@ -16,21 +17,25 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.SearchView
 import android.view.*
+import android.widget.ImageView
 import android.widget.TextView
-import com.ft.ftchinese.database.ArticleDbHelper
-import com.ft.ftchinese.models.LaunchSchedule
-import com.ft.ftchinese.models.ListPage
-import com.ft.ftchinese.models.MyftTab
-import com.ft.ftchinese.models.User
+import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.*
+import com.ft.ftchinese.util.gson
+import com.koushikdutta.ion.Ion
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.alert
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
+import org.joda.time.LocalDate
+import org.joda.time.format.ISODateTimeFormat
 
 const val REQUEST_CODE_SIGN_IN = 1
 const val REQUEST_CODE_SIGN_UP = 2
@@ -44,6 +49,9 @@ class MainActivity : AppCompatActivity(),
 
     private var mBottomDialog: BottomSheetDialog? = null
     private var user: User? = null
+    private var mBackKeyPressed = false
+    private var exitJob: Job? = null
+    private var timerJob: Job? = null
 
     /**
      * Implementation of BottomNavigationView.OnNavigationItemSelectedListener
@@ -119,8 +127,16 @@ class MainActivity : AppCompatActivity(),
     lateinit var api: IWXAPI
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // https://developer.android.com/training/system-ui/immersive
+//        hideSystemUI()
+        showAd()
+
+//        setTheme(R.style.Origami)
+
         setSupportActionBar(toolbar)
 
         val toggle = ActionBarDrawerToggle(
@@ -153,7 +169,81 @@ class MainActivity : AppCompatActivity(),
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false)
         api.registerApp(BuildConfig.WECAHT_APP_ID)
 
+
         checkAd()
+    }
+
+    private fun hideSystemUI() {
+        window.decorView.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_LOW_PROFILE or
+                View.SYSTEM_UI_FLAG_FULLSCREEN or
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+    }
+
+    private fun showSystemUI() {
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+    }
+
+    private fun showAd() {
+        val localDate = LocalDate.now()
+        val today = ISODateTimeFormat.basicDate().print(localDate)
+
+        val sharedPreferences = getSharedPreferences(LaunchSchedule.PREF_AD_SCHEDULE, Context.MODE_PRIVATE)
+
+        val scheduleSet = sharedPreferences.getStringSet(today, null)
+
+        // If there's not schedule for today, stop.
+        if (scheduleSet == null || scheduleSet.isEmpty()) {
+            showSystemUI()
+            return
+        }
+
+        // Parse JSON
+        val todaySchedules = scheduleSet.map {
+                    gson.fromJson(it, LaunchAd::class.java)
+                }
+
+        // Read this article on how inflate works:
+        // https://www.bignerdranch.com/blog/understanding-androids-layoutinflater-inflate/
+        val adView = View.inflate(this, R.layout.ad_view, null)
+        root_container.addView(adView)
+        val adImage = adView.findViewById<ImageView>(R.id.ad_image)
+        val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
+
+        val ad = todaySchedules[0]
+
+        Ion.with(adImage)
+                .load(ad.imageUrl)
+
+        timerJob = launch(UI) {
+            for (i in 5 downTo 1) {
+                adTimer.text = "跳过 ${i}"
+                delay(1000)
+            }
+
+            root_container.removeView(adView)
+//            showSystemUI()
+        }
+
+        adTimer.setOnClickListener {
+            toast("Clicked timer")
+            root_container.removeView(adView)
+//            showSystemUI()
+        }
+
+        adImage.setOnClickListener {
+            val customTabsInt = CustomTabsIntent.Builder().build()
+            customTabsInt.launchUrl(this, Uri.parse(ad.linkUrl))
+            root_container.removeView(adView)
+//            showSystemUI()
+            timerJob?.cancel()
+            info("Clicked ads")
+        }
     }
 
     private fun checkAd() {
@@ -221,6 +311,8 @@ class MainActivity : AppCompatActivity(),
     override fun onDestroy() {
         super.onDestroy()
 
+        timerJob?.cancel()
+
         info("onDestroy finished")
     }
 
@@ -234,7 +326,22 @@ class MainActivity : AppCompatActivity(),
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
         } else {
-            super.onBackPressed()
+            doubleClickToExit()
+        }
+    }
+
+    private fun doubleClickToExit() {
+        if (!mBackKeyPressed) {
+            toast("再按一次退出程序")
+            mBackKeyPressed = true
+
+            exitJob = launch(CommonPool) {
+                delay(2000)
+                mBackKeyPressed = false
+            }
+        } else {
+            exitJob?.cancel()
+            finish()
         }
     }
 

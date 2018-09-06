@@ -1,3 +1,14 @@
+## Test locally against API
+
+1. Install MySQL.
+2. Use `https://gitlab.com/ftchinese/sql-schema` to setup schema and populate data.
+3. Install Golang
+4. Clone this repository `https://gitlab.com/ftchinese/next-api` into golang's designated path, which should be `~/go/src/gitlab.com/ftchinese`.
+5. `cd` into `~/go/src/gitlab.com/ftchinese/next-api`
+6. Execute `make`.
+7. Use [Serveo](https://serveo.net/) for forward external request to your localhost: `ssh -R 80:localhost:8000 serveo.net`
+8. Change `private const val BASE = "https://lacerta.serveo.net"` in this package `util/ApiEndpoint` to the URL Serveo gives you.
+
 ## Localization
 
 ```
