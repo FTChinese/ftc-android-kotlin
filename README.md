@@ -31,3 +31,8 @@ DO NOT USE strings for numeric values! Use number as number. Why convert numbers
 DO NOT USE strings for array. If you mean an array, use an array. DO NOT USE a dot/comma...-separated string as array.
 
 JSON keys should indicated the meaning of their value.
+
+
+## Keystore File
+
+In the root of this project, add a file `keystore.properties` and add this line in it: `wechat.appId="your wechat app id"`.
