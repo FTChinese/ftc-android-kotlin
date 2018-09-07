@@ -9,6 +9,14 @@
 7. Use [Serveo](https://serveo.net/) for forward external request to your localhost: `ssh -R 80:localhost:8000 serveo.net`
 8. Change `private const val BASE = "https://lacerta.serveo.net"` in this package `util/ApiEndpoint` to the URL Serveo gives you.
 
+## Log on ActionBar
+
+Reference: https://stackoverflow.com/questions/15248207/actionbar-logo-size
+
+* drawable-mdpi/ic_logo_wide.png (75 x 32 px)
+* drawable-hdpi/ic_logo_wide.png (112 x 48 px)
+* drawable-xhdpi/ic_logo_wide.png (149 x 64 px)
+
 ## Localization
 
 ```

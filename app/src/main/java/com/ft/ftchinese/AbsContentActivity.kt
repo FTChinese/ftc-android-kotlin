@@ -255,7 +255,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
                         msg.title = articleTitle
                         msg.description = articleStandfirst
 
-                        val bmp = BitmapFactory.decodeResource(resources, R.drawable.ftc_logo_square)
+                        val bmp = BitmapFactory.decodeResource(resources, R.drawable.brand_ftc_logo_square_48)
                         val thumbBmp = Bitmap.createScaledBitmap(bmp, 150, 150, true)
                         bmp.recycle()
                         msg.thumbData = bmpToByteArray(thumbBmp, true)

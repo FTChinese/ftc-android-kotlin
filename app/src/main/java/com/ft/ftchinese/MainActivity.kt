@@ -22,8 +22,6 @@ import android.widget.TextView
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.*
 import com.ft.ftchinese.util.Store
-import com.ft.ftchinese.util.gson
-import com.koushikdutta.ion.Ion
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -32,9 +30,6 @@ import kotlinx.coroutines.experimental.android.UI
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-import org.joda.time.LocalDate
-import org.joda.time.format.ISODateTimeFormat
-import java.nio.file.FileSystem
 
 const val REQUEST_CODE_SIGN_IN = 1
 const val REQUEST_CODE_SIGN_UP = 2
@@ -51,6 +46,12 @@ class MainActivity : AppCompatActivity(),
     private var mBackKeyPressed = false
     private var exitJob: Job? = null
     private var timerJob: Job? = null
+    private var mTabAdapter: TabPagerAdapter? = null
+    private var mNewsAdapter: TabPagerAdapter? = null
+    private var mEnglishAdapter: TabPagerAdapter? = null
+    private var mFtaAdapter: TabPagerAdapter? = null
+    private var mVideoAdapter: TabPagerAdapter? = null
+    private var mMyftPagerAdapter: MyftPagerAdapter? = null
 
     /**
      * Implementation of BottomNavigationView.OnNavigationItemSelectedListener
@@ -60,31 +61,47 @@ class MainActivity : AppCompatActivity(),
 
         when (item.itemId) {
             R.id.nav_news -> {
-                supportActionBar?.setTitle(R.string.app_name)
-                view_pager.adapter = SectionsPagerAdapter(ListPage.newsPages, supportFragmentManager)
-
+                if (mNewsAdapter == null) {
+                    mNewsAdapter = TabPagerAdapter(ListPage.newsPages, supportFragmentManager)
+                }
+                view_pager.adapter = mNewsAdapter
+                displayLogo()
             }
 
             R.id.nav_english -> {
-                supportActionBar?.setTitle(R.string.nav_english)
-                view_pager.adapter = SectionsPagerAdapter(ListPage.englishPages, supportFragmentManager)
+                if (mEnglishAdapter == null) {
+                    mEnglishAdapter = TabPagerAdapter(ListPage.englishPages, supportFragmentManager)
+                }
+                view_pager.adapter = mEnglishAdapter
 
+                displayTitle(R.string.nav_english)
             }
 
             R.id.nav_ftacademy -> {
-                supportActionBar?.setTitle(R.string.nav_ftacademy)
-                view_pager.adapter = SectionsPagerAdapter(ListPage.ftaPages, supportFragmentManager)
+                if (mFtaAdapter == null) {
+                    mFtaAdapter = TabPagerAdapter(ListPage.ftaPages, supportFragmentManager)
+                }
+                view_pager.adapter = mFtaAdapter
 
+                displayTitle(R.string.nav_ftacademy)
             }
 
             R.id.nav_video -> {
-                supportActionBar?.setTitle(R.string.nav_video)
-                view_pager.adapter = SectionsPagerAdapter(ListPage.videoPages, supportFragmentManager)
+                if (mVideoAdapter == null) {
+                    mVideoAdapter = TabPagerAdapter(ListPage.videoPages, supportFragmentManager)
+                }
+                view_pager.adapter = mVideoAdapter
 
+                displayTitle(R.string.nav_video)
             }
 
             R.id.nav_myft -> {
-                view_pager.adapter = MyftPagerAdapter(MyftTab.pages, supportFragmentManager)
+                if (mMyftPagerAdapter == null) {
+                    mMyftPagerAdapter = MyftPagerAdapter(MyftTab.pages, supportFragmentManager)
+                }
+                view_pager.adapter = mMyftPagerAdapter
+
+                displayTitle(R.string.nav_myft)
             }
         }
         true
@@ -128,15 +145,16 @@ class MainActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+        setTheme(R.style.Origami)
         setContentView(R.layout.activity_main)
+
 
         // https://developer.android.com/training/system-ui/immersive
 //        hideSystemUI()
         showAd()
 
-//        setTheme(R.style.Origami)
-
         setSupportActionBar(toolbar)
+        displayLogo()
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -144,7 +162,10 @@ class MainActivity : AppCompatActivity(),
         toggle.syncState()
 
         // Set ViewPager adapter
-        view_pager.adapter = SectionsPagerAdapter(ListPage.newsPages, supportFragmentManager)
+        if (mNewsAdapter == null) {
+            mNewsAdapter = TabPagerAdapter(ListPage.newsPages, supportFragmentManager)
+        }
+        view_pager.adapter = mNewsAdapter
 
         // Link ViewPager and TabLayout
         tab_layout.setupWithViewPager(view_pager)
@@ -169,11 +190,23 @@ class MainActivity : AppCompatActivity(),
         api.registerApp(BuildConfig.WECAHT_APP_ID)
 
 
-        checkAd()
+//        checkAd()
+    }
+
+    private fun displayLogo() {
+        supportActionBar?.setDisplayUseLogoEnabled(true)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+        supportActionBar?.setLogo(R.drawable.ftc_masthead)
+    }
+
+    private fun displayTitle(title: Int) {
+        supportActionBar?.setDisplayUseLogoEnabled(false)
+        supportActionBar?.setDisplayShowTitleEnabled(true)
+        supportActionBar?.setTitle(title)
     }
 
     private fun hideSystemUI() {
-        window.decorView.systemUiVisibility =
+        root_container.systemUiVisibility =
                 View.SYSTEM_UI_FLAG_LOW_PROFILE or
                 View.SYSTEM_UI_FLAG_FULLSCREEN or
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
@@ -183,50 +216,75 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun showSystemUI() {
-        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN)
+        supportActionBar?.show()
+        root_container.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
     }
 
     private fun showAd() {
+
         val todaySchedules = LaunchSchedule.loadFromPref(this)
 
+        if (todaySchedules.isEmpty()) {
+            info("No ad schedule found")
+            showSystemUI()
+            return
+        }
         val ad = todaySchedules[0]
 
         if (!Store.exists(this, ad.imageName)) {
+            info("Ad image ${ad.imageName} not found")
+            showSystemUI()
             return
         }
 
         // Read this article on how inflate works:
         // https://www.bignerdranch.com/blog/understanding-androids-layoutinflater-inflate/
         val adView = View.inflate(this, R.layout.ad_view, null)
+
+        info("Starting to show ad. Hide system ui.")
+        supportActionBar?.hide()
+        adView.systemUiVisibility =
+                View.SYSTEM_UI_FLAG_LOW_PROFILE or
+                View.SYSTEM_UI_FLAG_FULLSCREEN or
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+
+        info("Added ad view")
         root_container.addView(adView)
+
         val adImage = adView.findViewById<ImageView>(R.id.ad_image)
         val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
 
         adTimer.setOnClickListener {
             toast("Clicked timer")
             root_container.removeView(adView)
-//            showSystemUI()
+            showSystemUI()
         }
 
         adImage.setOnClickListener {
             val customTabsInt = CustomTabsIntent.Builder().build()
             customTabsInt.launchUrl(this, Uri.parse(ad.linkUrl))
             root_container.removeView(adView)
-//            showSystemUI()
+            showSystemUI()
             timerJob?.cancel()
             info("Clicked ads")
         }
 
         timerJob = launch(UI) {
-            val result = async {
+            val result = async(CommonPool) {
                 Drawable.createFromStream(openFileInput(ad.imageName), ad.imageName)
             }
 
             val drawable = result.await()
 
+            info("Retrieved drawable: ${ad.imageName}")
+
             adImage.setImageDrawable(drawable)
+            adTimer.visibility = View.VISIBLE
+            info("Show timer")
 
             for (i in 5 downTo 1) {
                 adTimer.text = getString(R.string.prompt_ad_timer, i)
@@ -234,7 +292,8 @@ class MainActivity : AppCompatActivity(),
             }
 
             root_container.removeView(adView)
-//            showSystemUI()
+            info("Remove ad")
+            showSystemUI()
         }
     }
 
@@ -536,22 +595,26 @@ class MainActivity : AppCompatActivity(),
 
     /**
      * A [FragmentPagerAdapter] that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
+     * one of the sections/tabs/mPages.
      */
-    inner class SectionsPagerAdapter(private val pages: Array<ListPage>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+    inner class TabPagerAdapter(private var mPages: Array<ListPage>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
         override fun getItem(position: Int): Fragment {
             // getItem is called to instantiate the fragment for the given page.
-            info("Fragment data: ${pages[position]}")
-            return SectionFragment.newInstance(pages[position])
+            info("Fragment data: ${mPages[position]}")
+            return SectionFragment.newInstance(mPages[position])
         }
 
         override fun getCount(): Int {
-            return pages.size
+            return mPages.size
         }
 
         override fun getPageTitle(position: Int): CharSequence? {
-            return pages[position].title
+            return mPages[position].title
+        }
+
+        fun setPages(pages: Array<ListPage>) {
+            mPages = pages
         }
     }
 
