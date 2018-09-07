@@ -55,3 +55,7 @@ JSON keys should indicated the meaning of their value.
 ## Keystore File
 
 In the root of this project, add a file `keystore.properties` and add this line in it: `wechat.appId="your wechat app id"`.
+
+## Problems
+
+It seems Kotlin coroutine does not work as expected. Even commonpool blocks the main thread.
