@@ -59,3 +59,5 @@ In the root of this project, add a file `keystore.properties` and add this line 
 ## Problems
 
 It seems Kotlin coroutine does not work as expected. Even commonpool blocks the main thread.
+
+`checkAd` launched on commonpool blocks the main thread. A network error blocks the following execution.
