@@ -29,25 +29,27 @@ import org.jetbrains.anko.info
  */
 class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
 
-    private var listener: OnFragmentInteractionListener? = null
-    private lateinit var navigateListener: ChannelWebViewClient.OnInAppNavigate
+    private var mListener: OnFragmentInteractionListener? = null
+    private var mNavigateListener: ChannelWebViewClient.OnInAppNavigate? = null
     private lateinit var mWebViewClient: ChannelWebViewClient
 
     /**
      * Meta data about current page: the tab's title, where to load data, etc.
      * Passed in when the fragment is created.
      */
-    private var currentPage: ListPage? = null
+    private var mTabMetadata: PagerTab? = null
 
     /**
      * iOS equivalent might be defined Page/Layouts/Pages/Content/DetailModelController.swift#pageData
-     * This is a list of articles on each currentPage.
-     * Its value if set when WebView finished loading a web page
+     * This is a list of articles on each mTabMetadata.
+     * Its value is set when WebView finished loading a web page
      */
     private var channelItems: Array<ChannelItem>? = null
     private var channelMeta: ChannelMeta? = null
     private var job: Job? = null
     private var user: User? = null
+    private var mTemplate: String? = null
+    private var mListContent: String? = null
 
     /**
      * This interface must be implemented by activities that contain this
@@ -84,7 +86,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        fun newInstance(page: ListPage): ChannelFragment {
+        fun newInstance(page: PagerTab): ChannelFragment {
             val fragment = ChannelFragment()
             val args = Bundle()
             args.putString(ARG_SECTION_PAGE, gson.toJson(page))
@@ -99,12 +101,12 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     override fun onAttach(context: Context?) {
         info("onAttach fragment")
         super.onAttach(context)
-        // Cast parent activity
-//        listener = context as OnDataLoadListener
-        navigateListener = context as ChannelWebViewClient.OnInAppNavigate
 
+        if (context is ChannelWebViewClient.OnInAppNavigate) {
+            mNavigateListener = context
+        }
         if (context is OnFragmentInteractionListener) {
-            listener = context
+            mListener = context
         }
     }
 
@@ -115,21 +117,16 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         val pageMetadata = arguments?.getString(ARG_SECTION_PAGE)
 
-        currentPage = gson.fromJson<ListPage>(pageMetadata, ListPage::class.java)
+        mTabMetadata = gson.fromJson<PagerTab>(pageMetadata, PagerTab::class.java)
 
         // Set WebViewClient for current page
-        mWebViewClient = ChannelWebViewClient(activity, currentPage)
-        // Set navigate listener to enable in-app navigation when clicked a url which should to another tab.
-        mWebViewClient.setOnInAppNavigateListener(navigateListener)
+        mWebViewClient = ChannelWebViewClient(activity, mTabMetadata)
+        // Set navigate mListener to enable in-app navigation when clicked a url which should to another tab.
+        mWebViewClient.setOnInAppNavigateListener(mNavigateListener)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-
-//        val rootView = inflater.inflate(R.layout.fragment_section, container, false)
-//        You need to import kotlinx.android.synthetic.activity_main_search.fragment_section.view.* if you want to access child view here:
-//        rootView.section_label.text = getString(R.string.section_format, arguments?.getInt(ARG_SECTION_NUMBER))
-//        return rootView
 
         super.onCreateView(inflater, container, savedInstanceState)
 
@@ -164,7 +161,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             false
         }
 
-        info("Initiating current page with data: $currentPage")
+        info("Initiating current page with data: $mTabMetadata")
 
         init()
 
@@ -191,58 +188,47 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         showProgress(true)
 
-        if (currentPage?.listUrl != null ) {
+        when (mTabMetadata?.htmlType) {
+            PagerTab.HTML_TYPE_FRAGMENT -> {
+                loadPartialHtml()
+            }
+            PagerTab.HTML_TYPE_COMPLETE -> {
+                web_view.loadUrl(mTabMetadata?.contentUrl)
 
-            job = launch (UI) {
+                showProgress(false)
+            }
+        }
+    }
 
-                val cachedHtml = currentPage?.htmlFromCache(context)
+    private fun loadPartialHtml() {
+        job = launch (UI) {
+            mTemplate = PagerTab.readTemplate(resources).await()
+            mListContent = mTabMetadata?.fragmentFromCache(context)?.await()
 
-                if (cachedHtml != null) {
-
-                    Toast.makeText(context, "Using cache", Toast.LENGTH_SHORT).show()
-
-                    updateUi(cachedHtml)
-
-                    return@launch
-                }
-
-                fetchAndUpdate()
+            if (mTemplate != null && mListContent != null) {
+                val content = PagerTab.render(mTemplate, mListContent) ?: return@launch
+                loadData(content)
             }
 
-            return
+            // If on wifi, then fetch remote data and refresh. Stop.
+            fetchAndUpdate()
+            // If on cellar data, if mListContent is null, fetch remote data; otherwise stop.
         }
-
-        if (currentPage?.webUrl != null) {
-            info("This is complete web page that can be loaded directly into a web view")
-
-            web_view.loadUrl(currentPage?.webUrl)
-
-            showProgress(false)
-        }
-
     }
 
     private suspend fun fetchAndUpdate() {
-
-        val htmlString = currentPage?.htmlFromFragment(resources)
-
-        if (htmlString == null) {
-            updateUi(HTML_PLACEHOLDER)
-            return
-        }
-
-        updateUi(htmlString)
-
-        currentPage?.cache(context, htmlString)
+        mListContent = mTabMetadata?.htmlFromServer(context)?.await()
+        val content = PagerTab.render(mTemplate, mListContent) ?: return
+        loadData(content)
     }
 
-    private fun updateUi(data: String) {
+    private fun loadData(data: String) {
         web_view.loadDataWithBaseURL(WEBVIEV_BASE_URL, data, "text/html", null, null)
         showProgress(false)
     }
 
     private fun showProgress(show: Boolean) {
-        listener?.onProgress(show)
+        mListener?.onProgress(show)
         if (!show) {
             swipe_refresh_layout.isRefreshing = false
         }
@@ -250,7 +236,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
     inner class WebAppInterface : AnkoLogger {
         /**
-         * Method injected to WebView to receive a list of articles in a currentPage page upon finished loading.
+         * Method injected to WebView to receive a list of articles in a mTabMetadata page upon finished loading.
          */
         @JavascriptInterface
         fun postItems(message: String) {
@@ -292,10 +278,11 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
              */
             when (channelMeta?.title) {
                 "专栏" -> {
-                    val listPage = ListPage(
+                    val listPage = PagerTab(
                             title = channelItem.headline,
                             name = "${channelItem.type}_${channelItem.id}",
-                            listUrl = buildUrl("/${channelItem.type}/${channelItem.id}")
+                            contentUrl = buildUrl("/${channelItem.type}/${channelItem.id}"),
+                            htmlType = PagerTab.HTML_TYPE_FRAGMENT
                     )
 
                     ChannelActivity.start(context, listPage)

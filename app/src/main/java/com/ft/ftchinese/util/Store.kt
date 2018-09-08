@@ -35,12 +35,13 @@ object Store {
         if (context == null || filename == null) {
             return null
         }
-        try {
-            return context.openFileInput(filename).bufferedReader().readText()
+        return try {
+            context.openFileInput(filename).bufferedReader().readText()
         } catch (e: Exception) {
             Log.i(TAG, e.toString())
+
+            null
         }
-        return null
     }
 
     fun filesSpace(context: Context?): String? {
@@ -81,15 +82,16 @@ object Store {
      */
     fun readRawFile(resources: Resources, resId: Int): String? {
 
-        try {
+        return try {
             Log.i(TAG, "Reading raw file")
             val input = resources.openRawResource(resId)
-            return input.bufferedReader().use { it.readText() }
+            input.bufferedReader().use { it.readText() }
 
         } catch (e: ExceptionInInitializerError) {
             Log.w("readHtml", e.toString())
+
+            null
         }
-        return null
     }
 }
 
