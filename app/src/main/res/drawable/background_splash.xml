@@ -2,7 +2,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@color/colorPaper"/>
     <item>
-        <bitmap android:src="@drawable/ftc_logo_128"
+        <bitmap android:src="@drawable/ic_splash"
             android:gravity="center"/>
     </item>
 </layer-list>

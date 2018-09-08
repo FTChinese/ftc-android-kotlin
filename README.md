@@ -9,7 +9,13 @@
 7. Use [Serveo](https://serveo.net/) for forward external request to your localhost: `ssh -R 80:localhost:8000 serveo.net`
 8. Change `private const val BASE = "https://lacerta.serveo.net"` in this package `util/ApiEndpoint` to the URL Serveo gives you.
 
-## Log on ActionBar
+## Logo on ActionBar
+
+Reference: https://developer.android.com/training/multiscreen/screendensities
+
+* xhdpi：2.0
+* hdpi：1.5
+* mdpi：1.0（基准）
 
 Reference: https://stackoverflow.com/questions/15248207/actionbar-logo-size
 

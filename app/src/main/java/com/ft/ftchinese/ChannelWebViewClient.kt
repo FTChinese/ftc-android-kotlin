@@ -7,7 +7,7 @@ import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.models.pathToTitle
 
 /**
- * A WebViewClient used by a SectionFragment
+ * A WebViewClient used by a ChannelFragment
  */
 class ChannelWebViewClient(
         activity: Activity?,

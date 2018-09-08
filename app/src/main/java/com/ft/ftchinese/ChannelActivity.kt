@@ -5,7 +5,6 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.ListPage
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.activity_chanel.*
@@ -16,7 +15,7 @@ import org.jetbrains.anko.info
  * This is used to show a channel page, which consists of a list of article summaries.
  * It is similar to `MainActivity` execpt that it does not wrap a TabLayout.
  */
-class ChannelActivity : AppCompatActivity(), SectionFragment.OnFragmentInteractionListener, ChannelWebViewClient.OnInAppNavigate, AnkoLogger {
+class ChannelActivity : AppCompatActivity(), ChannelFragment.OnFragmentInteractionListener, ChannelWebViewClient.OnInAppNavigate, AnkoLogger {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,9 +39,9 @@ class ChannelActivity : AppCompatActivity(), SectionFragment.OnFragmentInteracti
         toolbar.title = listPage.title
 
         /**
-         * Begin to attach SectionFragment to this activity
+         * Begin to attach ChannelFragment to this activity
          */
-        val sectionFragment = SectionFragment.newInstance(listPage)
+        val sectionFragment = ChannelFragment.newInstance(listPage)
 
         supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, sectionFragment)

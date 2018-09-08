@@ -13,24 +13,21 @@ import android.webkit.*
 import android.widget.Toast
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.MembershipActivity
-import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.fragment_section.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
 
 /**
- * SectionFragment serves two purposes:
+ * ChannelFragment serves two purposes:
  * As part of TabLayout in MainActivity;
- * As part of ChannelActivity. For example, if you panned to Editor's Choice tab, the mFollows lead to another layer of a list page, not content. You need to use `SectionFragment` again to render a list page.
+ * As part of ChannelActivity. For example, if you panned to Editor's Choice tab, the mFollows lead to another layer of a list page, not content. You need to use `ChannelFragment` again to render a list page.
  */
-class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
+class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
 
     private var listener: OnFragmentInteractionListener? = null
     private lateinit var navigateListener: ChannelWebViewClient.OnInAppNavigate
@@ -87,8 +84,8 @@ class SectionFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        fun newInstance(page: ListPage): SectionFragment {
-            val fragment = SectionFragment()
+        fun newInstance(page: ListPage): ChannelFragment {
+            val fragment = ChannelFragment()
             val args = Bundle()
             args.putString(ARG_SECTION_PAGE, gson.toJson(page))
             fragment.arguments = args

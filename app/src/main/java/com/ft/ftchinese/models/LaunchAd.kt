@@ -8,6 +8,7 @@ import kotlinx.coroutines.experimental.async
 import android.net.Uri
 import com.ft.ftchinese.util.Store
 import com.koushikdutta.ion.Ion
+import kotlinx.coroutines.experimental.Deferred
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.joda.time.LocalDate
@@ -131,14 +132,10 @@ class LaunchSchedule(
         const val PREF_AD_SCHEDULE = "ad_schedule"
         private const val PREF_KEY_LASTED_MODIFIED = "last_modified"
 
-        suspend fun fetchData(): LaunchSchedule? {
-            return try {
-                val job = async {
-                    Fetch().get("https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule")
-                            .end()
-                }
-
-                val response = job.await()
+        fun fetchDataAsync(): Deferred<LaunchSchedule?> = async {
+            try {
+                val response = Fetch().get("https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule")
+                        .end()
 
                 val body = response.body()?.string()
 

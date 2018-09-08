@@ -77,7 +77,7 @@ class RequestTest {
 
         val prefSchedule = mutableMapOf<String, MutableSet<LaunchAd>>()
 
-        val schedule = LaunchSchedule.fetchData() ?: return@runBlocking
+        val schedule = LaunchSchedule.fetchDataAsync() ?: return@runBlocking
 
         val today = LocalDate.now()
 

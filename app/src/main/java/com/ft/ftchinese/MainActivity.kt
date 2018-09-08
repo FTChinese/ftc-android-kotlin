@@ -28,6 +28,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.coroutines.experimental.bg
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
@@ -37,7 +38,7 @@ const val REQUEST_CODE_SIGN_UP = 2
 class MainActivity : AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
         TabLayout.OnTabSelectedListener,
-        SectionFragment.OnFragmentInteractionListener,
+        ChannelFragment.OnFragmentInteractionListener,
         ChannelWebViewClient.OnInAppNavigate,
         AnkoLogger {
 
@@ -151,8 +152,13 @@ class MainActivity : AppCompatActivity(),
 
         // https://developer.android.com/training/system-ui/immersive
 //        hideSystemUI()
-        showAd()
+        launch(UI) {
 
+            showAd()
+            info("Show ad finished")
+        }
+
+        info("Initializing toolbar")
         setSupportActionBar(toolbar)
         displayLogo()
 
@@ -189,14 +195,18 @@ class MainActivity : AppCompatActivity(),
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false)
         api.registerApp(BuildConfig.WECAHT_APP_ID)
 
+        bg {
+            info("Starting checking ad schedules")
+            checkAdAsync()
+        }
 
-//        checkAd()
+        info("onCreate finished")
     }
 
     private fun displayLogo() {
         supportActionBar?.setDisplayUseLogoEnabled(true)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-        supportActionBar?.setLogo(R.drawable.ftc_masthead)
+        supportActionBar?.setLogo(R.drawable.ic_menu_masthead)
     }
 
     private fun displayTitle(title: Int) {
@@ -221,8 +231,9 @@ class MainActivity : AppCompatActivity(),
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
     }
 
-    private fun showAd() {
+    private suspend fun showAd() {
 
+        info("Entering show ad")
         val todaySchedules = LaunchSchedule.loadFromPref(this)
 
         if (todaySchedules.isEmpty()) {
@@ -273,44 +284,47 @@ class MainActivity : AppCompatActivity(),
             info("Clicked ads")
         }
 
-        timerJob = launch(UI) {
-            val result = async(CommonPool) {
-                Drawable.createFromStream(openFileInput(ad.imageName), ad.imageName)
-            }
 
-            val drawable = result.await()
-
-            info("Retrieved drawable: ${ad.imageName}")
-
-            adImage.setImageDrawable(drawable)
-            adTimer.visibility = View.VISIBLE
-            info("Show timer")
-
-            for (i in 5 downTo 1) {
-                adTimer.text = getString(R.string.prompt_ad_timer, i)
-                delay(1000)
-            }
-
-            root_container.removeView(adView)
-            info("Remove ad")
-            showSystemUI()
+        val readImageJob = bg {
+            Drawable.createFromStream(openFileInput(ad.imageName), ad.imageName)
         }
+
+        val drawable = readImageJob.await()
+
+        info("Retrieved drawable: ${ad.imageName}")
+
+        adImage.setImageDrawable(drawable)
+        adTimer.visibility = View.VISIBLE
+        info("Show timer")
+
+        for (i in 5 downTo 1) {
+            adTimer.text = getString(R.string.prompt_ad_timer, i)
+            delay(1000)
+        }
+
+        root_container.removeView(adView)
+        info("Remove ad")
+        showSystemUI()
     }
 
-    private fun checkAd() {
-        launch(CommonPool) {
-            val schedules = LaunchSchedule.fetchData()
-            schedules?.save(this@MainActivity)
+    private fun checkAdAsync() = async {
 
-            downloadAdImage()
+        for (i in 1..30) {
+            info("Delaying check ad $i")
+            delay(1000)
         }
-    }
+        info("Fetch schedule data")
+        val schedules = LaunchSchedule.fetchDataAsync().await()
 
-    private fun downloadAdImage() {
-        val adsToDownload = LaunchSchedule.loadFromPref(this, days = 1)
+        info("Save schedule")
+        schedules?.save(this@MainActivity)
+
+        val adsToDownload = LaunchSchedule.loadFromPref(this@MainActivity, days = 1)
+        info("Ad to download: $adsToDownload")
 
         for (ad in adsToDownload) {
-            ad.cacheImage(this)
+            info("Download ad image: ${ad.imageUrl}")
+            ad.cacheImage(this@MainActivity)
         }
     }
 
@@ -514,7 +528,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     /**
-     * Implementation of SectionFragment.OnDataLoadListener.
+     * Implementation of ChannelFragment.OnDataLoadListener.
      * This is used to handle the state of progress bar.
      */
     override fun onProgress(show: Boolean) {
@@ -602,7 +616,7 @@ class MainActivity : AppCompatActivity(),
         override fun getItem(position: Int): Fragment {
             // getItem is called to instantiate the fragment for the given page.
             info("Fragment data: ${mPages[position]}")
-            return SectionFragment.newInstance(mPages[position])
+            return ChannelFragment.newInstance(mPages[position])
         }
 
         override fun getCount(): Int {
