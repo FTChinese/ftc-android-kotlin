@@ -4,6 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Bundle
 import android.support.customtabs.CustomTabsIntent
@@ -34,6 +37,41 @@ import org.jetbrains.anko.toast
 
 const val REQUEST_CODE_SIGN_IN = 1
 const val REQUEST_CODE_SIGN_UP = 2
+
+fun Activity.getActiveNetworkInfo(): NetworkInfo {
+    val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    return connectivityManager.activeNetworkInfo
+}
+
+fun Activity.isNetworkConnected(): Boolean {
+    val networkInfo = getActiveNetworkInfo()
+    return networkInfo.isConnected
+}
+
+fun Activity.isNetworkAvailable(): Boolean {
+    val networkInfo = getActiveNetworkInfo()
+    return networkInfo.isAvailable
+}
+
+fun Activity.isActiveNetworkWifi(): Boolean {
+    val networkInfo = getActiveNetworkInfo()
+
+    return when (networkInfo.type) {
+        ConnectivityManager.TYPE_WIFI -> true
+        else -> false
+    }
+}
+
+fun Activity.isActiveNetworkMobile(): Boolean {
+    val networkInfo = getActiveNetworkInfo()
+
+    return when (networkInfo.type) {
+        ConnectivityManager.TYPE_MOBILE,
+        ConnectivityManager.TYPE_MOBILE_DUN -> true
+        else -> false
+    }
+}
 
 class MainActivity : AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,

@@ -1,6 +1,8 @@
 package com.ft.ftchinese
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -171,22 +173,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         info("onCreateView finished")
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-
-        val result = job?.cancel()
-
-        info("Job cancelled: $result")
-    }
-
-    override fun onRefresh() {
-        Toast.makeText(context, "Refreshing", Toast.LENGTH_SHORT).show()
-
-        job = launch(UI) {
-            fetchAndUpdate()
-        }
-    }
-
     private fun init() {
 
         showProgress(true)
@@ -245,6 +231,22 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         listener?.onProgress(show)
         if (!show) {
             swipe_refresh_layout.isRefreshing = false
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        val result = job?.cancel()
+
+        info("Job cancelled: $result")
+    }
+
+    override fun onRefresh() {
+        Toast.makeText(context, "Refreshing", Toast.LENGTH_SHORT).show()
+
+        job = launch(UI) {
+            fetchAndUpdate()
         }
     }
 
