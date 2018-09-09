@@ -7,6 +7,8 @@ import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.Store
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 /**
  * PagerTab contains the data used by a page in ViewPager
@@ -16,7 +18,7 @@ data class PagerTab (
         val name: String,  // Cache filename used by this tab
         val contentUrl: String,
         val htmlType: Int // Flag used to tell whether the url should be loaded directly
-) {
+) : AnkoLogger {
     suspend fun htmlFromCache(context: Context?): String? {
         val job = async {
             Store.load(context, "$name.html")
@@ -29,11 +31,22 @@ data class PagerTab (
         Store.load(context, "$name.html")
     }
 
-    fun htmlFromServer(context: Context?): Deferred<String?> = async {
-        val htmlStr = Fetch().get(contentUrl).string()
-        Store.save(context, "$name.html", htmlStr)
+    fun crawlWebAsync(context: Context?): Deferred<String?> = async {
+        try {
+            val htmlStr = Fetch().get(contentUrl).string()
+            if (htmlStr == null) {
+                info("Didn't crawl anything on $contentUrl")
+            } else {
+                info("Crawled content from $contentUrl")
+            }
+            Store.save(context, "$name.html", htmlStr)
 
-        htmlStr
+            htmlStr
+        } catch (e: Exception) {
+            e.printStackTrace()
+            info("Crawl web page error $contentUrl")
+            null
+        }
     }
 
     companion object {

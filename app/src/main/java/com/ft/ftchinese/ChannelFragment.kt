@@ -173,12 +173,12 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         when (mTabMetadata?.htmlType) {
             PagerTab.HTML_TYPE_FRAGMENT -> {
+                info("loadContent: html fragment")
                 loadPartialHtml()
             }
             PagerTab.HTML_TYPE_COMPLETE -> {
-                web_view.loadUrl(mTabMetadata?.contentUrl)
-
-                showProgress(false)
+                info("loadContent: web page")
+                web_view.loadUrl("http://www.ftchinese.com/m/marketing/intelligence.html?webview=ftcapp&001")
             }
         }
     }
@@ -186,17 +186,12 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     private fun loadPartialHtml() {
         job = launch (UI) {
             mTemplate = PagerTab.readTemplate(resources).await()
-            mListContent = mTabMetadata?.fragmentFromCache(context)?.await()
 
-            if (mTemplate == null) {
-                toast(R.string.prompt_load_failure)
-                return@launch
-            }
+            val listContent = mTabMetadata?.fragmentFromCache(context)?.await()
 
             // If cached HTML fragment exists
-            if (mListContent != null) {
-                val content = PagerTab.render(mTemplate, mListContent) ?: return@launch
-                loadData(content)
+            if (listContent != null) {
+                loadData(listContent)
                 info("Loaded data from cache")
             }
 
@@ -208,29 +203,35 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             // If on wifi, then fetch remote data and refresh. Stop.
             if (activity?.isActiveNetworkWifi() == true) {
                 info("Network is wifi. Fetch data.")
-                fetchAndUpdate()
+                crawlAndUpdate()
                 return@launch
             }
 
             // If no cached HTML fragment found, fetch remote data as long as there is network.
             // In this case, show progress.
-            if (mListContent == null) {
+            if (listContent == null) {
                 info("Cache not found. Fetch data.")
                 showProgress(true)
-                fetchAndUpdate()
+                crawlAndUpdate()
             }
         }
     }
 
-    private suspend fun fetchAndUpdate() {
-        mListContent = mTabMetadata?.htmlFromServer(context)?.await()
-        val content = PagerTab.render(mTemplate, mListContent) ?: return
+    private suspend fun crawlAndUpdate() {
+        info("Starting crawling ${mTabMetadata?.title}")
+        val listContent = mTabMetadata?.crawlWebAsync(context)?.await()
+        if (listContent == null) {
+            toast(R.string.prompt_load_failure)
+            return
+        }
         info("Fetched data from server")
-        loadData(content)
+        loadData(listContent)
     }
 
     private fun loadData(data: String) {
-        web_view.loadDataWithBaseURL(WEBVIEV_BASE_URL, data, "text/html", null, null)
+        val dataToLoad = PagerTab.render(mTemplate, data)
+
+        web_view.loadDataWithBaseURL(WEBVIEV_BASE_URL, dataToLoad, "text/html", null, null)
         showProgress(false)
         info("Data loaded into webview")
     }
@@ -274,12 +275,23 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             return
         }
 
-        job = launch(UI) {
-            if (mTemplate == null) {
-                mTemplate = PagerTab.readTemplate(resources).await()
+        when (mTabMetadata?.htmlType) {
+            PagerTab.HTML_TYPE_FRAGMENT -> {
+                info("onRefresh: crawlWebAsync html fragment")
+                job = launch(UI) {
+                    if (mTemplate == null) {
+                        mTemplate = PagerTab.readTemplate(resources).await()
+                    }
+                    info("Refreshing: fetch remote data")
+                    crawlAndUpdate()
+                }
             }
-            info("Refreshing: fetch remote data")
-            fetchAndUpdate()
+            PagerTab.HTML_TYPE_COMPLETE -> {
+                info("onRefresh: reload")
+                web_view.reload()
+
+                showProgress(false)
+            }
         }
     }
 

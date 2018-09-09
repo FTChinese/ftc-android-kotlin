@@ -77,7 +77,7 @@ class RequestTest {
 
         val prefSchedule = mutableMapOf<String, MutableSet<LaunchAd>>()
 
-        val schedule = LaunchSchedule.fetchDataAsync() ?: return@runBlocking
+        val schedule = LaunchSchedule.fetchDataAsync().await() ?: return@runBlocking
 
         val today = LocalDate.now()
 
@@ -112,6 +112,12 @@ class RequestTest {
             System.out.println(key)
             System.out.println(value)
         }
+    }
+
+    @Test fun ftIntelligence() {
+        val htmlStr = Fetch().get("http://www.ftchinese.com/m/marketing/intelligence.html?webview=ftcapp&001").string()
+
+        println(htmlStr)
     }
 }
 

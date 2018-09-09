@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
 import org.jetbrains.anko.info
+import org.jetbrains.anko.toast
 
 /**
  * WebContentActivity might be launched in two circumstances:
@@ -85,7 +85,7 @@ class WebContentActivity : AbsContentActivity() {
         if (apiUrl != null) {
             loadUrl(apiUrl!!)
         } else {
-            Toast.makeText(this, "Failed to load data.", Toast.LENGTH_SHORT).show()
+            toast(R.string.prompt_load_failure)
         }
     }
 
