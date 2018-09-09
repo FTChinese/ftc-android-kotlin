@@ -1,9 +1,8 @@
 package com.ft.ftchinese
 
 import android.app.Activity
-import android.content.Context
 import android.net.Uri
-import com.ft.ftchinese.models.ListPage
+import com.ft.ftchinese.models.PagerTab
 import com.ft.ftchinese.models.pathToTitle
 
 /**
@@ -11,14 +10,14 @@ import com.ft.ftchinese.models.pathToTitle
  */
 class ChannelWebViewClient(
         activity: Activity?,
-        private val currentPage: ListPage?
+        private val currentPage: PagerTab?
 ) : BaseWebViewClient(activity) {
 
     /**
      * Callback used by ChannelWebViewClient.
      * When certain links in web view is clicked, the event is passed to parent activity to open a bottom navigation item or a tab.
      */
-    private lateinit var mListener: OnInAppNavigate
+    private var mListener: OnInAppNavigate? = null
     /**
      * Jump to another bottom navigation item or another tab in hte same bottom navigation item when certain links are clicked.
      */
@@ -30,18 +29,18 @@ class ChannelWebViewClient(
         fun selectTabLayoutTab(tabIndex: Int)
     }
 
-    fun setOnInAppNavigateListener(listener: OnInAppNavigate) {
+    fun setOnInAppNavigateListener(listener: OnInAppNavigate?) {
         mListener = listener
     }
 
     override fun openChannelPagination(uri: Uri): Boolean {
 //        val queryPage = uri.getQueryParameter("page") ?: return false
 
-        val page = ListPage(
+        val page = PagerTab(
                 title = currentPage?.title ?: "",
                 // Pagination should not be cached since it always dynamic
                 name = "",
-                listUrl = buildUrl(uri, "/channel/${uri.path}"))
+                fragmentUrl = buildUrl(uri, "/channel/${uri.path}"))
 
         /**
          * Start a new page of article list.
@@ -62,10 +61,10 @@ class ChannelWebViewClient(
          * Just a precaution to handle any unexpected url.
          */
         if (lastPathSegment == null) {
-            val page = ListPage(
+            val page = PagerTab(
                     title = "",
                     name = "",
-                    listUrl = buildUrl(uri)
+                    fragmentUrl = buildUrl(uri)
             )
 
             ChannelActivity.start(activity, page)
@@ -77,7 +76,7 @@ class ChannelWebViewClient(
          * If the path is `/channel/english.html`, navigate to the second bottom nav item.
          */
             "english.html" -> {
-                mListener.selectBottomNavItem(R.id.nav_english)
+                mListener?.selectBottomNavItem(R.id.nav_english)
             }
 
 
@@ -85,7 +84,7 @@ class ChannelWebViewClient(
          * If the path is `/channel/mba.html`, navigate to the third bottom nav item
          */
             "mba.html" -> {
-                mListener.selectBottomNavItem(R.id.nav_ftacademy)
+                mListener?.selectBottomNavItem(R.id.nav_ftacademy)
             }
 
 
@@ -94,15 +93,15 @@ class ChannelWebViewClient(
          */
             "weekly.html" -> {
 
-                val tabIndex = ListPage.newsPages.indexOfFirst { it.name == "news_top_stories" }
+                val tabIndex = PagerTab.newsPages.indexOfFirst { it.name == "news_top_stories" }
 
-                mListener.selectTabLayoutTab(tabIndex)
+                mListener?.selectTabLayoutTab(tabIndex)
             }
 
             "markets.html" -> {
-                val tabIndex = ListPage.newsPages.indexOfFirst { it.name == "news_markets" }
+                val tabIndex = PagerTab.newsPages.indexOfFirst { it.name == "news_markets" }
 
-                mListener.selectTabLayoutTab(tabIndex)
+                mListener?.selectTabLayoutTab(tabIndex)
             }
 
         /**
@@ -118,10 +117,10 @@ class ChannelWebViewClient(
                 val issue = uri.getQueryParameter("issue")
                 val name = issue ?: "channel_$lastPathSegment"
 
-                val page = ListPage(
+                val page = PagerTab(
                         title = pathToTitle[lastPathSegment] ?: "",
                         name = name,
-                        listUrl = buildUrl(uri))
+                        fragmentUrl = buildUrl(uri))
 
                 ChannelActivity.start(activity, page)
             }
@@ -139,9 +138,9 @@ class ChannelWebViewClient(
              * navigate to the tab titled FT研究院
              */
                 "intelligence.html" -> {
-                    val tabIndex = ListPage.newsPages.indexOfFirst { it.name == "news_fta" }
+                    val tabIndex = PagerTab.newsPages.indexOfFirst { it.name == "news_fta" }
 
-                    mListener.selectTabLayoutTab(tabIndex)
+                    mListener?.selectTabLayoutTab(tabIndex)
                 }
 
             /**
@@ -150,10 +149,10 @@ class ChannelWebViewClient(
                 else -> {
                     val name = uri.lastPathSegment ?: ""
 
-                    val page = ListPage(
+                    val page = PagerTab(
                             title = pathToTitle[name] ?: "",
                             name = "marketing_$name",
-                            listUrl = buildUrl(uri)
+                            fragmentUrl = buildUrl(uri)
                     )
                     ChannelActivity.start(activity, page)
                 }
@@ -167,10 +166,10 @@ class ChannelWebViewClient(
          * There URLs looks like: `/m/corp/preview.html?pageid=we2016&isad=1`.
          * Don't bother with them
          */
-        val page = ListPage(
+        val page = PagerTab(
                 title = "",
                 name = "",
-                listUrl = buildUrl(uri)
+                fragmentUrl = buildUrl(uri)
         )
         ChannelActivity.start(activity, page)
 

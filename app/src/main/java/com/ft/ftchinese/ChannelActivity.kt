@@ -5,7 +5,7 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import com.ft.ftchinese.models.ListPage
+import com.ft.ftchinese.models.PagerTab
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.activity_chanel.*
 import org.jetbrains.anko.AnkoLogger
@@ -31,7 +31,7 @@ class ChannelActivity : AppCompatActivity(), ChannelFragment.OnFragmentInteracti
          * Get the metadata for this page of articles
          */
         val pageMeta = intent.getStringExtra(EXTRA_LIST_PAGE_META)
-        val listPage = gson.fromJson<ListPage>(pageMeta, ListPage::class.java)
+        val listPage = gson.fromJson<PagerTab>(pageMeta, PagerTab::class.java)
 
         /**
          * Set toolbar's title so that reader know where he is now.
@@ -74,7 +74,7 @@ class ChannelActivity : AppCompatActivity(), ChannelFragment.OnFragmentInteracti
     companion object {
         private const val EXTRA_LIST_PAGE_META = "extra_list_page_metadata"
 
-        fun start(context: Context?, page: ListPage) {
+        fun start(context: Context?, page: PagerTab) {
             val intent = Intent(context, ChannelActivity::class.java)
             intent.putExtra(EXTRA_LIST_PAGE_META, gson.toJson(page))
             context?.startActivity(intent)

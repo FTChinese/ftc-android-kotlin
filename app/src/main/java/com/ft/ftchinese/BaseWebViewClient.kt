@@ -10,7 +10,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.Endpoints
-import com.ft.ftchinese.models.ListPage
+import com.ft.ftchinese.models.PagerTab
 import com.ft.ftchinese.models.pathToTitle
 import com.ft.ftchinese.user.Registration
 import org.jetbrains.anko.AnkoLogger
@@ -181,10 +181,10 @@ open class BaseWebViewClient(
 
         val lastPathSegment = uri.lastPathSegment
 
-        val page = ListPage(
+        val page = PagerTab(
                 title = pathToTitle[lastPathSegment] ?: "",
                 name = "",
-                listUrl = buildUrl(uri))
+                fragmentUrl = buildUrl(uri))
 
         ChannelActivity.start(activity, page)
 
@@ -197,10 +197,10 @@ open class BaseWebViewClient(
     open fun openMarketingLink(uri: Uri): Boolean {
         val lastPathSegment = uri.lastPathSegment
 
-        val page = ListPage(
+        val page = PagerTab(
                 title = pathToTitle[lastPathSegment] ?: "",
                 name = "",
-                listUrl = buildUrl(uri))
+                fragmentUrl = buildUrl(uri))
 
         ChannelActivity.start(activity, page)
 
@@ -231,10 +231,10 @@ open class BaseWebViewClient(
     }
 
     private fun openTagLink(uri: Uri): Boolean {
-        val page = ListPage(
+        val page = PagerTab(
                 title = uri.pathSegments[1],
                 name = "${uri.pathSegments[0]}_${uri.pathSegments[1]}",
-                listUrl = buildUrl(uri))
+                fragmentUrl = buildUrl(uri))
 
         ChannelActivity.start(activity, page)
 

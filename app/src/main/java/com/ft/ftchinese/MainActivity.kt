@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity(),
         when (item.itemId) {
             R.id.nav_news -> {
                 if (mNewsAdapter == null) {
-                    mNewsAdapter = TabPagerAdapter(ListPage.newsPages, supportFragmentManager)
+                    mNewsAdapter = TabPagerAdapter(PagerTab.newsPages, supportFragmentManager)
                 }
                 view_pager.adapter = mNewsAdapter
                 displayLogo()
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity(),
 
             R.id.nav_english -> {
                 if (mEnglishAdapter == null) {
-                    mEnglishAdapter = TabPagerAdapter(ListPage.englishPages, supportFragmentManager)
+                    mEnglishAdapter = TabPagerAdapter(PagerTab.englishPages, supportFragmentManager)
                 }
                 view_pager.adapter = mEnglishAdapter
 
@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity(),
 
             R.id.nav_ftacademy -> {
                 if (mFtaAdapter == null) {
-                    mFtaAdapter = TabPagerAdapter(ListPage.ftaPages, supportFragmentManager)
+                    mFtaAdapter = TabPagerAdapter(PagerTab.ftaPages, supportFragmentManager)
                 }
                 view_pager.adapter = mFtaAdapter
 
@@ -127,7 +127,7 @@ class MainActivity : AppCompatActivity(),
 
             R.id.nav_video -> {
                 if (mVideoAdapter == null) {
-                    mVideoAdapter = TabPagerAdapter(ListPage.videoPages, supportFragmentManager)
+                    mVideoAdapter = TabPagerAdapter(PagerTab.videoPages, supportFragmentManager)
                 }
                 view_pager.adapter = mVideoAdapter
 
@@ -207,7 +207,7 @@ class MainActivity : AppCompatActivity(),
 
         // Set ViewPager adapter
         if (mNewsAdapter == null) {
-            mNewsAdapter = TabPagerAdapter(ListPage.newsPages, supportFragmentManager)
+            mNewsAdapter = TabPagerAdapter(PagerTab.newsPages, supportFragmentManager)
         }
         view_pager.adapter = mNewsAdapter
 
@@ -649,7 +649,7 @@ class MainActivity : AppCompatActivity(),
      * A [FragmentPagerAdapter] that returns a fragment corresponding to
      * one of the sections/tabs/mPages.
      */
-    inner class TabPagerAdapter(private var mPages: Array<ListPage>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+    inner class TabPagerAdapter(private var mPages: Array<PagerTab>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
         override fun getItem(position: Int): Fragment {
             // getItem is called to instantiate the fragment for the given page.
@@ -665,7 +665,7 @@ class MainActivity : AppCompatActivity(),
             return mPages[position].title
         }
 
-        fun setPages(pages: Array<ListPage>) {
+        fun setPages(pages: Array<PagerTab>) {
             mPages = pages
         }
     }

@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.ft.ftchinese.models.Following
-import com.ft.ftchinese.models.ListPage
+import com.ft.ftchinese.models.PagerTab
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 
@@ -73,10 +73,10 @@ class FollowingFragment : Fragment(), AnkoLogger {
             holder.secondaryText?.visibility = View.GONE
 
             holder.itemView.setOnClickListener {
-                val channelMeta = ListPage(
+                val channelMeta = PagerTab(
                         title = item.tag,
                         name = "${item.type}_${item.tag}",
-                        listUrl = item.bodyUrl
+                        fragmentUrl = item.bodyUrl
                 )
 
                 ChannelActivity.start(context, channelMeta)
