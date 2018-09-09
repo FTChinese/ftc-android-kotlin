@@ -20,7 +20,7 @@ data class RelatedStory(
         val last_publish_time: String
 )
 
-class ArticleDetail(
+class Story (
         val id: String,
         val fileupdatetime: String,
         val cheadline: String,
@@ -43,7 +43,7 @@ class ArticleDetail(
         val whitelist: Int,
         val relative_story: Array<RelatedStory>
 ) {
-    private val TAG = "ArticleDetail"
+    private val TAG = "Story"
 
     val title: Bilingual
         get() = Bilingual(cheadline, eheadline)

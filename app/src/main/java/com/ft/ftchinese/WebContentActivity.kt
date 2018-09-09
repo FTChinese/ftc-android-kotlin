@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
+import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
@@ -15,7 +17,6 @@ import org.jetbrains.anko.toast
  * Activities start this must pass the web page's parsed canonical uri (the url that could be directly opened in a browser), which will be used for social share.
  */
 class WebContentActivity : AbsContentActivity() {
-
 
     override val articleWebUrl: String
         get() = canonicalUri.toString()
@@ -66,7 +67,9 @@ class WebContentActivity : AbsContentActivity() {
             apiUrl = buildUrl(canonicalUri, null)
         }
 
-        init()
+        action_favourite.visibility = View.GONE
+
+        load()
     }
 
     override fun onDestroy() {
@@ -76,14 +79,16 @@ class WebContentActivity : AbsContentActivity() {
     }
 
     override fun onRefresh() {
-        super.onRefresh()
+        toast(R.string.prompt_refreshing)
 
-        init()
+        web_view.reload()
+        showProgress(false)
     }
 
-    override fun init() {
+    override fun load() {
         if (apiUrl != null) {
-            loadUrl(apiUrl!!)
+            web_view.loadUrl(apiUrl)
+            showProgress(false)
         } else {
             toast(R.string.prompt_load_failure)
         }

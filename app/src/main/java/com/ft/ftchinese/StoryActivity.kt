@@ -4,49 +4,45 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.webkit.CookieSyncManager
 import com.ft.ftchinese.database.ArticleStore
-import com.ft.ftchinese.models.ArticleDetail
+import com.ft.ftchinese.models.Story
 import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.models.User
-import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.activity_content.*
-import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
+import org.jetbrains.anko.coroutines.experimental.bg
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-import java.net.CookieManager
 
 /**
  * StoryActivity is used to show a story whose has a JSON api on server.
- * The remote JSON is fetched and concatenated with local HTML template in `res/raw/story.html`.
+ * The remote JSON is fetched and concatenated with local HTML mTemplate in `res/raw/story.html`.
  * For those articles that do not have a JSON api, do not use this activity. Load the a web page directly into web view.
  */
 class StoryActivity : AbsContentActivity() {
 
     override val articleWebUrl: String
-        get() = channelItem?.canonicalUrl ?: ""
+        get() = mChannelItem?.canonicalUrl ?: ""
 
     override val articleTitle: String
-        get() = channelItem?.headline ?: ""
+        get() = mChannelItem?.headline ?: ""
 
     override val articleStandfirst: String
-        get() = channelItem?.standfirst ?: ""
+        get() = mChannelItem?.standfirst ?: ""
 
-    private var currentLanguage: Int = ChannelItem.LANGUAGE_CN
+    private var mCurrentLanguage: Int = ChannelItem.LANGUAGE_CN
 
     // Hold metadata on where and how to find data for this page.
-    private var channelItem: ChannelItem? = null
+    private var mChannelItem: ChannelItem? = null
+
     private var job: Job? = null
 
-    private var template: String? = null
-    private var articleDetail: ArticleDetail? = null
+    private var mTemplate: String? = null
+    private var mStory: Story? = null
 
-    private var isStarring: Boolean = false
+    private var mIsStarring: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,42 +50,41 @@ class StoryActivity : AbsContentActivity() {
         // Meta data about current article
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
-        channelItem = gson.fromJson(itemData, ChannelItem::class.java)
+        if (itemData != null) {
+            mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
+        }
+
 
         action_favourite.setOnClickListener {
-            isStarring = !isStarring
+            mIsStarring = !mIsStarring
 
             updateFavouriteIcon()
 
-            if (isStarring) {
-                ArticleStore.getInstance(this).addStarred(channelItem)
+            if (mIsStarring) {
+                ArticleStore.getInstance(this).addStarred(mChannelItem)
             } else {
-                ArticleStore.getInstance(this).deleteStarred(channelItem)
+                ArticleStore.getInstance(this).deleteStarred(mChannelItem)
             }
         }
 
         titlebar_cn.setOnClickListener {
-            currentLanguage = ChannelItem.LANGUAGE_CN
-            init()
+            mCurrentLanguage = ChannelItem.LANGUAGE_CN
+            load()
         }
 
         titlebar_en.setOnClickListener {
-            currentLanguage = ChannelItem.LANGUAGE_EN
-            init()
+            mCurrentLanguage = ChannelItem.LANGUAGE_EN
+            load()
         }
 
         titlebar_bi.setOnClickListener {
-            currentLanguage = ChannelItem.LANGUAGE_BI
-            init()
+            mCurrentLanguage = ChannelItem.LANGUAGE_BI
+            load()
         }
 
-        init()
+        load()
 
         info("onCreate finished")
-    }
-
-    private fun updateFavouriteIcon() {
-        action_favourite.setImageResource(if (isStarring) R.drawable.ic_favorite_teal_24dp else R.drawable.ic_favorite_border_teal_24dp )
     }
 
     override fun onDestroy() {
@@ -98,100 +93,91 @@ class StoryActivity : AbsContentActivity() {
     }
 
     override fun onRefresh() {
-        super.onRefresh()
+        toast(R.string.prompt_refreshing)
 
-        // This is based on the assumption that `temaplte` is not null.
-        // Since refresh action should definitely happen after init() is called, `template` should never be null by this point.
         job = launch(UI) {
-            if (template == null) {
-                template = readTemplate()
+            if (mTemplate == null) {
+                mTemplate = ChannelItem.readTemplateAsync(resources).await()
             }
-            useRemoteJson()
+            fetchAndUpdate()
         }
     }
 
-    override fun init() {
-        info("Initializing content")
-
-        isStarring = ArticleStore.getInstance(this).isStarring(channelItem)
-        updateFavouriteIcon()
+    override fun load() {
 
         job = launch(UI) {
+            mTemplate = ChannelItem.readTemplateAsync(resources).await()
 
-            if (template == null) {
-                template = readTemplate()
-            }
-
-            if (template == null) {
+            if (mTemplate == null) {
+                toast(R.string.prompt_load_failure)
                 return@launch
             }
 
-            articleDetail = channelItem?.jsonFromCache(this@StoryActivity)
+            mStory = mChannelItem?.loadCachedStoryAsync(this@StoryActivity)?.await()
 
-            // Use cached data to render template
-            if (articleDetail != null) {
-                toast("Using cache")
-
-                showLanguageSwitch()
-
-                val html = channelItem?.render(this@StoryActivity, currentLanguage, template, articleDetail)
-
-                loadData(html)
-
-                saveHistory()
+            // Use cached data to render mTemplate
+            if (mStory != null) {
+                loadData()
 
                 return@launch
             }
 
-            // Cache not found, fetch data from server
+            if (!isNetworkConnected()) {
+                toast(R.string.prompt_no_network)
+                return@launch
+            }
+
+            // If it reached here, it indicates no cache found, and network is connected.
             showProgress(true)
-            useRemoteJson()
-        }
-    }
-
-    private fun showLanguageSwitch() {
-        language_group.visibility = if (articleDetail?.isBilingual == true) View.VISIBLE else View.GONE
-    }
-
-    private suspend fun useRemoteJson() {
-
-        toast("Fetching data from server")
-        try {
-            articleDetail = channelItem?.jsonFromServer(this)
-        } catch (e: Exception) {
-            toast(e.toString())
-            return
+            fetchAndUpdate()
         }
 
+        mIsStarring = ArticleStore.getInstance(this).isStarring(mChannelItem)
+        updateFavouriteIcon()
+    }
+
+    private suspend fun fetchAndUpdate() {
+        mStory = mChannelItem?.fetchStoryAsync(this)?.await()
+
+        loadData()
+    }
+
+    private fun loadData() {
         showLanguageSwitch()
 
-        val html = channelItem?.render(this, currentLanguage, template, articleDetail)
+        val html = mChannelItem?.render(this@StoryActivity, mCurrentLanguage, mTemplate, mStory)
 
-        // If remote json does not exist, or template file is not found, stop and return
         if (html == null) {
-            toast("Error! Failed to load data")
-
             showProgress(false)
+            toast(R.string.prompt_load_failure)
             return
         }
 
-        // Load the HTML string into web view.
-        loadData(html)
+//        CookieManager.getInstance().apply {
+//            setAcceptCookie(true)
+//            setCookie("http://www.ftchinese.com", "username=${user?.name}")
+//            setCookie("http://www.ftchinese.com", "userId=${user?.id}")
+//            setCookie("http://www.ftchinese.com", "uniqueVisitorId=${user?.id}")
+//        }
+
+        web_view.loadDataWithBaseURL("http://www.ftchinese.com", html, "text/html", null, null)
+
+        showProgress(false)
 
         saveHistory()
     }
 
-    private suspend fun readTemplate(): String? {
-        val job = async {
-            Store.readRawFile(resources, R.raw.story)
-        }
+    private fun showLanguageSwitch() {
+        language_group.visibility = if (mStory?.isBilingual == true) View.VISIBLE else View.GONE
+    }
 
-        return job.await()
+    private fun updateFavouriteIcon() {
+        action_favourite.setImageResource(if (mIsStarring) R.drawable.ic_favorite_teal_24dp else R.drawable.ic_favorite_border_teal_24dp )
     }
 
     private fun saveHistory() {
-        val item = channelItem ?: return
-        launch(CommonPool) {
+        val item = mChannelItem ?: return
+        bg {
 
             info("Save reading history")
             ArticleStore.getInstance(context = this@StoryActivity).addHistory(item)

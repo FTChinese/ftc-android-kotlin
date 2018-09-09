@@ -14,7 +14,7 @@ import android.widget.Toast
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.MembershipActivity
 import com.ft.ftchinese.util.gson
-import kotlinx.android.synthetic.main.fragment_section.*
+import kotlinx.android.synthetic.main.fragment_channel.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
@@ -52,8 +52,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
     // Hold string in raw/list.html
     private var mTemplate: String? = null
-    // Hold string of webview content
-    private var mListContent: String? = null
 
     /**
      * This interface must be implemented by activities that contain this
@@ -91,6 +89,10 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         }
     }
 
+    fun setUser(user: User?) {
+        info("setUser: $user")
+        mUser = user
+    }
     /**
      * Bind listeners here.
      */
@@ -131,13 +133,13 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         super.onCreateView(inflater, container, savedInstanceState)
 
         info("onCreateView finished")
-        return inflater.inflate(R.layout.fragment_section, container, false)
+        return inflater.inflate(R.layout.fragment_channel, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        swipe_refresh_layout.setOnRefreshListener(this)
+        channel_fragment_swipe.setOnRefreshListener(this)
 
         web_view.settings.apply {
             javaScriptEnabled = true
@@ -196,7 +198,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             }
 
             if (activity?.isNetworkConnected() == false) {
-                info("Network is not connected")
+                toast(R.string.prompt_no_network)
                 return@launch
             }
 
@@ -239,7 +241,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     private fun showProgress(show: Boolean) {
         mListener?.onProgress(show)
         if (!show) {
-            swipe_refresh_layout.isRefreshing = false
+            channel_fragment_swipe.isRefreshing = false
         }
     }
 
@@ -352,15 +354,18 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             }
 
 
-            if (channelItem.type == "interactive" && channelItem.subType == "radio") {
-                RadioActivity.start(context, channelItem)
-                return
-            }
-
             /**
              * Now assuming this is a plain article
              */
             channelItem.adId = channelMeta?.adid ?: ""
+
+            // If story is seven days old, user is not logged or user if free member
+            if (channelItem.isSevenDaysOld) {
+                if (mUser == null || mUser?.membership?.type == Membership.TYPE_FREE ) {
+                    MembershipActivity.start(context)
+                    return
+                }
+            }
 
             /**
              * Start different activity according to ChannelItem#type
@@ -384,6 +389,13 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                     return
                 }
 
+                ChannelItem.TYPE_INTERACTIVE -> {
+                    if (channelItem.type == ChannelItem.SUB_TYPE_RADIO) {
+                        RadioActivity.start(context, channelItem)
+                    } else {
+                        WebContentActivity.start(activity, Uri.parse(channelItem.canonicalUrl))
+                    }
+                }
                 // Article types other than `story` and `premium` do not have JSON API.
                 // Load theme directly
                 else -> {

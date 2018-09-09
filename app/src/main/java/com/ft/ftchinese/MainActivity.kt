@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
-import android.net.Network
 import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Bundle
@@ -76,11 +75,11 @@ class MainActivity : AppCompatActivity(),
         AnkoLogger {
 
     private var mBottomDialog: BottomSheetDialog? = null
-    private var user: User? = null
+    private var mUser: User? = null
     private var mBackKeyPressed = false
     private var exitJob: Job? = null
     private var timerJob: Job? = null
-    private var mTabAdapter: TabPagerAdapter? = null
+
     private var mNewsAdapter: TabPagerAdapter? = null
     private var mEnglishAdapter: TabPagerAdapter? = null
     private var mFtaAdapter: TabPagerAdapter? = null
@@ -143,19 +142,23 @@ class MainActivity : AppCompatActivity(),
 
     private val logoutListener = View.OnClickListener {
         User.removeFromPref(this)
-        updateUIForCookie()
+        // Remove user data stored in this activity.
+        mUser = null
+
+        syncUserData()
+
         mBottomDialog?.dismiss()
         toast("账号已登出")
     }
 
     private val drawerHeaderTitleListener = View.OnClickListener {
-        // If user is not logged in, show login.
-        if (user == null) {
+        // If mUser is not logged in, show login.
+        if (mUser == null) {
             LoginActivity.startForResult(this, REQUEST_CODE_SIGN_IN)
             return@OnClickListener
         }
 
-        // If user already logged in, show logout.
+        // If mUser already logged in, show logout.
         if (mBottomDialog == null) {
             mBottomDialog = BottomSheetDialog(this)
             mBottomDialog?.setContentView(R.layout.fragment_logout)
@@ -214,8 +217,8 @@ class MainActivity : AppCompatActivity(),
         bottom_nav.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)
         bottom_nav.setOnNavigationItemReselectedListener(bottomNavItemReseletedListener)
 
-        // Check user login status
-        updateUIForCookie()
+        // Check mUser login status
+        syncUserData()
 
         // Set a listener that will be notified when a menu item is selected.
         drawer_nav.setNavigationItemSelectedListener(this)
@@ -369,7 +372,7 @@ class MainActivity : AppCompatActivity(),
     override fun onStart() {
         super.onStart()
         info("onStart finished")
-        updateUIForCookie()
+        syncUserData()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
@@ -382,7 +385,7 @@ class MainActivity : AppCompatActivity(),
     /**
      * Deal with the cases that an activity launched by this activity exits.
      * For example, the LoginActvity will automatically finish when it successfully logged in,
-     * and then it should inform the MainActivity to update UI for a logged in user.
+     * and then it should inform the MainActivity to update UI for a logged in mUser.
      * `requestCode` is used to identify who this result cam from. We are using it to identify if the result came from LoginActivity or SignupActivity.
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -391,11 +394,11 @@ class MainActivity : AppCompatActivity(),
         info("onActivityResult: requestCode $requestCode, resultCode $resultCode")
 
         when (requestCode) {
-            // If the result come from SignIn or SignUp, update UI to show user login state.
+            // If the result come from SignIn or SignUp, update UI to show mUser login state.
             REQUEST_CODE_SIGN_IN, REQUEST_CODE_SIGN_UP -> {
                 if (resultCode == Activity.RESULT_OK) {
                     toast("登录成功")
-                    updateUIForCookie()
+                    syncUserData()
                 }
             }
         }
@@ -533,9 +536,9 @@ class MainActivity : AppCompatActivity(),
                 SettingsActivity.start(this)
             }
             R.id.action_logout -> {
-                // Delete user data from shared preference and update UI.
+                // Delete mUser data from shared preference and update UI.
                 User.removeFromPref(this)
-                updateUIForCookie()
+                syncUserData()
                 toast("账号已登出")
             }
         }
@@ -575,7 +578,7 @@ class MainActivity : AppCompatActivity(),
     /**
      * Implementation of ChannelWebViewClient.OnInAppNavigate
      * Use cases:
-     * When user clicked links on the frontpage like `每日英语`,
+     * When mUser clicked links on the frontpage like `每日英语`,
      * the app should actually jump to the second item in bottom navigation instead of opening a separate activity.
      */
     override fun selectBottomNavItem(itemId: Int) {
@@ -595,28 +598,40 @@ class MainActivity : AppCompatActivity(),
     }
 
     /**
-     * Update UI dpending user's login/logout state
+     * Update UI dpending mUser's login/logout state
      */
-    private fun updateUIForCookie() {
-        user = User.loadFromPref(this)
-        val isLoggedIn = (user != null)
+    private fun syncUserData() {
+        mUser = User.loadFromPref(this)
+        val isLoggedIn = (mUser != null)
+
+        info("User is loggedin: $isLoggedIn")
+        info("User data: $mUser")
 
         val menu = drawer_nav.menu
         val header = drawer_nav.getHeaderView(0)
 
         // If seems this is the only way to get the header view.
-        // You cannot user `import kotlinx.android.synthetic.activity_main_search.drawer_nav_header.*`,
+        // You cannot mUser `import kotlinx.android.synthetic.activity_main_search.drawer_nav_header.*`,
         // which will give you null pointer exception.
-        header.findViewById<TextView>(R.id.nav_header_title).text = if (!user?.name.isNullOrBlank()) {
-            user?.name
-        } else if (!user?.email.isNullOrBlank()) {
-            user?.email
+        header.findViewById<TextView>(R.id.nav_header_title).text = if (!mUser?.name.isNullOrBlank()) {
+            mUser?.name
+        } else if (!mUser?.email.isNullOrBlank()) {
+            mUser?.email
         } else {
             getString(R.string.nav_not_logged_in)
         }
 
         menu.setGroupVisible(R.id.drawer_group_sign_in_up, !isLoggedIn)
         menu.findItem(R.id.action_account).isVisible = isLoggedIn
+
+        val frag = supportFragmentManager.findFragmentById(R.id.channel_fragment_swipe)
+
+        // Set or remove user data stored in fragment
+        info("Is channelfragment: ${frag is ChannelFragment}")
+        if (frag is ChannelFragment) {
+            info("Set fragment's user data")
+            frag.setUser(mUser)
+        }
     }
 
     private fun feedbackEmail() {

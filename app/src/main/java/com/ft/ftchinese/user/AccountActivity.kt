@@ -67,7 +67,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
             try {
                 user = user?.refresh()
 
-                swipe_refresh_layout.isRefreshing = false
+                channel_fragment_swipe.isRefreshing = false
                 updateUI()
 
                 user?.save(context)
@@ -82,7 +82,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
             } catch (e: Exception) {
                 handleException(e)
             } finally {
-                swipe_refresh_layout.isRefreshing = false
+                channel_fragment_swipe.isRefreshing = false
             }
         }
     }
@@ -115,7 +115,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         super.onViewCreated(view, savedInstanceState)
 
         // Set refresh listener
-        swipe_refresh_layout.setOnRefreshListener(this)
+        channel_fragment_swipe.setOnRefreshListener(this)
 
         // Set up recycler view.
         recycler_view.apply {

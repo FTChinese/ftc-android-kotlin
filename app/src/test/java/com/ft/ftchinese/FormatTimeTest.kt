@@ -35,4 +35,16 @@ class FormatTimeTest{
 
         System.out.println(day1.isBefore(day2))
     }
+
+    @Test fun severDays() {
+        val timestamp = "1536249600".toLong()
+        val sevenDaysLater = timestamp + 7 * 24 * 60 * 60
+
+        println(sevenDaysLater)
+
+        val now = Date()
+        println(now.time)
+
+        println(Date(sevenDaysLater * 1000).after(now))
+    }
 }

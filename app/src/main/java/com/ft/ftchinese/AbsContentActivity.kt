@@ -31,7 +31,7 @@ import java.io.ByteArrayOutputStream
 
 /**
  * This is used to show the contents of an article in web view.
- * Subclass must implement `init` method to handle data fetching.
+ * Subclass must implement `load` method to handle data fetching.
  * Subclass must call `onCreate`.
  */
 abstract class AbsContentActivity : AppCompatActivity(),
@@ -44,7 +44,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
     abstract val articleWebUrl: String
     abstract val articleTitle: String
     abstract val articleStandfirst: String
-//    var isFavouring: Boolean = false
 
     var user: User? = null
 
@@ -111,10 +110,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
         }
     }
 
-    override fun onRefresh() {
-        Toast.makeText(this, "Refreshing", Toast.LENGTH_SHORT).show()
-    }
-
     // Create options menu
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)
@@ -152,31 +147,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
         }
     }
 
-    abstract fun init()
-
-    fun loadData(data: String?) {
-
-        info("Load HTML string into web view")
-
-        CookieManager.getInstance().apply {
-            setAcceptCookie(true)
-            setCookie("http://www.ftchinese.com", "username=${user?.name}")
-            setCookie("http://www.ftchinese.com", "userId=${user?.id}")
-            setCookie("http://www.ftchinese.com", "uniqueVisitorId=${user?.id}")
-        }
-
-        web_view.loadDataWithBaseURL("http://www.ftchinese.com", data, "text/html", null, null)
-
-        showProgress(false)
-    }
-
-    fun loadUrl(url: String) {
-
-        info("Load url directly: $url")
-
-        web_view.loadUrl(url)
-        showProgress(false)
-    }
+    abstract fun load()
 
     fun showProgress(show: Boolean) {
         if (show) {
@@ -186,29 +157,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
             progress_bar.visibility = View.GONE
         }
     }
-
-    /**
-     * Get all app installed on device that could be used for share.
-     * This is identical to `android.support.v7.widget.ShareActionProvider`.
-     * Share to Wechat Moments will not show up. This is not what we want.
-     */
-//    private fun getShareApps(): MutableList<AppInfo> {
-//        val intent = Intent(Intent.ACTION_SEND, null)
-//        intent.addCategory(Intent.CATEGORY_DEFAULT)
-//        intent.type = "text/plain"
-//        val resolveInfos = packageManager.queryIntentActivities(intent, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT)
-//
-//        val apps = mutableListOf<AppInfo>()
-//        for (info in resolveInfos) {
-//            val pkgName = info.activityInfo.packageName
-//            val launcherClassName = info.activityInfo.name
-//            val appName = info.loadLabel(packageManager)
-//            val icon = info.loadIcon(packageManager)
-//            apps.addHistory(AppInfo(pkgName, launcherClassName, appName, icon))
-//        }
-//
-//        return apps
-//    }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val iconView: ImageView = itemView.findViewById(R.id.share_icon_view)
@@ -320,13 +268,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
         }
     }
 }
-
-//data class AppInfo(
-//        val pkgName: String,
-//        val launcherClassname: String,
-//        val appName: CharSequence,
-//        val icon: Drawable
-//)
 
 data class ShareItem(
         val appName: CharSequence,

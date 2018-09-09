@@ -8,7 +8,10 @@ import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
+import org.jetbrains.anko.coroutines.experimental.bg
+import java.util.*
 
 class Endpoints{
     companion object {
@@ -56,7 +59,8 @@ data class ChannelItem(
         val type: String,
         val subType: String? = null,
         val headline: String,
-        val shortlead: String? = null
+        val shortlead: String? = null,
+        val timeStamp: String? = null // "1536249600"
 ) {
 
     var standfirst: String = ""
@@ -64,6 +68,22 @@ data class ChannelItem(
     // Used for sharing
     val canonicalUrl: String
         get() = "http://www.ftchinese.com/$type/$id"
+
+    val isSevenDaysOld: Boolean
+        get() {
+            if (timeStamp == null) {
+                return false
+            }
+
+            val sevenDaysLater = Date((timeStamp.toLong() + 7 * 24 * 60 * 60) * 1000)
+            val now = Date()
+
+            if (sevenDaysLater.after(now)) {
+                return false
+            }
+
+            return true
+        }
 
     private val filename: String
         get() = "${type}_$id.json"
@@ -103,39 +123,36 @@ data class ChannelItem(
             }
         }
 
-    suspend fun jsonFromCache(context: Context?): ArticleDetail? {
-        val job = async {
-            Store.load(context, filename)
-        }
+    fun loadCachedStoryAsync(context: Context?): Deferred<Story?> = async {
 
-        val jsonData = job.await() ?: return null
+        val jsonData = Store.load(context, filename) ?: return@async null
 
-        return parseJson(jsonData)
+        parseJson(jsonData)
     }
 
-    suspend fun jsonFromServer(context: Context): ArticleDetail? {
-        if (apiUrl == null) {
-            return null
+    fun fetchStoryAsync(context: Context): Deferred<Story?> = async {
+
+        val url = apiUrl ?: return@async null
+
+
+        try {
+            val jsonData = Fetch().get(url).string()
+
+            bg {
+                Store.save(context, filename, jsonData)
+            }
+
+            parseJson(jsonData)
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            null
         }
-
-        val url = apiUrl ?: return null
-
-        val job = async {
-            Fetch().get(url).string()
-        }
-
-        val jsonData = job.await() ?: return null
-
-        async {
-            Store.save(context, filename, jsonData)
-        }
-
-        return parseJson(jsonData)
     }
 
-    private fun parseJson(jsonData: String?): ArticleDetail? {
+    private fun parseJson(jsonData: String?): Story? {
         return try {
-            val article = gson.fromJson<ArticleDetail>(jsonData, ArticleDetail::class.java)
+            val article = gson.fromJson<Story>(jsonData, Story::class.java)
             standfirst = article.clongleadbody
 
             article
@@ -145,7 +162,7 @@ data class ChannelItem(
         }
     }
 
-    fun render(context: Context, language: Int, template: String?, article: ArticleDetail?): String? {
+    fun render(context: Context, language: Int, template: String?, article: Story?): String? {
 
         if (template == null || article == null) {
             return null
@@ -216,12 +233,8 @@ data class ChannelItem(
         const val TYPE_INTERACTIVE = "interactive"
         const val SUB_TYPE_RADIO = "radio"
 
-        suspend fun readTemplate(resources: Resources): String? {
-            val job = async {
-                Store.readRawFile(resources, R.raw.story)
-            }
-
-            return job.await()
+        fun readTemplateAsync(resources: Resources): Deferred<String?> = async {
+            Store.readRawFile(resources, R.raw.story)
         }
     }
 }
