@@ -49,11 +49,6 @@ fun Activity.isNetworkConnected(): Boolean {
     return networkInfo.isConnected
 }
 
-fun Activity.isNetworkAvailable(): Boolean {
-    val networkInfo = getActiveNetworkInfo()
-    return networkInfo.isAvailable
-}
-
 fun Activity.isActiveNetworkWifi(): Boolean {
     val networkInfo = getActiveNetworkInfo()
 

@@ -1,8 +1,6 @@
 package com.ft.ftchinese
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -22,6 +20,7 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.jetbrains.anko.support.v4.toast
 
 
 /**
@@ -49,8 +48,11 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     private var channelItems: Array<ChannelItem>? = null
     private var channelMeta: ChannelMeta? = null
     private var job: Job? = null
-    private var user: User? = null
+    private var mUser: User? = null
+
+    // Hold string in raw/list.html
     private var mTemplate: String? = null
+    // Hold string of webview content
     private var mListContent: String? = null
 
     /**
@@ -58,7 +60,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     *
      *
      * See the Android Training lesson [Communicating with Other Fragments]
      * (http://developer.android.com/training/basics/fragments/communicating.html)
@@ -76,13 +77,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          * fragment.
          */
         private const val ARG_SECTION_PAGE = "arg_section_page"
-        private val HTML_PLACEHOLDER = """
-            <html>
-                <body>
-                    <h1>无法加载数据</h1>
-                </body>
-            </html>
-        """.trimIndent()
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -110,21 +104,25 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         if (context is OnFragmentInteractionListener) {
             mListener = context
         }
+
+        info("onAttach finished")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        user = User.loadFromPref(context)
+        mUser = User.loadFromPref(context)
 
+        // Get metadata about current tab
         val pageMetadata = arguments?.getString(ARG_SECTION_PAGE)
-
         mTabMetadata = gson.fromJson<PagerTab>(pageMetadata, PagerTab::class.java)
 
         // Set WebViewClient for current page
         mWebViewClient = ChannelWebViewClient(activity, mTabMetadata)
         // Set navigate mListener to enable in-app navigation when clicked a url which should to another tab.
         mWebViewClient.setOnInAppNavigateListener(mNavigateListener)
+
+        info("onCreate finished")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -132,6 +130,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         super.onCreateView(inflater, container, savedInstanceState)
 
+        info("onCreateView finished")
         return inflater.inflate(R.layout.fragment_section, container, false)
     }
 
@@ -165,14 +164,12 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         info("Initiating current page with data: $mTabMetadata")
 
-        init()
+        loadContent()
 
         info("onCreateView finished")
     }
 
-    private fun init() {
-
-        showProgress(true)
+    private fun loadContent() {
 
         when (mTabMetadata?.htmlType) {
             PagerTab.HTML_TYPE_FRAGMENT -> {
@@ -191,26 +188,51 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             mTemplate = PagerTab.readTemplate(resources).await()
             mListContent = mTabMetadata?.fragmentFromCache(context)?.await()
 
-            if (mTemplate != null && mListContent != null) {
+            if (mTemplate == null) {
+                toast(R.string.prompt_load_failure)
+                return@launch
+            }
+
+            // If cached HTML fragment exists
+            if (mListContent != null) {
                 val content = PagerTab.render(mTemplate, mListContent) ?: return@launch
                 loadData(content)
+                info("Loaded data from cache")
+            }
+
+            if (activity?.isNetworkConnected() == false) {
+                info("Network is not connected")
+                return@launch
             }
 
             // If on wifi, then fetch remote data and refresh. Stop.
-            fetchAndUpdate()
-            // If on cellar data, if mListContent is null, fetch remote data; otherwise stop.
+            if (activity?.isActiveNetworkWifi() == true) {
+                info("Network is wifi. Fetch data.")
+                fetchAndUpdate()
+                return@launch
+            }
+
+            // If no cached HTML fragment found, fetch remote data as long as there is network.
+            // In this case, show progress.
+            if (mListContent == null) {
+                info("Cache not found. Fetch data.")
+                showProgress(true)
+                fetchAndUpdate()
+            }
         }
     }
 
     private suspend fun fetchAndUpdate() {
         mListContent = mTabMetadata?.htmlFromServer(context)?.await()
         val content = PagerTab.render(mTemplate, mListContent) ?: return
+        info("Fetched data from server")
         loadData(content)
     }
 
     private fun loadData(data: String) {
         web_view.loadDataWithBaseURL(WEBVIEV_BASE_URL, data, "text/html", null, null)
         showProgress(false)
+        info("Data loaded into webview")
     }
 
     private fun showProgress(show: Boolean) {
@@ -218,6 +240,22 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         if (!show) {
             swipe_refresh_layout.isRefreshing = false
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        info("onSaveInstanceState finished")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        info("onPause finished")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        info("onStop finished")
     }
 
     override fun onDestroy() {
@@ -229,9 +267,18 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     }
 
     override fun onRefresh() {
-        Toast.makeText(context, "Refreshing", Toast.LENGTH_SHORT).show()
+        toast(R.string.prompt_refreshing)
+
+        if (activity?.isNetworkConnected() == false) {
+            toast(R.string.prompt_no_network)
+            return
+        }
 
         job = launch(UI) {
+            if (mTemplate == null) {
+                mTemplate = PagerTab.readTemplate(resources).await()
+            }
+            info("Refreshing: fetch remote data")
             fetchAndUpdate()
         }
     }
@@ -255,7 +302,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          * See Page/Layouts/Page/SuperDataViewController.swift#SuperDataViewController what kind of data structure is passed back from web view.
          * The JSON data is parsed into SectionItem type in ContentActivity
          * iOS equivalent might be here: Page/Layouts/Pages/Content/DetailModelController.swift
-         * @param index is the number of article user clicked in current page. The value is extracted from `data-row` attribute of `div.item-container-app`.
+         * @param index is the number of article mUser clicked in current page. The value is extracted from `data-row` attribute of `div.item-container-app`.
          * In most cases when you clicked, an article should be loaded.
          * In a few exceptions, like `/channel/column.html`, an item in the list should open another page of article list.
          * It seems the only way to distinguish those cases is using `ChannelMeta.title` field.
@@ -316,7 +363,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                 }
 
                 ChannelItem.TYPE_PREMIUM -> {
-                    if (user == null || user?.membership?.type == Membership.TYPE_FREE ) {
+                    if (mUser == null || mUser?.membership?.type == Membership.TYPE_FREE ) {
                         MembershipActivity.start(context)
                         return
                     }

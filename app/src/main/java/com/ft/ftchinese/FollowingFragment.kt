@@ -76,7 +76,8 @@ class FollowingFragment : Fragment(), AnkoLogger {
                 val channelMeta = PagerTab(
                         title = item.tag,
                         name = "${item.type}_${item.tag}",
-                        fragmentUrl = item.bodyUrl
+                        contentUrl = item.bodyUrl,
+                        htmlType = PagerTab.HTML_TYPE_FRAGMENT
                 )
 
                 ChannelActivity.start(context, channelMeta)

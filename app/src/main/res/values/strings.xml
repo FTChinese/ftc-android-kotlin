@@ -18,9 +18,12 @@
     <string name="titlebar_en">英文</string>
     <string name="titlebar_bilingual">对照</string>
 
-    <string name="double_click_exit">再按一次退出程序</string>
+    <string name="prompt_exit">再按一次退出程序</string>
     <string name="prompt_ad_timer">跳过 %1$d</string>
 
+    <string name="prompt_refreshing">更新数据</string>
+    <string name="prompt_no_network">网络无连接，请检查网络设置</string>
+    <string name="prompt_load_failure">无法加载数据，请稍后再试</string>
     <!-- Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

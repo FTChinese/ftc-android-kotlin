@@ -40,7 +40,9 @@ class ChannelWebViewClient(
                 title = currentPage?.title ?: "",
                 // Pagination should not be cached since it always dynamic
                 name = "",
-                fragmentUrl = buildUrl(uri, "/channel/${uri.path}"))
+                contentUrl = buildUrl(uri, "/channel/${uri.path}"),
+                htmlType = PagerTab.HTML_TYPE_FRAGMENT
+        )
 
         /**
          * Start a new page of article list.
@@ -64,7 +66,8 @@ class ChannelWebViewClient(
             val page = PagerTab(
                     title = "",
                     name = "",
-                    fragmentUrl = buildUrl(uri)
+                    contentUrl = buildUrl(uri),
+                    htmlType = PagerTab.HTML_TYPE_FRAGMENT
             )
 
             ChannelActivity.start(activity, page)
@@ -120,7 +123,9 @@ class ChannelWebViewClient(
                 val page = PagerTab(
                         title = pathToTitle[lastPathSegment] ?: "",
                         name = name,
-                        fragmentUrl = buildUrl(uri))
+                        contentUrl = buildUrl(uri),
+                        htmlType = PagerTab.HTML_TYPE_FRAGMENT
+                )
 
                 ChannelActivity.start(activity, page)
             }
@@ -152,7 +157,8 @@ class ChannelWebViewClient(
                     val page = PagerTab(
                             title = pathToTitle[name] ?: "",
                             name = "marketing_$name",
-                            fragmentUrl = buildUrl(uri)
+                            contentUrl = buildUrl(uri),
+                            htmlType = PagerTab.HTML_TYPE_FRAGMENT
                     )
                     ChannelActivity.start(activity, page)
                 }
@@ -169,7 +175,8 @@ class ChannelWebViewClient(
         val page = PagerTab(
                 title = "",
                 name = "",
-                fragmentUrl = buildUrl(uri)
+                contentUrl = buildUrl(uri),
+                htmlType = PagerTab.HTML_TYPE_FRAGMENT
         )
         ChannelActivity.start(activity, page)
 

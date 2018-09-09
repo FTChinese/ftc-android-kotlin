@@ -184,7 +184,9 @@ open class BaseWebViewClient(
         val page = PagerTab(
                 title = pathToTitle[lastPathSegment] ?: "",
                 name = "",
-                fragmentUrl = buildUrl(uri))
+                contentUrl = buildUrl(uri),
+                htmlType = PagerTab.HTML_TYPE_FRAGMENT
+        )
 
         ChannelActivity.start(activity, page)
 
@@ -200,7 +202,9 @@ open class BaseWebViewClient(
         val page = PagerTab(
                 title = pathToTitle[lastPathSegment] ?: "",
                 name = "",
-                fragmentUrl = buildUrl(uri))
+                contentUrl = buildUrl(uri),
+                htmlType = PagerTab.HTML_TYPE_FRAGMENT
+        )
 
         ChannelActivity.start(activity, page)
 
@@ -234,7 +238,9 @@ open class BaseWebViewClient(
         val page = PagerTab(
                 title = uri.pathSegments[1],
                 name = "${uri.pathSegments[0]}_${uri.pathSegments[1]}",
-                fragmentUrl = buildUrl(uri))
+                contentUrl = buildUrl(uri),
+                htmlType = PagerTab.HTML_TYPE_FRAGMENT
+        )
 
         ChannelActivity.start(activity, page)
 
