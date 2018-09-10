@@ -6,6 +6,7 @@ import com.ft.ftchinese.util.ApiEndpoint
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
 import java.io.IOException
 
@@ -40,72 +41,48 @@ data class User(
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON
      * See Fetch#exectue for other exceptions
      */
-    suspend fun refresh(): User {
-        val job = async {
-            Fetch().get(ApiEndpoint.ACCOUNT)
-                    .noCache()
-                    .setUserId(this@User.id)
-                    .end()
-        }
+    fun refreshAsync(): Deferred<User> = async {
 
-        val response = job.await()
+        val response = Fetch().get(ApiEndpoint.ACCOUNT)
+                .noCache()
+                .setUserId(this@User.id)
+                .end()
 
         val body = response.body()?.string()
 
-        return gson.fromJson<User>(body, User::class.java)
+        gson.fromJson<User>(body, User::class.java)
     }
 
-    suspend fun starArticle(articleId: String): Boolean {
-        val job = async {
-            Fetch().put("${ApiEndpoint.STARRED}/$articleId")
-                    .noCache()
-                    .body(null)
-                    .setUserId(this@User.id)
-                    .end()
-        }
+    fun starArticle(articleId: String): Deferred<Boolean> = async {
 
-        val response = job.await()
+        val response = Fetch().put("${ApiEndpoint.STARRED}/$articleId")
+                .noCache()
+                .body(null)
+                .setUserId(this@User.id)
+                .end()
 
-        if (response.code() == 204) {
-            return true
-        }
-
-        return false
+        response.code() == 204
     }
 
-    suspend fun unstarArticle(articleId: String): Boolean {
-        val job = async {
-            Fetch().delete("${ApiEndpoint.STARRED}/$articleId")
-                    .noCache()
-                    .setUserId(this@User.id)
-                    .body(null)
-                    .end()
-        }
+    fun unstarArticle(articleId: String): Deferred<Boolean> = async {
 
-        val response = job.await()
+        val response = Fetch().delete("${ApiEndpoint.STARRED}/$articleId")
+                .noCache()
+                .setUserId(this@User.id)
+                .body(null)
+                .end()
 
-        if (response.code() == 204) {
-            return true
-        }
-
-        return false
+        response.code() == 204
     }
 
-    suspend fun isStarring(articleId: String): Boolean {
-        val job = async {
-            Fetch().get("${ApiEndpoint.STARRED}/$articleId")
-                    .noCache()
-                    .setUserId(this@User.id)
-                    .end()
-        }
+    fun isStarring(articleId: String): Deferred<Boolean> = async {
 
-        val response = job.await()
+        val response = Fetch().get("${ApiEndpoint.STARRED}/$articleId")
+                .noCache()
+                .setUserId(this@User.id)
+                .end()
 
-        if (response.code() == 204) {
-            return true
-        }
-
-        return false
+        response.code() == 204
     }
 
     companion object {
