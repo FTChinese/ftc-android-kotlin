@@ -45,8 +45,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
     abstract val articleTitle: String
     abstract val articleStandfirst: String
 
-    var user: User? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_content)
@@ -57,8 +55,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
             // Do not show title on the toolbar for any content.
             setDisplayShowTitleEnabled(false)
         }
-
-        user = User.loadFromPref(this)
 
         swipe_refresh.setOnRefreshListener(this)
 

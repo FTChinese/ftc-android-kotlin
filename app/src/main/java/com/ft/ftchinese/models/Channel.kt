@@ -85,6 +85,9 @@ data class ChannelItem(
             return true
         }
 
+    val isMembershipRequired: Boolean
+        get() = isSevenDaysOld || type == TYPE_PREMIUM
+
     private val filename: String
         get() = "${type}_$id.json"
 

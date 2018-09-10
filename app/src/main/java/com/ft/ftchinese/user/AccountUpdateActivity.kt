@@ -4,23 +4,24 @@ import android.content.Context
 import android.content.Intent
 import android.support.v4.app.Fragment
 import com.ft.ftchinese.R
+import com.ft.ftchinese.models.SessionManager
 
 class AccountUpdateActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {
         val itemId = intent.getIntExtra(ACCOUNT_ITEM_ID, 0)
-
+        val user = SessionManager.getInstance(this).loadUser()
         return when (itemId) {
             AccountItem.ID_EMAIL -> {
                 supportActionBar?.setTitle(R.string.title_change_email)
-                EmailFragment.newInstance()
+                EmailFragment.newInstance(user)
             }
             AccountItem.ID_USER_NAME -> {
                 supportActionBar?.setTitle(R.string.title_change_username)
-                UsernameFragment.newInstance()
+                UsernameFragment.newInstance(user)
             }
             AccountItem.ID_PASSWORD -> {
                 supportActionBar?.setTitle(R.string.title_change_password)
-                PasswordFragment.newInstance()
+                PasswordFragment.newInstance(user)
             }
             else -> {
                 Fragment()

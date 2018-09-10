@@ -14,9 +14,11 @@ import android.widget.Button
 import android.widget.TextView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
+import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.User
 import com.ft.ftchinese.util.ApiEndpoint
 import com.ft.ftchinese.util.Fetch
+import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.fragment_account.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -30,9 +32,13 @@ private const val VIEW_TYPE_SEPARATOR = 0x01
 private const val VIEW_TYPE_ITEM = 0x02
 private const val VIEW_TYPE_TEXT = 0x03
 
+/**
+ * Show user's account details
+ */
 class AccountActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {
-        return AccountFragment.newInstance()
+        val user = SessionManager.getInstance(this).loadUser()
+        return AccountFragment.newInstance(user)
     }
 
     companion object {
@@ -46,31 +52,33 @@ class AccountActivity : SingleFragmentActivity() {
 
 internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
 
-    private var user: User? = null
+    private var mUser: User? = null
     private var job: Job? = null
-    private var listener: OnFragmentInteractionListener? = null
-    private var accountItems: List<AccountItem>? = null
+    private var mListener: OnFragmentInteractionListener? = null
     private var mAdapter: Adapter? = null
 
     private var isInProgress: Boolean = false
         set(value) {
-            listener?.onProgress(value)
+            mListener?.onProgress(value)
         }
 
     /**
-     * Update refresh retrieve user data from API, save it and update ui.
+     * Update refresh retrieve mUser data from API, save it and update ui.
      */
     override fun onRefresh() {
-        info("onRefresh")
         toast(R.string.action_updating)
+
         job = launch(UI) {
             try {
-                user = user?.refresh()
-
+                val user = mUser?.refreshAsync()?.await()
                 channel_fragment_swipe.isRefreshing = false
+
+                mUser = user
                 updateUI()
 
-                user?.save(context)
+                if (user != null) {
+                    mListener?.onUserSession(user)
+                }
 
                 toast(R.string.success_updated)
             } catch (e: ErrorResponse) {
@@ -91,17 +99,21 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         super.onAttach(context)
 
         if (context is OnFragmentInteractionListener) {
-            listener = context
+            mListener = context
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Load user data from share preferences
-        user = User.loadFromPref(context)
-
-        info("onCreate")
+        arguments?.let {
+            val userData = it.getString(ARG_USER_DATA)
+            mUser = try {
+                gson.fromJson<User>(userData, User::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        }
+        info("onCreate finished")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -114,7 +126,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Set refresh listener
+        // Set refresh mListener
         channel_fragment_swipe.setOnRefreshListener(this)
 
         // Set up recycler view.
@@ -139,13 +151,13 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     private fun updateUI() {
         info("updateUI")
 
-        accountItems = AccountItem.create(user)
+        val accountItems = AccountItem.create(mUser)
 
         if (mAdapter == null) {
-            val items = accountItems ?: return
-            mAdapter = Adapter(items)
+            mAdapter = Adapter(accountItems)
             recycler_view.adapter = mAdapter
         } else {
+            mAdapter?.setItems(accountItems)
             mAdapter?.notifyDataSetChanged()
         }
     }
@@ -157,9 +169,13 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     }
 
     companion object {
-        fun newInstance(): AccountFragment {
-            return AccountFragment()
-        }
+        private const val ARG_USER_DATA = "user_data"
+        fun newInstance(user: User?) =
+                AccountFragment().apply {
+                    arguments = Bundle().apply {
+                        putString(ARG_USER_DATA, gson.toJson(user))
+                    }
+                }
     }
 
     inner class TextViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -174,7 +190,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
     inner class SeparatorViewHolder(view: View) : RecyclerView.ViewHolder(view)
 
-    inner class Adapter(val items: List<AccountItem>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    inner class Adapter(private var mItems: List<AccountItem>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
@@ -199,11 +215,11 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         }
 
         override fun getItemCount(): Int {
-            return items.size
+            return mItems.size
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val item = items[position]
+            val item = mItems[position]
 
             when (holder) {
                 is TextViewHolder -> {
@@ -232,7 +248,11 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         }
 
         override fun getItemViewType(position: Int): Int {
-            return items[position].viewType
+            return mItems[position].viewType
+        }
+
+        fun setItems(items: List<AccountItem>) {
+            mItems = items
         }
 
         override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
@@ -241,7 +261,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     }
 
     private fun resendVerification() {
-        val uuid = user?.id ?: return
+        val uuid = mUser?.id ?: return
 
         isInProgress = true
 
@@ -287,7 +307,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         if (response.code() == 204) {
             info("Email sent")
         } else {
-            info("Failed to send email. ${response.code()}: ${response.message()}")
+            info("Failed to updateAsync email. ${response.code()}: ${response.message()}")
         }
     }
 }

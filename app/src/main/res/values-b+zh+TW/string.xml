@@ -25,6 +25,7 @@
     <string name="prompt_refreshing">更新數據</string>
     <string name="prompt_no_network">網絡無連結，請檢查網絡設置</string>
     <string name="prompt_load_failure">無法加載數據，請稍後再試</string>
+    <string name="prompt_member_restricted">僅限會員閱讀</string>
     <!-- Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

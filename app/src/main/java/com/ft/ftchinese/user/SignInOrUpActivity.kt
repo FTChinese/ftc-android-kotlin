@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.LoaderManager
 import android.content.Context
 import android.content.CursorLoader
+import android.content.Intent
 import android.content.Loader
 import android.content.pm.PackageManager
 import android.database.Cursor
@@ -20,14 +21,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
-import com.ft.ftchinese.MainActivity
 import com.ft.ftchinese.R
-import com.ft.ftchinese.REQUEST_CODE_SIGN_IN
-import com.ft.ftchinese.REQUEST_CODE_SIGN_UP
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.ErrorResponse
-import com.ft.ftchinese.models.User
-import com.google.gson.JsonSyntaxException
+import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.fragment_sign_in_or_up.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -35,8 +32,31 @@ import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
-import java.io.IOException
 
+class SignInOrUpActivity : SingleFragmentActivity() {
+    override fun createFragment(): Fragment {
+        val fragmentType = intent.getIntExtra(KEY_FRAGMENT_TYPE, 0)
+        when (fragmentType) {
+            RequestCode.SIGN_IN -> {
+                supportActionBar?.setTitle(R.string.title_login)
+            }
+            RequestCode.SIGN_UP -> {
+                supportActionBar?.setTitle(R.string.title_sign_up)
+            }
+        }
+        return SignInOrUpFragment.newInstance(fragmentType)
+    }
+
+    companion object {
+        private const val KEY_FRAGMENT_TYPE = "fragment_type"
+        fun startForResult(activity: Activity?, requestCode: Int) {
+            val intent = Intent(activity, SignInOrUpActivity::class.java)
+            intent.putExtra(KEY_FRAGMENT_TYPE, requestCode)
+            activity?.startActivityForResult(intent, requestCode)
+        }
+    }
+
+}
 internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, AnkoLogger {
 
     private var job: Job? = null
@@ -83,11 +103,11 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         super.onViewCreated(view, savedInstanceState)
 
         when (usedFor) {
-            USED_FOR_LOGIN -> {
+            RequestCode.SIGN_IN -> {
                 email_sign_up_button.visibility = View.GONE
                 sign_in.visibility = View.GONE
             }
-            USED_FOR_SIGN_UP -> {
+            RequestCode.SIGN_UP -> {
                 email_sign_in_button.visibility = View.GONE
                 wechat_sign_in_button.visibility = View.GONE
                 reset_password.visibility = View.GONE
@@ -118,11 +138,11 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         }
 
         sign_up.setOnClickListener {
-            Registration.startForResult(activity, REQUEST_CODE_SIGN_UP)
+            SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_UP)
         }
 
         sign_in.setOnClickListener {
-            LoginActivity.startForResult(activity, REQUEST_CODE_SIGN_IN)
+            SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
         }
     }
 
@@ -207,31 +227,33 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         job = launch(UI) {
             val account = Account(email = email, password = password)
             try {
-                var user: User? = null
 
-                when (usedFor) {
-                    USED_FOR_LOGIN -> {
-                        info("Start loggin in")
+                val user = when (usedFor) {
+                    RequestCode.SIGN_IN -> {
+                        info("Start log in")
 
-                        user = account.login()
+                        account.loginAsync().await()
                     }
-                    USED_FOR_SIGN_UP -> {
+                    RequestCode.SIGN_UP -> {
                         info("Start signing up")
 
-                        user = account.create()
+                        account.createAsync().await()
                     }
+                    else -> null
                 }
 
                 isInProgress = false
 
                 if (user == null) {
-                    info("Failed to get user data. Stop")
+                    toast("Failed. Pleas  tray again")
+                    isInputAllowed = true
                     return@launch
                 }
 
                 info("User $user")
 
-                user.save(context)
+
+                listener?.onUserSession(user)
 
                 activity?.setResult(Activity.RESULT_OK)
                 activity?.finish()
@@ -312,8 +334,6 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     companion object {
         private const val REQUEST_READ_CONTACTS = 0
         private const val ARG_FRAGMENT_USAGE = "arg_fragment_usage"
-        const val USED_FOR_LOGIN = 1
-        const val USED_FOR_SIGN_UP = 2
 
         fun newInstance(usedFor: Int): SignInOrUpFragment {
             val fragment = SignInOrUpFragment()

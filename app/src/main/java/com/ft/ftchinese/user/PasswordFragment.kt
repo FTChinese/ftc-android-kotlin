@@ -10,9 +10,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.PasswordUpdate
 import com.ft.ftchinese.models.User
-import com.ft.ftchinese.util.EmptyResponseException
-import com.ft.ftchinese.util.NetworkException
-import com.google.gson.JsonSyntaxException
+import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.fragment_password.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -20,18 +18,17 @@ import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
-import java.io.IOException
 
 internal class PasswordFragment : Fragment(), AnkoLogger {
 
-    private var user: User? = null
+    private var mUser: User? = null
     private var job: Job? = null
-    private var listener: OnFragmentInteractionListener? = null
+    private var mListener: OnFragmentInteractionListener? = null
 
     private var isInProgress: Boolean
         get() = !password_save_button.isEnabled
         set(value) {
-            listener?.onProgress(value)
+            mListener?.onProgress(value)
         }
 
     private var isInputAllowed: Boolean
@@ -45,13 +42,20 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         if (context is OnFragmentInteractionListener) {
-            listener = context
+            mListener = context
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        user = User.loadFromPref(context)
+        arguments?.let {
+            val userData = it.getString(ARG_USER_DATA)
+            mUser = try {
+                gson.fromJson<User>(userData, User::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -116,7 +120,7 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
 
     private fun save(oldPassword: String, newPassword: String) {
 
-        val uuid = user?.id ?: return
+        val uuid = mUser?.id ?: return
 
         isInProgress = true
         isInputAllowed = false
@@ -127,7 +131,7 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
             try {
                 info("Start updating password")
 
-                passwordUpdate.send(uuid)
+                passwordUpdate.updateAsync(uuid).await()
 
                 isInProgress = false
                 toast(R.string.success_saved)
@@ -166,8 +170,11 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
     }
 
     companion object {
-        fun newInstance(): PasswordFragment {
-            return PasswordFragment()
+        private const val ARG_USER_DATA = "user_data"
+        fun newInstance(user: User?) = PasswordFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARG_USER_DATA, gson.toJson(mUser))
+            }
         }
     }
 }

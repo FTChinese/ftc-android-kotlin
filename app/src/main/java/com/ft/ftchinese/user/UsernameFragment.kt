@@ -10,9 +10,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.User
 import com.ft.ftchinese.models.UserNameUpdate
-import com.ft.ftchinese.util.EmptyResponseException
-import com.ft.ftchinese.util.NetworkException
-import com.google.gson.JsonSyntaxException
+import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.fragment_username.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -20,18 +18,17 @@ import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
-import java.io.IOException
 
 internal class UsernameFragment : Fragment(), AnkoLogger {
 
-    private var user: User? = null
+    private var mUser: User? = null
     private var job: Job? = null
-    private var listener: OnFragmentInteractionListener? = null
+    private var mListener: OnFragmentInteractionListener? = null
 
     private var isInProgress: Boolean
         get() = !name_save_button.isEnabled
         set(value) {
-            listener?.onProgress(value)
+            mListener?.onProgress(value)
         }
 
     private var isInputAllowed: Boolean
@@ -45,14 +42,21 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
         super.onAttach(context)
 
         if (context is OnFragmentInteractionListener) {
-            listener = context
+            mListener = context
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        user = User.loadFromPref(context)
+        arguments?.let {
+            val userData = it.getString(ARG_USER_DATA)
+            mUser = try {
+                gson.fromJson<User>(userData, User::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -64,7 +68,7 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        current_name.text = if (user?.name.isNullOrBlank()) "未设置" else user?.name
+        current_name.text = if (mUser?.name.isNullOrBlank()) "未设置" else mUser?.name
 
         name_save_button.setOnClickListener {
             attemptSave()
@@ -80,7 +84,7 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
         if (userNameStr.isBlank()) {
             user_name.error = getString(R.string.error_field_required)
             cancel = true
-        } else if (userNameStr == user?.name) {
+        } else if (userNameStr == mUser?.name) {
             user_name.error = getString(R.string.error_name_unchanged)
             cancel = true
         }
@@ -94,7 +98,7 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
     }
 
     private fun save(userName: String) {
-        val uuid = user?.id ?: return
+        val uuid = mUser?.id ?: return
 
         isInProgress = true
         isInputAllowed = false
@@ -105,13 +109,15 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
             val userNameUpdate = UserNameUpdate(userName)
 
             try {
-                info("Start updating user name")
+                info("Start updating mUser name")
 
-                val userUpdated = userNameUpdate.send(uuid)
+                val userUpdated = userNameUpdate.updateAsync(uuid).await()
 
                 isInProgress = false
 
-                userUpdated.save(context)
+                current_name.text = userName
+
+                mListener?.onUserSession(userUpdated)
 
                 toast(R.string.success_saved)
             } catch (e: ErrorResponse) {
@@ -146,8 +152,11 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
     }
 
     companion object {
-        fun newInstance(): UsernameFragment {
-            return UsernameFragment()
+        private const val ARG_USER_DATA = "user_data"
+        fun newInstance(user: User?) = UsernameFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARG_USER_DATA, gson.toJson(user))
+            }
         }
     }
 }

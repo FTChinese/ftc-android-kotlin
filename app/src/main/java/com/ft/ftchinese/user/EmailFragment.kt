@@ -10,7 +10,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.EmailUpdate
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.User
-import com.google.gson.JsonSyntaxException
+import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.fragment_email.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -18,25 +18,24 @@ import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
-import java.io.IOException
 
 
 internal class EmailFragment : Fragment(), AnkoLogger {
 
-    private var user: User? = null
+    private var mUser: User? = null
     private var job: Job? = null
-    private var listener: OnFragmentInteractionListener? = null
+    private var mListener: OnFragmentInteractionListener? = null
 
     /**
      * Set progress indicator.
      * By default, the progress bar is not visible and data input and save button is enabled.
      * In case of any error, progress bar should go away and data input and save button should be re-enabled.
-     * In case of successfully uploaded data, progress bar should go away but the data input and save button should be disabled to prevent user re-submitting the same data.
+     * In case of successfully uploaded data, progress bar should go away but the data input and save button should be disabled to prevent mUser re-submitting the same data.
      */
     private var isInProgress: Boolean
         get() = !email_save_button.isEnabled
         set(value) {
-            listener?.onProgress(value)
+            mListener?.onProgress(value)
         }
 
     private var isInputAllowed: Boolean
@@ -50,14 +49,21 @@ internal class EmailFragment : Fragment(), AnkoLogger {
         super.onAttach(context)
 
         if (context is OnFragmentInteractionListener) {
-            listener = context
+            mListener = context
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        user = User.loadFromPref(context)
+        arguments?.let {
+            val userData = it.getString(ARG_USER_DATA)
+            mUser = try {
+                gson.fromJson<User>(userData, User::class.java)
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -69,7 +75,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        current_email.text = if (user?.email.isNullOrBlank()) "未设置" else user?.email
+        current_email.text = if (mUser?.email.isNullOrBlank()) "未设置" else mUser?.email
 
         email_save_button.setOnClickListener {
             attemptSave()
@@ -88,7 +94,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
         } else if (!isEmailValid(emailStr)) {
             email.error = getString(R.string.error_field_required)
             cancel = true
-        } else if (emailStr == user?.email) {
+        } else if (emailStr == mUser?.email) {
             email.error = getString(R.string.error_email_unchanged)
             cancel = true
         }
@@ -103,7 +109,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
 
     private fun save(emailStr: String) {
 
-        val uuid = user?.id ?: return
+        val uuid = mUser?.id ?: return
 
         isInProgress = true
         isInputAllowed = false
@@ -114,11 +120,12 @@ internal class EmailFragment : Fragment(), AnkoLogger {
             try {
                 info("Start updating email")
 
-                val userUpdated = emailUpdate.send(uuid)
+                val userUpdated = emailUpdate.updateAsync(uuid).await()
 
                 isInProgress = false
 
-                userUpdated.save(context)
+                mListener?.onUserSession(userUpdated)
+                current_email.text = emailStr
 
                 // Notify parent activity to update data.
 
@@ -156,8 +163,12 @@ internal class EmailFragment : Fragment(), AnkoLogger {
     }
 
     companion object {
-        fun newInstance(): EmailFragment {
-            return EmailFragment()
-        }
+        private const val ARG_USER_DATA = "user_data"
+        fun newInstance(user: User?) =
+                EmailFragment().apply {
+                    arguments = Bundle().apply {
+                        putString(ARG_USER_DATA, gson.toJson(user))
+                    }
+            }
     }
 }

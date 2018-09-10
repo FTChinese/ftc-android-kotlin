@@ -24,6 +24,7 @@
     <string name="prompt_refreshing">更新数据</string>
     <string name="prompt_no_network">网络无连接，请检查网络设置</string>
     <string name="prompt_load_failure">无法加载数据，请稍后再试</string>
+    <string name="prompt_member_restricted">仅限会员阅读</string>
     <!-- Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -37,6 +38,7 @@
 
     <string name="price_standard">¥198.00/年</string>
     <string name="price_premium">¥1,998.00/年</string>
+    <string name="membership_free">尚未成为会员</string>
     <string name="membership_standard">标准会员</string>
     <string name="membership_premium">高级会员</string>
 

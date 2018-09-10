@@ -21,6 +21,7 @@ import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
+import java.lang.reflect.Member
 
 
 /**
@@ -48,7 +49,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     private var channelItems: Array<ChannelItem>? = null
     private var channelMeta: ChannelMeta? = null
     private var job: Job? = null
-    private var mUser: User? = null
 
     // Hold string in raw/list.html
     private var mTemplate: String? = null
@@ -89,10 +89,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         }
     }
 
-    fun setUser(user: User?) {
-        info("setUser: $user")
-        mUser = user
-    }
     /**
      * Bind listeners here.
      */
@@ -112,8 +108,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        mUser = User.loadFromPref(context)
 
         // Get metadata about current tab
         val pageMetadata = arguments?.getString(ARG_SECTION_PAGE)
@@ -353,40 +347,52 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                 }
             }
 
-
             /**
              * Now assuming this is a plain article
              */
             channelItem.adId = channelMeta?.adid ?: ""
 
-            // If story is seven days old, user is not logged or user if free member
-            if (channelItem.isSevenDaysOld) {
-                if (mUser == null || mUser?.membership?.type == Membership.TYPE_FREE ) {
+            /**
+             * User clicked an article that requires membership.
+             * If user if not logged in, or user already logged in but membership is free
+             */
+            if (channelItem.isMembershipRequired) {
+                val sessionManager = try {
+                    val ctx = requireContext()
+                    SessionManager.getInstance(ctx)
+                } catch (e: Exception) {
+                    null
+                }
+
+                if (sessionManager == null) {
+                    toast(R.string.prompt_member_restricted)
                     MembershipActivity.start(context)
                     return
                 }
-            }
 
-            /**
-             * Start different activity according to ChannelItem#type
-             */
-            when (channelItem.type) {
-                ChannelItem.TYPE_STORY -> {
-                    info("Start story activity")
-                    // Save reading history
-
-                    StoryActivity.start(activity, channelItem)
+                /**
+                 * If current user is not a paied member, or the membership is expired
+                 */
+                if (!sessionManager.isPaidMember() || sessionManager.isMembershipExpired()) {
+                    toast(R.string.prompt_member_restricted)
+                    MembershipActivity.start(context)
                     return
                 }
 
-                ChannelItem.TYPE_PREMIUM -> {
-                    if (mUser == null || mUser?.membership?.type == Membership.TYPE_FREE ) {
-                        MembershipActivity.start(context)
-                        return
-                    }
+                startReading(channelItem)
+                return
+            }
+
+            startReading(channelItem)
+
+        }
+
+        private fun startReading(channelItem: ChannelItem) {
+            when (channelItem.type) {
+                ChannelItem.TYPE_STORY, ChannelItem.TYPE_PREMIUM -> {
+                    info("Start story activity")
 
                     StoryActivity.start(activity, channelItem)
-                    return
                 }
 
                 ChannelItem.TYPE_INTERACTIVE -> {
@@ -403,7 +409,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                     WebContentActivity.start(activity, Uri.parse(channelItem.canonicalUrl))
                 }
             }
-
         }
 
 

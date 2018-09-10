@@ -72,17 +72,7 @@
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".user.LoginActivity"
-            android:label="@string/title_login"
-            android:parentActivityName=".MainActivity"
-            android:windowSoftInputMode="adjustResize">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-        <activity
-            android:name=".user.Registration"
-            android:label="@string/title_sign_up"
+            android:name=".user.SignInOrUpActivity"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="adjustResize">
             <meta-data

@@ -23,6 +23,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.*
+import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.Store
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -33,9 +34,6 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.coroutines.experimental.bg
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-
-const val REQUEST_CODE_SIGN_IN = 1
-const val REQUEST_CODE_SIGN_UP = 2
 
 fun Activity.getActiveNetworkInfo(): NetworkInfo {
     val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -67,6 +65,7 @@ fun Activity.isActiveNetworkMobile(): Boolean {
     }
 }
 
+
 class MainActivity : AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
         TabLayout.OnTabSelectedListener,
@@ -75,7 +74,6 @@ class MainActivity : AppCompatActivity(),
         AnkoLogger {
 
     private var mBottomDialog: BottomSheetDialog? = null
-    private var mUser: User? = null
     private var mBackKeyPressed = false
     private var exitJob: Job? = null
     private var timerJob: Job? = null
@@ -141,11 +139,10 @@ class MainActivity : AppCompatActivity(),
     }
 
     private val logoutListener = View.OnClickListener {
-        User.removeFromPref(this)
-        // Remove user data stored in this activity.
-        mUser = null
 
-        syncUserData()
+        SessionManager.getInstance(applicationContext).logout()
+
+        updateSessionUI()
 
         mBottomDialog?.dismiss()
         toast("账号已登出")
@@ -153,8 +150,8 @@ class MainActivity : AppCompatActivity(),
 
     private val drawerHeaderTitleListener = View.OnClickListener {
         // If mUser is not logged in, show login.
-        if (mUser == null) {
-            LoginActivity.startForResult(this, REQUEST_CODE_SIGN_IN)
+        if (!SessionManager.getInstance(applicationContext).isLoggedIn()) {
+            SignInOrUpActivity.startForResult(this, RequestCode.SIGN_IN)
             return@OnClickListener
         }
 
@@ -218,7 +215,8 @@ class MainActivity : AppCompatActivity(),
         bottom_nav.setOnNavigationItemReselectedListener(bottomNavItemReseletedListener)
 
         // Check mUser login status
-        syncUserData()
+
+        updateSessionUI()
 
         // Set a listener that will be notified when a menu item is selected.
         drawer_nav.setNavigationItemSelectedListener(this)
@@ -372,7 +370,7 @@ class MainActivity : AppCompatActivity(),
     override fun onStart() {
         super.onStart()
         info("onStart finished")
-        syncUserData()
+        updateSessionUI()
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
@@ -395,10 +393,10 @@ class MainActivity : AppCompatActivity(),
 
         when (requestCode) {
             // If the result come from SignIn or SignUp, update UI to show mUser login state.
-            REQUEST_CODE_SIGN_IN, REQUEST_CODE_SIGN_UP -> {
+            RequestCode.SIGN_IN, RequestCode.SIGN_UP -> {
                 if (resultCode == Activity.RESULT_OK) {
                     toast("登录成功")
-                    syncUserData()
+                    updateSessionUI()
                 }
             }
         }
@@ -512,10 +510,10 @@ class MainActivity : AppCompatActivity(),
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.action_login -> {
-                LoginActivity.startForResult(this, REQUEST_CODE_SIGN_IN)
+                SignInOrUpActivity.startForResult(this, RequestCode.SIGN_IN)
             }
             R.id.action_sign_up -> {
-                Registration.startForResult(this, REQUEST_CODE_SIGN_UP)
+                SignInOrUpActivity.startForResult(this, RequestCode.SIGN_IN)
             }
             R.id.action_account -> {
                 AccountActivity.start(this)
@@ -523,9 +521,6 @@ class MainActivity : AppCompatActivity(),
             R.id.action_subscription -> {
                 MembershipActivity.start(this)
             }
-//            R.id.action_help -> {
-//
-//            }
             R.id.action_about -> {
                 AboutUsActivity.start(this)
             }
@@ -534,12 +529,6 @@ class MainActivity : AppCompatActivity(),
             }
             R.id.action_settings -> {
                 SettingsActivity.start(this)
-            }
-            R.id.action_logout -> {
-                // Delete mUser data from shared preference and update UI.
-                User.removeFromPref(this)
-                syncUserData()
-                toast("账号已登出")
             }
         }
 
@@ -598,40 +587,29 @@ class MainActivity : AppCompatActivity(),
     }
 
     /**
-     * Update UI dpending mUser's login/logout state
+     * Update UI depending on user's login/logout state
      */
-    private fun syncUserData() {
-        mUser = User.loadFromPref(this)
-        val isLoggedIn = (mUser != null)
+    private fun updateSessionUI() {
+//        mUser = User.loadFromPref(this)
+        val user = SessionManager.getInstance(applicationContext).loadUser()
+        val isLoggedIn = user != null
 
-        info("User is loggedin: $isLoggedIn")
-        info("User data: $mUser")
+        info("User is logged in: $isLoggedIn")
 
         val menu = drawer_nav.menu
-        val header = drawer_nav.getHeaderView(0)
-
         // If seems this is the only way to get the header view.
         // You cannot mUser `import kotlinx.android.synthetic.activity_main_search.drawer_nav_header.*`,
         // which will give you null pointer exception.
-        header.findViewById<TextView>(R.id.nav_header_title).text = if (!mUser?.name.isNullOrBlank()) {
-            mUser?.name
-        } else if (!mUser?.email.isNullOrBlank()) {
-            mUser?.email
+        val headerTitle = drawer_nav.getHeaderView(0).findViewById<TextView>(R.id.nav_header_title)
+
+        if (isLoggedIn) {
+            headerTitle.text = user?.name ?: user?.email
         } else {
-            getString(R.string.nav_not_logged_in)
+            headerTitle.text = getString(R.string.nav_not_logged_in)
         }
 
         menu.setGroupVisible(R.id.drawer_group_sign_in_up, !isLoggedIn)
         menu.findItem(R.id.action_account).isVisible = isLoggedIn
-
-        val frag = supportFragmentManager.findFragmentById(R.id.channel_fragment_swipe)
-
-        // Set or remove user data stored in fragment
-        info("Is channelfragment: ${frag is ChannelFragment}")
-        if (frag is ChannelFragment) {
-            info("Set fragment's user data")
-            frag.setUser(mUser)
-        }
     }
 
     private fun feedbackEmail() {

@@ -2,6 +2,7 @@ package com.ft.ftchinese
 
 import org.junit.Test
 import android.text.format.DateFormat
+import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.ISODateTimeFormat
 import java.time.LocalDate
@@ -46,5 +47,12 @@ class FormatTimeTest{
         println(now.time)
 
         println(Date(sevenDaysLater * 1000).after(now))
+    }
+
+    @Test fun expireDate() {
+        val expire = "2019-08-05T22:19:41Z"
+        val dateTime = DateTime.parse(expire, ISODateTimeFormat.dateTimeNoMillis())
+
+        println(ISODateTimeFormat.date().print(dateTime))
     }
 }

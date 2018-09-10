@@ -28,13 +28,13 @@ data class User(
         val membership: Membership
 ) {
 
-    fun save(context: Context?) {
-        val sharedPreferences = context?.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
-
-        val editor = sharedPreferences?.edit()
-        editor?.putString(PREF_KEY_COOKIE, gson.toJson(this))
-                ?.apply()
-    }
+//    fun save(context: Context?) {
+//        val sharedPreferences = context?.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
+//
+//        val editor = sharedPreferences?.edit()
+//        editor?.putString(PREF_KEY_COOKIE, gson.toJson(this))
+//                ?.apply()
+//    }
 
     /**
      * @return User. Always returns a new one rather than modifying the existing one to make it immutable.
@@ -86,30 +86,30 @@ data class User(
     }
 
     companion object {
-        private const val PREF_KEY_COOKIE = "cookie"
-        private const val TAG = "User"
+//        private const val PREF_KEY_COOKIE = "cookie"
+//        private const val TAG = "User"
 
-        fun loadFromPref(context: Context?): User? {
-            if (context == null) {
-                return null
-            }
-            val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
-            val cookie = sharedPreferences.getString(PREF_KEY_COOKIE, null) ?: return null
-
-            return try { gson.fromJson<User>(cookie, User::class.java) }
-            catch (e: JsonSyntaxException) {
-                Log.i(TAG, e.toString())
-
-                null
-            }
-        }
-
-        fun removeFromPref(context: Context) {
-            val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
-
-            val editor = sharedPreferences.edit()
-            editor.remove(PREF_KEY_COOKIE).apply()
-        }
+//        fun loadFromPref(context: Context?): User? {
+//            if (context == null) {
+//                return null
+//            }
+//            val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
+//            val cookie = sharedPreferences.getString(PREF_KEY_COOKIE, null) ?: return null
+//
+//            return try { gson.fromJson<User>(cookie, User::class.java) }
+//            catch (e: JsonSyntaxException) {
+//                Log.i(TAG, e.toString())
+//
+//                null
+//            }
+//        }
+//
+//        fun removeFromPref(context: Context) {
+//            val sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME_USER, Context.MODE_PRIVATE)
+//
+//            val editor = sharedPreferences.edit()
+//            editor.remove(PREF_KEY_COOKIE).apply()
+//        }
     }
 }
 

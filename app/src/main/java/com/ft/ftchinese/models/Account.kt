@@ -5,6 +5,7 @@ import com.ft.ftchinese.util.ApiEndpoint
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -21,17 +22,13 @@ data class Account(
      * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON, regardless of if response is successful or not
      */
-    suspend fun send (url: String): User {
-        val job = async {
-//            Fetch.post(url, gson.toJson(this@Account))
-            Fetch().post(url)
-                    .setClient()
-                    .noCache()
-                    .body(this@Account)
-                    .end()
-        }
+    fun send (url: String): User {
 
-        val response = job.await()
+        val response = Fetch().post(url)
+                .setClient()
+                .noCache()
+                .body(this@Account)
+                .end()
 
         val body = response.body()?.string()
         info("Response body: $body")
@@ -39,14 +36,11 @@ data class Account(
         return gson.fromJson<User>(body, User::class.java)
     }
 
-    suspend fun login(): User {
-        info("Start login")
-        return send(ApiEndpoint.LOGIN)
+    fun loginAsync(): Deferred<User> = async {
+        send(ApiEndpoint.LOGIN)
     }
 
-    suspend fun create(): User {
-        info("Start creating account")
-
-        return send(ApiEndpoint.NEW_ACCOUNT)
+    fun createAsync(): Deferred<User> = async {
+        send(ApiEndpoint.NEW_ACCOUNT)
     }
 }

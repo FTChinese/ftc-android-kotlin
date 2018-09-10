@@ -12,7 +12,8 @@ import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.Endpoints
 import com.ft.ftchinese.models.PagerTab
 import com.ft.ftchinese.models.pathToTitle
-import com.ft.ftchinese.user.Registration
+import com.ft.ftchinese.user.SignInOrUpActivity
+import com.ft.ftchinese.util.RequestCode
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.warn
@@ -75,7 +76,7 @@ open class BaseWebViewClient(
         when (uri.scheme) {
             // The `免费注册` button is wrapped in a link with url set to `ftcregister://www.ftchinese.com/`
             "ftcregister" -> {
-                Registration.startForResult(activity, REQUEST_CODE_SIGN_IN)
+                SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
                 return true
             }
             // The `微信登录` button is wrapped in a link with url set to `weixinlogin://www.ftchinese.com/`
