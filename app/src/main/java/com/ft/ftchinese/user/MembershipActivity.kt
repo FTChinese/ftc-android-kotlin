@@ -11,8 +11,10 @@ import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Membership
 import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.User
+import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.fragment_membership.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 class MembershipActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {
@@ -35,10 +37,8 @@ class MembershipActivity : SingleFragmentActivity() {
  * create an instance of this fragment.
  *
  */
-class MembershipFragment : Fragment() {
-    // TODO: Rename and change types of parameters
+class MembershipFragment : Fragment(), AnkoLogger {
     private var mListener: OnFragmentInteractionListener? = null
-    private var mUser: User? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -52,12 +52,7 @@ class MembershipFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val ctx = try {
-            requireContext()
-        } catch (e: Exception) {
-            return
-        }
-        mUser = SessionManager.getInstance(ctx).loadUser()
+        info("onCreate finished")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -69,17 +64,28 @@ class MembershipFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (mUser == null) {
+        val ctx = try {
+            requireContext()
+        } catch (e: Exception) {
+            return
+        }
+        val user = SessionManager.getInstance(ctx).loadUser()
+
+        if (user == null) {
             membership_container.visibility = View.GONE
+
+            paywall_login_button.setOnClickListener {
+                SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
+            }
         } else {
-            member_value.text = when (mUser?.membership?.type) {
+            member_value.text = when (user.membership.type) {
                 Membership.TYPE_FREE -> getString(R.string.membership_free)
                 Membership.TYPE_STANDARD -> getString(R.string.membership_standard)
                 Membership.TYPE_PREMIUM -> getString(R.string.membership_premium)
                 else -> null
             }
 
-            duration_value.text = mUser?.membership?.localizedExpireDate
+            duration_value.text = user.membership.localizedExpireDate
 
             paywall_login_container.visibility = View.GONE
 
