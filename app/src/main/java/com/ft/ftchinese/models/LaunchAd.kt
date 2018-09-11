@@ -6,9 +6,12 @@ import com.ft.ftchinese.util.gson
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.experimental.async
 import android.net.Uri
+import com.ft.ftchinese.util.ApiEndpoint
 import com.ft.ftchinese.util.Store
 import com.koushikdutta.ion.Ion
 import kotlinx.coroutines.experimental.Deferred
+import org.apache.commons.math3.distribution.EnumeratedDistribution
+import org.apache.commons.math3.util.Pair
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.joda.time.LocalDate
@@ -32,6 +35,7 @@ data class LaunchAd(
         val android: String,
         val ipad: String,
         val dates: String,
+        // weight actually means https://en.wikipedia.org/wiki/Probability_distribution#Discrete_probability_distribution
         val weight: String
 ) : AnkoLogger {
     val scheduledOn: List<String>
@@ -132,9 +136,12 @@ class LaunchSchedule(
         const val PREF_AD_SCHEDULE = "ad_schedule"
         private const val PREF_KEY_LASTED_MODIFIED = "last_modified"
 
+        /**
+         * Download latest ad schedule upon app launch
+         */
         fun fetchDataAsync(): Deferred<LaunchSchedule?> = async {
             try {
-                val response = Fetch().get("https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule")
+                val response = Fetch().get(ApiEndpoint.APP_LAUNCH)
                         .end()
 
                 val body = response.body()?.string()
@@ -150,6 +157,7 @@ class LaunchSchedule(
 
         /**
          * @param days specify how many days' data you want to retrieve, starting from today.
+         * It returns at least today's list
          */
         fun loadFromPref(context: Context, days: Int = 0): List<LaunchAd> {
             val sharedPreferences = context.getSharedPreferences(LaunchSchedule.PREF_AD_SCHEDULE, Context.MODE_PRIVATE)
@@ -168,6 +176,21 @@ class LaunchSchedule(
             }
 
             return ads.map { gson.fromJson(it, LaunchAd::class.java) }
+        }
+
+        // Reference https://stackoverflow.com/questions/9330394/how-to-pick-an-item-by-its-probability
+        // We use Apache Math library http://commons.apache.org/proper/commons-math/userguide/distribution.html
+        fun randomAdFileName(context: Context): LaunchAd? {
+            val candidates = loadFromPref(context)
+            if (candidates.isEmpty()) return null
+
+            val pmf = candidates.map {
+                Pair(it, it.weight.toDouble())
+            }.toMutableList()
+
+            val distribution = EnumeratedDistribution(pmf)
+
+            return distribution.sample()
         }
     }
 }
