@@ -267,15 +267,7 @@ class MainActivity : AppCompatActivity(),
 
     private suspend fun showAd() {
 
-        info("Entering show ad")
-        val todaySchedules = LaunchSchedule.loadFromPref(this)
-
-        if (todaySchedules.isEmpty()) {
-            info("No ad schedule found")
-            showSystemUI()
-            return
-        }
-        val ad = todaySchedules[0]
+        val ad = LaunchSchedule.randomAdFileName(this) ?: return
 
         if (!Store.exists(this, ad.imageName)) {
             info("Ad image ${ad.imageName} not found")
@@ -513,7 +505,7 @@ class MainActivity : AppCompatActivity(),
                 SignInOrUpActivity.startForResult(this, RequestCode.SIGN_IN)
             }
             R.id.action_sign_up -> {
-                SignInOrUpActivity.startForResult(this, RequestCode.SIGN_IN)
+                SignInOrUpActivity.startForResult(this, RequestCode.SIGN_UP)
             }
             R.id.action_account -> {
                 AccountActivity.start(this)

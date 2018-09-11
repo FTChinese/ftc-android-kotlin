@@ -72,17 +72,17 @@
                 app:layout_constraintStart_toEndOf="@id/duration_label" />
 
 
-            <Button
-                android:id="@+id/upgrade_to_premium"
-                style="@style/OrigamiButton.Primary.Small"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:text="升级成高级会员"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="@+id/duration_value"
-                app:layout_constraintStart_toStartOf="@+id/duration_label"
-                app:layout_constraintTop_toBottomOf="@+id/duration_label" />
+            <!--<Button-->
+                <!--android:id="@+id/upgrade_to_premium"-->
+                <!--style="@style/OrigamiButton.Primary.Small"-->
+                <!--android:layout_width="0dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_marginTop="32dp"-->
+                <!--android:text="升级成高级会员"-->
+                <!--android:visibility="gone"-->
+                <!--app:layout_constraintEnd_toEndOf="@+id/duration_value"-->
+                <!--app:layout_constraintStart_toStartOf="@+id/duration_label"-->
+                <!--app:layout_constraintTop_toBottomOf="@+id/duration_label" />-->
 
         </android.support.constraint.ConstraintLayout>
 
@@ -151,6 +151,7 @@
                     style="@style/FTCText" />
 
                 <Button
+                    android:id="@+id/subscription_standard_btn"
                     style="@style/OrigamiButton.Primary.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -205,6 +206,7 @@
                     android:text="@string/subscribe_description_note" />
 
                 <Button
+                    android:id="@+id/subscription_premium_btn"
                     style="@style/OrigamiButton.Primary.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

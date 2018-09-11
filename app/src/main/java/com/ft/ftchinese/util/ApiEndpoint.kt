@@ -13,5 +13,6 @@ class ApiEndpoint {
         const val UPDATE_USER_NAME = "$BASE/user/name"
         const val UPDATE_PASSWORD = "$BASE/user/password"
         const val STARRED = "$BASE/user/starred"
+        const val APP_LAUNCH = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
     }
 }

@@ -71,13 +71,24 @@ class MembershipFragment : Fragment(), AnkoLogger {
         }
         val user = SessionManager.getInstance(ctx).loadUser()
 
+        // User is not logged in
         if (user == null) {
             membership_container.visibility = View.GONE
 
             paywall_login_button.setOnClickListener {
                 SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
             }
+
+            subscription_standard_btn.setOnClickListener {
+                SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
+            }
+
+            subscription_premium_btn.setOnClickListener {
+                SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
+            }
         } else {
+            // User is logged in
+            // Show user's membership information
             member_value.text = when (user.membership.type) {
                 Membership.TYPE_FREE -> getString(R.string.membership_free)
                 Membership.TYPE_STANDARD -> getString(R.string.membership_standard)
@@ -87,12 +98,19 @@ class MembershipFragment : Fragment(), AnkoLogger {
 
             duration_value.text = user.membership.localizedExpireDate
 
+            // Hide login button
             paywall_login_container.visibility = View.GONE
 
-            // Show a button to let standard member to upgrade to premium. Disabled for now.
-//            if (mUser?.membership?.type == Membership.TYPE_STANDARD) {
-//                upgrade_to_premium.visibility = View.VISIBLE
-//            }
+            // Show a dialog so that user could select payment channel
+            subscription_standard_btn.setOnClickListener {
+                val dialogFrag = PaymentFragment.newInstance()
+                dialogFrag.setTargetFragment(this, REQUEST_PAY)
+                dialogFrag.show(fragmentManager, "DialogPayment")
+            }
+
+            subscription_premium_btn.setOnClickListener {
+
+            }
         }
     }
 
@@ -102,11 +120,12 @@ class MembershipFragment : Fragment(), AnkoLogger {
     }
 
     companion object {
+        const val REQUEST_PAY = 1
         /**
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.
          *
-         * @return A new instance of fragment MembershipFragment.
+         * @return A new instance of MembershipFragment.
          */
         @JvmStatic
         fun newInstance() = MembershipFragment()
