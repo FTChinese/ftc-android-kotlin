@@ -42,12 +42,12 @@ class PaymentFragment : DialogFragment() {
 
         payZhifubao.setOnClickListener {
             toast("Pay ${membership.price} by zhifubao")
-            dialog.dismiss()
+//            dialog.dismiss()
         }
 
         payWechat.setOnClickListener {
             toast("Pay ${membership.price} by wechat")
-            dialog.dismiss()
+//            dialog.dismiss()
         }
 
         // You need to explicitly set a theme for the Buttons.

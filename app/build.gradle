@@ -75,6 +75,9 @@ dependencies {
     // Wechat
     implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:5.1.4'
 
+    // Alipay
+    implementation 'com.alipay.sdk:alipay-sdk-java:3.3.49.ALL'
+
     // Utilities
     implementation 'com.jakewharton.byteunits:byteunits:0.9.1'
     implementation 'joda-time:joda-time:2.10'
