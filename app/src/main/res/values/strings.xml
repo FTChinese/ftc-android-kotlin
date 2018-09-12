@@ -31,16 +31,26 @@
     <string name="nav_not_logged_in">您尚未登录</string>
     <string name="nav_header_desc">导航栏头部</string>
 
-    <string name="subscribe_description_standard">\u2714 精选深度分析\n\u2714 中英双语内容\n\u2714 金融英语速读训练\n\u2714 英语原声电台\n\u2714 无限浏览7日前所有历史文章（近8万篇）</string>
-    <string name="subscribe_description_premium">\u2714 享受“标准会员”所有权益\n\u2714 编辑精选，总编/各版块主编每周五为您推荐本周必读资讯，分享他们的思考与观点\n\u2714 FT中文网2019年度论坛门票2张</string>
-    <string name="subscribe_description_note">注：所有活动门票不可折算现金、不能转让、不含差旅与食宿</string>
-    <string name="subscribe_now">立即订阅</string>
-
-    <string name="price_standard">¥198.00/年</string>
-    <string name="price_premium">¥1,998.00/年</string>
-    <string name="membership_free">尚未成为会员</string>
-    <string name="membership_standard">标准会员</string>
-    <string name="membership_premium">高级会员</string>
+    <string name="price_annual_standard">¥198.00/年</string>
+    <string name="price_annual_premium">¥1,998.00/年</string>
+    <string name="membership_title">我的订阅</string>
+    <string name="label_member_type">会员类型</string>
+    <string name="member_type_free">尚未成为会员</string>
+    <string name="member_type_standard">标准会员</string>
+    <string name="member_type_premium">高级会员</string>
+    <string name="label_member_duration">会员期限</string>
+    <string name="label_member_price">支付金额</string>
+    <string name="paywall_title">购买会员服务，阅读FT独家内容</string>
+    <string name="paywall_login_prompt">已经购买过？</string>
+    <string name="paywall_description_standard">\u2714 精选深度分析\n\u2714 中英双语内容\n\u2714 金融英语速读训练\n\u2714 英语原声电台\n\u2714 无限浏览7日前所有历史文章（近8万篇）</string>
+    <string name="paywall_description_premium">\u2714 享受“标准会员”所有权益\n\u2714 编辑精选，总编/各版块主编每周五为您推荐本周必读资讯，分享他们的思考与观点\n\u2714 FT中文网2019年度论坛门票2张</string>
+    <string name="paywall_small_print">注：所有活动门票不可折算现金、不能转让、不含差旅与食宿</string>
+    <string name="paywall_buy_now">立即订阅</string>
+    <string name="pay_description_zhifubao">支付宝支付</string>
+    <string name="pay_description_wechat">微信支付</string>
+    <string name="pay_dialog_title">欢迎订阅FT会员服务</string>
+    <string name="pay_confirm">确定支付</string>
+    <string name="pay_cancel">取消</string>
 
     <string name="action_title_account">账号与安全</string>
     <string name="action_subscription">会员订阅</string>

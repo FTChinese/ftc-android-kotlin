@@ -1,5 +1,6 @@
 package com.ft.ftchinese.models
 
+import com.ft.ftchinese.R
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 
@@ -20,6 +21,23 @@ data class Membership(
             return DateTime.parse(expire, ISODateTimeFormat.dateTimeNoMillis()).isBeforeNow
         }
 
+    val typeResId: Int
+        get() = when(type) {
+            TYPE_PREMIUM -> R.string.member_type_premium
+            else -> R.string.member_type_standard
+        }
+
+    val priceResId: Int
+        get() = when(type) {
+            TYPE_PREMIUM -> R.string.price_annual_premium
+            else -> R.string.price_annual_standard
+        }
+
+    val price: Int
+        get() = when(type) {
+            TYPE_PREMIUM -> PRICE_PREMIUM
+            else -> PRICE_STANDARD
+        }
 
     // 2019-08-06
     val localizedExpireDate: String?
@@ -33,5 +51,7 @@ data class Membership(
         const val TYPE_FREE = "free"
         const val TYPE_STANDARD = "standard"
         const val TYPE_PREMIUM = "premium"
+        const val PRICE_STANDARD = 198
+        const val PRICE_PREMIUM = 1998
     }
 }

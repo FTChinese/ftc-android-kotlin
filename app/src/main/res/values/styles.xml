@@ -22,9 +22,7 @@
     </style>
 
     <style name="Dialog" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="colorPrimary">@color/colorWheat</item>
-        <item name="colorPrimaryDark">@color/colorBlack30</item>
-        <item name="colorAccent">@color/colorClaret</item>
+        <item name="colorAccent">@color/colorBlack20</item>
     </style>
 
     <style name="Origami" parent="AppTheme">

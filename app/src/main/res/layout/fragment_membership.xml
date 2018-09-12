@@ -22,7 +22,7 @@
                 android:id="@+id/membership_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="我的订阅"
+                android:text="@string/membership_title"
                 style="@style/FTCTitle"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -32,7 +32,7 @@
                 android:id="@+id/member_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="会员类型"
+                android:text="@string/label_member_type"
                 style="@style/FTCText"
                 app:layout_constraintEnd_toStartOf="@id/member_value"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
@@ -43,7 +43,6 @@
                 android:id="@+id/member_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="标准"
                 style="@style/FTCText"
                 app:layout_constraintBaseline_toBaselineOf="@+id/member_label"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -54,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="会员期限"
+                android:text="@string/label_member_duration"
                 style="@style/FTCText"
                 app:layout_constraintEnd_toStartOf="@id/duration_value"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
@@ -65,7 +64,6 @@
                 android:id="@+id/duration_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="期限"
                 style="@style/FTCText"
                 app:layout_constraintBaseline_toBaselineOf="@id/duration_label"
                 app:layout_constraintEnd_toEndOf="@+id/member_value"
@@ -93,7 +91,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="购买会员服务，阅读FT独家内容"
+            android:text="@string/paywall_title"
             android:textAlignment="center"
             style="@style/FTCText" />
 
@@ -111,7 +109,7 @@
                 android:id="@+id/paywall_login_prompt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="已经购买过？"
+                android:text="@string/paywall_login_prompt"
                 style="@style/FTCText" />
 
             <Button
@@ -139,7 +137,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/bottom_border"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/membership_standard"
+                    android:text="@string/member_type_standard"
                     style="@style/FTCTitle" />
 
                 <TextView
@@ -147,7 +145,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:lineSpacingExtra="8sp"
-                    android:text="@string/subscribe_description_standard"
+                    android:text="@string/paywall_description_standard"
                     style="@style/FTCText" />
 
                 <Button
@@ -158,13 +156,13 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_marginBottom="8dp"
                     android:layout_marginTop="8dp"
-                    android:text="@string/subscribe_now" />
+                    android:text="@string/paywall_buy_now" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/price_standard" />
+                    android:text="@string/price_annual_standard" />
             </LinearLayout>
 
         </android.support.v7.widget.CardView>
@@ -187,7 +185,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:background="@drawable/bottom_border"
-                    android:text="@string/membership_premium"
+                    android:text="@string/member_type_premium"
                     style="@style/FTCTitle" />
 
 
@@ -196,14 +194,14 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:lineSpacingExtra="8sp"
-                    android:text="@string/subscribe_description_premium"
+                    android:text="@string/paywall_description_premium"
                     style="@style/FTCText" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/subscribe_description_note" />
+                    android:text="@string/paywall_small_print" />
 
                 <Button
                     android:id="@+id/subscription_premium_btn"
@@ -213,13 +211,13 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_marginBottom="8dp"
                     android:layout_marginTop="8dp"
-                    android:text="@string/subscribe_now" />
+                    android:text="@string/paywall_buy_now" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/price_premium" />
+                    android:text="@string/price_annual_premium" />
             </LinearLayout>
 
         </android.support.v7.widget.CardView>

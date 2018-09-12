@@ -90,9 +90,9 @@ class MembershipFragment : Fragment(), AnkoLogger {
             // User is logged in
             // Show user's membership information
             member_value.text = when (user.membership.type) {
-                Membership.TYPE_FREE -> getString(R.string.membership_free)
-                Membership.TYPE_STANDARD -> getString(R.string.membership_standard)
-                Membership.TYPE_PREMIUM -> getString(R.string.membership_premium)
+                Membership.TYPE_FREE -> getString(R.string.member_type_free)
+                Membership.TYPE_STANDARD -> getString(R.string.member_type_standard)
+                Membership.TYPE_PREMIUM -> getString(R.string.member_type_premium)
                 else -> null
             }
 
@@ -103,13 +103,15 @@ class MembershipFragment : Fragment(), AnkoLogger {
 
             // Show a dialog so that user could select payment channel
             subscription_standard_btn.setOnClickListener {
-                val dialogFrag = PaymentFragment.newInstance()
+                val dialogFrag = PaymentFragment.newInstance(Membership.TYPE_STANDARD)
                 dialogFrag.setTargetFragment(this, REQUEST_PAY)
                 dialogFrag.show(fragmentManager, "DialogPayment")
             }
 
             subscription_premium_btn.setOnClickListener {
-
+                val dialogFrag = PaymentFragment.newInstance(Membership.TYPE_PREMIUM)
+                dialogFrag.setTargetFragment(this, REQUEST_PAY)
+                dialogFrag.show(fragmentManager, "DialogPayment")
             }
         }
     }
