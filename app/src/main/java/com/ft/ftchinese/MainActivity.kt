@@ -335,10 +335,10 @@ class MainActivity : AppCompatActivity(),
 
     private fun checkAdAsync() = async {
 
-        for (i in 1..30) {
-            info("Delaying check ad $i")
-            delay(1000)
-        }
+//        for (i in 1..30) {
+//            info("Delaying check ad $i")
+//            delay(1000)
+//        }
         info("Fetch schedule data")
         val schedules = LaunchSchedule.fetchDataAsync().await()
 

@@ -24,12 +24,14 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "WECAHT_APP_ID", props.getProperty("wechat.appId")
-
-//        externalNativeBuild {
-//            cmake {
-//                cppFlags "-std=c++11"
-//            }
-//        }
+        buildConfigField "String", "ALI_APP_ID", props.getProperty("ali.appId")
+        buildConfigField "String", "FTC_SIGN_KEY", props.getProperty("ftc.private_key")
+        buildConfigField "String", "ALI_VERIFY_KEY", props.getProperty("ali.pub_key")
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++11"
+            }
+        }
     }
     buildTypes {
         release {
@@ -62,31 +64,23 @@ dependencies {
     implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.android.support:cardview-v7:27.1.1'
-
     //  Network
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.koushikdutta.ion:ion:2.2.1'
-
     //  ORM. Unfortunately it does not work with Kotlin.
-//    implementation "android.arch.persistence.room:runtime:$room_version"
-//    kapt "android.arch.persistence.room:compiler:$room_version"
-
+    //    implementation "android.arch.persistence.room:runtime:$room_version"
+    //    kapt "android.arch.persistence.room:compiler:$room_version"
     // Wechat
     implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:5.1.4'
-
-    // Alipay
-    implementation 'com.alipay.sdk:alipay-sdk-java:3.3.49.ALL'
 
     // Utilities
     implementation 'com.jakewharton.byteunits:byteunits:0.9.1'
     implementation 'joda-time:joda-time:2.10'
     implementation 'org.apache.commons:commons-math3:3.6.1'
-
     //    Test
     testImplementation 'junit:junit:4.12'
     testImplementation 'com.github.javafaker:javafaker:0.16'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-//    debugImplementation 'com.amitshekhar.android:debug-db:1.0.4'
 }

@@ -64,6 +64,4 @@ In the root of this project, add a file `keystore.properties` and add this line 
 
 ## Problems
 
-It seems Kotlin coroutine does not work as expected. Even commonpool blocks the main thread.
-
-`checkAd` launched on commonpool blocks the main thread. A network error blocks the following execution.
+Alipay has a Maven repository `implementation 'com.alipay.sdk:alipay-sdk-java:3.3.49.ALL'`. It's the server-side SDK. DO NOT USE IT for Android!

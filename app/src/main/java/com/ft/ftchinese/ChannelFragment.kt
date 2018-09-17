@@ -356,32 +356,32 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
              * User clicked an article that requires membership.
              * If user if not logged in, or user already logged in but membership is free
              */
-            if (channelItem.isMembershipRequired) {
-                val sessionManager = try {
-                    val ctx = requireContext()
-                    SessionManager.getInstance(ctx)
-                } catch (e: Exception) {
-                    null
-                }
-
-                if (sessionManager == null) {
-                    toast(R.string.prompt_member_restricted)
-                    MembershipActivity.start(context)
-                    return
-                }
-
-                /**
-                 * If current user is not a paied member, or the membership is expired
-                 */
-                if (!sessionManager.isPaidMember() || sessionManager.isMembershipExpired()) {
-                    toast(R.string.prompt_member_restricted)
-                    MembershipActivity.start(context)
-                    return
-                }
-
-                startReading(channelItem)
-                return
-            }
+//            if (channelItem.isMembershipRequired) {
+//                val sessionManager = try {
+//                    val ctx = requireContext()
+//                    SessionManager.getInstance(ctx)
+//                } catch (e: Exception) {
+//                    null
+//                }
+//
+//                if (sessionManager == null) {
+//                    toast(R.string.prompt_member_restricted)
+//                    MembershipActivity.start(context)
+//                    return
+//                }
+//
+//                /**
+//                 * If current user is not a paied member, or the membership is expired
+//                 */
+//                if (!sessionManager.isPaidMember() || sessionManager.isMembershipExpired()) {
+//                    toast(R.string.prompt_member_restricted)
+//                    MembershipActivity.start(context)
+//                    return
+//                }
+//
+//                startReading(channelItem)
+//                return
+//            }
 
             startReading(channelItem)
 

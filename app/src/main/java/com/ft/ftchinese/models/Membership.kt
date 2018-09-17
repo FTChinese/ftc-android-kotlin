@@ -1,6 +1,8 @@
 package com.ft.ftchinese.models
 
+import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.R
+import kotlinx.coroutines.experimental.async
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 
@@ -47,11 +49,27 @@ data class Membership(
             return ISODateTimeFormat.date().print(dateTime)
         }
 
+    fun requestOrderAsync() = async {
+
+    }
+
     companion object {
         const val TYPE_FREE = "free"
         const val TYPE_STANDARD = "standard"
         const val TYPE_PREMIUM = "premium"
         const val PRICE_STANDARD = 198
         const val PRICE_PREMIUM = 1998
+    }
+}
+
+data class Subscription(
+        val price: Int,
+        val channel: Int
+) {
+    companion object {
+        const val PRICE_STANDARD = 198
+        const val PRICE_PREMIUM = 1998
+        const val VIA_ALIPAY = 1
+        const val VIA_WECHAT = 2
     }
 }

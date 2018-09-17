@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Membership
+import kotlinx.coroutines.experimental.async
 import org.jetbrains.anko.support.v4.toast
 
 
@@ -63,4 +64,5 @@ class PaymentFragment : DialogFragment() {
 
         return builder.create()
     }
+
 }

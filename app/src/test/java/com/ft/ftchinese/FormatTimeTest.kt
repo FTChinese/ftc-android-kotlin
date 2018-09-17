@@ -55,4 +55,12 @@ class FormatTimeTest{
 
         println(ISODateTimeFormat.date().print(dateTime))
     }
+
+    @Test fun alipayTimestamp() {
+        // "2018-09-13 15:05:40"
+        val now = DateTime.now()
+
+        val formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
+        println(formatter.print(now))
+    }
 }
