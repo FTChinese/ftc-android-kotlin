@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Membership
+import com.tencent.mm.opensdk.modelpay.PayReq
 import kotlinx.coroutines.experimental.async
 import org.jetbrains.anko.support.v4.toast
 
@@ -63,6 +64,27 @@ class PaymentFragment : DialogFragment() {
 
 
         return builder.create()
+    }
+
+    private fun alipay() {
+        // request order
+
+        // verify response
+
+        // paid
+    }
+
+    private fun wechatPay() {
+        // Send request to server to place an order
+
+        // Server send request to https://api.mch.weixin.qq.com/pay/unifiedorder
+
+        // Wechat return to server
+
+        // Server re-sign data and send it to this app
+
+        // App launch Wechat
+        val req = PayReq()
     }
 
 }
