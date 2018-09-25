@@ -1,14 +1,13 @@
 package com.ft.ftchinese.models
 
-import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.R
-import kotlinx.coroutines.experimental.async
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 
 
 data class Membership(
-        val type: String = "free",
+        val tier: String = TIER_FREE,
+        val billingCycle: String = BILLING_YEARLY,
         val startAt: String? = null,
         // ISO8601 format. Example: 2019-08-05T07:19:41Z
         val expireAt: String? = null
@@ -23,21 +22,27 @@ data class Membership(
             return DateTime.parse(expire, ISODateTimeFormat.dateTimeNoMillis()).isBeforeNow
         }
 
-    val typeResId: Int
-        get() = when(type) {
-            TYPE_PREMIUM -> R.string.member_type_premium
+    val tierResId: Int
+        get() = when(tier) {
+            TIER_PREMIUM -> R.string.member_type_premium
             else -> R.string.member_type_standard
         }
 
     val priceResId: Int
-        get() = when(type) {
-            TYPE_PREMIUM -> R.string.price_annual_premium
-            else -> R.string.price_annual_standard
+        get() = when(tier) {
+            TIER_PREMIUM -> when (billingCycle) {
+                BILLING_MONTHLY -> R.string.price_premium_month
+                else -> R.string.price_premium_annual
+            }
+            else -> when (billingCycle) {
+                BILLING_MONTHLY -> R.string.price_standard_month
+                else -> R.string.price_standard_annual
+            }
         }
 
     val price: Int
-        get() = when(type) {
-            TYPE_PREMIUM -> PRICE_PREMIUM
+        get() = when(tier) {
+            TIER_PREMIUM -> PRICE_PREMIUM
             else -> PRICE_STANDARD
         }
 
@@ -49,27 +54,19 @@ data class Membership(
             return ISODateTimeFormat.date().print(dateTime)
         }
 
-    fun requestOrderAsync() = async {
-
-    }
-
     companion object {
-        const val TYPE_FREE = "free"
-        const val TYPE_STANDARD = "standard"
-        const val TYPE_PREMIUM = "premium"
+        const val TIER_FREE = "free"
+        const val TIER_STANDARD = "standard"
+        const val TIER_PREMIUM = "premium"
+
+        const val BILLING_YEARLY = "year"
+        const val BILLING_MONTHLY = "month"
+
         const val PRICE_STANDARD = 198
         const val PRICE_PREMIUM = 1998
-    }
-}
 
-data class Subscription(
-        val price: Int,
-        val channel: Int
-) {
-    companion object {
-        const val PRICE_STANDARD = 198
-        const val PRICE_PREMIUM = 1998
-        const val VIA_ALIPAY = 1
-        const val VIA_WECHAT = 2
+        const val PAYMENT_METHOD_ALI = 1
+        const val PAYMENT_METHOD_WX = 2
+        const val PAYMENT_METHOD_STRIPE = 3
     }
 }

@@ -3,7 +3,6 @@ package com.ft.ftchinese.models
 import android.content.Context
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
-import java.lang.reflect.Member
 
 private const val SESSION_PREF_NAME = "user_session"
 private const val PREF_ID = "id"
@@ -27,7 +26,7 @@ class SessionManager(context: Context) {
         editor.putString(PREF_AVATAR, user.avatar)
         editor.putBoolean(PREF_IS_VIP, user.isVip)
         editor.putBoolean(PREF_IS_VERIFIED, user.verified)
-        editor.putString(PREF_MEMBER_TYPE, user.membership.type)
+        editor.putString(PREF_MEMBER_TYPE, user.membership.tier)
         editor.putString(PREF_MEMBER_EXPIRE, user.membership.expireAt)
 
         editor.putBoolean(PREF_IS_LOGGED_IN, true)
@@ -42,10 +41,10 @@ class SessionManager(context: Context) {
         val avatar = sharedPreferences.getString(PREF_AVATAR, "")
         val isVip = sharedPreferences.getBoolean(PREF_IS_VIP, false)
         val verified = sharedPreferences.getBoolean(PREF_IS_VERIFIED, false)
-        val memberType = sharedPreferences.getString(PREF_MEMBER_TYPE, Membership.TYPE_FREE)
+        val memberType = sharedPreferences.getString(PREF_MEMBER_TYPE, Membership.TIER_FREE)
         val expire = sharedPreferences.getString(PREF_MEMBER_EXPIRE, null)
 
-        val membership = Membership(type = memberType, expireAt = expire)
+        val membership = Membership(tier = memberType, expireAt = expire)
 
         return User(
                 id = id,
@@ -65,7 +64,7 @@ class SessionManager(context: Context) {
     fun isPaidMember(): Boolean {
         val type = sharedPreferences.getString(PREF_MEMBER_TYPE, null) ?: return false
 
-        return type == Membership.TYPE_STANDARD || type == Membership.TYPE_PREMIUM
+        return type == Membership.TIER_STANDARD || type == Membership.TIER_PREMIUM
     }
 
     fun isMembershipExpired(): Boolean {

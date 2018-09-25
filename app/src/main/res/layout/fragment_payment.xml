@@ -7,27 +7,27 @@
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/label_member_type"
+        android:id="@+id/label_member_tier"
         style="@style/FTCText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="@string/label_member_type"
-        app:layout_constraintEnd_toStartOf="@+id/value_member_type"
+        app:layout_constraintEnd_toStartOf="@+id/value_member_tier"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/value_member_type"
+        android:id="@+id/value_member_tier"
         style="@style/FTCText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textStyle="bold"
-        app:layout_constraintBaseline_toBaselineOf="@id/label_member_type"
+        app:layout_constraintBaseline_toBaselineOf="@id/label_member_tier"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/label_member_type" />
+        app:layout_constraintStart_toEndOf="@+id/label_member_tier" />
 
     <TextView
         android:id="@+id/label_member_price"
@@ -38,8 +38,8 @@
         android:text="@string/label_member_price"
         app:layout_constraintEnd_toStartOf="@+id/value_member_price"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
-        app:layout_constraintStart_toStartOf="@+id/label_member_type"
-        app:layout_constraintTop_toBottomOf="@+id/label_member_type" />
+        app:layout_constraintStart_toStartOf="@+id/label_member_tier"
+        app:layout_constraintTop_toBottomOf="@+id/label_member_tier" />
 
     <TextView
         android:id="@+id/value_member_price"
@@ -48,11 +48,11 @@
         android:layout_height="wrap_content"
         android:textColor="@color/colorClaret"
         app:layout_constraintBaseline_toBaselineOf="@+id/label_member_price"
-        app:layout_constraintEnd_toEndOf="@+id/value_member_type"
+        app:layout_constraintEnd_toEndOf="@+id/value_member_tier"
         app:layout_constraintStart_toEndOf="@+id/label_member_price" />
 
     <ImageView
-        android:id="@+id/pay_zhifubao"
+        android:id="@+id/pay_alipay"
         android:layout_width="wrap_content"
         android:layout_height="32dp"
         android:layout_marginTop="32dp"
@@ -61,19 +61,19 @@
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="@+id/label_member_price"
         app:layout_constraintTop_toBottomOf="@+id/label_member_price"
-        app:layout_constraintEnd_toStartOf="@+id/pay_wechat"
+        app:layout_constraintEnd_toStartOf="@+id/pay_tenpay"
         app:srcCompat="@drawable/alipay" />
 
     <ImageView
-        android:id="@+id/pay_wechat"
+        android:id="@+id/pay_tenpay"
         android:layout_width="wrap_content"
         android:layout_height="32dp"
         android:adjustViewBounds="true"
         android:scaleType="centerInside"
-        app:layout_constraintBottom_toBottomOf="@+id/pay_zhifubao"
+        app:layout_constraintBottom_toBottomOf="@+id/pay_alipay"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/pay_zhifubao"
-        app:layout_constraintTop_toTopOf="@+id/pay_zhifubao"
+        app:layout_constraintStart_toEndOf="@+id/pay_alipay"
+        app:layout_constraintTop_toTopOf="@+id/pay_alipay"
         app:srcCompat="@drawable/wechat_pay" />
 
 

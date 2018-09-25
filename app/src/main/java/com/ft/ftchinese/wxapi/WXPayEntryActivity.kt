@@ -1,9 +1,11 @@
 package com.ft.ftchinese.wxapi
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import com.ft.ftchinese.BuildConfig
+import com.ft.ftchinese.R
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
@@ -14,46 +16,45 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-class WXEntryActivity : Activity(), IWXAPIEventHandler, AnkoLogger {
+class WXPayEntryActivity: Activity(), IWXAPIEventHandler, AnkoLogger {
+    private var api: IWXAPI? = null
 
-    lateinit var api: IWXAPI
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false)
+        setContentView(R.layout.pay_result)
+
+        api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID)
+
+        api?.handleIntent(intent, this)
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        this.intent = intent
-
-        api.handleIntent(intent, this)
+        setIntent(intent)
+        api?.handleIntent(intent, this)
     }
 
     override fun onResp(resp: BaseResp?) {
+        info("onPayFinish, errCode = ${resp?.errCode}")
 
-        toast("Response tier: ${resp?.type}")
-
-        val result = when (resp?.errCode) {
-            BaseResp.ErrCode.ERR_OK -> "Success"
-            BaseResp.ErrCode.ERR_USER_CANCEL -> "User cancelled"
-            BaseResp.ErrCode.ERR_AUTH_DENIED -> "Authentication denied"
-            BaseResp.ErrCode.ERR_UNSUPPORT -> "Unsupported"
-            else -> "Unknown"
+        if (resp?.type == ConstantsAPI.COMMAND_PAY_BY_WX) {
+            when (resp?.errCode) {
+                0 -> {
+                    toast("Payment done")
+                    // Query order
+                }
+                -1 -> {
+                    toast("Payment error")
+                }
+                -2 -> {
+                    toast("User cancelled")
+                }
+            }
         }
-
-        toast(result)
     }
 
     override fun onReq(req: BaseReq?) {
-        when (req?.type) {
-            ConstantsAPI.COMMAND_GETMESSAGE_FROM_WX -> {
 
-            }
-            ConstantsAPI.COMMAND_SHOWMESSAGE_FROM_WX -> {
-
-            }
-        }
     }
-
 }

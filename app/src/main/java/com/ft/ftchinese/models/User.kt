@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.ft.ftchinese.util.ApiEndpoint
 import com.ft.ftchinese.util.Fetch
+import com.ft.ftchinese.util.SubscribeApi
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.experimental.Deferred
@@ -83,6 +84,17 @@ data class User(
                 .end()
 
         response.code() == 204
+    }
+
+    fun wxPrepayOrderAsync(tier: String, cycle: String): Deferred<WxPrepayOrder> = async {
+        val response = Fetch().post("${SubscribeApi.WX_PREPAY_ORDER}/$tier/$cycle")
+                .setUserId(this@User.id)
+                .setClient()
+                .body(null)
+                .end()
+
+        val body = response.body()?.string()
+        gson.fromJson<WxPrepayOrder>(body, WxPrepayOrder::class.java)
     }
 
     companion object {

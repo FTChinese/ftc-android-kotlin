@@ -149,7 +149,7 @@
                     style="@style/FTCText" />
 
                 <Button
-                    android:id="@+id/subscription_standard_btn"
+                    android:id="@+id/subscribe_standard_year"
                     style="@style/OrigamiButton.Primary.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -162,13 +162,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/price_annual_standard" />
+                    android:text="@string/price_standard_annual" />
             </LinearLayout>
 
         </android.support.v7.widget.CardView>
 
         <android.support.v7.widget.CardView
-            android:id="@+id/subscription_premium"
+            android:id="@+id/subscribe_premium_year"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp">
@@ -217,7 +217,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/price_annual_premium" />
+                    android:text="@string/price_premium_annual" />
             </LinearLayout>
 
         </android.support.v7.widget.CardView>

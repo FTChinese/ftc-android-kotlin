@@ -12,7 +12,7 @@ import org.jetbrains.anko.toast
 /**
  * WebContentActivity might be launched in two circumstances:
  * 1. Clicked on a link directly;
- * 2. A click event is intercepted by JS and JS executed Java method injected into the WebView and passed some data back (mostly ChannelItem type)
+ * 2. A click event is intercepted by JS and JS executed Java method injected into the WebView and passed some data back (mostly ChannelItem tier)
  *
  * Activities start this must pass the web page's parsed canonical uri (the url that could be directly opened in a browser), which will be used for social share.
  */

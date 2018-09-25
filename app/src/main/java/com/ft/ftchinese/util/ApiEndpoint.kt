@@ -16,3 +16,11 @@ class ApiEndpoint {
         const val APP_LAUNCH = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
     }
 }
+
+class SubscribeApi {
+    companion object {
+        private const val BASE = "http://www.ftacademy.cn/api/v1"
+        const val WX_PREPAY_ORDER = "$BASE/order/tenpay"
+        const val ALIPAY_ORDER = "$BASE/order/alipay"
+    }
+}

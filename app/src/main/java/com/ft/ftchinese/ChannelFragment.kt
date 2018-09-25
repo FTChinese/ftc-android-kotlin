@@ -308,7 +308,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         /**
          * Handle click event on an item of article list.
          * See Page/Layouts/Page/SuperDataViewController.swift#SuperDataViewController what kind of data structure is passed back from web view.
-         * The JSON data is parsed into SectionItem type in ContentActivity
+         * The JSON data is parsed into SectionItem tier in ContentActivity
          * iOS equivalent might be here: Page/Layouts/Pages/Content/DetailModelController.swift
          * @param index is the number of article mUser clicked in current page. The value is extracted from `data-row` attribute of `div.item-container-app`.
          * In most cases when you clicked, an article should be loaded.
@@ -371,7 +371,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 //                }
 //
 //                /**
-//                 * If current user is not a paied member, or the membership is expired
+//                 * If current user is not a paid member, or the membership is expired
 //                 */
 //                if (!sessionManager.isPaidMember() || sessionManager.isMembershipExpired()) {
 //                    toast(R.string.prompt_member_restricted)

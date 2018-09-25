@@ -183,7 +183,7 @@ class Fetch : AnkoLogger {
         }
 
         /**
-         * @throws JsonSyntaxException if json is not a valid representation for an object of type
+         * @throws JsonSyntaxException if json is not a valid representation for an object of tier
          * classOfT
          * `errResp` is null if body is null or if body is empty
          */

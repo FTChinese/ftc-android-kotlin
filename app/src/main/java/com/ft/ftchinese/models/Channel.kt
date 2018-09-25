@@ -35,24 +35,24 @@ data class ChannelMeta(
 
 /**
  * ChannelItem represents an item in a page of ViewPager.
- * This is the data type passed to AbsContentActivity so that it know what kind of data to load.
+ * This is the data tier passed to AbsContentActivity so that it know what kind of data to load.
  * iOS equivalent might be Page/Layouts/Content/ContentItem.swift#ContentItem
  * The fields are collected from all HTML elements `div.item-container-app`.
  * See https://github.com/FTChinese/android-client/app/scripts/list.js.
  * In short it used those attributes:
  * `data-id` for `id`
- * `data-type` for type. Possible values: `story`, `interactive`,
+ * `data-tier` for tier. Possible values: `story`, `interactive`,
  * The content of `a.item-headline-link` inside `div.item-container-app` for `headline`
  * `data-audio` for `shortlead`
  * `data-caudio` for `caudio`
  * `data-eaudio` for `eaudio`
- * `data-sub-type` for `subType`. Possible values: `radio`, `speedreading`
+ * `data-sub-tier` for `subType`. Possible values: `radio`, `speedreading`
  * `data-date` for `timeStamp`
  *
  * The fields in ChannelItem are also persisted to SQLite when user clicked on it.
  * It seems the Room library does not work well with Kotlin data class. Use a plain class works.
  *
- * The data type is also used to record reading history. `standfirst` is used only for this purpose. Do not use `subType` and `shortlead` should not be used for this purpose. ArticleStore could only recored `type==story`.
+ * The data tier is also used to record reading history. `standfirst` is used only for this purpose. Do not use `subType` and `shortlead` should not be used for this purpose. ArticleStore could only recored `tier==story`.
  */
 data class ChannelItem(
         val id: String,

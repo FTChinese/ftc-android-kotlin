@@ -101,7 +101,7 @@ class Story (
             <li class="story-theme mp${index+1}">
                 <a target="_blank" href="/tag/$s\">$s</a>
                 <div class="icon-right">
-                    <button class="myft-follow plus" data-tag="$s" data-type="tag">关注</button>
+                    <button class="myft-follow plus" data-tag="$s" data-tier="tag">关注</button>
                 </div>
             </li>
             """.trimIndent()
@@ -124,7 +124,7 @@ class Story (
         return """
             <div class="story-theme">
                 <a target="_blank" href="/tag/$firstTag">$firstTag</a>
-                <button class="myft-follow plus" data-tag="${firstTag}" data-type="tag">关注</button>
+                <button class="myft-follow plus" data-tag="${firstTag}" data-tier="tag">关注</button>
             </div>
         """.trimIndent()
     }

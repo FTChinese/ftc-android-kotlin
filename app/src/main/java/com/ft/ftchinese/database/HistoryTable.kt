@@ -6,7 +6,7 @@ object HistoryTable {
 
     object Cols : BaseColumns {
         const val ID = "id"
-        const val TYPE = "type"
+        const val TYPE = "tier"
         const val TITLE = "title"
         const val STANDFIRST = "standfirst"
     }
@@ -21,7 +21,7 @@ object HistoryTable {
                 ${Cols.TITLE} TEXT,
                 ${Cols.STANDFIRST} TEXT,
                 read_at TEXT DEFAULT CURRENT_TIMESTAMP,
-                UNIQUE (id, type) ON CONFLICT REPLACE)
+                UNIQUE (id, tier) ON CONFLICT REPLACE)
         """.trimIndent()
 
     const val SQL_DELETE_TABLE = "DROP TABLE IF EXISTS $NAME"

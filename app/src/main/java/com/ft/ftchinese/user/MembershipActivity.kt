@@ -1,5 +1,6 @@
 package com.ft.ftchinese.user
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -7,14 +8,23 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.ft.ftchinese.BuildConfig
 
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Membership
 import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.models.User
 import com.ft.ftchinese.util.RequestCode
+import com.tencent.mm.opensdk.modelpay.PayReq
+import com.tencent.mm.opensdk.openapi.IWXAPI
+import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.fragment_membership.*
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.coroutines.experimental.bg
 import org.jetbrains.anko.info
+import org.jetbrains.anko.support.v4.toast
 
 class MembershipActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {
@@ -39,6 +49,9 @@ class MembershipActivity : SingleFragmentActivity() {
  */
 class MembershipFragment : Fragment(), AnkoLogger {
     private var mListener: OnFragmentInteractionListener? = null
+    private var mDialog: PaymentFragment? = null
+    private var user: User? = null
+    private var wxApi: IWXAPI? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -51,6 +64,8 @@ class MembershipFragment : Fragment(), AnkoLogger {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        wxApi = WXAPIFactory.createWXAPI(context, BuildConfig.WECAHT_APP_ID)
 
         info("onCreate finished")
     }
@@ -69,7 +84,7 @@ class MembershipFragment : Fragment(), AnkoLogger {
         } catch (e: Exception) {
             return
         }
-        val user = SessionManager.getInstance(ctx).loadUser()
+        user = SessionManager.getInstance(ctx).loadUser()
 
         // User is not logged in
         if (user == null) {
@@ -79,7 +94,7 @@ class MembershipFragment : Fragment(), AnkoLogger {
                 SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
             }
 
-            subscription_standard_btn.setOnClickListener {
+            subscribe_standard_year.setOnClickListener {
                 SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
             }
 
@@ -89,29 +104,76 @@ class MembershipFragment : Fragment(), AnkoLogger {
         } else {
             // User is logged in
             // Show user's membership information
-            member_value.text = when (user.membership.type) {
-                Membership.TYPE_FREE -> getString(R.string.member_type_free)
-                Membership.TYPE_STANDARD -> getString(R.string.member_type_standard)
-                Membership.TYPE_PREMIUM -> getString(R.string.member_type_premium)
+            member_value.text = when (user?.membership?.tier) {
+                Membership.TIER_FREE -> getString(R.string.member_type_free)
+                Membership.TIER_STANDARD -> getString(R.string.member_type_standard)
+                Membership.TIER_PREMIUM -> getString(R.string.member_type_premium)
                 else -> null
             }
 
-            duration_value.text = user.membership.localizedExpireDate
+            // Show expiration date
+            duration_value.text = user?.membership?.localizedExpireDate
 
             // Hide login button
             paywall_login_container.visibility = View.GONE
 
             // Show a dialog so that user could select payment channel
-            subscription_standard_btn.setOnClickListener {
-                val dialogFrag = PaymentFragment.newInstance(Membership.TYPE_STANDARD)
+            subscribe_standard_year.setOnClickListener {
+                val dialogFrag = PaymentFragment.newInstance(Membership.TIER_STANDARD, Membership.BILLING_YEARLY)
                 dialogFrag.setTargetFragment(this, REQUEST_PAY)
                 dialogFrag.show(fragmentManager, "DialogPayment")
+                mDialog = dialogFrag
             }
 
             subscription_premium_btn.setOnClickListener {
-                val dialogFrag = PaymentFragment.newInstance(Membership.TYPE_PREMIUM)
+                val dialogFrag = PaymentFragment.newInstance(Membership.TIER_PREMIUM, Membership.BILLING_YEARLY)
                 dialogFrag.setTargetFragment(this, REQUEST_PAY)
                 dialogFrag.show(fragmentManager, "DialogPayment")
+                mDialog = dialogFrag
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (resultCode != Activity.RESULT_OK) {
+            return
+        }
+
+        if (requestCode == REQUEST_PAY) {
+            val memberTier = data?.getStringExtra(PaymentFragment.ARG_MEMBERSHIP_TIER)
+            val billingCycle = data?.getStringExtra(PaymentFragment.ARG_BILLING_CYCLE)
+            val paymentMethod = data?.getIntExtra(PaymentFragment.EXTRA_PAYMENT_METHOD, 0)
+
+            if (memberTier == null || billingCycle == null || paymentMethod == null) {
+                return
+            }
+
+            when (paymentMethod) {
+                Membership.PAYMENT_METHOD_WX -> {
+                    launch(UI) {
+                        val prepayOrder = user?.wxPrepayOrderAsync(memberTier, billingCycle)?.await() ?: return@launch
+                        val req = PayReq()
+                        req.appId = prepayOrder.appid
+                        req.partnerId = prepayOrder.partnerid
+                        req.nonceStr = prepayOrder.noncstr
+                        req.timeStamp = prepayOrder.timestamp
+                        req.packageValue = prepayOrder.`package`
+                        req.sign = prepayOrder.sign
+
+                        bg {
+                            wxApi?.sendReq(req)
+                        }
+                    }
+                }
+                Membership.PAYMENT_METHOD_ALI -> {
+
+                }
+                Membership.PAYMENT_METHOD_STRIPE -> {
+                    toast("Stripe payment is not implemented yet")
+                }
+                else -> {
+                    toast("Unknown payment method")
+                }
             }
         }
     }
@@ -119,6 +181,7 @@ class MembershipFragment : Fragment(), AnkoLogger {
     override fun onDetach() {
         super.onDetach()
         mListener = null
+        mDialog = null
     }
 
     companion object {

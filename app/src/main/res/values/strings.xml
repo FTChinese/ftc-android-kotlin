@@ -31,8 +31,10 @@
     <string name="nav_not_logged_in">您尚未登录</string>
     <string name="nav_header_desc">导航栏头部</string>
 
-    <string name="price_annual_standard">¥198.00/年</string>
-    <string name="price_annual_premium">¥1,998.00/年</string>
+    <string name="price_standard_annual">¥198.00/年</string>
+    <string name="price_standard_month">¥18/月</string>
+    <string name="price_premium_annual">¥1,998.00/年</string>
+    <string name="price_premium_month">¥180/月</string>
     <string name="membership_title">我的订阅</string>
     <string name="label_member_type">会员类型</string>
     <string name="member_type_free">尚未成为会员</string>
