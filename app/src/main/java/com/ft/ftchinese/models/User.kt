@@ -1,15 +1,12 @@
 package com.ft.ftchinese.models
 
-import android.content.Context
-import android.util.Log
-import com.ft.ftchinese.util.ApiEndpoint
+import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.SubscribeApi
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
-import java.io.IOException
 
 const val PREFERENCE_NAME_USER = "user"
 
@@ -44,7 +41,7 @@ data class User(
      */
     fun refreshAsync(): Deferred<User> = async {
 
-        val response = Fetch().get(ApiEndpoint.ACCOUNT)
+        val response = Fetch().get(NextApi.ACCOUNT)
                 .noCache()
                 .setUserId(this@User.id)
                 .end()
@@ -56,7 +53,7 @@ data class User(
 
     fun starArticle(articleId: String): Deferred<Boolean> = async {
 
-        val response = Fetch().put("${ApiEndpoint.STARRED}/$articleId")
+        val response = Fetch().put("${NextApi.STARRED}/$articleId")
                 .noCache()
                 .body(null)
                 .setUserId(this@User.id)
@@ -67,7 +64,7 @@ data class User(
 
     fun unstarArticle(articleId: String): Deferred<Boolean> = async {
 
-        val response = Fetch().delete("${ApiEndpoint.STARRED}/$articleId")
+        val response = Fetch().delete("${NextApi.STARRED}/$articleId")
                 .noCache()
                 .setUserId(this@User.id)
                 .body(null)
@@ -78,7 +75,7 @@ data class User(
 
     fun isStarring(articleId: String): Deferred<Boolean> = async {
 
-        val response = Fetch().get("${ApiEndpoint.STARRED}/$articleId")
+        val response = Fetch().get("${NextApi.STARRED}/$articleId")
                 .noCache()
                 .setUserId(this@User.id)
                 .end()
@@ -95,6 +92,17 @@ data class User(
 
         val body = response.body()?.string()
         gson.fromJson<WxPrepayOrder>(body, WxPrepayOrder::class.java)
+    }
+
+    fun alipayOrderAsync(tier: String, cycle: String): Deferred<AlipayOrder> = async {
+        val response = Fetch().post("${SubscribeApi.ALIPAY_ORDER}/$tier/$cycle")
+                .setUserId(this@User.id)
+                .setClient()
+                .body(null)
+                .end()
+
+        val body = response.body()?.string()
+        gson.fromJson<AlipayOrder>(body, AlipayOrder::class.java)
     }
 
     companion object {

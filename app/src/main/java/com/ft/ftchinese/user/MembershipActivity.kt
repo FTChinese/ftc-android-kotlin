@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 
 import com.ft.ftchinese.R
@@ -15,6 +16,7 @@ import com.ft.ftchinese.models.Membership
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.User
 import com.ft.ftchinese.util.RequestCode
+import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -150,12 +152,33 @@ class MembershipFragment : Fragment(), AnkoLogger {
 
             when (paymentMethod) {
                 Membership.PAYMENT_METHOD_WX -> {
+                    val supportedApi = wxApi?.wxAppSupportAPI
+                    if (supportedApi != null) {
+                        val isPaySupported = supportedApi >= Build.PAY_SUPPORTED_SDK_INT
+                        toast("WX pay supported: $isPaySupported")
+                    }
+
                     launch(UI) {
-                        val prepayOrder = user?.wxPrepayOrderAsync(memberTier, billingCycle)?.await() ?: return@launch
+                        val prepayOrder = try {
+                            user?.wxPrepayOrderAsync(memberTier, billingCycle)?.await()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            toast("Network error")
+                            return@launch
+                        }
+
+                        if (prepayOrder == null) {
+                            toast("Cannot create order for wechat")
+                            return@launch
+                        }
+
+                        info("Prepay order: $prepayOrder")
+
                         val req = PayReq()
                         req.appId = prepayOrder.appid
                         req.partnerId = prepayOrder.partnerid
-                        req.nonceStr = prepayOrder.noncstr
+                        req.prepayId = prepayOrder.prepayid
+                        req.nonceStr = prepayOrder.noncestr
                         req.timeStamp = prepayOrder.timestamp
                         req.packageValue = prepayOrder.`package`
                         req.sign = prepayOrder.sign
@@ -165,9 +188,41 @@ class MembershipFragment : Fragment(), AnkoLogger {
                         }
                     }
                 }
-                Membership.PAYMENT_METHOD_ALI -> {
 
+                Membership.PAYMENT_METHOD_ALI -> {
+                    launch(UI) {
+                        mListener?.onProgress(true)
+                        toast("创建订单...")
+                        val aliOrder = try {
+                            user?.alipayOrderAsync(memberTier, billingCycle)?.await()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            info("$e")
+                            return@launch
+                        } finally {
+                            mListener?.onProgress(false)
+                        }
+
+                        info("Alipay order: $aliOrder")
+
+                        val payJob = bg {
+                            val alipay = PayTask(activity)
+                            val result = alipay.payV2(aliOrder?.order, true)
+
+                            result
+                        }
+
+                        try {
+                            val result = payJob.await()
+
+                            info("Alipay result: $result")
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            toast("$e")
+                        }
+                    }
                 }
+
                 Membership.PAYMENT_METHOD_STRIPE -> {
                     toast("Stripe payment is not implemented yet")
                 }

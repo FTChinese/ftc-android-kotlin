@@ -26,6 +26,8 @@
             android:label="@string/app_name" />
         <activity
             android:name=".wxapi.WXPayEntryActivity"
+            android:parentActivityName=".user.MembershipActivity"
+            android:label="会员订阅支付"
             android:exported="true"
             android:launchMode="singleTop"/>
 

@@ -1,9 +1,8 @@
 package com.ft.ftchinese.models
 
 import android.util.Log
-import com.ft.ftchinese.util.ApiEndpoint
+import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.experimental.async
 import java.io.IOException
@@ -21,7 +20,7 @@ data class PasswordReset(
     suspend fun send() {
         val job = async {
 
-            Fetch().post(ApiEndpoint.PASSWORD_RESET)
+            Fetch().post(NextApi.PASSWORD_RESET)
                     .noCache()
                     .body(this@PasswordReset)
                     .end()

@@ -1,9 +1,8 @@
 package com.ft.ftchinese.wxapi
 
-import android.app.Activity
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.tencent.mm.opensdk.constants.ConstantsAPI
@@ -12,17 +11,20 @@ import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
+import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-class WXPayEntryActivity: Activity(), IWXAPIEventHandler, AnkoLogger {
+class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     private var api: IWXAPI? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.pay_result)
+
+        setSupportActionBar(toolbar)
 
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID)
 

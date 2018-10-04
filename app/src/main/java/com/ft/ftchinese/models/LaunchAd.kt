@@ -6,7 +6,7 @@ import com.ft.ftchinese.util.gson
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.experimental.async
 import android.net.Uri
-import com.ft.ftchinese.util.ApiEndpoint
+import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Store
 import com.koushikdutta.ion.Ion
 import kotlinx.coroutines.experimental.Deferred
@@ -141,7 +141,7 @@ class LaunchSchedule(
          */
         fun fetchDataAsync(): Deferred<LaunchSchedule?> = async {
             try {
-                val response = Fetch().get(ApiEndpoint.APP_LAUNCH)
+                val response = Fetch().get(NextApi.APP_LAUNCH)
                         .end()
 
                 val body = response.body()?.string()

@@ -2,12 +2,8 @@ package com.ft.ftchinese.models
 
 import android.content.Context
 import android.util.Log
-import com.ft.ftchinese.util.ApiEndpoint
-import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
-import kotlinx.coroutines.experimental.async
-import java.io.IOException
 
 data class Profile(
     val id: String,

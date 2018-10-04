@@ -1,6 +1,6 @@
 package com.ft.ftchinese.models
 
-import com.ft.ftchinese.util.ApiEndpoint
+import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
@@ -22,7 +22,7 @@ data class EmailUpdate(
      */
     fun updateAsync(uuid: String): Deferred<User> = async {
 
-        val response = Fetch().patch(ApiEndpoint.UPDATE_EMAIL)
+        val response = Fetch().patch(NextApi.UPDATE_EMAIL)
                 .noCache()
                 .setUserId(uuid)
                 .body(this@EmailUpdate)
@@ -40,7 +40,7 @@ data class UserNameUpdate(
 ) : AnkoLogger {
     fun updateAsync(uuid: String): Deferred<User> = async {
 
-        val response = Fetch().patch(ApiEndpoint.UPDATE_USER_NAME)
+        val response = Fetch().patch(NextApi.UPDATE_USER_NAME)
                 .noCache()
                 .setUserId(uuid)
                 .body(this@UserNameUpdate)
@@ -59,7 +59,7 @@ data class PasswordUpdate(
 ) : AnkoLogger {
     fun updateAsync(uuid: String) = async {
 
-        val response = Fetch().patch(ApiEndpoint.UPDATE_PASSWORD)
+        val response = Fetch().patch(NextApi.UPDATE_PASSWORD)
                 .noCache()
                 .setUserId(uuid)
                 .body(this@PasswordUpdate)

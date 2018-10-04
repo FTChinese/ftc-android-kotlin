@@ -1,6 +1,6 @@
 package com.ft.ftchinese.util
 
-class ApiEndpoint {
+class NextApi {
     companion object {
         private const val BASE = "https://lacerta.serveo.net"
         const val LOGIN = "$BASE/users/auth"
@@ -19,8 +19,9 @@ class ApiEndpoint {
 
 class SubscribeApi {
     companion object {
-        private const val BASE = "http://www.ftacademy.cn/api/v1"
-        const val WX_PREPAY_ORDER = "$BASE/order/tenpay"
-        const val ALIPAY_ORDER = "$BASE/order/alipay"
+//        private const val BASE = "http://www.ftacademy.cn/api/v1"
+        private const val BASE = "https://lacerta.serveo.net"
+        const val WX_PREPAY_ORDER = "$BASE/place-order/tenpay"
+        const val ALIPAY_ORDER = "$BASE/place-order/alipay"
     }
 }

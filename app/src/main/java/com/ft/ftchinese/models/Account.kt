@@ -1,7 +1,6 @@
 package com.ft.ftchinese.models
 
-import android.util.Log
-import com.ft.ftchinese.util.ApiEndpoint
+import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
@@ -37,10 +36,10 @@ data class Account(
     }
 
     fun loginAsync(): Deferred<User> = async {
-        send(ApiEndpoint.LOGIN)
+        send(NextApi.LOGIN)
     }
 
     fun createAsync(): Deferred<User> = async {
-        send(ApiEndpoint.NEW_ACCOUNT)
+        send(NextApi.NEW_ACCOUNT)
     }
 }

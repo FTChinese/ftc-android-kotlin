@@ -24,9 +24,6 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "WECAHT_APP_ID", props.getProperty("wechat.appId")
-        buildConfigField "String", "ALI_APP_ID", props.getProperty("ali.appId")
-        buildConfigField "String", "FTC_SIGN_KEY", props.getProperty("ftc.private_key")
-        buildConfigField "String", "ALI_VERIFY_KEY", props.getProperty("ali.pub_key")
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++11"

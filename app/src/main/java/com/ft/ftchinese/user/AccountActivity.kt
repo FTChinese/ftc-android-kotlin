@@ -16,7 +16,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.User
-import com.ft.ftchinese.util.ApiEndpoint
+import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.fragment_account.*
@@ -296,7 +296,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     private suspend fun sendRequest(uuid: String) {
         val job = async {
             Fetch()
-                    .post(ApiEndpoint.REQUEST_VERIFICATION)
+                    .post(NextApi.REQUEST_VERIFICATION)
                     .noCache()
                     .setUserId(uuid)
                     .end()

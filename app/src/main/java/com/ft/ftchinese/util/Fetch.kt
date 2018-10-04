@@ -157,7 +157,7 @@ class Fetch : AnkoLogger {
         val response = try {
             client.newCall(request).execute()
         } catch (e: IOException) {
-            throw NetworkErrorException()
+            throw NetworkException()
         }
 
 

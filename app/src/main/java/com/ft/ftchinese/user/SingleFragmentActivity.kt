@@ -22,8 +22,10 @@ import kotlinx.android.synthetic.main.simple_toolbar.*
  * for more information.
  */
 internal interface OnFragmentInteractionListener {
+    // Show/hide progress bar
     fun onProgress(show: Boolean)
 
+    // Update user data
     fun onUserSession(user: User)
 }
 
