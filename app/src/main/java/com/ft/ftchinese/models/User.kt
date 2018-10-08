@@ -7,6 +7,7 @@ import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
+import java.lang.reflect.Member
 
 const val PREFERENCE_NAME_USER = "user"
 
@@ -83,8 +84,11 @@ data class User(
         response.code() == 204
     }
 
-    fun wxPrepayOrderAsync(tier: String, cycle: String): Deferred<WxPrepayOrder> = async {
-        val response = Fetch().post("${SubscribeApi.WX_PREPAY_ORDER}/$tier/$cycle")
+    fun wxPrepayOrderAsync(membership: Membership?): Deferred<WxPrepayOrder?> = async {
+        if (membership == null) {
+            return@async null
+        }
+        val response = Fetch().post("${SubscribeApi.WX_PREPAY_ORDER}/${membership.tier}/${membership.billingCycle}")
                 .setUserId(this@User.id)
                 .setClient()
                 .body(null)
@@ -94,8 +98,11 @@ data class User(
         gson.fromJson<WxPrepayOrder>(body, WxPrepayOrder::class.java)
     }
 
-    fun alipayOrderAsync(tier: String, cycle: String): Deferred<AlipayOrder> = async {
-        val response = Fetch().post("${SubscribeApi.ALIPAY_ORDER}/$tier/$cycle")
+    fun alipayOrderAsync(membership: Membership?): Deferred<AlipayOrder?> = async {
+        if (membership == null) {
+            return@async null
+        }
+        val response = Fetch().post("${SubscribeApi.ALIPAY_ORDER}/${membership.tier}/${membership.billingCycle}")
                 .setUserId(this@User.id)
                 .setClient()
                 .body(null)

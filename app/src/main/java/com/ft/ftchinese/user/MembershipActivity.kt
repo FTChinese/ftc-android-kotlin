@@ -51,7 +51,6 @@ class MembershipActivity : SingleFragmentActivity() {
  */
 class MembershipFragment : Fragment(), AnkoLogger {
     private var mListener: OnFragmentInteractionListener? = null
-    private var mDialog: PaymentFragment? = null
     private var user: User? = null
     private var wxApi: IWXAPI? = null
 
@@ -100,7 +99,7 @@ class MembershipFragment : Fragment(), AnkoLogger {
                 SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
             }
 
-            subscription_premium_btn.setOnClickListener {
+            subscription_premium_year.setOnClickListener {
                 SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
             }
         } else {
@@ -121,17 +120,13 @@ class MembershipFragment : Fragment(), AnkoLogger {
 
             // Show a dialog so that user could select payment channel
             subscribe_standard_year.setOnClickListener {
-                val dialogFrag = PaymentFragment.newInstance(Membership.TIER_STANDARD, Membership.BILLING_YEARLY)
-                dialogFrag.setTargetFragment(this, REQUEST_PAY)
-                dialogFrag.show(fragmentManager, "DialogPayment")
-                mDialog = dialogFrag
+
+                PaymentActivity.start(context, Membership.TIER_STANDARD, Membership.BILLING_YEARLY)
             }
 
-            subscription_premium_btn.setOnClickListener {
-                val dialogFrag = PaymentFragment.newInstance(Membership.TIER_PREMIUM, Membership.BILLING_YEARLY)
-                dialogFrag.setTargetFragment(this, REQUEST_PAY)
-                dialogFrag.show(fragmentManager, "DialogPayment")
-                mDialog = dialogFrag
+            subscription_premium_year.setOnClickListener {
+
+                PaymentActivity.start(context, Membership.TIER_PREMIUM, Membership.BILLING_YEARLY)
             }
         }
     }
@@ -141,102 +136,11 @@ class MembershipFragment : Fragment(), AnkoLogger {
             return
         }
 
-        if (requestCode == REQUEST_PAY) {
-            val memberTier = data?.getStringExtra(PaymentFragment.ARG_MEMBERSHIP_TIER)
-            val billingCycle = data?.getStringExtra(PaymentFragment.ARG_BILLING_CYCLE)
-            val paymentMethod = data?.getIntExtra(PaymentFragment.EXTRA_PAYMENT_METHOD, 0)
-
-            if (memberTier == null || billingCycle == null || paymentMethod == null) {
-                return
-            }
-
-            when (paymentMethod) {
-                Membership.PAYMENT_METHOD_WX -> {
-                    val supportedApi = wxApi?.wxAppSupportAPI
-                    if (supportedApi != null) {
-                        val isPaySupported = supportedApi >= Build.PAY_SUPPORTED_SDK_INT
-                        toast("WX pay supported: $isPaySupported")
-                    }
-
-                    launch(UI) {
-                        val prepayOrder = try {
-                            user?.wxPrepayOrderAsync(memberTier, billingCycle)?.await()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            toast("Network error")
-                            return@launch
-                        }
-
-                        if (prepayOrder == null) {
-                            toast("Cannot create order for wechat")
-                            return@launch
-                        }
-
-                        info("Prepay order: $prepayOrder")
-
-                        val req = PayReq()
-                        req.appId = prepayOrder.appid
-                        req.partnerId = prepayOrder.partnerid
-                        req.prepayId = prepayOrder.prepayid
-                        req.nonceStr = prepayOrder.noncestr
-                        req.timeStamp = prepayOrder.timestamp
-                        req.packageValue = prepayOrder.`package`
-                        req.sign = prepayOrder.sign
-
-                        bg {
-                            wxApi?.sendReq(req)
-                        }
-                    }
-                }
-
-                Membership.PAYMENT_METHOD_ALI -> {
-                    launch(UI) {
-                        mListener?.onProgress(true)
-                        toast("创建订单...")
-                        val aliOrder = try {
-                            user?.alipayOrderAsync(memberTier, billingCycle)?.await()
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            info("$e")
-                            return@launch
-                        } finally {
-                            mListener?.onProgress(false)
-                        }
-
-                        info("Alipay order: $aliOrder")
-
-                        val payJob = bg {
-                            val alipay = PayTask(activity)
-                            val result = alipay.payV2(aliOrder?.order, true)
-
-                            result
-                        }
-
-                        try {
-                            val result = payJob.await()
-
-                            info("Alipay result: $result")
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                            toast("$e")
-                        }
-                    }
-                }
-
-                Membership.PAYMENT_METHOD_STRIPE -> {
-                    toast("Stripe payment is not implemented yet")
-                }
-                else -> {
-                    toast("Unknown payment method")
-                }
-            }
-        }
     }
 
     override fun onDetach() {
         super.onDetach()
         mListener = null
-        mDialog = null
     }
 
     companion object {
