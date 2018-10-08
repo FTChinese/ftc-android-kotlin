@@ -1,5 +1,6 @@
 package com.ft.ftchinese.user
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
@@ -161,6 +162,10 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             payJob.await()
 
             showProgress(false)
+
+            setResult(Activity.RESULT_OK)
+
+            finish()
         }
     }
 
@@ -191,6 +196,11 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                 val result = payJob.await()
 
                 info("Alipay result: $result")
+
+                setResult(Activity.RESULT_OK)
+
+                finish()
+
             } catch (e: Exception) {
                 e.printStackTrace()
                 toast("$e")
@@ -222,6 +232,14 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             intent.putExtra(EXTRA_MEMBER_TIER, memberTier)
             intent.putExtra(EXTRA_BILLING_CYCLE, billingCycle)
             context?.startActivity(intent)
+        }
+
+        fun startForResult(activity: Activity?, requestCode: Int, memberTier: String, billingCycle: String) {
+            val intent = Intent(activity, PaymentActivity::class.java)
+            intent.putExtra(EXTRA_MEMBER_TIER, memberTier)
+            intent.putExtra(EXTRA_BILLING_CYCLE, billingCycle)
+
+            activity?.startActivityForResult(intent, requestCode)
         }
     }
 }

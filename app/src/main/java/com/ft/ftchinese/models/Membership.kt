@@ -24,8 +24,9 @@ data class Membership(
 
     val tierResId: Int
         get() = when(tier) {
+            TIER_STANDARD -> R.string.member_type_standard
             TIER_PREMIUM -> R.string.member_type_premium
-            else -> R.string.member_type_standard
+            else -> R.string.member_type_free
         }
 
     val priceResId: Int
