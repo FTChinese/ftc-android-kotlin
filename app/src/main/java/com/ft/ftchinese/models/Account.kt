@@ -40,6 +40,6 @@ data class Account(
     }
 
     fun createAsync(): Deferred<User> = async {
-        send(NextApi.NEW_ACCOUNT)
+        send(NextApi.SIGN_UP)
     }
 }

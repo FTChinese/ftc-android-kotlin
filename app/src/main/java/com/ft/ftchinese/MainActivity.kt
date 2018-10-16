@@ -182,6 +182,8 @@ class MainActivity : AppCompatActivity(),
         setTheme(R.style.Origami)
         setContentView(R.layout.activity_main)
 
+        // Register Wechat id
+        WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false).registerApp(BuildConfig.WECAHT_APP_ID)
 
         // https://developer.android.com/training/system-ui/immersive
 //        hideSystemUI()

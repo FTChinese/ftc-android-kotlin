@@ -2,9 +2,9 @@ package com.ft.ftchinese.util
 
 class NextApi {
     companion object {
-        private const val BASE = "https://lacerta.serveo.net"
+        private const val BASE = "http://api.ftchinese.com/v1/"
         const val LOGIN = "$BASE/users/auth"
-        const val NEW_ACCOUNT = "$BASE/users/new"
+        const val SIGN_UP = "$BASE/users/new"
         const val PASSWORD_RESET = "$BASE/users/password-reset/letter"
         const val ACCOUNT = "$BASE/user/account"
         const val PROFILE = "$BASE/user/profile"

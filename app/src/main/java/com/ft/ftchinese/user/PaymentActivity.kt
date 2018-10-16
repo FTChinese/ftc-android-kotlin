@@ -19,12 +19,12 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_payment.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
 class PaymentActivity : AppCompatActivity(), AnkoLogger {
@@ -34,6 +34,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
     private var mPriceText: String? = null
     private var wxApi: IWXAPI? = null
     private var user: User? = null
+    private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,6 +100,8 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             return
         }
 
+        toast("获取订单中...")
+
         when (mPaymentMethod) {
             Membership.PAYMENT_METHOD_ALI -> {
                 aliPay()
@@ -123,7 +126,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         }
 
         showProgress(true)
-        launch(UI) {
+        job = launch(UI) {
 
             val prepayOrder = try {
                 user?.wxPrepayOrderAsync(mMembership)?.await()
@@ -171,7 +174,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
     private fun aliPay() {
         showProgress(true)
-        launch(UI) {
+        job = launch(UI) {
             val aliOrder = try {
                 user?.alipayOrderAsync(mMembership)?.await()
             } catch (e: Exception) {
@@ -219,10 +222,19 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
     private fun showProgress(show: Boolean) {
         if (show) {
             progress_bar.visibility = View.VISIBLE
+            check_out.isEnabled = true
         } else {
             progress_bar.visibility = View.GONE
+            check_out.isEnabled = true
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        job?.cancel()
+    }
+
     companion object {
         private const val EXTRA_MEMBER_TIER = "member_tier"
         private const val EXTRA_BILLING_CYCLE = "billing_cycle"
