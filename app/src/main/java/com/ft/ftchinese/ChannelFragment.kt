@@ -142,6 +142,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         web_view.apply {
 
+            // Interact with JS.
             // See Page/Layouts/Page/SuperDataViewController.swift#viewDidLoad() how iOS inject js to web view.
             addJavascriptInterface(WebAppInterface(), "Android")
             // Set WebViewClient to handle various links
@@ -291,6 +292,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         }
     }
 
+    // Controls access to restricted content.
     inner class WebAppInterface : AnkoLogger {
         /**
          * Method injected to WebView to receive a list of articles in a mTabMetadata page upon finished loading.
@@ -356,32 +358,32 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
              * User clicked an article that requires membership.
              * If user if not logged in, or user already logged in but membership is free
              */
-//            if (channelItem.isMembershipRequired) {
-//                val sessionManager = try {
-//                    val ctx = requireContext()
-//                    SessionManager.getInstance(ctx)
-//                } catch (e: Exception) {
-//                    null
-//                }
-//
-//                if (sessionManager == null) {
-//                    toast(R.string.prompt_member_restricted)
-//                    MembershipActivity.start(context)
-//                    return
-//                }
-//
-//                /**
-//                 * If current user is not a paid member, or the membership is expired
-//                 */
-//                if (!sessionManager.isPaidMember() || sessionManager.isMembershipExpired()) {
-//                    toast(R.string.prompt_member_restricted)
-//                    MembershipActivity.start(context)
-//                    return
-//                }
-//
-//                startReading(channelItem)
-//                return
-//            }
+            if (channelItem.isMembershipRequired) {
+                val sessionManager = try {
+                    val ctx = requireContext()
+                    SessionManager.getInstance(ctx)
+                } catch (e: Exception) {
+                    null
+                }
+
+                if (sessionManager == null) {
+                    toast(R.string.prompt_member_restricted)
+                    MembershipActivity.start(context)
+                    return
+                }
+
+                /**
+                 * If current user is not a paid member, or the membership is expired
+                 */
+                if (!sessionManager.isPaidMember() || sessionManager.isMembershipExpired()) {
+                    toast(R.string.prompt_member_restricted)
+                    MembershipActivity.start(context)
+                    return
+                }
+
+                startReading(channelItem)
+                return
+            }
 
             startReading(channelItem)
 
