@@ -201,7 +201,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
             val payJob = async {
                 val alipay = PayTask(this@PaymentActivity)
-                val result = alipay.payV2(aliOrder?.aliOrder, true)
+                val result = alipay.payV2(aliOrder?.param, true)
 
                 result
             }
