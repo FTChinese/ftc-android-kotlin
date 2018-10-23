@@ -19,9 +19,10 @@ class NextApi {
 
 class SubscribeApi {
     companion object {
-//        private const val BASE = "http://www.ftacademy.cn/api/v1"
-        private const val BASE = "https://lacerta.serveo.net"
-        const val WX_PREPAY_ORDER = "$BASE/place-order/tenpay"
-        const val ALIPAY_ORDER = "$BASE/place-order/alipay"
+        private const val BASE = "http://www.ftacademy.cn/api/v1"
+        const val WX_UNIFIED_ORDER = "$BASE/wxpay/unified-order"
+        const val WX_QUERY_ORDER = "$BASE/wxpay/order"
+        const val ALI_ORDER = "$BASE/alipay/app-order"
+        const val ALI_VERIFY_APP_PAY = "$BASE/verify/app-pay"
     }
 }
