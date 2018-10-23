@@ -129,16 +129,19 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         job = launch(UI) {
 
             val prepayOrder = try {
+                // Request server to create order
                 user?.wxPrepayOrderAsync(mMembership)?.await()
+
             } catch (e: Exception) {
                 e.printStackTrace()
-                toast("Network error")
+                toast(e.toString())
 
                 showProgress(false)
 
                 return@launch
             }
 
+            // If prepayOrder is empty
             if (prepayOrder == null) {
                 toast("Cannot create order for wechat")
 
@@ -147,7 +150,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                 return@launch
             }
 
-            info("Prepay order: $prepayOrder")
+            toast("Prepay order: ${prepayOrder.ftcOrderId}, ${prepayOrder.prepayid}")
 
             val req = PayReq()
             req.appId = prepayOrder.appid
@@ -158,13 +161,21 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             req.packageValue = prepayOrder.`package`
             req.sign = prepayOrder.sign
 
-            val payJob = async {
-                wxApi?.sendReq(req)
-            }
+            toast("Starting Wechat...")
 
-            payJob.await()
+//            val payJob = async {
+//                wxApi?.sendReq(req)
+//            }
+//
+//            val result = payJob.await()
+
+            wxApi?.registerApp(req.appId)
+            val result = wxApi?.sendReq(req)
 
             showProgress(false)
+
+            toast("Wx pay result: $result")
+            info("Call sendReq result: $result")
 
             setResult(Activity.RESULT_OK)
 
@@ -190,7 +201,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
             val payJob = async {
                 val alipay = PayTask(this@PaymentActivity)
-                val result = alipay.payV2(aliOrder?.order, true)
+                val result = alipay.payV2(aliOrder?.aliOrder, true)
 
                 result
             }

@@ -328,13 +328,13 @@ internal data class AccountItem(
                     AccountItem(label = "您的邮箱尚未验证，为保障您的账号安全，请及时验证邮箱。我们已经给您的登录邮箱发送了验证邮件，点击邮件中的链接即可。", value = "重新发送验证邮件", viewType = VIEW_TYPE_TEXT),
                     AccountItem(label = "账号", viewType = VIEW_TYPE_SEPARATOR),
                     AccountItem(label = "邮箱", value = user?.email, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_EMAIL),
-                    AccountItem(label = "用户名", value = user?.name, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_USER_NAME),
+                    AccountItem(label = "用户名", value = user?.userName, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_USER_NAME),
                     AccountItem(label = "密码", value = "修改密码", viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_PASSWORD),
                     AccountItem(label = "账号绑定", viewType = VIEW_TYPE_SEPARATOR),
                     AccountItem(label = "微信", value = "尚未绑定", viewType = VIEW_TYPE_ITEM)
             )
 
-            if (user?.verified == true) {
+            if (user?.isVerified == true) {
                 items.removeAt(0)
             }
             return items

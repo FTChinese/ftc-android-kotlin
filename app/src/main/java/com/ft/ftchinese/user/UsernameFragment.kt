@@ -68,7 +68,7 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        current_name.text = if (mUser?.name.isNullOrBlank()) "未设置" else mUser?.name
+        current_name.text = if (mUser?.userName.isNullOrBlank()) "未设置" else mUser?.userName
 
         name_save_button.setOnClickListener {
             attemptSave()
@@ -84,7 +84,7 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
         if (userNameStr.isBlank()) {
             user_name.error = getString(R.string.error_field_required)
             cancel = true
-        } else if (userNameStr == mUser?.name) {
+        } else if (userNameStr == mUser?.userName) {
             user_name.error = getString(R.string.error_name_unchanged)
             cancel = true
         }

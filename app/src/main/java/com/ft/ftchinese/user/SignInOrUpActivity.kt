@@ -21,10 +21,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.util.generateNonce
+import com.tencent.mm.opensdk.modelbase.BaseReq
+import com.tencent.mm.opensdk.modelbase.BaseResp
+import com.tencent.mm.opensdk.modelmsg.SendAuth
+import com.tencent.mm.opensdk.openapi.IWXAPI
+import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
+import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.fragment_sign_in_or_up.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -57,10 +65,12 @@ class SignInOrUpActivity : SingleFragmentActivity() {
     }
 
 }
-internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, AnkoLogger {
+internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, AnkoLogger, IWXAPIEventHandler {
 
     private var job: Job? = null
     private var listener: OnFragmentInteractionListener? = null
+    private var wxApi: IWXAPI? = null
+
     private var isInProgress: Boolean
         get() = !email_sign_in_button.isEnabled
         set(value) {
@@ -89,6 +99,8 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        wxApi = WXAPIFactory.createWXAPI(context, BuildConfig.WECAHT_APP_ID)
 
         usedFor = arguments?.getInt(ARG_FRAGMENT_USAGE)
     }
@@ -144,6 +156,42 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         sign_in.setOnClickListener {
             SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
         }
+
+        wechat_sign_in_button.setOnClickListener {
+
+            // SendAuth is an empty class. Its only purpose is to wrap tow inner class: Req and Resp.
+            val req = SendAuth.Req()
+            // scope max length is 1024. Not documented.
+            req.scope = "snsapi_userinfo"
+            // state max length is 1024. It is not documented in official API.
+            req.state = generateNonce(5)
+            wxApi?.sendReq(req)
+        }
+    }
+
+    override fun onResp(resp: BaseResp?) {
+        info("Wx login response type: ${resp?.type}, error code: ${resp?.errCode}")
+
+        when (resp?.errCode) {
+            BaseResp.ErrCode.ERR_OK -> {
+                info("User authorized")
+
+                if (resp is SendAuth.Resp) {
+                    info("code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
+                }
+            }
+
+            BaseResp.ErrCode.ERR_USER_CANCEL -> {
+                info("User canceled")
+            }
+            BaseResp.ErrCode.ERR_AUTH_DENIED -> {
+                info("User denied")
+            }
+        }
+    }
+
+    override fun onReq(req: BaseReq?) {
+
     }
 
     private fun populateAutoComplete() {
@@ -285,6 +333,7 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
             }
         }
     }
+
 
     override fun onDestroy() {
         super.onDestroy()

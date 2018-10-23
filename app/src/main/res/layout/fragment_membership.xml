@@ -29,24 +29,24 @@
                 app:layout_constraintTop_toTopOf="parent"/>
 
             <TextView
-                android:id="@+id/member_label"
+                android:id="@+id/tier_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/label_member_type"
+                android:text="@string/label_member_tier"
                 style="@style/FTCText"
-                app:layout_constraintEnd_toStartOf="@id/member_value"
+                app:layout_constraintEnd_toStartOf="@id/tier_value"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/membership_title"/>
 
             <TextView
-                android:id="@+id/member_value"
+                android:id="@+id/tier_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/FTCText"
-                app:layout_constraintBaseline_toBaselineOf="@+id/member_label"
+                app:layout_constraintBaseline_toBaselineOf="@+id/tier_label"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/member_label" />
+                app:layout_constraintStart_toEndOf="@+id/tier_label" />
 
             <TextView
                 android:id="@+id/duration_label"
@@ -58,7 +58,7 @@
                 app:layout_constraintEnd_toStartOf="@id/duration_value"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/member_label" />
+                app:layout_constraintTop_toBottomOf="@+id/tier_label" />
 
             <TextView
                 android:id="@+id/duration_value"
@@ -66,7 +66,7 @@
                 android:layout_height="wrap_content"
                 style="@style/FTCText"
                 app:layout_constraintBaseline_toBaselineOf="@id/duration_label"
-                app:layout_constraintEnd_toEndOf="@+id/member_value"
+                app:layout_constraintEnd_toEndOf="@+id/tier_value"
                 app:layout_constraintStart_toEndOf="@id/duration_label" />
 
 
@@ -117,7 +117,7 @@
                 style="@style/OrigamiButton.Inline.NoPadding"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/action_login" />
+                android:text="@string/action_login"/>
         </LinearLayout>
 
         <android.support.v7.widget.CardView
@@ -137,7 +137,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/bottom_border"
                     android:layout_marginBottom="8dp"
-                    android:text="@string/member_type_standard"
+                    android:text="@string/member_tier_standard"
                     style="@style/FTCTitle" />
 
                 <TextView
@@ -156,19 +156,24 @@
                     android:layout_gravity="center_horizontal"
                     android:layout_marginBottom="8dp"
                     android:layout_marginTop="8dp"
-                    android:text="@string/paywall_buy_now" />
+                    android:text="@string/price_standard_annual"/>
 
-                <TextView
+                <Button
+                    android:id="@+id/subscribe_standard_month"
+                    style="@style/OrigamiButton.Secondary.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/price_standard_annual" />
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/price_standard_month"/>
+
             </LinearLayout>
 
         </android.support.v7.widget.CardView>
 
         <android.support.v7.widget.CardView
-            android:id="@+id/subscribe_premium_year"
+            android:id="@+id/subscribe_premium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp">
@@ -185,7 +190,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:background="@drawable/bottom_border"
-                    android:text="@string/member_type_premium"
+                    android:text="@string/member_tier_premium"
                     style="@style/FTCTitle" />
 
 
@@ -204,20 +209,25 @@
                     android:text="@string/paywall_small_print" />
 
                 <Button
-                    android:id="@+id/subscription_premium_year"
+                    android:id="@+id/subscribe_premium_year"
                     style="@style/OrigamiButton.Primary.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginBottom="8dp"
                     android:layout_marginTop="8dp"
-                    android:text="@string/paywall_buy_now" />
+                    android:text="@string/price_premium_annual"/>
 
-                <TextView
+                <Button
+                    android:id="@+id/subscribe_premium_month"
+                    style="@style/OrigamiButton.Secondary.Small"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="@string/price_premium_annual" />
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/price_premium_month"/>
+
             </LinearLayout>
 
         </android.support.v7.widget.CardView>

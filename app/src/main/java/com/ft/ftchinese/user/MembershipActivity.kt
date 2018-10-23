@@ -89,44 +89,75 @@ class MembershipFragment : Fragment(), AnkoLogger {
                 SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
             }
 
+            // All payment button should jump to login
             subscribe_standard_year.setOnClickListener {
                 SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
             }
 
-            subscription_premium_year.setOnClickListener {
+            subscribe_standard_month.setOnClickListener {
+                SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
+            }
+
+            subscribe_premium_year.setOnClickListener {
+                SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
+            }
+
+            subscribe_premium_month.setOnClickListener {
                 SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
             }
         } else {
-            // User is logged in
-            // Show mUser's membership information
-
-
             // Hide login button
             paywall_login_container.visibility = View.GONE
 
-            // Launch payment activity
-            subscribe_standard_year.setOnClickListener {
+            // User is logged in
+            // Show mUser's membership information
+            updateUI()
 
+
+            // Launch PaymentActivity
+            subscribe_standard_year.setOnClickListener {
                 PaymentActivity.startForResult(activity, RequestCode.PAYMENT, Membership.TIER_STANDARD, Membership.BILLING_YEARLY)
             }
 
-            subscription_premium_year.setOnClickListener {
+            subscribe_standard_month.setOnClickListener {
+                PaymentActivity.startForResult(activity, RequestCode.PAYMENT, Membership.TIER_STANDARD, Membership.BILLING_MONTHLY)
+            }
 
+            subscribe_premium_year.setOnClickListener {
                 PaymentActivity.startForResult(activity, RequestCode.PAYMENT, Membership.TIER_PREMIUM, Membership.BILLING_YEARLY)
+            }
+
+            subscribe_premium_month.setOnClickListener {
+                PaymentActivity.startForResult(activity, RequestCode.PAYMENT, Membership.TIER_PREMIUM, Membership.BILLING_MONTHLY)
             }
         }
     }
 
+
     private fun updateUI() {
-        member_value.text = when (mUser?.membership?.tier) {
-            Membership.TIER_FREE -> getString(R.string.member_type_free)
-            Membership.TIER_STANDARD -> getString(R.string.member_type_standard)
-            Membership.TIER_PREMIUM -> getString(R.string.member_type_premium)
+
+        if (mUser?.isVip == true) {
+            tier_value.text = getString(R.string.member_tier_vip)
+            duration_value.text = getString(R.string.vip_duration)
+
+            return
+        }
+
+        val cycleText = when(mUser?.membership?.billingCycle) {
+            Membership.BILLING_YEARLY -> getString(R.string.billing_cycle_year)
+            Membership.BILLING_MONTHLY -> getString(R.string.billing_cycle_month)
+            else -> ""
+        }
+
+        tier_value.text = when (mUser?.membership?.tier) {
+            Membership.TIER_FREE -> getString(R.string.member_tier_free)
+            Membership.TIER_STANDARD -> getString(R.string.member_tier_standard) + "/" + cycleText
+            Membership.TIER_PREMIUM -> getString(R.string.member_tier_premium) + "/" + cycleText
             else -> null
         }
 
         // Show expiration date
-        duration_value.text = mUser?.membership?.localizedExpireDate
+        duration_value.text = mUser?.membership?.expireDate
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

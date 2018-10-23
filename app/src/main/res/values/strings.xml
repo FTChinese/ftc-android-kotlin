@@ -32,14 +32,21 @@
     <string name="nav_header_desc">导航栏头部</string>
 
     <string name="price_standard_annual">¥198.00/年</string>
-    <string name="price_standard_month">¥18/月</string>
+    <string name="price_standard_month">¥28.00/月</string>
     <string name="price_premium_annual">¥1,998.00/年</string>
-    <string name="price_premium_month">¥180/月</string>
+    <string name="price_premium_month">¥280.00/月</string>
     <string name="membership_title">我的订阅</string>
-    <string name="label_member_type">会员类型</string>
-    <string name="member_type_free">尚未成为会员</string>
-    <string name="member_type_standard">标准会员</string>
-    <string name="member_type_premium">高级会员</string>
+    <string name="label_member_tier">会员类型</string>
+
+    <string name="member_tier_free">尚未成为会员</string>
+    <string name="member_tier_standard">标准会员</string>
+    <string name="member_tier_premium">高级会员</string>
+    <string name="member_tier_vip">超级会员</string>
+
+    <string name="billing_cycle_year">年</string>
+    <string name="billing_cycle_month">月</string>
+    <string name="vip_duration">无限期</string>
+
     <string name="label_member_duration">会员期限</string>
     <string name="label_member_price">支付金额</string>
     <string name="paywall_title">购买会员服务，阅读FT独家内容</string>

@@ -43,7 +43,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="@string/label_member_type"
+                    android:text="@string/label_member_tier"
                     app:layout_constraintEnd_toStartOf="@+id/member_tier_tv"
                     app:layout_constraintHorizontal_chainStyle="spread_inside"
                     app:layout_constraintStart_toStartOf="parent"
