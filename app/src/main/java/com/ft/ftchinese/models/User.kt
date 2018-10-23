@@ -7,7 +7,6 @@ import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
-import java.lang.reflect.Member
 
 const val PREFERENCE_NAME_USER = "user"
 
@@ -19,11 +18,11 @@ const val PREFERENCE_NAME_USER = "user"
  */
 data class User(
         val id: String,
-        val name: String,
+        val userName: String,
         val email: String,
         val avatar: String,
         val isVip: Boolean,
-        val verified: Boolean,
+        val isVerified: Boolean,
         val membership: Membership
 ) {
 
@@ -88,7 +87,7 @@ data class User(
         if (membership == null) {
             return@async null
         }
-        val response = Fetch().post("${SubscribeApi.WX_PREPAY_ORDER}/${membership.tier}/${membership.billingCycle}")
+        val response = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${membership.tier}/${membership.billingCycle}")
                 .setUserId(this@User.id)
                 .setClient()
                 .body(null)
@@ -102,7 +101,7 @@ data class User(
         if (membership == null) {
             return@async null
         }
-        val response = Fetch().post("${SubscribeApi.ALIPAY_ORDER}/${membership.tier}/${membership.billingCycle}")
+        val response = Fetch().post("${SubscribeApi.ALI_ORDER}/${membership.tier}/${membership.billingCycle}")
                 .setUserId(this@User.id)
                 .setClient()
                 .body(null)
