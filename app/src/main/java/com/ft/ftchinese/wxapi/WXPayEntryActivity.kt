@@ -22,7 +22,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.pay_result)
+        setContentView(R.layout.activity_wx_pay_result)
 
         setSupportActionBar(toolbar)
 

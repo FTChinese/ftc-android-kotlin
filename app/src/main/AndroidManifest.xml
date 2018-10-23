@@ -25,7 +25,25 @@
             android:exported="true"
             android:label="会员订阅支付"
             android:launchMode="singleTop"
-            android:parentActivityName=".user.MembershipActivity" />
+            android:parentActivityName=".user.MembershipActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="wxacddf1c20516eb69"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".wxapi.WXEntryActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="sdksample"/>
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation"
