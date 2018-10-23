@@ -597,7 +597,7 @@ class MainActivity : AppCompatActivity(),
         val headerTitle = drawer_nav.getHeaderView(0).findViewById<TextView>(R.id.nav_header_title)
 
         if (isLoggedIn) {
-            headerTitle.text = user?.name ?: user?.email
+            headerTitle.text = user?.userName ?: user?.email
         } else {
             headerTitle.text = getString(R.string.nav_not_logged_in)
         }

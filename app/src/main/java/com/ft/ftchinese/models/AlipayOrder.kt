@@ -1,5 +1,6 @@
 package com.ft.ftchinese.models
 
 data class AlipayOrder(
-        val order: String
+        val ftcOrderId: String,
+        val param: String
 )
