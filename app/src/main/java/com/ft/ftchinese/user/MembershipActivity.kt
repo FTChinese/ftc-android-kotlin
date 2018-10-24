@@ -102,9 +102,6 @@ class MembershipFragment : Fragment(), AnkoLogger {
                 SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
             }
 
-            subscribe_premium_month.setOnClickListener {
-                SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
-            }
         } else {
             // Hide login button
             paywall_login_container.visibility = View.GONE
@@ -125,10 +122,6 @@ class MembershipFragment : Fragment(), AnkoLogger {
 
             subscribe_premium_year.setOnClickListener {
                 PaymentActivity.startForResult(activity, RequestCode.PAYMENT, Membership.TIER_PREMIUM, Membership.BILLING_YEARLY)
-            }
-
-            subscribe_premium_month.setOnClickListener {
-                PaymentActivity.startForResult(activity, RequestCode.PAYMENT, Membership.TIER_PREMIUM, Membership.BILLING_MONTHLY)
             }
         }
     }

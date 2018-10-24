@@ -31,10 +31,7 @@ data class Membership(
     // Use after clicked to buy a membership.
     val priceResId: Int
         get() = when(tier) {
-            TIER_PREMIUM -> when (billingCycle) {
-                BILLING_MONTHLY -> R.string.price_premium_month
-                else -> R.string.price_premium_annual
-            }
+            TIER_PREMIUM -> R.string.price_premium_month
             else -> when (billingCycle) {
                 BILLING_MONTHLY -> R.string.price_standard_month
                 else -> R.string.price_standard_annual

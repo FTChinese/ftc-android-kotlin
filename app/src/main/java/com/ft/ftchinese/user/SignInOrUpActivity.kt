@@ -23,15 +23,12 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.Account
+import com.ft.ftchinese.models.Login
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.generateNonce
-import com.tencent.mm.opensdk.modelbase.BaseReq
-import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
-import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.fragment_sign_in_or_up.*
 import kotlinx.coroutines.experimental.Job
@@ -65,7 +62,7 @@ class SignInOrUpActivity : SingleFragmentActivity() {
     }
 
 }
-internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, AnkoLogger, IWXAPIEventHandler {
+internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, AnkoLogger {
 
     private var job: Job? = null
     private var listener: OnFragmentInteractionListener? = null
@@ -157,6 +154,7 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
             SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
         }
 
+        // Wechat login response is handled in `wxapi.WXEntryActivity`
         wechat_sign_in_button.setOnClickListener {
 
             // SendAuth is an empty class. Its only purpose is to wrap tow inner class: Req and Resp.
@@ -167,31 +165,6 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
             req.state = generateNonce(5)
             wxApi?.sendReq(req)
         }
-    }
-
-    override fun onResp(resp: BaseResp?) {
-        info("Wx login response type: ${resp?.type}, error code: ${resp?.errCode}")
-
-        when (resp?.errCode) {
-            BaseResp.ErrCode.ERR_OK -> {
-                info("User authorized")
-
-                if (resp is SendAuth.Resp) {
-                    info("code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
-                }
-            }
-
-            BaseResp.ErrCode.ERR_USER_CANCEL -> {
-                info("User canceled")
-            }
-            BaseResp.ErrCode.ERR_AUTH_DENIED -> {
-                info("User denied")
-            }
-        }
-    }
-
-    override fun onReq(req: BaseReq?) {
-
     }
 
     private fun populateAutoComplete() {
@@ -273,7 +246,7 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         isInputAllowed = false
 
         job = launch(UI) {
-            val account = Account(email = email, password = password)
+            val account = Login(email = email, password = password)
             try {
 
                 val user = when (usedFor) {

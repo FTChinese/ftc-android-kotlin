@@ -10,7 +10,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.io.IOException
 
-data class Account(
+data class Login(
         val email: String,
         val password: String
 ) : AnkoLogger {
@@ -26,7 +26,7 @@ data class Account(
         val response = Fetch().post(url)
                 .setClient()
                 .noCache()
-                .body(this@Account)
+                .body(this@Login)
                 .end()
 
         val body = response.body()?.string()
