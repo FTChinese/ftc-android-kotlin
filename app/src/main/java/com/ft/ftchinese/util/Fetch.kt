@@ -90,6 +90,8 @@ class Fetch : AnkoLogger {
     }
 
     /**
+     * Send the request and get response body as a string.
+     * No JSON parsing is performed.
      * @return String if request successfully, or null otherwise.
      * @throws IllegalStateException If url is empty
      * @throws IOException If request cannot be executed, or response body cannot be read

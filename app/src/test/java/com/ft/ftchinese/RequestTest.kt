@@ -12,7 +12,7 @@ import org.junit.Test
 class RequestTest {
     @Test
     fun loginTest() {
-        val account = Account(email = "weiguo.ni@ftchinese.com", password = "12345678")
+        val account = Login(email = "weiguo.ni@ftchinese.com", password = "12345678")
 
         val response = Fetch()
                 .post("http://localhost:8000/users/auth")
@@ -35,7 +35,7 @@ class RequestTest {
         val faker = Faker()
 
         val email = faker.internet().emailAddress()
-        val account = Account(email = email, password = "12345678")
+        val account = Login(email = email, password = "12345678")
 
         val response = Fetch()
                 .post("http://localhost:8000/users/new")

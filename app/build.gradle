@@ -24,6 +24,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "WECAHT_APP_ID", props.getProperty("wechat.appId")
+        buildConfigField "String", "WECHAT_SECRET", props.getProperty("wechat.secret")
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++11"
