@@ -14,6 +14,6 @@ data class ErrorDetail(
         const val CODE_MISSING = "missing"
         const val CODE_MISSING_FIELD = "missing_field"
         const val CODE_INVALID = "invalid"
-        const val ALREADY_EXISTS = "already_exists"
+        const val CODE_ALREADY_EXISTS = "already_exists"
     }
 }
