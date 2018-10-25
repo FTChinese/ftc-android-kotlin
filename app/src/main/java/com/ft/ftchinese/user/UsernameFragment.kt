@@ -8,7 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
-import com.ft.ftchinese.models.User
+import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.UserNameUpdate
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.fragment_username.*
@@ -21,7 +21,7 @@ import org.jetbrains.anko.support.v4.toast
 
 internal class UsernameFragment : Fragment(), AnkoLogger {
 
-    private var mUser: User? = null
+    private var mUser: Account? = null
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
 
@@ -52,7 +52,7 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
         arguments?.let {
             val userData = it.getString(ARG_USER_DATA)
             mUser = try {
-                gson.fromJson<User>(userData, User::class.java)
+                gson.fromJson<Account>(userData, Account::class.java)
             } catch (e: Exception) {
                 null
             }
@@ -109,7 +109,7 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
             val userNameUpdate = UserNameUpdate(userName)
 
             try {
-                info("Start updating mUser name")
+                info("Start updating mUser userName")
 
                 val userUpdated = userNameUpdate.updateAsync(uuid).await()
 
@@ -153,7 +153,7 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
 
     companion object {
         private const val ARG_USER_DATA = "user_data"
-        fun newInstance(user: User?) = UsernameFragment().apply {
+        fun newInstance(user: Account?) = UsernameFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_USER_DATA, gson.toJson(user))
             }

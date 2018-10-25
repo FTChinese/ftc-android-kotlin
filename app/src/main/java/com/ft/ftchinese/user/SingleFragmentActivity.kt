@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.User
+import com.ft.ftchinese.models.Account
 import kotlinx.android.synthetic.main.activity_fragment.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 
@@ -26,7 +26,7 @@ internal interface OnFragmentInteractionListener {
     fun onProgress(show: Boolean)
 
     // Update user data
-    fun onUserSession(user: User)
+    fun onUserSession(user: Account)
 }
 
 abstract class SingleFragmentActivity : AppCompatActivity(), OnFragmentInteractionListener {
@@ -62,7 +62,7 @@ abstract class SingleFragmentActivity : AppCompatActivity(), OnFragmentInteracti
         }
     }
 
-    override fun onUserSession(user: User) {
+    override fun onUserSession(user: Account) {
         val sessionManager = SessionManager.getInstance(applicationContext)
         sessionManager.saveUser(user)
     }
