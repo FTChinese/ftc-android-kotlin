@@ -191,6 +191,7 @@ class Fetch : AnkoLogger {
          */
         val errResp = gson.fromJson<ErrorResponse>(body, ErrorResponse::class.java)
 
+        // Add response status to ErrorResponse, otherwise HTTP response status is no accessible outside the function.
         errResp.statusCode = response.code()
 
         throw errResp
