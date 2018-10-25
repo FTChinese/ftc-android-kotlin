@@ -10,7 +10,7 @@ data class SignUp(
         val email: String,
         val password: String
 ) {
-    fun sendAsync(): Deferred<User> = async {
+    fun sendAsync(): Deferred<Account> = async {
         val response = Fetch().post((NextApi.SIGN_UP))
                 .setClient()
                 .noCache()
@@ -19,6 +19,6 @@ data class SignUp(
 
         val body = response.body()?.string()
 
-        gson.fromJson<User>(body, User::class.java)
+        gson.fromJson<Account>(body, Account::class.java)
     }
 }
