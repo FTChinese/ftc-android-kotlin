@@ -6,21 +6,20 @@ import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
 
 data class Profile(
-    val id: String,
-    val name: String,
-    val email: String,
-    val avatarUrl: String?,
-    val gender: String?,
-    val familyName: String?,
-    val givenName: String?,
-    val phoneNumber: String?,
-    val mobileNumber: String?,
-    val birthdate: String?,
-    val address: Address,
-    val createdAt: String,
-    val updated: String,
-    val newsletter: Newsletter,
-    val membership: Membership
+        val id: String,
+        val userName: String,
+        val email: String,
+        val avatarUrl: String?,
+        val gender: String?,
+        val familyName: String?,
+        val givenName: String?,
+        val phoneNumber: String?,
+        val mobileNumber: String?,
+        val birthdate: String?,
+        val address: Address,
+        val createdAt: String,
+        val updatedAt: String,
+        val newsletter: Newsletter
 ) {
     /**
      * Save user's profile to shared preferences_profile so that we do not need to hit API every time user open's profile page.
