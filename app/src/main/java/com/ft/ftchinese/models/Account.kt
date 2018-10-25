@@ -18,8 +18,8 @@ const val PREFERENCE_NAME_USER = "user"
  */
 data class Account(
         val id: String,
-        val userName: String,
-        val email: String,
+        var userName: String,
+        var email: String,
         val avatarUrl: String,
         val isVip: Boolean,
         val isVerified: Boolean,
@@ -40,6 +40,44 @@ data class Account(
         val body = response.body()?.string()
 
         gson.fromJson<Account>(body, Account::class.java)
+    }
+
+    fun requestVerificationAsync(): Deferred<Int> = async {
+        val response = Fetch().post(NextApi.REQUEST_VERIFICATION)
+                .noCache()
+                .setUserId(this@Account.id)
+                .body(null)
+                .end()
+
+        response.code()
+    }
+
+    fun wxPrepayOrderAsync(membership: Membership?): Deferred<WxPrepayOrder?> = async {
+        if (membership == null) {
+            return@async null
+        }
+        val response = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${membership.tier}/${membership.billingCycle}")
+                .setUserId(this@Account.id)
+                .setClient()
+                .body(null)
+                .end()
+
+        val body = response.body()?.string()
+        gson.fromJson<WxPrepayOrder>(body, WxPrepayOrder::class.java)
+    }
+
+    fun alipayOrderAsync(membership: Membership?): Deferred<AlipayOrder?> = async {
+        if (membership == null) {
+            return@async null
+        }
+        val response = Fetch().post("${SubscribeApi.ALI_ORDER}/${membership.tier}/${membership.billingCycle}")
+                .setUserId(this@Account.id)
+                .setClient()
+                .body(null)
+                .end()
+
+        val body = response.body()?.string()
+        gson.fromJson<AlipayOrder>(body, AlipayOrder::class.java)
     }
 
     fun starArticle(articleId: String): Deferred<Boolean> = async {
@@ -72,34 +110,6 @@ data class Account(
                 .end()
 
         response.code() == 204
-    }
-
-    fun wxPrepayOrderAsync(membership: Membership?): Deferred<WxPrepayOrder?> = async {
-        if (membership == null) {
-            return@async null
-        }
-        val response = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${membership.tier}/${membership.billingCycle}")
-                .setUserId(this@Account.id)
-                .setClient()
-                .body(null)
-                .end()
-
-        val body = response.body()?.string()
-        gson.fromJson<WxPrepayOrder>(body, WxPrepayOrder::class.java)
-    }
-
-    fun alipayOrderAsync(membership: Membership?): Deferred<AlipayOrder?> = async {
-        if (membership == null) {
-            return@async null
-        }
-        val response = Fetch().post("${SubscribeApi.ALI_ORDER}/${membership.tier}/${membership.billingCycle}")
-                .setUserId(this@Account.id)
-                .setClient()
-                .body(null)
-                .end()
-
-        val body = response.body()?.string()
-        gson.fromJson<AlipayOrder>(body, AlipayOrder::class.java)
     }
 }
 
