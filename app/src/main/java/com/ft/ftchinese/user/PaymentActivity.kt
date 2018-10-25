@@ -12,7 +12,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Membership
 import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.User
+import com.ft.ftchinese.models.Account
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -33,7 +33,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
     private var mPaymentMethod: Int? = null
     private var mPriceText: String? = null
     private var wxApi: IWXAPI? = null
-    private var user: User? = null
+    private var user: Account? = null
     private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {

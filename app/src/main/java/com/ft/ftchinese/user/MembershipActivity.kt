@@ -13,7 +13,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Membership
 import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.User
+import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.util.RequestCode
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -45,7 +45,7 @@ class MembershipActivity : SingleFragmentActivity() {
  */
 class MembershipFragment : Fragment(), AnkoLogger {
     private var mListener: OnFragmentInteractionListener? = null
-    private var mUser: User? = null
+    private var mUser: Account? = null
     private var wxApi: IWXAPI? = null
 
     override fun onAttach(context: Context) {
@@ -81,32 +81,32 @@ class MembershipFragment : Fragment(), AnkoLogger {
         }
         mUser = SessionManager.getInstance(ctx).loadUser()
 
-        // User is not logged in
+        // Account is not logged in
         if (mUser == null) {
             membership_container.visibility = View.GONE
 
             paywall_login_button.setOnClickListener {
-                SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
+                SignInActivity.start(activity)
             }
 
             // All payment button should jump to login
             subscribe_standard_year.setOnClickListener {
-                SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
+                SignInActivity.start(activity)
             }
 
             subscribe_standard_month.setOnClickListener {
-                SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
+                SignInActivity.start(activity)
             }
 
             subscribe_premium_year.setOnClickListener {
-                SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
+                SignInActivity.start(activity)
             }
 
         } else {
             // Hide login button
             paywall_login_container.visibility = View.GONE
 
-            // User is logged in
+            // Account is logged in
             // Show mUser's membership information
             updateUI()
 

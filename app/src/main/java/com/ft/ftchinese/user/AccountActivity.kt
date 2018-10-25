@@ -15,7 +15,7 @@ import android.widget.TextView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.User
+import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
@@ -52,7 +52,7 @@ class AccountActivity : SingleFragmentActivity() {
 
 internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
 
-    private var mUser: User? = null
+    private var mUser: Account? = null
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
     private var mAdapter: Adapter? = null
@@ -108,7 +108,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         arguments?.let {
             val userData = it.getString(ARG_USER_DATA)
             mUser = try {
-                gson.fromJson<User>(userData, User::class.java)
+                gson.fromJson<Account>(userData, Account::class.java)
             } catch (e: Exception) {
                 null
             }
@@ -170,7 +170,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
     companion object {
         private const val ARG_USER_DATA = "user_data"
-        fun newInstance(user: User?) =
+        fun newInstance(user: Account?) =
                 AccountFragment().apply {
                     arguments = Bundle().apply {
                         putString(ARG_USER_DATA, gson.toJson(user))
@@ -323,7 +323,7 @@ internal data class AccountItem(
         const val ID_USER_NAME = 2
         const val ID_PASSWORD = 3
 
-        fun create(user: User?): List<AccountItem> {
+        fun create(user: Account?): List<AccountItem> {
             val items = mutableListOf(
                     AccountItem(label = "您的邮箱尚未验证，为保障您的账号安全，请及时验证邮箱。我们已经给您的登录邮箱发送了验证邮件，点击邮件中的链接即可。", value = "重新发送验证邮件", viewType = VIEW_TYPE_TEXT),
                     AccountItem(label = "账号", viewType = VIEW_TYPE_SEPARATOR),

@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.PasswordUpdate
-import com.ft.ftchinese.models.User
+import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.fragment_password.*
 import kotlinx.coroutines.experimental.Job
@@ -21,7 +21,7 @@ import org.jetbrains.anko.support.v4.toast
 
 internal class PasswordFragment : Fragment(), AnkoLogger {
 
-    private var mUser: User? = null
+    private var mUser: Account? = null
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
 
@@ -51,7 +51,7 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
         arguments?.let {
             val userData = it.getString(ARG_USER_DATA)
             mUser = try {
-                gson.fromJson<User>(userData, User::class.java)
+                gson.fromJson<Account>(userData, Account::class.java)
             } catch (e: Exception) {
                 null
             }
@@ -171,7 +171,7 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
 
     companion object {
         private const val ARG_USER_DATA = "user_data"
-        fun newInstance(user: User?) = PasswordFragment().apply {
+        fun newInstance(user: Account?) = PasswordFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_USER_DATA, gson.toJson(mUser))
             }

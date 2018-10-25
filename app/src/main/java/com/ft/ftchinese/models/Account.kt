@@ -13,33 +13,33 @@ const val PREFERENCE_NAME_USER = "user"
 /**
  * A user's essential data.
  * All fields should be declared as `var` except `id` which should never be changed.
- * When user changes data like email, user name, verified email, purchased subscription, the corresponding fields should be updated and saved to shared preferences.
+ * When user changes data like email, user userName, verified email, purchased subscription, the corresponding fields should be updated and saved to shared preferences.
  * Avoid modifying an instance when user's data changed so that everything is immutable.
  */
-data class User(
+data class Account(
         val id: String,
         val userName: String,
         val email: String,
-        val avatar: String,
+        val avatarUrl: String,
         val isVip: Boolean,
         val isVerified: Boolean,
         val membership: Membership
 ) {
     /**
-     * @return User. Always returns a new one rather than modifying the existing one to make it immutable.
+     * @return Account. Always returns a new one rather than modifying the existing one to make it immutable.
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON
      * See Fetch#exectue for other exceptions
      */
-    fun refreshAsync(): Deferred<User> = async {
+    fun refreshAsync(): Deferred<Account> = async {
 
         val response = Fetch().get(NextApi.ACCOUNT)
                 .noCache()
-                .setUserId(this@User.id)
+                .setUserId(this@Account.id)
                 .end()
 
         val body = response.body()?.string()
 
-        gson.fromJson<User>(body, User::class.java)
+        gson.fromJson<Account>(body, Account::class.java)
     }
 
     fun starArticle(articleId: String): Deferred<Boolean> = async {
@@ -47,7 +47,7 @@ data class User(
         val response = Fetch().put("${NextApi.STARRED}/$articleId")
                 .noCache()
                 .body(null)
-                .setUserId(this@User.id)
+                .setUserId(this@Account.id)
                 .end()
 
         response.code() == 204
@@ -57,7 +57,7 @@ data class User(
 
         val response = Fetch().delete("${NextApi.STARRED}/$articleId")
                 .noCache()
-                .setUserId(this@User.id)
+                .setUserId(this@Account.id)
                 .body(null)
                 .end()
 
@@ -68,7 +68,7 @@ data class User(
 
         val response = Fetch().get("${NextApi.STARRED}/$articleId")
                 .noCache()
-                .setUserId(this@User.id)
+                .setUserId(this@Account.id)
                 .end()
 
         response.code() == 204
@@ -79,7 +79,7 @@ data class User(
             return@async null
         }
         val response = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${membership.tier}/${membership.billingCycle}")
-                .setUserId(this@User.id)
+                .setUserId(this@Account.id)
                 .setClient()
                 .body(null)
                 .end()
@@ -93,7 +93,7 @@ data class User(
             return@async null
         }
         val response = Fetch().post("${SubscribeApi.ALI_ORDER}/${membership.tier}/${membership.billingCycle}")
-                .setUserId(this@User.id)
+                .setUserId(this@Account.id)
                 .setClient()
                 .body(null)
                 .end()
