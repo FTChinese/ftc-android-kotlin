@@ -149,9 +149,9 @@ class MainActivity : AppCompatActivity(),
     }
 
     private val drawerHeaderTitleListener = View.OnClickListener {
-        // If mUser is not logged in, show login.
+        // If user is not logged in, show login.
         if (!SessionManager.getInstance(applicationContext).isLoggedIn()) {
-            SignInOrUpActivity.startForResult(this, RequestCode.SIGN_IN)
+            SignInActivity.start(this)
             return@OnClickListener
         }
 
@@ -504,10 +504,10 @@ class MainActivity : AppCompatActivity(),
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.action_login -> {
-                SignInOrUpActivity.startForResult(this, RequestCode.SIGN_IN)
+                SignInActivity.start(this)
             }
             R.id.action_sign_up -> {
-                SignInOrUpActivity.startForResult(this, RequestCode.SIGN_UP)
+                SignUpActivity.start(this)
             }
             R.id.action_account -> {
                 AccountActivity.start(this)
@@ -584,11 +584,11 @@ class MainActivity : AppCompatActivity(),
      * Update UI depending on user's login/logout state
      */
     private fun updateSessionUI() {
-//        mUser = User.loadFromPref(this)
+//        mUser = Account.loadFromPref(this)
         val user = SessionManager.getInstance(applicationContext).loadUser()
         val isLoggedIn = user != null
 
-        info("User is logged in: $isLoggedIn")
+        info("Account is logged in: $isLoggedIn")
 
         val menu = drawer_nav.menu
         // If seems this is the only way to get the header view.
