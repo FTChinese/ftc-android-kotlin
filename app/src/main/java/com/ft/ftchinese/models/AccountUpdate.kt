@@ -12,15 +12,15 @@ import java.io.IOException
 
 data class EmailUpdate(
         val email: String
-) : AnkoLogger {
+) {
     /**
-     * @return Account instance containing the updated user data.
+     * @return HTTP status code instance containing the updated user data.
      * @throws ErrorResponse If HTTP response status is above 400.
      * @throws IllegalStateException If request url is empty.
      * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON, regardless of if response is successful or not
      */
-    fun updateAsync(uuid: String): Deferred<Account> = async {
+    fun updateAsync(uuid: String): Deferred<Int> = async {
 
         val response = Fetch().patch(NextApi.UPDATE_EMAIL)
                 .noCache()
@@ -28,17 +28,14 @@ data class EmailUpdate(
                 .body(this@EmailUpdate)
                 .end()
 
-        val body = response.body()?.string()
-        info("Response body: $body")
-
-        gson.fromJson<Account>(body, Account::class.java)
+        response.code()
     }
 }
 
 data class UserNameUpdate(
         val name: String
-) : AnkoLogger {
-    fun updateAsync(uuid: String): Deferred<Account> = async {
+) {
+    fun updateAsync(uuid: String): Deferred<Int> = async {
 
         val response = Fetch().patch(NextApi.UPDATE_USER_NAME)
                 .noCache()
@@ -46,18 +43,15 @@ data class UserNameUpdate(
                 .body(this@UserNameUpdate)
                 .end()
 
-        val body = response.body()?.string()
-        info("Update username response: $body")
-
-        gson.fromJson<Account>(body, Account::class.java)
+        response.code()
     }
 }
 
 data class PasswordUpdate(
         val oldPassword: String,
         val newPassword: String
-) : AnkoLogger {
-    fun updateAsync(uuid: String) = async {
+) {
+    fun updateAsync(uuid: String): Deferred<Int> = async {
 
         val response = Fetch().patch(NextApi.UPDATE_PASSWORD)
                 .noCache()
@@ -65,6 +59,6 @@ data class PasswordUpdate(
                 .body(this@PasswordUpdate)
                 .end()
 
-        info("Update password result: ${response.isSuccessful}")
+        response.code()
     }
 }
