@@ -14,13 +14,13 @@ data class EmailUpdate(
         val email: String
 ) : AnkoLogger {
     /**
-     * @return User instance containing the updated user data.
+     * @return Account instance containing the updated user data.
      * @throws ErrorResponse If HTTP response status is above 400.
      * @throws IllegalStateException If request url is empty.
      * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON, regardless of if response is successful or not
      */
-    fun updateAsync(uuid: String): Deferred<User> = async {
+    fun updateAsync(uuid: String): Deferred<Account> = async {
 
         val response = Fetch().patch(NextApi.UPDATE_EMAIL)
                 .noCache()
@@ -31,14 +31,14 @@ data class EmailUpdate(
         val body = response.body()?.string()
         info("Response body: $body")
 
-        gson.fromJson<User>(body, User::class.java)
+        gson.fromJson<Account>(body, Account::class.java)
     }
 }
 
 data class UserNameUpdate(
         val name: String
 ) : AnkoLogger {
-    fun updateAsync(uuid: String): Deferred<User> = async {
+    fun updateAsync(uuid: String): Deferred<Account> = async {
 
         val response = Fetch().patch(NextApi.UPDATE_USER_NAME)
                 .noCache()
@@ -49,7 +49,7 @@ data class UserNameUpdate(
         val body = response.body()?.string()
         info("Update username response: $body")
 
-        gson.fromJson<User>(body, User::class.java)
+        gson.fromJson<Account>(body, Account::class.java)
     }
 }
 
