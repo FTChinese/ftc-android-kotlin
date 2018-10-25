@@ -1,19 +1,21 @@
 package com.ft.ftchinese.models
 
+import com.google.gson.annotations.SerializedName
+
 data class ErrorResponse (
-        var statusCode: Int,
+        var statusCode: Int, // HTTP status code
         override val message: String,
         val error: ErrorDetail
 ) : Exception(message)
 
+/**
+ * Mind naming conflict with Kotlin.
+ * `field` identifier is used by Kotlin as backing fields.
+ */
 data class ErrorDetail(
-        val field: String,
-        val code: String
+        @SerializedName("field") val errField: String,
+        @SerializedName("code") val errCode: String
 ) {
-    companion object {
-        const val CODE_MISSING = "missing"
-        const val CODE_MISSING_FIELD = "missing_field"
-        const val CODE_INVALID = "invalid"
-        const val CODE_ALREADY_EXISTS = "already_exists"
-    }
+    val msgKey: String
+        get() = "${errField}_$errCode"
 }
