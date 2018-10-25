@@ -94,18 +94,24 @@
     <string name="about_title2">關於英國《金融時報》</string>
     <string name="about_text2">英國《金融時報》是一家世界領先的商業新聞機構，以其內容報導的權威性、真實性、準確性享譽世界。2018年，英國《金融時報》迎來130周年，創造歷史最高的付費訂閱記錄，擁有逾910,000位付費讀者。現在，英國《金融時報》已成為一家以數字內容出版為主營業務的新聞機構，數位訂閱增長達10%，擁有逾714,000位付費讀者, 並在所有付費讀者中占比超過75%。其來自內容的收入增長迅速，約占總營收的2/3，與五年前相比成長一倍。</string>
 
+    <string name="prompt_verify_email">您的信箱尚未驗證，為保障您的帳號安全，請及時驗證信箱。我們已經給您的登入信箱發送了驗證信件，点击信件中的連接即可。</string>
     <string name="prompt_email">信箱</string>
     <string name="prompt_new_email">新信箱</string>
     <string name="prompt_current_email">目前信箱</string>
     <string name="prompt_current_name">目前使用者名稱</string>
+    <string name="prompt_user_name">使用者名稱</string>
     <string name="prompt_new_name">新使用者名稱</string>
     <string name="prompt_password">密碼</string>
+    <string name="prompt_change_password">修改密碼</string>
     <string name="prompt_old_password">目前密碼</string>
     <string name="prompt_new_password">新密碼</string>
     <string name="prompt_confirm_password">確認新密碼</string>
     <string name="prompt_password_letter">請輸入您的登入FT中文網所用的電子信箱，我們會向該信箱發送郵件，幫您重設密碼</string>
     <string name="prompt_letter_sent">請檢查您的信件，點擊郵件中的「重設密碼」連接，在所打開的網頁中修改您的密碼。如果幾分鐘內沒有看到信件，請檢查是否被放進了垃圾信件列表。</string>
     <string name="prompt_not_logged_in">您尚未登入，登入後可以查看</string>
+    <string name="prompt_not_set">未設置</string>
+
+    <string name="action_request_verify">重新發送驗證信件</string>
 
     <string name="action_login">登入</string>
     <string name="action_wx_login">微信登入</string>
@@ -115,8 +121,10 @@
     <string name="action_save">保存</string>
     <string name="success_saved">保存成功!</string>
     <string name="success_updated">更新成功!</string>
-    <string name="success_letter_sent">郵件已發送</string>
-    <string name="action_updating">更新資料&#8230;</string>
+    <string name="success_letter_sent">信件已發送</string>
+    <string name="progress_updating">更新資料&#8230;</string>
+    <string name="progress_refresh_account">更新账号資料&#8230;</string>
+    <string name="progress_request_verification">正在發送驗證信件&#8230;</string>
 
     <string name="link_reset_password">忘記密碼？</string>
     <string name="link_sign_up">註冊帳號</string>
@@ -129,6 +137,7 @@
     <string name="error_invalid_password">密碼無效</string>
     <string name="error_mismatched_confirm_password">兩次輸入的新密碼不一致</string>
     <string name="error_incorrect_password">密碼錯誤</string>
+    <string name="error_incorrect_old_password">當前密碼錯誤，不能設置新密碼</string>
     <string name="error_field_required">請填寫此項</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
@@ -137,9 +146,11 @@
     <string name="api_wrong_credentials">使用者名稱或密碼錯誤</string>
     <string name="api_email_taken">電子信箱已經註冊</string>
     <string name="api_email_not_found">電子信箱尚未註冊</string>
+    <string name="api_account_not_found">沒有找到您的帳號</string>
     <string name="api_invalid_credentials">使用者名稱或密碼無效</string>
     <string name="api_bad_request">無效的請求</string>
-    <string name="api_too_many_request">請求過於頻繁，請稍後再試</string>
+    <string name="api_too_many_request">請求過於頻繁，請稍後再試</string><string name="api_unauthorized">沒有訪問伺服器的權限</string>
+    <string name="api_server_error">伺服器出錯，請稍後再試</string>
 
     <string name="api_empty_url">網址(URL)錯誤</string>
     <string name="api_network_failure">網路錯誤</string>

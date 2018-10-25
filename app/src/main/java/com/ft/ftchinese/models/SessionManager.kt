@@ -34,6 +34,30 @@ class SessionManager(context: Context) {
         editor.apply()
     }
 
+    fun updateEmail(email: String) {
+        editor.putString(PREF_EMAIL, email)
+
+        editor.apply()
+    }
+
+    fun updateUserName(name: String) {
+        editor.putString(PREF_USER_NAME, name)
+
+        editor.apply()
+    }
+
+    fun updateMemberTier(tier: String) {
+        editor.putString(PREF_MEMBER_TIER, tier)
+
+        editor.apply()
+    }
+
+    fun updateExpireDate(date: String) {
+        editor.putString(PREF_MEMBER_EXPIRE, date)
+
+        editor.apply()
+    }
+
     fun loadUser(): Account? {
         val userId = sharedPreferences.getString(PREF_USER_ID, null) ?: return null
         val userName = sharedPreferences.getString(PREF_USER_NAME, "")

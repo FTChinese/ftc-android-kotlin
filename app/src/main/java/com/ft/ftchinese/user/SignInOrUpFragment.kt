@@ -299,7 +299,7 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
 
                 info("API error response: $e")
 
-                handleApiError(e)
+                handleErrorResponse(e)
 
             } catch (e: Exception) {
                 isInProgress = false
@@ -310,16 +310,12 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
         }
     }
 
-    private fun handleApiError(resp: ErrorResponse) {
+    private fun handleErrorResponse(resp: ErrorResponse) {
         // Hide progress bar, enable input.
-
-
         when (resp.statusCode) {
+            // User is not found, or password is wrong
             404, 403 -> {
                 toast(R.string.api_wrong_credentials)
-            }
-            400 -> {
-                toast(R.string.api_bad_request)
             }
             // Since client already checked email and password cannot be empty, it won't get missing error.
             // For 422, it could only be email or password too long or too short.
@@ -333,8 +329,8 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
                     toast(R.string.api_invalid_credentials)
                 }
             }
-            429 -> {
-                toast(R.string.api_too_many_request)
+            else -> {
+                handleApiError(resp)
             }
         }
     }

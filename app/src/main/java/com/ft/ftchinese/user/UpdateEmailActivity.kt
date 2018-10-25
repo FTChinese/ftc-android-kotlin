@@ -1,6 +1,7 @@
 package com.ft.ftchinese.user
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -10,7 +11,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.EmailUpdate
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.Account
-import com.ft.ftchinese.util.gson
+import com.ft.ftchinese.models.SessionManager
 import kotlinx.android.synthetic.main.fragment_email.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -19,10 +20,25 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
+class UpdateEmailActivity : SingleFragmentActivity() {
+    override fun createFragment(): Fragment {
+        mAccount = SessionManager.getInstance(this).loadUser()
+
+        return EmailFragment.newInstance()
+    }
+
+    companion object {
+        fun start(context: Context?) {
+            val intent = Intent(context, UpdateEmailActivity::class.java)
+
+            context?.startActivity(intent)
+        }
+    }
+}
 
 internal class EmailFragment : Fragment(), AnkoLogger {
 
-    private var mUser: Account? = null
+    private var mAccount: Account? = null
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
 
@@ -30,7 +46,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
      * Set progress indicator.
      * By default, the progress bar is not visible and data input and save button is enabled.
      * In case of any error, progress bar should go away and data input and save button should be re-enabled.
-     * In case of successfully uploaded data, progress bar should go away but the data input and save button should be disabled to prevent mUser re-submitting the same data.
+     * In case of successfully uploaded data, progress bar should go away but the data input and save button should be disabled to prevent mAccount re-submitting the same data.
      */
     private var isInProgress: Boolean
         get() = !email_save_button.isEnabled
@@ -50,20 +66,12 @@ internal class EmailFragment : Fragment(), AnkoLogger {
 
         if (context is OnFragmentInteractionListener) {
             mListener = context
+            mAccount = mListener?.getUserSession()
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        arguments?.let {
-            val userData = it.getString(ARG_USER_DATA)
-            mUser = try {
-                gson.fromJson<Account>(userData, Account::class.java)
-            } catch (e: Exception) {
-                null
-            }
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -75,11 +83,14 @@ internal class EmailFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        current_email.text = if (mUser?.email.isNullOrBlank()) "未设置" else mUser?.email
-
         email_save_button.setOnClickListener {
             attemptSave()
         }
+
+        // Check if user has email set.
+        val email = mAccount?.email ?: return
+
+        current_email.text = email
     }
 
     private fun attemptSave() {
@@ -88,13 +99,16 @@ internal class EmailFragment : Fragment(), AnkoLogger {
 
         var cancel = false
 
+        // If email is empty
         if (emailStr.isBlank()) {
             email.error = getString(R.string.error_field_required)
             cancel = true
         } else if (!isEmailValid(emailStr)) {
+            // If email is invalid
             email.error = getString(R.string.error_field_required)
             cancel = true
-        } else if (emailStr == mUser?.email) {
+        } else if (emailStr == mAccount?.email) {
+            // If new email equals the current one
             email.error = getString(R.string.error_email_unchanged)
             cancel = true
         }
@@ -109,7 +123,8 @@ internal class EmailFragment : Fragment(), AnkoLogger {
 
     private fun save(emailStr: String) {
 
-        val uuid = mUser?.id ?: return
+        // If user id is not found, we could not perform updating.
+        val uuid = mAccount?.id ?: return
 
         isInProgress = true
         isInputAllowed = false
@@ -120,33 +135,25 @@ internal class EmailFragment : Fragment(), AnkoLogger {
             try {
                 info("Start updating email")
 
-                val userUpdated = emailUpdate.updateAsync(uuid).await()
+                val statusCode = emailUpdate.updateAsync(uuid).await()
 
                 isInProgress = false
 
-                mListener?.onUserSession(userUpdated)
-                current_email.text = emailStr
+                if (statusCode == 204) {
+                    mAccount?.email = emailStr
+                    mListener?.updateEmail(emailStr)
 
-                // Notify parent activity to update data.
+                    current_email.text = emailStr
 
-                toast(R.string.success_saved)
-
+                    toast(R.string.success_saved)
+                } else {
+                    toast("API response status: $statusCode")
+                }
             } catch (e: ErrorResponse) {
                 isInProgress = false
                 isInputAllowed = true
 
-                when (e.statusCode) {
-                    // Should handle duplicate email here.
-                    422 -> {
-                        toast("邮箱无效或已经被占用")
-                    }
-                    404 -> {
-                        toast("用户不存在")
-                    }
-                    400 -> {
-                        toast("提交了非法的JSON")
-                    }
-                }
+                handleApiError(e)
 
             } catch (e: Exception) {
                 isInProgress = false
@@ -156,6 +163,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
             }
         }
     }
+
     override fun onDestroy() {
         super.onDestroy()
 
@@ -163,12 +171,6 @@ internal class EmailFragment : Fragment(), AnkoLogger {
     }
 
     companion object {
-        private const val ARG_USER_DATA = "user_data"
-        fun newInstance(user: Account?) =
-                EmailFragment().apply {
-                    arguments = Bundle().apply {
-                        putString(ARG_USER_DATA, gson.toJson(user))
-                    }
-            }
+        fun newInstance() = EmailFragment()
     }
 }

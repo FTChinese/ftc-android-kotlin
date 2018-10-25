@@ -26,11 +26,18 @@ internal interface OnFragmentInteractionListener {
     fun onProgress(show: Boolean)
 
     // Update user data
-    fun onUserSession(user: Account)
+    fun onUserSession(account: Account)
+
+    fun getUserSession(): Account?
+
+    fun updateEmail(email: String)
+
+    fun updateUserName(name: String)
 }
 
 abstract class SingleFragmentActivity : AppCompatActivity(), OnFragmentInteractionListener {
 
+    protected var mAccount: Account? = null
     protected abstract fun createFragment(): Fragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,9 +69,21 @@ abstract class SingleFragmentActivity : AppCompatActivity(), OnFragmentInteracti
         }
     }
 
-    override fun onUserSession(user: Account) {
+    override fun onUserSession(account: Account) {
         val sessionManager = SessionManager.getInstance(applicationContext)
-        sessionManager.saveUser(user)
+        sessionManager.saveUser(account)
+    }
+
+    override fun getUserSession(): Account? {
+        return mAccount
+    }
+
+    override fun updateEmail(email: String) {
+        SessionManager.getInstance(applicationContext).updateEmail(email)
+    }
+
+    override fun updateUserName(name: String) {
+        SessionManager.getInstance(applicationContext).updateUserName(name)
     }
 }
 

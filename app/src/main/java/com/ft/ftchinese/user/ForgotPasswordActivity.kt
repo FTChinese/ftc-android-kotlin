@@ -140,7 +140,7 @@ internal class ForgotPasswordFragment : Fragment(), AnkoLogger {
                 isInputAllowed = true
 
                 info("API error response: ${e.message}")
-                handleApiError(e)
+                handleErrorResponse(e)
 
             } catch (e: Exception) {
                 isInProgress = false
@@ -154,24 +154,15 @@ internal class ForgotPasswordFragment : Fragment(), AnkoLogger {
     /**
      * Handle restful api error response
      */
-    private fun handleApiError(resp: ErrorResponse) {
+    private fun handleErrorResponse(resp: ErrorResponse) {
         when (resp.statusCode) {
             // 422 could be email_invalid
-            422 -> {
-                val resId = apiErrResId[resp.error.msgKey]
-                if (resId != null) {
-                    toast(resId)
-                } else {
-                    toast(R.string.error_invalid_email)
-                }
-            }
             // Email is not found
             404 -> {
                 toast(R.string.api_email_not_found)
             }
-            // Bad Request. Show a generic message.
-            400 -> {
-                toast(R.string.api_bad_request)
+            else -> {
+                handleApiError(resp)
             }
         }
     }

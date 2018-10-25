@@ -2,6 +2,7 @@ package com.ft.ftchinese.user
 
 import android.support.v4.app.Fragment
 import com.ft.ftchinese.R
+import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.util.EmptyResponseException
 import com.ft.ftchinese.util.NetworkException
 import com.google.gson.JsonSyntaxException
@@ -20,7 +21,8 @@ const val CODE_ALREADY_EXISTS = "already_exists"
  */
 val apiErrResId = mapOf<String, Int>(
         "email_already_exists" to R.string.api_email_taken,
-        "email_invalid" to R.string.error_invalid_email
+        "email_invalid" to R.string.error_invalid_email,
+        "password_invalid" to R.string.error_invalid_password
 )
 
 fun Fragment.handleException(e: Exception) {
@@ -43,6 +45,36 @@ fun Fragment.handleException(e: Exception) {
         }
         else -> {
             toast(e.toString())
+        }
+    }
+}
+
+/**
+ * Handle api error response.
+ * This is used to handle common errors.
+ * Many request has specified error message to show that could only be handled in its own fragment.
+ */
+fun Fragment.handleApiError(resp: ErrorResponse) {
+    when (resp.statusCode) {
+        400 -> {
+            toast(R.string.api_bad_request)
+        }
+        // If request header does not contain X-User-Id
+        401 -> {
+            toast(R.string.api_unauthorized)
+        }
+        422 -> {
+            val resId = apiErrResId[resp.error.msgKey]
+            if (resId != null) {
+                toast(resId)
+            }
+        }
+        429 -> {
+            toast(R.string.api_too_many_request)
+        }
+        // All other errors are treated as server error.
+        else -> {
+            toast(R.string.api_server_error)
         }
     }
 }

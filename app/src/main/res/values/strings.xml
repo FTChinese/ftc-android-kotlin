@@ -108,7 +108,7 @@
     <string name="prompt_password_letter">请输入您的登录FT中文网所用的电子邮箱，我们会向该邮箱发送邮件，帮您重置密码</string>
     <string name="prompt_letter_sent">请检查您的邮件，点击邮件中的“重置密码”链接，在所打开的网页中修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</string>
     <string name="prompt_not_logged_in">您尚未登录，登录后可以查看</string>
-
+    <string name="prompt_not_set">未设置</string>
 
 
     <string name="action_request_verify">重新发送验证邮件</string>
@@ -123,7 +123,10 @@
     <string name="success_saved">保存成功!</string>
     <string name="success_updated">更新成功!</string>
     <string name="success_letter_sent">邮件已发送</string>
-    <string name="action_updating">更新数据&#8230;</string>
+
+    <string name="progress_updating">更新数据&#8230;</string>
+    <string name="progress_refresh_account">更新账号数据&#8230;</string>
+    <string name="progress_request_verification">正在发送验证邮件&#8230;</string>
 
     <string name="link_reset_password">忘记密码?</string>
     <string name="link_sign_up">注册账号</string>
@@ -137,6 +140,7 @@
     <string name="error_invalid_password">密码无效</string>
     <string name="error_mismatched_confirm_password">两次输入的新密码不一致</string>
     <string name="error_incorrect_password">密码错误</string>
+    <string name="error_incorrect_old_password">当前密码错误，不能设置新密码</string>
     <string name="error_field_required">请填写此项</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
@@ -146,9 +150,13 @@
     <string name="api_wrong_credentials">用户名或密码错误</string>
     <string name="api_email_taken">该邮箱已经注册</string>
     <string name="api_email_not_found">邮箱尚未注册</string>
+    <string name="api_account_not_found">没有找到您的账号</string>
+
     <string name="api_invalid_credentials">用户名或密码无效</string>
     <string name="api_bad_request">无效的请求</string>
     <string name="api_too_many_request">请求过于频繁，请稍后再试</string>
+    <string name="api_unauthorized">没有访问服务器的权限</string>
+    <string name="api_server_error">服务器错误，请稍后再试</string>
 
     <string name="api_empty_url">请求地址错误</string>
     <string name="api_network_failure">网络错误</string>

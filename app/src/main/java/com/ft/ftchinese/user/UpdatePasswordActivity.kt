@@ -1,6 +1,7 @@
 package com.ft.ftchinese.user
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.PasswordUpdate
 import com.ft.ftchinese.models.Account
+import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.fragment_password.*
 import kotlinx.coroutines.experimental.Job
@@ -19,9 +21,25 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
-internal class PasswordFragment : Fragment(), AnkoLogger {
+class UpdatePasswordActivity : SingleFragmentActivity() {
+    override fun createFragment(): Fragment {
+        mAccount = SessionManager.getInstance(this).loadUser()
 
-    private var mUser: Account? = null
+        return PasswordFragment.newInstance()
+    }
+
+    companion object {
+        fun start(context: Context?) {
+            val intent = Intent(context, UpdatePasswordActivity::class.java)
+
+            context?.startActivity(intent)
+        }
+    }
+}
+
+class PasswordFragment : Fragment(), AnkoLogger {
+
+    private var mAccount: Account? = null
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
 
@@ -43,19 +61,12 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
         super.onAttach(context)
         if (context is OnFragmentInteractionListener) {
             mListener = context
+            mAccount = mListener?.getUserSession()
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            val userData = it.getString(ARG_USER_DATA)
-            mUser = try {
-                gson.fromJson<Account>(userData, Account::class.java)
-            } catch (e: Exception) {
-                null
-            }
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -120,7 +131,7 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
 
     private fun save(oldPassword: String, newPassword: String) {
 
-        val uuid = mUser?.id ?: return
+        val uuid = mAccount?.id ?: return
 
         isInProgress = true
         isInputAllowed = false
@@ -131,35 +142,42 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
             try {
                 info("Start updating password")
 
-                passwordUpdate.updateAsync(uuid).await()
+                val statusCode = passwordUpdate.updateAsync(uuid).await()
 
                 isInProgress = false
-                toast(R.string.success_saved)
+
+                if (statusCode == 204) {
+                    toast(R.string.success_saved)
+                } else {
+                    toast("API response status: $statusCode")
+                }
+
             } catch (e: ErrorResponse) {
-                e.printStackTrace()
                 isInProgress = false
                 isInputAllowed = true
 
-                when (e.statusCode) {
-                    // Should handle duplicate email here.
-                    400 -> {
-                        toast("提交了非法的JSON")
-                    }
-                    422 -> {
-                        toast("密码过长")
-                    }
-                    404 -> {
-                        toast("用户不存在")
-                    }
-                    403 -> {
-                        toast("当前密码未通过验证")
-                    }
-                }
+
             } catch (e: Exception) {
                 isInProgress = false
                 isInputAllowed = true
 
                 handleException(e)
+            }
+        }
+    }
+
+    private fun handleErrorResponse(resp: ErrorResponse) {
+        when (resp.statusCode) {
+            // 422 could be password_invalid
+            404 -> {
+                toast(R.string.api_account_not_found)
+            }
+            // Wrong old password
+            403 -> {
+                toast(R.string.error_incorrect_old_password)
+            }
+            else -> {
+                handleApiError(resp)
             }
         }
     }
@@ -170,11 +188,6 @@ internal class PasswordFragment : Fragment(), AnkoLogger {
     }
 
     companion object {
-        private const val ARG_USER_DATA = "user_data"
-        fun newInstance(user: Account?) = PasswordFragment().apply {
-            arguments = Bundle().apply {
-                putString(ARG_USER_DATA, gson.toJson(mUser))
-            }
-        }
+        fun newInstance() = PasswordFragment()
     }
 }

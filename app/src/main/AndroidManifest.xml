@@ -121,18 +121,38 @@
         <activity
             android:name=".user.AccountActivity"
             android:label="@string/action_title_account"
-            android:parentActivityName=".MainActivity">
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
         <activity
-            android:name=".user.AccountUpdateActivity"
+            android:name=".user.UpdateEmailActivity"
+            android:label="@string/title_change_email"
             android:parentActivityName=".user.AccountActivity"
             android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
+                android:value=".user.AccountActivity" />
+        </activity>
+        <activity
+            android:name=".user.UpdateUserNameActivity"
+            android:label="@string/title_change_username"
+            android:parentActivityName=".user.AccountActivity"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".user.AccountActivity" />
+        </activity>
+        <activity
+            android:name=".user.UpdatePasswordActivity"
+            android:label="@string/title_change_password"
+            android:parentActivityName=".user.AccountActivity"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".user.AccountActivity" />
         </activity>
         <activity
             android:name=".user.MembershipActivity"

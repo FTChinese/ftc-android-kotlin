@@ -1,6 +1,7 @@
 package com.ft.ftchinese.user
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -9,8 +10,8 @@ import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.Account
+import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.UserNameUpdate
-import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.fragment_username.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -19,9 +20,24 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
-internal class UsernameFragment : Fragment(), AnkoLogger {
+class UpdateUserNameActivity : SingleFragmentActivity() {
+    override fun createFragment(): Fragment {
+        mAccount = SessionManager.getInstance(this).loadUser()
+        return UsernameFragment.newInstance()
+    }
 
-    private var mUser: Account? = null
+    companion object {
+        fun start(context: Context?) {
+            val intent = Intent(context, UpdateUserNameActivity::class.java)
+
+            context?.startActivity(intent)
+        }
+    }
+}
+
+class UsernameFragment : Fragment(), AnkoLogger {
+
+    private var mAccount: Account? = null
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
 
@@ -43,20 +59,14 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
 
         if (context is OnFragmentInteractionListener) {
             mListener = context
+            mAccount = mListener?.getUserSession()
+
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        arguments?.let {
-            val userData = it.getString(ARG_USER_DATA)
-            mUser = try {
-                gson.fromJson<Account>(userData, Account::class.java)
-            } catch (e: Exception) {
-                null
-            }
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -68,11 +78,13 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        current_name.text = if (mUser?.userName.isNullOrBlank()) "未设置" else mUser?.userName
-
         name_save_button.setOnClickListener {
             attemptSave()
         }
+
+        val userName = mAccount?.userName ?: return
+
+        current_name.text = userName
     }
 
     private fun attemptSave() {
@@ -84,7 +96,7 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
         if (userNameStr.isBlank()) {
             user_name.error = getString(R.string.error_field_required)
             cancel = true
-        } else if (userNameStr == mUser?.userName) {
+        } else if (userNameStr == mAccount?.userName) {
             user_name.error = getString(R.string.error_name_unchanged)
             cancel = true
         }
@@ -98,7 +110,7 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
     }
 
     private fun save(userName: String) {
-        val uuid = mUser?.id ?: return
+        val uuid = mAccount?.id ?: return
 
         isInProgress = true
         isInputAllowed = false
@@ -109,33 +121,28 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
             val userNameUpdate = UserNameUpdate(userName)
 
             try {
-                info("Start updating mUser userName")
+                info("Start updating mAccount userName")
 
-                val userUpdated = userNameUpdate.updateAsync(uuid).await()
+                val statusCode = userNameUpdate.updateAsync(uuid).await()
 
                 isInProgress = false
 
-                current_name.text = userName
+                if (statusCode == 204) {
+                    mAccount?.userName = userName
+                    mListener?.updateUserName(userName)
 
-                mListener?.onUserSession(userUpdated)
+                    current_name.text = userName
 
-                toast(R.string.success_saved)
+                    toast(R.string.success_saved)
+                } else {
+                    toast("API response status: $statusCode")
+                }
             } catch (e: ErrorResponse) {
                 isInProgress = false
                 isInputAllowed = true
 
-                when (e.statusCode) {
-                    // Should handle duplicate email here.
-                    422 -> {
-                        toast("用户名无效或已经被占用")
-                    }
-                    404 -> {
-                        toast("用户不存在")
-                    }
-                    400 -> {
-                        toast("提交了非法的JSON")
-                    }
-                }
+                handleApiError(e)
+
             } catch (e: Exception) {
                 isInProgress = false
                 isInputAllowed = true
@@ -152,11 +159,7 @@ internal class UsernameFragment : Fragment(), AnkoLogger {
     }
 
     companion object {
-        private const val ARG_USER_DATA = "user_data"
-        fun newInstance(user: Account?) = UsernameFragment().apply {
-            arguments = Bundle().apply {
-                putString(ARG_USER_DATA, gson.toJson(user))
-            }
-        }
+
+        fun newInstance() = UsernameFragment()
     }
 }

@@ -50,6 +50,7 @@
 
 
             <android.support.constraint.ConstraintLayout
+                android:id="@+id/email_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -75,7 +76,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
-                    android:text="TextView"
+                    android:text="@string/prompt_not_set"
                     android:textAppearance="@style/TextAppearance.AppCompat"
                     android:textSize="18sp"
                     app:layout_constraintBaseline_toBaselineOf="@+id/prompt_email"
@@ -86,6 +87,7 @@
 
 
             <android.support.constraint.ConstraintLayout
+                android:id="@+id/user_name_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/list_item_background"
@@ -109,7 +111,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
-                    android:text="TextView"
+                    android:text="@string/prompt_not_set"
                     android:textAppearance="@style/TextAppearance.AppCompat"
                     android:textSize="18sp"
                     app:layout_constraintBaseline_toBaselineOf="@+id/prompt_user_name"
@@ -119,6 +121,7 @@
             </android.support.constraint.ConstraintLayout>
 
             <android.support.constraint.ConstraintLayout
+                android:id="@+id/password_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
