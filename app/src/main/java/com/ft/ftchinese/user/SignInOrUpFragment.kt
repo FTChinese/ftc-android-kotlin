@@ -5,7 +5,6 @@ import android.app.Activity
 import android.app.LoaderManager
 import android.content.Context
 import android.content.CursorLoader
-import android.content.Intent
 import android.content.Loader
 import android.content.pm.PackageManager
 import android.database.Cursor
@@ -21,15 +20,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
-import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.Login
 import com.ft.ftchinese.models.ErrorResponse
-import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.util.generateNonce
-import com.tencent.mm.opensdk.modelmsg.SendAuth
-import com.tencent.mm.opensdk.openapi.IWXAPI
-import com.tencent.mm.opensdk.openapi.WXAPIFactory
+import com.ft.ftchinese.models.Login
+import com.ft.ftchinese.models.SignUp
 import kotlinx.android.synthetic.main.fragment_sign_in_or_up.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -38,36 +32,13 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
-class SignInOrUpActivity : SingleFragmentActivity() {
-    override fun createFragment(): Fragment {
-        val fragmentType = intent.getIntExtra(KEY_FRAGMENT_TYPE, 0)
-        when (fragmentType) {
-            RequestCode.SIGN_IN -> {
-                supportActionBar?.setTitle(R.string.title_login)
-            }
-            RequestCode.SIGN_UP -> {
-                supportActionBar?.setTitle(R.string.title_sign_up)
-            }
-        }
-        return SignInOrUpFragment.newInstance(fragmentType)
-    }
-
-    companion object {
-        private const val KEY_FRAGMENT_TYPE = "fragment_type"
-        fun startForResult(activity: Activity?, requestCode: Int) {
-            val intent = Intent(activity, SignInOrUpActivity::class.java)
-            intent.putExtra(KEY_FRAGMENT_TYPE, requestCode)
-            activity?.startActivityForResult(intent, requestCode)
-        }
-    }
-
-}
-internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, AnkoLogger {
+class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, AnkoLogger {
 
     private var job: Job? = null
     private var listener: OnFragmentInteractionListener? = null
-    private var wxApi: IWXAPI? = null
+//    private var wxApi: IWXAPI? = null
 
+    // Show or hide progress bar.
     private var isInProgress: Boolean
         get() = !email_sign_in_button.isEnabled
         set(value) {
@@ -75,6 +46,10 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
             email_sign_in_button.isEnabled = !value
         }
 
+    // Enable or disabled input.
+    // When progress bar is visible, disable any input and button;
+    // When progress bar is gone and login/signup failed, reenable input;
+    // When progress bar is gone and login/signpu succeeded, destroy the activity and it's not necessary to enable input.
     private var isInputAllowed: Boolean
         get() = email.isEnabled
         set(value) {
@@ -86,6 +61,7 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
 
     private var usedFor: Int? = null
 
+    // Cast parent activity to OnFragmentInteractionListener
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
@@ -97,30 +73,37 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        wxApi = WXAPIFactory.createWXAPI(context, BuildConfig.WECAHT_APP_ID)
+        // Init Wechat API
+//        wxApi = WXAPIFactory.createWXAPI(context, BuildConfig.WECAHT_APP_ID)
 
+        // Decide whether this is used for login or signup.
         usedFor = arguments?.getInt(ARG_FRAGMENT_USAGE)
     }
 
+    // Inflate UI from fragment_sign_in_or_up file.
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
 
         return inflater.inflate(R.layout.fragment_sign_in_or_up, container, false)
     }
 
+    // After UI is created.
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Display different part of UI according to how it is used.
         when (usedFor) {
-            RequestCode.SIGN_IN -> {
+            // For login, hide signup button.
+            USED_FOR_SIGN_IN -> {
                 email_sign_up_button.visibility = View.GONE
-                sign_in.visibility = View.GONE
+                go_to_sign_in.visibility = View.GONE
             }
-            RequestCode.SIGN_UP -> {
+            // For signup, hide login button, and reset password and sign up button.
+            USED_FOR_SIGN_UP -> {
                 email_sign_in_button.visibility = View.GONE
-                wechat_sign_in_button.visibility = View.GONE
-                reset_password.visibility = View.GONE
-                sign_up.visibility = View.GONE
+//                wechat_sign_in_button.visibility = View.GONE
+                go_to_reset_password.visibility = View.GONE
+                go_to_sign_up.visibility = View.GONE
             }
         }
 
@@ -134,37 +117,41 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
             false
         }
 
+        // When user pressed signup button, validate data.
         email_sign_up_button.setOnClickListener {
             validate()
         }
 
+        // When user pressed login button, validate data
         email_sign_in_button.setOnClickListener {
             validate()
         }
 
-        reset_password.setOnClickListener {
+        // When user clicked reset password, launch ForgotPasswordActivity.
+        go_to_reset_password.setOnClickListener {
             ForgotPasswordActivity.start(context)
         }
 
-        sign_up.setOnClickListener {
-            SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_UP)
+        // When user clicked sign up, launch sign up activity.
+        go_to_sign_up.setOnClickListener {
+            SignUpActivity.start(activity)
         }
 
-        sign_in.setOnClickListener {
-            SignInOrUpActivity.startForResult(activity, RequestCode.SIGN_IN)
+        go_to_sign_in.setOnClickListener {
+            SignInActivity.start(activity)
         }
 
         // Wechat login response is handled in `wxapi.WXEntryActivity`
-        wechat_sign_in_button.setOnClickListener {
-
-            // SendAuth is an empty class. Its only purpose is to wrap tow inner class: Req and Resp.
-            val req = SendAuth.Req()
-            // scope max length is 1024. Not documented.
-            req.scope = "snsapi_userinfo"
-            // state max length is 1024. It is not documented in official API.
-            req.state = generateNonce(5)
-            wxApi?.sendReq(req)
-        }
+//        wechat_sign_in_button.setOnClickListener {
+//
+//            // SendAuth is an empty class. Its only purpose is to wrap tow inner class: Req and Resp.
+//            val req = SendAuth.Req()
+//            // scope max length is 1024. Not documented.
+//            req.scope = "snsapi_userinfo"
+//            // state max length is 1024. It is not documented in official API.
+//            req.state = generateNonce(5)
+//            wxApi?.sendReq(req)
+//        }
     }
 
     private fun populateAutoComplete() {
@@ -206,6 +193,8 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
             }
         }
     }
+
+    // Validate user input.
     private fun validate() {
         email.error = null
         password.error = null
@@ -215,12 +204,6 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
 
         var cancel = false
         var focusView: View? = null
-
-        if (!TextUtils.isEmpty(passwordStr) && !isPasswordValid(passwordStr)) {
-            password.error = getString(R.string.error_invalid_password)
-            focusView = password
-            cancel = true
-        }
 
         if (TextUtils.isEmpty(emailStr)) {
             email.error = getString(R.string.error_field_required)
@@ -232,6 +215,33 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
             cancel = true
         }
 
+        if (TextUtils.isEmpty(passwordStr)) {
+            password.error = getString(R.string.error_field_required)
+            focusView = password
+            cancel = true
+        }
+
+        when (usedFor) {
+            // For login limit password length to 6
+            USED_FOR_SIGN_IN -> {
+                if (passwordStr.length < 6) {
+                    password.error = getString(R.string.error_invalid_password)
+                    focusView = password
+                    cancel = true
+                }
+            }
+
+            // For new signup limit password length to 8
+            USED_FOR_SIGN_UP -> {
+                if (!isPasswordValid(passwordStr)) {
+                    password.error = getString(R.string.error_invalid_password)
+                    focusView = password
+                    cancel = true
+                }
+            }
+        }
+
+
         if (cancel) {
             focusView?.requestFocus()
 
@@ -241,24 +251,28 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         authenticate(emailStr, passwordStr)
     }
 
+    // Send user credentials to API.
     private fun authenticate(email: String, password: String) {
         isInProgress = true
         isInputAllowed = false
 
         job = launch(UI) {
-            val account = Login(email = email, password = password)
             try {
 
                 val user = when (usedFor) {
-                    RequestCode.SIGN_IN -> {
+                    USED_FOR_SIGN_IN -> {
                         info("Start log in")
-
-                        account.loginAsync().await()
+                        Login(email, password)
+                                .sendAsync()
+                                .await()
+//                        login.sendAsync().await()
                     }
-                    RequestCode.SIGN_UP -> {
+                    USED_FOR_SIGN_UP -> {
                         info("Start signing up")
-
-                        account.createAsync().await()
+                        SignUp(email, password)
+                                .sendAsync()
+                                .await()
+//                        login.createAsync().await()
                     }
                     else -> null
                 }
@@ -266,38 +280,23 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
                 isInProgress = false
 
                 if (user == null) {
-                    toast("Failed. Pleas  tray again")
+                    toast("Failed. Please try again")
                     isInputAllowed = true
                     return@launch
                 }
 
-                info("User $user")
+                info("Account $user")
 
-
+                // Ask parent activity to save session data.
                 listener?.onUserSession(user)
 
                 activity?.setResult(Activity.RESULT_OK)
                 activity?.finish()
 
             } catch (e: ErrorResponse) {
-                info(e.message)
-                isInProgress = false
-                isInputAllowed = true
+                info("API error response: $e")
+                handleApiError(e)
 
-                when (e.statusCode) {
-                    404 -> {
-                        toast("用户名或密码错误")
-                    }
-                    400 -> {
-                        toast("提交了非法的JSON")
-                    }
-                    422 -> {
-                        toast("用户名或密码非法")
-                    }
-                    429 -> {
-                        toast("创建账号过于频繁，请稍后再试")
-                    }
-                }
             } catch (e: Exception) {
                 isInProgress = false
                 isInputAllowed = true
@@ -307,6 +306,35 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
         }
     }
 
+    private fun handleApiError(resp: ErrorResponse) {
+        // Hide progress bar, enable input.
+        isInProgress = false
+        isInputAllowed = true
+
+        when (resp.statusCode) {
+            404, 403 -> {
+                toast(R.string.api_wrong_credentials)
+            }
+            400 -> {
+                toast(R.string.api_bad_request)
+            }
+            // Since client already checked email and password cannot be empty, it won't get missing error.
+            // For 422, it could only be email or password too long or too short.
+            422 -> {
+                info("Map key: ${resp.error.msgKey}")
+                val resId = apiErrResId[resp.error.msgKey]
+
+                if (resId != null) {
+                    toast(resId)
+                } else {
+                    toast(R.string.api_invalid_credentials)
+                }
+            }
+            429 -> {
+                toast(R.string.api_too_many_request)
+            }
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -350,20 +378,24 @@ internal class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cu
                 ContactsContract.CommonDataKinds.Email.ADDRESS,
                 ContactsContract.CommonDataKinds.Email.IS_PRIMARY)
         val ADDRESS = 0
-        val IS_PRIMARY = 1
     }
 
     companion object {
         private const val REQUEST_READ_CONTACTS = 0
         private const val ARG_FRAGMENT_USAGE = "arg_fragment_usage"
+        private const val USED_FOR_SIGN_IN = 1
+        private const val USED_FOR_SIGN_UP = 2
 
-        fun newInstance(usedFor: Int): SignInOrUpFragment {
-            val fragment = SignInOrUpFragment()
-            fragment.arguments = Bundle().apply {
-                putInt(ARG_FRAGMENT_USAGE, usedFor)
+        fun newInstanceSignIn() = SignInOrUpFragment().apply {
+            arguments = Bundle().apply {
+                putInt(ARG_FRAGMENT_USAGE, USED_FOR_SIGN_IN)
             }
+        }
 
-            return fragment
+        fun newInstanceSignUp() = SignInOrUpFragment().apply {
+            arguments = Bundle().apply {
+                putInt(ARG_FRAGMENT_USAGE, USED_FOR_SIGN_UP)
+            }
         }
     }
 }
