@@ -5,5 +5,5 @@ fun isEmailValid(email: String): Boolean {
 }
 
 fun isPasswordValid(password: String): Boolean {
-    return password.length > 4
+    return password.length >= 8
 }
