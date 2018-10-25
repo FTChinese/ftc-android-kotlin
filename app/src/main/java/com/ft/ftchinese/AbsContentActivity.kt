@@ -14,9 +14,7 @@ import android.view.*
 import android.webkit.*
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import com.ft.ftchinese.models.Following
-import com.ft.ftchinese.models.User
 import com.ft.ftchinese.util.gson
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
