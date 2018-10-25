@@ -112,7 +112,7 @@
         <activity
             android:name=".user.ForgotPasswordActivity"
             android:label="@string/title_reset_password"
-            android:parentActivityName=".MainActivity"
+            android:parentActivityName=".user.SignInActivity"
             android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
