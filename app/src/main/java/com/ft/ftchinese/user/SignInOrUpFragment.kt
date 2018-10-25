@@ -294,7 +294,11 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
                 activity?.finish()
 
             } catch (e: ErrorResponse) {
+                isInProgress = false
+                isInputAllowed = true
+
                 info("API error response: $e")
+
                 handleApiError(e)
 
             } catch (e: Exception) {
@@ -308,8 +312,7 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
 
     private fun handleApiError(resp: ErrorResponse) {
         // Hide progress bar, enable input.
-        isInProgress = false
-        isInputAllowed = true
+
 
         when (resp.statusCode) {
             404, 403 -> {
