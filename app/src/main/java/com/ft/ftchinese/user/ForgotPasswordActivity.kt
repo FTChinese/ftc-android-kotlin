@@ -4,20 +4,19 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.PasswordReset
-import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.fragment_forgot_password.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
-import java.io.IOException
 
 class ForgotPasswordActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {
@@ -33,12 +32,12 @@ class ForgotPasswordActivity : SingleFragmentActivity() {
     }
 }
 
-internal class ForgotPasswordFragment : Fragment() {
+internal class ForgotPasswordFragment : Fragment(), AnkoLogger {
 
     private var job: Job? = null
     private var listener: OnFragmentInteractionListener? = null
     private var isInProgress: Boolean
-        get() = !reset_letter_button.isEnabled
+        get() = !send_button.isEnabled
         set(value) {
             listener?.onProgress(value)
 
@@ -48,9 +47,9 @@ internal class ForgotPasswordFragment : Fragment() {
             }
         }
     private var isInputAllowed: Boolean
-        get() = reset_letter_button.isEnabled
+        get() = send_button.isEnabled
         set(value) {
-            reset_letter_button.isEnabled = value
+            send_button.isEnabled = value
             email.isEnabled = value
         }
 
@@ -87,7 +86,7 @@ internal class ForgotPasswordFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        reset_letter_button.setOnClickListener {
+        send_button.setOnClickListener {
             attemptSendLetter()
         }
     }
@@ -113,10 +112,10 @@ internal class ForgotPasswordFragment : Fragment() {
             return
         }
 
-        sendPasswordResetLetter(emailStr)
+        sendLetter(emailStr)
     }
 
-    private fun sendPasswordResetLetter(emailStr: String) {
+    private fun sendLetter(emailStr: String) {
         isInProgress = true
         isInputAllowed = false
 
@@ -124,30 +123,55 @@ internal class ForgotPasswordFragment : Fragment() {
             val passwordReset = PasswordReset(emailStr)
 
             try {
-                passwordReset.send()
+                val statusCode = passwordReset.sendAsync().await()
 
-                toast(R.string.success_letter_sent)
+                if (statusCode == 204) {
+                    toast(R.string.success_letter_sent)
 
-                successState()
+                    isInProgress = false
+                } else {
+                    toast("API response status: $statusCode")
+                    isInProgress = false
+                    isInputAllowed = true
+                }
 
             } catch (e: ErrorResponse) {
-                failureState()
+                isInProgress = false
+                isInputAllowed = true
 
-                when (e.statusCode) {
-                    422 -> {
-                        toast("邮箱无效")
-                    }
-                    404 -> {
-                        toast("邮箱尚未注册")
-                    }
-                    400 -> {
-                        toast("提交了非法的JSON")
-                    }
-                }
+                info("API error response: ${e.message}")
+                handleApiError(e)
+
             } catch (e: Exception) {
-                failureState()
+                isInProgress = false
+                isInputAllowed = true
 
                 handleException(e)
+            }
+        }
+    }
+
+    /**
+     * Handle restful api error response
+     */
+    private fun handleApiError(resp: ErrorResponse) {
+        when (resp.statusCode) {
+            // 422 could be email_invalid
+            422 -> {
+                val resId = apiErrResId[resp.error.msgKey]
+                if (resId != null) {
+                    toast(resId)
+                } else {
+                    toast(R.string.error_invalid_email)
+                }
+            }
+            // Email is not found
+            404 -> {
+                toast(R.string.api_email_not_found)
+            }
+            // Bad Request. Show a generic message.
+            400 -> {
+                toast(R.string.api_bad_request)
             }
         }
     }
