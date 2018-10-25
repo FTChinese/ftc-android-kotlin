@@ -6,9 +6,11 @@ class NextApi {
         const val LOGIN = "$BASE/users/auth"
         const val SIGN_UP = "$BASE/users/new"
         const val PASSWORD_RESET = "$BASE/users/password-reset/letter"
+        // Refresh account data.
         const val ACCOUNT = "$BASE/user/account"
         const val PROFILE = "$BASE/user/profile"
         const val UPDATE_EMAIL = "$BASE/user/email"
+        // Resend email verification letter
         const val REQUEST_VERIFICATION = "$BASE/user/email/request-verification"
         const val UPDATE_USER_NAME = "$BASE/user/name"
         const val UPDATE_PASSWORD = "$BASE/user/password"
