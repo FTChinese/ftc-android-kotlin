@@ -15,15 +15,14 @@ data class Login(
         val password: String
 ) : AnkoLogger {
     /**
-     * @return User
+     * @return Account
      * @throws ErrorResponse If HTTP response status is above 400.
      * @throws IllegalStateException If request url is empty.
      * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON, regardless of if response is successful or not
      */
-    fun send (url: String): User {
-
-        val response = Fetch().post(url)
+    fun sendAsync(): Deferred<Account> = async {
+        val response = Fetch().post(NextApi.LOGIN)
                 .setClient()
                 .noCache()
                 .body(this@Login)
@@ -32,14 +31,6 @@ data class Login(
         val body = response.body()?.string()
         info("Response body: $body")
 
-        return gson.fromJson<User>(body, User::class.java)
-    }
-
-    fun loginAsync(): Deferred<User> = async {
-        send(NextApi.LOGIN)
-    }
-
-    fun createAsync(): Deferred<User> = async {
-        send(NextApi.SIGN_UP)
+        gson.fromJson<Account>(body, Account::class.java)
     }
 }
