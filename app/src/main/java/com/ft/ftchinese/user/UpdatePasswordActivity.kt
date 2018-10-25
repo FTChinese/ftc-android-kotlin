@@ -156,6 +156,7 @@ class PasswordFragment : Fragment(), AnkoLogger {
                 isInProgress = false
                 isInputAllowed = true
 
+                handleErrorResponse(e)
 
             } catch (e: Exception) {
                 isInProgress = false
