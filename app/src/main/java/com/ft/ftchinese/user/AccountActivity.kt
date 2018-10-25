@@ -28,9 +28,9 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
-private const val VIEW_TYPE_SEPARATOR = 0x01
-private const val VIEW_TYPE_ITEM = 0x02
-private const val VIEW_TYPE_TEXT = 0x03
+private const val VIEW_TYPE_SEPARATOR = 0x01 // Use list_item_separator.xml
+private const val VIEW_TYPE_ITEM = 0x02 // Use list_item_table_row.xml
+private const val VIEW_TYPE_TEXT = 0x03 // Use list_item_text_button.xml
 
 /**
  * Show user's account details
@@ -55,7 +55,6 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     private var mUser: Account? = null
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
-    private var mAdapter: Adapter? = null
 
     private var isInProgress: Boolean = false
         set(value) {
@@ -71,7 +70,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         job = launch(UI) {
             try {
                 val user = mUser?.refreshAsync()?.await()
-                channel_fragment_swipe.isRefreshing = false
+                swipe_refresh.isRefreshing = false
 
                 mUser = user
                 updateUI()
@@ -90,7 +89,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
             } catch (e: Exception) {
                 handleException(e)
             } finally {
-                channel_fragment_swipe.isRefreshing = false
+                swipe_refresh.isRefreshing = false
             }
         }
     }
@@ -126,17 +125,6 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Set refresh mListener
-        channel_fragment_swipe.setOnRefreshListener(this)
-
-        // Set up recycler view.
-        recycler_view.apply {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(context)
-
-            // Add divider
-//            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
-        }
 
         info("onViewCreated")
     }
@@ -151,15 +139,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     private fun updateUI() {
         info("updateUI")
 
-        val accountItems = AccountItem.create(mUser)
 
-        if (mAdapter == null) {
-            mAdapter = Adapter(accountItems)
-            recycler_view.adapter = mAdapter
-        } else {
-            mAdapter?.setItems(accountItems)
-            mAdapter?.notifyDataSetChanged()
-        }
     }
 
     override fun onDestroy() {
@@ -178,87 +158,6 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
                 }
     }
 
-    inner class TextViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val messageView: TextView? = itemView.findViewById(R.id.message_view)
-        val actionButton: Button? = itemView.findViewById(R.id.action_button)
-    }
-
-    inner class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val labelView: TextView? = itemView.findViewById(R.id.label_text)
-        val valueView: TextView? = itemView.findViewById(R.id.value_text)
-    }
-
-    inner class SeparatorViewHolder(view: View) : RecyclerView.ViewHolder(view)
-
-    inner class Adapter(private var mItems: List<AccountItem>) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-
-            return when (viewType) {
-                VIEW_TYPE_TEXT -> {
-                    val view = LayoutInflater.from(parent.context)
-                            .inflate(R.layout.list_item_text_button, parent, false)
-
-                    TextViewHolder(view)
-                }
-                VIEW_TYPE_SEPARATOR -> {
-                    val view = LayoutInflater.from(parent.context)
-                            .inflate(R.layout.list_item_separator, parent, false)
-                    SeparatorViewHolder(view)
-                }
-                else -> {
-                    val view = LayoutInflater.from(parent.context)
-                            .inflate(R.layout.list_item_table_row, parent, false)
-                    ItemViewHolder(view)
-                }
-            }
-        }
-
-        override fun getItemCount(): Int {
-            return mItems.size
-        }
-
-        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val item = mItems[position]
-
-            when (holder) {
-                is TextViewHolder -> {
-                    holder.messageView?.text = item.label
-                    holder.actionButton?.text = item.value
-
-                    holder.actionButton?.setOnClickListener {
-                        toast("Request verification")
-                    }
-                }
-                is ItemViewHolder -> {
-                    holder.labelView?.text = item.label
-                    holder.valueView?.text = if (item.value.isNullOrBlank()) "未设置" else item.value
-
-                    holder.itemView.setOnClickListener {
-
-                        if (item.id == null) {
-                            return@setOnClickListener
-                        }
-
-                        AccountUpdateActivity.start(context, item.id)
-
-                    }
-                }
-            }
-        }
-
-        override fun getItemViewType(position: Int): Int {
-            return mItems[position].viewType
-        }
-
-        fun setItems(items: List<AccountItem>) {
-            mItems = items
-        }
-
-        override fun onViewAttachedToWindow(holder: RecyclerView.ViewHolder) {
-            super.onViewAttachedToWindow(holder)
-        }
-    }
 
     private fun resendVerification() {
         val uuid = mUser?.id ?: return
@@ -273,22 +172,26 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
             } catch (e: ErrorResponse) {
                 isInProgress = false
 
-                when (e.statusCode) {
-                    403 -> {
-                        toast("Access Forbidden")
-                    }
-                    404 -> {
-                        toast("用户不存在")
-                    }
-                    500 -> {
-                        toast("服务器出错了")
-                    }
-                }
+                handleApiError(e)
 
             } catch (e: Exception) {
                 isInProgress = false
 
                 handleException(e)
+            }
+        }
+    }
+
+    private fun handleApiError(resp: ErrorResponse) {
+        when (resp.statusCode) {
+            403 -> {
+                toast("Access Forbidden")
+            }
+            404 -> {
+                toast("用户不存在")
+            }
+            500 -> {
+                toast("服务器出错了")
             }
         }
     }
@@ -312,32 +215,3 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     }
 }
 
-internal data class AccountItem(
-        val label: String,
-        var value: String? = null,
-        val viewType: Int,
-        val id: Int? = null
-) {
-    companion object {
-        const val ID_EMAIL = 1
-        const val ID_USER_NAME = 2
-        const val ID_PASSWORD = 3
-
-        fun create(user: Account?): List<AccountItem> {
-            val items = mutableListOf(
-                    AccountItem(label = "您的邮箱尚未验证，为保障您的账号安全，请及时验证邮箱。我们已经给您的登录邮箱发送了验证邮件，点击邮件中的链接即可。", value = "重新发送验证邮件", viewType = VIEW_TYPE_TEXT),
-                    AccountItem(label = "账号", viewType = VIEW_TYPE_SEPARATOR),
-                    AccountItem(label = "邮箱", value = user?.email, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_EMAIL),
-                    AccountItem(label = "用户名", value = user?.userName, viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_USER_NAME),
-                    AccountItem(label = "密码", value = "修改密码", viewType = VIEW_TYPE_ITEM, id = AccountItem.ID_PASSWORD),
-                    AccountItem(label = "账号绑定", viewType = VIEW_TYPE_SEPARATOR),
-                    AccountItem(label = "微信", value = "尚未绑定", viewType = VIEW_TYPE_ITEM)
-            )
-
-            if (user?.isVerified == true) {
-                items.removeAt(0)
-            }
-            return items
-        }
-    }
-}

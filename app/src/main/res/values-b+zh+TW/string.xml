@@ -136,6 +136,7 @@
 
     <string name="api_wrong_credentials">使用者名稱或密碼錯誤</string>
     <string name="api_email_taken">電子信箱已經註冊</string>
+    <string name="api_email_not_found">電子信箱尚未註冊</string>
     <string name="api_invalid_credentials">使用者名稱或密碼無效</string>
     <string name="api_bad_request">無效的請求</string>
     <string name="api_too_many_request">請求過於頻繁，請稍後再試</string>
