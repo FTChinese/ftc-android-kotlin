@@ -8,6 +8,7 @@ import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.models.Story
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.util.gson
+import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.activity_content.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI

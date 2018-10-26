@@ -14,6 +14,8 @@ import android.widget.Toast
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.MembershipActivity
 import com.ft.ftchinese.util.gson
+import com.ft.ftchinese.util.isActiveNetworkWifi
+import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_channel.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
