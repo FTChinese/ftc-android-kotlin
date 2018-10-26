@@ -43,7 +43,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
     private var mListener: OnFragmentInteractionListener? = null
 
     private var isInProgress: Boolean
-        get() = !name_save_button.isEnabled
+        get() = !save_button.isEnabled
         set(value) {
             mListener?.onProgress(value)
         }
@@ -52,7 +52,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
         get() = user_name.isEnabled
         set(value) {
             user_name.isEnabled = value
-            name_save_button.isEnabled = value
+            save_button.isEnabled = value
         }
 
     override fun onAttach(context: Context?) {
@@ -79,7 +79,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        name_save_button.setOnClickListener {
+        save_button.setOnClickListener {
             attemptSave()
         }
 

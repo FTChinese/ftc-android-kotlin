@@ -12,7 +12,6 @@ import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.PasswordUpdate
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_password.*
 import kotlinx.coroutines.experimental.Job
@@ -45,7 +44,7 @@ class PasswordFragment : Fragment(), AnkoLogger {
     private var mListener: OnFragmentInteractionListener? = null
 
     private var isInProgress: Boolean
-        get() = !password_save_button.isEnabled
+        get() = !save_button.isEnabled
         set(value) {
             mListener?.onProgress(value)
         }
@@ -56,6 +55,7 @@ class PasswordFragment : Fragment(), AnkoLogger {
             old_password.isEnabled = value
             new_password.isEnabled = value
             confirm_password.isEnabled = value
+            save_button.isEnabled = value
         }
 
     override fun onAttach(context: Context?) {
@@ -79,7 +79,7 @@ class PasswordFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        password_save_button.setOnClickListener {
+        save_button.setOnClickListener {
             info("Saving password...")
             attemptSave()
         }

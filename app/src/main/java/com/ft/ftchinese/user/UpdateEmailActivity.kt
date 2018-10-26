@@ -50,7 +50,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
      * In case of successfully uploaded data, progress bar should go away but the data input and save button should be disabled to prevent mAccount re-submitting the same data.
      */
     private var isInProgress: Boolean
-        get() = !email_save_button.isEnabled
+        get() = !save_button.isEnabled
         set(value) {
             mListener?.onProgress(value)
         }
@@ -59,7 +59,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
         get() = email.isEnabled
         set(value) {
             email.isEnabled = value
-            email_save_button.isEnabled = value
+            save_button.isEnabled = value
         }
 
     override fun onAttach(context: Context?) {
@@ -84,7 +84,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        email_save_button.setOnClickListener {
+        save_button.setOnClickListener {
             attemptSave()
         }
 
