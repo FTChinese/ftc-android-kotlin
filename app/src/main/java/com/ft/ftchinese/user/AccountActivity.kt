@@ -12,6 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.Account
+import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_account.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -59,6 +60,12 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
      * It is necessary to inform parent activity of data change?
      */
     override fun onRefresh() {
+        if (activity?.isNetworkConnected() != true) {
+            toast(R.string.prompt_no_network)
+
+            return
+        }
+
         toast(R.string.progress_refresh_account)
 
         job = launch(UI) {
@@ -168,6 +175,12 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     }
 
     private fun requestVerification() {
+        if (activity?.isNetworkConnected() != true) {
+            toast(R.string.prompt_no_network)
+
+            return
+        }
+
         isInProgress = true
         isInputAllowed = false
 

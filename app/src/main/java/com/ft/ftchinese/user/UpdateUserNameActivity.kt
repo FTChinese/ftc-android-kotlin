@@ -12,6 +12,7 @@ import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.UserNameUpdate
+import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_username.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -110,6 +111,13 @@ class UsernameFragment : Fragment(), AnkoLogger {
     }
 
     private fun save(userName: String) {
+
+        if (activity?.isNetworkConnected() != true) {
+            toast(R.string.prompt_no_network)
+
+            return
+        }
+
         val uuid = mAccount?.id ?: return
 
         isInProgress = true

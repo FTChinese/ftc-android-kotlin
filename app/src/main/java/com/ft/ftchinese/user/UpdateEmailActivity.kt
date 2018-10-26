@@ -12,6 +12,7 @@ import com.ft.ftchinese.models.EmailUpdate
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_email.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -122,6 +123,11 @@ internal class EmailFragment : Fragment(), AnkoLogger {
     }
 
     private fun save(emailStr: String) {
+        if (activity?.isNetworkConnected() != true) {
+            toast(R.string.prompt_no_network)
+
+            return
+        }
 
         // If user id is not found, we could not perform updating.
         val uuid = mAccount?.id ?: return

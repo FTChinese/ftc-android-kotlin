@@ -24,6 +24,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.Login
 import com.ft.ftchinese.models.SignUp
+import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_sign_in_or_up.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -253,6 +254,12 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
 
     // Send user credentials to API.
     private fun authenticate(email: String, password: String) {
+        if (activity?.isNetworkConnected() != true) {
+            toast(R.string.prompt_no_network)
+
+            return
+        }
+
         isInProgress = true
         isInputAllowed = false
 

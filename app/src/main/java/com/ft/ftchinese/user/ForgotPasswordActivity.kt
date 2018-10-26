@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.PasswordReset
+import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_forgot_password.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -118,6 +119,12 @@ internal class ForgotPasswordFragment : Fragment(), AnkoLogger {
     private fun sendLetter(emailStr: String) {
         isInProgress = true
         isInputAllowed = false
+
+        if (activity?.isNetworkConnected() != true) {
+            toast(R.string.prompt_no_network)
+
+            return
+        }
 
         job = launch(UI) {
             val passwordReset = PasswordReset(emailStr)

@@ -13,6 +13,7 @@ import com.ft.ftchinese.models.PasswordUpdate
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.gson
+import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_password.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -130,6 +131,12 @@ class PasswordFragment : Fragment(), AnkoLogger {
     }
 
     private fun save(oldPassword: String, newPassword: String) {
+
+        if (activity?.isNetworkConnected() != true) {
+            toast(R.string.prompt_no_network)
+
+            return
+        }
 
         val uuid = mAccount?.id ?: return
 
