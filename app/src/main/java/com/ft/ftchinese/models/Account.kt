@@ -52,11 +52,12 @@ data class Account(
         response.code()
     }
 
-    fun wxPrepayOrderAsync(membership: Membership?): Deferred<WxPrepayOrder?> = async {
+    fun wxOrderAsync(membership: Membership?): Deferred<WxPrepayOrder?> = async {
         if (membership == null) {
             return@async null
         }
         val response = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${membership.tier}/${membership.billingCycle}")
+                .noCache()
                 .setUserId(this@Account.id)
                 .setClient()
                 .body(null)
@@ -64,6 +65,17 @@ data class Account(
 
         val body = response.body()?.string()
         gson.fromJson<WxPrepayOrder>(body, WxPrepayOrder::class.java)
+    }
+
+    fun wxQueryOrderAsync(orderId: String): Deferred<WxQueryOrder> = async {
+        val resp = Fetch().get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
+                .noCache()
+                .setUserId(this@Account.id)
+                .setClient()
+                .end()
+        val body = resp.body()?.string()
+
+        gson.fromJson<WxQueryOrder>(body, WxQueryOrder::class.java)
     }
 
     fun alipayOrderAsync(membership: Membership?): Deferred<AlipayOrder?> = async {
