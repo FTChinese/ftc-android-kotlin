@@ -61,21 +61,36 @@
         <item name="android:textSize">18sp</item>
     </style>
 
+    <style name="OrigamiButton.Primary.Small">
+        <item name="android:minHeight">0dip</item>
+        <item name="android:minWidth">0dip</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+    </style>
+
     <style name="OrigamiButton.Secondary">
         <item name="android:background">@drawable/button_secondary</item>
         <item name="android:textColor">@color/colorTeal</item>
     </style>
 
-    <style name="OrigamiButton.Primary.Small">
-        <item name="android:minHeight">0dip</item>
-        <item name="android:minWidth">0dip</item>
-        <item name="android:padding">8dp</item>
-    </style>
-
     <style name="OrigamiButton.Secondary.Small">
         <item name="android:minHeight">0dip</item>
         <item name="android:minWidth">0dip</item>
-        <item name="android:padding">8dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+    </style>
+
+    <style name="OrigamiButton.Secondary.Flat">
+        <item name="android:minHeight">0dip</item>
+        <item name="android:minWidth">0dip</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:paddingStart">32dp</item>
+        <item name="android:paddingEnd">32dp</item>
     </style>
 
     <style name="OrigamiButton.Inline">
@@ -83,10 +98,6 @@
         <item name="android:textColor">@color/colorTeal</item>
         <item name="android:minHeight">0dip</item>
         <item name="android:minWidth">0dip</item>
-        <item name="android:padding">4dp</item>
-    </style>
-
-    <style name="OrigamiButton.Inline.NoPadding">
         <item name="android:padding">0dp</item>
     </style>
 
