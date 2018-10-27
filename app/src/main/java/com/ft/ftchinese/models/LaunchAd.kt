@@ -95,7 +95,7 @@ class LaunchSchedule(
     /**
      * Use date as key. For example: 20180906
      */
-    fun formatData(): Map<String, Set<LaunchAd>> {
+    private fun formatData(): Map<String, Set<LaunchAd>> {
         val prefSchedule = mutableMapOf<String, MutableSet<LaunchAd>>()
 
         val today = LocalDate.now()
