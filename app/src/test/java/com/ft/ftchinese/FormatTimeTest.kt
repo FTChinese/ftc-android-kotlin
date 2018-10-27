@@ -3,10 +3,10 @@ package com.ft.ftchinese
 import org.junit.Test
 import android.text.format.DateFormat
 import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
+import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.ISODateTimeFormat
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 class FormatTimeTest{
@@ -19,25 +19,32 @@ class FormatTimeTest{
     @Test fun useCalendar() {
         val day1 = GregorianCalendar(2018, 9, 3)
         val day2 = GregorianCalendar(2018, 9, 4)
-        System.out.println(day1.after(day2))
+        println(day1.after(day2))
     }
 
-    @Test fun useLocalDate() {
-        val day1 = LocalDate.parse("20180821", DateTimeFormatter.BASIC_ISO_DATE)
-        val day2 = LocalDate.parse("20180903", DateTimeFormatter.BASIC_ISO_DATE)
 
-        System.out.println(day1.isBefore(day2))
+    @Test fun parseBasicDate() {
+        val day1 =LocalDate.parse("20180821", ISODateTimeFormat.basicDate())
+        val day2 = LocalDate.parse("20180903", ISODateTimeFormat.basicDate())
 
+        println(day1.isBefore(day2))
     }
 
-    @Test fun useJoda() {
-        val day1 = org.joda.time.LocalDate.parse("20180821", ISODateTimeFormat.basicDate())
-        val day2 = org.joda.time.LocalDate.parse("20180903", ISODateTimeFormat.basicDate())
+    @Test fun nowToISO8601() {
+        val t = ISODateTimeFormat.dateTimeNoMillis().print(DateTime.now())
 
-        System.out.println(day1.isBefore(day2))
+        println(t)
     }
 
-    @Test fun severDays() {
+    @Test fun paseSQLDate() {
+        val date = "2018-10-27"
+
+        val dt = DateTime.parse(date, ISODateTimeFormat.date())
+
+        println(dt)
+    }
+
+    @Test fun sevenDaysLater() {
         val timestamp = "1536249600".toLong()
         val sevenDaysLater = timestamp + 7 * 24 * 60 * 60
 
@@ -54,6 +61,19 @@ class FormatTimeTest{
         val dateTime = DateTime.parse(expire, ISODateTimeFormat.dateTimeNoMillis())
 
         println(ISODateTimeFormat.date().print(dateTime))
+    }
+
+    @Test fun deduceExpireDate() {
+        val dt = "2018-02-09T08:49:49Z"
+        val inst = DateTime.parse(dt, ISODateTimeFormat.dateTimeNoMillis())
+
+        val iso8601UTC = ISODateTimeFormat.dateTimeNoMillis().print(inst.plusYears(1).withZone(DateTimeZone.UTC))
+        val iso8601Local = ISODateTimeFormat.dateTimeNoMillis().print(inst.plusYears(1))
+        val exp = ISODateTimeFormat.date().print(inst.plusYears(1))
+
+        println(iso8601UTC)
+        println(iso8601Local)
+        println(exp)
     }
 
     @Test fun alipayTimestamp() {
