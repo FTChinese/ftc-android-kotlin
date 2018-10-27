@@ -32,21 +32,26 @@
     <string name="nav_not_logged_in">您尚未登入</string>
     <string name="nav_header_desc">導覽列</string>
 
+
+
+    <string name="membership_title">　我的訂閱</string>
+    <string name="label_member_tier">會員類型</string>
+    <string name="member_tier_free">尚未成為會員</string>
+    <string name="member_tier_standard">標準會員</string>
+    <string name="member_tier_premium">高級會員</string>
+    <string name="member_tier_vip">超級會員</string>
+
     <string name="price_standard_annual">¥198.00/年</string>
     <string name="price_standard_month">¥18/月</string>
     <string name="price_premium_annual">¥1,998.00/年</string>
-    <string name="price_premium_month">¥180/月</string>
-    <string name="membership_title">　我的訂閱</string>
-    <string name="label_member_tier">會員類型</string>
-    <string name="member_tier_vip">超級會員</string>
+
+    <string name="pay_standard_year">¥198.00</string>
+    <string name="pay_standard_month">¥28.00</string>
+    <string name="pay_premium_year">¥1,998.00</string>
 
     <string name="billing_cycle_year">年</string>
     <string name="billing_cycle_month">月</string>
     <string name="vip_duration">無限期</string>
-
-    <string name="member_tier_free">尚未成為會員</string>
-    <string name="member_tier_standard">標準會員</string>
-    <string name="member_tier_premium">高級會員</string>
 
     <string name="label_member_duration">會員期限</string>
     <string name="label_member_price">支付金額</string>
@@ -64,6 +69,12 @@
     <string name="unknown_payment_method">請選擇支付方式</string>
     <string name="check_out_text">%1$s %2$s</string>
     <string name="check_out_default">支付</string>
+    <string name="request_order">創建訂單&#8230;</string>
+    <string name="done">完成</string>
+    <string name="wxpay_not_supported">您的設備不支持微信支付</string>
+    <string name="renewal_not_allowed">您已經是會員了，請勿重複購買</string>
+    <string name="create_order_failed">無法創建訂單，請稍後再試</string>
+
 
     <string name="action_title_account">帳號與安全</string>
     <string name="action_subscription">會員訂閱</string>
