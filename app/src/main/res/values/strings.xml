@@ -84,6 +84,8 @@
     <string name="wxpay_failed">支付失败</string>
     <string name="wxpay_cancelled">支付已取消</string>
     <string name="wxpay_error">无法支付</string>
+    <string name="wxpay_member_tier">您已经订阅了FT中文网 %1$s/%2$s</string>
+    <string name="wxpay_exppire_date">会员有效期：%1$s</string>
 
     <string name="action_title_account">账号与安全</string>
     <string name="action_subscription">会员订阅</string>
@@ -108,6 +110,7 @@
     <string name="title_change_username">修改用户名</string>
     <string name="title_about_us">关于我们</string>
     <string name="title_payment">收银台</string>
+    <string name="title_wxpay_result">支付结果</string>
 
     <string name="about_title1">关于FT中文网 (FTChinese.com)</string>
     <string name="about_text1">FT中文网(http://www.FTChinese.com) 是英国《金融时报》集团旗下唯一的中文商业财经网站，旨在为中国商业菁英和决策者们提供每日不可或缺的商业财经新闻、深度分析以及评论。凭借英国《金融时报》遍布全球的丰富报道资源，FT中文网深入分析对中国经济和全球商业具有影响力的重大事件，并揭示事件的来龙去脉，以真正富有国际视野的权威报道成为中国高级管理人员“必读”的商业财经资讯网站。FT中文网目前拥有逾270 万注册用户，移动产品已覆盖iOS、Android和Windows系统。2018年4月，FT中文网正式推出付费订阅业务，为专属会员提供精选资讯与个性化服务。</string>

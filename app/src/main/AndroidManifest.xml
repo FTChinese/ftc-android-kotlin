@@ -23,7 +23,7 @@
         <activity
             android:name=".wxapi.WXPayEntryActivity"
             android:exported="true"
-            android:label="会员订阅支付"
+            android:label="@string/title_wxpay_result"
             android:launchMode="singleTop"
             android:parentActivityName=".user.MembershipActivity" >
             <intent-filter>

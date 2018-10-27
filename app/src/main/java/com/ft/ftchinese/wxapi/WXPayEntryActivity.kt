@@ -35,9 +35,20 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
             if (value) {
                 progress_bar.visibility = View.VISIBLE
                 done_button.visibility = View.GONE
+                result_tv.visibility = View.GONE
             } else {
                 progress_bar.visibility = View.GONE
                 done_button.visibility = View.VISIBLE
+                result_tv.visibility = View.VISIBLE
+            }
+        }
+
+    private var isSuccess: Boolean = true
+        set(value) {
+            if (value) {
+                member_container.visibility = View.VISIBLE
+            } else {
+                member_container.visibility = View.GONE
             }
         }
 
@@ -77,11 +88,13 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 // 错误
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
                 -1 -> {
+                    isInProgress = false
                     result_tv.text = getString(R.string.wxpay_error)
                 }
                 // 用户取消
                 // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
                 -2 -> {
+                    isInProgress = false
                     result_tv.text = getString(R.string.wxpay_cancelled)
                 }
             }
@@ -94,6 +107,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         val user = mSession?.loadUser() ?: return
 
         isInProgress = true
+
         job = launch(UI) {
 
             try {
@@ -110,6 +124,8 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
                 handleApiErr(resp)
             } catch (e: Exception) {
+                e.printStackTrace()
+
                 isInProgress = false
                 handleException(e)
             }
@@ -125,11 +141,13 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         when (queryResult.paymentState) {
             // If payment success, update user sessions's member tier, expire date, billing cycle.
             "SUCCESS" -> {
+                isSuccess = true
                 resultText = getString(R.string.wxpay_done)
 
 
                 val member = subs.updateMembership(currentMember)
 
+                updateUI(member)
                 updateSession(member)
 
             }
@@ -154,6 +172,25 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         }
 
         result_tv.text = resultText
+    }
+
+    private fun updateUI(member: Membership) {
+
+        val tierText = when (member.tier) {
+            Membership.TIER_STANDARD -> getString(R.string.member_tier_standard)
+            Membership.TIER_PREMIUM -> getString(R.string.member_tier_premium)
+            else -> ""
+        }
+
+        val cycleText = when (member.billingCycle) {
+            Membership.BILLING_YEARLY -> getString(R.string.billing_cycle_year)
+            Membership.BILLING_MONTHLY -> getString(R.string.billing_cycle_month)
+            else -> ""
+        }
+
+        tier_tv.text = getString(R.string.wxpay_member_tier, tierText, cycleText)
+
+        expire_tv.text = getString(R.string.wxpay_exppire_date, member.expireDate)
     }
 
     private fun handleApiErr(resp: ErrorResponse) {

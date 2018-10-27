@@ -109,6 +109,7 @@
     <string name="title_change_username">修改使用者名稱</string>
     <string name="title_about_us">關於我們</string>
     <string name="title_payment">付費中心 </string>
+    <string name="title_wxpay_result">支付结果</string>
 
     <string name="about_title1">關於FT中文網(FTChinese.com)</string>
     <string name="about_text1">FT中文網(http://www.FTChinese.com) 是英國《金融時報》集團旗下唯一的中文商業財經網站，旨在為中國商業菁英和決策者們提供每日不可或缺的商業財經新聞、深度分析以及評論。憑借英國《金融時報》遍布全球的豐富報導資源，FT中文網深入分析對中國經濟和全球商業具有影響力的重大事件，並揭示事件的來龍去脈，以真正富有國際視野的權威報道成為中國高級管理人員“必讀”的商業財經資訊網站。FT中文網目前擁有逾270 萬註冊用戶，手機產品已覆蓋iOS、Android和Windows系統。2018年4月，FT中文網正式推出付費訂閱業務，為專屬會員提供精選資訊與個性化服務。</string>
