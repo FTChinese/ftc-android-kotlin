@@ -12,6 +12,7 @@ private const val PREF_AVATAR_URL = "avatar_url"
 private const val PREF_IS_VIP = "is_vip"
 private const val PREF_IS_VERIFIED = "is_verified"
 private const val PREF_MEMBER_TIER = "member_tier"
+private const val PREF_MEMBER_CYCLE = "member_billing_cycle"
 private const val PREF_MEMBER_EXPIRE = "member_expire"
 private const val PREF_IS_LOGGED_IN = "is_logged_in"
 
@@ -27,6 +28,7 @@ class SessionManager(context: Context) {
         editor.putBoolean(PREF_IS_VIP, user.isVip)
         editor.putBoolean(PREF_IS_VERIFIED, user.isVerified)
         editor.putString(PREF_MEMBER_TIER, user.membership.tier)
+        editor.putString(PREF_MEMBER_CYCLE, user.membership.billingCycle)
         editor.putString(PREF_MEMBER_EXPIRE, user.membership.expireDate)
 
         editor.putBoolean(PREF_IS_LOGGED_IN, true)
@@ -46,14 +48,10 @@ class SessionManager(context: Context) {
         editor.apply()
     }
 
-    fun updateMemberTier(tier: String) {
-        editor.putString(PREF_MEMBER_TIER, tier)
-
-        editor.apply()
-    }
-
-    fun updateExpireDate(date: String) {
-        editor.putString(PREF_MEMBER_EXPIRE, date)
+    fun updateMembership(member: Membership) {
+        editor.putString(PREF_MEMBER_TIER, member.tier)
+        editor.putString(PREF_MEMBER_EXPIRE, member.expireDate)
+        editor.putString(PREF_MEMBER_CYCLE, member.billingCycle)
 
         editor.apply()
     }
@@ -65,10 +63,11 @@ class SessionManager(context: Context) {
         val avatarUrl = sharedPreferences.getString(PREF_AVATAR_URL, "")
         val isVip = sharedPreferences.getBoolean(PREF_IS_VIP, false)
         val isVerified = sharedPreferences.getBoolean(PREF_IS_VERIFIED, false)
-        val memberTier = sharedPreferences.getString(PREF_MEMBER_TIER, Membership.TIER_FREE)
+        val memberTier = sharedPreferences.getString(PREF_MEMBER_TIER, "")
+        val billingCycle = sharedPreferences.getString(PREF_MEMBER_CYCLE, "")
         val expireDate = sharedPreferences.getString(PREF_MEMBER_EXPIRE, null)
 
-        val membership = Membership(tier = memberTier, expireDate = expireDate)
+        val membership = Membership(tier = memberTier, billingCycle = billingCycle, expireDate = expireDate)
 
         return Account(
                 id = userId,
@@ -86,9 +85,9 @@ class SessionManager(context: Context) {
     }
 
     fun isPaidMember(): Boolean {
-        val type = sharedPreferences.getString(PREF_MEMBER_TIER, null) ?: return false
+        val tier = sharedPreferences.getString(PREF_MEMBER_TIER, null) ?: return false
 
-        return type == Membership.TIER_STANDARD || type == Membership.TIER_PREMIUM
+        return tier == Membership.TIER_STANDARD || tier == Membership.TIER_PREMIUM
     }
 
     fun isMembershipExpired(): Boolean {
