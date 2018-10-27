@@ -8,19 +8,16 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.ft.ftchinese.BuildConfig
-
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Membership
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.util.RequestCode
-import com.tencent.mm.opensdk.openapi.IWXAPI
-import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.fragment_membership.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
+
 
 class MembershipActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {
@@ -46,7 +43,6 @@ class MembershipActivity : SingleFragmentActivity() {
 class MembershipFragment : Fragment(), AnkoLogger {
     private var mListener: OnFragmentInteractionListener? = null
     private var mUser: Account? = null
-    private var wxApi: IWXAPI? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -60,7 +56,6 @@ class MembershipFragment : Fragment(), AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        wxApi = WXAPIFactory.createWXAPI(context, BuildConfig.WECAHT_APP_ID)
 
         info("onCreate finished")
     }
@@ -81,9 +76,12 @@ class MembershipFragment : Fragment(), AnkoLogger {
         }
         mUser = SessionManager.getInstance(ctx).loadUser()
 
-        // Account is not logged in
+        // User is not logged in
         if (mUser == null) {
+            // Do not show membership box
             membership_container.visibility = View.GONE
+            // Do not show renewal button
+            renewal_button.visibility = View.GONE
 
             paywall_login_button.setOnClickListener {
                 SignInActivity.start(activity)
@@ -129,28 +127,42 @@ class MembershipFragment : Fragment(), AnkoLogger {
 
     private fun updateUI() {
 
-        if (mUser?.isVip == true) {
+        val user = mUser ?: return
+        if (user.isVip) {
             tier_value.text = getString(R.string.member_tier_vip)
             duration_value.text = getString(R.string.vip_duration)
 
             return
         }
 
-        val cycleText = when(mUser?.membership?.billingCycle) {
+        val cycleText = when(user.membership.billingCycle) {
             Membership.BILLING_YEARLY -> getString(R.string.billing_cycle_year)
             Membership.BILLING_MONTHLY -> getString(R.string.billing_cycle_month)
             else -> ""
         }
 
-        tier_value.text = when (mUser?.membership?.tier) {
-            Membership.TIER_FREE -> getString(R.string.member_tier_free)
+        tier_value.text = when (user.membership.tier) {
             Membership.TIER_STANDARD -> getString(R.string.member_tier_standard) + "/" + cycleText
             Membership.TIER_PREMIUM -> getString(R.string.member_tier_premium) + "/" + cycleText
-            else -> null
+            else -> getString(R.string.member_tier_free)
         }
 
         // Show expiration date
-        duration_value.text = mUser?.membership?.expireDate
+        duration_value.text = user.membership.expireDate
+
+        // Test if renewal button should be visible.
+        // Only the current date to expire date is less than a billing cycle will the user allowed to renew.
+        if (user.membership.isRenewable) {
+            renewal_button.visibility = View.VISIBLE
+
+            // For renewal use user's current membership tier and billing cycle
+            renewal_button.setOnClickListener {
+                PaymentActivity.startForResult(activity, RequestCode.PAYMENT, user.membership.tier, user.membership.billingCycle)
+            }
+
+        } else {
+            renewal_button.visibility = View.GONE
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
