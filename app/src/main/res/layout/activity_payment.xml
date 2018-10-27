@@ -30,19 +30,19 @@
                 android:text="@string/product_overview"
                 android:textSize="18sp" />
 
-            <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
+            <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp">
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bottom_border_grey"
+                android:paddingTop="4dp"
+                android:paddingBottom="16dp">
 
                 <TextView
                     android:id="@+id/member_tier_label"
                     style="@style/FTCText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
                     android:text="@string/label_member_tier"
                     app:layout_constraintEnd_toStartOf="@+id/member_tier_tv"
                     app:layout_constraintHorizontal_chainStyle="spread_inside"
@@ -96,7 +96,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:divider="@color/colorBlack30"
+                android:divider="@color/colorBlack20"
                 android:showDividers="middle">
 
                 <RadioButton
@@ -121,16 +121,16 @@
                     android:textSize="18sp"
                     android:onClick="onSelectPaymentMethod"/>
 
-                <RadioButton
-                    android:id="@+id/pay_by_stripe"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:drawableStart="@drawable/stripe"
-                    android:drawablePadding="20dp"
-                    android:text="@string/pay_by_stripe"
-                    android:textSize="18sp"
-                    android:onClick="onSelectPaymentMethod"/>
+                <!--<RadioButton-->
+                    <!--android:id="@+id/pay_by_stripe"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginTop="8dp"-->
+                    <!--android:drawableStart="@drawable/stripe"-->
+                    <!--android:drawablePadding="20dp"-->
+                    <!--android:text="@string/pay_by_stripe"-->
+                    <!--android:textSize="18sp"-->
+                    <!--android:onClick="onSelectPaymentMethod"/>-->
             </RadioGroup>
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
