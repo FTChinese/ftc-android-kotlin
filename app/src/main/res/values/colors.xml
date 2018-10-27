@@ -7,6 +7,7 @@
     <color name="colorBlack">#000000</color>
     <color name="colorBlack5">#f2e5da</color>
     <color name="colorBlack10">#e6d9ce</color>
+    <!-- Color for grey border used by ft.com -->
     <color name="colorBlack20">#ccc1b7</color>
     <color name="colorBlack30">#b3a9a0</color>
     <color name="colorBlack40">#999189</color>
