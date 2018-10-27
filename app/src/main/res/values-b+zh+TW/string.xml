@@ -75,6 +75,16 @@
     <string name="renewal_not_allowed">您已經是會員了，請勿重複購買</string>
     <string name="create_order_failed">無法創建訂單，請稍後再試</string>
 
+    <string name="order_not_found">沒有查詢到訂單，請稍後刷新</string>
+    <string name="wxpay_done">支付成功</string>
+    <string name="wxpay_refund">轉入退款</string>
+    <string name="wxpay_not_paid">未支付</string>
+    <string name="wxpay_closed">交易已關閉</string>
+    <string name="wxpay_revoked">已撤銷</string>
+    <string name="wxpay_pending">正在支付</string>
+    <string name="wxpay_failed">支付失敗</string>
+    <string name="wxpay_cancelled">支付已取消</string>
+    <string name="wxpay_error">无法支付</string>
 
     <string name="action_title_account">帳號與安全</string>
     <string name="action_subscription">會員訂閱</string>
