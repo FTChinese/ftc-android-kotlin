@@ -16,45 +16,47 @@
             android:id="@+id/membership_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp">
+            android:layout_margin="16dp"
+            android:background="@drawable/bottom_border_grey"
+            android:paddingBottom="16dp">
 
             <TextView
                 android:id="@+id/membership_title"
+                style="@style/FTCTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/membership_title"
-                style="@style/FTCTitle"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/tier_label"
+                style="@style/FTCText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/label_member_tier"
-                style="@style/FTCText"
                 app:layout_constraintEnd_toStartOf="@id/tier_value"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/membership_title"/>
+                app:layout_constraintTop_toBottomOf="@+id/membership_title" />
 
             <TextView
                 android:id="@+id/tier_value"
+                style="@style/FTCText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/FTCText"
                 app:layout_constraintBaseline_toBaselineOf="@+id/tier_label"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/tier_label" />
 
             <TextView
                 android:id="@+id/duration_label"
+                style="@style/FTCText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/label_member_duration"
-                style="@style/FTCText"
                 app:layout_constraintEnd_toStartOf="@id/duration_value"
                 app:layout_constraintHorizontal_chainStyle="spread_inside"
                 app:layout_constraintStart_toStartOf="parent"
@@ -62,27 +64,25 @@
 
             <TextView
                 android:id="@+id/duration_value"
+                style="@style/FTCText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/FTCText"
                 app:layout_constraintBaseline_toBaselineOf="@id/duration_label"
                 app:layout_constraintEnd_toEndOf="@+id/tier_value"
                 app:layout_constraintStart_toEndOf="@id/duration_label" />
 
 
-            <!--<Button-->
-                <!--android:id="@+id/upgrade_to_premium"-->
-                <!--style="@style/OrigamiButton.Primary.Small"-->
-                <!--android:layout_width="0dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginTop="32dp"-->
-                <!--android:text="升级成高级会员"-->
-                <!--android:visibility="gone"-->
-                <!--app:layout_constraintEnd_toEndOf="@+id/duration_value"-->
-                <!--app:layout_constraintStart_toStartOf="@+id/duration_label"-->
-                <!--app:layout_constraintTop_toBottomOf="@+id/duration_label" />-->
-
         </android.support.constraint.ConstraintLayout>
+
+        <!-- Only show this button who is a member and will expire -->
+        <Button
+            android:id="@+id/renewal_button"
+            style="@style/OrigamiButton.Primary.Small"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:text="我要续订" />
 
         <TextView
             android:id="@+id/paywall_title"
@@ -114,7 +114,7 @@
 
             <Button
                 android:id="@+id/paywall_login_button"
-                style="@style/OrigamiButton.Inline.NoPadding"
+                style="@style/OrigamiButton.Inline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/action_login"/>
@@ -135,7 +135,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bottom_border"
+                    android:background="@drawable/bottom_border_teal"
                     android:layout_marginBottom="8dp"
                     android:text="@string/member_tier_standard"
                     style="@style/FTCTitle" />
@@ -189,7 +189,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:background="@drawable/bottom_border"
+                    android:background="@drawable/bottom_border_teal"
                     android:text="@string/member_tier_premium"
                     style="@style/FTCTitle" />
 
