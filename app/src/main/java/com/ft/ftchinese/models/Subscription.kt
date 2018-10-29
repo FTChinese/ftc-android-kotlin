@@ -33,18 +33,15 @@ data class WxQueryOrder(
         val totalFee: String,
         val transactionId: String,
         val ftcOrderId: String,
-        val paidAt: String,
+        val paidAt: String, // ISO8601
         val paymentStateDesc: String
-) {
-    fun deduceExpireDate(): String {
-        val inst = DateTime.parse(paidAt, ISODateTimeFormat.dateTimeNoMillis())
-        return ISODateTimeFormat
-                .date()
-                .print(
-                        inst.plusYears(1).withZone(DateTimeZone.UTC)
-                )
-    }
-}
+)
+
+data class AliVerifiedOrder(
+        val ftcOrderId: String,
+        val aliOrderId: String,
+        val paidAt: String // ISO8601
+)
 
 data class Subscription(
         val orderId: String,
@@ -80,7 +77,9 @@ data class Subscription(
                 .print(newInst)
     }
 
+    // Create new or extended membership based on the current one.
     fun updateMembership(currentMember: Membership): Membership {
+        // If user is renewing, add billing cycle to the current expire date
         if (currentMember.isRenewable) {
             return Membership(
                     tier = tierToBuy,
@@ -89,6 +88,7 @@ data class Subscription(
             )
         }
 
+        // If this is a new subscription, expire date is the payment confirmation time plus billing cycle.
         return Membership(
                 tier = tierToBuy,
                 billingCycle = billingCycle,
@@ -103,6 +103,10 @@ data class Subscription(
         private const val PREF_BILLING_CYCLE = "billing_cycle"
         private const val PREF_PAYMENT_METHOD = "payment_method"
         private const val PREF_CREATED_AT = "create_at"
+
+        const val PAYMENT_METHOD_ALI = 1
+        const val PAYMENT_METHOD_WX = 2
+        const val PAYMENT_METHOD_STRIPE = 3
 
         fun load(ctx: Context): Subscription? {
             val pref = ctx.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
