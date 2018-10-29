@@ -20,12 +20,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Origami">
+        <!-- WXPayEntryActivity does not need parent activity since that is useless. -->
         <activity
             android:name=".wxapi.WXPayEntryActivity"
             android:exported="true"
             android:label="@string/title_wxpay_result"
-            android:launchMode="singleTop"
-            android:parentActivityName=".user.MembershipActivity" >
+            android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
