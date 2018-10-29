@@ -12,6 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Membership
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.Account
+import com.ft.ftchinese.models.Subscription
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.fragment_membership.*
 import org.jetbrains.anko.AnkoLogger
@@ -19,9 +20,30 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 
-class MembershipActivity : SingleFragmentActivity() {
+class MembershipActivity : SingleFragmentActivity(), AnkoLogger {
     override fun createFragment(): Fragment {
         return MembershipFragment.newInstance()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        info("onActivityResult requestCode: $requestCode, resultCode: $resultCode")
+
+        // When user selected wechat pay in PaymentActivity, it kills itself and tells MembershipActivity to finish too.
+        // Otherwise after user clicked done button in WXPayEntryActivity, MembershipActivity will be started again, and user see this activity two times after clicked back button.
+        if (requestCode == RequestCode.PAYMENT) {
+            if (resultCode == Activity.RESULT_OK) {
+
+                val paymentMethod = data?.getIntExtra(EXTRA_PAYMENT_METHOD, 0)
+                when (paymentMethod) {
+                    Subscription.PAYMENT_METHOD_WX -> {
+                        finish()
+                    }
+                    Subscription.PAYMENT_METHOD_ALI -> {
+                        // update ui
+                    }
+                }
+            }
+        }
     }
 
     companion object {
@@ -162,19 +184,6 @@ class MembershipFragment : Fragment(), AnkoLogger {
 
         } else {
             renewal_button.visibility = View.GONE
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == RequestCode.PAYMENT) {
-            if (resultCode != Activity.RESULT_OK) {
-                toast("支付失败")
-                return
-            }
-
-            // Get memberTier and billingCycle from intent, then update mUser, update ui.
-            updateUI()
-            toast("支付成功")
         }
     }
 
