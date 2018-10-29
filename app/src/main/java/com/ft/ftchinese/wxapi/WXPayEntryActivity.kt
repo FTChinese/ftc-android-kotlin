@@ -1,5 +1,6 @@
 package com.ft.ftchinese.wxapi
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -7,6 +8,7 @@ import android.view.View
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
+import com.ft.ftchinese.user.MembershipActivity
 import com.ft.ftchinese.util.handleException
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
@@ -27,7 +29,6 @@ import org.jetbrains.anko.toast
 class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     private var api: IWXAPI? = null
     private var job: Job? = null
-//    private var mAccount: Account? = null
     private var mSession: SessionManager? = null
 
     private var isInProgress: Boolean = false
@@ -35,11 +36,11 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
             if (value) {
                 progress_bar.visibility = View.VISIBLE
                 done_button.visibility = View.GONE
-                result_tv.visibility = View.GONE
+                heading_tv.visibility = View.GONE
             } else {
                 progress_bar.visibility = View.GONE
                 done_button.visibility = View.VISIBLE
-                result_tv.visibility = View.VISIBLE
+                heading_tv.visibility = View.VISIBLE
             }
         }
 
@@ -61,9 +62,29 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID)
 
-//        mAccount = SessionManager.getInstance(this).loadUser()
-
         mSession = SessionManager.getInstance(this)
+
+        // Only used to test WXPayEntryActivity's UI.
+        // Comment them for production.
+//        val isUiTest = intent.getBooleanExtra(EXTRA_IS_TEST, false)
+//
+//        if (isUiTest) {
+//            val member = Membership(
+//                    tier = Membership.TIER_STANDARD,
+//                    billingCycle = Membership.BILLING_MONTHLY,
+//                    expireDate = "2018-12-12"
+//            )
+//            isInProgress = false
+//            isSuccess = true
+//            heading_tv.text = getString(R.string.wxpay_done)
+//            updateUI(member)
+//
+//            return
+//        } else {
+//            isInProgress = false
+//            heading_tv.text = getString(R.string.wxpay_cancelled)
+//            return
+//        }
 
         api?.handleIntent(intent, this)
     }
@@ -89,13 +110,13 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
                 -1 -> {
                     isInProgress = false
-                    result_tv.text = getString(R.string.wxpay_error)
+                    heading_tv.text = getString(R.string.wxpay_error)
                 }
                 // 用户取消
                 // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
                 -2 -> {
                     isInProgress = false
-                    result_tv.text = getString(R.string.wxpay_cancelled)
+                    heading_tv.text = getString(R.string.wxpay_cancelled)
                 }
             }
         }
@@ -115,6 +136,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
                 isInProgress = false
 
+                // confirmedAt is ISO8601 string.
                 subs.confirmedAt = payResult.paidAt
 
                 handleQueryResult(payResult, subs)
@@ -147,6 +169,8 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
                 val member = subs.updateMembership(currentMember)
 
+                info("New membership: $member")
+
                 updateUI(member)
                 updateSession(member)
 
@@ -171,7 +195,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
             }
         }
 
-        result_tv.text = resultText
+        heading_tv.text = resultText
     }
 
     private fun updateUI(member: Membership) {
@@ -222,6 +246,10 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     }
 
     fun onClickDone(view: View) {
+        // Start MembershipActivity manually here.
+        // This is the only way to refresh user data.
+        MembershipActivity.start(this)
+
         finish()
     }
 
@@ -230,4 +258,24 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
         job?.cancel()
     }
+
+    // Force back button to start MembershipActivity so that use feels he is returning to previous MembershipActivity while actually the old instance already killed.
+    // This hacking is used to refresh user data.
+    // On iOS you do not need to handle it since there's no back button.
+    override fun onBackPressed() {
+        super.onBackPressed()
+        MembershipActivity.start(this)
+        finish()
+    }
+
+    // For test only.
+//    companion object {
+//        private const val EXTRA_IS_TEST = "ui_test"
+//        fun start(activity: Activity?) {
+//            val intent = Intent(activity, WXPayEntryActivity::class.java)
+//            intent.putExtra(EXTRA_IS_TEST, false)
+//
+//            activity?.startActivity(intent)
+//        }
+//    }
 }
