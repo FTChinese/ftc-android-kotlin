@@ -9,7 +9,7 @@
         layout="@layout/simple_toolbar" />
 
     <TextView
-        android:id="@+id/result_tv"
+        android:id="@+id/heading_tv"
         style="@style/FTCTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,29 +17,29 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:visibility="gone"
+        android:text="@string/wxpay_done"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
     <LinearLayout
         android:id="@+id/member_container"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginTop="32dp"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/result_tv">
+        app:layout_constraintEnd_toEndOf="@+id/heading_tv"
+        app:layout_constraintStart_toStartOf="@+id/heading_tv"
+        app:layout_constraintTop_toBottomOf="@+id/heading_tv">
 
         <TextView
             android:id="@+id/tier_tv"
             style="@style/FTCText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="您已经订阅了FT中文网 标准会员/年"
+            android:layout_marginBottom="16dp"
             android:textAlignment="center" />
 
         <TextView
@@ -47,8 +47,7 @@
             style="@style/FTCText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="会员有效期：2018-11-27"
+            android:layout_marginBottom="16dp"
             android:textAlignment="center" />
 
     </LinearLayout>
@@ -59,7 +58,9 @@
         style="@style/OrigamiButton.Secondary.Flat"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginBottom="48dp"
         android:onClick="onClickDone"
         android:text="@string/done"
