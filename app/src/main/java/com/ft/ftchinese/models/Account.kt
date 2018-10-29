@@ -52,7 +52,7 @@ data class Account(
         response.code()
     }
 
-    fun wxOrderAsync(membership: Membership?): Deferred<WxPrepayOrder?> = async {
+    fun wxPlaceOrderAsync(membership: Membership?): Deferred<WxPrepayOrder?> = async {
         if (membership == null) {
             return@async null
         }
@@ -78,7 +78,7 @@ data class Account(
         gson.fromJson<WxQueryOrder>(body, WxQueryOrder::class.java)
     }
 
-    fun alipayOrderAsync(membership: Membership?): Deferred<AlipayOrder?> = async {
+    fun aliPlaceOrderAsync(membership: Membership?): Deferred<AlipayOrder?> = async {
         if (membership == null) {
             return@async null
         }
@@ -90,6 +90,18 @@ data class Account(
 
         val body = response.body()?.string()
         gson.fromJson<AlipayOrder>(body, AlipayOrder::class.java)
+    }
+
+    fun aliVerifyOrderAsync(content: String): Deferred<AliVerifiedOrder> = async {
+        val resp = Fetch().post("${SubscribeApi.ALI_VERIFY_APP_PAY}")
+                .noCache()
+                .setUserId(this@Account.id)
+                .setClient()
+                .body(content)
+                .end()
+        val body = resp.body()?.string()
+
+        gson.fromJson<AliVerifiedOrder>(body, AliVerifiedOrder::class.java)
     }
 
     fun starArticle(articleId: String): Deferred<Boolean> = async {
