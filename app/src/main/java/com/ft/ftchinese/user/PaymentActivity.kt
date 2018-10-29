@@ -11,8 +11,8 @@ import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
+import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
-import com.google.gson.JsonSyntaxException
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -25,7 +25,6 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
 private val priceIds = mapOf<String, Int>(
@@ -34,22 +33,45 @@ private val priceIds = mapOf<String, Int>(
         "premium_year" to R.string.pay_premium_year
 )
 
+const val EXTRA_PAYMENT_METHOD = "payment_method"
+
 class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
     private var mMembership: Membership? = null
     private var mPaymentMethod: Int? = null
     private var mPriceText: String? = null
     private var wxApi: IWXAPI? = null
-    private var mAccount: Account? = null
+//    private var mAccount: Account? = null
+    private var mSession: SessionManager? = null
     private var job: Job? = null
 
+    private var isInProgress: Boolean = false
+        set(value) {
+            if (value) {
+                progress_bar.visibility = View.VISIBLE
+            } else {
+                progress_bar.visibility = View.GONE
+            }
+        }
+
+    private var isInputAllowed: Boolean = true
+        set(value) {
+            check_out.isEnabled = value
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Alipay sandbox.
+        // Comment out on production.
+//        EnvUtils.setEnv(EnvUtils.EnvEnum.SANDBOX)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment)
 
         // Initialize wechat pay
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID)
-        mAccount = SessionManager.getInstance(this).loadUser()
+//        mAccount = SessionManager.getInstance(this).loadUser()
+
+        mSession = SessionManager.getInstance(this)
 
         info("onCreate finished")
 
@@ -132,6 +154,10 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                 aliPay()
             }
             Membership.PAYMENT_METHOD_WX -> {
+                // The commented codes are used for testing WXPayEntryActivity ui only.
+//                WXPayEntryActivity.start(this)
+//                setResult(Activity.RESULT_OK)
+//                finish()
                 wxPay()
             }
             Membership.PAYMENT_METHOD_STRIPE -> {
@@ -159,18 +185,23 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
         val member = mMembership ?: return
         val payMethod = mPaymentMethod ?: return
+        val user = mSession?.loadUser() ?: return
 
-        showProgress(true)
+        isInProgress = true
+        isInputAllowed = false
 
         job = launch(UI) {
 
             try {
                 // Request server to create order
-                val wxOrder = mAccount?.wxOrderAsync(member)?.await()
+                val wxOrder = user.wxPlaceOrderAsync(member).await()
 
-                showProgress(false)
+                isInProgress = false
+
                 if (wxOrder == null) {
                     toast(R.string.create_order_failed)
+
+                    isInputAllowed = true
 
                     return@launch
                 }
@@ -189,8 +220,6 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                 wxApi?.registerApp(req.appId)
                 val result = wxApi?.sendReq(req)
 
-                showProgress(false)
-
                 info("Call sendReq result: $result")
 
                 // Save order details
@@ -205,67 +234,195 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                     subs.save(this@PaymentActivity)
                 }
 
+                // Tell MembershipActivity to kill itself.
                 setResult(Activity.RESULT_OK)
 
                 finish()
 
             } catch (ex: ErrorResponse) {
-                showProgress(false)
+                isInProgress = false
+                isInputAllowed = true
 
                 handleApiError(ex)
 
-            } catch (ex: JsonSyntaxException) {
-                toast("Server response is not valid JSON")
-
             } catch (e: Exception) {
-                showProgress(false)
+                e.printStackTrace()
 
-                toast(e.toString())
+                isInProgress = false
+                isInputAllowed = true
+
+                handleException(e)
             }
         }
     }
 
     private fun aliPay() {
-        showProgress(true)
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
+
+            return
+        }
+
+        val member = mMembership ?: return
+        val payMethod = mPaymentMethod ?: return
+        val user = mSession?.loadUser() ?: return
+
+        isInProgress = true
+        isInputAllowed = false
+
         job = launch(UI) {
+
+            toast(R.string.request_order)
+
+            // Get order from server
             val aliOrder = try {
-                mAccount?.alipayOrderAsync(mMembership)?.await()
+                val aliOrder = user.aliPlaceOrderAsync(mMembership).await()
+                isInProgress = false
+
+                aliOrder
+            } catch (resp: ErrorResponse) {
+                isInProgress = false
+                isInputAllowed = true
+
+                handleApiError(resp)
+
+                return@launch
             } catch (e: Exception) {
                 e.printStackTrace()
-                toast("$e")
 
-                showProgress(false)
+                isInProgress = false
+                isInputAllowed = true
+
+                handleException(e)
+
+                return@launch
+            } ?: return@launch
+
+
+            info("Alipay order: $aliOrder")
+
+            // Save this subscription data.
+            val subs = Subscription(
+                    orderId = aliOrder.ftcOrderId,
+                    tierToBuy = member.tier,
+                    billingCycle = member.billingCycle,
+                    paymentMethod = payMethod
+            )
+
+            subs.save(this@PaymentActivity)
+
+            // Call ali sdk asynchronously.
+            val payJob = async {
+                val payTask = PayTask(this@PaymentActivity)
+                payTask.payV2(aliOrder.param, true)
+            }
+
+            // You will get hte pay result after Zhifubao's popup disappeared.
+            val payResult = try {
+                /**
+                 * Result is a map:
+                 * {
+                 *  "memo": "",
+                 *  "result": "",
+                 *   "resultStatus": "9000"
+                 * }
+                 * NOTE result field is JSON but you cannot use it as JSON.
+                 * You could only use it as a string
+                 */
+                payJob.await()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+
+                isInProgress = false
+                isInputAllowed = true
+
+                handleException(e)
 
                 return@launch
             }
 
-            info("Alipay order: $aliOrder")
+            info("Alipay result: $payResult")
 
-            val payJob = async {
-                val alipay = PayTask(this@PaymentActivity)
-                val result = alipay.payV2(aliOrder?.param, true)
+            val resultStatus = payResult["resultStatus"]
+            val msg = payResult["memo"] ?: getString(R.string.wxpay_failed)
 
-                result
+
+            // Verify response on server.
+            if (resultStatus != "9000") {
+
+                toast(msg)
+
+                return@launch
             }
 
-            try {
-                val result = payJob.await()
+            val appPayResp = payResult["result"] ?: return@launch
 
-                info("Alipay result: $result")
+            // query server
+            val verifiedOrder = user.aliVerifyOrderAsync(appPayResp).await()
 
-                setResult(Activity.RESULT_OK)
+            // update subs.confirmedAt
+            subs.confirmedAt = verifiedOrder.paidAt
 
-                finish()
+            // handle verification result.
 
-            } catch (e: Exception) {
-                e.printStackTrace()
-                toast("$e")
+            val updatedMembership = subs.updateMembership(user.membership)
 
-            } finally {
-                showProgress(false)
+            mSession?.updateMembership(updatedMembership)
+
+            val intent = Intent().apply {
+                putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_ALI)
             }
+
+            setResult(Activity.RESULT_OK, intent)
+            finish()
+        }
+    }
+
+    private fun handleAlipayResult(result: Map<String, String>) {
+        val msg = result["memo"]
+        if (msg != null) {
+            toast(msg)
         }
 
+        when (result["resultStatus"]) {
+            // 订单支付成功
+            "9000" -> {
+
+                val appPayResp = result["result"]
+
+                setResult(Activity.RESULT_OK)
+                finish()
+            }
+            // 正在处理中，支付结果未知
+            "8000" -> {
+
+            }
+            // 订单支付失败
+            "4000" -> {
+
+            }
+            // 重复请求
+            "5000" -> {
+
+            }
+            // 用户中途取消
+            "6001" -> {
+
+            }
+            // 网络连接出错
+            "6002" -> {
+
+            }
+            // 支付结果未知（有可能已经支付成功），请查询商户订单列表中订单的支付状态
+            "6004" -> {
+
+            }
+            // 其它支付错误
+            else -> {
+
+            }
+        }
     }
 
     private fun stripePay() {
@@ -292,15 +449,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         }
     }
 
-    private fun showProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
 
-        check_out.isEnabled = !show
-    }
 
     override fun onDestroy() {
         super.onDestroy()
