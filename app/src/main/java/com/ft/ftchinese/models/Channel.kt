@@ -39,6 +39,7 @@ data class ChannelMeta(
  * iOS equivalent might be Page/Layouts/Content/ContentItem.swift#ContentItem
  * The fields are collected from all HTML elements `div.item-container-app`.
  * See https://github.com/FTChinese/android-client/app/scripts/list.js.
+ *
  * In short it used those attributes:
  * `data-id` for `id`
  * `data-tier` for tier. Possible values: `story`, `interactive`,
@@ -118,10 +119,19 @@ data class ChannelItem(
         get() {
             return when(type) {
                 "story", "premium" -> "https://api.ftmailbox.com/index.php/jsapi/get_story_more_info/$id"
-                "interactive" -> "https://api003.ftmailbox.com/interactive/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
+                "interactive" -> {
+                    // https://webnodeiv.ftchinese.com/interactive/12751?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes
+                    return if (subType == SUB_TYPE_RADIO) {
+//                        "https://api003.ftmailbox.com/$type/$id?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes"
+                        "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
+                    } else {
+                        "https://api003.ftmailbox.com/interactive/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
+                    }
+
+                }
                 "gym", "special" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp"
                 "video" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&004"
-                "radio" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&exclusive"
+
                 else -> null
             }
         }

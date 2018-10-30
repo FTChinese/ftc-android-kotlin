@@ -87,6 +87,7 @@ class WebContentActivity : AbsContentActivity() {
 
     override fun load() {
         if (apiUrl != null) {
+            info("Load url $apiUrl")
             web_view.loadUrl(apiUrl)
             showProgress(false)
         } else {

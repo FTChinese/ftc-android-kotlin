@@ -12,7 +12,7 @@ import android.view.ViewGroup
 import android.webkit.*
 import android.widget.Toast
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.user.MembershipActivity
+import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isActiveNetworkWifi
 import com.ft.ftchinese.util.isNetworkConnected
@@ -23,7 +23,6 @@ import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
-import java.lang.reflect.Member
 
 
 /**
@@ -301,11 +300,12 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          */
         @JavascriptInterface
         fun postItems(message: String) {
-            info("Posted mFollows: $message")
 
             val channelContent = gson.fromJson<ChannelContent>(message, ChannelContent::class.java)
 
             channelItems = channelContent.sections[0].lists[0].items
+
+            info("Articles list in a channel: $channelItems")
             channelMeta = channelContent.meta
         }
 
@@ -370,7 +370,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
                 if (sessionManager == null) {
                     toast(R.string.prompt_member_restricted)
-                    MembershipActivity.start(context)
+                    SubscriptionActivity.start(context)
                     return
                 }
 
@@ -379,7 +379,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                  */
                 if (!sessionManager.isPaidMember() || sessionManager.isMembershipExpired()) {
                     toast(R.string.prompt_member_restricted)
-                    MembershipActivity.start(context)
+                    SubscriptionActivity.start(context)
                     return
                 }
 
@@ -394,15 +394,19 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         private fun startReading(channelItem: ChannelItem) {
             when (channelItem.type) {
                 ChannelItem.TYPE_STORY, ChannelItem.TYPE_PREMIUM -> {
-                    info("Start story activity")
+                    info("Start StoryActivity")
 
                     StoryActivity.start(activity, channelItem)
                 }
 
                 ChannelItem.TYPE_INTERACTIVE -> {
-                    if (channelItem.type == ChannelItem.SUB_TYPE_RADIO) {
+                    info("Clicked an interactive: $channelItem")
+
+                    if (channelItem.subType == ChannelItem.SUB_TYPE_RADIO) {
+                        info("Start RadioActivity")
                         RadioActivity.start(context, channelItem)
                     } else {
+                        info("Start WebContentActivity")
                         WebContentActivity.start(activity, Uri.parse(channelItem.canonicalUrl))
                     }
                 }

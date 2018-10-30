@@ -60,14 +60,12 @@ class RadioActivity : AppCompatActivity(), AnkoLogger {
         channelItem = gson.fromJson(itemData, ChannelItem::class.java)
         info("Creating radio activity for $channelItem")
 
-        val audioUrl = channelItem?.shortlead
+        info("API URL: ${channelItem?.apiUrl}")
 
         loadUrl(channelItem?.apiUrl)
     }
 
     private fun loadUrl(url: String?) {
-
-        info("Load url directly: $url")
 
         web_view.loadUrl(url)
     }
