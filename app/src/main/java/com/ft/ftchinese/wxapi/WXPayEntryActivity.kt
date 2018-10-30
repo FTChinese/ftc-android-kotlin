@@ -8,7 +8,7 @@ import android.view.View
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.user.MembershipActivity
+import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.handleException
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
@@ -66,25 +66,25 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
         // Only used to test WXPayEntryActivity's UI.
         // Comment them for production.
-//        val isUiTest = intent.getBooleanExtra(EXTRA_IS_TEST, false)
-//
-//        if (isUiTest) {
-//            val member = Membership(
-//                    tier = Membership.TIER_STANDARD,
-//                    billingCycle = Membership.BILLING_MONTHLY,
-//                    expireDate = "2018-12-12"
-//            )
-//            isInProgress = false
-//            isSuccess = true
-//            heading_tv.text = getString(R.string.wxpay_done)
-//            updateUI(member)
-//
-//            return
-//        } else {
-//            isInProgress = false
-//            heading_tv.text = getString(R.string.wxpay_cancelled)
-//            return
-//        }
+        val isUiTest = intent.getBooleanExtra(EXTRA_IS_TEST, false)
+
+        if (isUiTest) {
+            val member = Membership(
+                    tier = Membership.TIER_STANDARD,
+                    billingCycle = Membership.CYCLE_MONTH,
+                    expireDate = "2018-12-12"
+            )
+            isInProgress = false
+            isSuccess = true
+            heading_tv.text = getString(R.string.wxpay_done)
+            updateUI(member)
+
+            return
+        } else {
+            isInProgress = false
+            heading_tv.text = getString(R.string.wxpay_cancelled)
+            return
+        }
 
         api?.handleIntent(intent, this)
     }
@@ -207,8 +207,8 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         }
 
         val cycleText = when (member.billingCycle) {
-            Membership.BILLING_YEARLY -> getString(R.string.billing_cycle_year)
-            Membership.BILLING_MONTHLY -> getString(R.string.billing_cycle_month)
+            Membership.CYCLE_YEAR -> getString(R.string.billing_cycle_year)
+            Membership.CYCLE_MONTH -> getString(R.string.billing_cycle_month)
             else -> ""
         }
 
@@ -248,7 +248,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     fun onClickDone(view: View) {
         // Start MembershipActivity manually here.
         // This is the only way to refresh user data.
-        MembershipActivity.start(this)
+        SubscriptionActivity.start(this, true)
 
         finish()
     }
@@ -264,18 +264,18 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     // On iOS you do not need to handle it since there's no back button.
     override fun onBackPressed() {
         super.onBackPressed()
-        MembershipActivity.start(this)
+        SubscriptionActivity.start(this, true)
         finish()
     }
 
     // For test only.
-//    companion object {
-//        private const val EXTRA_IS_TEST = "ui_test"
-//        fun start(activity: Activity?) {
-//            val intent = Intent(activity, WXPayEntryActivity::class.java)
-//            intent.putExtra(EXTRA_IS_TEST, false)
-//
-//            activity?.startActivity(intent)
-//        }
-//    }
+    companion object {
+        private const val EXTRA_IS_TEST = "ui_test"
+        fun start(activity: Activity?) {
+            val intent = Intent(activity, WXPayEntryActivity::class.java)
+            intent.putExtra(EXTRA_IS_TEST, false)
+
+            activity?.startActivity(intent)
+        }
+    }
 }

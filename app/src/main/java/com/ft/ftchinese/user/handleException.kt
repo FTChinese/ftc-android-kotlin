@@ -22,7 +22,8 @@ const val CODE_ALREADY_EXISTS = "already_exists"
 val apiErrResId = mapOf<String, Int>(
         "email_already_exists" to R.string.api_email_taken,
         "email_invalid" to R.string.error_invalid_email,
-        "password_invalid" to R.string.error_invalid_password
+        "password_invalid" to R.string.error_invalid_password,
+        "email_server_missing" to R.string.api_email_server_down
 )
 
 fun Fragment.handleException(e: Exception) {

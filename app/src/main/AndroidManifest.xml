@@ -155,7 +155,7 @@
                 android:value=".user.AccountActivity" />
         </activity>
         <activity
-            android:name=".user.MembershipActivity"
+            android:name=".user.SubscriptionActivity"
             android:label="@string/action_subscription"
             android:parentActivityName=".MainActivity">
             <meta-data
@@ -172,7 +172,7 @@
         </activity>
         <activity android:name=".user.PaymentActivity"
             android:label="@string/title_payment"
-            android:parentActivityName=".user.MembershipActivity">
+            android:parentActivityName=".user.SubscriptionActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />

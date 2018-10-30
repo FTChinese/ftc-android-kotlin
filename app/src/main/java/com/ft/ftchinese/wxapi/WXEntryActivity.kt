@@ -9,6 +9,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
 import com.google.gson.annotations.SerializedName
+import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.modelmsg.SendAuth
@@ -60,7 +61,25 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     override fun onResp(resp: BaseResp?) {
         info("Wx login response type: ${resp?.type}, error code: ${resp?.errCode}")
 
-        when (resp?.errCode) {
+        when (resp?.type) {
+            ConstantsAPI.COMMAND_SENDAUTH -> {
+                info("Wx auth")
+                processLogin(resp)
+            }
+            // This is used to handle your app sending message to wx and then return back to your app.
+            ConstantsAPI.COMMAND_SENDMESSAGE_TO_WX -> {
+                info("Send message to wx")
+                finish()
+            }
+            else -> {
+                finish()
+            }
+        }
+
+    }
+
+    private fun processLogin(resp: BaseResp) {
+        when (resp.errCode) {
             BaseResp.ErrCode.ERR_OK -> {
                 info("User authorized")
 
@@ -91,7 +110,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 .appendPath("oauth2")
                 .appendPath("access_token")
                 .appendQueryParameter("appid", BuildConfig.WECAHT_APP_ID)
-                .appendQueryParameter("secret", BuildConfig.WECHAT_SECRET)
+                .appendQueryParameter("secret", "")
                 .appendQueryParameter("code", resp.code)
                 .appendQueryParameter("grant_type", "authorization_code")
                 .build()

@@ -2,7 +2,7 @@ package com.ft.ftchinese.util
 
 class NextApi {
     companion object {
-        private const val BASE = "http://api.ftchinese.com/v1/"
+        private const val BASE = "http://api.ftchinese.com/v1"
         const val LOGIN = "$BASE/users/auth"
         const val SIGN_UP = "$BASE/users/new"
         const val PASSWORD_RESET = "$BASE/users/password-reset/letter"
@@ -21,8 +21,8 @@ class NextApi {
 
 class SubscribeApi {
     companion object {
-//        private const val BASE = "http://www.ftacademy.cn/api/v1"
-        private const val BASE = "https://lacerta.serveo.net"
+        private const val BASE = "http://www.ftacademy.cn/api/v1"
+//        private const val BASE = "https://lacerta.serveo.net"
 
         const val WX_UNIFIED_ORDER = "$BASE/wxpay/unified-order"
         const val WX_ORDER_QUERY = "$BASE/wxpay/query"

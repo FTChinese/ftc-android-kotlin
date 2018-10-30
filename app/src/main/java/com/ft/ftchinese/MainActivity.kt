@@ -482,7 +482,7 @@ class MainActivity : AppCompatActivity(),
                 AccountActivity.start(this)
             }
             R.id.action_subscription -> {
-                MembershipActivity.start(this)
+                SubscriptionActivity.start(this)
             }
             R.id.action_about -> {
                 AboutUsActivity.start(this)

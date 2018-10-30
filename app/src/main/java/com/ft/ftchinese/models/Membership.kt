@@ -6,7 +6,7 @@ import org.joda.time.format.ISODateTimeFormat
 
 data class Membership(
         val tier: String,
-        val billingCycle: String = BILLING_YEARLY,
+        val billingCycle: String = CYCLE_YEAR,
         // ISO8601 format. Example: 2019-08-05
         val expireDate: String
 ) {
@@ -32,10 +32,10 @@ data class Membership(
             val expire = DateTime.parse(expireDate, ISODateTimeFormat.date())
 
             return when (billingCycle) {
-                BILLING_YEARLY -> {
+                CYCLE_YEAR -> {
                     return expire.isBefore(DateTime.now().plusYears(1).plusDays(1))
                 }
-                BILLING_MONTHLY -> {
+                CYCLE_MONTH -> {
                     return expire.isBefore(DateTime.now().plusMonths(1).plusDays(1))
                 }
                 else -> false
@@ -53,12 +53,33 @@ data class Membership(
     val priceKey: String
         get() = "${tier}_$billingCycle"
 
+    // Compare expireDate against another instance.
+    // Pick whichever is later.
+    fun isNewer(m: Membership): Boolean {
+        if (expireDate.isBlank() && m.expireDate.isBlank()) {
+            return false
+        }
+
+        if (m.expireDate.isBlank()) {
+            return true
+        }
+
+        if (expireDate.isBlank()) {
+            return false
+        }
+
+        val selfExpire = DateTime.parse(expireDate, ISODateTimeFormat.date())
+        val anotherExpire = DateTime.parse(expireDate, ISODateTimeFormat.date())
+
+        return selfExpire.isAfter(anotherExpire)
+    }
+
     fun extendedExpireDate(cycle: String): String {
         val inst = DateTime.parse(expireDate, ISODateTimeFormat.date())
 
         val newInst = when (cycle) {
-            BILLING_YEARLY -> inst.plusYears(1)
-            BILLING_MONTHLY -> inst.plusMonths(1)
+            CYCLE_YEAR -> inst.plusYears(1)
+            CYCLE_MONTH -> inst.plusMonths(1)
             else -> inst
         }
 
@@ -72,13 +93,8 @@ data class Membership(
         const val TIER_STANDARD = "standard"
         const val TIER_PREMIUM = "premium"
 
-        const val BILLING_YEARLY = "year"
-        const val BILLING_MONTHLY = "month"
-
-        const val PAYMENT_METHOD_ALI = 1
-        const val PAYMENT_METHOD_WX = 2
-        const val PAYMENT_METHOD_STRIPE = 3
+        const val CYCLE_YEAR = "year"
+        const val CYCLE_MONTH = "month"
     }
-
 }
 

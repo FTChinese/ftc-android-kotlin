@@ -205,7 +205,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
                 }
 
             } catch (ex: ErrorResponse) {
-                info(ex.message)
+                info("API error response: $ex")
 
                 isInProgress = false
                 isInputAllowed = true

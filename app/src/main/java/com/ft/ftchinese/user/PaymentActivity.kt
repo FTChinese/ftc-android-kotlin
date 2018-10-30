@@ -13,6 +13,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
+import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -67,21 +68,19 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment)
 
+        setSupportActionBar(toolbar)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+        }
+
         // Initialize wechat pay
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID)
 //        mAccount = SessionManager.getInstance(this).loadUser()
 
         mSession = SessionManager.getInstance(this)
 
-        info("onCreate finished")
-
-        setSupportActionBar(toolbar)
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-        }
-
         val memberTier = intent.getStringExtra(EXTRA_MEMBER_TIER) ?: Membership.TIER_STANDARD
-        val billingCycle = intent.getStringExtra(EXTRA_BILLING_CYCLE) ?: Membership.BILLING_YEARLY
+        val billingCycle = intent.getStringExtra(EXTRA_BILLING_CYCLE) ?: Membership.CYCLE_YEAR
 
         // Create a membership instance based on the value passed from MemberActivity
         val membership = Membership(tier = memberTier, billingCycle = billingCycle, expireDate = "")
@@ -89,13 +88,15 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         mMembership = membership
 
         updateUI(membership)
+
+        info("onCreate finished")
     }
 
     private fun updateUI(member: Membership) {
 
         val cycleText = when(member.billingCycle) {
-            Membership.BILLING_YEARLY -> getString(R.string.billing_cycle_year)
-            Membership.BILLING_MONTHLY -> getString(R.string.billing_cycle_month)
+            Membership.CYCLE_YEAR -> getString(R.string.billing_cycle_year)
+            Membership.CYCLE_MONTH -> getString(R.string.billing_cycle_month)
             else -> ""
         }
 
@@ -118,24 +119,24 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
             when (view.id) {
                 R.id.pay_by_ali -> {
-                    mPaymentMethod = Membership.PAYMENT_METHOD_ALI
+                    mPaymentMethod = Subscription.PAYMENT_METHOD_ALI
 
-                    checkOutButtonText(R.string.pay_by_ali)
+                    updateUIForCheckOut(R.string.pay_by_ali)
                 }
                 R.id.pay_by_wechat -> {
-                    mPaymentMethod = Membership.PAYMENT_METHOD_WX
+                    mPaymentMethod = Subscription.PAYMENT_METHOD_WX
 
-                    checkOutButtonText(R.string.pay_by_wechat)
+                    updateUIForCheckOut(R.string.pay_by_wechat)
                 }
 //                R.id.pay_by_stripe -> {
 //
-//                    checkOutButtonText(R.string.pay_by_stripe)
+//                    updateUIForCheckOut(R.string.pay_by_stripe)
 //                }
             }
         }
     }
 
-    private fun checkOutButtonText(resId: Int) {
+    private fun updateUIForCheckOut(resId: Int) {
         val methodStr = getString(resId)
 
         check_out.text = getString(R.string.check_out_text, methodStr, mPriceText)
@@ -150,17 +151,33 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         toast(R.string.request_order)
 
         when (mPaymentMethod) {
-            Membership.PAYMENT_METHOD_ALI -> {
+            Subscription.PAYMENT_METHOD_ALI -> {
+                // The commented code are used for testing UI only.
+//                val intent = Intent().apply {
+//                    putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_ALI)
+//                }
+//
+//                // Destroy this activity and tells parent activity to update user data.
+//                setResult(Activity.RESULT_OK, intent)
+//                finish()
+
                 aliPay()
             }
-            Membership.PAYMENT_METHOD_WX -> {
+
+            Subscription.PAYMENT_METHOD_WX -> {
                 // The commented codes are used for testing WXPayEntryActivity ui only.
 //                WXPayEntryActivity.start(this)
-//                setResult(Activity.RESULT_OK)
+//
+//                val intent = Intent().apply {
+//                    putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_WX)
+//                }
+//
+//                setResult(Activity.RESULT_OK, intent)
 //                finish()
+
                 wxPay()
             }
-            Membership.PAYMENT_METHOD_STRIPE -> {
+            Subscription.PAYMENT_METHOD_STRIPE -> {
                 stripePay()
             }
             else -> {
@@ -231,11 +248,17 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                             paymentMethod = payMethod
                     )
 
+                    // Save subscription details to shared preference so that we could use it in WXPayEntryActivity
                     subs.save(this@PaymentActivity)
                 }
 
+                // Tell parent activity to kill itself.
+                val intent = Intent().apply {
+                    putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_WX)
+                }
+
                 // Tell MembershipActivity to kill itself.
-                setResult(Activity.RESULT_OK)
+                setResult(Activity.RESULT_OK, intent)
 
                 finish()
 
@@ -359,21 +382,33 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             val appPayResp = payResult["result"] ?: return@launch
 
             // query server
-            val verifiedOrder = user.aliVerifyOrderAsync(appPayResp).await()
+            isInProgress = true
+            val verifiedOrder = try {
+                user.aliVerifyOrderAsync(appPayResp).await()
+            } catch (resp: ErrorResponse) {
+                isInProgress = false
+                handleApiError(resp)
+                return@launch
+            } catch (e: Exception) {
+                isInProgress = false
+                handleException(e)
+                return@launch
+            }
 
+            isInProgress = false
+            toast(R.string.wxpay_done)
             // update subs.confirmedAt
             subs.confirmedAt = verifiedOrder.paidAt
 
-            // handle verification result.
-
+            // Update membership
             val updatedMembership = subs.updateMembership(user.membership)
-
             mSession?.updateMembership(updatedMembership)
 
             val intent = Intent().apply {
                 putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_ALI)
             }
 
+            // Destroy this activity and tells parent activity to update user data.
             setResult(Activity.RESULT_OK, intent)
             finish()
         }

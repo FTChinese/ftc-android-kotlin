@@ -1,9 +1,7 @@
 package com.ft.ftchinese.models
 
 import android.content.Context
-import kotlinx.coroutines.experimental.async
 import org.joda.time.DateTime
-import org.joda.time.DateTimeZone
 import org.joda.time.format.ISODateTimeFormat
 
 data class AlipayOrder(
@@ -67,8 +65,8 @@ data class Subscription(
         val inst = DateTime.parse(confirmedAt, ISODateTimeFormat.dateTimeNoMillis())
 
         val newInst = when (tierToBuy) {
-            Membership.BILLING_YEARLY -> inst.plusYears(1)
-            Membership.BILLING_MONTHLY -> inst.plusMonths(1)
+            Membership.CYCLE_YEAR -> inst.plusYears(1)
+            Membership.CYCLE_MONTH -> inst.plusMonths(1)
             else -> inst
         }
 
