@@ -41,9 +41,11 @@
     <string name="member_tier_premium">高級會員</string>
     <string name="member_tier_vip">超級會員</string>
 
+    <string name="membership_renew">我要續訂</string>
+
     <string name="price_standard_annual">¥198.00/年</string>
     <string name="price_standard_month">¥18/月</string>
-    <string name="price_premium_annual">¥1,998.00/年</string>
+    <string name="price_premium">¥1,998.00/年</string>
 
     <string name="pay_standard_year">¥198.00</string>
     <string name="pay_standard_month">¥28.00</string>
@@ -57,9 +59,9 @@
     <string name="label_member_price">支付金額</string>
     <string name="paywall_title">購買會員服務，閱讀FT獨家內容</string>
     <string name="paywall_login_prompt">已經購買過？</string>
-    <string name="paywall_description_standard">\u2714 精選深度分析\n\u2714 中英雙語內容\n\u2714 金融英語速讀訓練\n\u2714 英語原聲電台\n\u2714 無限瀏覽7日前所有歷史文章（近8萬篇）</string>
-    <string name="paywall_description_premium">\u2714 享受“標準會員”所有權益\n\u2714 編輯精選，總編/各領域主編每週五為您推薦本週必讀資訊，分享他們的思考與觀點\n\u2714 FT中文網2019年度論壇門票2張</string>
-    <string name="paywall_small_print">注：所有活動門票不可折算現金、不能轉讓、不含差旅與食宿</string>
+    <string name="standard_tier_description">\u2714 精選深度分析\n\u2714 中英雙語內容\n\u2714 金融英語速讀訓練\n\u2714 英語原聲電台\n\u2714 無限瀏覽7日前所有歷史文章（近8萬篇）</string>
+    <string name="premium_tier_description">\u2714 享受“標準會員”所有權益\n\u2714 編輯精選，總編/各領域主編每週五為您推薦本週必讀資訊，分享他們的思考與觀點\n\u2714 FT中文網2019年度論壇門票2張</string>
+    <string name="premium_small_print">注：所有活動門票不可折算現金、不能轉讓、不含差旅與食宿</string>
     <string name="paywall_buy_now">立即訂閱</string>
     <string name="payment_methods_title">選擇支付方式</string>
     <string name="product_overview">成為FT會員</string>
@@ -85,6 +87,9 @@
     <string name="wxpay_failed">支付失敗</string>
     <string name="wxpay_cancelled">支付已取消</string>
     <string name="wxpay_error">无法支付</string>
+    <string name="wxpay_member_tier">您已經訂閱了FT中文網 %1$s/%2$s</string>
+    <string name="wxpay_exppire_date">會員有效期：%1$s</string>
+    <string name="wxshare_done">分享成功</string>
 
     <string name="action_title_account">帳號與安全</string>
     <string name="action_subscription">會員訂閱</string>
@@ -173,6 +178,7 @@
     <string name="api_bad_request">無效的請求</string>
     <string name="api_too_many_request">請求過於頻繁，請稍後再試</string><string name="api_unauthorized">沒有訪問伺服器的權限</string>
     <string name="api_server_error">伺服器出錯，請稍後再試</string>
+    <string name="api_email_server_down">信箱伺服器暫時不可用</string>
 
     <string name="api_empty_url">網址(URL)錯誤</string>
     <string name="api_network_failure">網路錯誤</string>
