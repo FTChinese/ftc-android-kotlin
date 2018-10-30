@@ -44,6 +44,18 @@ class FormatTimeTest{
         println(dt)
     }
 
+    @Test fun compareExpireDate() {
+        val local = "2018-10-29"
+        val remote = "2018-10-29"
+
+        val localTime = DateTime.parse(local, ISODateTimeFormat.date())
+
+        val remoteTime = DateTime.parse(remote, ISODateTimeFormat.date())
+
+        // as long as local is after remote, we can assume remote is not updated.
+        println(localTime.isAfter(remoteTime))
+    }
+
     @Test fun sevenDaysLater() {
         val timestamp = "1536249600".toLong()
         val sevenDaysLater = timestamp + 7 * 24 * 60 * 60
@@ -75,6 +87,8 @@ class FormatTimeTest{
         println(iso8601Local)
         println(exp)
     }
+
+
 
     @Test fun alipayTimestamp() {
         // "2018-09-13 15:05:40"
