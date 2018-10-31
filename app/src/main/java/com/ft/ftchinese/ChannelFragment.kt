@@ -10,12 +10,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
-import android.widget.Toast
 import com.ft.ftchinese.models.*
+import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isActiveNetworkWifi
 import com.ft.ftchinese.util.isNetworkConnected
+import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.fragment_channel.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
@@ -40,16 +41,17 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
      * Meta data about current page: the tab's title, where to load data, etc.
      * Passed in when the fragment is created.
      */
-    private var mTabMetadata: PagerTab? = null
+    private var mPageMeta: PagerTab? = null
 
     /**
      * iOS equivalent might be defined Page/Layouts/Pages/Content/DetailModelController.swift#pageData
-     * This is a list of articles on each mTabMetadata.
+     * This is a list of articles on each mPageMeta.
      * Its value is set when WebView finished loading a web page
      */
-    private var channelItems: Array<ChannelItem>? = null
-    private var channelMeta: ChannelMeta? = null
-    private var job: Job? = null
+    private var mChannelItems: Array<ChannelItem>? = null
+    private var mChannelMeta: ChannelMeta? = null
+    private var mJob: Job? = null
+    private var mSession: SessionManager? = null
 
     // Hold string in raw/list.html
     private var mTemplate: String? = null
@@ -66,6 +68,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
      */
     interface OnFragmentInteractionListener {
         fun onProgress(show: Boolean)
+        fun getSession(): SessionManager?
     }
 
     companion object {
@@ -75,7 +78,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          * The fragment argument representing the section number for this
          * fragment.
          */
-        private const val ARG_SECTION_PAGE = "arg_section_page"
+        private const val ARG_PAGE_META = "arg_page_meta"
 
         /**
          * Returns a new instance of this fragment for the given section
@@ -84,7 +87,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         fun newInstance(page: PagerTab): ChannelFragment {
             val fragment = ChannelFragment()
             val args = Bundle()
-            args.putString(ARG_SECTION_PAGE, gson.toJson(page))
+            args.putString(ARG_PAGE_META, gson.toJson(page))
             fragment.arguments = args
             return fragment
         }
@@ -102,6 +105,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         }
         if (context is OnFragmentInteractionListener) {
             mListener = context
+            mSession = mListener?.getSession()
         }
 
         info("onAttach finished")
@@ -111,11 +115,11 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         super.onCreate(savedInstanceState)
 
         // Get metadata about current tab
-        val pageMetadata = arguments?.getString(ARG_SECTION_PAGE)
-        mTabMetadata = gson.fromJson<PagerTab>(pageMetadata, PagerTab::class.java)
+        val pageMetadata = arguments?.getString(ARG_PAGE_META)
+        mPageMeta = gson.fromJson<PagerTab>(pageMetadata, PagerTab::class.java)
 
         // Set WebViewClient for current page
-        mWebViewClient = ChannelWebViewClient(activity, mTabMetadata)
+        mWebViewClient = ChannelWebViewClient(activity, mPageMeta)
         // Set navigate mListener to enable in-app navigation when clicked a url which should to another tab.
         mWebViewClient.setOnInAppNavigateListener(mNavigateListener)
 
@@ -134,13 +138,16 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Setup swipe refresh listener
         channel_fragment_swipe.setOnRefreshListener(this)
 
+        // Configure web view.
         web_view.settings.apply {
             javaScriptEnabled = true
             loadsImagesAutomatically = true
         }
 
+        // Setup webview.
         web_view.apply {
 
             // Interact with JS.
@@ -151,6 +158,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             webChromeClient = MyChromeClient()
         }
 
+        // Setup back key behavior.
         web_view.setOnKeyListener { v, keyCode, event ->
             if (keyCode == KeyEvent.KEYCODE_BACK && web_view.canGoBack()) {
                 web_view.goBack()
@@ -160,7 +168,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             false
         }
 
-        info("Initiating current page with data: $mTabMetadata")
+        info("Initiating current page with data: $mPageMeta")
 
         loadContent()
 
@@ -168,12 +176,13 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     }
 
     private fun loadContent() {
-
-        when (mTabMetadata?.htmlType) {
+        // For partial HTML, we need to crawl its content and render it with a template file to get the template HMTL page.
+        when (mPageMeta?.htmlType) {
             PagerTab.HTML_TYPE_FRAGMENT -> {
                 info("loadContent: html fragment")
                 loadPartialHtml()
             }
+            // For complete HTML, load it directly into Web view.
             PagerTab.HTML_TYPE_COMPLETE -> {
                 info("loadContent: web page")
                 web_view.loadUrl("http://www.ftchinese.com/m/marketing/intelligence.html?webview=ftcapp&001")
@@ -182,14 +191,14 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     }
 
     private fun loadPartialHtml() {
-        job = launch (UI) {
+        mJob = launch (UI) {
             mTemplate = PagerTab.readTemplate(resources).await()
 
-            val listContent = mTabMetadata?.fragmentFromCache(context)?.await()
+            val cachedChannelContent = mPageMeta?.fragmentFromCache(context)?.await()
 
             // If cached HTML fragment exists
-            if (listContent != null) {
-                loadData(listContent)
+            if (cachedChannelContent != null) {
+                loadData(cachedChannelContent)
                 info("Loaded data from cache")
             }
 
@@ -207,7 +216,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
             // If no cached HTML fragment found, fetch remote data as long as there is network.
             // In this case, show progress.
-            if (listContent == null) {
+            if (cachedChannelContent == null) {
                 info("Cache not found. Fetch data.")
                 showProgress(true)
                 crawlAndUpdate()
@@ -216,18 +225,26 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     }
 
     private suspend fun crawlAndUpdate() {
-        info("Starting crawling ${mTabMetadata?.title}")
-        val listContent = mTabMetadata?.crawlWebAsync(context)?.await()
-        if (listContent == null) {
-            toast(R.string.prompt_load_failure)
-            return
+        info("Starting crawling ${mPageMeta?.title}")
+        try {
+            val listContent = mPageMeta?.crawlWebAsync(context)?.await()
+            if (listContent == null) {
+                info("No data crawled")
+                return
+            }
+
+            loadData(listContent)
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+            toast(R.string.prompt_no_network)
         }
-        info("Fetched data from server")
-        loadData(listContent)
     }
 
     private fun loadData(data: String) {
-        val dataToLoad = PagerTab.render(mTemplate, data)
+
+        val dataToLoad = mPageMeta?.render(mTemplate, data)
 
         web_view.loadDataWithBaseURL(WEBVIEV_BASE_URL, dataToLoad, "text/html", null, null)
         showProgress(false)
@@ -260,9 +277,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     override fun onDestroy() {
         super.onDestroy()
 
-        val result = job?.cancel()
-
-        info("Job cancelled: $result")
+        mJob?.cancel()
     }
 
     override fun onRefresh() {
@@ -273,10 +288,10 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             return
         }
 
-        when (mTabMetadata?.htmlType) {
+        when (mPageMeta?.htmlType) {
             PagerTab.HTML_TYPE_FRAGMENT -> {
                 info("onRefresh: crawlWebAsync html fragment")
-                job = launch(UI) {
+                mJob = launch(UI) {
                     if (mTemplate == null) {
                         mTemplate = PagerTab.readTemplate(resources).await()
                     }
@@ -293,22 +308,125 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         }
     }
 
-    // Controls access to restricted content.
+    // Interact with Web view.
+    // iOS equivalent: SuperDataViewController.swift#extension SuperDataViewController: WKScriptMessageHandler
+    // Each methods equivalent on iOS is `message.name`.
     inner class WebAppInterface : AnkoLogger {
         /**
-         * Method injected to WebView to receive a list of articles in a mTabMetadata page upon finished loading.
+         * Method injected to WebView to receive a list of articles in a mPageMeta page upon finished loading.
+         * Structure of the JSON received:
+         * {
+         *  "meta": {
+         *      "title": "FT中文网",
+         *      "description": "",
+         *      "theme": "default",
+         *      "adid": "1000", // from window.adchID, default '1000'
+         *      "adZone": "home" // Extracted from a <script> block.
+         *  },
+         *  "sections": [
+         *      "lists": [
+         *          {
+         *             "name": "New List",
+         *             "items": [
+         *                  {
+         *                      "id": "001078965", // from attribute data-id.
+         *                      "type": "story",  //
+         *                       "headline": "中国千禧一代将面临养老金短缺", // The content of .item-headline-link
+        *                       "eaudio": "https://s3-us-west-2.amazonaws.com/ftlabs-audio-rss-bucket.prod/7a6d6d6a-9f75-11e8-85da-eeb7a9ce36e4.mp3",
+         *                      "timeStamp": "1534308162"
+         *                  }
+         *             ]
+         *          }
+         *      ]
+         *  ]
+         * }
+         *
+         * The source of `adZone` (partial):
+         * {
+         *  "gpt": {
+         *      "network": 80682004,
+         *      "site": "ftchinese",
+         *      "zone": "home"
+         *   }
+         *   "formats": {}
+         * }
+         *
+         *  Example for interactive:
+         *  {
+         *   "id": "12761",
+         *   "type": "interactive",
+         *   "headline": "和美国总统对着干，耐克这次押对了吗？",
+         *   "shortlead": "http://v.ftimg.net/album/021ec2fe-b04c-11e8-99ca-68cf89602132.mp3",
+         *   "subType": "radio"
+         *   }
+         * The value of `gpt.zone` field if used as `adZone`'s value.
          */
         @JavascriptInterface
-        fun postItems(message: String) {
+        fun onPageLoaded(message: String) {
+            info("Articles list in a channel: $message")
 
-            val channelContent = gson.fromJson<ChannelContent>(message, ChannelContent::class.java)
+            try {
+                val channelContent = gson.fromJson<ChannelContent>(message, ChannelContent::class.java)
 
-            channelItems = channelContent.sections[0].lists[0].items
+                mChannelItems = channelContent.sections[0].lists[0].items
 
-            info("Articles list in a channel: $channelItems")
-            channelMeta = channelContent.meta
+
+                mChannelMeta = channelContent.meta
+            } catch (e: JsonSyntaxException) {
+                info("Cannot parse JSON after a channel loaded")
+            } catch (e: Exception) {
+               info("$e")
+            }
+
         }
 
+        /**
+         * Data retrieved from HTML element .specialanchor.
+         * JSON structure:
+         * [
+         *  {
+         *      "tag": "",  // from attribute 'tag'
+         *      "title": "", // from attribute 'title'
+         *      "adid": "", // from attribute 'adid'
+         *      "zone": "",  // from attribute 'zone'
+         *      "channel": "", // from attribute 'channel'
+         *      "hideAd": ""  // from optinal attribute 'hideAd'
+         *  }
+         * ]
+         */
+        fun onLoadedSponsors(message: String) {
+            try {
+                SponsorManager.sponsors = gson.fromJson(message, Array<Sponsor>::class.java)
+
+            } catch (e: Exception) {
+                info("$e")
+            }
+        }
+
+        /**
+         * {
+         *  forceNewAdTags: [],
+         *  forceOldAdTags: [],
+         *  grayReleaseTarget: '0'
+         * }
+         */
+        fun onNewAdSwitchData(message: String) {
+            try {
+                val adSwitch = gson.fromJson<AdSwitch>(message, AdSwitch::class.java)
+
+
+            } catch (e: Exception) {
+                info("$e")
+            }
+        }
+
+        fun onSharePageFromApp(message: String) {
+
+        }
+
+        fun onSendPageInfoToApp(message: String) {
+
+        }
         /**
          * Handle click event on an item of article list.
          * See Page/Layouts/Page/SuperDataViewController.swift#SuperDataViewController what kind of data structure is passed back from web view.
@@ -320,24 +438,22 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          * It seems the only way to distinguish those cases is using `ChannelMeta.title` field.
          */
         @JavascriptInterface
-        fun selectItem(index: String) {
+        fun onSelectItem(index: String) {
             info("Channel list click event: $index")
 
-            Toast.makeText(activity, "Selected item $index", Toast.LENGTH_SHORT).show()
 
-
-            if (channelMeta == null && channelItems == null) {
+            if (mChannelMeta == null && mChannelItems == null) {
                 return
             }
 
             val i = index.toInt()
-            val channelItem = channelItems?.getOrNull(i) ?: return
+            val channelItem = mChannelItems?.getOrNull(i) ?: return
             info("Clicked item: $channelItem")
 
             /**
              * For `column`, start a new ChannelActivity
              */
-            when (channelMeta?.title) {
+            when (mChannelMeta?.title) {
                 "专栏" -> {
                     val listPage = PagerTab(
                             title = channelItem.headline,
@@ -352,46 +468,43 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             }
 
             /**
-             * Now assuming this is a plain article
+             * Copy channel meta to channel item.
              */
-            channelItem.adId = channelMeta?.adid ?: ""
+            channelItem.adId = mChannelMeta?.adid ?: ""
+            channelItem.adZone = mChannelMeta?.adZone ?: ""
 
+            if (!channelItem.isMembershipRequired) {
+                startReading(channelItem)
+
+                return
+            }
             /**
              * User clicked an article that requires membership.
              * If user if not logged in, or user already logged in but membership is free
              */
-            if (channelItem.isMembershipRequired) {
-                val sessionManager = try {
-                    val ctx = requireContext()
-                    SessionManager.getInstance(ctx)
-                } catch (e: Exception) {
-                    null
-                }
+            val user = mSession?.loadUser()
 
-                if (sessionManager == null) {
-                    toast(R.string.prompt_member_restricted)
-                    SubscriptionActivity.start(context)
-                    return
-                }
+            // If user is not logged in
+            if (user == null) {
+                toast(R.string.prompt_restricted_paid_user)
+                SignInActivity.start(activity)
+                return
+            }
 
-                /**
-                 * If current user is not a paid member, or the membership is expired
-                 */
-                if (!sessionManager.isPaidMember() || sessionManager.isMembershipExpired()) {
-                    toast(R.string.prompt_member_restricted)
-                    SubscriptionActivity.start(context)
-                    return
-                }
-
-                startReading(channelItem)
+            /**
+             * If current user is not a paid member, or the membership is expired
+             */
+            if (!user.canAccessPaidContent) {
+                toast(R.string.prompt_restricted_paid_user)
+                SubscriptionActivity.start(context)
                 return
             }
 
             startReading(channelItem)
-
         }
 
         private fun startReading(channelItem: ChannelItem) {
+
             when (channelItem.type) {
                 ChannelItem.TYPE_STORY, ChannelItem.TYPE_PREMIUM -> {
                     info("Start StoryActivity")

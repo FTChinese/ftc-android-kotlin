@@ -25,6 +25,10 @@ data class Account(
         val isVerified: Boolean,
         val membership: Membership
 ) {
+    val canAccessPaidContent: Boolean
+        get() {
+            return (membership.isPaidMember && !membership.isExpired) || isVip
+        }
     /**
      * @return Account. Always returns a new one rather than modifying the existing one to make it immutable.
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON

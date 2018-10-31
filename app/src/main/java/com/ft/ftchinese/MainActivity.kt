@@ -35,6 +35,9 @@ import org.jetbrains.anko.coroutines.experimental.bg
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
+/**
+ * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
+ */
 class MainActivity : AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
         TabLayout.OnTabSelectedListener,
@@ -47,11 +50,17 @@ class MainActivity : AppCompatActivity(),
     private var exitJob: Job? = null
     private var timerJob: Job? = null
 
+    private var mSession: SessionManager? = null
+
     private var mNewsAdapter: TabPagerAdapter? = null
     private var mEnglishAdapter: TabPagerAdapter? = null
     private var mFtaAdapter: TabPagerAdapter? = null
     private var mVideoAdapter: TabPagerAdapter? = null
     private var mMyftPagerAdapter: MyftPagerAdapter? = null
+
+    override fun getSession(): SessionManager? {
+        return mSession
+    }
 
     /**
      * Implementation of BottomNavigationView.OnNavigationItemSelectedListener
@@ -154,6 +163,8 @@ class MainActivity : AppCompatActivity(),
         // Register Wechat id
         WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false).registerApp(BuildConfig.WECAHT_APP_ID)
 
+        mSession = SessionManager.getInstance(this)
+
         // https://developer.android.com/training/system-ui/immersive
 //        hideSystemUI()
         launch(UI) {
@@ -200,7 +211,7 @@ class MainActivity : AppCompatActivity(),
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false)
         api.registerApp(BuildConfig.WECAHT_APP_ID)
 
-        bg {
+        async {
             info("Starting checking ad schedules")
             checkAdAsync()
         }
@@ -306,10 +317,6 @@ class MainActivity : AppCompatActivity(),
 
     private fun checkAdAsync() = async {
 
-//        for (i in 1..30) {
-//            info("Delaying check ad $i")
-//            delay(1000)
-//        }
         info("Fetch schedule data")
         val schedules = LaunchSchedule.fetchDataAsync().await()
 
@@ -420,36 +427,36 @@ class MainActivity : AppCompatActivity(),
     /**
      * Create menus on toolbar
      */
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds mFollows to the action bar if it is present.
-
-        menuInflater.inflate(R.menu.activity_main_search, menu)
-
-        val expandListener = object : MenuItem.OnActionExpandListener {
-            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                info("Menu item action collapse")
-                return true
-            }
-
-            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-                info("Menu item action expand")
-                return true
-            }
-        }
-
-        // Configure action view.
-        // See https://developer.android.com/training/appbar/action-views
-        val searchItem = menu.findItem(R.id.action_search)
-        searchItem.setOnActionExpandListener(expandListener)
-
-        val searchView = searchItem.actionView as SearchView
-
-        // Handle activity_main_search. See
-        // guide https://developer.android.com/guide/topics/search/
-        // API https://developer.android.com/reference/android/support/v7/widget/SearchView
-
-        return super.onCreateOptionsMenu(menu)
-    }
+//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+//        // Inflate the menu; this adds mFollows to the action bar if it is present.
+//
+//        menuInflater.inflate(R.menu.activity_main_search, menu)
+//
+//        val expandListener = object : MenuItem.OnActionExpandListener {
+//            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+//                info("Menu item action collapse")
+//                return true
+//            }
+//
+//            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+//                info("Menu item action expand")
+//                return true
+//            }
+//        }
+//
+//        // Configure action view.
+//        // See https://developer.android.com/training/appbar/action-views
+//        val searchItem = menu.findItem(R.id.action_search)
+//        searchItem.setOnActionExpandListener(expandListener)
+//
+//        val searchView = searchItem.actionView as SearchView
+//
+//        // Handle activity_main_search. See
+//        // guide https://developer.android.com/guide/topics/search/
+//        // API https://developer.android.com/reference/android/support/v7/widget/SearchView
+//
+//        return super.onCreateOptionsMenu(menu)
+//    }
 
     /**
      * Respond to menu item on the toolbar being selected
@@ -554,7 +561,7 @@ class MainActivity : AppCompatActivity(),
      */
     private fun updateSessionUI() {
 //        mUser = Account.loadFromPref(this)
-        val user = SessionManager.getInstance(applicationContext).loadUser()
+        val user = mSession?.loadUser()
         val isLoggedIn = user != null
 
         info("Account is logged in: $isLoggedIn")

@@ -7,6 +7,9 @@ import android.view.View
 import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.models.Story
 import com.ft.ftchinese.models.ChannelItem
+import com.ft.ftchinese.models.Following
+import com.ft.ftchinese.user.SignInActivity
+import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.activity_content.*
@@ -53,6 +56,8 @@ class StoryActivity : AbsContentActivity() {
 
         if (itemData != null) {
             mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
+
+            info("Start loading article: $mChannelItem")
         }
 
 
@@ -74,11 +79,48 @@ class StoryActivity : AbsContentActivity() {
         }
 
         titlebar_en.setOnClickListener {
+            val user = mSession?.loadUser()
+
+            if (user == null) {
+                languageSwitchFobidden()
+
+                toast(R.string.prompt_restricted_login)
+
+                SignInActivity.start(this)
+                return@setOnClickListener
+            }
+
+            if (!user.canAccessPaidContent) {
+                languageSwitchFobidden()
+
+                toast(R.string.prompt_restricted_paid_user)
+                SubscriptionActivity.start(this)
+                return@setOnClickListener
+            }
+
             mCurrentLanguage = ChannelItem.LANGUAGE_EN
             load()
         }
 
         titlebar_bi.setOnClickListener {
+            val user = mSession?.loadUser()
+
+            if (user == null) {
+                languageSwitchFobidden()
+                toast(R.string.prompt_restricted_login)
+
+                SignInActivity.start(this)
+                return@setOnClickListener
+            }
+
+            if (!user.canAccessPaidContent) {
+                languageSwitchFobidden()
+                toast(R.string.prompt_restricted_paid_user)
+
+                SubscriptionActivity.start(this)
+                return@setOnClickListener
+            }
+
             mCurrentLanguage = ChannelItem.LANGUAGE_BI
             load()
         }
@@ -86,6 +128,12 @@ class StoryActivity : AbsContentActivity() {
         load()
 
         info("onCreate finished")
+    }
+
+    private fun languageSwitchFobidden() {
+        titlebar_cn.isChecked = true
+        titlebar_en.isChecked = false
+        titlebar_bi.isChecked = false
     }
 
     override fun onDestroy() {
@@ -109,28 +157,35 @@ class StoryActivity : AbsContentActivity() {
         job = launch(UI) {
             mTemplate = ChannelItem.readTemplateAsync(resources).await()
 
+            info("Story template: $mTemplate")
+
             if (mTemplate == null) {
                 toast(R.string.prompt_load_failure)
                 return@launch
             }
 
-            mStory = mChannelItem?.loadCachedStoryAsync(this@StoryActivity)?.await()
+            try {
+                mStory = mChannelItem?.loadCachedStoryAsync(this@StoryActivity)?.await()
 
-            // Use cached data to render mTemplate
-            if (mStory != null) {
-                loadData()
+                // Use cached data to render mTemplate
+                if (mStory != null) {
+                    loadData()
 
-                return@launch
+                    return@launch
+                }
+
+                if (!isNetworkConnected()) {
+                    toast(R.string.prompt_no_network)
+                    return@launch
+                }
+
+                // If it reached here, it indicates no cache found, and network is connected.
+                showProgress(true)
+                fetchAndUpdate()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                toast("${e.message}")
             }
-
-            if (!isNetworkConnected()) {
-                toast(R.string.prompt_no_network)
-                return@launch
-            }
-
-            // If it reached here, it indicates no cache found, and network is connected.
-            showProgress(true)
-            fetchAndUpdate()
         }
 
         mIsStarring = ArticleStore.getInstance(this).isStarring(mChannelItem)
@@ -140,13 +195,17 @@ class StoryActivity : AbsContentActivity() {
     private suspend fun fetchAndUpdate() {
         mStory = mChannelItem?.fetchStoryAsync(this)?.await()
 
+        info("Fetched story: $mStory")
         loadData()
     }
 
     private fun loadData() {
         showLanguageSwitch()
+        val follows = Following.loadAsMap(this)
 
-        val html = mChannelItem?.render(this@StoryActivity, mCurrentLanguage, mTemplate, mStory)
+        val html = mChannelItem?.render(mTemplate, mStory, mCurrentLanguage, follows = follows)
+
+        info("Story: $html")
 
         if (html == null) {
             showProgress(false)

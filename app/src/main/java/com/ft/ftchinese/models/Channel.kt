@@ -2,7 +2,6 @@ package com.ft.ftchinese.models
 
 import android.content.Context
 import android.content.res.Resources
-import android.util.Log
 import com.ft.ftchinese.R
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.Store
@@ -10,8 +9,9 @@ import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
-import org.jetbrains.anko.coroutines.experimental.bg
+import org.jetbrains.anko.AnkoLogger
 import java.util.*
+import java.io.IOException
 
 class Endpoints{
     companion object {
@@ -24,15 +24,38 @@ class Endpoints{
 /**
  * The following data keys is used to parse JSON data passed from WebView by WebAppInterface.postItems methods.
  * Most of them are useless, serving as placeholders so that we can extract the deep nested JSON values.
- * `ChannelMeta` represent the `meta` filed in JSON data.
+ * `ChannelMeta` represent the `meta` fieled in JSON data.
  */
+data class ChannelContent(
+        val meta: ChannelMeta,
+        val sections: Array<ChannelSection>
+)
+
 data class ChannelMeta(
         val title: String,
         val description: String,
         val theme: String,
-        val adid: String
+        val adid: String,
+        val adZone: String = "home"
 )
 
+
+data class ChannelSection(
+        val type: String,
+        val title: String,
+        val name: String,
+        val side: String,
+        val sideAlign: String,
+        val lists: Array<ChannelList>
+)
+
+data class ChannelList(
+        val name: String,
+        val title: String,
+        val preferLead: String,
+        val sponsorAdId: String,
+        val items: Array<ChannelItem>
+)
 /**
  * ChannelItem represents an item in a page of ViewPager.
  * This is the data tier passed to AbsContentActivity so that it know what kind of data to load.
@@ -53,7 +76,7 @@ data class ChannelMeta(
  * The fields in ChannelItem are also persisted to SQLite when user clicked on it.
  * It seems the Room library does not work well with Kotlin data class. Use a plain class works.
  *
- * The data tier is also used to record reading history. `standfirst` is used only for this purpose. Do not use `subType` and `shortlead` should not be used for this purpose. ArticleStore could only recored `tier==story`.
+ * This class is also used to record reading history. `standfirst` is used only for this purpose. `subType` and `shortlead` should not be used for this purpose. ArticleStore could only recored `type==story`.
  */
 data class ChannelItem(
         val id: String,
@@ -61,8 +84,14 @@ data class ChannelItem(
         val subType: String? = null,
         val headline: String,
         val shortlead: String? = null,
-        val timeStamp: String? = null // "1536249600"
-) {
+        val timeStamp: String? = null, // "1536249600"
+        var keywords: String? = null,
+        // These two properties are not parsed from JSON.
+        // They are copy from ChannelMeata
+        var adId: String = "",
+        var adZone: String = "",
+        var hideAd: Boolean = false
+) : AnkoLogger {
 
     var standfirst: String = ""
 
@@ -87,15 +116,13 @@ data class ChannelItem(
         }
 
     val isMembershipRequired: Boolean
-        get() = isSevenDaysOld || type == TYPE_PREMIUM
+        get() = isSevenDaysOld || type == TYPE_PREMIUM || subType == SUB_TYPE_RADIO
 
     private val filename: String
         get() = "${type}_$id.json"
 
     private val prefKey: String
         get() = "${type}_$id"
-
-    var adId: String = ""
 
     private val commentsId: String
         get() {
@@ -136,6 +163,9 @@ data class ChannelItem(
             }
         }
 
+    /**
+     * @throws JsonSyntaxException
+     */
     fun loadCachedStoryAsync(context: Context?): Deferred<Story?> = async {
 
         val jsonData = Store.load(context, filename) ?: return@async null
@@ -143,45 +173,163 @@ data class ChannelItem(
         parseJson(jsonData)
     }
 
+    /**
+     * @throws JsonSyntaxException
+     * @throws IOException
+     * @throws IllegalStateException
+     */
     fun fetchStoryAsync(context: Context): Deferred<Story?> = async {
 
         val url = apiUrl ?: return@async null
 
+        val jsonData = Fetch().get(url).string() ?: return@async null
 
-        try {
-            val jsonData = Fetch().get(url).string()
+        async {
+            Store.save(context, filename, jsonData)
+        }
 
-            bg {
-                Store.save(context, filename, jsonData)
+        val story = parseJson(jsonData)
+
+        keywords = story.keywords
+
+        story
+    }
+
+    /**
+     * @throws JsonSyntaxException
+     */
+    private fun parseJson(jsonData: String): Story {
+
+        val article = gson.fromJson<Story>(jsonData, Story::class.java)
+        standfirst = article.clongleadbody
+
+        return article
+    }
+
+    private fun pickAdZone(homepageZone: String, fallbackZone: String): String {
+        if (!keywords.isNullOrBlank()) {
+            return fallbackZone
+        }
+
+        for (sponsor in SponsorManager.sponsors) {
+            if ((keywords?.contains(sponsor.tag) == true || keywords?.contains(sponsor.title) == true) && sponsor.zone.isNotEmpty() ) {
+                return if (sponsor.zone.contains("/")) {
+                    sponsor.zone
+                } else {
+                    "home/special/${sponsor.zone}"
+                }
+            }
+        }
+
+        if (adZone != homepageZone) {
+            return adZone
+        }
+
+        if (keywords?.contains("lifestyle") == true) {
+            return "lifestyle"
+        }
+
+        if (keywords?.contains("management") == true) {
+            return "management"
+        }
+
+        if (keywords?.contains("opinion") == true) {
+            return "opinion"
+        }
+
+        if (keywords?.contains("创新经济") == true) {
+            return "创新经济"
+        }
+
+        if (keywords?.contains("markets") == true) {
+            return "markets"
+        }
+
+        if (keywords?.contains("economy") == true) {
+            return "economy"
+        }
+
+        if (keywords?.contains("china") == true) {
+            return "china"
+        }
+
+        return fallbackZone
+    }
+
+    private fun pickAdchID(homepageId: String, fallbackId: String): String {
+        if (!keywords.isNullOrBlank()) {
+            for (sponsor in SponsorManager.sponsors) {
+                if ((keywords?.contains(sponsor.tag) == true || keywords?.contains(sponsor.title) == true) && sponsor.adid.isNotEmpty()) {
+                    return sponsor.adid
+                }
             }
 
-            parseJson(jsonData)
-        } catch (e: Exception) {
-            e.printStackTrace()
+            if (adId != homepageId) {
+                return adId
+            }
 
-            null
+            if (keywords?.contains("lifestyle") == true) {
+                return "1800"
+            }
+
+            if (keywords?.contains("management") == true) {
+                return "1700"
+            }
+
+            if (keywords?.contains("opinion") == true) {
+                return "1600"
+            }
+
+            if (keywords?.contains("创新经济") == true) {
+                return "2100"
+            }
+
+            if (keywords?.contains("markets") == true) {
+                return "1400"
+            }
+
+            if (keywords?.contains("economy") == true) {
+                return "1300"
+            }
+
+            if (keywords?.contains("china") == true) {
+                return "1100"
+            }
+
+            return "1200"
         }
+
+        if (adId.isNotEmpty()) {
+            return fallbackId
+        }
+        return fallbackId
     }
 
-    private fun parseJson(jsonData: String?): Story? {
-        return try {
-            val article = gson.fromJson<Story>(jsonData, Story::class.java)
-            standfirst = article.clongleadbody
-
-            article
-        } catch (e: JsonSyntaxException) {
-            Log.w(TAG, "Cannot parse json: $e")
-            null
-        }
-    }
-
-    fun render(context: Context, language: Int, template: String?, article: Story?): String? {
+    fun render(template: String?, article: Story?, language: Int, follows: Map<String, String>): String? {
 
         if (template == null || article == null) {
             return null
         }
 
-        val follows = Following.loadAsMap(context)
+        var shouldHideAd = false
+
+        if (hideAd) {
+            shouldHideAd = true
+        } else if (!keywords.isNullOrBlank()) {
+            if (keywords?.contains(Keywords.removeAd) == true) {
+                shouldHideAd = true
+            } else {
+                for (sponsor in SponsorManager.sponsors) {
+                    if (keywords?.contains(sponsor.tag) == true || keywords?.contains(sponsor.title) == true) {
+                        shouldHideAd = sponsor.hideAd == "yes"
+                        break
+                    }
+                }
+            }
+        }
+
+
+        val adMPU = if (shouldHideAd) "" else AdParser.getAdCode(AdPosition.MIDDLE_ONE)
 
         val followTags = follows[Following.keys[0]]
         val followTopics = follows[Following.keys[1]]
@@ -195,11 +343,11 @@ data class ChannelItem(
 
         when (language) {
             LANGUAGE_CN -> {
-                body = article.bodyXML.cn
+                body = article.getCnBody(withAd = !shouldHideAd)
                 title = article.title.cn
             }
             LANGUAGE_EN -> {
-                body = article.bodyXML.en ?: ""
+                body = article.getEnBody(withAd = !shouldHideAd)
                 title = article.title.en ?: ""
             }
             LANGUAGE_BI -> {
@@ -208,7 +356,7 @@ data class ChannelItem(
             }
         }
 
-        return template.replace("{story-body}", body)
+        val storyHTMLOriginal = template.replace("{story-body}", body)
                 .replace("{story-headline}", title)
                 .replace("{story-byline}", article.byline)
                 .replace("{story-time}", article.createdAt)
@@ -227,11 +375,19 @@ data class ChannelItem(
                 .replace("'{follow-areas}'", followAreas ?: "")
                 .replace("'{follow-authors}'", followAuthors ?: "")
                 .replace("'{follow-columns}'", followColumns ?: "")
-                .replace("{adchID}", adId)
-                //                        .replace("{ad-banner}", "")
-                //                        .replace("{ad-mpu}", "")
+                .replace("{adchID}", pickAdchID(HOME_AD_CH_ID, DEFAULT_STORY_AD_CH_ID))
+                .replace("{ad-zone}", pickAdZone(HOME_AD_ZONE, DEFAULT_STORY_AD_ZONE))
+                .replace("{ad-mpu}", adMPU)
                 //                        .replace("{font-class}", "")
                 .replace("{comments-id}", commentsId)
+                .replace("{{googletagservices-js}}", JSCodes.googletagservices)
+
+        val storyHTML = AdParser.updateAdCode(storyHTMLOriginal, shouldHideAd)
+
+        val storyHTMLCheckingVideo = JSCodes.getInlineVideo(storyHTML)
+
+        return JSCodes.getCleanHTML(storyHTMLCheckingVideo)
+
     }
 
 
@@ -245,23 +401,22 @@ data class ChannelItem(
         const val TYPE_PREMIUM = "premium"
         const val TYPE_INTERACTIVE = "interactive"
         const val SUB_TYPE_RADIO = "radio"
+        const val SUB_TYPE_USER_COMMENT = ""
 
+        const val HOME_AD_ZONE = "home"
+        const val DEFAULT_STORY_AD_ZONE = "world"
+
+        const val HOME_AD_CH_ID = "1000"
+        const val DEFAULT_STORY_AD_CH_ID = "1200"
+
+        // Read story.html file.
         fun readTemplateAsync(resources: Resources): Deferred<String?> = async {
             Store.readRawFile(resources, R.raw.story)
         }
     }
 }
 
-data class ChannelList(
-        val items: Array<ChannelItem>
-)
-data class ChannelSection(
-        val lists: Array<ChannelList>
-)
-data class ChannelContent(
-        val meta: ChannelMeta,
-        val sections: Array<ChannelSection>
-)
+
 
 val pathToTitle = mapOf(
         "businesscase.html" to "中国商业案例精选",

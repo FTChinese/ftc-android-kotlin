@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">FT中文网</string>
     <string name="action_search">搜索</string>
-    <string name="action_share">分享</string>
+    <string name="action_listen_story">朗读</string>
     <string name="action_favorite">收藏</string>
 
     <string name="share_template">[FT中文网]%1$s - %2$s</string>
@@ -24,7 +24,8 @@
     <string name="prompt_refreshing">更新数据</string>
     <string name="prompt_no_network">网络无连接，请检查网络设置</string>
     <string name="prompt_load_failure">无法加载数据，请稍后再试</string>
-    <string name="prompt_member_restricted">仅限会员阅读</string>
+    <string name="prompt_restricted_paid_user">仅限付费会员阅读</string>
+    <string name="prompt_restricted_login">会员登入后可以阅读</string>
 
     <!-- Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>

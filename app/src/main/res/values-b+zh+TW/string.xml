@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">FTChinese</string>
     <string name="action_search">搜尋</string>
-    <string name="action_share">分享</string>
+    <string name="action_listen_story">分享</string>
     <string name="action_favorite">收藏</string>
 
     <string name="share_template">[FT中文網]%1$s - %2$s</string>
@@ -25,7 +25,10 @@
     <string name="prompt_refreshing">更新頁面</string>
     <string name="prompt_no_network">網路無連結，請檢查網路設置</string>
     <string name="prompt_load_failure">無法下載頁面，請稍後再試</string>
-    <string name="prompt_member_restricted">僅限會員閱讀</string>
+    <string name="prompt_restricted_paid_user">僅限會員閱讀</string>
+    <string name="prompt_restricted_login">會員登入后可以閱讀</string>
+
+
     <!-- Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

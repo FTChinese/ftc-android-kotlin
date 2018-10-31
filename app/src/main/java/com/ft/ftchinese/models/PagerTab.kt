@@ -32,36 +32,29 @@ data class PagerTab (
     }
 
     fun crawlWebAsync(context: Context?): Deferred<String?> = async {
-        try {
-            val htmlStr = Fetch().get(contentUrl).string()
-            if (htmlStr == null) {
-                info("Didn't crawl anything on $contentUrl")
-            } else {
-                info("Crawled content from $contentUrl")
-            }
-            Store.save(context, "$name.html", htmlStr)
+        val htmlStr = Fetch().get(contentUrl).string()
 
-            htmlStr
-        } catch (e: Exception) {
-            e.printStackTrace()
-            info("Crawl web page error $contentUrl")
-            null
+        Store.save(context, "$name.html", htmlStr)
+
+        htmlStr
+    }
+
+    fun render(template: String?, listContent: String?): String? {
+        if (template == null || listContent == null) {
+            return null
         }
+        return template.replace("{list-content}", listContent)
+                .replace("{{googletagservices-js}}", "")
     }
 
     companion object {
+        // Indicate you need to craw an HTML fragment
         const val HTML_TYPE_FRAGMENT = 1
+        // Indicate you need to load a complete web page into webview.
         const val HTML_TYPE_COMPLETE = 2
 
         fun readTemplate(resources: Resources): Deferred<String?> = async {
             Store.readRawFile(resources, R.raw.list)
-        }
-
-        fun render(template: String?, listContent: String?): String? {
-            if (template == null || listContent == null) {
-                return null
-            }
-            return template.replace("{list-content}", listContent)
         }
 
         val newsPages = arrayOf(

@@ -15,6 +15,7 @@ import android.webkit.*
 import android.widget.ImageView
 import android.widget.TextView
 import com.ft.ftchinese.models.Following
+import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.gson
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
@@ -43,6 +44,8 @@ abstract class AbsContentActivity : AppCompatActivity(),
     abstract val articleTitle: String
     abstract val articleStandfirst: String
 
+    protected var mSession: SessionManager? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_content)
@@ -53,6 +56,8 @@ abstract class AbsContentActivity : AppCompatActivity(),
             // Do not show title on the toolbar for any content.
             setDisplayShowTitleEnabled(false)
         }
+
+        mSession = SessionManager.getInstance(this)
 
         swipe_refresh.setOnRefreshListener(this)
 
@@ -105,23 +110,23 @@ abstract class AbsContentActivity : AppCompatActivity(),
     }
 
     // Create options menu
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        super.onCreateOptionsMenu(menu)
-        menuInflater.inflate(R.menu.activity_content_list, menu)
-
-        /**
-         * Docs on share:
-         * https://developer.android.com/training/appbar/action-views
-         * https://developer.android.com/training/sharing/shareaction
-         * https://developer.android.com/reference/android/support/v7/widget/ShareActionProvider
-         * How to set intent: https://developer.android.com/training/sharing/send
-         */
-//        menu?.findItem(R.id.action_share).also { menuItem ->
-//            mShareActionProvider = MenuItemCompat.getActionProvider(menuItem) as ShareActionProvider
-//        }
-
-        return true
-    }
+//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+//        super.onCreateOptionsMenu(menu)
+//        menuInflater.inflate(R.menu.activity_content_list, menu)
+//
+//        /**
+//         * Docs on share:
+//         * https://developer.android.com/training/appbar/action-views
+//         * https://developer.android.com/training/sharing/shareaction
+//         * https://developer.android.com/reference/android/support/v7/widget/ShareActionProvider
+//         * How to set intent: https://developer.android.com/training/sharing/send
+//         */
+////        menu?.findItem(R.id.action_share).also { menuItem ->
+////            mShareActionProvider = MenuItemCompat.getActionProvider(menuItem) as ShareActionProvider
+////        }
+//
+//        return true
+//    }
 
     /**
      * Called by subclass to set share intent for ShareActionProvider
@@ -208,7 +213,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
                         req.scene = if (app.id == ShareItem.WECHAT_FRIEND) SendMessageToWX.Req.WXSceneSession else SendMessageToWX.Req.WXSceneTimeline
 
                         val ok = api.sendReq(req)
-                        toast("Send result: $ok")
                     }
 
                     ShareItem.OPEN_IN_BROWSER -> {

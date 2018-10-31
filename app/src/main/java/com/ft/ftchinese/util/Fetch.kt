@@ -1,6 +1,5 @@
 package com.ft.ftchinese.util
 
-import android.accounts.NetworkErrorException
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.models.ErrorResponse
 import com.google.gson.Gson

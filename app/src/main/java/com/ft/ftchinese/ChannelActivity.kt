@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import com.ft.ftchinese.models.PagerTab
+import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.activity_chanel.*
 import org.jetbrains.anko.AnkoLogger
@@ -17,6 +18,12 @@ import org.jetbrains.anko.info
  */
 class ChannelActivity : AppCompatActivity(), ChannelFragment.OnFragmentInteractionListener, ChannelWebViewClient.OnInAppNavigate, AnkoLogger {
 
+    private var mSession: SessionManager? = null
+
+    override fun getSession(): SessionManager? {
+        return mSession
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_chanel)
@@ -27,6 +34,7 @@ class ChannelActivity : AppCompatActivity(), ChannelFragment.OnFragmentInteracti
             setDisplayShowTitleEnabled(false)
         }
 
+        mSession = SessionManager.getInstance(this)
         /**
          * Get the metadata for this page of articles
          */

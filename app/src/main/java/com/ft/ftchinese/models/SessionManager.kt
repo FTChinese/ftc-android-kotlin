@@ -84,18 +84,6 @@ class SessionManager(context: Context) {
         return sharedPreferences.getBoolean(PREF_IS_LOGGED_IN, false)
     }
 
-    fun isPaidMember(): Boolean {
-        val tier = sharedPreferences.getString(PREF_MEMBER_TIER, null) ?: return false
-
-        return tier == Membership.TIER_STANDARD || tier == Membership.TIER_PREMIUM
-    }
-
-    fun isMembershipExpired(): Boolean {
-        val expireAt = sharedPreferences.getString(PREF_MEMBER_EXPIRE, null) ?: return true
-
-        return DateTime.parse(expireAt, ISODateTimeFormat.date()).isBeforeNow
-    }
-
     fun logout() {
         editor.clear()
         editor.apply()

@@ -37,10 +37,11 @@ class Story (
         val ebyline: String,
         val ebody: String,
         val tag: String,
+        val genre: String,
+        val topic: String,
+        val area: String,
         val last_publish_time: String,
         val story_pic: StoryPic,
-        val paywall: Int,
-        val whitelist: Int,
         val relative_story: Array<RelatedStory>
 ) {
     private val TAG = "Story"
@@ -71,6 +72,12 @@ class Story (
 
     val tags: List<String>
         get() = tag.split(",")
+
+    val keywords: String
+        get() = "$tag,$area,$topic,$genre"
+                .replace(Regex(",+"), ",")
+                .replace(Regex("^,"), "")
+                .replace(Regex(",$"), "")
 
     val updatedAt: String
         get() = DateFormat.format("yyyy年M月d日 HH:mm", fileupdatetime.toLong() * 1000) as String
@@ -129,6 +136,75 @@ class Story (
         """.trimIndent()
     }
 
+    fun getCnBody(withAd: Boolean = true): String {
+        if (!withAd) {
+            return cbody
+        }
+
+        val arrBody = splitCnBody().toMutableList()
+
+        // Insert ad after paragraph 3 and paragraph 9 of the original list.
+        if (arrBody.size > 3) {
+            arrBody.add(3, AdParser.getAdCode(AdPosition.MIDDLE_ONE))
+        } else {
+            arrBody.add(arrBody.size, AdParser.getAdCode(AdPosition.MIDDLE_ONE))
+        }
+
+        if (arrBody.size > 10) {
+            arrBody.add(10, AdParser.getAdCode(AdPosition.MIDDLE_TWO))
+        }
+
+        return arrBody.joinToString("")
+    }
+
+    fun getEnBody(withAd: Boolean = true): String {
+        if (ebody.isNullOrBlank()) {
+            return ""
+        }
+
+        if (!withAd) {
+            return ebody
+        }
+
+        val arrBody = splitEnBody().toMutableList()
+
+        // Insert ad after paragraph 3 and paragraph 9 of the original list.
+        if (arrBody.size > 3) {
+            arrBody.add(3, AdParser.getAdCode(AdPosition.MIDDLE_ONE))
+        } else {
+            arrBody.add(arrBody.size, AdParser.getAdCode(AdPosition.MIDDLE_ONE))
+        }
+
+        if (arrBody.size > 10) {
+            arrBody.add(10, AdParser.getAdCode(AdPosition.MIDDLE_TWO))
+        }
+
+        return arrBody.joinToString("")
+    }
+
+    fun getBilingualBody(): String {
+        if (ebody.isNullOrBlank()) {
+            return ""
+        }
+
+        val alignedBody = alignBody()
+
+        return alignedBody.joinToString("") {
+            "${it.cn}${it.en}"
+        }
+    }
+
+    private fun splitCnBody(): List<String> {
+        return cbody.split("\r\n")
+    }
+
+    private fun splitEnBody(): List<String> {
+        return ebody.split("\r\n")
+    }
+
+    /**
+     * Align english text to chinese text paragraph by paragraph.
+     */
     private fun alignBody(): List<Bilingual> {
         val cnArray = cbody.split("\r\n")
         val enArray = ebody.split("\r\n")

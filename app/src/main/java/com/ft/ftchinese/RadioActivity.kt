@@ -3,18 +3,16 @@ package com.ft.ftchinese
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.KeyEvent
+import android.view.View
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.util.gson
-
-import kotlinx.android.synthetic.main.activity_radio.*
-import org.jetbrains.anko.AnkoLogger
+import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.info
 
-class RadioActivity : AppCompatActivity(), AnkoLogger {
+class RadioActivity : AbsContentActivity() {
 
-    private var channelItem: ChannelItem? = null
+    private var mChannelItem: ChannelItem? = null
 
     companion object {
         private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
@@ -28,13 +26,16 @@ class RadioActivity : AppCompatActivity(), AnkoLogger {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_radio)
-        setSupportActionBar(toolbar)
+//        setContentView(R.layout.activity_radio)
 
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowTitleEnabled(false)
-        }
+//        supportActionBar?.apply {
+//            setDisplayHomeAsUpEnabled(true)
+//            setDisplayShowTitleEnabled(false)
+//        }
+
+        swipe_refresh.isEnabled = false
+        language_group.visibility = View.GONE
+        action_favourite.visibility = View.GONE
 
         web_view.settings.apply {
             javaScriptEnabled = true
@@ -57,12 +58,29 @@ class RadioActivity : AppCompatActivity(), AnkoLogger {
 
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
-        channelItem = gson.fromJson(itemData, ChannelItem::class.java)
-        info("Creating radio activity for $channelItem")
+        mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
+        info("Creating radio activity for $mChannelItem")
 
-        info("API URL: ${channelItem?.apiUrl}")
+        info("API URL: ${mChannelItem?.apiUrl}")
 
-        loadUrl(channelItem?.apiUrl)
+        loadUrl(mChannelItem?.apiUrl)
+    }
+
+    override val articleWebUrl: String
+        get() = mChannelItem?.canonicalUrl ?: ""
+
+    override val articleTitle: String
+        get() = mChannelItem?.headline ?: ""
+
+    override val articleStandfirst: String
+        get() = mChannelItem?.standfirst ?: mChannelItem?.headline ?: ""
+
+    override fun load() {
+
+    }
+
+    override fun onRefresh() {
+
     }
 
     private fun loadUrl(url: String?) {
