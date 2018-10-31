@@ -200,23 +200,20 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             if (cachedChannelContent != null) {
                 loadData(cachedChannelContent)
                 info("Loaded data from cache")
-            }
 
-            if (activity?.isNetworkConnected() == false) {
-                toast(R.string.prompt_no_network)
+                // If user is using wifi, we can download the latest data and save it but do not refresh ui.
+                if (activity?.isActiveNetworkWifi() == true) {
+                    info("Network is wifi and cached exits. Fetch data but only update.")
+                    mPageMeta?.crawlWebAsync(context)
+                }
                 return@launch
-            }
+            } else {
+                // Cache is not found. Fetch data anyway unless no network.
+                if (activity?.isNetworkConnected() == false) {
+                    toast(R.string.prompt_no_network)
+                    return@launch
+                }
 
-            // If on wifi, then fetch remote data and refresh. Stop.
-            if (activity?.isActiveNetworkWifi() == true) {
-                info("Network is wifi. Fetch data.")
-                crawlAndUpdate()
-                return@launch
-            }
-
-            // If no cached HTML fragment found, fetch remote data as long as there is network.
-            // In this case, show progress.
-            if (cachedChannelContent == null) {
                 info("Cache not found. Fetch data.")
                 showProgress(true)
                 crawlAndUpdate()
@@ -242,9 +239,9 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         }
     }
 
-    private fun loadData(data: String) {
+    private fun loadData(htmlFragment: String) {
 
-        val dataToLoad = mPageMeta?.render(mTemplate, data)
+        val dataToLoad = mPageMeta?.render(mTemplate, htmlFragment)
 
         web_view.loadDataWithBaseURL(WEBVIEV_BASE_URL, dataToLoad, "text/html", null, null)
         showProgress(false)

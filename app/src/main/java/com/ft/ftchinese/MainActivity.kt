@@ -278,7 +278,6 @@ class MainActivity : AppCompatActivity(),
         val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
 
         adTimer.setOnClickListener {
-            toast("Clicked timer")
             root_container.removeView(adView)
             showSystemUI()
         }

@@ -31,6 +31,9 @@ data class PagerTab (
         Store.load(context, "$name.html")
     }
 
+    /**
+     * Crawl a web page and save it.
+     */
     fun crawlWebAsync(context: Context?): Deferred<String?> = async {
         val htmlStr = Fetch().get(contentUrl).string()
 

@@ -118,6 +118,7 @@ class Fetch : AnkoLogger {
      * See execute for thrown errors.
      */
     fun end(): Response {
+        headers.set("Authorization", "Bearer ${BuildConfig.ACCESS_TOKEN}")
         reqBuilder.headers(headers.build())
 
         if (cacheControl != null) {
