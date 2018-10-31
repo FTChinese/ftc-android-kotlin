@@ -55,6 +55,8 @@ open class BaseWebViewClient(
     }
 
     // Handle clicks on a link in a web page loaded into url
+    // Returns true if you handled url links yourself;
+    // returns false Android will try to handle it.
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
         info("shouldOverrideUrlLoading: $url")
 
@@ -122,7 +124,7 @@ open class BaseWebViewClient(
             true
         } else {
             activity?.toast(R.string.prompt_no_email_app)
-            false
+            true
         }
     }
 
