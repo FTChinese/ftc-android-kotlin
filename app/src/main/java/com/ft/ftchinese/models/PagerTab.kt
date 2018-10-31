@@ -61,7 +61,7 @@ data class PagerTab (
         }
 
         val newsPages = arrayOf(
-                PagerTab(title = "首页", name = "news_frontpage", contentUrl = "https://api003.ftmailbox.com/?webview=ftcapp&bodyonly=yes&maxB=1&backupfile=localbackup&showIAP=yes&pagetype=home&001", htmlType = HTML_TYPE_FRAGMENT),
+                PagerTab(title = "首页", name = "news_home", contentUrl = "https://api003.ftmailbox.com/?webview=ftcapp&bodyonly=yes&maxB=1&backupfile=localbackup&showIAP=yes&pagetype=home&001", htmlType = HTML_TYPE_FRAGMENT),
                 PagerTab(title = "中国", name = "news_china", contentUrl = "https://api003.ftmailbox.com/channel/china.html?webview=ftcapp&bodyonly=yes", htmlType = HTML_TYPE_FRAGMENT),
                 PagerTab(title = "独家", name = "news_scoop", contentUrl = "https://api003.ftmailbox.com/channel/exclusive.html?webview=ftcapp&bodyonly=yes&ad=no&001", htmlType = HTML_TYPE_FRAGMENT),
                 PagerTab(title = "编辑精选", name = "news_editor_choice", contentUrl = "https://api003.ftmailbox.com/channel/editorchoice.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018", htmlType = HTML_TYPE_FRAGMENT),

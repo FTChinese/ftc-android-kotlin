@@ -137,6 +137,7 @@
     <string name="prompt_letter_sent">请检查您的邮件，点击邮件中的“重置密码”链接，在所打开的网页中修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</string>
     <string name="prompt_not_logged_in">您尚未登录，登录后可以查看</string>
     <string name="prompt_not_set">未设置</string>
+    <string name="prompt_no_email_app">您的设备上没有安装邮件程序，无法发送反馈邮件</string>
 
 
     <string name="action_request_verify">重新发送验证邮件</string>

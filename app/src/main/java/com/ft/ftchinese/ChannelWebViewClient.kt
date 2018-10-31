@@ -6,7 +6,8 @@ import com.ft.ftchinese.models.PagerTab
 import com.ft.ftchinese.models.pathToTitle
 
 /**
- * A WebViewClient used by a ChannelFragment
+ * A WebViewClient used by a ChannelFragment。
+ * Handles click on a url.
  */
 class ChannelWebViewClient(
         activity: Activity?,

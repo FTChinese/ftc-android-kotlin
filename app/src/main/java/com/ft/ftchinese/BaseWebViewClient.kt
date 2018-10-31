@@ -1,6 +1,7 @@
 package com.ft.ftchinese
 
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.support.customtabs.CustomTabsIntent
@@ -15,6 +16,7 @@ import com.ft.ftchinese.models.pathToTitle
 import com.ft.ftchinese.user.SignUpActivity
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.jetbrains.anko.toast
 import org.jetbrains.anko.warn
 
 /**
@@ -45,7 +47,6 @@ open class BaseWebViewClient(
         super.onReceivedError(view, request, error)
 
         info("onReceivedError: Failed to ${request?.method}: ${request?.url}")
-        warn("Error code: ${error?.errorCode}, ${error?.description}")
     }
 
     override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
@@ -62,7 +63,6 @@ open class BaseWebViewClient(
         }
 
         val uri = Uri.parse(url)
-
         // At the comment section of story page there is a login form.
         // Handle login in web view.
         // the login button calls js `bower_components/ftcnext/app/scripts/user-login-native.js`
@@ -73,36 +73,57 @@ open class BaseWebViewClient(
         // paywall: String,
         // paywallExpire: String
         // The data structure is not compatible with our restful API. After we get this message in Java, it might be better send a request to API with `userId` so that native app always use API data.
-        when (uri.scheme) {
+        return when (uri.scheme) {
+            // 通过邮件反馈 link: mailto:ftchinese.feedback@gmail.com?subject=Feedback
+            "mailto" -> {
+                return feedbackEmail()
+            }
             // The `免费注册` button is wrapped in a link with url set to `ftcregister://www.ftchinese.com/`
             "ftcregister" -> {
                 SignUpActivity.start(activity)
                 return true
             }
             // The `微信登录` button is wrapped in a link with url set to `weixinlogin://www.ftchinese.com/`
-            /**
-             * @TODO Call wechat
-             */
             "weixinlogin" -> {
                 info("Request wechat login")
                 return true
             }
+
+            /**
+             * If the clicked url is of the pattern `.../story/xxxxxx`, you should use `StoryActivity`
+             * and fetch JSON from server and concatenate it with a html bundle into the package `raw/story.html`,
+             * then call `WebView.loadDataWithBaseUrl()` to load the string into WebView.
+             * In such a case, you need to provide a base url so that contents in the WebView know where to fetch resources (like advertisement).
+             * The base url for such contents should be `www.ftchinese.com`.
+             * If you load a url directly into, the host might be something else, like `api003.ftmailbox.com`, depending your url you use.
+             * Here we check origin or the clicked URL: for "www.ftchinese.com" or "api003.ftmailbox.com", we load them directly into the app.
+             * For external links (mostly ads), open in external browser.
+             */
+            "http", "https" -> {
+                if (Endpoints.hosts.contains(uri.host)) {
+                    return handleInSiteLink(uri)
+                }
+
+                return handleExternalLink(uri)
+            }
+            else -> false
         }
-        /**
-         * If the clicked url is of the pattern `.../story/xxxxxx`, you should use `StoryActivity`
-         * and fetch JSON from server and concatenate it with a html bundle into the package `raw/story.html`,
-         * then call `WebView.loadDataWithBaseUrl()` to load the string into WebView.
-         * In such a case, you need to provide a base url so that contents in the WebView know where to fetch resources (like advertisement).
-         * The base url for such contents should be `www.ftchinese.com`.
-         * If you load a url directly into, the host might be something else, like `api003.ftmailbox.com`, depending your url you use.
-         * Here we check origin or the clicked URL: for "www.ftchinese.com" or "api003.ftmailbox.com", we load them directly into the app.
-         * For external links (mostly ads), open in external browser.
-         */
-        if (Endpoints.hosts.contains(uri.host)) {
-            return handleInSiteLink(uri)
+    }
+
+    private fun feedbackEmail(): Boolean {
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:")
+            putExtra(Intent.EXTRA_EMAIL, "ftchinese.feedback@gmail.com")
+            putExtra(Intent.EXTRA_SUBJECT, "Feedback on FTC Android App")
         }
 
-        return handleExternalLink(uri)
+        return if (intent.resolveActivity(activity?.packageManager) != null) {
+            activity?.startActivity(intent)
+            true
+        } else {
+            activity?.toast(R.string.prompt_no_email_app)
+            false
+        }
     }
 
     private fun handleInSiteLink(uri: Uri): Boolean {
