@@ -97,4 +97,9 @@ class FormatTimeTest{
         val formatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
         println(formatter.print(now))
     }
+
+    @Test fun AdSwitch() {
+        val result = DateTime.parse("2019-01-01", ISODateTimeFormat.date()).isBeforeNow
+        println(result)
+    }
 }
