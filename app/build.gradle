@@ -14,6 +14,16 @@ apply plugin: 'kotlin-android-extensions'
 def props = new Properties()
 file("$rootDir/config.properties").withInputStream { props.load(it) }
 
+// Creates a variable called keystorePropertiesFile, and initializes it to the
+// keystore.properties file.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+
+// Initializes a new Properties() object called keystoreProperties.
+def keystoreProperties = new Properties()
+
+// Loads the keystore.properties file into the keystoreProperties object.
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     compileSdkVersion 27
     defaultConfig {
@@ -21,7 +31,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "WECAHT_APP_ID", props.getProperty("wechat.appId")
         buildConfigField "String", "ACCESS_TOKEN", props.getProperty("access_token")
@@ -31,8 +41,18 @@ android {
             }
         }
     }
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
     buildTypes {
         release {
+            // Adds the "release" signing configuration to the release build type.
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -71,7 +91,6 @@ dependencies {
     //    kapt "android.arch.persistence.room:compiler:$room_version"
     // Wechat
     implementation 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:5.1.6'
-
     // Utilities
     implementation 'com.jakewharton.byteunits:byteunits:0.9.1'
     implementation 'joda-time:joda-time:2.10'
