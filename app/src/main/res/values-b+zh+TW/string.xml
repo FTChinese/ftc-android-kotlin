@@ -140,6 +140,7 @@
     <string name="prompt_letter_sent">請檢查您的信件，點擊郵件中的「重設密碼」連接，在所打開的網頁中修改您的密碼。如果幾分鐘內沒有看到信件，請檢查是否被放進了垃圾信件列表。</string>
     <string name="prompt_not_logged_in">您尚未登入，登入後可以查看</string>
     <string name="prompt_not_set">未設置</string>
+    <string name="prompt_no_email_app">您的設備上沒有安裝信件程式，無法發送反饋信件</string>
 
     <string name="action_request_verify">重新發送驗證信件</string>
 
@@ -192,6 +193,7 @@
     <string name="pref_language">語言偏好</string>
     <string name="pref_clear_cache">清除页面快取</string>
     <string name="pref_clear_history">清空閱讀歷史</string>
+    <string name="pref_version_name">當前版本</string>
     <string name="summary_articles_read">已閱讀 %1$d 篇文章</string>
 
     <string-array name="profile_gender_entries">
