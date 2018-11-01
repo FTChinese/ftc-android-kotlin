@@ -66,25 +66,25 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
         // Only used to test WXPayEntryActivity's UI.
         // Comment them for production.
-        val isUiTest = intent.getBooleanExtra(EXTRA_IS_TEST, false)
-
-        if (isUiTest) {
-            val member = Membership(
-                    tier = Membership.TIER_STANDARD,
-                    billingCycle = Membership.CYCLE_MONTH,
-                    expireDate = "2018-12-12"
-            )
-            isInProgress = false
-            isSuccess = true
-            heading_tv.text = getString(R.string.wxpay_done)
-            updateUI(member)
-
-            return
-        } else {
-            isInProgress = false
-            heading_tv.text = getString(R.string.wxpay_cancelled)
-            return
-        }
+//        val isUiTest = intent.getBooleanExtra(EXTRA_IS_TEST, false)
+//
+//        if (isUiTest) {
+//            val member = Membership(
+//                    tier = Membership.TIER_STANDARD,
+//                    billingCycle = Membership.CYCLE_MONTH,
+//                    expireDate = "2018-12-12"
+//            )
+//            isInProgress = false
+//            isSuccess = true
+//            heading_tv.text = getString(R.string.wxpay_done)
+//            updateUI(member)
+//
+//            return
+//        } else {
+//            isInProgress = false
+//            heading_tv.text = getString(R.string.wxpay_cancelled)
+//            return
+//        }
 
         api?.handleIntent(intent, this)
     }
@@ -269,13 +269,13 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     }
 
     // For test only.
-    companion object {
-        private const val EXTRA_IS_TEST = "ui_test"
-        fun start(activity: Activity?) {
-            val intent = Intent(activity, WXPayEntryActivity::class.java)
-            intent.putExtra(EXTRA_IS_TEST, false)
-
-            activity?.startActivity(intent)
-        }
-    }
+//    companion object {
+//        private const val EXTRA_IS_TEST = "ui_test"
+//        fun start(activity: Activity?) {
+//            val intent = Intent(activity, WXPayEntryActivity::class.java)
+//            intent.putExtra(EXTRA_IS_TEST, false)
+//
+//            activity?.startActivity(intent)
+//        }
+//    }
 }
