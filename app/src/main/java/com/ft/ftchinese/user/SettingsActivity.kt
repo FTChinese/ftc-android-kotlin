@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.preference.Preference
 import android.support.v7.preference.PreferenceFragmentCompat
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.util.Store
@@ -39,6 +40,7 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
         prefClearCache = findPreference("pref_clear_cache")
         prefClearHistory = findPreference("pref_clear_history")
+        findPreference("pref_version_name").summary = BuildConfig.VERSION_NAME
 
         updateCacheUI()
 
