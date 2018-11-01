@@ -27,6 +27,6 @@ class SubscribeApi {
         const val WX_UNIFIED_ORDER = "$BASE/wxpay/unified-order"
         const val WX_ORDER_QUERY = "$BASE/wxpay/query"
         const val ALI_ORDER = "$BASE/alipay/app-order"
-        const val ALI_VERIFY_APP_PAY = "$BASE/verify/app-pay"
+        const val ALI_VERIFY_APP_PAY = "$BASE/alipay/verify/app-pay"
     }
 }
