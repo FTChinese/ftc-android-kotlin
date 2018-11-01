@@ -34,6 +34,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.coroutines.experimental.bg
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
+import java.lang.Exception
 
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
@@ -304,10 +305,22 @@ class MainActivity : AppCompatActivity(),
         adTimer.visibility = View.VISIBLE
         info("Show timer")
 
+        // send impressions
+        async {
+            try {
+                ad.sendImpressionAsync()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                info("Send launch screen impression failed")
+            }
+        }
+
         for (i in 5 downTo 1) {
             adTimer.text = getString(R.string.prompt_ad_timer, i)
             delay(1000)
         }
+
+        // Record impression here.
 
         root_container.removeView(adView)
         info("Remove ad")

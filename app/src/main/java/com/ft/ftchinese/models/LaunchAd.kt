@@ -14,6 +14,7 @@ import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import org.joda.time.format.ISODateTimeFormat
 import java.io.File
@@ -30,7 +31,9 @@ data class LaunchMeta(
 data class LaunchAd(
         @SerializedName("fileName") val imageUrl: String,
         @SerializedName("click") val linkUrl: String,
-        @SerializedName("impression_1") val impressionUrl: String,
+        @SerializedName("impression_1") val impressionUrl1: String,
+        @SerializedName("impression_2") val impressionUrl2: String?,
+        @SerializedName("impression_3") val impressionUrl3: String?,
         val iphone: String,
         val android: String,
         val ipad: String,
@@ -59,6 +62,30 @@ data class LaunchAd(
                 .setCallback { e, result ->
                     info("Download complete: ${result.absolutePath}")
                 }
+    }
+
+    fun sendImpressionAsync() = async {
+        val urls = mutableListOf<String>()
+        if (impressionUrl1.isNotEmpty()) {
+            urls.add(impressionUrl1)
+        }
+        if (impressionUrl2 != null && impressionUrl2.isNotEmpty()) {
+            urls.add(impressionUrl2)
+        }
+
+        if (impressionUrl3 != null && impressionUrl3.isNotEmpty()) {
+            urls.add(impressionUrl3)
+        }
+        val timestamp = DateTime.now().millis / 1000
+
+        urls.forEach {
+            val urlStr = it.replace("[timestamp]", "$timestamp")
+            val url = Uri.parse(urlStr).buildUpon().appendQueryParameter("fttime", "$timestamp").build().toString()
+            info("Send impression to $url")
+            val resp = Fetch().get(url).string()
+
+            info("Send impression response $resp")
+        }
     }
 }
 
