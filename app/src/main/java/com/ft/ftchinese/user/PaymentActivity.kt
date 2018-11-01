@@ -27,6 +27,9 @@ import kotlinx.coroutines.experimental.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
+import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
+import org.joda.time.format.ISODateTimeFormat
 
 private val priceIds = mapOf<String, Int>(
         "standard_year" to R.string.pay_standard_year,
@@ -381,24 +384,27 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
             val appPayResp = payResult["result"] ?: return@launch
 
-            // query server
-            isInProgress = true
-            val verifiedOrder = try {
-                user.aliVerifyOrderAsync(appPayResp).await()
-            } catch (resp: ErrorResponse) {
-                isInProgress = false
-                handleApiError(resp)
-                return@launch
-            } catch (e: Exception) {
-                isInProgress = false
-                handleException(e)
-                return@launch
-            }
+            info("Ali pay result: $appPayResp")
 
-            isInProgress = false
+            // query server
+//            isInProgress = true
+//            val verifiedOrder = try {
+//                user.aliVerifyOrderAsync(appPayResp).await()
+//            } catch (resp: ErrorResponse) {
+//                info("Verify ali pay result: $resp")
+//                isInProgress = false
+//                handleApiError(resp)
+//                return@launch
+//            } catch (e: Exception) {
+//                isInProgress = false
+//                handleException(e)
+//                return@launch
+//            }
+//
+//            isInProgress = false
             toast(R.string.wxpay_done)
             // update subs.confirmedAt
-            subs.confirmedAt = verifiedOrder.paidAt
+            subs.confirmedAt = ISODateTimeFormat.dateTimeNoMillis().print(DateTime.now().withZone(DateTimeZone.UTC))
 
             // Update membership
             val updatedMembership = subs.updateMembership(user.membership)
