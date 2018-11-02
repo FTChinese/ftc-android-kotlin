@@ -18,9 +18,9 @@ import com.ft.ftchinese.util.isActiveNetworkWifi
 import com.ft.ftchinese.util.isNetworkConnected
 import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.fragment_channel.*
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.android.UI
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast

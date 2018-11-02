@@ -12,9 +12,7 @@ import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.PasswordReset
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_forgot_password.*
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -53,18 +51,6 @@ internal class ForgotPasswordFragment : Fragment(), AnkoLogger {
             send_button.isEnabled = value
             email.isEnabled = value
         }
-
-    private fun failureState() {
-        isInProgress = false
-        isInputAllowed = true
-        letter_sent_feedback.visibility = View.GONE
-    }
-
-    private fun successState() {
-        isInProgress = true
-        isInputAllowed = false
-        letter_sent_feedback.visibility = View.VISIBLE
-    }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -126,11 +112,13 @@ internal class ForgotPasswordFragment : Fragment(), AnkoLogger {
             return
         }
 
-        job = launch(UI) {
+        job = GlobalScope.launch(Dispatchers.Main) {
             val passwordReset = PasswordReset(emailStr)
 
             try {
-                val statusCode = passwordReset.sendAsync().await()
+                val statusCode = async {
+                    passwordReset.send()
+                }.await()
 
                 if (statusCode == 204) {
                     toast(R.string.success_letter_sent)

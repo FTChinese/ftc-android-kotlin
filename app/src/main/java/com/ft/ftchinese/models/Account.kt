@@ -5,10 +5,8 @@ import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.SubscribeApi
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.async
 
-const val PREFERENCE_NAME_USER = "user"
+const val PREFERENCE_USER_ACCOUNT = "user_account"
 
 /**
  * A user's essential data.
@@ -34,7 +32,8 @@ data class Account(
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON
      * See Fetch#exectue for other exceptions
      */
-    fun refreshAsync(): Deferred<Account> = async {
+    fun refresh(): Account {
+
 
         val response = Fetch().get(NextApi.ACCOUNT)
                 .noCache()
@@ -43,22 +42,22 @@ data class Account(
 
         val body = response.body()?.string()
 
-        gson.fromJson<Account>(body, Account::class.java)
+        return gson.fromJson<Account>(body, Account::class.java)
     }
 
-    fun requestVerificationAsync(): Deferred<Int> = async {
+    fun requestVerification(): Int {
         val response = Fetch().post(NextApi.REQUEST_VERIFICATION)
                 .noCache()
                 .setUserId(this@Account.id)
                 .body(null)
                 .end()
 
-        response.code()
+        return response.code()
     }
 
-    fun wxPlaceOrderAsync(membership: Membership?): Deferred<WxPrepayOrder?> = async {
+    fun wxPlaceOrder(membership: Membership?): WxPrepayOrder? {
         if (membership == null) {
-            return@async null
+            return null
         }
         val response = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${membership.tier}/${membership.billingCycle}")
                 .noCache()
@@ -68,10 +67,10 @@ data class Account(
                 .end()
 
         val body = response.body()?.string()
-        gson.fromJson<WxPrepayOrder>(body, WxPrepayOrder::class.java)
+        return gson.fromJson<WxPrepayOrder>(body, WxPrepayOrder::class.java)
     }
 
-    fun wxQueryOrderAsync(orderId: String): Deferred<WxQueryOrder> = async {
+    fun wxQueryOrderAsync(orderId: String): WxQueryOrder {
         val resp = Fetch().get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
                 .noCache()
                 .setUserId(this@Account.id)
@@ -79,12 +78,12 @@ data class Account(
                 .end()
         val body = resp.body()?.string()
 
-        gson.fromJson<WxQueryOrder>(body, WxQueryOrder::class.java)
+        return gson.fromJson<WxQueryOrder>(body, WxQueryOrder::class.java)
     }
 
-    fun aliPlaceOrderAsync(membership: Membership?): Deferred<AlipayOrder?> = async {
+    fun aliPlaceOrderAsync(membership: Membership?): AlipayOrder? {
         if (membership == null) {
-            return@async null
+            return null
         }
         val response = Fetch().post("${SubscribeApi.ALI_ORDER}/${membership.tier}/${membership.billingCycle}")
                 .setUserId(this@Account.id)
@@ -93,10 +92,10 @@ data class Account(
                 .end()
 
         val body = response.body()?.string()
-        gson.fromJson<AlipayOrder>(body, AlipayOrder::class.java)
+        return gson.fromJson<AlipayOrder>(body, AlipayOrder::class.java)
     }
 
-    fun aliVerifyOrderAsync(content: String): Deferred<AliVerifiedOrder> = async {
+    fun aliVerifyOrderAsync(content: String): AliVerifiedOrder {
         val resp = Fetch().post("${SubscribeApi.ALI_VERIFY_APP_PAY}")
                 .noCache()
                 .setUserId(this@Account.id)
@@ -105,10 +104,10 @@ data class Account(
                 .end()
         val body = resp.body()?.string()
 
-        gson.fromJson<AliVerifiedOrder>(body, AliVerifiedOrder::class.java)
+        return gson.fromJson<AliVerifiedOrder>(body, AliVerifiedOrder::class.java)
     }
 
-    fun starArticle(articleId: String): Deferred<Boolean> = async {
+    fun starArticle(articleId: String): Boolean {
 
         val response = Fetch().put("${NextApi.STARRED}/$articleId")
                 .noCache()
@@ -116,10 +115,10 @@ data class Account(
                 .setUserId(this@Account.id)
                 .end()
 
-        response.code() == 204
+        return response.code() == 204
     }
 
-    fun unstarArticle(articleId: String): Deferred<Boolean> = async {
+    fun unstarArticle(articleId: String): Boolean {
 
         val response = Fetch().delete("${NextApi.STARRED}/$articleId")
                 .noCache()
@@ -127,17 +126,17 @@ data class Account(
                 .body(null)
                 .end()
 
-        response.code() == 204
+        return response.code() == 204
     }
 
-    fun isStarring(articleId: String): Deferred<Boolean> = async {
+    fun isStarring(articleId: String): Boolean {
 
         val response = Fetch().get("${NextApi.STARRED}/$articleId")
                 .noCache()
                 .setUserId(this@Account.id)
                 .end()
 
-        response.code() == 204
+        return response.code() == 204
     }
 }
 

@@ -5,10 +5,9 @@ import android.content.res.Resources
 import com.ft.ftchinese.R
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.Store
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 /**
  * PagerTab contains the data used by a page in ViewPager
@@ -19,27 +18,26 @@ data class PagerTab (
         val contentUrl: String,
         val htmlType: Int // Flag used to tell whether the url should be loaded directly
 ) : AnkoLogger {
-    suspend fun htmlFromCache(context: Context?): String? {
-        val job = async {
-            Store.load(context, "$name.html")
-        }
+    fun htmlFromCache(context: Context?): String? {
 
-        return job.await()
+        return Store.load(context, "$name.html")
     }
 
-    fun fragmentFromCache(context: Context?): Deferred<String?> = async {
-        Store.load(context, "$name.html")
+    fun fragmentFromCache(context: Context?): String? {
+        return Store.load(context, "$name.html")
     }
 
     /**
      * Crawl a web page and save it.
      */
-    fun crawlWebAsync(context: Context?): Deferred<String?> = async {
+    fun crawlWebAsync(context: Context?):String? {
         val htmlStr = Fetch().get(contentUrl).string()
 
-        Store.save(context, "$name.html", htmlStr)
+        GlobalScope.launch {
+            Store.save(context, "$name.html", htmlStr)
+        }
 
-        htmlStr
+        return htmlStr
     }
 
     fun render(template: String?, listContent: String?): String? {
@@ -56,8 +54,8 @@ data class PagerTab (
         // Indicate you need to load a complete web page into webview.
         const val HTML_TYPE_COMPLETE = 2
 
-        fun readTemplate(resources: Resources): Deferred<String?> = async {
-            Store.readRawFile(resources, R.raw.list)
+        fun readTemplate(resources: Resources): String? {
+            return Store.readRawFile(resources, R.raw.list)
         }
 
         val newsPages = arrayOf(

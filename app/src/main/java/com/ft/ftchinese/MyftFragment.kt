@@ -12,7 +12,7 @@ import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.MyftTab
 import kotlinx.android.synthetic.main.fragment_recycler.*
-import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.Job
 import org.jetbrains.anko.AnkoLogger
 
 

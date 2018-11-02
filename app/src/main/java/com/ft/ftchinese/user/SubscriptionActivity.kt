@@ -15,9 +15,7 @@ import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.activity_subscription.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -96,9 +94,12 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
             isInProgress = true
         }
 
-        mJob = launch(UI) {
+        mJob = GlobalScope.launch(Dispatchers.Main) {
             try {
-                val account = user.refreshAsync().await()
+                val remoteAccount = async {
+                    user.refresh()
+                }.await()
+
                 info("Retrieved user account data.")
                 swipe_refresh.isRefreshing = false
                 isInProgress = false
@@ -109,17 +110,17 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
                     // Save update user info
 
                     info("Save user account and update ui")
-                    mSession?.saveUser(account)
+                    mSession?.saveUser(remoteAccount)
 
                     // Update ui.
-                    updateUI(account)
+                    updateUI(remoteAccount)
                 } else {
-                    // check remover server's membership against local one.
-                    if (account.membership.isNewer(user.membership)) {
+                    // check remote server's membership against local one.
+                    if (remoteAccount.membership.isNewer(user.membership)) {
                         info("Remote user account is fresh.")
-                        mSession?.saveUser(account)
+                        mSession?.saveUser(remoteAccount)
 
-                        updateUI(account)
+                        updateUI(remoteAccount)
                     } else {
 
                         info("Local user account is fresh.")

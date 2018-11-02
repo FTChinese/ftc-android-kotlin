@@ -13,9 +13,9 @@ import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.activity_content.*
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.android.UI
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.coroutines.experimental.bg
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast

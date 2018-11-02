@@ -13,17 +13,13 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
-import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_payment.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -210,11 +206,13 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         isInProgress = true
         isInputAllowed = false
 
-        job = launch(UI) {
+        job = GlobalScope.launch(Dispatchers.Main) {
 
             try {
                 // Request server to create order
-                val wxOrder = user.wxPlaceOrderAsync(member).await()
+                val wxOrder = async {
+                    user.wxPlaceOrder(member)
+                }.await()
 
                 isInProgress = false
 
@@ -296,13 +294,15 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         isInProgress = true
         isInputAllowed = false
 
-        job = launch(UI) {
+        job = GlobalScope.launch(Dispatchers.Main) {
 
             toast(R.string.request_order)
 
             // Get order from server
             val aliOrder = try {
-                val aliOrder = user.aliPlaceOrderAsync(mMembership).await()
+                val aliOrder = async {
+                    user.aliPlaceOrderAsync(mMembership)
+                }.await()
                 isInProgress = false
 
                 aliOrder

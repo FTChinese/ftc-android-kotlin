@@ -3,6 +3,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.google.gms.google-services'
 
 // NOTE: this does not work in Android Studio, although Google and Kotlin all says it works.
 //apply plugin: 'kotlin-kapt'
@@ -100,4 +101,5 @@ dependencies {
     testImplementation 'com.github.javafaker:javafaker:0.16'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.google.firebase:firebase-core:16.0.4'
 }

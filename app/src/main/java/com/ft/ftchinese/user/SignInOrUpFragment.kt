@@ -26,9 +26,7 @@ import com.ft.ftchinese.models.Login
 import com.ft.ftchinese.models.SignUp
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_sign_in_or_up.*
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -263,22 +261,21 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
         isInProgress = true
         isInputAllowed = false
 
-        job = launch(UI) {
+        job = GlobalScope.launch(Dispatchers.Main) {
             try {
 
                 val user = when (usedFor) {
                     USED_FOR_SIGN_IN -> {
                         info("Start log in")
-                        Login(email, password)
-                                .sendAsync()
-                                .await()
-//                        login.sendAsync().await()
+                        async {
+                            Login(email, password).send()
+                        }.await()
                     }
                     USED_FOR_SIGN_UP -> {
                         info("Start signing up")
-                        SignUp(email, password)
-                                .sendAsync()
-                                .await()
+                        async {
+                            SignUp(email, password).send()
+                        }.await()
 //                        login.createAsync().await()
                     }
                     else -> null

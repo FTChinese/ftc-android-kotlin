@@ -7,8 +7,8 @@ import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import org.jetbrains.anko.AnkoLogger
 import java.util.*
 import java.io.IOException
@@ -166,11 +166,11 @@ data class ChannelItem(
     /**
      * @throws JsonSyntaxException
      */
-    fun loadCachedStoryAsync(context: Context?): Deferred<Story?> = async {
+    fun loadCachedStoryAsync(context: Context?): Story? {
 
-        val jsonData = Store.load(context, filename) ?: return@async null
+        val jsonData = Store.load(context, filename) ?: return null
 
-        parseJson(jsonData)
+        return parseJson(jsonData)
     }
 
     /**
@@ -178,13 +178,13 @@ data class ChannelItem(
      * @throws IOException
      * @throws IllegalStateException
      */
-    fun fetchStoryAsync(context: Context): Deferred<Story?> = async {
+    suspend fun fetchStoryAsync(context: Context): Story? {
 
-        val url = apiUrl ?: return@async null
+        val url = apiUrl ?: return null
 
-        val jsonData = Fetch().get(url).string() ?: return@async null
+        val jsonData = Fetch().get(url).string() ?: return null
 
-        async {
+        GlobalScope.async {
             Store.save(context, filename, jsonData)
         }
 
@@ -192,7 +192,7 @@ data class ChannelItem(
 
         keywords = story.keywords
 
-        story
+        return story
     }
 
     /**
@@ -410,8 +410,8 @@ data class ChannelItem(
         const val DEFAULT_STORY_AD_CH_ID = "1200"
 
         // Read story.html file.
-        fun readTemplateAsync(resources: Resources): Deferred<String?> = async {
-            Store.readRawFile(resources, R.raw.story)
+        fun readTemplateAsync(resources: Resources): String? {
+            return Store.readRawFile(resources, R.raw.story)
         }
     }
 }

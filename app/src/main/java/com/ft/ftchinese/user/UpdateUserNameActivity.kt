@@ -14,9 +14,8 @@ import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.UserNameUpdate
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_username.*
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.android.UI
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -131,7 +130,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
             try {
                 info("Start updating mAccount userName")
 
-                val statusCode = userNameUpdate.updateAsync(uuid).await()
+                val statusCode = userNameUpdate.send(uuid).await()
 
                 isInProgress = false
 

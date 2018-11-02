@@ -2,12 +2,7 @@ package com.ft.ftchinese.models
 
 import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.async
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import java.io.IOException
 
 data class EmailUpdate(
@@ -20,7 +15,7 @@ data class EmailUpdate(
      * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON, regardless of if response is successful or not
      */
-    fun updateAsync(uuid: String): Deferred<Int> = async {
+    fun send(uuid: String): Int {
 
         val response = Fetch().patch(NextApi.UPDATE_EMAIL)
                 .noCache()
@@ -28,14 +23,14 @@ data class EmailUpdate(
                 .body(this@EmailUpdate)
                 .end()
 
-        response.code()
+        return response.code()
     }
 }
 
 data class UserNameUpdate(
         val name: String
 ) {
-    fun updateAsync(uuid: String): Deferred<Int> = async {
+    fun send(uuid: String): Int {
 
         val response = Fetch().patch(NextApi.UPDATE_USER_NAME)
                 .noCache()
@@ -43,7 +38,7 @@ data class UserNameUpdate(
                 .body(this@UserNameUpdate)
                 .end()
 
-        response.code()
+        return response.code()
     }
 }
 
@@ -51,7 +46,7 @@ data class PasswordUpdate(
         val oldPassword: String,
         val newPassword: String
 ) {
-    fun updateAsync(uuid: String): Deferred<Int> = async {
+    fun send(uuid: String): Int {
 
         val response = Fetch().patch(NextApi.UPDATE_PASSWORD)
                 .noCache()
@@ -59,6 +54,6 @@ data class PasswordUpdate(
                 .body(this@PasswordUpdate)
                 .end()
 
-        response.code()
+        return response.code()
     }
 }

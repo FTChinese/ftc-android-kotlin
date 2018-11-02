@@ -14,9 +14,7 @@ import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_account.*
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -68,9 +66,12 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
         toast(R.string.progress_refresh_account)
 
-        job = launch(UI) {
+        job = GlobalScope.launch(Dispatchers.Main) {
             try {
-                val account = mAccount?.refreshAsync()?.await()
+                val account = async {
+                    mAccount?.refresh()
+                }.await()
+
                 // hide refreshing indicator
                 swipe_refresh.isRefreshing = false
 
@@ -190,9 +191,11 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         // In the future, we might need to take into account user logged in via social platforms.
         val account = mAccount ?: return
 
-        job = launch(UI) {
+        job = GlobalScope.launch(Dispatchers.Main) {
             try {
-                val statusCode = account.requestVerificationAsync().await()
+                val statusCode = async {
+                    account.requestVerification()
+                }.await()
 
                 // If request succeeds, disable request verification button.
                 isInProgress = false

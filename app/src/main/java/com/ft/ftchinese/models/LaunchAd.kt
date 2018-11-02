@@ -4,12 +4,10 @@ import android.content.Context
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
 import com.google.gson.annotations.SerializedName
-import kotlinx.coroutines.experimental.async
 import android.net.Uri
 import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Store
 import com.koushikdutta.ion.Ion
-import kotlinx.coroutines.experimental.Deferred
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.jetbrains.anko.AnkoLogger
@@ -64,7 +62,7 @@ data class LaunchAd(
                 }
     }
 
-    fun sendImpressionAsync() = async {
+    fun sendImpression()  {
         val urls = mutableListOf<String>()
         if (impressionUrl1.isNotEmpty()) {
             urls.add(impressionUrl1)
@@ -166,8 +164,8 @@ class LaunchSchedule(
         /**
          * Download latest ad schedule upon app launch
          */
-        fun fetchDataAsync(): Deferred<LaunchSchedule?> = async {
-            try {
+        fun fetchData(): LaunchSchedule? {
+            return try {
                 val response = Fetch().get(NextApi.APP_LAUNCH)
                         .end()
 

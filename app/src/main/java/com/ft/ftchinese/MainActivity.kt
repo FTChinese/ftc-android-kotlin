@@ -4,8 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import android.net.ConnectivityManager
-import android.net.NetworkInfo
 import android.net.Uri
 import android.os.Bundle
 import android.support.customtabs.CustomTabsIntent
@@ -17,7 +15,6 @@ import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.SearchView
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
@@ -28,10 +25,8 @@ import com.ft.ftchinese.util.Store
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.coroutines.experimental.bg
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import java.lang.Exception
@@ -48,8 +43,10 @@ class MainActivity : AppCompatActivity(),
 
     private var mBottomDialog: BottomSheetDialog? = null
     private var mBackKeyPressed = false
-    private var exitJob: Job? = null
-    private var timerJob: Job? = null
+
+    private var mExitJob: Job? = null
+    private var mShowAdJob: Job? = null
+    private var mDownloadAdJob: Job? = null
 
     private var mSession: SessionManager? = null
 
@@ -166,9 +163,9 @@ class MainActivity : AppCompatActivity(),
 
         mSession = SessionManager.getInstance(this)
 
-        // https://developer.android.com/training/system-ui/immersive
-//        hideSystemUI()
-        launch(UI) {
+        // Show advertisement
+        // Keep a reference the coroutine in case user exit at this moment
+        mShowAdJob = GlobalScope.launch(Dispatchers.Main) {
 
             showAd()
             info("Show ad finished")
@@ -212,9 +209,12 @@ class MainActivity : AppCompatActivity(),
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false)
         api.registerApp(BuildConfig.WECAHT_APP_ID)
 
-        async {
+
+        // Fetch ads schedule from remote server in background.
+        // Keep a reference to this coroutine in case user exits before this task finished.
+        mDownloadAdJob = GlobalScope.launch {
             info("Starting checking ad schedules")
-            checkAdAsync()
+            checkAd()
         }
 
         info("onCreate finished")
@@ -232,6 +232,7 @@ class MainActivity : AppCompatActivity(),
         supportActionBar?.setTitle(title)
     }
 
+    // https://developer.android.com/training/system-ui/immersive
     private fun hideSystemUI() {
         root_container.systemUiVisibility =
                 View.SYSTEM_UI_FLAG_LOW_PROFILE or
@@ -250,8 +251,10 @@ class MainActivity : AppCompatActivity(),
 
     private suspend fun showAd() {
 
+        // Pick an ad based on its probability distribution factor.
         val ad = LaunchSchedule.randomAdFileName(this) ?: return
 
+        // Check if the required ad image is required.
         if (!Store.exists(this, ad.imageName)) {
             info("Ad image ${ad.imageName} not found")
             showSystemUI()
@@ -281,6 +284,8 @@ class MainActivity : AppCompatActivity(),
         adTimer.setOnClickListener {
             root_container.removeView(adView)
             showSystemUI()
+            mShowAdJob?.cancel()
+            info("Skipped ads")
         }
 
         adImage.setOnClickListener {
@@ -288,16 +293,14 @@ class MainActivity : AppCompatActivity(),
             customTabsInt.launchUrl(this, Uri.parse(ad.linkUrl))
             root_container.removeView(adView)
             showSystemUI()
-            timerJob?.cancel()
+            mShowAdJob?.cancel()
             info("Clicked ads")
         }
 
 
-        val readImageJob = bg {
+        val drawable = GlobalScope.async {
             Drawable.createFromStream(openFileInput(ad.imageName), ad.imageName)
-        }
-
-        val drawable = readImageJob.await()
+        }.await()
 
         info("Retrieved drawable: ${ad.imageName}")
 
@@ -305,10 +308,10 @@ class MainActivity : AppCompatActivity(),
         adTimer.visibility = View.VISIBLE
         info("Show timer")
 
-        // send impressions
-        async {
+        // send impressions in background.
+        GlobalScope.launch {
             try {
-                ad.sendImpressionAsync()
+                ad.sendImpression()
             } catch (e: Exception) {
                 e.printStackTrace()
                 info("Send launch screen impression failed")
@@ -320,17 +323,18 @@ class MainActivity : AppCompatActivity(),
             delay(1000)
         }
 
-        // Record impression here.
-
         root_container.removeView(adView)
         info("Remove ad")
         showSystemUI()
     }
 
-    private fun checkAdAsync() = async {
+    // Get advertisement schedule from server
+    private suspend fun checkAd() {
 
         info("Fetch schedule data")
-        val schedules = LaunchSchedule.fetchDataAsync().await()
+        val schedules = GlobalScope.async {
+            LaunchSchedule.fetchData()
+        }.await()
 
         info("Save schedule")
         schedules?.save(this@MainActivity)
@@ -402,7 +406,8 @@ class MainActivity : AppCompatActivity(),
     override fun onDestroy() {
         super.onDestroy()
 
-        timerJob?.cancel()
+        mShowAdJob?.cancel()
+        mDownloadAdJob?.cancel()
 
         info("onDestroy finished")
     }
@@ -422,16 +427,21 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun doubleClickToExit() {
+        // If this is the first time user clicked back button, the first part the will executed.
         if (!mBackKeyPressed) {
             toast("再按一次退出程序")
             mBackKeyPressed = true
 
-            exitJob = launch(CommonPool) {
+            // Delay for 2 seconds.
+            // If user did not touch the back button within 2 seconds, mBackKeyPressed will be changed back gto false.
+            // If user touch the back button within 2 seconds, `if` condition will be false, this part will not be executed.
+            mExitJob = GlobalScope.launch {
                 delay(2000)
                 mBackKeyPressed = false
             }
         } else {
-            exitJob?.cancel()
+            // If user clicked back button two times within 2 seconds, this part will be executed.
+            mExitJob?.cancel()
             finish()
         }
     }
@@ -633,10 +643,6 @@ class MainActivity : AppCompatActivity(),
 
         override fun getPageTitle(position: Int): CharSequence? {
             return mPages[position].title
-        }
-
-        fun setPages(pages: Array<PagerTab>) {
-            mPages = pages
         }
     }
 

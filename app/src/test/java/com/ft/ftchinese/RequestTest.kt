@@ -3,7 +3,8 @@ package com.ft.ftchinese
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.Fetch
 import com.github.javafaker.Faker
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import okhttp3.Response
 import org.joda.time.LocalDate
 import org.joda.time.format.ISODateTimeFormat
@@ -77,7 +78,9 @@ class RequestTest {
 
         val prefSchedule = mutableMapOf<String, MutableSet<LaunchAd>>()
 
-        val schedule = LaunchSchedule.fetchDataAsync().await() ?: return@runBlocking
+        val schedule = async {
+            LaunchSchedule.fetchData()
+        }.await() ?: return@runBlocking
 
         val today = LocalDate.now()
 

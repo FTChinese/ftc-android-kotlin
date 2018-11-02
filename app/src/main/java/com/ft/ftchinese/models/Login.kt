@@ -4,8 +4,6 @@ import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.async
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.io.IOException
@@ -21,7 +19,7 @@ data class Login(
      * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON, regardless of if response is successful or not
      */
-    fun sendAsync(): Deferred<Account> = async {
+    fun send(): Account {
         val response = Fetch().post(NextApi.LOGIN)
                 .setClient()
                 .noCache()
@@ -31,6 +29,6 @@ data class Login(
         val body = response.body()?.string()
         info("Response body: $body")
 
-        gson.fromJson<Account>(body, Account::class.java)
+        return gson.fromJson<Account>(body, Account::class.java)
     }
 }

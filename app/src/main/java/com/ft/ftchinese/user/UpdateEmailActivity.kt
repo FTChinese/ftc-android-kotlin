@@ -14,9 +14,7 @@ import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_email.*
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -135,13 +133,15 @@ internal class EmailFragment : Fragment(), AnkoLogger {
         isInProgress = true
         isInputAllowed = false
 
-        job = launch(UI) {
+        job = GlobalScope.launch(Dispatchers.Main) {
             val emailUpdate = EmailUpdate(emailStr)
 
             try {
                 info("Start updating email")
 
-                val statusCode = emailUpdate.updateAsync(uuid).await()
+                val statusCode = async {
+                    emailUpdate.send(uuid)
+                }.await()
 
                 isInProgress = false
 

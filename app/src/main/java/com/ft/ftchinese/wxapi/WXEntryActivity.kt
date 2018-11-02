@@ -17,10 +17,10 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.android.UI
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -176,7 +176,7 @@ data class WxAccessResp(
         @SerializedName("unionid") val unionId: String
 
 ) {
-//    fun refreshAsync(): Deferred<WxAccessResp?> = async {
+//    fun refresh(): Deferred<WxAccessResp?> = async {
 //
 //    }
 
