@@ -2,6 +2,7 @@ package com.ft.ftchinese
 
 import android.app.Activity
 import android.net.Uri
+import com.ft.ftchinese.models.Navigation
 import com.ft.ftchinese.models.PagerTab
 import com.ft.ftchinese.models.pathToTitle
 
@@ -97,13 +98,13 @@ class ChannelWebViewClient(
          */
             "weekly.html" -> {
 
-                val tabIndex = PagerTab.newsPages.indexOfFirst { it.name == "news_top_stories" }
+                val tabIndex = Navigation.newsPages.indexOfFirst { it.name == "news_top_stories" }
 
                 mListener?.selectTabLayoutTab(tabIndex)
             }
 
             "markets.html" -> {
-                val tabIndex = PagerTab.newsPages.indexOfFirst { it.name == "news_markets" }
+                val tabIndex = Navigation.newsPages.indexOfFirst { it.name == "news_markets" }
 
                 mListener?.selectTabLayoutTab(tabIndex)
             }
@@ -144,7 +145,7 @@ class ChannelWebViewClient(
              * navigate to the tab titled FT研究院
              */
                 "intelligence.html" -> {
-                    val tabIndex = PagerTab.newsPages.indexOfFirst { it.name == "news_fta" }
+                    val tabIndex = Navigation.newsPages.indexOfFirst { it.name == "news_fta" }
 
                     mListener?.selectTabLayoutTab(tabIndex)
                 }

@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity(),
         when (item.itemId) {
             R.id.nav_news -> {
                 if (mNewsAdapter == null) {
-                    mNewsAdapter = TabPagerAdapter(PagerTab.newsPages, supportFragmentManager)
+                    mNewsAdapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
                 }
                 view_pager.adapter = mNewsAdapter
                 displayLogo()
@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity(),
 
             R.id.nav_english -> {
                 if (mEnglishAdapter == null) {
-                    mEnglishAdapter = TabPagerAdapter(PagerTab.englishPages, supportFragmentManager)
+                    mEnglishAdapter = TabPagerAdapter(Navigation.englishPages, supportFragmentManager)
                 }
                 view_pager.adapter = mEnglishAdapter
 
@@ -86,7 +86,7 @@ class MainActivity : AppCompatActivity(),
 
             R.id.nav_ftacademy -> {
                 if (mFtaAdapter == null) {
-                    mFtaAdapter = TabPagerAdapter(PagerTab.ftaPages, supportFragmentManager)
+                    mFtaAdapter = TabPagerAdapter(Navigation.ftaPages, supportFragmentManager)
                 }
                 view_pager.adapter = mFtaAdapter
 
@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity(),
 
             R.id.nav_video -> {
                 if (mVideoAdapter == null) {
-                    mVideoAdapter = TabPagerAdapter(PagerTab.videoPages, supportFragmentManager)
+                    mVideoAdapter = TabPagerAdapter(Navigation.videoPages, supportFragmentManager)
                 }
                 view_pager.adapter = mVideoAdapter
 
@@ -182,7 +182,7 @@ class MainActivity : AppCompatActivity(),
 
         // Set ViewPager adapter
         if (mNewsAdapter == null) {
-            mNewsAdapter = TabPagerAdapter(PagerTab.newsPages, supportFragmentManager)
+            mNewsAdapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
         }
         view_pager.adapter = mNewsAdapter
 
