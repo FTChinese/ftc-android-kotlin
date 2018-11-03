@@ -45,7 +45,7 @@ data class PagerTab (
             return null
         }
         return template.replace("{list-content}", listContent)
-                .replace("{{googletagservices-js}}", "")
+                .replace("{{googletagservices-js}}", JSCodes.googletagservices)
     }
 
     companion object {
