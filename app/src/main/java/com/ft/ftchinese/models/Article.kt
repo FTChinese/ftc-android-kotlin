@@ -39,6 +39,7 @@ class Story (
         val tag: String,
         val genre: String,
         val topic: String,
+        val industry: String,
         val area: String,
         val last_publish_time: String,
         val story_pic: StoryPic,
@@ -131,7 +132,7 @@ class Story (
         return """
             <div class="story-theme">
                 <a target="_blank" href="/tag/$firstTag">$firstTag</a>
-                <button class="myft-follow plus" data-tag="${firstTag}" data-tier="tag">关注</button>
+                <button class="myft-follow plus" data-tag="$firstTag" data-type="tag">关注</button>
             </div>
         """.trimIndent()
     }

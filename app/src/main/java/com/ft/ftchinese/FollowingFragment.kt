@@ -9,16 +9,25 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.ft.ftchinese.models.Following
+import com.ft.ftchinese.models.FollowingManager
 import com.ft.ftchinese.models.PagerTab
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 class FollowingFragment : Fragment(), AnkoLogger {
 
     private var mAdapter: Adapter? = null
+    private var mFollowingManager: FollowingManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        try {
+            mFollowingManager = FollowingManager.getInstance(requireContext())
+        } catch (e: Exception) {
+            info("Cannot initiate FollowingManager")
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -34,7 +43,7 @@ class FollowingFragment : Fragment(), AnkoLogger {
     }
 
     private fun updateUI() {
-        val follows = Following.loadAsList(context)
+        val follows = mFollowingManager?.load() ?: return
 
         if (mAdapter == null) {
             mAdapter = Adapter(follows)

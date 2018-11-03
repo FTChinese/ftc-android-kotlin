@@ -1,7 +1,15 @@
 package com.ft.ftchinese.models
 
 import android.content.Context
-import android.util.Log
+import android.content.SharedPreferences
+
+private val followTypes = arrayOf("tag", "topic", "area", "industry", "author", "column")
+private val FOLLOW_TYPE_TAG = followTypes[0]
+private val FOLLOW_TYPE_TOPIC = followTypes[1]
+private val FOLLOW_TYPE_AREA = followTypes[2]
+private val FOLLOW_TYPE_INDUSTRY = followTypes[3]
+private val FOLLOW_TYPE_AUTHOR = followTypes[4]
+private val FOLLOW_TYPE_COLUMN = followTypes[5]
 
 /**
  * Used to parse messages passed from JS when user clicked `FOLLOW` button.
@@ -24,76 +32,110 @@ data class Following(
 ) {
     val bodyUrl: String
         get() = "https://api003.ftmailbox.com/$type/$tag?bodyonly=yes&webviewftcapp"
+}
 
-    fun save(context: Context) {
-        val sharedPreferences = context.getSharedPreferences(PREF_NAME_FOLLOWING, Context.MODE_PRIVATE)
+/**
+ * This is used to manage saving and loading of data
+ * into/from shared preference for 关注 button in WebView.
+ * It is used by the inner class ContentWebViewInterface in
+ * AbsContentActivity, and FollowingActivity.
+ */
+class FollowingManager(context: Context) {
+    private val sharedPreferences = context.getSharedPreferences(PREF_FILE_FOLLOWING, Context.MODE_PRIVATE)
+    private val editor = sharedPreferences.edit()
 
-        val hs = sharedPreferences.getStringSet(type, HashSet<String>())
-
-        Log.i(TAG, "Current shared prefernce: $hs")
+    fun save(following: Following) {
+        val hs = sharedPreferences.getStringSet(following.type, HashSet<String>())
 
         val newHs = HashSet(hs)
 
-        when (action) {
-            FOLLOWING_ACTION_ADD -> {
-                newHs.add(tag)
+        when (following.action) {
+            ACTION_FOLLOW -> {
+                newHs.add(following.tag)
             }
 
-            FOLLOWING_ACTION_REMOVE -> {
-                newHs.remove(tag)
+            ACTION_UNFOLLOW -> {
+                newHs.remove(following.tag)
             }
         }
 
-        Log.i(TAG, "New set: $newHs")
-
         val editor = sharedPreferences.edit()
-        editor.putStringSet(type, newHs)
+        editor.putStringSet(following.type, newHs)
         editor.apply()
     }
 
-    companion object {
-        private const val TAG = "Following"
-        const val FOLLOWING_ACTION_ADD = "follow"
-        const val FOLLOWING_ACTION_REMOVE = "unfollow"
+    fun loadForJS(): JSFollows {
 
-        // Keys used in shared preferences
-        val keys = arrayOf("tag", "topic", "area", "industry", "author", "column")
-        const val PREF_NAME_FOLLOWING = "following"
+        val result = mutableMapOf<String, String>()
 
-        /**
-         * Load whatever a user put in favorite collection.
-         * Returns a map of strings.
-         * The key is from `keys`.
-         * The value is a string join from a Set.
-         * The value will be passed to a JS object in HTML file.
-         */
-        fun loadAsMap(context: Context): Map<String, String> {
-            val sharedPreferences = context.getSharedPreferences(PREF_NAME_FOLLOWING, Context.MODE_PRIVATE)
+        for (key in followTypes) {
+            try {
+                val ss = sharedPreferences.getStringSet(key, null) ?: setOf()
 
-            return keys.associate {
-                val ss = sharedPreferences.getStringSet(it, setOf())
+                result[key] = ss.joinToString { "'$it'" }
 
-                val v = ss.joinToString {
-                    "'$it'"
-                }
-
-                Pair(it, v)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                continue
             }
         }
 
-        fun loadAsList(context: Context?): MutableList<Following> {
-            val result = mutableListOf<Following>()
+        return JSFollows(result)
+    }
 
-            val sharedPreferences = context?.getSharedPreferences(PREF_NAME_FOLLOWING, Context.MODE_PRIVATE) ?: return result
+    fun load(): MutableList<Following> {
+        val result = mutableListOf<Following>()
 
-            for (key in keys) {
-                val ss = sharedPreferences.getStringSet(key, setOf())
-                for (elem in ss) {
-                    result.add(Following(type = key, tag = elem, action = FOLLOWING_ACTION_REMOVE))
+        for (key in followTypes) {
+            try {
+                val ss = sharedPreferences.getStringSet(key, setOf()) ?: setOf()
+
+                ss.forEach {
+                    result.add(Following(type = key, tag = it, action = ACTION_UNFOLLOW))
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                continue
             }
+        }
 
-            return result
+        return result
+    }
+
+    companion object {
+        const val ACTION_FOLLOW = "follow"
+        const val ACTION_UNFOLLOW = "unfollow"
+        const val PREF_FILE_FOLLOWING = "following"
+
+        private var instance: FollowingManager ?= null
+
+        @Synchronized fun getInstance(ctx: Context): FollowingManager {
+            if (instance == null) {
+                instance = FollowingManager(ctx.applicationContext)
+            }
+            return instance!!
         }
     }
+}
+
+data class JSFollows(
+        private val follows: Map<String, String>
+) {
+    val tag: String
+        get() = follows[FOLLOW_TYPE_TAG] ?: ""
+
+    val topic: String
+        get() = follows[FOLLOW_TYPE_TOPIC] ?: ""
+
+    val area: String
+        get() = follows[FOLLOW_TYPE_AREA] ?: ""
+
+    val industry: String
+        get() = follows[FOLLOW_TYPE_INDUSTRY] ?: ""
+
+    val author: String
+        get() = follows[FOLLOW_TYPE_AUTHOR] ?: ""
+
+    val column: String
+        get() = follows[FOLLOW_TYPE_COLUMN] ?: ""
 }

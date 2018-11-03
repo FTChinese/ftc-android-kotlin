@@ -18,9 +18,7 @@ import com.ft.ftchinese.util.isActiveNetworkWifi
 import com.ft.ftchinese.util.isNetworkConnected
 import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.fragment_channel.*
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.android.UI
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -50,7 +48,8 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
      */
     private var mChannelItems: Array<ChannelItem>? = null
     private var mChannelMeta: ChannelMeta? = null
-    private var mJob: Job? = null
+    private var mLoadJob: Job? = null
+    private var mRefreshJob: Job? = null
     private var mSession: SessionManager? = null
 
     // Hold string in raw/list.html
@@ -191,10 +190,14 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     }
 
     private fun loadPartialHtml() {
-        mJob = launch (UI) {
-            mTemplate = PagerTab.readTemplate(resources).await()
+        mLoadJob = GlobalScope.launch (Dispatchers.Main) {
+            mTemplate = async {
+                PagerTab.readTemplate(resources)
+            }.await()
 
-            val cachedChannelContent = mPageMeta?.fragmentFromCache(context)?.await()
+            val cachedChannelContent = async {
+                mPageMeta?.fragmentFromCache(context)
+            }.await()
 
             // If cached HTML fragment exists
             if (cachedChannelContent != null) {
@@ -204,7 +207,14 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                 // If user is using wifi, we can download the latest data and save it but do not refresh ui.
                 if (activity?.isActiveNetworkWifi() == true) {
                     info("Network is wifi and cached exits. Fetch data but only update.")
-                    mPageMeta?.crawlWebAsync(context)
+                    launch {
+                        try {
+                            mPageMeta?.crawlWeb(context)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+
                 }
                 return@launch
             } else {
@@ -224,7 +234,9 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     private suspend fun crawlAndUpdate() {
         info("Starting crawling ${mPageMeta?.title}")
         try {
-            val listContent = mPageMeta?.crawlWebAsync(context)?.await()
+            val listContent = GlobalScope.async {
+                mPageMeta?.crawlWeb(context)
+            }.await()
             if (listContent == null) {
                 info("No data crawled")
                 return
@@ -269,12 +281,15 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     override fun onStop() {
         super.onStop()
         info("onStop finished")
+        mLoadJob?.cancel()
+        mRefreshJob?.cancel()
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        mJob?.cancel()
+        mLoadJob?.cancel()
+        mRefreshJob?.cancel()
     }
 
     override fun onRefresh() {
@@ -285,12 +300,19 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             return
         }
 
+        // If auto loading did not stop yet, stop it.
+        if (mLoadJob?.isActive == true) {
+            mLoadJob?.cancel()
+        }
+
         when (mPageMeta?.htmlType) {
             PagerTab.HTML_TYPE_FRAGMENT -> {
-                info("onRefresh: crawlWebAsync html fragment")
-                mJob = launch(UI) {
+                info("onRefresh: crawlWeb html fragment")
+                mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
                     if (mTemplate == null) {
-                        mTemplate = PagerTab.readTemplate(resources).await()
+                        mTemplate = async {
+                            PagerTab.readTemplate(resources)
+                        }.await()
                     }
                     info("Refreshing: fetch remote data")
                     crawlAndUpdate()

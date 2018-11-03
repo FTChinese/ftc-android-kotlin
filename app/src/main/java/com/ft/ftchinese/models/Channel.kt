@@ -10,6 +10,7 @@ import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import java.util.*
 import java.io.IOException
 
@@ -22,7 +23,7 @@ class Endpoints{
 }
 
 /**
- * The following data keys is used to parse JSON data passed from WebView by WebAppInterface.postItems methods.
+ * The following data keys is used to parse JSON data passed from WebView by ContentWebViewInterface.postItems methods.
  * Most of them are useless, serving as placeholders so that we can extract the deep nested JSON values.
  * `ChannelMeta` represent the `meta` fieled in JSON data.
  */
@@ -166,7 +167,7 @@ data class ChannelItem(
     /**
      * @throws JsonSyntaxException
      */
-    fun loadCachedStoryAsync(context: Context?): Story? {
+    fun loadCachedStory(context: Context?): Story? {
 
         val jsonData = Store.load(context, filename) ?: return null
 
@@ -178,10 +179,11 @@ data class ChannelItem(
      * @throws IOException
      * @throws IllegalStateException
      */
-    suspend fun fetchStoryAsync(context: Context): Story? {
+    fun fetchStory(context: Context): Story? {
 
         val url = apiUrl ?: return null
 
+        info("Fetch a story from $url")
         val jsonData = Fetch().get(url).string() ?: return null
 
         GlobalScope.async {
@@ -305,7 +307,7 @@ data class ChannelItem(
         return fallbackId
     }
 
-    fun render(template: String?, article: Story?, language: Int, follows: Map<String, String>): String? {
+    fun render(template: String?, article: Story?, language: Int, follows: JSFollows): String? {
 
         if (template == null || article == null) {
             return null
@@ -331,13 +333,6 @@ data class ChannelItem(
 
         val adMPU = if (shouldHideAd) "" else AdParser.getAdCode(AdPosition.MIDDLE_ONE)
 
-        val followTags = follows[Following.keys[0]]
-        val followTopics = follows[Following.keys[1]]
-        val followAreas = follows[Following.keys[2]]
-        val followIndustries = follows[Following.keys[3]]
-        val followAuthors = follows[Following.keys[4]]
-        val followColumns = follows[Following.keys[5]]
-
         var body = ""
         var title = ""
 
@@ -356,30 +351,37 @@ data class ChannelItem(
             }
         }
 
-        val storyHTMLOriginal = template.replace("{story-body}", body)
-                .replace("{story-headline}", title)
-                .replace("{story-byline}", article.byline)
-                .replace("{story-time}", article.createdAt)
-                .replace("{story-lead}", article.standfirst)
-                .replace("{story-theme}", article.htmlForTheme())
+        val storyHTMLOriginal = template
                 .replace("{story-tag}", article.tag)
-                .replace("{story-id}", article.id)
+                .replace("{story-author}", article.cauthor)
+                .replace("{story-genre}", article.genre)
+                .replace("{story-area}", article.area)
+                .replace("{story-industry}", article.industry)
+                .replace("{story-main-topic}", "")
+                .replace("{story-sub-topic}", "")
+                .replace("{adchID}", pickAdchID(HOME_AD_CH_ID, DEFAULT_STORY_AD_CH_ID))
+                .replace("{comments-id}", commentsId)
+                .replace("{story-theme}", article.htmlForTheme())
+                .replace("{story-headline}", title)
+                .replace("{story-lead}", article.standfirst)
                 .replace("{story-image}", article.htmlForCoverImage())
+                .replace("{story-time}", article.createdAt)
+                .replace("{story-byline}", article.byline)
+                .replace("{story-body}", body)
+                .replace("{story-id}", article.id)
                 .replace("{related-stories}", article.htmlForRelatedStories())
                 .replace("{related-topics}", article.htmlForRelatedTopics())
                 .replace("{comments-order}", commentsOrder)
                 .replace("{story-container-style}", "")
-                .replace("'{follow-tags}'", followTags ?: "")
-                .replace("'{follow-topics}'", followTopics ?: "")
-                .replace("'{follow-industries}'", followIndustries ?: "")
-                .replace("'{follow-areas}'", followAreas ?: "")
-                .replace("'{follow-authors}'", followAuthors ?: "")
-                .replace("'{follow-columns}'", followColumns ?: "")
-                .replace("{adchID}", pickAdchID(HOME_AD_CH_ID, DEFAULT_STORY_AD_CH_ID))
+                .replace("'{follow-tags}'", follows.tag)
+                .replace("'{follow-topic}'", follows.topic)
+                .replace("'{follow-industry}'", follows.industry)
+                .replace("'{follow-area}'", follows.area)
+                .replace("'{follow-augthor}'", follows.author)
+                .replace("'{follow-column}'", follows.column)
                 .replace("{ad-zone}", pickAdZone(HOME_AD_ZONE, DEFAULT_STORY_AD_ZONE))
                 .replace("{ad-mpu}", adMPU)
                 //                        .replace("{font-class}", "")
-                .replace("{comments-id}", commentsId)
                 .replace("{{googletagservices-js}}", JSCodes.googletagservices)
 
         val storyHTML = AdParser.updateAdCode(storyHTMLOriginal, shouldHideAd)
@@ -410,13 +412,11 @@ data class ChannelItem(
         const val DEFAULT_STORY_AD_CH_ID = "1200"
 
         // Read story.html file.
-        fun readTemplateAsync(resources: Resources): String? {
+        fun readTemplate(resources: Resources): String? {
             return Store.readRawFile(resources, R.raw.story)
         }
     }
 }
-
-
 
 val pathToTitle = mapOf(
         "businesscase.html" to "中国商业案例精选",

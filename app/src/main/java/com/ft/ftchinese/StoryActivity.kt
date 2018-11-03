@@ -5,18 +5,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import com.ft.ftchinese.database.ArticleStore
-import com.ft.ftchinese.models.Story
-import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.models.Following
+import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.activity_content.*
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.android.UI
-import kotlinx.coroutines.launch
-import org.jetbrains.anko.coroutines.experimental.bg
+import kotlinx.coroutines.*
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
@@ -41,16 +36,20 @@ class StoryActivity : AbsContentActivity() {
     // Hold metadata on where and how to find data for this page.
     private var mChannelItem: ChannelItem? = null
 
-    private var job: Job? = null
+    private var mLoadJob: Job? = null
+    private var mRefreshJob: Job? = null
 
     private var mTemplate: String? = null
     private var mStory: Story? = null
+
+    private var mFollowingManager: FollowingManager? = null
 
     private var mIsStarring: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        mFollowingManager = FollowingManager.getInstance(this)
         // Meta data about current article
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
@@ -136,17 +135,36 @@ class StoryActivity : AbsContentActivity() {
         titlebar_bi.isChecked = false
     }
 
+    override fun onStop() {
+        super.onStop()
+        mLoadJob?.cancel()
+        mRefreshJob?.cancel()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        job?.cancel()
+        mLoadJob?.cancel()
+        mRefreshJob?.cancel()
     }
 
     override fun onRefresh() {
         toast(R.string.prompt_refreshing)
 
-        job = launch(UI) {
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        // If user tries to refresh while content is still loading, stop it.
+        if (mLoadJob?.isActive == true) {
+            mLoadJob?.cancel()
+        }
+
+        mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
             if (mTemplate == null) {
-                mTemplate = ChannelItem.readTemplateAsync(resources).await()
+                mTemplate = async {
+                    ChannelItem.readTemplate(resources)
+                }.await()
             }
             fetchAndUpdate()
         }
@@ -154,8 +172,10 @@ class StoryActivity : AbsContentActivity() {
 
     override fun load() {
 
-        job = launch(UI) {
-            mTemplate = ChannelItem.readTemplateAsync(resources).await()
+        mLoadJob = GlobalScope.launch(Dispatchers.Main) {
+            mTemplate = async {
+                ChannelItem.readTemplate(resources)
+            }.await()
 
             info("Story template: $mTemplate")
 
@@ -165,7 +185,9 @@ class StoryActivity : AbsContentActivity() {
             }
 
             try {
-                mStory = mChannelItem?.loadCachedStoryAsync(this@StoryActivity)?.await()
+                mStory = async {
+                    mChannelItem?.loadCachedStory(this@StoryActivity)
+                }.await()
 
                 // Use cached data to render mTemplate
                 if (mStory != null) {
@@ -193,7 +215,9 @@ class StoryActivity : AbsContentActivity() {
     }
 
     private suspend fun fetchAndUpdate() {
-        mStory = mChannelItem?.fetchStoryAsync(this)?.await()
+        mStory = GlobalScope.async {
+            mChannelItem?.fetchStory(this@StoryActivity)
+        }.await()
 
         info("Fetched story: $mStory")
         loadData()
@@ -201,7 +225,7 @@ class StoryActivity : AbsContentActivity() {
 
     private fun loadData() {
         showLanguageSwitch()
-        val follows = Following.loadAsMap(this)
+        val follows = mFollowingManager?.loadForJS() ?: JSFollows(mapOf())
 
         val html = mChannelItem?.render(mTemplate, mStory, mCurrentLanguage, follows = follows)
 
@@ -237,7 +261,7 @@ class StoryActivity : AbsContentActivity() {
 
     private fun saveHistory() {
         val item = mChannelItem ?: return
-        bg {
+        GlobalScope.launch {
 
             info("Save reading history")
             ArticleStore.getInstance(context = this@StoryActivity).addHistory(item)
