@@ -301,7 +301,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             // Get order from server
             val aliOrder = try {
                 val aliOrder = async {
-                    user.aliPlaceOrderAsync(mMembership)
+                    user.aliPlaceOrder(mMembership)
                 }.await()
                 isInProgress = false
 

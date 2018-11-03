@@ -1,6 +1,5 @@
 package com.ft.ftchinese.wxapi
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -19,8 +18,9 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_wx_pay_result.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.android.UI
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -100,7 +100,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         info("onPayFinish, errCode = ${resp?.errCode}")
 
         if (resp?.type == ConstantsAPI.COMMAND_PAY_BY_WX) {
-            when (resp?.errCode) {
+            when (resp.errCode) {
                 // 成功
                 // 展示成功页面
                 0 -> {
@@ -129,10 +129,12 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
         isInProgress = true
 
-        job = launch(UI) {
+        job = GlobalScope.launch {
 
             try {
-                val payResult = user.wxQueryOrderAsync(subs.orderId).await()
+                val payResult = async {
+                    user.wxQueryOrder(subs.orderId)
+                }.await()
 
                 isInProgress = false
 

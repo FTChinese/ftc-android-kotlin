@@ -17,10 +17,7 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.android.UI
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -116,16 +113,21 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 .build()
                 .toString()
 
-        launch(UI) {
+        GlobalScope.launch(Dispatchers.Main) {
             try {
                 // 第二步：通过code获取access_token
-                val wxAccess = resp.getTokenAsync(url).await()
+                val wxAccess = async {
+                    resp.getTokenAsync(url)
+                }.await()
 
                 info("Get wx access: $wxAccess")
 
                 // 获取用户个人信息
 
-                val userInfo = wxAccess?.getUserInfo()?.await()
+                val userInfo = async {
+                    wxAccess?.getUserInfo()
+                }.await()
+                
                 info("Userinfo $userInfo")
 
             } catch (e: WxAccessException) {
@@ -148,14 +150,14 @@ data class WxCodeResp(
      * @return WxAccessResp if request success, or null if failed.
      * @throws WxAccessException
      */
-    fun getTokenAsync(url: String): Deferred<WxAccessResp?> = async {
+    fun getTokenAsync(url: String): WxAccessResp? {
         val respStr = Fetch().get(url).string()
 
-        try {
+        return try {
             gson.fromJson<WxAccessResp>(respStr, WxAccessResp::class.java)
         } catch (e: Exception) {
             e.printStackTrace()
-            try {
+            return try {
                 val ex =gson.fromJson<WxAccessException>(respStr, WxAccessException::class.java)
 
                 throw ex
@@ -180,7 +182,7 @@ data class WxAccessResp(
 //
 //    }
 
-    fun getUserInfo(): Deferred<WxUserInfo?> = async {
+    fun getUserInfo(): WxUserInfo? {
         val url = wxSnsUri.buildUpon()
                 .appendPath("userinfo")
                 .appendQueryParameter("access_token", accessToken)
@@ -189,10 +191,10 @@ data class WxAccessResp(
                 .toString()
         val respStr = Fetch().get(url).string()
 
-        try {
+        return try {
             gson.fromJson<WxUserInfo>(respStr, WxUserInfo::class.java)
         } catch (e: Exception) {
-            try {
+            return try {
                 val ex = gson.fromJson<WxAccessException>(respStr, WxAccessException::class.java)
                 throw ex
             } catch (e: Exception) {
