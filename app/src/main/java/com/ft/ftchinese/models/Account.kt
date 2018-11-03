@@ -70,7 +70,7 @@ data class Account(
         return gson.fromJson<WxPrepayOrder>(body, WxPrepayOrder::class.java)
     }
 
-    fun wxQueryOrderAsync(orderId: String): WxQueryOrder {
+    fun wxQueryOrder(orderId: String): WxQueryOrder {
         val resp = Fetch().get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
                 .noCache()
                 .setUserId(this@Account.id)
@@ -81,7 +81,7 @@ data class Account(
         return gson.fromJson<WxQueryOrder>(body, WxQueryOrder::class.java)
     }
 
-    fun aliPlaceOrderAsync(membership: Membership?): AlipayOrder? {
+    fun aliPlaceOrder(membership: Membership?): AlipayOrder? {
         if (membership == null) {
             return null
         }
@@ -96,7 +96,7 @@ data class Account(
     }
 
     fun aliVerifyOrderAsync(content: String): AliVerifiedOrder {
-        val resp = Fetch().post("${SubscribeApi.ALI_VERIFY_APP_PAY}")
+        val resp = Fetch().post(SubscribeApi.ALI_VERIFY_APP_PAY)
                 .noCache()
                 .setUserId(this@Account.id)
                 .setClient()
