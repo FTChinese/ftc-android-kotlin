@@ -30,7 +30,7 @@ data class PagerTab (
     /**
      * Crawl a web page and save it.
      */
-    fun crawlWebAsync(context: Context?):String? {
+    fun crawlWeb(context: Context?):String? {
         val htmlStr = Fetch().get(contentUrl).string()
 
         GlobalScope.launch {
