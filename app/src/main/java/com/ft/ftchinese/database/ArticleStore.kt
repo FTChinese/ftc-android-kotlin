@@ -4,7 +4,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.provider.BaseColumns
-import android.util.Log
 import com.ft.ftchinese.models.ChannelItem
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -14,13 +13,11 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
     private val mDatabase: SQLiteDatabase = ArticleDbHelper.getInstance(context)
             .writableDatabase
 
-    fun addHistory(item: ChannelItem?) {
-        if (item == null) return
+    fun addHistory(item: ChannelItem?): Long {
+        if (item == null) return 0
 
         val values = contentValues(item)
-        val result = mDatabase.insert(HistoryTable.NAME, null, values)
-
-        Log.i(TAG, "Insert result: $result")
+        return mDatabase.insert(HistoryTable.NAME, null, values)
     }
 
     fun queryHistory(whereClause: String? = null, whereArgs: Array<String>? = null): ArticleCursorWrapper {
@@ -53,24 +50,29 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
         }
     }
 
-    fun addStarred(item: ChannelItem?) {
-        if (item == null) return
+    /**
+     * Return -1 for error.
+     * 0 for noop.
+     * Return row id if ok.
+     */
+    fun addStarred(item: ChannelItem?): Long {
+        if (item == null) return 0
+
+        info("Starred an article: $item")
 
         val values = contentValues(item)
-        val result = mDatabase.insert(StarredTable.NAME, null, values)
-
-        Log.i(TAG, "Starred an article: $result")
+        return  mDatabase.insert(StarredTable.NAME, null, values)
     }
 
-    fun deleteStarred(item: ChannelItem?) {
-        if (item == null) return
+    fun deleteStarred(item: ChannelItem?): Int {
+        if (item == null) return 0
 
         val id = item.id
-        val result = mDatabase.delete(StarredTable.NAME, "${StarredTable.Cols.ID} = ?", arrayOf(id))
-        Log.i(TAG, "Delete starred article $item, result: $result")
+        return mDatabase.delete(StarredTable.NAME, "${StarredTable.Cols.ID} = ?", arrayOf(id))
     }
 
     fun isStarring(item: ChannelItem?): Boolean {
+        info("Checking if is starring article $item")
         if (item == null) return false
         val id = item.id
         val query = """
@@ -87,6 +89,7 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
         cursor.moveToFirst()
         val exists = cursor.getInt(0)
 
+        info("Is starring $exists")
         cursor.close()
         return exists == 1
     }
@@ -123,7 +126,6 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
 //    }
 
     companion object {
-        private const val TAG = "ArticleStore"
 
         private var instance: ArticleStore? = null
 
