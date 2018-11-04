@@ -13,11 +13,13 @@ import android.webkit.*
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
+import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isActiveNetworkWifi
 import com.ft.ftchinese.util.isNetworkConnected
 import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.fragment_channel.*
+import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -55,6 +57,15 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     // Hold string in raw/list.html
     private var mTemplate: String? = null
 
+    private var isInProgress: Boolean = false
+        set(value) {
+            if (value) {
+                progress_bar.visibility = View.VISIBLE
+            } else {
+                progress_bar.visibility = View.GONE
+                channel_fragment_swipe.isRefreshing = false
+            }
+        }
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -66,7 +77,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
      * for more information.
      */
     interface OnFragmentInteractionListener {
-        fun onProgress(show: Boolean)
         fun getSession(): SessionManager?
     }
 
@@ -83,13 +93,12 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        fun newInstance(page: PagerTab): ChannelFragment {
-            val fragment = ChannelFragment()
-            val args = Bundle()
-            args.putString(ARG_PAGE_META, gson.toJson(page))
-            fragment.arguments = args
-            return fragment
+        fun newInstance(page: PagerTab) = ChannelFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARG_PAGE_META, gson.toJson(page))
+            }
         }
+
     }
 
     /**
@@ -151,7 +160,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
             // Interact with JS.
             // See Page/Layouts/Page/SuperDataViewController.swift#viewDidLoad() how iOS inject js to web view.
-            addJavascriptInterface(WebAppInterface(), "Android")
+            addJavascriptInterface(ChannelWebViewInterface(), "Android")
             // Set WebViewClient to handle various links
             webViewClient = mWebViewClient
             webChromeClient = MyChromeClient()
@@ -170,8 +179,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         info("Initiating current page with data: $mPageMeta")
 
         loadContent()
-
-        info("onCreateView finished")
     }
 
     private fun loadContent() {
@@ -192,7 +199,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     private fun loadPartialHtml() {
         mLoadJob = GlobalScope.launch (Dispatchers.Main) {
             mTemplate = async {
-                PagerTab.readTemplate(resources)
+                Store.readChannelTemplate(resources)
             }.await()
 
             val cachedChannelContent = async {
@@ -225,18 +232,30 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                 }
 
                 info("Cache not found. Fetch data.")
-                showProgress(true)
+
+                isInProgress = true
+
                 crawlAndUpdate()
             }
         }
     }
 
+    /**
+     * Do not use isInProgress here since it is also used
+     * by refresh. You detinitely do not want to show
+     * progress bar when swiping
+     */
     private suspend fun crawlAndUpdate() {
         info("Starting crawling ${mPageMeta?.title}")
+
+
         try {
             val listContent = GlobalScope.async {
                 mPageMeta?.crawlWeb(context)
             }.await()
+
+            isInProgress = false
+
             if (listContent == null) {
                 info("No data crawled")
                 return
@@ -256,16 +275,14 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         val dataToLoad = mPageMeta?.render(mTemplate, htmlFragment)
 
         web_view.loadDataWithBaseURL(WEBVIEV_BASE_URL, dataToLoad, "text/html", null, null)
-        showProgress(false)
-        info("Data loaded into webview")
     }
 
-    private fun showProgress(show: Boolean) {
-        mListener?.onProgress(show)
-        if (!show) {
-            channel_fragment_swipe.isRefreshing = false
-        }
-    }
+//    private fun showProgress(show: Boolean) {
+//        mListener?.onProgress(show)
+//        if (!show) {
+//            channel_fragment_swipe.isRefreshing = false
+//        }
+//    }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -311,7 +328,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                 mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
                     if (mTemplate == null) {
                         mTemplate = async {
-                            PagerTab.readTemplate(resources)
+                            Store.readChannelTemplate(resources)
                         }.await()
                     }
                     info("Refreshing: fetch remote data")
@@ -321,8 +338,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             PagerTab.HTML_TYPE_COMPLETE -> {
                 info("onRefresh: reload")
                 web_view.reload()
-
-                showProgress(false)
             }
         }
     }
@@ -330,7 +345,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     // Interact with Web view.
     // iOS equivalent: SuperDataViewController.swift#extension SuperDataViewController: WKScriptMessageHandler
     // Each methods equivalent on iOS is `message.name`.
-    inner class WebAppInterface : AnkoLogger {
+    inner class ChannelWebViewInterface : AnkoLogger {
         /**
          * Method injected to WebView to receive a list of articles in a mPageMeta page upon finished loading.
          * Structure of the JSON received:
@@ -384,8 +399,19 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         fun onPageLoaded(message: String) {
             info("Articles list in a channel: $message")
 
+            // See what the data is.
+            if (BuildConfig.DEBUG) {
+                GlobalScope.launch {
+                    val fileName = mPageMeta?.name ?: return@launch
+                    Store.save(context, "$fileName.json", message)
+                }
+            }
+
             try {
                 val channelContent = gson.fromJson<ChannelContent>(message, ChannelContent::class.java)
+
+
+
 
                 mChannelItems = channelContent.sections[0].lists[0].items
 
@@ -474,14 +500,14 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
              */
             when (mChannelMeta?.title) {
                 "专栏" -> {
-                    val listPage = PagerTab(
+                    val channelPage = PagerTab(
                             title = channelItem.headline,
                             name = "${channelItem.type}_${channelItem.id}",
                             contentUrl = buildUrl("/${channelItem.type}/${channelItem.id}"),
                             htmlType = PagerTab.HTML_TYPE_FRAGMENT
                     )
 
-                    ChannelActivity.start(context, listPage)
+                    ChannelActivity.start(context, channelPage)
                     return
                 }
             }
@@ -534,12 +560,18 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                 ChannelItem.TYPE_INTERACTIVE -> {
                     info("Clicked an interactive: $channelItem")
 
-                    if (channelItem.subType == ChannelItem.SUB_TYPE_RADIO) {
-                        info("Start RadioActivity")
-                        RadioActivity.start(context, channelItem)
-                    } else {
-                        info("Start WebContentActivity")
-                        WebContentActivity.start(activity, Uri.parse(channelItem.canonicalUrl))
+                    when (channelItem.subType) {
+                        ChannelItem.SUB_TYPE_RADIO -> {
+                            info("Start RadioActivity")
+                            RadioActivity.start(context, channelItem)
+                        }
+                        ChannelItem.SUB_TYPE_MBAGYM -> {
+                            WebContentActivity.start(activity, channelItem)
+                        }
+                        else -> {
+                            info("Start WebContentActivity")
+                            WebContentActivity.start(activity, Uri.parse(channelItem.canonicalUrl))
+                        }
                     }
                 }
                 // Article types other than `story` and `premium` do not have JSON API.
@@ -550,7 +582,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                 }
             }
         }
-
 
         private fun buildUrl(path: String): String {
             return Uri.Builder()
