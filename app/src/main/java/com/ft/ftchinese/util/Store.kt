@@ -3,12 +3,13 @@ package com.ft.ftchinese.util
 import android.content.Context
 import android.content.res.Resources
 import android.util.Log
+import com.ft.ftchinese.R
 import com.jakewharton.byteunits.BinaryByteUnit
 import java.io.File
 
 object Store {
 
-    private val TAG = "Store"
+    private const val TAG = "Store"
 
     fun save(context: Context?, filename: String?, text: String?) {
 
@@ -83,15 +84,19 @@ object Store {
     fun readRawFile(resources: Resources, resId: Int): String? {
 
         return try {
-            Log.i(TAG, "Reading raw file")
             val input = resources.openRawResource(resId)
             input.bufferedReader().use { it.readText() }
-
         } catch (e: ExceptionInInitializerError) {
-            Log.w("readHtml", e.toString())
-
             null
         }
+    }
+
+    fun readChannelTemplate(resources: Resources): String? {
+        return readRawFile(resources, R.raw.list)
+    }
+
+    fun readStoryTemplate(resources: Resources): String? {
+        return Store.readRawFile(resources, R.raw.story)
     }
 }
 
