@@ -5,6 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import com.ft.ftchinese.models.ChannelItem
+import com.ft.ftchinese.models.FollowingManager
+import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -19,7 +22,7 @@ import org.jetbrains.anko.toast
 class WebContentActivity : AbsContentActivity() {
 
     override val articleWebUrl: String
-        get() = canonicalUri.toString()
+        get() = mChannelItem?.canonicalUrl ?: ""
 
     override val articleTitle: String
         get() = ""
@@ -27,49 +30,27 @@ class WebContentActivity : AbsContentActivity() {
     override val articleStandfirst: String
         get() = ""
 
-    private var canonicalUri: Uri? = null
-    private var apiUrl: String? = null
-
-    private fun buildUrl(uri: Uri?, path: String? = null): String? {
-        if (uri == null) {
-            return null
-        }
-        val builder = uri.buildUpon()
-                .scheme("https")
-                .authority("api003.ftmailbox.com")
-                .appendQueryParameter("bodyonly", "yes")
-                .appendQueryParameter("webview", "ftcapp")
-
-        if (path != null) {
-            builder.path(path)
-        }
-
-        return builder.build().toString()
-    }
-
-    companion object {
-        private const val EXTRA_CANONICAL_URI = "extra_canonical_uri"
-
-        fun start(context: Context?, url: Uri) {
-            val intent = Intent(context, WebContentActivity::class.java)
-            intent.putExtra(EXTRA_CANONICAL_URI, url)
-            context?.startActivity(intent)
-        }
-    }
-
+    override var mChannelItem: ChannelItem? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        canonicalUri = intent.getParcelableExtra(EXTRA_CANONICAL_URI)
+        val itemDate = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
-        if (canonicalUri != null) {
-            apiUrl = buildUrl(canonicalUri, null)
+        if (itemDate != null) {
+            try {
+                mChannelItem = gson.fromJson(itemDate, ChannelItem::class.java)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
 
-        action_favourite.visibility = View.GONE
+        val url = mChannelItem?.apiUrl ?: return
 
-        load()
+        info("Start loading a url directly into webview: $url")
+        load(url)
+        updateStarUI()
     }
 
     override fun onDestroy() {
@@ -86,13 +67,28 @@ class WebContentActivity : AbsContentActivity() {
     }
 
     override fun load() {
-        if (apiUrl != null) {
-            info("Load url $apiUrl")
-            web_view.loadUrl(apiUrl)
-            showProgress(false)
-        } else {
-            toast(R.string.prompt_load_failure)
-        }
+
     }
 
+    fun load(url: String) {
+        web_view.loadUrl(url)
+        showProgress(false)
+    }
+
+    companion object {
+        private const val EXTRA_CANONICAL_URI = "extra_canonical_uri"
+        private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
+
+        fun start(context: Context?, url: Uri) {
+            val intent = Intent(context, WebContentActivity::class.java)
+            intent.putExtra(EXTRA_CANONICAL_URI, url)
+            context?.startActivity(intent)
+        }
+
+        fun start(context: Context?, channelItem: ChannelItem) {
+            val intent = Intent(context, WebContentActivity::class.java)
+            intent.putExtra(EXTRA_CHANNEL_ITEM, gson.toJson(channelItem))
+            context?.startActivity(intent)
+        }
+    }
 }

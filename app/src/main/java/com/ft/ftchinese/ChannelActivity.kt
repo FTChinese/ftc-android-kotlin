@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import com.ft.ftchinese.models.PagerTab
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.gson
@@ -38,30 +37,22 @@ class ChannelActivity : AppCompatActivity(), ChannelFragment.OnFragmentInteracti
         /**
          * Get the metadata for this page of articles
          */
-        val pageMeta = intent.getStringExtra(EXTRA_LIST_PAGE_META)
-        val listPage = gson.fromJson<PagerTab>(pageMeta, PagerTab::class.java)
+        val data = intent.getStringExtra(EXTRA_LIST_PAGE_META)
+        val pageMeta = gson.fromJson<PagerTab>(data, PagerTab::class.java)
 
         /**
          * Set toolbar's title so that reader know where he is now.
          */
-        toolbar.title = listPage.title
+        toolbar.title = pageMeta.title
 
         /**
          * Begin to attach ChannelFragment to this activity
          */
-        val sectionFragment = ChannelFragment.newInstance(listPage)
+        val sectionFragment = ChannelFragment.newInstance(pageMeta)
 
         supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, sectionFragment)
                 .commit()
-    }
-
-    override fun onProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
     }
 
     /**
@@ -69,11 +60,11 @@ class ChannelActivity : AppCompatActivity(), ChannelFragment.OnFragmentInteracti
      * If user enters this activity, there's no BottomNavigationView
      */
     override fun selectBottomNavItem(itemId: Int) {
-        info("Dump implementation")
+
     }
 
     override fun selectTabLayoutTab(tabIndex: Int) {
-        info("Dump implementation")
+
     }
 
     /**

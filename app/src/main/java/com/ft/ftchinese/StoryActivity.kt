@@ -4,10 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
+import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.activity_content.*
@@ -34,7 +34,7 @@ class StoryActivity : AbsContentActivity() {
     private var mCurrentLanguage: Int = ChannelItem.LANGUAGE_CN
 
     // Hold metadata on where and how to find data for this page.
-    private var mChannelItem: ChannelItem? = null
+    override var mChannelItem: ChannelItem? = null
 
     private var mLoadJob: Job? = null
     private var mRefreshJob: Job? = null
@@ -42,33 +42,20 @@ class StoryActivity : AbsContentActivity() {
     private var mTemplate: String? = null
     private var mStory: Story? = null
 
-    private var mFollowingManager: FollowingManager? = null
-
-    private var mIsStarring: Boolean = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mFollowingManager = FollowingManager.getInstance(this)
+
         // Meta data about current article
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
         if (itemData != null) {
-            mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
-
-            info("Start loading article: $mChannelItem")
-        }
+            try {
+                mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
 
 
-        action_favourite.setOnClickListener {
-            mIsStarring = !mIsStarring
-
-            updateFavouriteIcon()
-
-            if (mIsStarring) {
-                ArticleStore.getInstance(this).addStarred(mChannelItem)
-            } else {
-                ArticleStore.getInstance(this).deleteStarred(mChannelItem)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
 
@@ -78,7 +65,7 @@ class StoryActivity : AbsContentActivity() {
         }
 
         titlebar_en.setOnClickListener {
-            val user = mSession?.loadUser()
+            val user = mSessionManager?.loadUser()
 
             if (user == null) {
                 languageSwitchFobidden()
@@ -102,7 +89,7 @@ class StoryActivity : AbsContentActivity() {
         }
 
         titlebar_bi.setOnClickListener {
-            val user = mSession?.loadUser()
+            val user = mSessionManager?.loadUser()
 
             if (user == null) {
                 languageSwitchFobidden()
@@ -124,9 +111,10 @@ class StoryActivity : AbsContentActivity() {
             load()
         }
 
-        load()
 
-        info("onCreate finished")
+        info("Start loading article: $mChannelItem")
+        load()
+        updateStarUI()
     }
 
     private fun languageSwitchFobidden() {
@@ -163,7 +151,7 @@ class StoryActivity : AbsContentActivity() {
         mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
             if (mTemplate == null) {
                 mTemplate = async {
-                    ChannelItem.readTemplate(resources)
+                    Store.readStoryTemplate(resources)
                 }.await()
             }
             fetchAndUpdate()
@@ -174,10 +162,8 @@ class StoryActivity : AbsContentActivity() {
 
         mLoadJob = GlobalScope.launch(Dispatchers.Main) {
             mTemplate = async {
-                ChannelItem.readTemplate(resources)
+                Store.readStoryTemplate(resources)
             }.await()
-
-            info("Story template: $mTemplate")
 
             if (mTemplate == null) {
                 toast(R.string.prompt_load_failure)
@@ -209,9 +195,6 @@ class StoryActivity : AbsContentActivity() {
                 toast("${e.message}")
             }
         }
-
-        mIsStarring = ArticleStore.getInstance(this).isStarring(mChannelItem)
-        updateFavouriteIcon()
     }
 
     private suspend fun fetchAndUpdate() {
@@ -219,7 +202,6 @@ class StoryActivity : AbsContentActivity() {
             mChannelItem?.fetchStory(this@StoryActivity)
         }.await()
 
-        info("Fetched story: $mStory")
         loadData()
     }
 
@@ -228,8 +210,6 @@ class StoryActivity : AbsContentActivity() {
         val follows = mFollowingManager?.loadForJS() ?: JSFollows(mapOf())
 
         val html = mChannelItem?.render(mTemplate, mStory, mCurrentLanguage, follows = follows)
-
-        info("Story: $html")
 
         if (html == null) {
             showProgress(false)
@@ -255,16 +235,16 @@ class StoryActivity : AbsContentActivity() {
         language_group.visibility = if (mStory?.isBilingual == true) View.VISIBLE else View.GONE
     }
 
-    private fun updateFavouriteIcon() {
-        action_favourite.setImageResource(if (mIsStarring) R.drawable.ic_favorite_teal_24dp else R.drawable.ic_favorite_border_teal_24dp )
-    }
+//    private fun updateFavouriteIcon() {
+//        action_favourite.setImageResource(if (mIsStarring) R.drawable.ic_favorite_teal_24dp else R.drawable.ic_favorite_border_teal_24dp )
+//    }
 
     private fun saveHistory() {
         val item = mChannelItem ?: return
         GlobalScope.launch {
 
             info("Save reading history")
-            ArticleStore.getInstance(context = this@StoryActivity).addHistory(item)
+            mArticleStore?.addHistory(item)
         }
     }
 

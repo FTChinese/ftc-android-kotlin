@@ -12,7 +12,7 @@ import org.jetbrains.anko.info
 
 class RadioActivity : AbsContentActivity() {
 
-    private var mChannelItem: ChannelItem? = null
+    override var mChannelItem: ChannelItem? = null
 
     companion object {
         private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"

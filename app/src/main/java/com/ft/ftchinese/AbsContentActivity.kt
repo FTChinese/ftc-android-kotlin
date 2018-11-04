@@ -14,6 +14,8 @@ import android.view.*
 import android.webkit.*
 import android.widget.ImageView
 import android.widget.TextView
+import com.ft.ftchinese.database.ArticleStore
+import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.Following
 import com.ft.ftchinese.models.FollowingManager
 import com.ft.ftchinese.models.SessionManager
@@ -24,6 +26,10 @@ import com.tencent.mm.opensdk.modelmsg.WXWebpageObject
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_content.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -45,8 +51,36 @@ abstract class AbsContentActivity : AppCompatActivity(),
     abstract val articleTitle: String
     abstract val articleStandfirst: String
 
-    protected var mSession: SessionManager? = null
-    private var mFollowing: FollowingManager? = null
+    protected var mSessionManager: SessionManager? = null
+    protected var mFollowingManager: FollowingManager? = null
+    protected var mArticleStore: ArticleStore? = null
+
+    private var _starring: Boolean = false
+    private var mIsStarring: Boolean
+        get() = _starring
+        set(value) {
+            _starring = value
+            if (value) {
+                action_favourite.setImageResource(R.drawable.ic_favorite_teal_24dp)
+            } else {
+                action_favourite.setImageResource(R.drawable.ic_favorite_border_teal_24dp)
+            }
+        }
+
+    protected var isInProgress: Boolean = false
+        set(value) {
+            if (value) {
+                progress_bar.visibility = View.VISIBLE
+            } else {
+                swipe_refresh.isRefreshing = value
+                progress_bar.visibility = View.GONE
+            }
+        }
+
+    /**
+     * Do not use this value until it is initialized!
+     */
+    protected abstract var mChannelItem: ChannelItem?
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,8 +93,9 @@ abstract class AbsContentActivity : AppCompatActivity(),
             setDisplayShowTitleEnabled(false)
         }
 
-        mSession = SessionManager.getInstance(this)
-        mFollowing = FollowingManager.getInstance(this)
+        mSessionManager = SessionManager.getInstance(this)
+        mFollowingManager = FollowingManager.getInstance(this)
+        mArticleStore = ArticleStore.getInstance(this)
 
         swipe_refresh.setOnRefreshListener(this)
 
@@ -92,6 +127,34 @@ abstract class AbsContentActivity : AppCompatActivity(),
             }
         }
 
+        // Handle star/unstar action
+        action_favourite.setOnClickListener {
+            // Save to SQL
+            GlobalScope.launch {
+                // If is starring currently, remove it
+                if (mIsStarring) {
+                    info("Unstar article: $mChannelItem")
+                    val affectedRows = mArticleStore?.deleteStarred(mChannelItem) ?: return@launch
+
+                    // Turn is starting to false after deleted.
+                    if (affectedRows > 0) {
+                        mIsStarring  = false
+                    }
+
+                    return@launch
+                }
+
+                // If is not starring, add it.
+                info("Start article: $mChannelItem")
+                val rowId = mArticleStore?.addStarred(mChannelItem) ?: return@launch
+
+                // Turn is starring to true after added.
+                if (rowId > 0) {
+                    mIsStarring = true
+                }
+            }
+        }
+
         action_share.setOnClickListener {
             if (mBottomDialog == null) {
                 mBottomDialog = BottomSheetDialog(this)
@@ -109,6 +172,14 @@ abstract class AbsContentActivity : AppCompatActivity(),
             }
 
             mBottomDialog?.show()
+        }
+    }
+
+    protected fun updateStarUI() {
+        GlobalScope.launch(Dispatchers.Main) {
+            mIsStarring = async {
+                mArticleStore?.isStarring(mChannelItem)
+            }.await() ?: false
         }
     }
 
@@ -215,7 +286,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
                         req.message = msg
                         req.scene = if (app.id == ShareItem.WECHAT_FRIEND) SendMessageToWX.Req.WXSceneSession else SendMessageToWX.Req.WXSceneTimeline
 
-                        val ok = api.sendReq(req)
+                        api.sendReq(req)
                     }
 
                     ShareItem.OPEN_IN_BROWSER -> {
@@ -244,7 +315,10 @@ abstract class AbsContentActivity : AppCompatActivity(),
 
     }
 
-    // Methods injected to JavaScript in WebView
+    /**
+     * Methods injected to JavaScript in WebView.
+     * This is used to handle click event for a story.
+     */
     inner class ContentWebViewInterface : AnkoLogger {
 
         /**
@@ -307,7 +381,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
             info("Received follow message: $message")
 
             val following = gson.fromJson<Following>(message, Following::class.java)
-            mFollowing?.save(following)
+            mFollowingManager?.save(following)
         }
 
         /**

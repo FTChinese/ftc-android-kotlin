@@ -22,7 +22,8 @@ import org.jetbrains.anko.warn
 /**
  * A base WebViewClient that can be used directly or subclassed.
  * AbsContentActivity uses it directly.
- * This is used to handle various event when loading a web page.
+ * This is used to handle various event when loading a web page,
+ * particularly the click event on a url.
  */
 open class BaseWebViewClient(
         val activity: Activity?
