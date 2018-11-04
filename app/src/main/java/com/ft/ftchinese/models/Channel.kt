@@ -122,9 +122,6 @@ data class ChannelItem(
     private val filename: String
         get() = "${type}_$id.json"
 
-    private val prefKey: String
-        get() = "${type}_$id"
-
     private val commentsId: String
         get() {
             return when(subType) {
@@ -144,24 +141,23 @@ data class ChannelItem(
     // See Page/FTChinese/Main/APIs.swift
     // https://api003.ftmailbox.com/interactive/12339?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24
     val apiUrl: String?
-        get() {
-            return when(type) {
-                "story", "premium" -> "https://api.ftmailbox.com/index.php/jsapi/get_story_more_info/$id"
-                "interactive" -> {
-                    // https://webnodeiv.ftchinese.com/interactive/12751?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes
-                    return if (subType == SUB_TYPE_RADIO) {
-//                        "https://api003.ftmailbox.com/$type/$id?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes"
-                        "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
-                    } else {
-                        "https://api003.ftmailbox.com/interactive/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
-                    }
+        get() = when(type) {
+            "story", "premium" -> "https://api.ftmailbox.com/index.php/jsapi/get_story_more_info/$id"
 
-                }
-                "gym", "special" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp"
-                "video" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&004"
+            "interactive" -> when (subType) {
+                //"https://api003.ftmailbox.com/$type/$id?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes"
+                SUB_TYPE_RADIO -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
 
-                else -> null
+                SUB_TYPE_MBAGYM -> canonicalUrl
+
+                else -> "https://api003.ftmailbox.com/interactive/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
             }
+
+            "gym", "special" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp"
+
+            "video" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&004"
+
+            else -> null
         }
 
     /**
@@ -404,17 +400,13 @@ data class ChannelItem(
         const val TYPE_INTERACTIVE = "interactive"
         const val SUB_TYPE_RADIO = "radio"
         const val SUB_TYPE_USER_COMMENT = ""
+        const val SUB_TYPE_MBAGYM = "mbagym"
 
         const val HOME_AD_ZONE = "home"
         const val DEFAULT_STORY_AD_ZONE = "world"
 
         const val HOME_AD_CH_ID = "1000"
         const val DEFAULT_STORY_AD_CH_ID = "1200"
-
-        // Read story.html file.
-        fun readTemplate(resources: Resources): String? {
-            return Store.readRawFile(resources, R.raw.story)
-        }
     }
 }
 
