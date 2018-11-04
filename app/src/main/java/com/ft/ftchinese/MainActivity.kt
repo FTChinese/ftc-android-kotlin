@@ -56,6 +56,8 @@ class MainActivity : AppCompatActivity(),
     private var mVideoAdapter: TabPagerAdapter? = null
     private var mMyftPagerAdapter: MyftPagerAdapter? = null
 
+    private var mSelectedTabPosition: Int = -1
+
     override fun getSession(): SessionManager? {
         return mSession
     }
@@ -163,17 +165,18 @@ class MainActivity : AppCompatActivity(),
 
         mSession = SessionManager.getInstance(this)
 
+
+
         // Show advertisement
         // Keep a reference the coroutine in case user exit at this moment
         mShowAdJob = GlobalScope.launch(Dispatchers.Main) {
-
             showAd()
-            info("Show ad finished")
         }
 
-        info("Initializing toolbar")
         setSupportActionBar(toolbar)
         displayLogo()
+
+        updateSessionUI()
 
         val toggle = ActionBarDrawerToggle(
                 this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
@@ -194,10 +197,6 @@ class MainActivity : AppCompatActivity(),
         bottom_nav.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)
         bottom_nav.setOnNavigationItemReselectedListener(bottomNavItemReseletedListener)
 
-        // Check mUser login status
-
-        updateSessionUI()
-
         // Set a listener that will be notified when a menu item is selected.
         drawer_nav.setNavigationItemSelectedListener(this)
 
@@ -213,11 +212,8 @@ class MainActivity : AppCompatActivity(),
         // Fetch ads schedule from remote server in background.
         // Keep a reference to this coroutine in case user exits before this task finished.
         mDownloadAdJob = GlobalScope.launch {
-            info("Starting checking ad schedules")
             checkAd()
         }
-
-        info("onCreate finished")
     }
 
     private fun displayLogo() {
@@ -401,6 +397,8 @@ class MainActivity : AppCompatActivity(),
     override fun onStop() {
         super.onStop()
         info("onStop finished")
+        mShowAdJob?.cancel()
+        mDownloadAdJob?.cancel()
     }
 
     override fun onDestroy() {
@@ -409,7 +407,6 @@ class MainActivity : AppCompatActivity(),
         mShowAdJob?.cancel()
         mDownloadAdJob?.cancel()
 
-        info("onDestroy finished")
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {
@@ -530,10 +527,11 @@ class MainActivity : AppCompatActivity(),
 
     /**
      * Implementation of TabLayout.OnTabSelectedListener
+     * Tab index starts from 0
      */
     override fun onTabSelected(tab: TabLayout.Tab?) {
-        info("Tab position: ${tab?.position}")
-        info("Tab selected: ${tab_layout.selectedTabPosition}")
+        info("Tab selected: ${tab?.position}")
+        mSelectedTabPosition = tab_layout.selectedTabPosition
     }
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
@@ -548,13 +546,14 @@ class MainActivity : AppCompatActivity(),
      * Implementation of ChannelFragment.OnDataLoadListener.
      * This is used to handle the state of progress bar.
      */
-    override fun onProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
-    }
+//    override fun onProgress(show: Boolean) {
+//        if (show) {
+//            info("Show progress")
+//            progress_bar.visibility = View.VISIBLE
+//        } else {
+//            progress_bar.visibility = View.GONE
+//        }
+//    }
 
     /**
      * Implementation of ChannelWebViewClient.OnInAppNavigate
@@ -632,8 +631,7 @@ class MainActivity : AppCompatActivity(),
     inner class TabPagerAdapter(private var mPages: Array<PagerTab>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
         override fun getItem(position: Int): Fragment {
-            // getItem is called to instantiate the fragment for the given page.
-            info("Fragment data: ${mPages[position]}")
+            info("TabPagerAdapter getItem $position. Data passed to ChannelFragment: ${mPages[position]}")
             return ChannelFragment.newInstance(mPages[position])
         }
 
