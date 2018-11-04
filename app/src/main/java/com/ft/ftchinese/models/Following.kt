@@ -59,7 +59,6 @@ class FollowingManager(context: Context) {
             }
         }
 
-        val editor = sharedPreferences.edit()
         editor.putStringSet(following.type, newHs)
         editor.apply()
     }
