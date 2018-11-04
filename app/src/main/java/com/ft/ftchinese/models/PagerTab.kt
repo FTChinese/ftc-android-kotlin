@@ -18,10 +18,6 @@ data class PagerTab (
         val contentUrl: String,
         val htmlType: Int // Flag used to tell whether the url should be loaded directly
 ) : AnkoLogger {
-    fun htmlFromCache(context: Context?): String? {
-
-        return Store.load(context, "$name.html")
-    }
 
     fun fragmentFromCache(context: Context?): String? {
         return Store.load(context, "$name.html")
@@ -53,9 +49,5 @@ data class PagerTab (
         const val HTML_TYPE_FRAGMENT = 1
         // Indicate you need to load a complete web page into webview.
         const val HTML_TYPE_COMPLETE = 2
-
-        fun readTemplate(resources: Resources): String? {
-            return Store.readRawFile(resources, R.raw.list)
-        }
     }
 }

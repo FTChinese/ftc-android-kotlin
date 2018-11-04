@@ -38,6 +38,46 @@ object Navigation {
             PagerTab(title = "热点观察", name = "fta_hot", contentUrl = "https://api003.ftmailbox.com/m/corp/preview.html?pageid=hotcourse&webview=ftcapp&bodyonly=yes", htmlType = HTML_TYPE_FRAGMENT),
             PagerTab(title = "MBA训练营", name = "fta_gym", contentUrl = "https://api003.ftmailbox.com/channel/mbagym.html?webview=ftcapp&bodyonly=yes", htmlType = HTML_TYPE_FRAGMENT),
             PagerTab(title = "互动小测", name = "fta_quiz", contentUrl = "https://api003.ftmailbox.com/m/corp/preview.html?pageid=quizplus&webview=ftcapp&bodyonly=yes", htmlType = HTML_TYPE_FRAGMENT),
+            /**
+             * Article items for this page:
+             * {
+             *  "meta": {
+             *      "title":"深度阅读 - FT商学院",
+             *      "description":"",
+             *      "theme":"default",
+             *      "adid":"1701",
+             *      "adZone":"home"
+             * },
+             *  "sections":[
+             *      {
+             *          "lists":[
+             *              {
+             *                  "items":[
+             *                      {
+             *                          "id":"7457",
+             *                          "type":"interactive",
+             *                          "headline":"拆分北京",
+             *                          "subType":"mbagym"
+             *                      },
+             *                      {
+             *                          "id":"971","type":
+             *                          "interactive",
+             *                          "headline":"改变商业的创新",
+             *                          "subType":"mbagym"
+             *                      },
+             *                      {
+             *                          "id":"960",
+             *                          "type":"interactive",
+             *                          "headline":"索罗斯文集",
+             *                          "subType":"mbagym"
+             *                      }
+             *                  ]
+             *              }
+             *          ]
+             *      }
+             *  ]
+             * }
+             */
             PagerTab(title = "深度阅读", name = "fta_reading", contentUrl = "https://api003.ftmailbox.com/m/corp/preview.html?pageid=mbaread&webview=ftcapp&bodyonly=yes", htmlType = HTML_TYPE_FRAGMENT)
     )
 
