@@ -132,9 +132,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         job = GlobalScope.launch {
 
             try {
-                val payResult = async {
-                    user.wxQueryOrder(subs.orderId)
-                }.await()
+                val payResult = user.wxQueryOrder(subs.orderId)
 
                 isInProgress = false
 
