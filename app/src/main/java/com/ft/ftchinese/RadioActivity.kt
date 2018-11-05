@@ -14,6 +14,15 @@ class RadioActivity : AbsContentActivity() {
 
     override var mChannelItem: ChannelItem? = null
 
+    override val articleWebUrl: String
+        get() = mChannelItem?.canonicalUrl ?: ""
+
+    override val articleTitle: String
+        get() = mChannelItem?.headline ?: ""
+
+    override val articleStandfirst: String
+        get() = mChannelItem?.standfirst ?: mChannelItem?.headline ?: ""
+
     companion object {
         private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
 
@@ -35,7 +44,6 @@ class RadioActivity : AbsContentActivity() {
 
         swipe_refresh.isEnabled = false
         language_group.visibility = View.GONE
-        action_favourite.visibility = View.GONE
 
         web_view.settings.apply {
             javaScriptEnabled = true
@@ -44,7 +52,7 @@ class RadioActivity : AbsContentActivity() {
 
         web_view.apply {
 
-            webViewClient = BaseWebViewClient(this@RadioActivity)
+            webViewClient = MainWebViewClient(this@RadioActivity)
 
             setOnKeyListener { v, keyCode, event ->
                 if (keyCode == KeyEvent.KEYCODE_BACK && web_view.canGoBack()) {
@@ -59,21 +67,12 @@ class RadioActivity : AbsContentActivity() {
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
         mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
-        info("Creating radio activity for $mChannelItem")
+        info("Creating radio activity for $mChannelItem, API URL: ${mChannelItem?.apiUrl}")
 
-        info("API URL: ${mChannelItem?.apiUrl}")
+        updateStarUI()
 
         loadUrl(mChannelItem?.apiUrl)
     }
-
-    override val articleWebUrl: String
-        get() = mChannelItem?.canonicalUrl ?: ""
-
-    override val articleTitle: String
-        get() = mChannelItem?.headline ?: ""
-
-    override val articleStandfirst: String
-        get() = mChannelItem?.standfirst ?: mChannelItem?.headline ?: ""
 
     override fun load() {
 
