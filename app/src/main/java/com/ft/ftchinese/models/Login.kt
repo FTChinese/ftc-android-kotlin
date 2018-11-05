@@ -4,6 +4,8 @@ import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.io.IOException
@@ -19,12 +21,14 @@ data class Login(
      * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON, regardless of if response is successful or not
      */
-    fun send(): Account {
-        val response = Fetch().post(NextApi.LOGIN)
-                .setClient()
-                .noCache()
-                .body(this@Login)
-                .end()
+    suspend fun send(): Account {
+        val response = GlobalScope.async {
+            Fetch().post(NextApi.LOGIN)
+                    .setClient()
+                    .noCache()
+                    .body(this@Login)
+                    .end()
+        }.await()
 
         val body = response.body()?.string()
         info("Response body: $body")
