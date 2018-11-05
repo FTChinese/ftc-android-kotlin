@@ -50,6 +50,10 @@ abstract class AbsContentActivity : AppCompatActivity(),
     abstract val articleWebUrl: String
     abstract val articleTitle: String
     abstract val articleStandfirst: String
+    /**
+     * Do not use this value until it is initialized!
+     */
+    protected abstract var mChannelItem: ChannelItem?
 
     protected var mSessionManager: SessionManager? = null
     protected var mFollowingManager: FollowingManager? = null
@@ -76,11 +80,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
                 progress_bar.visibility = View.GONE
             }
         }
-
-    /**
-     * Do not use this value until it is initialized!
-     */
-    protected abstract var mChannelItem: ChannelItem?
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,7 +110,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
             addJavascriptInterface(ContentWebViewInterface(), "Android")
 
             // Set a WebViewClient to handle various links in the WebView
-            webViewClient = BaseWebViewClient(this@AbsContentActivity)
+            webViewClient = MainWebViewClient(this@AbsContentActivity)
 
             // Set the chrome handler
             webChromeClient = MyChromeClient()
