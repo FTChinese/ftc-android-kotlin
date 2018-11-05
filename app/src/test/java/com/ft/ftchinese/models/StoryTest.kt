@@ -35,7 +35,8 @@ class StoryTest {
                             eheadline = "China hastens drug approval with embrace of foreign data",
                             last_publish_time = "1507587858"
                     )
-            )
+            ),
+            industry = ""
     )
 
     @Test fun splitBody() {
