@@ -1,12 +1,5 @@
 package com.ft.ftchinese.models
 
-import android.content.Context
-import android.content.res.Resources
-import com.ft.ftchinese.R
-import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.Store
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 
 /**
@@ -14,27 +7,17 @@ import org.jetbrains.anko.AnkoLogger
  */
 data class PagerTab (
         val title: String, // A Tab's title
+        // name is used to cache files.
+        // If empty, do not cache it, nor should you try to
+        // find cache.
         val name: String,  // Cache filename used by this tab
         val contentUrl: String,
         val htmlType: Int // Flag used to tell whether the url should be loaded directly
 ) : AnkoLogger {
 
-    fun fragmentFromCache(context: Context?): String? {
-        return Store.load(context, "$name.html")
-    }
+    val fileName: String
+        get() = if (name.isBlank()) "" else "$name.html"
 
-    /**
-     * Crawl a web page and save it.
-     */
-    fun crawlWeb(context: Context?):String? {
-        val htmlStr = Fetch().get(contentUrl).string()
-
-        GlobalScope.launch {
-            Store.save(context, "$name.html", htmlStr)
-        }
-
-        return htmlStr
-    }
 
     fun render(template: String?, listContent: String?): String? {
         if (template == null || listContent == null) {
