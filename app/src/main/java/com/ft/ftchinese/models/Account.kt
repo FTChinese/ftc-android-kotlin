@@ -5,6 +5,8 @@ import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.SubscribeApi
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 
 const val PREFERENCE_USER_ACCOUNT = "user_account"
 
@@ -32,76 +34,92 @@ data class Account(
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON
      * See Fetch#exectue for other exceptions
      */
-    fun refresh(): Account {
-
-
-        val response = Fetch().get(NextApi.ACCOUNT)
-                .noCache()
-                .setUserId(this@Account.id)
-                .end()
+    suspend fun refresh(): Account {
+        val response = GlobalScope.async {
+            Fetch().get(NextApi.ACCOUNT)
+                    .noCache()
+                    .setUserId(this@Account.id)
+                    .end()
+        }.await()
 
         val body = response.body()?.string()
 
         return gson.fromJson<Account>(body, Account::class.java)
     }
 
-    fun requestVerification(): Int {
-        val response = Fetch().post(NextApi.REQUEST_VERIFICATION)
-                .noCache()
-                .setUserId(this@Account.id)
-                .body(null)
-                .end()
+    suspend fun requestVerification(): Int {
+        val response = GlobalScope.async {
+            Fetch().post(NextApi.REQUEST_VERIFICATION)
+                    .noCache()
+                    .setUserId(this@Account.id)
+                    .body(null)
+                    .end()
+        }.await()
 
         return response.code()
     }
 
-    fun wxPlaceOrder(membership: Membership?): WxPrepayOrder? {
+    suspend fun wxPlaceOrder(membership: Membership?): WxPrepayOrder? {
         if (membership == null) {
             return null
         }
-        val response = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${membership.tier}/${membership.billingCycle}")
-                .noCache()
-                .setUserId(this@Account.id)
-                .setClient()
-                .body(null)
-                .end()
+        val response = GlobalScope.async {
+            Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${membership.tier}/${membership.billingCycle}")
+                    .noCache()
+                    .setUserId(this@Account.id)
+                    .setClient()
+                    .body(null)
+                    .end()
+        }.await()
+
 
         val body = response.body()?.string()
         return gson.fromJson<WxPrepayOrder>(body, WxPrepayOrder::class.java)
     }
 
-    fun wxQueryOrder(orderId: String): WxQueryOrder {
-        val resp = Fetch().get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
-                .noCache()
-                .setUserId(this@Account.id)
-                .setClient()
-                .end()
+    suspend fun wxQueryOrder(orderId: String): WxQueryOrder {
+        val resp = GlobalScope.async {
+            Fetch().get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
+                    .noCache()
+                    .setUserId(this@Account.id)
+                    .setClient()
+                    .end()
+        }.await()
+
         val body = resp.body()?.string()
 
         return gson.fromJson<WxQueryOrder>(body, WxQueryOrder::class.java)
     }
 
-    fun aliPlaceOrder(membership: Membership?): AlipayOrder? {
+    suspend fun aliPlaceOrder(membership: Membership?): AlipayOrder? {
         if (membership == null) {
             return null
         }
-        val response = Fetch().post("${SubscribeApi.ALI_ORDER}/${membership.tier}/${membership.billingCycle}")
-                .setUserId(this@Account.id)
-                .setClient()
-                .body(null)
-                .end()
+        val response = GlobalScope.async {
+            Fetch().post("${SubscribeApi.ALI_ORDER}/${membership.tier}/${membership.billingCycle}")
+                    .setUserId(this@Account.id)
+                    .setClient()
+                    .body(null)
+                    .end()
+        }.await()
+
 
         val body = response.body()?.string()
         return gson.fromJson<AlipayOrder>(body, AlipayOrder::class.java)
     }
 
-    fun aliVerifyOrderAsync(content: String): AliVerifiedOrder {
-        val resp = Fetch().post(SubscribeApi.ALI_VERIFY_APP_PAY)
-                .noCache()
-                .setUserId(this@Account.id)
-                .setClient()
-                .body(content)
-                .end()
+    suspend fun aliVerifyOrderAsync(content: String): AliVerifiedOrder {
+
+        val resp = GlobalScope.async {
+            Fetch().post(SubscribeApi.ALI_VERIFY_APP_PAY)
+                    .noCache()
+                    .setUserId(this@Account.id)
+                    .setClient()
+                    .body(content)
+                    .end()
+        }.await()
+
+
         val body = resp.body()?.string()
 
         return gson.fromJson<AliVerifiedOrder>(body, AliVerifiedOrder::class.java)
