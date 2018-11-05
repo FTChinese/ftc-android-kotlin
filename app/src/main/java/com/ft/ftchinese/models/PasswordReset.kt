@@ -3,6 +3,8 @@ package com.ft.ftchinese.models
 import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
 import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import java.io.IOException
 
 data class PasswordReset(
@@ -15,12 +17,14 @@ data class PasswordReset(
      * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.
      * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON, regardless of if response is successful or not
      */
-    fun send(): Int {
+    suspend fun send(): Int {
 
-        val response = Fetch().post(NextApi.PASSWORD_RESET)
-                .noCache()
-                .body(this@PasswordReset)
-                .end()
+        val response= GlobalScope.async {
+            Fetch().post(NextApi.PASSWORD_RESET)
+                    .noCache()
+                    .body(this@PasswordReset)
+                    .end()
+        }.await()
 
         return response.code()
     }
