@@ -9,15 +9,11 @@ import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.models.Endpoints
-import com.ft.ftchinese.models.PagerTab
-import com.ft.ftchinese.models.pathToTitle
+import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignUpActivity
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-import org.jetbrains.anko.warn
 
 /**
  * A base WebViewClient that can be used directly or subclassed.
@@ -25,34 +21,38 @@ import org.jetbrains.anko.warn
  * This is used to handle various event when loading a web page,
  * particularly the click event on a url.
  */
-open class BaseWebViewClient(
+open class MainWebViewClient(
         val activity: Activity?
 ) : WebViewClient(), AnkoLogger {
-    override fun onLoadResource(view: WebView?, url: String?) {
-        super.onLoadResource(view, url)
-    }
-
-    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-        super.onPageStarted(view, url, favicon)
-    }
-
-    override fun onPageFinished(view: WebView?, url: String?) {
-        super.onPageFinished(view, url)
-
-    }
 
     /**
-     * Error code: -1, net::ERR_INCOMPLETE_CHUNKED_ENCODING
+     * Callback used by ChannelWebViewClient.
+     * When certain links in web view is clicked, the event is passed to parent activity to open a bottom navigation item or a tab.
      */
-    override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-        super.onReceivedError(view, request, error)
+    private var mListener: OnInAppNavigateListener? = null
 
-        info("onReceivedError: Failed to ${request?.method}: ${request?.url}")
+    private var mPaginateListener: OnPaginateListener? = null
+    /**
+     * Jump to another bottom navigation item or another tab in hte same bottom navigation item when certain links are clicked.
+     */
+    interface OnInAppNavigateListener {
+        // Jump to a new bottom navigation item
+        fun onGotoBottomNavItem(itemId: Int)
+
+        // Go to another tab
+        fun onGotoTabLayoutTab(tabIndex: Int)
     }
 
-    override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
-        super.onReceivedError(view, errorCode, description, failingUrl)
-        info("onReceivedError: $errorCode, $description, $failingUrl")
+    interface OnPaginateListener {
+        fun onPagination(page: String)
+    }
+
+    fun setOnInAppNavigateListener(listener: OnInAppNavigateListener?) {
+        mListener = listener
+    }
+
+    fun setOnPaginateListener(listener: OnPaginateListener?) {
+        mPaginateListener = listener
     }
 
     // Handle clicks on a link in a web page loaded into url
@@ -132,13 +132,14 @@ open class BaseWebViewClient(
     private fun handleInSiteLink(uri: Uri): Boolean {
         val pathSegments = uri.pathSegments
 
-
+        info("Handle in-site link $uri")
         /**
          * Determine if the link is a channel's pagination link.
          * `page` query parameter is used for each channel's pagination.
          * For unknown reasons, the pagination url uses relative links, you have to handle it separately.
          */
-        if (pathSegments.size < 2 && uri.getQueryParameter("page") != null) {
+        if (uri.getQueryParameter("page") != null || uri.getQueryParameter("p") != null) {
+            info("Open channel pagination for uri: $uri")
             return openChannelPagination(uri)
         }
 
@@ -160,8 +161,9 @@ open class BaseWebViewClient(
             /**
              * If the path looks like `/story/001078593`
              */
-            "story", "premium" -> openStoryLink(uri)
+            ChannelItem.TYPE_STORY, ChannelItem.TYPE_PREMIUM -> openArticleLink(uri)
 
+            ChannelItem.TYPE_VIDEO -> openVideoLink(uri)
 
             /**
              * If the path looks like `/tag/中美贸易战`,
@@ -189,14 +191,85 @@ open class BaseWebViewClient(
     }
 
     /**
+     * Loads a story page who has JSON api on server
+     * StoryActivity accepts a ChannelItem parameter.
+     */
+    private fun openArticleLink(uri: Uri): Boolean {
+        val channelItem = ChannelItem(
+                id = uri.pathSegments[1],
+                type = uri.pathSegments[0],
+                headline = "",
+                shortlead = "")
+        StoryActivity.start(activity, channelItem)
+
+        return true
+    }
+
+    private fun openVideoLink(uri: Uri): Boolean {
+        val channelItem = ChannelItem(
+                id = uri.pathSegments[1],
+                type = uri.pathSegments[0],
+                headline = "",
+                shortlead = "")
+
+        WebContentActivity.start(activity, channelItem)
+
+        return true
+    }
+    /**
      * Handle the pagination link of each channel
      * There's a problem with each channel's pagination: they used relative urls.
      * When loaded in WebView with base url `http://www.ftchinese.com`,
      * the url will become something `http://www.ftchinese.com/china.html?page=2`,
      * which should actually be `http://www.ftchiese.com/channel/china.html?page=2`
+     *
+     * However,
+     * `columns` uses /column/007000049?page=2
+     * English radio uses http://www.ftchinese.com/channel/radio.html?p=2
+     * Speed read uses http://www.ftchinese.com/channel/speedread.html?p=2
+     * Bilingual reading uses http://www.ftchinese.com/channel/ce.html?p=2
+     *
      */
     open fun openChannelPagination(uri: Uri): Boolean {
-        return false
+
+
+        var pageKey: String? = null
+        var pageNumber: String? = null
+
+        pageNumber = uri.getQueryParameter("page")
+        if (pageNumber != null) {
+            pageKey = "page"
+        } else {
+            pageNumber = uri.getQueryParameter("p")
+
+            if (pageNumber != null) {
+                pageKey = "p"
+            }
+        }
+
+        if (pageKey == null || pageNumber == null) { return true }
+
+        val key = uri.lastPathSegment ?: return true
+
+        val pageMeta = paginationMap[key] ?: return true
+        val url = Uri.parse(pageMeta.contentUrl)
+                .buildUpon()
+                .appendQueryParameter(pageKey, pageNumber)
+                .build()
+                .toString()
+
+        val listPage = PagerTab(
+                title = pageMeta.title,
+                name = "${pageMeta.name}_$pageNumber",
+                contentUrl = url,
+                htmlType = pageMeta.htmlType
+        )
+
+        info("Open channel page ${listPage.contentUrl}")
+
+        ChannelActivity.start(activity, listPage)
+
+        return true
     }
 
     /**
@@ -208,7 +281,7 @@ open class BaseWebViewClient(
 
         val page = PagerTab(
                 title = pathToTitle[lastPathSegment] ?: "",
-                name = "",
+                name = uri.pathSegments.joinToString("_").removeSuffix(".html"),
                 contentUrl = buildUrl(uri),
                 htmlType = PagerTab.HTML_TYPE_FRAGMENT
         )
@@ -222,34 +295,69 @@ open class BaseWebViewClient(
      * This kind of page is a list of articles
      */
     open fun openMarketingLink(uri: Uri): Boolean {
+        info("Open a marketing link: $uri")
+        when (uri.pathSegments[1]) {
+            "corp" -> {
+                val listPage = PagerTab(
+                        title = "",
+                        name = "",
+                        contentUrl = uri.buildUpon()
+                                .appendQueryParameter("webview", "ftcapp")
+                                .build()
+                                .toString(),
+                        htmlType = PagerTab.HTML_TYPE_COMPLETE
+                )
+
+                ChannelActivity.start(activity, listPage)
+                return true
+            }
+            "marketing" -> {
+                when (uri.lastPathSegment) {
+
+                    /**
+                     * If the path is `/m/marketing/intelligence.html`,
+                     * navigate to the tab titled FT研究院
+                     */
+                    "intelligence.html" -> {
+                        val tabIndex = Navigation.newsPages.indexOfFirst { it.name == "news_fta" }
+
+                        mListener?.onGotoTabLayoutTab(tabIndex)
+                    }
+                    /**
+                     * If the path looks like `/m/marketing/businesscase.html`
+                     */
+                    else -> {
+                        val name = uri.lastPathSegment ?: ""
+                        val listPage = PagerTab(
+                                title = pathToTitle[name] ?: "",
+                                name = "marketing_$name",
+                                contentUrl = uri.buildUpon().appendQueryParameter("webview", "ftcapp").build().toString(),
+                                htmlType = PagerTab.HTML_TYPE_COMPLETE
+                        )
+
+                        ChannelActivity.start(activity, listPage)
+                    }
+                }
+
+                return true
+            }
+        }
+
         val lastPathSegment = uri.lastPathSegment
 
-        val page = PagerTab(
+        val listPage = PagerTab(
                 title = pathToTitle[lastPathSegment] ?: "",
                 name = "",
                 contentUrl = buildUrl(uri),
-                htmlType = PagerTab.HTML_TYPE_FRAGMENT
+                htmlType = PagerTab.HTML_TYPE_COMPLETE
         )
 
-        ChannelActivity.start(activity, page)
+        ChannelActivity.start(activity, listPage)
 
         return true
     }
 
-    /**
-     * Loads a story page who has JSON api on server
-     * StoryActivity accepts a ChannelItem parameter.
-     */
-    private fun openStoryLink(uri: Uri): Boolean {
-        val channelItem = ChannelItem(
-                id = uri.pathSegments[1],
-                type = uri.pathSegments[0],
-                headline = "",
-                shortlead = "")
-        StoryActivity.start(activity, channelItem)
 
-        return true
-    }
 
     private fun handleExternalLink(uri: Uri): Boolean {
         // This opens an external browser
@@ -261,7 +369,7 @@ open class BaseWebViewClient(
 
     private fun openTagLink(uri: Uri): Boolean {
         val page = PagerTab(
-                title = uri.pathSegments[1],
+                title = uri.lastPathSegment,
                 name = "${uri.pathSegments[0]}_${uri.pathSegments[1]}",
                 contentUrl = buildUrl(uri),
                 htmlType = PagerTab.HTML_TYPE_FRAGMENT
@@ -286,3 +394,16 @@ open class BaseWebViewClient(
         return builder.build().toString()
     }
 }
+
+val paginationMap = mapOf(
+        "china.html" to Navigation.newsPages[1],
+        "world.html" to Navigation.newsPages[4],
+        "opinion.html" to Navigation.newsPages[5],
+        "markets.html" to Navigation.newsPages[7],
+        "business.html" to Navigation.newsPages[8],
+        "management.html" to Navigation.newsPages[11],
+        "lifestyle.html" to Navigation.newsPages[12],
+        "radio.html" to Navigation.englishPages[0],
+        "speedread.html" to Navigation.englishPages[1],
+        "ce.html" to Navigation.englishPages[2]
+)

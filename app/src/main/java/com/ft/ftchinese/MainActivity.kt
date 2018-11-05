@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
         TabLayout.OnTabSelectedListener,
         ChannelFragment.OnFragmentInteractionListener,
-        ChannelWebViewClient.OnInAppNavigate,
+//        ChannelWebViewClient.OnPaginateListener,
         AnkoLogger {
 
     private var mBottomDialog: BottomSheetDialog? = null
@@ -55,8 +55,6 @@ class MainActivity : AppCompatActivity(),
     private var mFtaAdapter: TabPagerAdapter? = null
     private var mVideoAdapter: TabPagerAdapter? = null
     private var mMyftPagerAdapter: MyftPagerAdapter? = null
-
-    private var mSelectedTabPosition: Int = -1
 
     override fun getSession(): SessionManager? {
         return mSession
@@ -531,7 +529,7 @@ class MainActivity : AppCompatActivity(),
      */
     override fun onTabSelected(tab: TabLayout.Tab?) {
         info("Tab selected: ${tab?.position}")
-        mSelectedTabPosition = tab_layout.selectedTabPosition
+//        mSelectedTabPosition = tab_layout.selectedTabPosition
     }
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
@@ -543,39 +541,26 @@ class MainActivity : AppCompatActivity(),
     }
 
     /**
-     * Implementation of ChannelFragment.OnDataLoadListener.
-     * This is used to handle the state of progress bar.
-     */
-//    override fun onProgress(show: Boolean) {
-//        if (show) {
-//            info("Show progress")
-//            progress_bar.visibility = View.VISIBLE
-//        } else {
-//            progress_bar.visibility = View.GONE
-//        }
-//    }
-
-    /**
-     * Implementation of ChannelWebViewClient.OnInAppNavigate
+     * Implementation of ChannelWebViewClient.OnPaginateListener
      * Use cases:
      * When mUser clicked links on the frontpage like `每日英语`,
      * the app should actually jump to the second item in bottom navigation instead of opening a separate activity.
      */
-    override fun selectBottomNavItem(itemId: Int) {
-        val item = bottom_nav.menu.findItem(itemId)
+//    override fun selectBottomNavItem(itemId: Int) {
+//        val item = bottom_nav.menu.findItem(itemId)
+//
+//        if (item != null) {
+//            item.isChecked = true
+//            // You should also call this method to make view visible.
+//            // Set `isChecked` only changes the menu item's own state
+//            bottomNavItemSelectedListener.onNavigationItemSelected(item)
+//        }
+//
+//    }
 
-        if (item != null) {
-            item.isChecked = true
-            // You should also call this method to make view visible.
-            // Set `isChecked` only changes the menu item's own state
-            bottomNavItemSelectedListener.onNavigationItemSelected(item)
-        }
-
-    }
-
-    override fun selectTabLayoutTab(tabIndex: Int) {
-        tab_layout.getTabAt(tabIndex)?.select()
-    }
+//    override fun selectTabLayoutTab(tabIndex: Int) {
+//        tab_layout.getTabAt(tabIndex)?.select()
+//    }
 
     /**
      * Update UI depending on user's login/logout state

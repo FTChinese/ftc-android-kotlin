@@ -81,20 +81,28 @@ data class ChannelList(
  */
 data class ChannelItem(
         val id: String,
-        val type: String,
-        val subType: String? = null,
+        // For column type, you should start a ChannelActivity instead of  StoryActivity.
+        val type: String, // story | premium | video | interactive | column |
+        val subType: String? = null, // speedreading | radio
         val headline: String,
-        val shortlead: String? = null,
-        val timeStamp: String? = null, // "1536249600"
-        var keywords: String? = null,
-        // These two properties are not parsed from JSON.
-        // They are copy from ChannelMeata
-        var adId: String = "",
-        var adZone: String = "",
-        var hideAd: Boolean = false
+        val eaudio: String? = null,
+        val shortlead: String? = null, // this is a url of mp3
+        val timeStamp: String? = null // "1536249600"
 ) : AnkoLogger {
 
-    var standfirst: String = ""
+    var keywords: String? = null
+    // These two properties are not parsed from JSON.
+    // They are copy from ChannelMeta
+    var channelTitle: String = ""
+    var theme: String = "default"
+    var adId: String = ""
+    var adZone: String = ""
+    var hideAd: Boolean = false
+
+    // For a story, this is extracted from json
+    // retrieved from server;
+    // For other types of article, we have no way to get the value.
+    var standfirst: String? = null
 
     // Used for sharing
     val canonicalUrl: String
@@ -142,11 +150,12 @@ data class ChannelItem(
     // https://api003.ftmailbox.com/interactive/12339?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24
     val apiUrl: String?
         get() = when(type) {
-            "story", "premium" -> "https://api.ftmailbox.com/index.php/jsapi/get_story_more_info/$id"
+            TYPE_STORY, TYPE_PREMIUM -> "https://api.ftmailbox.com/index.php/jsapi/get_story_more_info/$id"
 
-            "interactive" -> when (subType) {
+            TYPE_INTERACTIVE -> when (subType) {
                 //"https://api003.ftmailbox.com/$type/$id?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes"
-                SUB_TYPE_RADIO -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
+                SUB_TYPE_RADIO -> "https://api003.ftmailbox.com/interactive/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
+                SUB_TYPE_SPEED_READING -> "https://api003.ftmailbox.com/interactive/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
 
                 SUB_TYPE_MBAGYM -> canonicalUrl
 
@@ -155,7 +164,7 @@ data class ChannelItem(
 
             "gym", "special" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp"
 
-            "video" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&004"
+            TYPE_VIDEO -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&004"
 
             else -> null
         }
@@ -163,7 +172,7 @@ data class ChannelItem(
     /**
      * @throws JsonSyntaxException
      */
-    fun loadCachedStory(context: Context?): Story? {
+    suspend fun loadCachedStory(context: Context?): Story? {
 
         val jsonData = Store.load(context, filename) ?: return null
 
@@ -388,7 +397,6 @@ data class ChannelItem(
 
     }
 
-
     companion object {
         private const val TAG = "ChannelItem"
         private const val PREF_NAME_FAVOURITE = "favourite"
@@ -397,10 +405,13 @@ data class ChannelItem(
         const val LANGUAGE_BI = 2
         const val TYPE_STORY = "story"
         const val TYPE_PREMIUM = "premium"
+        const val TYPE_VIDEO = "video"
         const val TYPE_INTERACTIVE = "interactive"
+        const val TYPE_COLUMN = "column"
         const val SUB_TYPE_RADIO = "radio"
         const val SUB_TYPE_USER_COMMENT = ""
         const val SUB_TYPE_MBAGYM = "mbagym"
+        const val SUB_TYPE_SPEED_READING = "speedreading"
 
         const val HOME_AD_ZONE = "home"
         const val DEFAULT_STORY_AD_ZONE = "world"

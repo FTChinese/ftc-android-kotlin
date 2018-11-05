@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
+import awaitStringResult
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
@@ -17,6 +18,7 @@ import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isActiveNetworkWifi
 import com.ft.ftchinese.util.isNetworkConnected
+import com.github.kittinunf.fuel.Fuel
 import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.fragment_channel.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -31,11 +33,14 @@ import org.jetbrains.anko.support.v4.toast
  * As part of TabLayout in MainActivity;
  * As part of ChannelActivity. For example, if you panned to Editor's Choice tab, the mFollows lead to another layer of a list page, not content. You need to use `ChannelFragment` again to render a list page.
  */
-class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
+class ChannelFragment : Fragment(),
+        SwipeRefreshLayout.OnRefreshListener,
+        MainWebViewClient.OnPaginateListener,
+        AnkoLogger {
 
     private var mListener: OnFragmentInteractionListener? = null
-    private var mNavigateListener: ChannelWebViewClient.OnInAppNavigate? = null
-    private lateinit var mWebViewClient: ChannelWebViewClient
+//    private var mNavigateListener: ChannelWebViewClient.OnPaginateListener? = null
+//    private lateinit var mWebViewClient: ChannelWebViewClient
 
     /**
      * Meta data about current page: the tab's title, where to load data, etc.
@@ -108,9 +113,9 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         info("onAttach fragment")
         super.onAttach(context)
 
-        if (context is ChannelWebViewClient.OnInAppNavigate) {
-            mNavigateListener = context
-        }
+//        if (context is ChannelWebViewClient.OnPaginateListener) {
+//            mNavigateListener = context
+//        }
         if (context is OnFragmentInteractionListener) {
             mListener = context
             mSession = mListener?.getSession()
@@ -127,9 +132,9 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         mPageMeta = gson.fromJson<PagerTab>(pageMetadata, PagerTab::class.java)
 
         // Set WebViewClient for current page
-        mWebViewClient = ChannelWebViewClient(activity, mPageMeta)
+//        mWebViewClient = ChannelWebViewClient(activity, mPageMeta)
         // Set navigate mListener to enable in-app navigation when clicked a url which should to another tab.
-        mWebViewClient.setOnInAppNavigateListener(mNavigateListener)
+//        mWebViewClient.setOnPaginateListener(mNavigateListener)
 
         info("onCreate finished")
     }
@@ -162,7 +167,8 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             // See Page/Layouts/Page/SuperDataViewController.swift#viewDidLoad() how iOS inject js to web view.
             addJavascriptInterface(ChannelWebViewInterface(), "Android")
             // Set WebViewClient to handle various links
-            webViewClient = mWebViewClient
+            webViewClient = MainWebViewClient(activity)
+
             webChromeClient = MyChromeClient()
         }
 
@@ -181,94 +187,101 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
         loadContent()
     }
 
+    override fun onPagination(page: String) {
+
+    }
+
     private fun loadContent() {
         // For partial HTML, we need to crawl its content and render it with a template file to get the template HMTL page.
         when (mPageMeta?.htmlType) {
             PagerTab.HTML_TYPE_FRAGMENT -> {
                 info("loadContent: html fragment")
-                loadPartialHtml()
+
+                mLoadJob = GlobalScope.launch (Dispatchers.Main) {
+
+                    val cachedFrag = Store.load(context, mPageMeta?.fileName)
+
+                    // If cached HTML fragment exists
+                    if (cachedFrag != null) {
+
+                        loadFromCache(cachedFrag)
+
+                        return@launch
+                    }
+
+                    loadFromServer()
+                }
             }
             // For complete HTML, load it directly into Web view.
             PagerTab.HTML_TYPE_COMPLETE -> {
                 info("loadContent: web page")
-                web_view.loadUrl("http://www.ftchinese.com/m/marketing/intelligence.html?webview=ftcapp&001")
+                web_view.loadUrl(mPageMeta?.contentUrl)
             }
         }
     }
 
-    private fun loadPartialHtml() {
-        mLoadJob = GlobalScope.launch (Dispatchers.Main) {
-            mTemplate = async {
-                Store.readChannelTemplate(resources)
-            }.await()
+    // Load data from cache and update cache in background.
+    private suspend fun loadFromCache(htmlFrag: String) {
 
-            val cachedChannelContent = async {
-                mPageMeta?.fragmentFromCache(context)
-            }.await()
+        if (mTemplate == null) {
+            mTemplate = Store.readChannelTemplate(resources)
+        }
 
-            // If cached HTML fragment exists
-            if (cachedChannelContent != null) {
-                loadData(cachedChannelContent)
-                info("Loaded data from cache")
+        loadData(htmlFrag)
 
-                // If user is using wifi, we can download the latest data and save it but do not refresh ui.
-                if (activity?.isActiveNetworkWifi() == true) {
-                    info("Network is wifi and cached exits. Fetch data but only update.")
-                    launch {
-                        try {
-                            mPageMeta?.crawlWeb(context)
-                        } catch (e: Exception) {
-                            e.printStackTrace()
+        if (activity?.isActiveNetworkWifi() != true) {
+            return
+        }
+
+        info("Network is wifi and cached exits. Fetch data to update cache only.")
+        val url = mPageMeta?.contentUrl ?: return
+
+        Fuel.get(url)
+                .awaitStringResult()
+                .fold(
+                        { data ->
+                            Store.save(context, mPageMeta?.fileName, data)
+                        },
+                        { error ->
+                            info("$error")
                         }
-                    }
-
-                }
-                return@launch
-            } else {
-                // Cache is not found. Fetch data anyway unless no network.
-                if (activity?.isNetworkConnected() == false) {
-                    toast(R.string.prompt_no_network)
-                    return@launch
-                }
-
-                info("Cache not found. Fetch data.")
-
-                isInProgress = true
-
-                crawlAndUpdate()
-            }
-        }
+                )
     }
 
-    /**
-     * Do not use isInProgress here since it is also used
-     * by refresh. You detinitely do not want to show
-     * progress bar when swiping
-     */
-    private suspend fun crawlAndUpdate() {
-        info("Starting crawling ${mPageMeta?.title}")
-
-
-        try {
-            val listContent = GlobalScope.async {
-                mPageMeta?.crawlWeb(context)
-            }.await()
-
-            isInProgress = false
-
-            if (listContent == null) {
-                info("No data crawled")
-                return
-            }
-
-            loadData(listContent)
-
-        } catch (e: Exception) {
-            e.printStackTrace()
-
+    private suspend fun loadFromServer() {
+        if (activity?.isNetworkConnected() != true) {
             toast(R.string.prompt_no_network)
+            return
         }
+
+        info("Cache not found. Fetch from remote.")
+
+        val url = mPageMeta?.contentUrl ?: return
+
+        if (!channel_fragment_swipe.isRefreshing) {
+            isInProgress = true
+        }
+
+        Fuel.get(url)
+                .awaitStringResult()
+                .fold(
+                        { data ->
+                            isInProgress = false
+
+                            GlobalScope.launch {
+                                Store.save(context, mPageMeta?.fileName, data)
+                            }
+
+                            loadData(data)
+                        },
+                        { error ->
+                            isInProgress = false
+                            info("$error")
+                            toast(R.string.prompt_load_failure)
+                        }
+                )
     }
+
 
     private fun loadData(htmlFragment: String) {
 
@@ -276,13 +289,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         web_view.loadDataWithBaseURL(WEBVIEV_BASE_URL, dataToLoad, "text/html", null, null)
     }
-
-//    private fun showProgress(show: Boolean) {
-//        mListener?.onProgress(show)
-//        if (!show) {
-//            channel_fragment_swipe.isRefreshing = false
-//        }
-//    }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -293,6 +299,8 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
     override fun onPause() {
         super.onPause()
         info("onPause finished")
+        mLoadJob?.cancel()
+        mRefreshJob?.cancel()
     }
 
     override fun onStop() {
@@ -327,17 +335,17 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                 info("onRefresh: crawlWeb html fragment")
                 mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
                     if (mTemplate == null) {
-                        mTemplate = async {
-                            Store.readChannelTemplate(resources)
-                        }.await()
+                        mTemplate = Store.readChannelTemplate(resources)
                     }
+
                     info("Refreshing: fetch remote data")
-                    crawlAndUpdate()
+                    loadFromServer()
                 }
             }
             PagerTab.HTML_TYPE_COMPLETE -> {
                 info("onRefresh: reload")
                 web_view.reload()
+                isInProgress = false
             }
         }
     }
@@ -365,7 +373,7 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          *                  {
          *                      "id": "001078965", // from attribute data-id.
          *                      "type": "story",  //
-         *                       "headline": "中国千禧一代将面临养老金短缺", // The content of .item-headline-link
+         *                      "headline": "中国千禧一代将面临养老金短缺", // The content of .item-headline-link
         *                       "eaudio": "https://s3-us-west-2.amazonaws.com/ftlabs-audio-rss-bucket.prod/7a6d6d6a-9f75-11e8-85da-eeb7a9ce36e4.mp3",
          *                      "timeStamp": "1534308162"
          *                  }
@@ -397,21 +405,17 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
          */
         @JavascriptInterface
         fun onPageLoaded(message: String) {
-            info("Articles list in a channel: $message")
-
             // See what the data is.
             if (BuildConfig.DEBUG) {
                 GlobalScope.launch {
                     val fileName = mPageMeta?.name ?: return@launch
+                    info("Save page loaded data: $fileName")
                     Store.save(context, "$fileName.json", message)
                 }
             }
 
             try {
                 val channelContent = gson.fromJson<ChannelContent>(message, ChannelContent::class.java)
-
-
-
 
                 mChannelItems = channelContent.sections[0].lists[0].items
 
@@ -425,53 +429,6 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
 
         }
 
-        /**
-         * Data retrieved from HTML element .specialanchor.
-         * JSON structure:
-         * [
-         *  {
-         *      "tag": "",  // from attribute 'tag'
-         *      "title": "", // from attribute 'title'
-         *      "adid": "", // from attribute 'adid'
-         *      "zone": "",  // from attribute 'zone'
-         *      "channel": "", // from attribute 'channel'
-         *      "hideAd": ""  // from optinal attribute 'hideAd'
-         *  }
-         * ]
-         */
-        fun onLoadedSponsors(message: String) {
-            try {
-                SponsorManager.sponsors = gson.fromJson(message, Array<Sponsor>::class.java)
-
-            } catch (e: Exception) {
-                info("$e")
-            }
-        }
-
-        /**
-         * {
-         *  forceNewAdTags: [],
-         *  forceOldAdTags: [],
-         *  grayReleaseTarget: '0'
-         * }
-         */
-        fun onNewAdSwitchData(message: String) {
-            try {
-                val adSwitch = gson.fromJson<AdSwitch>(message, AdSwitch::class.java)
-
-
-            } catch (e: Exception) {
-                info("$e")
-            }
-        }
-
-        fun onSharePageFromApp(message: String) {
-
-        }
-
-        fun onSendPageInfoToApp(message: String) {
-
-        }
         /**
          * Handle click event on an item of article list.
          * See Page/Layouts/Page/SuperDataViewController.swift#SuperDataViewController what kind of data structure is passed back from web view.
@@ -498,16 +455,15 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             /**
              * For `column`, start a new ChannelActivity
              */
-            when (mChannelMeta?.title) {
-                "专栏" -> {
-                    val channelPage = PagerTab(
+            when (channelItem.type) {
+                ChannelItem.TYPE_COLUMN -> {
+                    ChannelActivity.start(context, PagerTab(
                             title = channelItem.headline,
-                            name = "${channelItem.type}_${channelItem.id}",
+                            name = "${mPageMeta?.name}_${channelItem.id}",
                             contentUrl = buildUrl("/${channelItem.type}/${channelItem.id}"),
                             htmlType = PagerTab.HTML_TYPE_FRAGMENT
-                    )
+                    ))
 
-                    ChannelActivity.start(context, channelPage)
                     return
                 }
             }
@@ -515,6 +471,8 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
             /**
              * Copy channel meta to channel item.
              */
+            channelItem.channelTitle = mChannelMeta?.title ?: ""
+            channelItem.theme = mChannelMeta?.theme ?: ""
             channelItem.adId = mChannelMeta?.adid ?: ""
             channelItem.adZone = mChannelMeta?.adZone ?: ""
 
@@ -565,12 +523,9 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                             info("Start RadioActivity")
                             RadioActivity.start(context, channelItem)
                         }
-                        ChannelItem.SUB_TYPE_MBAGYM -> {
-                            WebContentActivity.start(activity, channelItem)
-                        }
                         else -> {
                             info("Start WebContentActivity")
-                            WebContentActivity.start(activity, Uri.parse(channelItem.canonicalUrl))
+                            WebContentActivity.start(activity, channelItem)
                         }
                     }
                 }
@@ -578,10 +533,59 @@ class ChannelFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLo
                 // Load theme directly
                 else -> {
                     info("Start web content activity")
-                    WebContentActivity.start(activity, Uri.parse(channelItem.canonicalUrl))
+                    WebContentActivity.start(activity, channelItem)
                 }
             }
         }
+
+        /**
+         * Data retrieved from HTML element .specialanchor.
+         * JSON structure:
+         * [
+         *  {
+         *      "tag": "",  // from attribute 'tag'
+         *      "title": "", // from attribute 'title'
+         *      "adid": "", // from attribute 'adid'
+         *      "zone": "",  // from attribute 'zone'
+         *      "channel": "", // from attribute 'channel'
+         *      "hideAd": ""  // from optinal attribute 'hideAd'
+         *  }
+         * ]
+         */
+        fun onLoadedSponsors(message: String) {
+            try {
+                SponsorManager.sponsors = gson.fromJson(message, Array<Sponsor>::class.java)
+
+            } catch (e: Exception) {
+                info("$e")
+            }
+        }
+
+        /**
+         * {
+         *  forceNewAdTags: [],
+         *  forceOldAdTags: [],
+         *  grayReleaseTarget: '0'
+         * }
+         */
+        fun onNewAdSwitchData(message: String) {
+            try {
+                val adSwitch = gson.fromJson<AdSwitch>(message, AdSwitch::class.java)
+
+
+            } catch (e: Exception) {
+                info("$e")
+            }
+        }
+
+        fun onSharePageFromApp(message: String) {
+
+        }
+
+        fun onSendPageInfoToApp(message: String) {
+
+        }
+
 
         private fun buildUrl(path: String): String {
             return Uri.Builder()
