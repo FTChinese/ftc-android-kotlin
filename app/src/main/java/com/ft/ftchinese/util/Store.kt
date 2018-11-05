@@ -5,6 +5,8 @@ import android.content.res.Resources
 import android.util.Log
 import com.ft.ftchinese.R
 import com.jakewharton.byteunits.BinaryByteUnit
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import java.io.File
 
 object Store {
@@ -13,7 +15,7 @@ object Store {
 
     fun save(context: Context?, filename: String?, text: String?) {
 
-        if (context == null || filename == null || text == null) {
+        if (context == null || filename.isNullOrBlank() || text.isNullOrBlank()) {
             return
         }
         val file = File(context.filesDir, filename)
@@ -31,13 +33,16 @@ object Store {
         }
     }
 
-    fun load(context: Context?, filename: String?): String? {
+    suspend fun load(context: Context?, filename: String?): String? {
         Log.i(TAG, "Reading file: $filename")
-        if (context == null || filename == null) {
+        if (context == null || filename.isNullOrBlank()) {
             return null
         }
         return try {
-            context.openFileInput(filename).bufferedReader().readText()
+            GlobalScope.async {
+                context.openFileInput(filename).bufferedReader().readText()
+            }.await()
+
         } catch (e: Exception) {
             Log.i(TAG, e.toString())
 
@@ -81,7 +86,7 @@ object Store {
     /**
      * Read files from the the `raw` directory of the package.
      */
-    fun readRawFile(resources: Resources, resId: Int): String? {
+    private fun readRawFile(resources: Resources, resId: Int): String? {
 
         return try {
             val input = resources.openRawResource(resId)
@@ -91,12 +96,16 @@ object Store {
         }
     }
 
-    fun readChannelTemplate(resources: Resources): String? {
-        return readRawFile(resources, R.raw.list)
+    suspend fun readChannelTemplate(resources: Resources): String? {
+        return GlobalScope.async {
+            readRawFile(resources, R.raw.list)
+        }.await()
     }
 
-    fun readStoryTemplate(resources: Resources): String? {
-        return Store.readRawFile(resources, R.raw.story)
+    suspend fun readStoryTemplate(resources: Resources): String? {
+        return GlobalScope.async {
+            readRawFile(resources, R.raw.story)
+        }.await()
     }
 }
 
