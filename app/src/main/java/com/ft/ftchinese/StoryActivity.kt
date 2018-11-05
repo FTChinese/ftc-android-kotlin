@@ -171,9 +171,7 @@ class StoryActivity : AbsContentActivity() {
             }
 
             try {
-                mStory = async {
-                    mChannelItem?.loadCachedStory(this@StoryActivity)
-                }.await()
+                mStory = mChannelItem?.loadCachedStory(this@StoryActivity)
 
                 // Use cached data to render mTemplate
                 if (mStory != null) {
