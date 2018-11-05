@@ -129,9 +129,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
             try {
                 info("Start updating mAccount userName")
 
-                val statusCode = async {
-                    userNameUpdate.send(uuid)
-                }.await()
+                val statusCode = userNameUpdate.send(uuid)
 
                 isInProgress = false
 

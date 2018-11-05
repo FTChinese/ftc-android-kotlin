@@ -68,9 +68,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
-                val account = async {
-                    mAccount?.refresh()
-                }.await()
+                val account = mAccount?.refresh()
 
                 // hide refreshing indicator
                 swipe_refresh.isRefreshing = false
@@ -193,9 +191,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
-                val statusCode = async {
-                    account.requestVerification()
-                }.await()
+                val statusCode = account.requestVerification()
 
                 // If request succeeds, disable request verification button.
                 isInProgress = false

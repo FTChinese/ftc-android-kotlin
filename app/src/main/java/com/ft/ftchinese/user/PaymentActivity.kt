@@ -210,9 +210,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
             try {
                 // Request server to create order
-                val wxOrder = async {
-                    user.wxPlaceOrder(member)
-                }.await()
+                val wxOrder = user.wxPlaceOrder(member)
 
                 isInProgress = false
 
@@ -300,9 +298,8 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
             // Get order from server
             val aliOrder = try {
-                val aliOrder = async {
-                    user.aliPlaceOrder(mMembership)
-                }.await()
+                val aliOrder = user.aliPlaceOrder(mMembership)
+
                 isInProgress = false
 
                 aliOrder

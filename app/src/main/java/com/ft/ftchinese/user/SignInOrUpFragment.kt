@@ -21,6 +21,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import com.ft.ftchinese.R
+import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.Login
 import com.ft.ftchinese.models.SignUp
@@ -264,21 +265,17 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
 
-                val user = when (usedFor) {
+                var user: Account? = null
+
+                when (usedFor) {
                     USED_FOR_SIGN_IN -> {
                         info("Start log in")
-                        async {
-                            Login(email, password).send()
-                        }.await()
+                        user = Login(email, password).send()
                     }
                     USED_FOR_SIGN_UP -> {
                         info("Start signing up")
-                        async {
-                            SignUp(email, password).send()
-                        }.await()
-//                        login.createAsync().await()
+                        user = SignUp(email, password).send()
                     }
-                    else -> null
                 }
 
                 isInProgress = false

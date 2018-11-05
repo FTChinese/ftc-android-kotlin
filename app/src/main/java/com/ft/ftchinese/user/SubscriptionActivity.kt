@@ -78,7 +78,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
             return
         }
 
-        toast(R.string.progress_refresh_account)
+
 
         val user = mSession?.loadUser()
 
@@ -94,11 +94,11 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
             isInProgress = true
         }
 
+        toast(R.string.progress_refresh_account)
+
         mJob = GlobalScope.launch(Dispatchers.Main) {
             try {
-                val remoteAccount = async {
-                    user.refresh()
-                }.await()
+                val remoteAccount = user.refresh()
 
                 info("Retrieved user account data.")
                 swipe_refresh.isRefreshing = false

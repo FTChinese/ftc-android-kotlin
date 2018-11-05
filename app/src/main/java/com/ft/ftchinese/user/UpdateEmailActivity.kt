@@ -139,9 +139,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
             try {
                 info("Start updating email")
 
-                val statusCode = async {
-                    emailUpdate.send(uuid)
-                }.await()
+                val statusCode = emailUpdate.send(uuid)
 
                 isInProgress = false
 

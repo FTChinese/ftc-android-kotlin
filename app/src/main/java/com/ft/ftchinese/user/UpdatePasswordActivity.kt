@@ -147,9 +147,7 @@ class PasswordFragment : Fragment(), AnkoLogger {
             try {
                 info("Start updating password")
 
-                val statusCode = async {
-                    passwordUpdate.send(uuid)
-                }.await()
+                val statusCode = passwordUpdate.send(uuid)
 
                 isInProgress = false
 

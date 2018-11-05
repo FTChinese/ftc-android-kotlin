@@ -116,9 +116,7 @@ internal class ForgotPasswordFragment : Fragment(), AnkoLogger {
             val passwordReset = PasswordReset(emailStr)
 
             try {
-                val statusCode = async {
-                    passwordReset.send()
-                }.await()
+                val statusCode = passwordReset.send()
 
                 if (statusCode == 204) {
                     toast(R.string.success_letter_sent)
