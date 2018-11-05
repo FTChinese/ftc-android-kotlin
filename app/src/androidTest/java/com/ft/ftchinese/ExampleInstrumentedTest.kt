@@ -3,6 +3,7 @@ package com.ft.ftchinese
 import android.net.Uri
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
+import android.util.Log
 
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,5 +37,11 @@ class ExampleInstrumentedTest {
         println(uri.query)
         println(uri.encodedQuery)
 
+    }
+
+    @Test fun parseUri() {
+        val uri = Uri.parse("http://www.ftchinese.com/channel/tradewar.html")
+        Log.i("TestURI", uri.pathSegments.toString())
+        Log.i("TestURI", uri.path)
     }
 }
