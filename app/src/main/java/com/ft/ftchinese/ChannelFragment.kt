@@ -169,7 +169,7 @@ class ChannelFragment : Fragment(),
             // Set WebViewClient to handle various links
             webViewClient = MainWebViewClient(activity)
 
-            webChromeClient = MyChromeClient()
+            webChromeClient = ChromeClient()
         }
 
         // Setup back key behavior.
@@ -597,14 +597,6 @@ class ChannelFragment : Fragment(),
                 .build()
                 .toString()
         }
-    }
-}
-
-class MyChromeClient : WebChromeClient(), AnkoLogger {
-
-    override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-        info("${consoleMessage?.lineNumber()} : ${consoleMessage?.message()}")
-        return true
     }
 }
 
