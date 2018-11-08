@@ -289,7 +289,7 @@ object Navigation {
                 "adZone": "english/speedread"
                 }
              */
-            PagerTab("金融英语速读", name = "english_finance", contentUrl = "https://api003.ftmailbox.com/channel/speedread.html?webview=ftcapp&bodyonly=yes", htmlType = HTML_TYPE_FRAGMENT),
+            PagerTab("金融英语速读", name = "english_speedreading", contentUrl = "https://api003.ftmailbox.com/channel/speedread.html?webview=ftcapp&bodyonly=yes", htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
                 "title": "双语阅读",
