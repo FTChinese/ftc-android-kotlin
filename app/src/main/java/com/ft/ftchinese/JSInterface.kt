@@ -8,7 +8,6 @@ import com.google.gson.JsonSyntaxException
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-const val JS_INTERFACE_NAME = "Anroid"
 
 class JSInterface(private val pageMeta: PagerTab?) : AnkoLogger {
 
