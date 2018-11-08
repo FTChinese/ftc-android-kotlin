@@ -55,12 +55,30 @@ DO NOT USE strings for numeric values! Use number as number. Why convert numbers
 
 DO NOT USE strings for array. If you mean an array, use an array. DO NOT USE a dot/comma...-separated string as array.
 
-JSON keys should indicated the meaning of their value.
+JSON keys should indicate the meaning of their value.
 
 
-## Keystore File
+## Files
 
-In the root of this project, add a file `keystore.properties` and add this line in it: `wechat.appId="your wechat app id"`.
+Add those two files in the root of the project:
+
+`config.properties`
+
+```
+wechat.appId="......."
+access_token="......."
+```
+
+`keystore.properties`
+
+```
+storePassword="......"
+keyPassword="......"
+keyAlias="......."
+storeFile="......."
+```
+
+Add `google-service.json` to the `app` directory.
 
 ## Problems
 
