@@ -10,7 +10,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
-import awaitStringResult
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
@@ -18,9 +17,10 @@ import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isActiveNetworkWifi
 import com.ft.ftchinese.util.isNetworkConnected
-import com.github.kittinunf.fuel.Fuel
 import com.google.gson.JsonSyntaxException
-import kotlinx.android.synthetic.main.fragment_channel.*
+import com.koushikdutta.async.future.Future
+import com.koushikdutta.ion.Ion
+import kotlinx.android.synthetic.main.fragment_view_pager.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
@@ -33,9 +33,8 @@ import org.jetbrains.anko.support.v4.toast
  * As part of TabLayout in MainActivity;
  * As part of ChannelActivity. For example, if you panned to Editor's Choice tab, the mFollows lead to another layer of a list page, not content. You need to use `ChannelFragment` again to render a list page.
  */
-class ChannelFragment : Fragment(),
+class ViewPagerFragment : Fragment(),
         SwipeRefreshLayout.OnRefreshListener,
-        MainWebViewClient.OnPaginateListener,
         AnkoLogger {
 
     private var mListener: OnFragmentInteractionListener? = null
@@ -57,6 +56,8 @@ class ChannelFragment : Fragment(),
     private var mChannelMeta: ChannelMeta? = null
     private var mLoadJob: Job? = null
     private var mRefreshJob: Job? = null
+    private var mRequest: Future<String>? = null
+
     private var mSession: SessionManager? = null
 
     // Hold string in raw/list.html
@@ -68,7 +69,7 @@ class ChannelFragment : Fragment(),
                 progress_bar.visibility = View.VISIBLE
             } else {
                 progress_bar.visibility = View.GONE
-                channel_fragment_swipe.isRefreshing = false
+                swipe_refresh.isRefreshing = false
             }
         }
     /**
@@ -86,8 +87,6 @@ class ChannelFragment : Fragment(),
     }
 
     companion object {
-
-        private const val WEBVIEV_BASE_URL = "http://www.ftchinese.com"
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -98,7 +97,7 @@ class ChannelFragment : Fragment(),
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        fun newInstance(page: PagerTab) = ChannelFragment().apply {
+        fun newInstance(page: PagerTab) = ViewPagerFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_PAGE_META, gson.toJson(page))
             }
@@ -145,14 +144,14 @@ class ChannelFragment : Fragment(),
         super.onCreateView(inflater, container, savedInstanceState)
 
         info("onCreateView finished")
-        return inflater.inflate(R.layout.fragment_channel, container, false)
+        return inflater.inflate(R.layout.fragment_view_pager, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         // Setup swipe refresh listener
-        channel_fragment_swipe.setOnRefreshListener(this)
+        swipe_refresh.setOnRefreshListener(this)
 
         // Configure web view.
         web_view.settings.apply {
@@ -187,12 +186,8 @@ class ChannelFragment : Fragment(),
         loadContent()
     }
 
-    override fun onPagination(page: String) {
-
-    }
-
     private fun loadContent() {
-        // For partial HTML, we need to crawl its content and render it with a template file to get the template HMTL page.
+        // For partial HTML, we need to crawl its content and render it with a template file to get the template HTML page.
         when (mPageMeta?.htmlType) {
             PagerTab.HTML_TYPE_FRAGMENT -> {
                 info("loadContent: html fragment")
@@ -227,25 +222,27 @@ class ChannelFragment : Fragment(),
             mTemplate = Store.readChannelTemplate(resources)
         }
 
-        loadData(htmlFrag)
+        renderAndLoad(htmlFrag)
 
         if (activity?.isActiveNetworkWifi() != true) {
             return
         }
 
         info("Network is wifi and cached exits. Fetch data to update cache only.")
+
         val url = mPageMeta?.contentUrl ?: return
 
-        Fuel.get(url)
-                .awaitStringResult()
-                .fold(
-                        { data ->
-                            Store.save(context, mPageMeta?.fileName, data)
-                        },
-                        { error ->
-                            info("$error")
-                        }
-                )
+        mLoadJob = GlobalScope.launch {
+            try {
+                val frag = Ion.with(context)
+                        .load(url)
+                        .asString()
+                        .get()
+                Store.save(context, mPageMeta?.fileName, frag)
+            } catch (e: Exception) {
+                info("Error fetch data from $url. Reason: $e")
+            }
+        }
     }
 
     private suspend fun loadFromServer() {
@@ -254,36 +251,45 @@ class ChannelFragment : Fragment(),
             return
         }
 
-        info("Cache not found. Fetch from remote.")
+        info("Cache not found. Fetch from remote ${mPageMeta?.contentUrl}")
 
         val url = mPageMeta?.contentUrl ?: return
 
-        if (!channel_fragment_swipe.isRefreshing) {
+        if (mTemplate == null) {
+            mTemplate = Store.readChannelTemplate(resources)
+        }
+
+        if (!swipe_refresh.isRefreshing) {
             isInProgress = true
         }
 
-        Fuel.get(url)
-                .awaitStringResult()
-                .fold(
-                        { data ->
-                            isInProgress = false
+        mRequest = Ion.with(context)
+                .load(url)
+                .asString()
+                .setCallback { e, result ->
+                    isInProgress = false
 
-                            GlobalScope.launch {
-                                Store.save(context, mPageMeta?.fileName, data)
-                            }
+                    if (e != null) {
+                        info("Failed to fetch $url. Reason: $e")
+                        return@setCallback
+                    }
 
-                            loadData(data)
-                        },
-                        { error ->
-                            isInProgress = false
-                            info("$error")
-                            toast(R.string.prompt_load_failure)
-                        }
-                )
+                    renderAndLoad(result)
+
+                    cacheData(result)
+                }
     }
 
 
-    private fun loadData(htmlFragment: String) {
+    private fun cacheData(data: String) {
+        GlobalScope.launch {
+            info("Caching data to file: ${mPageMeta?.fileName}")
+
+            Store.save(context, mPageMeta?.fileName, data)
+        }
+    }
+
+    private fun renderAndLoad(htmlFragment: String) {
 
         val dataToLoad = mPageMeta?.render(mTemplate, htmlFragment)
 
@@ -299,6 +305,8 @@ class ChannelFragment : Fragment(),
     override fun onPause() {
         super.onPause()
         info("onPause finished")
+
+        mRequest?.cancel()
         mLoadJob?.cancel()
         mRefreshJob?.cancel()
     }
@@ -306,6 +314,8 @@ class ChannelFragment : Fragment(),
     override fun onStop() {
         super.onStop()
         info("onStop finished")
+
+        mRequest?.cancel()
         mLoadJob?.cancel()
         mRefreshJob?.cancel()
     }
@@ -313,8 +323,13 @@ class ChannelFragment : Fragment(),
     override fun onDestroy() {
         super.onDestroy()
 
+        mRequest?.cancel()
         mLoadJob?.cancel()
         mRefreshJob?.cancel()
+
+        mRequest = null
+        mLoadJob = null
+        mRefreshJob = null
     }
 
     override fun onRefresh() {
