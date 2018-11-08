@@ -113,7 +113,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
             webViewClient = MainWebViewClient(this@AbsContentActivity)
 
             // Set the chrome handler
-            webChromeClient = MyChromeClient()
+            webChromeClient = ChromeClient()
 
             // Handle Back button
             setOnKeyListener { _, keyCode, _ ->
