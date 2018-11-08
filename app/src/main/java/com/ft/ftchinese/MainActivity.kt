@@ -37,7 +37,7 @@ import java.lang.Exception
 class MainActivity : AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
         TabLayout.OnTabSelectedListener,
-        ChannelFragment.OnFragmentInteractionListener,
+        ViewPagerFragment.OnFragmentInteractionListener,
 //        ChannelWebViewClient.OnPaginateListener,
         AnkoLogger {
 
@@ -617,7 +617,7 @@ class MainActivity : AppCompatActivity(),
 
         override fun getItem(position: Int): Fragment {
             info("TabPagerAdapter getItem $position. Data passed to ChannelFragment: ${mPages[position]}")
-            return ChannelFragment.newInstance(mPages[position])
+            return ViewPagerFragment.newInstance(mPages[position])
         }
 
         override fun getCount(): Int {
