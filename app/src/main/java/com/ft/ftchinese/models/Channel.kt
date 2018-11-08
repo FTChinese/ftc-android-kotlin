@@ -84,7 +84,7 @@ data class ChannelItem(
         // For column type, you should start a ChannelActivity instead of  StoryActivity.
         val type: String, // story | premium | video | interactive | column |
         val subType: String? = null, // speedreading | radio
-        val headline: String,
+        val headline: String, // It seems it is not used.
         val eaudio: String? = null,
         val shortlead: String? = null, // this is a url of mp3
         val timeStamp: String? = null // "1536249600"
@@ -125,7 +125,7 @@ data class ChannelItem(
         }
 
     val isMembershipRequired: Boolean
-        get() = isSevenDaysOld || type == TYPE_PREMIUM || subType == SUB_TYPE_RADIO
+        get() = isSevenDaysOld || type == TYPE_PREMIUM || type == TYPE_INTERACTIVE
 
     private val filename: String
         get() = "${type}_$id.json"
@@ -408,6 +408,7 @@ data class ChannelItem(
         const val TYPE_VIDEO = "video"
         const val TYPE_INTERACTIVE = "interactive"
         const val TYPE_COLUMN = "column"
+        const val TYPE_PHOTONEWS = "photonews"
         const val SUB_TYPE_RADIO = "radio"
         const val SUB_TYPE_USER_COMMENT = ""
         const val SUB_TYPE_MBAGYM = "mbagym"
@@ -421,16 +422,3 @@ data class ChannelItem(
     }
 }
 
-val pathToTitle = mapOf(
-        "businesscase.html" to "中国商业案例精选",
-        "editorchoice-issue.html" to "编辑精选",
-        "chinabusinesswatch.html" to "宝珀·中国商业观察",
-        "viewtop.html" to "高端视点",
-        "Emotech2017.html" to "2018·预见人工智能",
-        "antfinancial.html" to "“新四大发明”背后的中国浪潮",
-        "teawithft.html" to "与FT共进下午茶",
-        "creditease.html" to "未来生活 未来金融",
-        "markets.html" to "金融市场",
-        "hxxf2016.html" to "透视中国PPP模式",
-        "money.html" to "理财"
-)
