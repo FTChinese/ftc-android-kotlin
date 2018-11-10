@@ -11,7 +11,7 @@ data class PagerTab (
         // If empty, do not cache it, nor should you try to
         // find cache.
         val name: String,  // Cache filename used by this tab
-        val contentUrl: String,
+        val contentUrl: String, // This is used to fetch html fragment containing a list of articles.
         val htmlType: Int // Flag used to tell whether the url should be loaded directly
 ) : AnkoLogger {
 
