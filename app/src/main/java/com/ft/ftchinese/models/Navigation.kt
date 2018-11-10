@@ -133,7 +133,7 @@ object Navigation {
              * You have to compare type == column. If true,
              * start a ChannelActivity.
              *
-             * After you opened a column, its another list of articles.
+             * After you opened a column, it's another list of articles.
              * The data looks like:
              * "meta": {
              *   "title": "《徐瑾经济人》",
