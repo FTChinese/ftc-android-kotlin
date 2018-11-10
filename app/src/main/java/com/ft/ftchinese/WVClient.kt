@@ -7,7 +7,9 @@ import android.support.customtabs.CustomTabsIntent
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.ft.ftchinese.models.*
+import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SignUpActivity
+import com.ft.ftchinese.user.SubscriptionActivity
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -46,37 +48,29 @@ val pathToTitle = mapOf(
         "money.html" to "理财"
 )
 
-val paginationMap = mapOf(
-        "china.html" to Navigation.newsPages[1],
-        "world.html" to Navigation.newsPages[4],
-        "opinion.html" to Navigation.newsPages[5],
-        "markets.html" to Navigation.newsPages[7],
-        "business.html" to Navigation.newsPages[8],
-        "management.html" to Navigation.newsPages[11],
-        "lifestyle.html" to Navigation.newsPages[12],
-        "radio.html" to Navigation.englishPages[0],
-        "speedread.html" to Navigation.englishPages[1],
-        "ce.html" to Navigation.englishPages[2]
-)
-
 /**
- * MainWebViewClient is use mostly to handle url clicks loaded into
+ * WVClient is use mostly to handle url clicks loaded into
  * ViewPagerFragment.
  */
-open class MainWebViewClient(
-        val activity: Activity?
+class WVClient(
+        private val activity: Activity?
 ) : WebViewClient(), AnkoLogger {
+
+    var mSession: SessionManager? = null
 
     // Pass click events to host.
     private var mListener: OnClickListener? = null
 
     interface OnClickListener {
-        fun onClickUrl()
+
+        // Let host to handle clicks on pagination links.
+        fun onPagination(pageKey: String, pageNumber: String)
     }
 
     fun setOnClickListener(listener: OnClickListener?) {
         mListener = listener
     }
+
     // Handle clicks on a link in a web page loaded into url
     // Returns true if you handled url links yourself;
     // returns false Android will try to handle it.
@@ -90,11 +84,6 @@ open class MainWebViewClient(
 
         val uri = Uri.parse(url)
 
-        // Tell host that a url is clicked.
-        // Host should handle the event.
-        mListener?.onClickUrl()
-
-
         // At the comment section of story page there is a login form.
         // Handle login in web view.
         // the login button calls js `bower_components/ftcnext/app/scripts/user-login-native.js`
@@ -107,9 +96,8 @@ open class MainWebViewClient(
         // The data structure is not compatible with our restful API. After we get this message in Java, it might be better send a request to API with `userId` so that native app always use API data.
         return when (uri.scheme) {
             // 通过邮件反馈 link: mailto:ftchinese.feedback@gmail.com?subject=Feedback
-            "mailto" -> {
-                return feedbackEmail()
-            }
+            "mailto" -> feedbackEmail()
+
             // The `免费注册` button is wrapped in a link with url set to `ftcregister://www.ftchinese.com/`
             "ftcregister" -> {
                 SignUpActivity.start(activity)
@@ -132,12 +120,16 @@ open class MainWebViewClient(
              * For external links (mostly ads), open in external browser.
              */
             "http", "https" -> {
-                if (Endpoints.hosts.contains(uri.host)) {
+                if (HostName.hosts.contains(uri.host)) {
                     return handleInSiteLink(uri)
                 }
 
+                // Handle www.ftacademy.cn here.
+
                 return handleExternalLink(uri)
             }
+            // For unknown links, simply returns true to prevent
+            // crash caused by loading unknown content.
             else -> true
         }
     }
@@ -150,22 +142,50 @@ open class MainWebViewClient(
         info("Handle in-site link $uri")
         /**
          * Handle pagination links.
-         * This will start a new ChannelActivity.
-         */
+         * What action to preform depends on whether you
+         *
+         * Whichever pagination link user clicked, just start a ChannelActivity.
+         *
+         * Handle the pagination link of each channel
+         * There's a problem with each channel's pagination: they used relative urls.
+         * When loaded in WebView with base url `http://www.ftchinese.com`,
+         * the url will become something `http://www.ftchinese.com/china.html?page=2`,
+         * which should actually be `http://www.ftchiese.com/channel/china.html?page=2`
+         *
+         * However,
+         * `columns` uses /column/007000049?page=2
+         * English radio uses http://www.ftchinese.com/channel/radio.html?p=2
+         * Speed read uses http://www.ftchinese.com/channel/speedread.html?p=2
+         * Bilingual reading uses http://www.ftchinese.com/channel/ce.html?p=2
+         *
+         * For all paginiation links in a ViewPerFragment, start a ChannelActivity
+        */
         if (uri.getQueryParameter("page") != null || uri.getQueryParameter("p") != null) {
             info("Open channel pagination for uri: $uri")
-            return openChannelPagination(uri)
+
+            val pageValue = uri.getQueryParameter("page")
+                ?: uri.getQueryParameter("p")
+                ?: return true
+
+            // Since the pagination query parameter's key is not uniform across whole site, we have to explicitly tells host.
+            val pageKey = if (uri.getQueryParameter("page") != null) "page"
+            else "p"
+
+            // Let host activity/fragment to handle pagination link
+            mListener?.onPagination(pageKey, pageValue)
+
+            return true
         }
 
         /**
          * URL needs to be handled on home page
          * 每日英语 /channel/english.html?webview=ftcapp
          * FT商学院 /channel/mba.html?webview=ftcapp
-         * FT商学院 articles /photonews/1082
+         * FT商学院 /photonews/1082 articles under it
          * FT研究院 /m/marketing/intelligence.html?webview=ftcapp
-         * FT研究院 articles /interactive/12781
+         * FT研究院 /interactive/12781 article under it.
          * 热门文章 /channel/weekly.html
-         * 热门文章 articles /story/xxxx
+         * 热门文章 /story/xxxx articles under it.
          *
          * It plays similar roles like JS interface `onSelectItem`
          * but might differs.
@@ -178,6 +198,8 @@ open class MainWebViewClient(
             /**
              * Handle various article-like urls first.
              * If the path looks like `/story/001078593`
+             * We could only get an article's type and id from
+             * url. No more information could be acquired.
              */
             ChannelItem.TYPE_STORY,
             ChannelItem.TYPE_PREMIUM,
@@ -191,17 +213,28 @@ open class MainWebViewClient(
                 )
 
                 // If this article is not restricted.
+                // The logic here is similar to JSInterface#selectitem.
+                // It seems there's no way to merge them together
+                // since js event to activities, and url links to activities are all many-to-many relationship.
                 if (!channelItem.isMembershipRequired) {
                     return startReading(channelItem)
                 }
 
-                // If this article is restricted, check user privilege.
+                val account = mSession?.loadUser()
 
-                // If user is not logged in, to to login.
+                if (account == null) {
+                    activity?.toast(R.string.prompt_restricted_paid_user)
+                    SignInActivity.start(activity)
 
-                // If user already logged in, but not a member,
-                // got to subscription.
-                // Else, just startReading.
+                    return true
+                }
+
+                if (!account.canAccessPaidContent) {
+                    activity?.toast(R.string.prompt_restricted_paid_user)
+                    SubscriptionActivity.start(activity)
+
+                    return true
+                }
 
                 return startReading(channelItem)
             }
@@ -223,16 +256,6 @@ open class MainWebViewClient(
              */
             "m" -> openMLink(uri)
 
-            /**
-             * Loads an article that do not have JSON api and load it directly into the WebView.
-             * WebContentActivity accepts a String url.
-             * Example:
-             * `FT研究院` is a web page loaded directly into WebView. You could only click a title's link to read this an article.
-             * The link is actually pointing to somewhere like `http://www.ftchinese.com/interactive/12376`.
-             * But you want it to load a stripped HTML web page on `https://api003.ftmailbox.com/interactive/12376?bodyonly=no&webview=ftcapp&i=3&0=01&exclusive`.
-             * To to this, you have to transform the URL using `buildListUrl`.
-             */
-
             else -> {
                 info("Open a web page directly. Original url is: $uri")
                 WebContentActivity.start(activity, uri)
@@ -248,8 +271,14 @@ open class MainWebViewClient(
      */
     private fun startReading(channelItem: ChannelItem): Boolean {
 
-        StoryActivity.start(activity, channelItem)
-
+        when (channelItem.type) {
+            ChannelItem.TYPE_STORY, ChannelItem.TYPE_PREMIUM -> {
+                StoryActivity.start(activity, channelItem)
+            }
+            else -> {
+                WebContentActivity.start(activity, channelItem)
+            }
+        }
         return true
     }
 
@@ -287,73 +316,8 @@ open class MainWebViewClient(
         return true
     }
 
-
-    /**
-     * Whichever pagination link user clicked, just start a ChannelActivity.
-     *
-     * Handle the pagination link of each channel
-     * There's a problem with each channel's pagination: they used relative urls.
-     * When loaded in WebView with base url `http://www.ftchinese.com`,
-     * the url will become something `http://www.ftchinese.com/china.html?page=2`,
-     * which should actually be `http://www.ftchiese.com/channel/china.html?page=2`
-     *
-     * However,
-     * `columns` uses /column/007000049?page=2
-     * English radio uses http://www.ftchinese.com/channel/radio.html?p=2
-     * Speed read uses http://www.ftchinese.com/channel/speedread.html?p=2
-     * Bilingual reading uses http://www.ftchinese.com/channel/ce.html?p=2
-     *
-     * For all paginiation links in a ViewPerFragment, start a ChannelActivity
-     */
-    open fun openChannelPagination(uri: Uri): Boolean {
-
-        var pageKey: String? = null
-        var pageNumber: String? = null
-
-        pageNumber = uri.getQueryParameter("page")
-        if (pageNumber != null) {
-            pageKey = "page"
-        } else {
-            pageNumber = uri.getQueryParameter("p")
-
-            if (pageNumber != null) {
-                pageKey = "p"
-            }
-        }
-
-        if (pageKey == null || pageNumber == null) { return true }
-
-        val key = uri.lastPathSegment ?: return true
-
-        val pageMeta = paginationMap[key] ?: return true
-        val url = Uri.parse(pageMeta.contentUrl)
-                .buildUpon()
-                .appendQueryParameter(pageKey, pageNumber)
-                .build()
-                .toString()
-
-        val listPage = PagerTab(
-                title = pageMeta.title,
-                name = "${pageMeta.name}_$pageNumber",
-                contentUrl = url,
-                htmlType = pageMeta.htmlType
-        )
-
-        info("Open channel page ${listPage.contentUrl}")
-
-        ChannelActivity.start(activity, listPage)
-
-        return true
-    }
-
-
-
     /**
      * This kind of page is a list of articles
-     *
-     *
-     *
-     *
      */
     open fun openMLink(uri: Uri): Boolean {
         info("Open a m link: $uri")

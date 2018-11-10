@@ -52,7 +52,7 @@ class RadioActivity : AbsContentActivity() {
 
         web_view.apply {
 
-            webViewClient = MainWebViewClient(this@RadioActivity)
+            webViewClient = WVClient(this@RadioActivity)
 
             setOnKeyListener { v, keyCode, event ->
                 if (keyCode == KeyEvent.KEYCODE_BACK && web_view.canGoBack()) {

@@ -110,7 +110,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
             addJavascriptInterface(ContentWebViewInterface(), "Android")
 
             // Set a WebViewClient to handle various links in the WebView
-            webViewClient = MainWebViewClient(this@AbsContentActivity)
+            webViewClient = WVClient(this@AbsContentActivity)
 
             // Set the chrome handler
             webChromeClient = ChromeClient()

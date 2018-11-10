@@ -5,12 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.customtabs.CustomTabsIntent
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.View
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
@@ -35,16 +31,13 @@ import org.jetbrains.anko.toast
  * in a web page.
  */
 class ChannelActivity : AppCompatActivity(),
+        WVClient.OnClickListener,
+        JSInterface.OnJSInteractionListener,
         SwipeRefreshLayout.OnRefreshListener,
-        JSInterface.OnEventListener,
         AnkoLogger {
 
     // Passed from caller
     private var mPageMeta: PagerTab? = null
-    // Passed from JS
-    private var mChannelItems: Array<ChannelItem>? = null
-    // Passed from JS
-    private var mChannelMeta: ChannelMeta? = null
 
     private var mLoadJob: Job? = null
     private var mRefreshJob: Job? = null
@@ -63,26 +56,6 @@ class ChannelActivity : AppCompatActivity(),
                 swipe_refresh.isRefreshing = false
             }
         }
-
-    override fun onPageLoaded(channelDate: ChannelContent) {
-        mChannelItems = channelDate.sections[0].lists[0].items
-        mChannelMeta = channelDate.meta
-    }
-
-    override fun onSelectItem(index: Int) {
-        val channelMeta = mChannelMeta ?: return
-        val channelItem = mChannelItems?.getOrNull(index) ?: return
-
-        channelItem.channelTitle = channelMeta.title
-        channelItem.theme = channelMeta.theme
-        channelItem.adId = channelMeta.adid
-        channelItem.adZone = channelMeta.adZone
-
-        if (!channelItem.isMembershipRequired) {
-
-            return
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,16 +81,22 @@ class ChannelActivity : AppCompatActivity(),
              */
             toolbar.title = pageMeta.title
 
+            val jsInterface = JSInterface(this)
+            jsInterface.mSession = mSession
+
+            val wvClient = WVClient(this)
+            wvClient.mSession = mSession
+            wvClient.setOnClickListener(this)
+
             web_view.apply {
                 addJavascriptInterface(
                         // Set JS event listener to current class.
-                        JSInterface(pageMeta).apply {
-                            setOnEventListener(this@ChannelActivity)
-                        },
+                        jsInterface,
                         JS_INTERFACE_NAME
                 )
 
-                webViewClient = ChannelWVClient()
+                webViewClient = wvClient
+
                 webChromeClient = ChromeClient()
             }
 
@@ -284,90 +263,77 @@ class ChannelActivity : AppCompatActivity(),
         }
     }
 
-    /**
-     * Handles URL click event for contents loaded into ChannelActivity.
-     * This the main difference between this one and
-     * MainWebViewClient lies in how it handles pagniation:
-     * When user clicked a pagination link, MainWebViewClient
-     * starts a new ChannelActivity; but this one simply load new
-     * HTML string into web view.
-     */
-    inner class ChannelWVClient : WebViewClient() {
-        override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-            val uri = request?.url ?: return true
+    override fun onPagination(pageKey: String, pageNumber: String) {
+        val pageMeta = mPageMeta ?: return
 
-            return when (uri.scheme) {
-                "http", "https" -> {
-                    if (Endpoints.hosts.contains(uri.host)) {
-                        return handleInSiteLink(uri)
-                    }
+        // If ChannelActivity is started from ViewPagerFragment,
+        // pageMeta.name looks like news_china_1.
+        // What if it is not?
+        // If ChannelActivity is started from ViewPagerFragment's pagination link,
+        // the current mPageMeta.contentUrl must contain query
+        // parameter like `page=2` or `p=2`. The page number
+        // must not be 1 since the first page is in
+        // ViewPagerFragment and is not clickable.
+        // If the ChannelActivity is started from other links
+        // or JSInterface, it must not contain `page=x` or `p=x`.
+        val nameArr = pageMeta.name.split("_").toMutableList()
+        if (nameArr.size > 0) {
+            nameArr[nameArr.size - 1] = pageNumber
+        }
 
-                    return handleExternalLink(uri)
+        val newName = nameArr.joinToString("_")
+
+        val currentUri = Uri.parse(pageMeta.contentUrl)
+
+        if (currentUri.getQueryParameter(pageKey) != null) {
+
+            val newUri = currentUri.buildUpon().clearQuery()
+
+            // Replace the value of `page` or `p` with pageNumber
+            for (key in currentUri.queryParameterNames) {
+                if (key == pageKey) {
+                    newUri.appendQueryParameter(key, pageNumber)
                 }
 
-                else -> true
+                val value = currentUri.getQueryParameter(key)
+                newUri.appendQueryParameter(key, value)
             }
-        }
-
-
-
-        private fun handleInSiteLink(uri: Uri): Boolean {
-
-            if (uri.getQueryParameter("page") != null || uri.getQueryParameter("p") != null) {
-                info("Reuse channel activity by reloading a new page")
-                return  openPanigation(uri)
-            }
-            return true
-        }
-
-        // Handles clicks on a pagination link.
-        // This action simply changes the mPageMeta and force webview to load new html content by crawling a new web page.
-        // No new activity or fragment is created.
-        private fun openPanigation(uri: Uri): Boolean {
-            val currentPage = mPageMeta ?: return true
-
-            val pageNumber = uri.getQueryParameter("page")
-                    ?: uri.getQueryParameter("p")
-                    ?: return true
-
-            val nameArr = currentPage.name.split("_").toMutableList()
-            if (nameArr.size > 0) {
-                nameArr[nameArr.size - 1] = pageNumber
-            }
-
-            val newName = nameArr.joinToString("_")
-
-            val currentUri = Uri.parse(currentPage.contentUrl)
-            val url = uri.buildUpon()
-                    .scheme(currentUri.scheme)
-                    .authority(currentUri.authority)
-                    .path(currentUri.path)
-                    .appendQueryParameter("bodyonly", "yes")
-                    .appendQueryParameter("webview", "ftcapp")
-                    .build()
-                    .toString()
-
 
             mPageMeta = PagerTab(
-                    title = currentPage.title,
+                    title = pageMeta.title,
                     name = newName,
-                    contentUrl = url,
-                    htmlType = currentPage.htmlType
+                    contentUrl = newUri.build().toString(),
+                    htmlType = pageMeta.htmlType
             )
 
             info("Loading pagination url: ${mPageMeta?.contentUrl}")
+
             loadContent()
 
-            return true
+        } else {
+            val url = currentUri.buildUpon()
+                    .appendQueryParameter(pageKey, pageNumber)
+                    .build()
+                    .toString()
+
+            val listPage = PagerTab(
+                    title = pageMeta.title,
+                    name = "${pageMeta.name}_$pageNumber",
+                    contentUrl = url,
+                    htmlType = pageMeta.htmlType
+            )
+
+            ChannelActivity.start(this, listPage)
         }
+    }
 
-        // Open an external link in browser
-        private fun handleExternalLink(uri: Uri): Boolean {
-            // This opens an external browser
-            val customTabsInt = CustomTabsIntent.Builder().build()
-            customTabsInt.launchUrl(this@ChannelActivity, uri)
+    override fun onPageLoaded(message: String) {
+        if (BuildConfig.DEBUG) {
+            val fileName = mPageMeta?.name ?: return
 
-            return true
+            GlobalScope.launch {
+                Store.save(this@ChannelActivity, "$fileName.json", message)
+            }
         }
     }
 }

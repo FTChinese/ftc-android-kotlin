@@ -9,15 +9,11 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.*
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.user.SignInActivity
-import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isActiveNetworkWifi
 import com.ft.ftchinese.util.isNetworkConnected
-import com.google.gson.JsonSyntaxException
 import com.koushikdutta.async.future.Future
 import com.koushikdutta.ion.Ion
 import kotlinx.android.synthetic.main.fragment_view_pager.*
@@ -34,6 +30,8 @@ import org.jetbrains.anko.support.v4.toast
  * As part of ChannelActivity. For example, if you panned to Editor's Choice tab, the mFollows lead to another layer of a list page, not content. You need to use `ChannelFragment` again to render a list page.
  */
 class ViewPagerFragment : Fragment(),
+        WVClient.OnClickListener,
+        JSInterface.OnJSInteractionListener,
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
@@ -47,13 +45,6 @@ class ViewPagerFragment : Fragment(),
      */
     private var mPageMeta: PagerTab? = null
 
-    /**
-     * iOS equivalent might be defined Page/Layouts/Pages/Content/DetailModelController.swift#pageData
-     * This is a list of articles on each mPageMeta.
-     * Its value is set when WebView finished loading a web page
-     */
-    private var mChannelItems: Array<ChannelItem>? = null
-    private var mChannelMeta: ChannelMeta? = null
     private var mLoadJob: Job? = null
     private var mRefreshJob: Job? = null
     private var mRequest: Future<String>? = null
@@ -160,19 +151,32 @@ class ViewPagerFragment : Fragment(),
         }
 
         // Setup webview.
+
+        val jsInterface = JSInterface(activity)
+        jsInterface.mSession = mSession
+        jsInterface.setOnJSInteractionListener(this)
+
+        val wvClient = WVClient(activity)
+        wvClient.mSession = mSession
+        wvClient.setOnClickListener(this)
+
         web_view.apply {
 
             // Interact with JS.
             // See Page/Layouts/Page/SuperDataViewController.swift#viewDidLoad() how iOS inject js to web view.
-            addJavascriptInterface(ChannelWebViewInterface(), "Android")
+            addJavascriptInterface(
+                    jsInterface,
+                    JS_INTERFACE_NAME
+            )
+
             // Set WebViewClient to handle various links
-            webViewClient = MainWebViewClient(activity)
+            webViewClient = wvClient
 
             webChromeClient = ChromeClient()
         }
 
         // Setup back key behavior.
-        web_view.setOnKeyListener { v, keyCode, event ->
+        web_view.setOnKeyListener { _, keyCode, _ ->
             if (keyCode == KeyEvent.KEYCODE_BACK && web_view.canGoBack()) {
                 web_view.goBack()
                 return@setOnKeyListener true
@@ -365,252 +369,34 @@ class ViewPagerFragment : Fragment(),
         }
     }
 
-    // Interact with Web view.
-    // iOS equivalent: SuperDataViewController.swift#extension SuperDataViewController: WKScriptMessageHandler
-    // Each methods equivalent on iOS is `message.name`.
-    inner class ChannelWebViewInterface : AnkoLogger {
-        /**
-         * Method injected to WebView to receive a list of articles in a mPageMeta page upon finished loading.
-         * Structure of the JSON received:
-         * {
-         *  "meta": {
-         *      "title": "FT中文网",
-         *      "description": "",
-         *      "theme": "default",
-         *      "adid": "1000", // from window.adchID, default '1000'
-         *      "adZone": "home" // Extracted from a <script> block.
-         *  },
-         *  "sections": [
-         *      "lists": [
-         *          {
-         *             "name": "New List",
-         *             "items": [
-         *                  {
-         *                      "id": "001078965", // from attribute data-id.
-         *                      "type": "story",  //
-         *                      "headline": "中国千禧一代将面临养老金短缺", // The content of .item-headline-link
-        *                       "eaudio": "https://s3-us-west-2.amazonaws.com/ftlabs-audio-rss-bucket.prod/7a6d6d6a-9f75-11e8-85da-eeb7a9ce36e4.mp3",
-         *                      "timeStamp": "1534308162"
-         *                  }
-         *             ]
-         *          }
-         *      ]
-         *  ]
-         * }
-         *
-         * The source of `adZone` (partial):
-         * {
-         *  "gpt": {
-         *      "network": 80682004,
-         *      "site": "ftchinese",
-         *      "zone": "home"
-         *   }
-         *   "formats": {}
-         * }
-         *
-         *  Example for interactive:
-         *  {
-         *   "id": "12761",
-         *   "type": "interactive",
-         *   "headline": "和美国总统对着干，耐克这次押对了吗？",
-         *   "shortlead": "http://v.ftimg.net/album/021ec2fe-b04c-11e8-99ca-68cf89602132.mp3",
-         *   "subType": "radio"
-         *   }
-         * The value of `gpt.zone` field if used as `adZone`'s value.
-         */
-        @JavascriptInterface
-        fun onPageLoaded(message: String) {
-            // See what the data is.
-            if (BuildConfig.DEBUG) {
-                GlobalScope.launch {
-                    val fileName = mPageMeta?.name ?: return@launch
-                    info("Save page loaded data: $fileName")
-                    Store.save(context, "$fileName.json", message)
-                }
-            }
+    override fun onPagination(pageKey: String, pageNumber: String) {
+        val pageMeta = mPageMeta ?: return
 
-            try {
-                val channelContent = gson.fromJson<ChannelContent>(message, ChannelContent::class.java)
-
-                mChannelItems = channelContent.sections[0].lists[0].items
-
-
-                mChannelMeta = channelContent.meta
-            } catch (e: JsonSyntaxException) {
-                info("Cannot parse JSON after a channel loaded")
-            } catch (e: Exception) {
-               info("$e")
-            }
-
-        }
-
-        /**
-         * Handle click event on an item of article list.
-         * See Page/Layouts/Page/SuperDataViewController.swift#SuperDataViewController what kind of data structure is passed back from web view.
-         * The JSON data is parsed into SectionItem tier in ContentActivity
-         * iOS equivalent might be here: Page/Layouts/Pages/Content/DetailModelController.swift
-         * @param index is the number of article mUser clicked in current page. The value is extracted from `data-row` attribute of `div.item-container-app`.
-         * In most cases when you clicked, an article should be loaded.
-         * In a few exceptions, like `/channel/column.html`, an item in the list should open another page of article list.
-         * It seems the only way to distinguish those cases is using `ChannelMeta.title` field.
-         */
-        @JavascriptInterface
-        fun onSelectItem(index: String) {
-            info("Channel list click event: $index")
-
-
-            if (mChannelMeta == null && mChannelItems == null) {
-                return
-            }
-
-            val i = index.toInt()
-            val channelItem = mChannelItems?.getOrNull(i) ?: return
-            info("Clicked item: $channelItem")
-
-            /**
-             * For `column`, start a new ChannelActivity
-             */
-            when (channelItem.type) {
-                ChannelItem.TYPE_COLUMN -> {
-                    ChannelActivity.start(context, PagerTab(
-                            title = channelItem.headline,
-                            name = "${mPageMeta?.name}_${channelItem.id}",
-                            contentUrl = buildUrl("/${channelItem.type}/${channelItem.id}"),
-                            htmlType = PagerTab.HTML_TYPE_FRAGMENT
-                    ))
-
-                    return
-                }
-            }
-
-            /**
-             * Copy channel meta to channel item.
-             */
-            channelItem.channelTitle = mChannelMeta?.title ?: ""
-            channelItem.theme = mChannelMeta?.theme ?: ""
-            channelItem.adId = mChannelMeta?.adid ?: ""
-            channelItem.adZone = mChannelMeta?.adZone ?: ""
-
-            if (!channelItem.isMembershipRequired) {
-                startReading(channelItem)
-
-                return
-            }
-            /**
-             * User clicked an article that requires membership.
-             * If user if not logged in, or user already logged in but membership is free
-             */
-            val user = mSession?.loadUser()
-
-            // If user is not logged in
-            if (user == null) {
-                toast(R.string.prompt_restricted_paid_user)
-                SignInActivity.start(activity)
-                return
-            }
-
-            /**
-             * If current user is not a paid member, or the membership is expired
-             */
-            if (!user.canAccessPaidContent) {
-                toast(R.string.prompt_restricted_paid_user)
-                SubscriptionActivity.start(context)
-                return
-            }
-
-            startReading(channelItem)
-        }
-
-        private fun startReading(channelItem: ChannelItem) {
-
-            when (channelItem.type) {
-                ChannelItem.TYPE_STORY, ChannelItem.TYPE_PREMIUM -> {
-                    info("Start StoryActivity")
-
-                    StoryActivity.start(activity, channelItem)
-                }
-
-                ChannelItem.TYPE_INTERACTIVE -> {
-                    info("Clicked an interactive: $channelItem")
-
-                    when (channelItem.subType) {
-                        ChannelItem.SUB_TYPE_RADIO -> {
-                            info("Start RadioActivity")
-                            RadioActivity.start(context, channelItem)
-                        }
-                        else -> {
-                            info("Start WebContentActivity")
-                            WebContentActivity.start(activity, channelItem)
-                        }
-                    }
-                }
-                // Article types other than `story` and `premium` do not have JSON API.
-                // Load theme directly
-                else -> {
-                    info("Start web content activity")
-                    WebContentActivity.start(activity, channelItem)
-                }
-            }
-        }
-
-        /**
-         * Data retrieved from HTML element .specialanchor.
-         * JSON structure:
-         * [
-         *  {
-         *      "tag": "",  // from attribute 'tag'
-         *      "title": "", // from attribute 'title'
-         *      "adid": "", // from attribute 'adid'
-         *      "zone": "",  // from attribute 'zone'
-         *      "channel": "", // from attribute 'channel'
-         *      "hideAd": ""  // from optinal attribute 'hideAd'
-         *  }
-         * ]
-         */
-        fun onLoadedSponsors(message: String) {
-            try {
-                SponsorManager.sponsors = gson.fromJson(message, Array<Sponsor>::class.java)
-
-            } catch (e: Exception) {
-                info("$e")
-            }
-        }
-
-        /**
-         * {
-         *  forceNewAdTags: [],
-         *  forceOldAdTags: [],
-         *  grayReleaseTarget: '0'
-         * }
-         */
-        fun onNewAdSwitchData(message: String) {
-            try {
-                val adSwitch = gson.fromJson<AdSwitch>(message, AdSwitch::class.java)
-
-
-            } catch (e: Exception) {
-                info("$e")
-            }
-        }
-
-        fun onSharePageFromApp(message: String) {
-
-        }
-
-        fun onSendPageInfoToApp(message: String) {
-
-        }
-
-
-        private fun buildUrl(path: String): String {
-            return Uri.Builder()
-                .scheme("https")
-                .authority("api003.ftmailbox.com")
-                .path(path)
-                .appendQueryParameter("bodyonly", "yes")
-                .appendQueryParameter("webview", "ftcapp")
+        val url = Uri.parse(pageMeta.contentUrl)
+                .buildUpon()
+                .appendQueryParameter(pageKey, pageNumber)
                 .build()
                 .toString()
+
+        val listPage = PagerTab(
+                title = pageMeta.title,
+                name = "${pageMeta.name}_$pageNumber",
+                contentUrl = url,
+                htmlType = pageMeta.htmlType
+        )
+
+        info("Open a pagination: $listPage")
+
+        ChannelActivity.start(activity, listPage)
+    }
+
+    override fun onPageLoaded(message: String) {
+        if (BuildConfig.DEBUG) {
+            val fileName = mPageMeta?.name ?: return
+
+            GlobalScope.launch {
+                Store.save(context, "$fileName.json", message)
+            }
         }
     }
 }
