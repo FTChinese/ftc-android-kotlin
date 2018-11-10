@@ -1,8 +1,7 @@
 package com.ft.ftchinese.models
 
 import android.content.Context
-import android.content.res.Resources
-import com.ft.ftchinese.R
+import android.net.Uri
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
@@ -14,12 +13,10 @@ import org.jetbrains.anko.info
 import java.util.*
 import java.io.IOException
 
-class Endpoints{
-    companion object {
-        const val HOST_FTC = "www.ftchinese.com"
-        const val HOST_MAILBOX = "api003.ftmailbox.com"
-        val hosts = arrayOf(HOST_FTC, HOST_MAILBOX)
-    }
+object HostName {
+    const val FTC = "www.ftchinese.com"
+    const val MAILBOX = "api003.ftmailbox.com"
+    val hosts = arrayOf(FTC, MAILBOX)
 }
 
 /**
@@ -145,6 +142,21 @@ data class ChannelItem(
         get() {
             return "story"
         }
+
+    /**
+     * Build the url to fetch content.
+     * See https://en.wikipedia.org/wiki/Uniform_Resource_Identifier for URI definition.
+     */
+    fun buildUrlForListFrag(): Uri {
+        return Uri.Builder()
+                .scheme("https")
+                .authority(HostName.MAILBOX)
+                .appendPath(type)
+                .appendPath(id)
+                .appendQueryParameter("bodyonly", "yes")
+                .appendQueryParameter("webview", "ftcapp")
+                .build()
+    }
 
     // See Page/FTChinese/Main/APIs.swift
     // https://api003.ftmailbox.com/interactive/12339?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24
