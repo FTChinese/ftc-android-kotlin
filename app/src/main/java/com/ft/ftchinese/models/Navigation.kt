@@ -1,7 +1,15 @@
 package com.ft.ftchinese.models
 
-import com.ft.ftchinese.models.PagerTab.Companion.HTML_TYPE_COMPLETE
-import com.ft.ftchinese.models.PagerTab.Companion.HTML_TYPE_FRAGMENT
+import com.ft.ftchinese.BuildConfig
+
+const val HOST_FTC = "www.ftchinese.com"
+const val HOST_MAILBOX = "api003.ftmailbox.com"
+const val HOST_FTA = "www.ftacademy.cn"
+
+const val URL_FTC = "http://www.ftchinese.com"
+const val URL_MAILBOX = "https://api003.ftmailbox.com"
+
+val hostNames = arrayOf(HOST_FTC, HOST_MAILBOX)
 
 object Navigation {
 
@@ -16,11 +24,11 @@ object Navigation {
              *  }
              *  [
              *      {
-                        "id": "001080012",
-                        "type": "story",
-                        "headline": "与让-保罗•高提耶共进午餐",
-                        "eaudio":
-                        "https://s3-us-west-2.amazonaws.com/ftlabs-audio-rss-bucket.prod/6f0390b0-a549-11e8-8ecf-a7ae1beff35b.mp3"
+                    "id": "001080012",
+                    "type": "story",
+                    "headline": "与让-保罗•高提耶共进午餐",
+                    "eaudio":
+                    "https://s3-us-west-2.amazonaws.com/ftlabs-audio-rss-bucket.prod/6f0390b0-a549-11e8-8ecf-a7ae1beff35b.mp3"
                     },
                     {
                     "id": "001080060",
@@ -47,7 +55,12 @@ object Navigation {
                     }
              *  ]
              */
-            PagerTab(title = "首页", name = "news_home", contentUrl = "https://api003.ftmailbox.com/?webview=ftcapp&bodyonly=yes&maxB=1&backupfile=localbackup&showIAP=yes&pagetype=home&001", htmlType = HTML_TYPE_FRAGMENT),
+            PagerTab(
+                    title = "首页",
+                    name = "news_home",
+                    contentUrl = "https://api003.ftmailbox.com/?webview=ftcapp&bodyonly=yes&maxB=1&backupfile=localbackup&showIAP=yes&pagetype=home&001&android=${BuildConfig.VERSION_CODE}",
+                    htmlType = HTML_TYPE_FRAGMENT
+            ),
             /**
              * "meta": {
                     "title": "中国",
@@ -64,6 +77,11 @@ object Navigation {
                     "timeStamp": "1541001600"
                     }
                 ]
+             * Pagination: china.html?page=2
+             * When user clicked such kind of links,
+             * WVClient will receive url like http://www.ftchinese.com/china.html?page=2
+             * because this is a relative url and it is
+             * relative to web view's base url.
              */
             PagerTab(title = "中国", name = "news_china", contentUrl = "https://api003.ftmailbox.com/channel/china.html?webview=ftcapp&bodyonly=yes", htmlType = HTML_TYPE_FRAGMENT),
             /**
@@ -236,7 +254,7 @@ object Navigation {
              *   "adZone": "home/weekly"
              *   }
              */
-            PagerTab(title = "热门文章", name = "news_top_stories", contentUrl = "https://api003.ftmailbox.com/channel/weekly.html?webview=ftcapp&bodyonly=yes", htmlType = HTML_TYPE_FRAGMENT),
+            PagerTab(title = "热门文章", name = "news_weekly", contentUrl = "https://api003.ftmailbox.com/channel/weekly.html?webview=ftcapp&bodyonly=yes", htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
              *   "title": "数据新闻",
