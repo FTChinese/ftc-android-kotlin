@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.ft.ftchinese.models.Following
 import com.ft.ftchinese.models.FollowingManager
+import com.ft.ftchinese.models.HTML_TYPE_FRAGMENT
 import com.ft.ftchinese.models.PagerTab
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
@@ -86,7 +87,7 @@ class FollowingFragment : Fragment(), AnkoLogger {
                         title = item.tag,
                         name = "${item.type}_${item.tag}",
                         contentUrl = item.bodyUrl,
-                        htmlType = PagerTab.HTML_TYPE_FRAGMENT
+                        htmlType = HTML_TYPE_FRAGMENT
                 )
 
                 ChannelActivity.start(context, channelMeta)
