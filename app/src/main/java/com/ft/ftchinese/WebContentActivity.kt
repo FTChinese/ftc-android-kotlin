@@ -4,9 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.models.FollowingManager
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.info
@@ -35,11 +33,19 @@ class WebContentActivity : AbsContentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val itemDate = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
+        val uri = intent.getParcelableExtra<Uri>(EXTRA_UNKNOWN_URI)
 
-        if (itemDate != null) {
+        if (uri != null) {
+            load(uri.toString())
+
+            return
+        }
+
+        val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
+
+        if (itemData != null) {
             try {
-                mChannelItem = gson.fromJson(itemDate, ChannelItem::class.java)
+                mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -63,31 +69,34 @@ class WebContentActivity : AbsContentActivity() {
         toast(R.string.prompt_refreshing)
 
         web_view.reload()
-        showProgress(false)
-    }
-
-    override fun load() {
-
     }
 
     fun load(url: String) {
         web_view.loadUrl(url)
-        showProgress(false)
     }
 
     companion object {
-        private const val EXTRA_CANONICAL_URI = "extra_canonical_uri"
+        private const val EXTRA_UNKNOWN_URI = "extra_unknown_uri"
         private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
 
+        // Mainly used to handle unknown urls.
+        // Since we do not know the exact structure of the uri,
+        // we cannot turn it into a ChannelItem
         fun start(context: Context?, url: Uri) {
-            val intent = Intent(context, WebContentActivity::class.java)
-            intent.putExtra(EXTRA_CANONICAL_URI, url)
+            val intent = Intent(context, WebContentActivity::class.java).apply {
+                putExtra(EXTRA_UNKNOWN_URI, url)
+            }
+
             context?.startActivity(intent)
         }
 
+        // Mainly used to handle JSInterface click event and url clicks in web view clint.
+        // The type and id must be known.
         fun start(context: Context?, channelItem: ChannelItem) {
-            val intent = Intent(context, WebContentActivity::class.java)
-            intent.putExtra(EXTRA_CHANNEL_ITEM, gson.toJson(channelItem))
+            val intent = Intent(context, WebContentActivity::class.java).apply {
+                putExtra(EXTRA_CHANNEL_ITEM, gson.toJson(channelItem))
+            }
+
             context?.startActivity(intent)
         }
     }
