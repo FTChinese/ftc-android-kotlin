@@ -120,13 +120,14 @@ class WVClient(
              * For external links (mostly ads), open in external browser.
              */
             "http", "https" -> {
-                if (HostName.hosts.contains(uri.host)) {
+                if (hostNames.contains(uri.host)) {
                     return handleInSiteLink(uri)
                 }
-
-                // Handle www.ftacademy.cn here.
-
-                return handleExternalLink(uri)
+                return when (uri.host) {
+                    HOST_FTC, HOST_MAILBOX -> handleInSiteLink(uri)
+                    HOST_FTA -> handleFtaLink(uri)
+                    else -> handleExternalLink(uri)
+                }
             }
             // For unknown links, simply returns true to prevent
             // crash caused by loading unknown content.
@@ -135,6 +136,17 @@ class WVClient(
     }
 
 
+    /**
+     * Handle urls like:
+     * http://www.ftacademy.cn/subscription.html?ccode=ftchomepromobox
+     */
+    private fun handleFtaLink(uri: Uri): Boolean {
+        if (uri.lastPathSegment == "subscription.html") {
+            SubscriptionActivity.start(activity)
+        }
+
+        return true
+    }
 
     private fun handleInSiteLink(uri: Uri): Boolean {
         val pathSegments = uri.pathSegments
@@ -205,7 +217,7 @@ class WVClient(
             ChannelItem.TYPE_PREMIUM,
             ChannelItem.TYPE_VIDEO,
             ChannelItem.TYPE_INTERACTIVE,
-            ChannelItem.TYPE_PHOTONEWS -> {
+            ChannelItem.TYPE_PHOTO_NEWS -> {
                 val channelItem = ChannelItem(
                         id = pathSegments[1],
                         type = pathSegments[0],
@@ -242,19 +254,47 @@ class WVClient(
             /**
              * If the path looks like `/channel/english.html`
              * On home page '每日英语' section, the title is a link
+             * Similar to TYPE_COLUMN
              */
-            "channel" -> openChannelLink(uri)
+            ChannelItem.TYPE_CHANNEL -> {
+                val lastPathSegment = uri.lastPathSegment
+
+                val listPage = PagerTab(
+                        title = pathToTitle[lastPathSegment] ?: "",
+                        name = uri.pathSegments.joinToString("_").removeSuffix(".html"),
+                        contentUrl = buildUrlForFragment(uri),
+                        htmlType = HTML_TYPE_FRAGMENT
+                )
+
+                info("Start channel activity for link: ${listPage.contentUrl}")
+
+                ChannelActivity.start(activity, listPage)
+
+                return true
+            }
 
             /**
              * If the path looks like `/tag/中美贸易战`,
              * start a new page listing articles
              */
-            "tag" -> openTagLink(uri)
+            ChannelItem.TYPE_TAG -> {
+                val page = PagerTab(
+                        title = uri.lastPathSegment,
+                        name = uri.pathSegments.joinToString("_"),
+                        contentUrl = buildUrlForFragment(uri),
+                        htmlType = HTML_TYPE_FRAGMENT
+                )
+
+                ChannelActivity.start(activity, page)
+
+                return true
+            }
 
             /**
              * If the path looks like `/m/marketing/intelligence.html`
+             * or /m/corp/preview.html?pageid=huawei2018
              */
-            "m" -> openMLink(uri)
+            ChannelItem.TYPE_M -> openMLink(uri)
 
             else -> {
                 info("Open a web page directly. Original url is: $uri")
@@ -282,58 +322,28 @@ class WVClient(
         return true
     }
 
-    private fun openWebPage(uri: Uri): Boolean {
-        val channelItem = ChannelItem(
-                id = uri.pathSegments[1],
-                type = uri.pathSegments[0],
-                headline = "",
-                shortlead = "")
-
-        WebContentActivity.start(activity, channelItem)
-
-        return true
-    }
-
-    /**
-     * A list of articles
-     */
-    open fun openChannelLink(uri: Uri): Boolean {
-
-
-        val lastPathSegment = uri.lastPathSegment
-
-        val listPage = PagerTab(
-                title = pathToTitle[lastPathSegment] ?: "",
-                name = uri.pathSegments.joinToString("_").removeSuffix(".html"),
-                contentUrl = buildUrlForFragment(uri),
-                htmlType = PagerTab.HTML_TYPE_FRAGMENT
-        )
-
-        info("Start channel activity for link: ${listPage.contentUrl}")
-
-        ChannelActivity.start(activity, listPage)
-
-        return true
-    }
-
     /**
      * This kind of page is a list of articles
      */
-    open fun openMLink(uri: Uri): Boolean {
+    private fun openMLink(uri: Uri): Boolean {
         info("Open a m link: $uri")
 
         return when (uri.pathSegments[1]) {
             // Links like /m/corp/preview.html?pageid=huawei2018
-            "corp" -> {
-                val key = uri.getQueryParameter("pageid") ?: return true
+            ChannelItem.SUB_TYPE_CORP -> {
+                val pageName = uri.getQueryParameter("pageid")
 
-                val name = uri.pathSegments.joinToString("_").removeSuffix(".html") + "_$key"
+                val name = if (pageName != null) {
+                    uri.pathSegments.joinToString("_").removeSuffix(".html") + "_$pageName"
+                } else {
+                    uri.pathSegments.joinToString("_").removeSuffix(".html")
+                }
 
                 val listPage = PagerTab(
-                        title = pathToTitle[key] ?: "",
+                        title = pathToTitle[pageName] ?: "",
                         name = name,
                         contentUrl = buildUrlForFullPage(uri),
-                        htmlType = PagerTab.HTML_TYPE_COMPLETE
+                        htmlType = HTML_TYPE_COMPLETE
                 )
 
                 ChannelActivity.start(activity, listPage)
@@ -341,13 +351,13 @@ class WVClient(
                 true
             }
             // Links like /m/marketing/intelligence.html?webview=ftcapp
-            "marketing" -> {
+            ChannelItem.SUB_TYPE_MARKETING -> {
                 val key = uri.lastPathSegment ?: ""
                 val listPage = PagerTab(
                         title = pathToTitle[key] ?: "",
                         name = uri.pathSegments.joinToString("_").removeSuffix(".html"),
                         contentUrl = buildUrlForFullPage(uri),
-                        htmlType = PagerTab.HTML_TYPE_COMPLETE
+                        htmlType = HTML_TYPE_COMPLETE
                 )
 
                 ChannelActivity.start(activity, listPage)
@@ -362,7 +372,7 @@ class WVClient(
                         title = pathToTitle[key] ?: "",
                         name = "",
                         contentUrl = buildUrlForFullPage(uri),
-                        htmlType = PagerTab.HTML_TYPE_COMPLETE
+                        htmlType = HTML_TYPE_COMPLETE
                 )
 
                 ChannelActivity.start(activity, listPage)
@@ -370,19 +380,6 @@ class WVClient(
                 true
             }
         }
-    }
-
-    private fun openTagLink(uri: Uri): Boolean {
-        val page = PagerTab(
-                title = uri.lastPathSegment,
-                name = "${uri.pathSegments[0]}_${uri.pathSegments[1]}",
-                contentUrl = buildUrlForFragment(uri),
-                htmlType = PagerTab.HTML_TYPE_FRAGMENT
-        )
-
-        ChannelActivity.start(activity, page)
-
-        return true
     }
 
     private fun feedbackEmail(): Boolean {
