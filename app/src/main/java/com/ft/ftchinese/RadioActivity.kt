@@ -74,16 +74,14 @@ class RadioActivity : AbsContentActivity() {
         loadUrl(mChannelItem?.apiUrl)
     }
 
-    override fun load() {
-
-    }
-
+    /**
+     * Stub implementation
+     */
     override fun onRefresh() {
-
+        web_view.reload()
     }
 
     private fun loadUrl(url: String?) {
-
         web_view.loadUrl(url)
     }
 }
