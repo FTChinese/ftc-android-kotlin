@@ -1,7 +1,6 @@
 package com.ft.ftchinese
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
@@ -193,7 +192,7 @@ class ViewPagerFragment : Fragment(),
     private fun loadContent() {
         // For partial HTML, we need to crawl its content and render it with a template file to get the template HTML page.
         when (mPageMeta?.htmlType) {
-            PagerTab.HTML_TYPE_FRAGMENT -> {
+            HTML_TYPE_FRAGMENT -> {
                 info("loadContent: html fragment")
 
                 mLoadJob = GlobalScope.launch (Dispatchers.Main) {
@@ -212,7 +211,7 @@ class ViewPagerFragment : Fragment(),
                 }
             }
             // For complete HTML, load it directly into Web view.
-            PagerTab.HTML_TYPE_COMPLETE -> {
+            HTML_TYPE_COMPLETE -> {
                 info("loadContent: web page")
                 web_view.loadUrl(mPageMeta?.contentUrl)
             }
@@ -269,6 +268,7 @@ class ViewPagerFragment : Fragment(),
 
         mRequest = Ion.with(context)
                 .load(url)
+                .noCache()
                 .asString()
                 .setCallback { e, result ->
                     isInProgress = false
@@ -350,7 +350,7 @@ class ViewPagerFragment : Fragment(),
         }
 
         when (mPageMeta?.htmlType) {
-            PagerTab.HTML_TYPE_FRAGMENT -> {
+            HTML_TYPE_FRAGMENT -> {
                 info("onRefresh: crawlWeb html fragment")
                 mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
                     if (mTemplate == null) {
@@ -361,7 +361,7 @@ class ViewPagerFragment : Fragment(),
                     loadFromServer()
                 }
             }
-            PagerTab.HTML_TYPE_COMPLETE -> {
+            HTML_TYPE_COMPLETE -> {
                 info("onRefresh: reload")
                 web_view.reload()
                 isInProgress = false
@@ -372,18 +372,7 @@ class ViewPagerFragment : Fragment(),
     override fun onPagination(pageKey: String, pageNumber: String) {
         val pageMeta = mPageMeta ?: return
 
-        val url = Uri.parse(pageMeta.contentUrl)
-                .buildUpon()
-                .appendQueryParameter(pageKey, pageNumber)
-                .build()
-                .toString()
-
-        val listPage = PagerTab(
-                title = pageMeta.title,
-                name = "${pageMeta.name}_$pageNumber",
-                contentUrl = url,
-                htmlType = pageMeta.htmlType
-        )
+        val listPage = pageMeta.withPagination(pageKey, pageNumber)
 
         info("Open a pagination: $listPage")
 
