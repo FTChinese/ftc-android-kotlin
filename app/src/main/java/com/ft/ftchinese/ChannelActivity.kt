@@ -2,7 +2,6 @@ package com.ft.ftchinese
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
@@ -114,7 +113,7 @@ class ChannelActivity : AppCompatActivity(),
 
     private fun loadContent() {
         when (mPageMeta?.htmlType) {
-            PagerTab.HTML_TYPE_FRAGMENT -> {
+            HTML_TYPE_FRAGMENT -> {
                 info("loadContent: html fragment")
 
                 mLoadJob = GlobalScope.launch(Dispatchers.Main) {
@@ -130,7 +129,7 @@ class ChannelActivity : AppCompatActivity(),
                 }
             }
 
-            PagerTab.HTML_TYPE_COMPLETE -> {
+            HTML_TYPE_COMPLETE -> {
                 web_view.loadUrl(mPageMeta?.contentUrl)
             }
         }
@@ -251,7 +250,6 @@ class ChannelActivity : AppCompatActivity(),
      * Launch this activity with intent
      */
     companion object {
-        private const val WEBVIEV_BASE_URL = "http://www.ftchinese.com"
         private const val EXTRA_LIST_PAGE_META = "extra_list_page_metadata"
 
         fun start(context: Context?, page: PagerTab) {
@@ -266,63 +264,15 @@ class ChannelActivity : AppCompatActivity(),
     override fun onPagination(pageKey: String, pageNumber: String) {
         val pageMeta = mPageMeta ?: return
 
-        // If ChannelActivity is started from ViewPagerFragment,
-        // pageMeta.name looks like news_china_1.
-        // What if it is not?
-        // If ChannelActivity is started from ViewPagerFragment's pagination link,
-        // the current mPageMeta.contentUrl must contain query
-        // parameter like `page=2` or `p=2`. The page number
-        // must not be 1 since the first page is in
-        // ViewPagerFragment and is not clickable.
-        // If the ChannelActivity is started from other links
-        // or JSInterface, it must not contain `page=x` or `p=x`.
-        val nameArr = pageMeta.name.split("_").toMutableList()
-        if (nameArr.size > 0) {
-            nameArr[nameArr.size - 1] = pageNumber
-        }
+        val listPage = pageMeta.withPagination(pageKey, pageNumber)
 
-        val newName = nameArr.joinToString("_")
+        if (listPage.shouldReload) {
+            info("Realoding a pagination ${listPage}")
 
-        val currentUri = Uri.parse(pageMeta.contentUrl)
-
-        if (currentUri.getQueryParameter(pageKey) != null) {
-
-            val newUri = currentUri.buildUpon().clearQuery()
-
-            // Replace the value of `page` or `p` with pageNumber
-            for (key in currentUri.queryParameterNames) {
-                if (key == pageKey) {
-                    newUri.appendQueryParameter(key, pageNumber)
-                }
-
-                val value = currentUri.getQueryParameter(key)
-                newUri.appendQueryParameter(key, value)
-            }
-
-            mPageMeta = PagerTab(
-                    title = pageMeta.title,
-                    name = newName,
-                    contentUrl = newUri.build().toString(),
-                    htmlType = pageMeta.htmlType
-            )
-
-            info("Loading pagination url: ${mPageMeta?.contentUrl}")
+            mPageMeta = listPage
 
             loadContent()
-
         } else {
-            val url = currentUri.buildUpon()
-                    .appendQueryParameter(pageKey, pageNumber)
-                    .build()
-                    .toString()
-
-            val listPage = PagerTab(
-                    title = pageMeta.title,
-                    name = "${pageMeta.name}_$pageNumber",
-                    contentUrl = url,
-                    htmlType = pageMeta.htmlType
-            )
-
             ChannelActivity.start(this, listPage)
         }
     }
