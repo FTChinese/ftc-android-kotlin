@@ -3,13 +3,15 @@ package com.ft.ftchinese
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isNetworkConnected
+import com.google.gson.JsonSyntaxException
+import com.koushikdutta.async.future.Future
+import com.koushikdutta.ion.Ion
 import kotlinx.android.synthetic.main.activity_content.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.info
@@ -38,6 +40,7 @@ class StoryActivity : AbsContentActivity() {
 
     private var mLoadJob: Job? = null
     private var mRefreshJob: Job? = null
+    private var mRequest: Future<String>? = null
 
     private var mTemplate: String? = null
     private var mStory: Story? = null
@@ -61,14 +64,14 @@ class StoryActivity : AbsContentActivity() {
 
         titlebar_cn.setOnClickListener {
             mCurrentLanguage = ChannelItem.LANGUAGE_CN
-            load()
+            loadContent()
         }
 
         titlebar_en.setOnClickListener {
             val user = mSessionManager?.loadUser()
 
             if (user == null) {
-                languageSwitchFobidden()
+                enableLanguageSwitch = false
 
                 toast(R.string.prompt_restricted_login)
 
@@ -77,7 +80,7 @@ class StoryActivity : AbsContentActivity() {
             }
 
             if (!user.canAccessPaidContent) {
-                languageSwitchFobidden()
+                enableLanguageSwitch = false
 
                 toast(R.string.prompt_restricted_paid_user)
                 SubscriptionActivity.start(this)
@@ -85,14 +88,15 @@ class StoryActivity : AbsContentActivity() {
             }
 
             mCurrentLanguage = ChannelItem.LANGUAGE_EN
-            load()
+            loadContent()
         }
 
         titlebar_bi.setOnClickListener {
             val user = mSessionManager?.loadUser()
 
             if (user == null) {
-                languageSwitchFobidden()
+                enableLanguageSwitch = false
+
                 toast(R.string.prompt_restricted_login)
 
                 SignInActivity.start(this)
@@ -100,7 +104,8 @@ class StoryActivity : AbsContentActivity() {
             }
 
             if (!user.canAccessPaidContent) {
-                languageSwitchFobidden()
+                enableLanguageSwitch = false
+
                 toast(R.string.prompt_restricted_paid_user)
 
                 SubscriptionActivity.start(this)
@@ -108,19 +113,132 @@ class StoryActivity : AbsContentActivity() {
             }
 
             mCurrentLanguage = ChannelItem.LANGUAGE_BI
-            load()
+            loadContent()
         }
 
 
         info("Start loading article: $mChannelItem")
-        load()
+        loadContent()
         updateStarUI()
     }
 
-    private fun languageSwitchFobidden() {
-        titlebar_cn.isChecked = true
-        titlebar_en.isChecked = false
-        titlebar_bi.isChecked = false
+    private fun loadContent() {
+
+        mLoadJob = GlobalScope.launch(Dispatchers.Main) {
+
+            try {
+
+                val ok = loadFromCache()
+
+                if (!ok) {
+                    loadFromServer()
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                toast("${e.message}")
+            }
+        }
+    }
+
+    private suspend fun loadFromCache(): Boolean {
+        if (mTemplate == null) {
+            mTemplate = Store.readStoryTemplate(resources)
+        }
+
+        return try {
+            // Try to load cached JSON.
+            val jsonData = Store.load(this, mChannelItem?.cacheFileName)
+
+            val story = gson.fromJson<Story>(jsonData, Story::class.java)
+
+            renderAndLoad(story)
+
+            true
+
+        } catch (e: JsonSyntaxException) {
+            info("Parse story data failed. Reason: $e")
+            false
+        } catch (e: Exception) {
+            info("Cannot load story json from cache. Reason: $e")
+            false
+        }
+    }
+
+    private suspend fun loadFromServer() {
+
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        val url = mChannelItem?.apiUrl ?: return
+
+        if (mTemplate == null) {
+            mTemplate = Store.readStoryTemplate(resources)
+        }
+
+        if (!swipe_refresh.isRefreshing) {
+            isInProgress = true
+        }
+
+
+        mRequest = Ion.with(this)
+                .load(url)
+                .asString()
+                .setCallback { e, result ->
+                    isInProgress = false
+
+                    if (e != null) {
+                        toast("Cannot load data. Reason: $e")
+                        return@setCallback
+                    }
+
+                    try {
+                        val story = gson.fromJson<Story>(result, Story::class.java)
+
+                        renderAndLoad(story)
+
+                        cacheData(result)
+                    } catch (e: JsonSyntaxException) {
+                        info("Cannot parse JSON. Reason: $e")
+                    } catch (e: Exception) {
+                        info("Failed to load data. Reason: $e")
+                    }
+                }
+    }
+
+    private fun cacheData(data: String) {
+        GlobalScope.launch {
+            info("Caching data to file: ${mChannelItem?.cacheFileName}")
+
+            Store.save(this@StoryActivity, mChannelItem?.cacheFileName, data)
+        }
+    }
+
+    private fun renderAndLoad(story: Story) {
+
+        showLanguageSwitch = story.isBilingual
+
+        val follows = mFollowingManager?.loadForJS() ?: JSFollows(mapOf())
+
+        val html = mChannelItem?.renderStory(mTemplate, story, mCurrentLanguage, follows = follows)
+
+        if (html == null) {
+            toast(R.string.prompt_load_failure)
+            return
+        }
+
+//        CookieManager.getInstance().apply {
+//            setAcceptCookie(true)
+//            setCookie("http://www.ftchinese.com", "username=${user?.name}")
+//            setCookie("http://www.ftchinese.com", "userId=${user?.id}")
+//            setCookie("http://www.ftchinese.com", "uniqueVisitorId=${user?.id}")
+//        }
+
+        web_view.loadDataWithBaseURL("http://www.ftchinese.com", html, "text/html", null, null)
+
+        saveHistory()
     }
 
     override fun onStop() {
@@ -150,87 +268,11 @@ class StoryActivity : AbsContentActivity() {
 
         mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
             if (mTemplate == null) {
-                mTemplate = async {
-                    Store.readStoryTemplate(resources)
-                }.await()
-            }
-            fetchAndUpdate()
-        }
-    }
-
-    override fun load() {
-
-        mLoadJob = GlobalScope.launch(Dispatchers.Main) {
-            mTemplate = async {
-                Store.readStoryTemplate(resources)
-            }.await()
-
-            if (mTemplate == null) {
-                toast(R.string.prompt_load_failure)
-                return@launch
+                mTemplate = Store.readStoryTemplate(resources)
             }
 
-            try {
-                mStory = mChannelItem?.loadCachedStory(this@StoryActivity)
-
-                // Use cached data to render mTemplate
-                if (mStory != null) {
-                    loadData()
-
-                    return@launch
-                }
-
-                if (!isNetworkConnected()) {
-                    toast(R.string.prompt_no_network)
-                    return@launch
-                }
-
-                // If it reached here, it indicates no cache found, and network is connected.
-                showProgress(true)
-                fetchAndUpdate()
-            } catch (e: Exception) {
-                e.printStackTrace()
-                toast("${e.message}")
-            }
+            loadFromServer()
         }
-    }
-
-    private suspend fun fetchAndUpdate() {
-        mStory = GlobalScope.async {
-            mChannelItem?.fetchStory(this@StoryActivity)
-        }.await()
-
-        loadData()
-    }
-
-    private fun loadData() {
-        showLanguageSwitch()
-        val follows = mFollowingManager?.loadForJS() ?: JSFollows(mapOf())
-
-        val html = mChannelItem?.render(mTemplate, mStory, mCurrentLanguage, follows = follows)
-
-        if (html == null) {
-            showProgress(false)
-            toast(R.string.prompt_load_failure)
-            return
-        }
-
-//        CookieManager.getInstance().apply {
-//            setAcceptCookie(true)
-//            setCookie("http://www.ftchinese.com", "username=${user?.name}")
-//            setCookie("http://www.ftchinese.com", "userId=${user?.id}")
-//            setCookie("http://www.ftchinese.com", "uniqueVisitorId=${user?.id}")
-//        }
-
-        web_view.loadDataWithBaseURL("http://www.ftchinese.com", html, "text/html", null, null)
-
-        showProgress(false)
-
-        saveHistory()
-    }
-
-    private fun showLanguageSwitch() {
-        language_group.visibility = if (mStory?.isBilingual == true) View.VISIBLE else View.GONE
     }
 
 //    private fun updateFavouriteIcon() {
