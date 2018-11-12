@@ -1,13 +1,12 @@
 package com.ft.ftchinese.models
 
 import android.content.Context
-import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
 import com.google.gson.annotations.SerializedName
 import android.net.Uri
-import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Store
-import com.koushikdutta.ion.Ion
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.Request
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.jetbrains.anko.AnkoLogger
@@ -17,7 +16,12 @@ import org.joda.time.LocalDate
 import org.joda.time.format.ISODateTimeFormat
 import java.io.File
 
+private const val apiUrl = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
+private const val PREF_AD_SCHEDULE = "ad_schedule"
+private const val PREF_KEY_LASTED_MODIFIED = "last_modified"
+
 data class LaunchMeta(
+
     val title: String,
     val description: String,
     val theme: String,
@@ -35,6 +39,9 @@ data class LaunchAd(
         val iphone: String,
         val android: String,
         val ipad: String,
+        // targetUser is an enum: all, free, standard, premium.
+        // It indicates which groups of user can see the launch ad.
+        @SerializedName("audienceCohort") val targetUser: String?,
         val dates: String,
         // weight actually means https://en.wikipedia.org/wiki/Probability_distribution#Discrete_probability_distribution
         val weight: String
@@ -42,6 +49,7 @@ data class LaunchAd(
     val scheduledOn: List<String>
         get() = dates.split(",")
 
+    // The name used to cache image locally
     val imageName: String
         get() {
             val uri = Uri.parse(imageUrl)
@@ -49,19 +57,24 @@ data class LaunchAd(
             return segments[segments.size - 1]
         }
 
-    fun cacheImage(context: Context) {
-        if (Store.exists(context, imageName)) {
-            return
+    // Save ad image. Returns the Request object so that
+    // we can cancel it in if host activity is destroyed while downloading.
+    fun cacheImage(filesDir: File): Request? {
+
+        if (Store.exists(filesDir, imageName)) {
+            return null
         }
 
-        Ion.with(context)
-                .load(imageUrl)
-                .write(File(context.filesDir, imageName))
-                .setCallback { e, result ->
-                    info("Download complete: ${result.absolutePath}")
+        return Fuel.download(imageUrl)
+                .destination { _, _ ->
+                    File(filesDir, imageName)
+                }
+                .response { _, _, result ->
+                    info("Download ad image complete: $result")
                 }
     }
 
+    // Notify that we successfully showed ad to user.
     fun sendImpression()  {
         val urls = mutableListOf<String>()
         if (impressionUrl1.isNotEmpty()) {
@@ -78,33 +91,112 @@ data class LaunchAd(
 
         urls.forEach {
             val urlStr = it.replace("[timestamp]", "$timestamp")
-            val url = Uri.parse(urlStr).buildUpon().appendQueryParameter("fttime", "$timestamp").build().toString()
-            info("Send impression to $url")
-            val resp = Fetch().get(url).string()
+            val url = Uri.parse(urlStr)
+                    .buildUpon()
+                    .appendQueryParameter("fttime", "$timestamp")
+                    .build()
+                    .toString()
 
-            info("Send impression response $resp")
+            info("Send impression to $url")
+
+            Fuel.get(url)
+                    .responseString { _, _, result ->
+                        val (_, error) = result
+
+                        info("Send impression result: $error")
+                    }
         }
     }
 }
 
 class LaunchSchedule(
         val meta: LaunchMeta,
-        val sections: Array<LaunchAd>
-) {
+        private val sections: Array<LaunchAd>
+) : AnkoLogger {
 
-    fun save(context: Context) {
-        val sharedPreferences = context.getSharedPreferences(PREF_AD_SCHEDULE, Context.MODE_PRIVATE)
+    /**
+     * Transform an array of LaunchAd into a map using date as key. For example: 20180906.
+     * Value is a set of LaunchAd scheduled to be used on the date of `key`
+     */
+    fun transform(): Map<String, Set<LaunchAd>> {
+        val prefSchedule = mutableMapOf<String, MutableSet<LaunchAd>>()
 
-        // Only save data if remote is new than current one.
+        val today = LocalDate.now()
+
+        for (adItem in sections) {
+            if (adItem.android != "yes") {
+                continue
+            }
+            for (date in adItem.scheduledOn) {
+                if (date.isBlank()) {
+                    continue
+                }
+                // If date >= today and android == "yes"
+                // Add adItem to map the key does not exist,
+                // else append to key.
+                // Throws IllegalArgumentException
+                try {
+                    val planned = LocalDate.parse(date, ISODateTimeFormat.basicDate())
+                    // Record those equal to or later than today.
+                    if (today.isBefore(planned)) {
+                        continue
+                    }
+
+                    if (prefSchedule.containsKey(date)) {
+                        prefSchedule[date]?.add(adItem)
+                    } else {
+                        prefSchedule[date] = mutableSetOf(adItem)
+                    }
+                } catch (e: Exception) {
+                    info("Parse date failed: $e")
+                    continue
+                }
+            }
+        }
+
+        return prefSchedule
+    }
+}
+
+class LaunchAdManager(context: Context) : AnkoLogger {
+    private val sharedPreferences = context.getSharedPreferences(PREF_AD_SCHEDULE, Context.MODE_PRIVATE)
+    private val editor = sharedPreferences.edit()
+
+    /**
+     * Download latest ad schedule upon app launch
+     */
+    fun fetchAndCache(): Request {
+
+        return Fuel.get(apiUrl)
+                .responseString { _, _, result ->
+                    val (data, error) = result
+
+                    if (error != null || data == null) {
+                        info("Cannot get ad schedule data: $error")
+                        return@responseString
+                    }
+
+                    val schedule = try {
+                        gson.fromJson<LaunchSchedule>(data, LaunchSchedule::class.java)
+                    } catch (e: Exception) {
+                        return@responseString
+                    }
+
+                    save(schedule)
+                }
+    }
+
+    private fun save(schedule: LaunchSchedule) {
+
+        // Only save data if remote is newer than current one.
         val lastModified = sharedPreferences.getLong(PREF_KEY_LASTED_MODIFIED, 0)
-        if (meta.fileTime <= lastModified) {
+        if (schedule.meta.fileTime <= lastModified) {
             return
         }
 
-        val prefSchedule = formatData()
+        val prefSchedule = schedule.transform()
 
-        val editor = sharedPreferences.edit()
-        editor.putLong(PREF_KEY_LASTED_MODIFIED, meta.fileTime)
+        editor.putLong(PREF_KEY_LASTED_MODIFIED, schedule.meta.fileTime)
 
         prefSchedule.forEach { (key, value) ->
             val strSet = value.map {
@@ -117,105 +209,62 @@ class LaunchSchedule(
         editor.apply()
     }
 
-    /**
-     * Use date as key. For example: 20180906
-     */
-    private fun formatData(): Map<String, Set<LaunchAd>> {
-        val prefSchedule = mutableMapOf<String, MutableSet<LaunchAd>>()
+    fun load(days: Int = 0): List<LaunchAd> {
 
-        val today = LocalDate.now()
+        val localDate = LocalDate.now()
+        val formatter = ISODateTimeFormat.basicDate()
 
-        for (adItem in sections) {
-            if (adItem.android != "yes") {
-                continue
-            }
-            for (date in adItem.scheduledOn) {
-                if (date.isNullOrBlank()) {
-                    continue
-                }
-                // If date >= today and android == "yes"
-                // Add adItem to map if using date as key if not exists
-                // else append to key `date`
-                // Throws IllegalArgumentException
-                try {
-                    val planned = LocalDate.parse(date, ISODateTimeFormat.basicDate())
-                    // Record those equal to or later than today.
-                    if (!today.isAfter(planned)) {
-                        if (prefSchedule.containsKey(date)) {
-                            prefSchedule[date]?.add(adItem)
-                        } else {
-                            prefSchedule[date] = mutableSetOf(adItem)
-                        }
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    continue
-                }
-            }
+        val today = formatter.print(localDate)
+
+        val ads = sharedPreferences.getStringSet(today, mutableSetOf())
+
+        for (i in 0..days) {
+            val key = formatter.print(localDate.plusDays(i))
+            val adData = sharedPreferences.getStringSet(key, setOf())
+            ads.union(adData)
         }
 
-        return prefSchedule
+        return ads.map { gson.fromJson(it, LaunchAd::class.java) }
+    }
+
+    // Reference https://stackoverflow.com/questions/9330394/how-to-pick-an-item-by-its-probability
+    // We use Apache Math library http://commons.apache.org/proper/commons-math/userguide/distribution.html
+    fun getRandomAd(membership: Membership?): LaunchAd? {
+        val candidates = load()
+        if (candidates.isEmpty()) return null
+
+        // Create probability mass function enumerated as a list of <T, probability>
+        val pmf = candidates.map {
+            Pair(it, it.weight.toDouble())
+        }.toMutableList()
+
+        val distribution = EnumeratedDistribution(pmf)
+
+        val ad = distribution.sample()
+
+        if (membership == null || ad.targetUser == null || ad.targetUser == "all") {
+            return ad
+        }
+
+        // If user is not targeted do not show the ad.
+        val tier = if (membership.tier.isBlank()) "free" else membership.tier
+
+        if (tier != ad.targetUser) {
+            return null
+        }
+
+        return ad
     }
 
     companion object {
-        const val PREF_AD_SCHEDULE = "ad_schedule"
-        private const val PREF_KEY_LASTED_MODIFIED = "last_modified"
+        private var instance: LaunchAdManager? = null
 
-        /**
-         * Download latest ad schedule upon app launch
-         */
-        fun fetchData(): LaunchSchedule? {
-            return try {
-                val response = Fetch().get(NextApi.APP_LAUNCH)
-                        .end()
-
-                val body = response.body()?.string()
-
-                gson.fromJson<LaunchSchedule>(body, LaunchSchedule::class.java)
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-
-                null
-            }
-        }
-
-        /**
-         * @param days specify how many days' data you want to retrieve, starting from today.
-         * It returns at least today's list
-         */
-        fun loadFromPref(context: Context, days: Int = 0): List<LaunchAd> {
-            val sharedPreferences = context.getSharedPreferences(LaunchSchedule.PREF_AD_SCHEDULE, Context.MODE_PRIVATE)
-
-            val localDate = LocalDate.now()
-            val formatter = ISODateTimeFormat.basicDate()
-
-            val today = formatter.print(localDate)
-
-            val ads = sharedPreferences.getStringSet(today, mutableSetOf())
-
-            for (i in 0..days) {
-                val key = formatter.print(localDate.plusDays(i))
-                val adData = sharedPreferences.getStringSet(key, setOf())
-                ads.union(adData)
+        @Synchronized fun getInstance(ctx: Context): LaunchAdManager {
+            if (instance == null) {
+                instance = LaunchAdManager(ctx.applicationContext)
             }
 
-            return ads.map { gson.fromJson(it, LaunchAd::class.java) }
-        }
-
-        // Reference https://stackoverflow.com/questions/9330394/how-to-pick-an-item-by-its-probability
-        // We use Apache Math library http://commons.apache.org/proper/commons-math/userguide/distribution.html
-        fun randomAdFileName(context: Context): LaunchAd? {
-            val candidates = loadFromPref(context)
-            if (candidates.isEmpty()) return null
-
-            val pmf = candidates.map {
-                Pair(it, it.weight.toDouble())
-            }.toMutableList()
-
-            val distribution = EnumeratedDistribution(pmf)
-
-            return distribution.sample()
+            return instance!!
         }
     }
 }
