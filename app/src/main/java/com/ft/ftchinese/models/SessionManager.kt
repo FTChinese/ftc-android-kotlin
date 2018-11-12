@@ -1,10 +1,8 @@
 package com.ft.ftchinese.models
 
 import android.content.Context
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 
-private const val SESSION_PREF_NAME = "user_session"
+private const val SESSION_PREF_NAME = "user"
 private const val PREF_USER_ID = "id"
 private const val PREF_USER_NAME = "user_name"
 private const val PREF_EMAIL = "email"
