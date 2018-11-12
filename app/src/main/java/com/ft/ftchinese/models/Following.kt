@@ -1,7 +1,6 @@
 package com.ft.ftchinese.models
 
 import android.content.Context
-import android.content.SharedPreferences
 
 private val followTypes = arrayOf("tag", "topic", "area", "industry", "author", "column")
 private val FOLLOW_TYPE_TAG = followTypes[0]
@@ -106,7 +105,7 @@ class FollowingManager(context: Context) {
         const val ACTION_UNFOLLOW = "unfollow"
         const val PREF_FILE_FOLLOWING = "following"
 
-        private var instance: FollowingManager ?= null
+        private var instance: FollowingManager? = null
 
         @Synchronized fun getInstance(ctx: Context): FollowingManager {
             if (instance == null) {
