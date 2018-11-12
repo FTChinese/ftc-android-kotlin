@@ -11,15 +11,12 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.*
-import android.webkit.*
 import android.widget.ImageView
 import android.widget.TextView
 import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.models.Following
 import com.ft.ftchinese.models.FollowingManager
 import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.util.gson
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
 import com.tencent.mm.opensdk.modelmsg.WXWebpageObject
@@ -32,7 +29,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.jetbrains.anko.toast
 import java.io.ByteArrayOutputStream
 
 /**
@@ -81,6 +77,24 @@ abstract class AbsContentActivity : AppCompatActivity(),
             }
         }
 
+    protected var showLanguageSwitch = false
+        set(value) {
+            if (value) {
+                language_group.visibility = View.VISIBLE
+            } else {
+                language_group.visibility = View.GONE
+            }
+        }
+
+    protected var enableLanguageSwitch = true
+        set(value) {
+            if (!value) {
+                titlebar_cn.isChecked = true
+                titlebar_en.isChecked = false
+                titlebar_bi.isChecked = false
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_content)
@@ -104,13 +118,22 @@ abstract class AbsContentActivity : AppCompatActivity(),
             loadsImagesAutomatically = true
         }
 
+        val jsInterface = JSInterface(this)
+        jsInterface.mFollowingManager = mFollowingManager
+
+        val wvClient = WVClient(this)
+        wvClient.mSession = mSessionManager
+
         web_view.apply {
 
             // Binding JavaScript code to Android Code
-            addJavascriptInterface(ContentWebViewInterface(), "Android")
+            addJavascriptInterface(
+                    jsInterface,
+                    JS_INTERFACE_NAME
+            )
 
             // Set a WebViewClient to handle various links in the WebView
-            webViewClient = WVClient(this@AbsContentActivity)
+            webViewClient = wvClient
 
             // Set the chrome handler
             webChromeClient = ChromeClient()
@@ -219,17 +242,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
         }
     }
 
-    abstract fun load()
-
-    fun showProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            swipe_refresh.isRefreshing = false
-            progress_bar.visibility = View.GONE
-        }
-    }
-
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val iconView: ImageView = itemView.findViewById(R.id.share_icon_view)
         val textView: TextView = itemView.findViewById(R.id.share_text_view)
@@ -313,85 +325,6 @@ abstract class AbsContentActivity : AppCompatActivity(),
         }
 
     }
-
-    /**
-     * Methods injected to JavaScript in WebView.
-     * This is used to handle click event for a story.
-     */
-    inner class ContentWebViewInterface : AnkoLogger {
-
-        /**
-         * Handle the 关注 button in WebView.
-         * When user clicked a button, data will be passed from WebView:
-         * {
-         *  tag: "中国经济",
-         *  type: null,
-         *  action: "follow | unfollow"
-         * }
-         * Data is saved in or removed from
-         * shared preference depending on the value of
-         * action.
-         *
-         * When loading HTML into WebView, you have to
-         * replace those values in HTML so that JS
-         * could know whether the current story is
-         * being followed:
-         *
-         * var follows = {
-         *  'tag': ['{follow-tags}'],
-         *  'topic': ['{follow-topics}'],
-         *  'industry': ['{follow-industries}'],
-         *  'area': ['{follow-areas}'],
-         *  'augthor': ['{follow-authors}'],
-         *  'column': ['{follow-columns}']
-         *  }
-         *
-         * An example of what does this string look liks:
-         * var follows = {
-         * 'tag': ['中国经济', '香港'],
-         * 'topic': ['management'],
-         * 'industry': ['technology', 'media'],
-         * 'area': ['china', 'us'],
-         * 'augthor': ['Martin Wolf'],
-         * 'column': ['10002']
-         * }
-         *
-         * NOTE: `augthor` might be a typo in the
-         * source code. Just follow it.
-         *
-         * You also need to replace `{story-theme}` in
-         * in HTML so that the 关注 could be displayed
-         * in a webview. The HTML should be:
-         * <div class="story-theme">
-         *     <a target="_blank" href="/tag/香港">香港</a>
-         *     <button class="myft-follow tick" data-tag="香港" data-type="tag">已关注</button>
-         * </div>
-         *
-         * This string is generated by Story#htmlForTheme in models.Article.kt
-         *
-         * The replacement of HTML content happens in
-         * ChannelItem#render().
-         *
-         *  See Web-NewFTCiPhone/app/templates/story.html for the HTML codes.
-         */
-        @JavascriptInterface
-        fun follow(message: String) {
-            info("Clicked a follow button")
-            info("Received follow message: $message")
-
-            val following = gson.fromJson<Following>(message, Following::class.java)
-            mFollowingManager?.save(following)
-        }
-
-        /**
-         * Handle login in webview. Usage: Android.login(message: String)
-         */
-        @JavascriptInterface
-        fun login(message: String) {
-            info("Login data from webview")
-            toast("WebView login: $message")
-        }
-    }
 }
 
 data class ShareItem(
@@ -408,15 +341,15 @@ data class ShareItem(
 }
 
 fun bmpToByteArray(bmp: Bitmap, needRecycle: Boolean): ByteArray {
-		val output = ByteArrayOutputStream();
-		bmp.compress(Bitmap.CompressFormat.PNG, 100, output);
+		val output = ByteArrayOutputStream()
+		bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
 		if (needRecycle) {
 			bmp.recycle()
 		}
 
 		val result = output.toByteArray()
 		try {
-			output.close();
+			output.close()
 		} catch (e: Exception) {
 			e.printStackTrace()
 		}
