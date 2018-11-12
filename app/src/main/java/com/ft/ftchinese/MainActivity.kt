@@ -22,6 +22,7 @@ import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.*
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.Store
+import com.github.kittinunf.fuel.core.Request
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -48,7 +49,12 @@ class MainActivity : AppCompatActivity(),
     private var mShowAdJob: Job? = null
     private var mDownloadAdJob: Job? = null
 
+    private var mAdScheduleRequest: Request? = null
+    private var mDownloadAdRequest: Request? = null
+
     private var mSession: SessionManager? = null
+    private var mAdManager: LaunchAdManager? = null
+
 
     private var mNewsAdapter: TabPagerAdapter? = null
     private var mEnglishAdapter: TabPagerAdapter? = null
@@ -162,8 +168,7 @@ class MainActivity : AppCompatActivity(),
         WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false).registerApp(BuildConfig.WECAHT_APP_ID)
 
         mSession = SessionManager.getInstance(this)
-
-
+        mAdManager = LaunchAdManager.getInstance(this)
 
         // Show advertisement
         // Keep a reference the coroutine in case user exit at this moment
@@ -227,15 +232,15 @@ class MainActivity : AppCompatActivity(),
     }
 
     // https://developer.android.com/training/system-ui/immersive
-    private fun hideSystemUI() {
-        root_container.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LOW_PROFILE or
-                View.SYSTEM_UI_FLAG_FULLSCREEN or
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-    }
+//    private fun hideSystemUI() {
+//        root_container.systemUiVisibility =
+//                View.SYSTEM_UI_FLAG_LOW_PROFILE or
+//                View.SYSTEM_UI_FLAG_FULLSCREEN or
+//                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+//                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+//                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+//                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//    }
 
     private fun showSystemUI() {
         supportActionBar?.show()
@@ -246,10 +251,12 @@ class MainActivity : AppCompatActivity(),
     private suspend fun showAd() {
 
         // Pick an ad based on its probability distribution factor.
-        val ad = LaunchSchedule.randomAdFileName(this) ?: return
+        val adManager = mAdManager ?: return
+        val account = mSession?.loadUser()
+        val ad = adManager.getRandomAd(account?.membership) ?: return
 
         // Check if the required ad image is required.
-        if (!Store.exists(this, ad.imageName)) {
+        if (!Store.exists(filesDir, ad.imageName)) {
             info("Ad image ${ad.imageName} not found")
             showSystemUI()
             return
@@ -292,9 +299,11 @@ class MainActivity : AppCompatActivity(),
         }
 
 
-        val drawable = GlobalScope.async {
+        val readImageJob = GlobalScope.async {
             Drawable.createFromStream(openFileInput(ad.imageName), ad.imageName)
-        }.await()
+        }
+
+        val drawable = readImageJob.await()
 
         info("Retrieved drawable: ${ad.imageName}")
 
@@ -323,22 +332,20 @@ class MainActivity : AppCompatActivity(),
     }
 
     // Get advertisement schedule from server
-    private suspend fun checkAd() {
+    private fun checkAd() {
 
-        info("Fetch schedule data")
-        val schedules = GlobalScope.async {
-            LaunchSchedule.fetchData()
-        }.await()
+        val adManager = mAdManager ?: return
 
-        info("Save schedule")
-        schedules?.save(this@MainActivity)
+        info("Fetch ad schedule data")
 
-        val adsToDownload = LaunchSchedule.loadFromPref(this@MainActivity, days = 1)
+        mAdScheduleRequest = adManager.fetchAndCache()
+
+        val adsToDownload = adManager.load(days = 1)
         info("Ad to download: $adsToDownload")
 
         for (ad in adsToDownload) {
             info("Download ad image: ${ad.imageUrl}")
-            ad.cacheImage(this@MainActivity)
+            mDownloadAdRequest = ad.cacheImage(filesDir)
         }
     }
 
@@ -390,13 +397,21 @@ class MainActivity : AppCompatActivity(),
     override fun onPause() {
         super.onPause()
         info("onPause finished")
+
+        mShowAdJob?.cancel()
+        mDownloadAdJob?.cancel()
+        mAdScheduleRequest?.cancel()
+        mDownloadAdRequest?.cancel()
     }
 
     override fun onStop() {
         super.onStop()
         info("onStop finished")
+
         mShowAdJob?.cancel()
         mDownloadAdJob?.cancel()
+        mAdScheduleRequest?.cancel()
+        mDownloadAdRequest?.cancel()
     }
 
     override fun onDestroy() {
@@ -404,6 +419,16 @@ class MainActivity : AppCompatActivity(),
 
         mShowAdJob?.cancel()
         mDownloadAdJob?.cancel()
+        mAdScheduleRequest?.cancel()
+        mDownloadAdRequest?.cancel()
+
+        mShowAdJob = null
+        mDownloadAdJob = null
+        mAdScheduleRequest = null
+        mDownloadAdRequest = null
+
+        mSession = null
+        mAdManager = null
 
     }
 
