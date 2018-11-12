@@ -51,6 +51,7 @@ data class Account(
         val response = GlobalScope.async {
             Fetch().post(NextApi.REQUEST_VERIFICATION)
                     .noCache()
+                    .setClient()
                     .setUserId(this@Account.id)
                     .body(null)
                     .end()
