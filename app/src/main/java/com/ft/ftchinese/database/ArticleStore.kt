@@ -17,6 +17,9 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
         if (item == null) return 0
 
         val values = contentValues(item)
+
+        info("Add a reading history: $values")
+
         return mDatabase.insert(HistoryTable.NAME, null, values)
     }
 
@@ -43,8 +46,8 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
 
     fun dropHistory() {
         try {
-            mDatabase.execSQL(HistoryTable.SQL_DELETE_TABLE)
-            mDatabase.execSQL(HistoryTable.SQL_CREATE_TABLE)
+            mDatabase.execSQL(HistoryTable.delete)
+            mDatabase.execSQL(HistoryTable.delete)
         } catch (e: Exception) {
             info("Drop reading_history table error: $e")
         }
@@ -58,9 +61,10 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
     fun addStarred(item: ChannelItem?): Long {
         if (item == null) return 0
 
-        info("Starred an article: $item")
-
         val values = contentValues(item)
+
+        info("Add a starred article: $values")
+
         return  mDatabase.insert(StarredTable.NAME, null, values)
     }
 
@@ -68,7 +72,7 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
         if (item == null) return 0
 
         val id = item.id
-        return mDatabase.delete(StarredTable.NAME, "${StarredTable.Cols.ID} = ?", arrayOf(id))
+        return mDatabase.delete(StarredTable.NAME, "${Cols.ID} = ?", arrayOf(id))
     }
 
     fun isStarring(item: ChannelItem?): Boolean {
@@ -79,7 +83,7 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
             SELECT EXISTS(
                 SELECT *
                 FROM ${StarredTable.NAME}
-                WHERE ${StarredTable.Cols.ID} = ?
+                WHERE ${Cols.ID} = ?
                 LIMIT 1
             )
         """.trimIndent()
@@ -139,10 +143,14 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
 
         private fun contentValues(item: ChannelItem): ContentValues {
             return ContentValues().apply {
-                put(HistoryTable.Cols.ID, item.id)
-                put(HistoryTable.Cols.TYPE, item.type)
-                put(HistoryTable.Cols.TITLE, item.headline)
-                put(HistoryTable.Cols.STANDFIRST, item.standfirst)
+                put(Cols.ID, item.id)
+                put(Cols.TYPE, item.type)
+                put(Cols.SUB_TYPE, item.subType)
+                put(Cols.TITLE, item.headline)
+                put(Cols.STANDFIRST, item.standfirst)
+                put(Cols.AUDIO_URL, item.eaudio)
+                put(Cols.RADIO_URL, item.shortlead)
+                put(Cols.PUBLISHED_AT, item.timeStamp)
             }
         }
     }
