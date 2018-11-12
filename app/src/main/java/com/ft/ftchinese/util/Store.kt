@@ -16,6 +16,7 @@ object Store {
 
     private const val TAG = "Store"
 
+    // Cache files to the data directory.
     fun save(context: Context?, filename: String?, text: String?): Job? {
 
         if (context == null || filename.isNullOrBlank() || text.isNullOrBlank()) {
@@ -38,6 +39,14 @@ object Store {
         return try {
             File(context.filesDir, filename).exists()
         } catch (e: Exception) {
+            false
+        }
+    }
+
+    fun exists(filesDir: File, fileName: String): Boolean {
+        return try {
+            File(filesDir, fileName).exists()
+        } catch (e: java.lang.Exception) {
             false
         }
     }
