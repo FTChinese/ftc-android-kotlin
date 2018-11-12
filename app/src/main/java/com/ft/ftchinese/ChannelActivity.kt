@@ -11,7 +11,8 @@ import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isActiveNetworkWifi
 import com.ft.ftchinese.util.isNetworkConnected
-import com.koushikdutta.ion.Ion
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.Request
 import kotlinx.android.synthetic.main.activity_chanel.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -39,7 +40,10 @@ class ChannelActivity : AppCompatActivity(),
     private var mPageMeta: PagerTab? = null
 
     private var mLoadJob: Job? = null
+    private var mCacheJob: Job? = null
     private var mRefreshJob: Job? = null
+
+    private var mRequest: Request? = null
 
     private var mSession: SessionManager? = null
 
@@ -150,18 +154,18 @@ class ChannelActivity : AppCompatActivity(),
 
         val url = mPageMeta?.contentUrl ?: return
 
-        // Launch in background.
-        mLoadJob = GlobalScope.launch {
-            try {
-                val frag = Ion.with(this@ChannelActivity)
-                        .load(url)
-                        .asString()
-                        .get()
-                Store.save(this@ChannelActivity, mPageMeta?.fileName, frag)
-            } catch (e: Exception) {
-                info("Error fetch data. Reason: $e")
-            }
-        }
+
+        mRequest = Fuel.get(url)
+                .responseString { request, response, result ->
+                    val (data, error) = result
+
+                    if (error != null || data == null) {
+                        info("Cannot update cache in background. Reason: $error")
+                        return@responseString
+                    }
+
+                    cacheData(data)
+                }
     }
 
     private suspend fun loadFromServer() {
@@ -183,31 +187,27 @@ class ChannelActivity : AppCompatActivity(),
             isInProgress = true
         }
 
-        Ion.with(this)
-                .load(url)
-                .asString()
-                .setCallback { e, result ->
+        mRequest = Fuel.get(url)
+                .responseString { request, response, result ->
                     isInProgress = false
 
-                    if (e != null) {
-                        info("Failed to fetch $url. Reason $e")
-                        return@setCallback
+                    val (data, error) = result
+
+                    if (error != null || data == null) {
+                        info(R.string.prompt_load_failure)
+                        return@responseString
                     }
 
-                    renderAndLoad(result)
+                    renderAndLoad(data)
 
-                    cacheData(result)
+                    cacheData(data)
                 }
     }
 
     private fun cacheData(data: String) {
-        GlobalScope.launch {
-            info("Caching data to file: ${mPageMeta?.fileName}")
-
-            Store.save(this@ChannelActivity, mPageMeta?.fileName, data)
-        }
-
+        mCacheJob = Store.save(this@ChannelActivity, mPageMeta?.fileName, data)
     }
+    
     private fun renderAndLoad(htmlFragment: String) {
         val dataToLoad = mPageMeta?.render(mTemplate, htmlFragment)
 
@@ -233,15 +233,23 @@ class ChannelActivity : AppCompatActivity(),
 
     override fun onStop() {
         super.onStop()
+
+        mRequest?.cancel()
+        mCacheJob?.cancel()
         mLoadJob?.cancel()
         mRefreshJob?.cancel()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+
+        mRequest?.cancel()
+        mCacheJob?.cancel()
         mLoadJob?.cancel()
         mRefreshJob?.cancel()
 
+        mRequest = null
+        mCacheJob = null
         mLoadJob = null
         mRefreshJob = null
     }

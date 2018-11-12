@@ -6,23 +6,32 @@ import android.util.Log
 import com.ft.ftchinese.R
 import com.jakewharton.byteunits.BinaryByteUnit
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.io.File
+import java.io.IOException
 
 object Store {
 
     private const val TAG = "Store"
 
-    fun save(context: Context?, filename: String?, text: String?) {
+    fun save(context: Context?, filename: String?, text: String?): Job? {
 
         if (context == null || filename.isNullOrBlank() || text.isNullOrBlank()) {
-            return
+            return null
         }
         val file = File(context.filesDir, filename)
 
-        file.writeText(text)
+        return GlobalScope.launch {
+            try {
+                file.writeText(text)
 
-        Log.i(TAG, "Saved file: ${file.name}. Canonical path: ${file.canonicalPath}")
+                Log.i(TAG, "Saved file: ${file.name}. Canonical path: ${file.canonicalPath}")
+            } catch (e: IOException) {
+                Log.i(TAG, "Failed to save ${file.name}. Reason: $e")
+            }
+        }
     }
 
     fun exists(context: Context, filename: String): Boolean {

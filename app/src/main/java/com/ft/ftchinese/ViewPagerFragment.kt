@@ -13,8 +13,8 @@ import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isActiveNetworkWifi
 import com.ft.ftchinese.util.isNetworkConnected
-import com.koushikdutta.async.future.Future
-import com.koushikdutta.ion.Ion
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.Request
 import kotlinx.android.synthetic.main.fragment_view_pager.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.*
@@ -45,8 +45,10 @@ class ViewPagerFragment : Fragment(),
     private var mPageMeta: PagerTab? = null
 
     private var mLoadJob: Job? = null
+    private var mCacheJob: Job? = null
     private var mRefreshJob: Job? = null
-    private var mRequest: Future<String>? = null
+
+    private var mRequest: Request? = null
 
     private var mSession: SessionManager? = null
 
@@ -235,17 +237,17 @@ class ViewPagerFragment : Fragment(),
 
         val url = mPageMeta?.contentUrl ?: return
 
-        mLoadJob = GlobalScope.launch {
-            try {
-                val frag = Ion.with(context)
-                        .load(url)
-                        .asString()
-                        .get()
-                Store.save(context, mPageMeta?.fileName, frag)
-            } catch (e: Exception) {
-                info("Error fetch data from $url. Reason: $e")
-            }
-        }
+        mRequest = Fuel.get(url)
+                .responseString { _, _, result ->
+                    val (data, error) = result
+
+                    if (error != null || data == null) {
+                        info("Cannot update cache in background. Reason: $error")
+                        return@responseString
+                    }
+
+                    cacheData(data)
+                }
     }
 
     private suspend fun loadFromServer() {
@@ -266,31 +268,25 @@ class ViewPagerFragment : Fragment(),
             isInProgress = true
         }
 
-        mRequest = Ion.with(context)
-                .load(url)
-                .noCache()
-                .asString()
-                .setCallback { e, result ->
+        mRequest = Fuel.get(url)
+                .responseString { _, _, result ->
                     isInProgress = false
 
-                    if (e != null) {
-                        info("Failed to fetch $url. Reason: $e")
-                        return@setCallback
+                    val (data, error) = result
+                    if (error != null || data == null) {
+                        toast(R.string.prompt_load_failure)
+                        return@responseString
+
                     }
 
-                    renderAndLoad(result)
-
-                    cacheData(result)
+                    renderAndLoad(data)
+                    cacheData(data)
                 }
     }
 
 
     private fun cacheData(data: String) {
-        GlobalScope.launch {
-            info("Caching data to file: ${mPageMeta?.fileName}")
-
-            Store.save(context, mPageMeta?.fileName, data)
-        }
+        mCacheJob = Store.save(context, mPageMeta?.fileName, data)
     }
 
     private fun renderAndLoad(htmlFragment: String) {
@@ -311,6 +307,7 @@ class ViewPagerFragment : Fragment(),
         info("onPause finished")
 
         mRequest?.cancel()
+        mCacheJob?.cancel()
         mLoadJob?.cancel()
         mRefreshJob?.cancel()
     }
@@ -320,6 +317,7 @@ class ViewPagerFragment : Fragment(),
         info("onStop finished")
 
         mRequest?.cancel()
+        mCacheJob?.cancel()
         mLoadJob?.cancel()
         mRefreshJob?.cancel()
     }
@@ -328,10 +326,12 @@ class ViewPagerFragment : Fragment(),
         super.onDestroy()
 
         mRequest?.cancel()
+        mCacheJob?.cancel()
         mLoadJob?.cancel()
         mRefreshJob?.cancel()
 
         mRequest = null
+        mCacheJob = null
         mLoadJob = null
         mRefreshJob = null
     }

@@ -9,9 +9,9 @@ import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isNetworkConnected
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.Request
 import com.google.gson.JsonSyntaxException
-import com.koushikdutta.async.future.Future
-import com.koushikdutta.ion.Ion
 import kotlinx.android.synthetic.main.activity_content.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.info
@@ -39,11 +39,12 @@ class StoryActivity : AbsContentActivity() {
     override var mChannelItem: ChannelItem? = null
 
     private var mLoadJob: Job? = null
+    private var mCacheJob: Job? = null
     private var mRefreshJob: Job? = null
-    private var mRequest: Future<String>? = null
+
+    private var mRequest: Request? = null
 
     private var mTemplate: String? = null
-    private var mStory: Story? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -146,23 +147,11 @@ class StoryActivity : AbsContentActivity() {
             mTemplate = Store.readStoryTemplate(resources)
         }
 
-        return try {
-            // Try to load cached JSON.
-            val jsonData = Store.load(this, mChannelItem?.cacheFileName)
+        val jsonData = Store.load(this, mChannelItem?.cacheFileName) ?: return false
 
-            val story = gson.fromJson<Story>(jsonData, Story::class.java)
+        renderAndLoad(jsonData)
 
-            renderAndLoad(story)
-
-            true
-
-        } catch (e: JsonSyntaxException) {
-            info("Parse story data failed. Reason: $e")
-            false
-        } catch (e: Exception) {
-            info("Cannot load story json from cache. Reason: $e")
-            false
-        }
+        return true
     }
 
     private suspend fun loadFromServer() {
@@ -182,41 +171,35 @@ class StoryActivity : AbsContentActivity() {
             isInProgress = true
         }
 
-
-        mRequest = Ion.with(this)
-                .load(url)
-                .asString()
-                .setCallback { e, result ->
+        mRequest = Fuel.get(url)
+                .responseString { _, _, result ->
                     isInProgress = false
 
-                    if (e != null) {
-                        toast("Cannot load data. Reason: $e")
-                        return@setCallback
+                    val (data, error) = result
+
+                    if (error != null || data == null) {
+                        toast(R.string.prompt_load_failure)
+                        return@responseString
                     }
 
-                    try {
-                        val story = gson.fromJson<Story>(result, Story::class.java)
+                    renderAndLoad(data)
 
-                        renderAndLoad(story)
-
-                        cacheData(result)
-                    } catch (e: JsonSyntaxException) {
-                        info("Cannot parse JSON. Reason: $e")
-                    } catch (e: Exception) {
-                        info("Failed to load data. Reason: $e")
-                    }
+                    cacheData(data)
                 }
     }
 
     private fun cacheData(data: String) {
-        GlobalScope.launch {
-            info("Caching data to file: ${mChannelItem?.cacheFileName}")
-
-            Store.save(this@StoryActivity, mChannelItem?.cacheFileName, data)
-        }
+        mCacheJob = Store.save(this@StoryActivity, mChannelItem?.cacheFileName, data)
     }
 
-    private fun renderAndLoad(story: Story) {
+    private fun renderAndLoad(data: String) {
+
+        val story = try {
+            gson.fromJson<Story>(data, Story::class.java)
+        } catch (e: JsonSyntaxException) {
+            toast(R.string.prompt_load_failure)
+            return
+        }
 
         showLanguageSwitch = story.isBilingual
 
