@@ -13,12 +13,6 @@ import org.jetbrains.anko.info
 import java.util.*
 import java.io.IOException
 
-object HostName {
-    const val FTC = "www.ftchinese.com"
-    const val MAILBOX = "api003.ftmailbox.com"
-    val hosts = arrayOf(FTC, MAILBOX)
-}
-
 /**
  * The following data keys is used to parse JSON data passed from WebView by ContentWebViewInterface.postItems methods.
  * Most of them are useless, serving as placeholders so that we can extract the deep nested JSON values.
@@ -83,7 +77,7 @@ data class ChannelItem(
         val subType: String? = null, // speedreading | radio
         val headline: String, // It seems it is not used.
         val eaudio: String? = null,
-        val shortlead: String? = null, // this is a url of mp3
+        val shortlead: String? = null, // this is a url of mp3 for subType radio.
         val timeStamp: String? = null // "1536249600"
 ) : AnkoLogger {
 
@@ -103,9 +97,9 @@ data class ChannelItem(
 
     // Used for sharing
     val canonicalUrl: String
-        get() = "http://www.ftchinese.com/$type/$id"
+        get() = "$URL_FTC/$type/$id"
 
-    val isSevenDaysOld: Boolean
+    private val isSevenDaysOld: Boolean
         get() {
             if (timeStamp == null) {
                 return false
@@ -122,44 +116,51 @@ data class ChannelItem(
         }
 
     val isMembershipRequired: Boolean
-        get() = isSevenDaysOld || type == TYPE_PREMIUM || type == TYPE_INTERACTIVE
+        get() = isSevenDaysOld || type == TYPE_PREMIUM
 
-    private val filename: String
+    // File name used to cache/retrieve json data.
+    val cacheFileName: String
         get() = "${type}_$id.json"
 
     private val commentsId: String
-        get() {
-            return when(subType) {
+        get() = when(subType) {
                 "interactive" -> "r_interactive_$id"
                 "video" -> "r_video_$id"
                 "story" -> id
                 "photo", "photonews" -> "r_photo_$id"
                 else -> "r_${type}_$id"
             }
-        }
+
 
     private val commentsOrder: String
         get() {
             return "story"
         }
 
+    private val baseUri = Uri.parse(URL_MAILBOX)
     /**
-     * Build the url to fetch content.
+     * URL used to fetch another list of articles.
      * See https://en.wikipedia.org/wiki/Uniform_Resource_Identifier for URI definition.
      */
-    fun buildUrlForListFrag(): Uri {
-        return Uri.Builder()
-                .scheme("https")
-                .authority(HostName.MAILBOX)
+    val uriForWebFrag: Uri
+        get() = baseUri.buildUpon()
                 .appendPath(type)
                 .appendPath(id)
                 .appendQueryParameter("bodyonly", "yes")
                 .appendQueryParameter("webview", "ftcapp")
                 .build()
-    }
 
-    // See Page/FTChinese/Main/APIs.swift
-    // https://api003.ftmailbox.com/interactive/12339?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24
+    val uriForWebPage: Uri
+        get() = baseUri.buildUpon()
+                .appendPath(type)
+                .appendPath(id)
+                .appendQueryParameter("webview", "ftcapp")
+                .build()
+    /**
+     * URL used to fetch an article
+     * See Page/FTChinese/Main/APIs.swift
+     * https://api003.ftmailbox.com/interactive/12339?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24
+     */
     val apiUrl: String?
         get() = when(type) {
             TYPE_STORY, TYPE_PREMIUM -> "https://api.ftmailbox.com/index.php/jsapi/get_story_more_info/$id"
@@ -174,56 +175,10 @@ data class ChannelItem(
                 else -> "https://api003.ftmailbox.com/interactive/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
             }
 
-            "gym", "special" -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp"
-
             TYPE_VIDEO -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&004"
 
-            else -> null
+            else -> uriForWebPage.toString()
         }
-
-    /**
-     * @throws JsonSyntaxException
-     */
-    suspend fun loadCachedStory(context: Context?): Story? {
-
-        val jsonData = Store.load(context, filename) ?: return null
-
-        return parseJson(jsonData)
-    }
-
-    /**
-     * @throws JsonSyntaxException
-     * @throws IOException
-     * @throws IllegalStateException
-     */
-    fun fetchStory(context: Context): Story? {
-
-        val url = apiUrl ?: return null
-
-        info("Fetch a story from $url")
-        val jsonData = Fetch().get(url).string() ?: return null
-
-        GlobalScope.async {
-            Store.save(context, filename, jsonData)
-        }
-
-        val story = parseJson(jsonData)
-
-        keywords = story.keywords
-
-        return story
-    }
-
-    /**
-     * @throws JsonSyntaxException
-     */
-    private fun parseJson(jsonData: String): Story {
-
-        val article = gson.fromJson<Story>(jsonData, Story::class.java)
-        standfirst = article.clongleadbody
-
-        return article
-    }
 
     private fun pickAdZone(homepageZone: String, fallbackZone: String): String {
         if (!keywords.isNullOrBlank()) {
@@ -324,11 +279,14 @@ data class ChannelItem(
         return fallbackId
     }
 
-    fun render(template: String?, article: Story?, language: Int, follows: JSFollows): String? {
+    fun renderStory(template: String?, story: Story?, language: Int, follows: JSFollows): String? {
 
-        if (template == null || article == null) {
+        if (template == null || story == null) {
             return null
         }
+
+        standfirst = story.clongleadbody
+        keywords = story.keywords
 
         var shouldHideAd = false
 
@@ -355,39 +313,39 @@ data class ChannelItem(
 
         when (language) {
             LANGUAGE_CN -> {
-                body = article.getCnBody(withAd = !shouldHideAd)
-                title = article.title.cn
+                body = story.getCnBody(withAd = !shouldHideAd)
+                title = story.title.cn
             }
             LANGUAGE_EN -> {
-                body = article.getEnBody(withAd = !shouldHideAd)
-                title = article.title.en ?: ""
+                body = story.getEnBody(withAd = !shouldHideAd)
+                title = story.title.en ?: ""
             }
             LANGUAGE_BI -> {
-                body = article.bodyAlignedXML
-                title = "${article.title.cn}<br>${article.title.en}"
+                body = story.bodyAlignedXML
+                title = "${story.title.cn}<br>${story.title.en}"
             }
         }
 
         val storyHTMLOriginal = template
-                .replace("{story-tag}", article.tag)
-                .replace("{story-author}", article.cauthor)
-                .replace("{story-genre}", article.genre)
-                .replace("{story-area}", article.area)
-                .replace("{story-industry}", article.industry)
+                .replace("{story-tag}", story.tag)
+                .replace("{story-author}", story.cauthor)
+                .replace("{story-genre}", story.genre)
+                .replace("{story-area}", story.area)
+                .replace("{story-industry}", story.industry)
                 .replace("{story-main-topic}", "")
                 .replace("{story-sub-topic}", "")
                 .replace("{adchID}", pickAdchID(HOME_AD_CH_ID, DEFAULT_STORY_AD_CH_ID))
                 .replace("{comments-id}", commentsId)
-                .replace("{story-theme}", article.htmlForTheme())
+                .replace("{story-theme}", story.htmlForTheme())
                 .replace("{story-headline}", title)
-                .replace("{story-lead}", article.standfirst)
-                .replace("{story-image}", article.htmlForCoverImage())
-                .replace("{story-time}", article.createdAt)
-                .replace("{story-byline}", article.byline)
+                .replace("{story-lead}", story.standfirst)
+                .replace("{story-image}", story.htmlForCoverImage())
+                .replace("{story-time}", story.createdAt)
+                .replace("{story-byline}", story.byline)
                 .replace("{story-body}", body)
-                .replace("{story-id}", article.id)
-                .replace("{related-stories}", article.htmlForRelatedStories())
-                .replace("{related-topics}", article.htmlForRelatedTopics())
+                .replace("{story-id}", story.id)
+                .replace("{related-stories}", story.htmlForRelatedStories())
+                .replace("{related-topics}", story.htmlForRelatedTopics())
                 .replace("{comments-order}", commentsOrder)
                 .replace("{story-container-style}", "")
                 .replace("'{follow-tags}'", follows.tag)
@@ -410,8 +368,8 @@ data class ChannelItem(
     }
 
     companion object {
-        private const val TAG = "ChannelItem"
         private const val PREF_NAME_FAVOURITE = "favourite"
+
         const val LANGUAGE_CN = 0
         const val LANGUAGE_EN = 1
         const val LANGUAGE_BI = 2
@@ -420,11 +378,18 @@ data class ChannelItem(
         const val TYPE_VIDEO = "video"
         const val TYPE_INTERACTIVE = "interactive"
         const val TYPE_COLUMN = "column"
-        const val TYPE_PHOTONEWS = "photonews"
+        const val TYPE_PHOTO_NEWS = "photonews"
+        const val TYPE_CHANNEL = "channel"
+        const val TYPE_TAG = "tag"
+        const val TYPE_M = "m"
+
         const val SUB_TYPE_RADIO = "radio"
         const val SUB_TYPE_USER_COMMENT = ""
         const val SUB_TYPE_MBAGYM = "mbagym"
         const val SUB_TYPE_SPEED_READING = "speedreading"
+
+        const val SUB_TYPE_CORP = "corp"
+        const val SUB_TYPE_MARKETING = "marketing"
 
         const val HOME_AD_ZONE = "home"
         const val DEFAULT_STORY_AD_ZONE = "world"
