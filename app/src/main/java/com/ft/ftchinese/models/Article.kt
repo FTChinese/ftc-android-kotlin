@@ -45,7 +45,6 @@ class Story (
         val story_pic: StoryPic,
         val relative_story: Array<RelatedStory>
 ) {
-    private val TAG = "Story"
 
     val title: Bilingual
         get() = Bilingual(cheadline, eheadline)
