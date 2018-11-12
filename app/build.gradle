@@ -89,8 +89,8 @@ dependencies {
     //  Network
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.koushikdutta.ion:ion:2.2.1'
     implementation "com.github.kittinunf.fuel:fuel-android:1.16.0"
+
     //  ORM. Unfortunately it does not work with Kotlin.
     //    implementation "android.arch.persistence.room:runtime:$room_version"
     //    kapt "android.arch.persistence.room:compiler:$room_version"
