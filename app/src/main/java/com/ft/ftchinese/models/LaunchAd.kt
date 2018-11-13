@@ -31,6 +31,8 @@ data class LaunchMeta(
 )
 
 data class LaunchAd(
+        val type: String,
+        val title: String,
         @SerializedName("fileName") val imageUrl: String,
         @SerializedName("click") val linkUrl: String,
         @SerializedName("impression_1") val impressionUrl1: String,
