@@ -142,11 +142,7 @@ class StoryActivity : AbsContentActivity() {
             }
         }
 
-        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.VIEW_ITEM, Bundle().apply {
-            putString(FirebaseAnalytics.Param.ITEM_ID, mChannelItem?.id)
-            putString(FirebaseAnalytics.Param.ITEM_NAME, mChannelItem?.headline)
-            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, mChannelItem?.type)
-        })
+        logViewItemEvent()
     }
 
     private suspend fun loadFromCache(): Boolean {

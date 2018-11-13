@@ -208,6 +208,16 @@ abstract class AbsContentActivity : AppCompatActivity(),
         }
     }
 
+    protected fun logViewItemEvent() {
+        val item = mChannelItem ?: return
+
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.VIEW_ITEM, Bundle().apply {
+            putString(FirebaseAnalytics.Param.ITEM_ID, item.id)
+            putString(FirebaseAnalytics.Param.ITEM_NAME, item.headline)
+            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, item.type)
+        })
+    }
+
     // Create options menu
 //    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 //        super.onCreateOptionsMenu(menu)

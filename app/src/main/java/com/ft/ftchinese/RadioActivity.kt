@@ -83,5 +83,7 @@ class RadioActivity : AbsContentActivity() {
 
     private fun loadUrl(url: String?) {
         web_view.loadUrl(url)
+
+        logViewItemEvent()
     }
 }

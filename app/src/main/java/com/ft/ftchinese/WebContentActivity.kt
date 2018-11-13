@@ -73,6 +73,8 @@ class WebContentActivity : AbsContentActivity() {
 
     fun load(url: String) {
         web_view.loadUrl(url)
+
+        logViewItemEvent()
     }
 
     companion object {
