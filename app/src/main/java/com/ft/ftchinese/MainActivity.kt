@@ -43,7 +43,6 @@ import java.lang.Exception
 class MainActivity : AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
         TabLayout.OnTabSelectedListener,
-        ViewPagerFragment.OnFragmentInteractionListener,
 //        ChannelWebViewClient.OnPaginateListener,
         AnkoLogger {
 
@@ -68,10 +67,6 @@ class MainActivity : AppCompatActivity(),
     private var mMyftPagerAdapter: MyftPagerAdapter? = null
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
-
-    override fun getSession(): SessionManager? {
-        return mSession
-    }
 
     /**
      * Implementation of BottomNavigationView.OnNavigationItemSelectedListener
@@ -129,7 +124,7 @@ class MainActivity : AppCompatActivity(),
 
     private val logoutListener = View.OnClickListener {
 
-        SessionManager.getInstance(applicationContext).logout()
+        mSession?.logout()
 
         updateSessionUI()
 
@@ -139,7 +134,7 @@ class MainActivity : AppCompatActivity(),
 
     private val drawerHeaderTitleListener = View.OnClickListener {
         // If user is not logged in, show login.
-        if (!SessionManager.getInstance(applicationContext).isLoggedIn()) {
+        if (mSession?.isLoggedIn() == false) {
             SignInActivity.start(this)
             return@OnClickListener
         }
