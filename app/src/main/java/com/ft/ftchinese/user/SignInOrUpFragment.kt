@@ -21,11 +21,9 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.Account
-import com.ft.ftchinese.models.ErrorResponse
-import com.ft.ftchinese.models.Login
-import com.ft.ftchinese.models.SignUp
+import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.isNetworkConnected
+import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.fragment_sign_in_or_up.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
@@ -36,6 +34,10 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
 
     private var job: Job? = null
     private var listener: OnFragmentInteractionListener? = null
+
+    private var mFirebaseAnalytics: FirebaseAnalytics? = null
+    private var mSession: SessionManager? = null
+
 //    private var wxApi: IWXAPI? = null
 
     // Show or hide progress bar.
@@ -67,6 +69,11 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
 
         if (context is OnFragmentInteractionListener) {
             listener = context
+        }
+
+        if (context != null) {
+            mFirebaseAnalytics = FirebaseAnalytics.getInstance(context)
+            mSession = SessionManager.getInstance(context)
         }
     }
 
@@ -267,12 +274,18 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
 
                 var user: Account? = null
 
+                val bundle = Bundle().apply {
+                    putString(FirebaseAnalytics.Param.METHOD, "email")
+                }
+
                 when (usedFor) {
                     USED_FOR_SIGN_IN -> {
+                        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
                         info("Start log in")
                         user = Login(email, password).send()
                     }
                     USED_FOR_SIGN_UP -> {
+                        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
                         info("Start signing up")
                         user = SignUp(email, password).send()
                     }
@@ -281,16 +294,18 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
                 isInProgress = false
 
                 if (user == null) {
-                    toast("Failed. Please try again")
                     isInputAllowed = true
+
+                    when (usedFor) {
+                        USED_FOR_SIGN_IN -> toast(R.string.error_login)
+                        USED_FOR_SIGN_UP -> toast(R.string.error_sign_up)
+                    }
+
+
                     return@launch
                 }
 
-                info("Account $user")
-
-                // Ask parent activity to save session data.
-                listener?.onUserSession(user)
-
+                mSession?.saveUser(user)
                 activity?.setResult(Activity.RESULT_OK)
                 activity?.finish()
 
