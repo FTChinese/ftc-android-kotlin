@@ -19,14 +19,7 @@
     <string name="titlebar_en">英文</string>
     <string name="titlebar_bilingual">對照</string>
 
-    <string name="prompt_exit">再按一次退出程序</string>
-    <string name="prompt_ad_timer">跳過 %1$d</string>
 
-    <string name="prompt_refreshing">更新頁面</string>
-    <string name="prompt_no_network">網路無連結，請檢查網路設置</string>
-    <string name="prompt_load_failure">無法下載頁面，請稍後再試</string>
-    <string name="prompt_restricted_paid_user">僅限會員閱讀</string>
-    <string name="prompt_restricted_login">會員登入后可以閱讀</string>
 
 
     <!-- Drawer -->
@@ -124,6 +117,15 @@
     <string name="about_title2">關於英國《金融時報》</string>
     <string name="about_text2">英國《金融時報》是一家世界領先的商業新聞機構，以其內容報導的權威性、真實性、準確性享譽世界。2018年，英國《金融時報》迎來130周年，創造歷史最高的付費訂閱記錄，擁有逾910,000位付費讀者。現在，英國《金融時報》已成為一家以數字內容出版為主營業務的新聞機構，數位訂閱增長達10%，擁有逾714,000位付費讀者, 並在所有付費讀者中占比超過75%。其來自內容的收入增長迅速，約占總營收的2/3，與五年前相比成長一倍。</string>
 
+    <string name="prompt_exit">再按一次退出程序</string>
+    <string name="prompt_ad_timer">跳過 %1$d</string>
+
+    <string name="prompt_refreshing">更新頁面</string>
+    <string name="prompt_no_network">網路無連結，請檢查網路設置</string>
+    <string name="prompt_load_failure">無法下載頁面，請稍後再試</string>
+    <string name="prompt_restricted_paid_user">僅限會員閱讀</string>
+    <string name="prompt_restricted_login">會員登入后可以閱讀</string>
+
     <string name="prompt_verify_email">您的信箱尚未驗證，為保障您的帳號安全，請及時驗證信箱。我們已經給您的登入信箱發送了驗證信件，点击信件中的連接即可。</string>
     <string name="prompt_email">信箱</string>
     <string name="prompt_new_email">新信箱</string>
@@ -161,7 +163,9 @@
     <string name="link_sign_up">註冊帳號</string>
     <string name="link_login">已有帳號？登入</string>
 
-    <!-- Form error message -->
+    <string name="error_login">登入失敗，請重试</string>
+    <string name="error_sign_up">注冊失敗，請重试</string>
+    <!-- Error message -->
     <string name="error_invalid_email">電子信箱錯誤</string>
     <string name="error_email_unchanged">您已經在使用該電子信箱</string>
     <string name="error_name_unchanged">不能與當前使用者名稱相同</string>
