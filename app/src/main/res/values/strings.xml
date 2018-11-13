@@ -37,10 +37,7 @@
     <string name="price_standard_annual">¥198.00/年</string>
     <string name="price_standard_month">¥28.00/月</string>
     <string name="price_premium">¥1,998.00/年</string>
-
-    <string name="pay_standard_year">¥198.00</string>
-    <string name="pay_standard_month">¥28.00</string>
-    <string name="pay_premium_year">¥1,998.00</string>
+    <string name="price_formatter">¥%1$,.2f</string>
 
     <string name="billing_cycle_year">年</string>
     <string name="billing_cycle_month">月</string>
@@ -137,7 +134,9 @@
     <string name="prompt_not_logged_in">您尚未登录，登录后可以查看</string>
     <string name="prompt_not_set">未设置</string>
     <string name="prompt_no_email_app">您的设备上没有安装邮件程序，无法发送反馈邮件</string>
-
+    <string name="prompt_cache_cleared">缓存已清空</string>
+    <string name="prompt_cache_not_cleared">无法清空缓存</string>
+    <string name="prompt_reading_history">阅读历史已删除</string>
 
     <string name="action_request_verify">重新发送验证邮件</string>
 
