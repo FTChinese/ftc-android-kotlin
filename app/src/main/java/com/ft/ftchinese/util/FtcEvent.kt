@@ -16,6 +16,10 @@ object FtcEvent {
     const val AD_SKIP = "ftc_ad_skip"
 }
 
+object FtcParam {
+    const val PAYMENT_METHOD = "payment_method"
+}
+
 object AdSlot {
     const val APP_OPEN = "launch screen"
 }
