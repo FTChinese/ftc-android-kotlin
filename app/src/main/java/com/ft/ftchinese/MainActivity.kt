@@ -23,6 +23,7 @@ import com.ft.ftchinese.user.*
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.Store
 import com.github.kittinunf.fuel.core.Request
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -30,6 +31,8 @@ import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import java.lang.Exception
 
 /**
@@ -61,6 +64,8 @@ class MainActivity : AppCompatActivity(),
     private var mFtaAdapter: TabPagerAdapter? = null
     private var mVideoAdapter: TabPagerAdapter? = null
     private var mMyftPagerAdapter: MyftPagerAdapter? = null
+
+    private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
     override fun getSession(): SessionManager? {
         return mSession
@@ -163,6 +168,17 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setTheme(R.style.Origami)
         setContentView(R.layout.activity_main)
+
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        val bundle = Bundle().apply {
+
+            val now = ISODateTimeFormat.dateTimeNoMillis().print(DateTime.now())
+            info("APP_OPEN event: $now")
+
+            putString(FirebaseAnalytics.Param.SUCCESS, now)
+        }
+
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle)
 
         // Register Wechat id
         WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false).registerApp(BuildConfig.WECAHT_APP_ID)

@@ -214,6 +214,7 @@ class LaunchAdManager(context: Context) : AnkoLogger {
         val localDate = LocalDate.now()
         val formatter = ISODateTimeFormat.basicDate()
 
+        // Format today to yyyyMMdd.
         val today = formatter.print(localDate)
 
         val ads = sharedPreferences.getStringSet(today, mutableSetOf())

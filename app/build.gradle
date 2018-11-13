@@ -92,20 +92,24 @@ dependencies {
     implementation "com.github.kittinunf.fuel:fuel-android:1.16.0"
 
     //  ORM. Unfortunately it does not work with Kotlin.
-    //    implementation "android.arch.persistence.room:runtime:$room_version"
-    //    kapt "android.arch.persistence.room:compiler:$room_version"
+    //  implementation "android.arch.persistence.room:runtime:$room_version"
+    //  kapt "android.arch.persistence.room:compiler:$room_version"
+
     // Wechat
     implementation 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:5.1.6'
+
     // Utilities
     implementation 'com.jakewharton.byteunits:byteunits:0.9.1'
     implementation 'joda-time:joda-time:2.10'
     implementation 'org.apache.commons:commons-math3:3.6.1'
+    implementation 'com.google.firebase:firebase-core:16.0.5'
+
     //    Test
     testImplementation 'junit:junit:4.12'
     testImplementation 'com.github.javafaker:javafaker:0.16'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    implementation 'com.google.firebase:firebase-core:16.0.5'
+
     testImplementation 'org.hamcrest:hamcrest-junit:2.0.0.0'
     testImplementation 'org.mockito:mockito-core:2.23.0'
     testImplementation 'org.robolectric:robolectric:4.0.2'
