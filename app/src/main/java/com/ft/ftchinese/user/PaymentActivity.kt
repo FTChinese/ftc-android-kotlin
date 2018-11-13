@@ -11,8 +11,10 @@ import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
+import com.ft.ftchinese.util.FtcParam
 import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -27,22 +29,17 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.format.ISODateTimeFormat
 
-private val priceIds = mapOf(
-        "standard_year" to R.string.pay_standard_year,
-        "standard_month" to R.string.pay_standard_month,
-        "premium_year" to R.string.pay_premium_year
-)
-
 const val EXTRA_PAYMENT_METHOD = "payment_method"
 
 class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
     private var mMembership: Membership? = null
-    private var mPaymentMethod: Int? = null
+    private var mPaymentMethod: String? = null
     private var mPriceText: String? = null
     private var wxApi: IWXAPI? = null
-//    private var mAccount: Account? = null
     private var mSession: SessionManager? = null
+    private var mOrderManager: OrderManager? = null
+    private var mFirebaseAnalytics: FirebaseAnalytics? = null
     private var job: Job? = null
 
     private var isInProgress: Boolean = false
@@ -60,12 +57,13 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Alipay sandbox.
-        // Comment out on production.
-//        EnvUtils.setEnv(EnvUtils.EnvEnum.SANDBOX)
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment)
+
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        mSession = SessionManager.getInstance(this)
+        mOrderManager = OrderManager.getInstance(this)
 
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -74,9 +72,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
         // Initialize wechat pay
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID)
-//        mAccount = SessionManager.getInstance(this).loadUser()
 
-        mSession = SessionManager.getInstance(this)
 
         val memberTier = intent.getStringExtra(EXTRA_MEMBER_TIER) ?: Membership.TIER_STANDARD
         val billingCycle = intent.getStringExtra(EXTRA_BILLING_CYCLE) ?: Membership.CYCLE_YEAR
@@ -84,9 +80,18 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         // Create a membership instance based on the value passed from MemberActivity
         val membership = Membership(tier = memberTier, billingCycle = billingCycle, expireDate = "")
 
+        // Keep it for later use.
         mMembership = membership
 
         updateUI(membership)
+
+        // When user started this activity, we can assume he is adding to cart.
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle().apply {
+            putString(FirebaseAnalytics.Param.ITEM_ID, membership.id)
+            putString(FirebaseAnalytics.Param.ITEM_NAME, memberTier)
+            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, billingCycle)
+            putLong(FirebaseAnalytics.Param.QUANTITY, 1)
+        })
 
         info("onCreate finished")
     }
@@ -105,12 +110,10 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             else -> ""
         }
 
-        val priceId = priceIds[member.priceKey]
-        if (priceId != null) {
-            val priceText = getString(priceId)
-            member_price_tv.text = priceText
-            mPriceText = priceText
-        }
+        val priceText = getString(R.string.price_formatter, member.price)
+        member_price_tv.text = priceText
+
+        mPriceText = priceText
     }
 
     fun onSelectPaymentMethod(view: View) {
@@ -148,6 +151,13 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         }
 
         toast(R.string.request_order)
+
+        // Begin to checkout event
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
+            putDouble(FirebaseAnalytics.Param.VALUE, mMembership?.price ?: 0.0)
+            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
+            putString(FtcParam.PAYMENT_METHOD, mPaymentMethod)
+        })
 
         when (mPaymentMethod) {
             Subscription.PAYMENT_METHOD_ALI -> {
@@ -244,11 +254,12 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                             orderId = wxOrder.ftcOrderId,
                             tierToBuy = member.tier,
                             billingCycle = member.billingCycle,
-                            paymentMethod = payMethod
+                            paymentMethod = payMethod,
+                            apiPrice = wxOrder.price
                     )
 
                     // Save subscription details to shared preference so that we could use it in WXPayEntryActivity
-                    subs.save(this@PaymentActivity)
+                    mOrderManager?.save(subs)
                 }
 
                 // Tell parent activity to kill itself.
@@ -329,10 +340,11 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                     orderId = aliOrder.ftcOrderId,
                     tierToBuy = member.tier,
                     billingCycle = member.billingCycle,
-                    paymentMethod = payMethod
+                    paymentMethod = payMethod,
+                    apiPrice = aliOrder.price
             )
 
-            subs.save(this@PaymentActivity)
+            mOrderManager?.save(subs)
 
             // Call ali sdk asynchronously.
             val payJob = async {
@@ -407,6 +419,13 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             val updatedMembership = subs.updateMembership(user.membership)
             mSession?.updateMembership(updatedMembership)
 
+            // Purchase event
+            mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
+                putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
+                putDouble(FirebaseAnalytics.Param.VALUE, subs.apiPrice)
+            })
+
+            // Send result to SubscriptionActivity.
             val intent = Intent().apply {
                 putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_ALI)
             }
@@ -417,51 +436,51 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         }
     }
 
-    private fun handleAlipayResult(result: Map<String, String>) {
-        val msg = result["memo"]
-        if (msg != null) {
-            toast(msg)
-        }
-
-        when (result["resultStatus"]) {
-            // 订单支付成功
-            "9000" -> {
-
-                val appPayResp = result["result"]
-
-                setResult(Activity.RESULT_OK)
-                finish()
-            }
-            // 正在处理中，支付结果未知
-            "8000" -> {
-
-            }
-            // 订单支付失败
-            "4000" -> {
-
-            }
-            // 重复请求
-            "5000" -> {
-
-            }
-            // 用户中途取消
-            "6001" -> {
-
-            }
-            // 网络连接出错
-            "6002" -> {
-
-            }
-            // 支付结果未知（有可能已经支付成功），请查询商户订单列表中订单的支付状态
-            "6004" -> {
-
-            }
-            // 其它支付错误
-            else -> {
-
-            }
-        }
-    }
+//    private fun handleAlipayResult(result: Map<String, String>) {
+//        val msg = result["memo"]
+//        if (msg != null) {
+//            toast(msg)
+//        }
+//
+//        when (result["resultStatus"]) {
+//            // 订单支付成功
+//            "9000" -> {
+//
+//                val appPayResp = result["result"]
+//
+//                setResult(Activity.RESULT_OK)
+//                finish()
+//            }
+//            // 正在处理中，支付结果未知
+//            "8000" -> {
+//
+//            }
+//            // 订单支付失败
+//            "4000" -> {
+//
+//            }
+//            // 重复请求
+//            "5000" -> {
+//
+//            }
+//            // 用户中途取消
+//            "6001" -> {
+//
+//            }
+//            // 网络连接出错
+//            "6002" -> {
+//
+//            }
+//            // 支付结果未知（有可能已经支付成功），请查询商户订单列表中订单的支付状态
+//            "6004" -> {
+//
+//            }
+//            // 其它支付错误
+//            else -> {
+//
+//            }
+//        }
+//    }
 
     private fun stripePay() {
 
