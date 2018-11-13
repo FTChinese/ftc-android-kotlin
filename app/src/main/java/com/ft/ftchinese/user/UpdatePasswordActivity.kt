@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.PasswordUpdate
-import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_password.*
@@ -21,8 +20,6 @@ import org.jetbrains.anko.support.v4.toast
 
 class UpdatePasswordActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {
-        mAccount = SessionManager.getInstance(this).loadUser()
-
         return PasswordFragment.newInstance()
     }
 
@@ -37,9 +34,10 @@ class UpdatePasswordActivity : SingleFragmentActivity() {
 
 class PasswordFragment : Fragment(), AnkoLogger {
 
-    private var mAccount: Account? = null
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
+
+    private var mSession: SessionManager? = null
 
     private var isInProgress: Boolean
         get() = !save_button.isEnabled
@@ -60,12 +58,11 @@ class PasswordFragment : Fragment(), AnkoLogger {
         super.onAttach(context)
         if (context is OnFragmentInteractionListener) {
             mListener = context
-            mAccount = mListener?.getUserSession()
         }
-    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        if (context != null) {
+            mSession = SessionManager.getInstance(context)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -136,7 +133,7 @@ class PasswordFragment : Fragment(), AnkoLogger {
             return
         }
 
-        val uuid = mAccount?.id ?: return
+        val uuid = mSession?.loadUser()?.id ?: return
 
         isInProgress = true
         isInputAllowed = false

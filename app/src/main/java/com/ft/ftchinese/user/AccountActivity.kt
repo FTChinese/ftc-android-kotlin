@@ -43,6 +43,8 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
 
+    private var mSession: SessionManager? = null
+
     private var isInProgress: Boolean = false
         set(value) {
             mListener?.onProgress(value)
@@ -77,7 +79,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
 
                 if (account != null) {
-                    mListener?.onUserSession(account)
+                    mSession?.saveUser(account)
                     updateUI(account)
                 }
 
@@ -102,7 +104,10 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
         if (context is OnFragmentInteractionListener) {
             mListener = context
-            mAccount = mListener?.getUserSession()
+        }
+
+        if (context != null) {
+            mSession = SessionManager.getInstance(context)
         }
     }
 

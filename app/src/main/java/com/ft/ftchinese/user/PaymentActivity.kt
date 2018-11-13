@@ -27,7 +27,7 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.format.ISODateTimeFormat
 
-private val priceIds = mapOf<String, Int>(
+private val priceIds = mapOf(
         "standard_year" to R.string.pay_standard_year,
         "standard_month" to R.string.pay_standard_month,
         "premium_year" to R.string.pay_premium_year

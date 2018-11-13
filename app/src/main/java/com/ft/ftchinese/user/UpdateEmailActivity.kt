@@ -10,7 +10,6 @@ import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.EmailUpdate
 import com.ft.ftchinese.models.ErrorResponse
-import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_email.*
@@ -21,8 +20,6 @@ import org.jetbrains.anko.support.v4.toast
 
 class UpdateEmailActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {
-        mAccount = SessionManager.getInstance(this).loadUser()
-
         return EmailFragment.newInstance()
     }
 
@@ -37,9 +34,9 @@ class UpdateEmailActivity : SingleFragmentActivity() {
 
 internal class EmailFragment : Fragment(), AnkoLogger {
 
-    private var mAccount: Account? = null
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
+    private var mSession: SessionManager? = null
 
     /**
      * Set progress indicator.
@@ -65,13 +62,13 @@ internal class EmailFragment : Fragment(), AnkoLogger {
 
         if (context is OnFragmentInteractionListener) {
             mListener = context
-            mAccount = mListener?.getUserSession()
+        }
+
+        if (context != null) {
+            mSession = SessionManager.getInstance(context)
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
@@ -86,10 +83,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
             attemptSave()
         }
 
-        // Check if user has email set.
-        val email = mAccount?.email ?: return
-
-        current_email.text = email
+        current_email.text = mSession?.loadUser()?.email
     }
 
     private fun attemptSave() {
@@ -106,7 +100,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
             // If email is invalid
             email.error = getString(R.string.error_field_required)
             cancel = true
-        } else if (emailStr == mAccount?.email) {
+        } else if (emailStr == mSession?.loadUser()?.email) {
             // If new email equals the current one
             email.error = getString(R.string.error_email_unchanged)
             cancel = true
@@ -128,7 +122,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
         }
 
         // If user id is not found, we could not perform updating.
-        val uuid = mAccount?.id ?: return
+        val uuid = mSession?.loadUser()?.id ?: return
 
         isInProgress = true
         isInputAllowed = false
@@ -144,8 +138,8 @@ internal class EmailFragment : Fragment(), AnkoLogger {
                 isInProgress = false
 
                 if (statusCode == 204) {
-                    mAccount?.email = emailStr
-                    mListener?.updateEmail(emailStr)
+
+                    mSession?.updateEmail(emailStr)
 
                     current_email.text = emailStr
 

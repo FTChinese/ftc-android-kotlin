@@ -27,7 +27,6 @@ internal interface OnFragmentInteractionListener {
 
 abstract class SingleFragmentActivity : AppCompatActivity(), OnFragmentInteractionListener {
 
-    protected var mAccount: Account? = null
     protected abstract fun createFragment(): Fragment
 
     override fun onCreate(savedInstanceState: Bundle?) {

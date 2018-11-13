@@ -9,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.ErrorResponse
-import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.UserNameUpdate
 import com.ft.ftchinese.util.isNetworkConnected
@@ -36,9 +35,10 @@ class UpdateUserNameActivity : SingleFragmentActivity() {
 
 class UsernameFragment : Fragment(), AnkoLogger {
 
-    private var mAccount: Account? = null
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
+
+    private var mSession: SessionManager? = null
 
     private var isInProgress: Boolean
         get() = !save_button.isEnabled
@@ -58,14 +58,11 @@ class UsernameFragment : Fragment(), AnkoLogger {
 
         if (context is OnFragmentInteractionListener) {
             mListener = context
-            mAccount = mListener?.getUserSession()
-
         }
-    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
+        if (context != null) {
+            mSession = SessionManager.getInstance(context)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -81,9 +78,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
             attemptSave()
         }
 
-        val userName = mAccount?.userName ?: return
-
-        current_name.text = userName
+        current_name.text = mSession?.loadUser()?.userName
     }
 
     private fun attemptSave() {
@@ -95,7 +90,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
         if (userNameStr.isBlank()) {
             user_name.error = getString(R.string.error_field_required)
             cancel = true
-        } else if (userNameStr == mAccount?.userName) {
+        } else if (userNameStr == mSession?.loadUser()?.userName) {
             user_name.error = getString(R.string.error_name_unchanged)
             cancel = true
         }
@@ -116,7 +111,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
             return
         }
 
-        val uuid = mAccount?.id ?: return
+        val uuid = mSession?.loadUser()?.id ?: return
 
         isInProgress = true
         isInputAllowed = false
@@ -134,8 +129,8 @@ class UsernameFragment : Fragment(), AnkoLogger {
                 isInProgress = false
 
                 if (statusCode == 204) {
-                    mAccount?.userName = userName
-                    mListener?.updateUserName(userName)
+
+                    mSession?.updateUserName(userName)
 
                     current_name.text = userName
 
