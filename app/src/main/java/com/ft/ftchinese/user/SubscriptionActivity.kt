@@ -211,6 +211,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
             updateUI(user)
 
             standard_year_button.setOnClickListener {
+
                 PaymentActivity.startForResult(
                         activity = this,
                         requestCode = RequestCode.PAYMENT,
@@ -289,7 +290,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
         if (requestCode == RequestCode.PAYMENT) {
             if (resultCode == Activity.RESULT_OK) {
 
-                val paymentMethod = data?.getIntExtra(EXTRA_PAYMENT_METHOD, 0)
+                val paymentMethod = data?.getStringExtra(EXTRA_PAYMENT_METHOD)
                 when (paymentMethod) {
                     Subscription.PAYMENT_METHOD_WX -> {
                         // If user selected wechat pay, kill this activity.
