@@ -9,6 +9,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.handleException
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
@@ -18,10 +19,7 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_wx_pay_result.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -30,6 +28,8 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     private var api: IWXAPI? = null
     private var job: Job? = null
     private var mSession: SessionManager? = null
+    private var mOrderManager: OrderManager? = null
+    private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
     private var isInProgress: Boolean = false
         set(value) {
@@ -63,6 +63,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID)
 
         mSession = SessionManager.getInstance(this)
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
         // Only used to test WXPayEntryActivity's UI.
         // Comment them for production.
@@ -123,13 +124,13 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     }
 
     private fun verifyOrder() {
-        val subs = Subscription.load(this) ?: return
+        val subs = mOrderManager?.load() ?: return
 
         val user = mSession?.loadUser() ?: return
 
         isInProgress = true
 
-        job = GlobalScope.launch {
+        job = GlobalScope.launch(Dispatchers.Main) {
 
             try {
                 val payResult = user.wxQueryOrder(subs.orderId)
@@ -167,12 +168,18 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 resultText = getString(R.string.wxpay_done)
 
 
-                val member = subs.updateMembership(currentMember)
+                val updatedMember = subs.updateMembership(currentMember)
 
-                info("New membership: $member")
+                info("New membership: $updatedMember")
 
-                updateUI(member)
-                updateSession(member)
+                updateUI(updatedMember)
+                mSession?.updateMembership(updatedMember)
+
+                // Log purchase event.
+                mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
+                    putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
+                    putDouble(FirebaseAnalytics.Param.VALUE, subs.apiPrice)
+                })
 
             }
             "REFUND" -> {
@@ -235,10 +242,6 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 toast(R.string.api_server_error)
             }
         }
-    }
-
-    private fun updateSession(membership: Membership) {
-        mSession?.updateMembership(membership)
     }
 
     override fun onReq(req: BaseReq?) {
