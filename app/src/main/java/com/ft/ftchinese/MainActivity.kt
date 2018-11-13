@@ -20,6 +20,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.*
+import com.ft.ftchinese.util.AdSlot
+import com.ft.ftchinese.util.FtcEvent
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.Store
 import com.github.kittinunf.fuel.core.Request
