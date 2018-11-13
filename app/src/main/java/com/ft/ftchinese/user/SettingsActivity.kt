@@ -48,9 +48,9 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
             val result = Store.clearFiles(context)
             if (result) {
-                toast("缓存已清空")
+                toast(R.string.prompt_cache_cleared)
             } else {
-                toast("无法清空缓存")
+                toast(R.string.prompt_cache_not_cleared)
             }
 
             updateCacheUI()
@@ -59,13 +59,11 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
         prefClearHistory?.setOnPreferenceClickListener {
             val ctx = context ?: return@setOnPreferenceClickListener false
-            toast("Clear reading history")
+            toast(R.string.prompt_reading_history)
             ArticleStore.getInstance(ctx).dropHistory()
             prefClearHistory?.summary = getString(R.string.summary_articles_read, 0)
             true
         }
-
-
     }
 
     private fun updateCacheUI() {
