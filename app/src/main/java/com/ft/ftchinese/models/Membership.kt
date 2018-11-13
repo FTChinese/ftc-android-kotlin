@@ -3,6 +3,11 @@ package com.ft.ftchinese.models
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 
+private val prices = mapOf(
+        "standard_year" to 198.00,
+        "standard_month" to 28.00,
+        "premium_year" to 1998.00
+)
 
 data class Membership(
         val tier: String,
@@ -49,9 +54,14 @@ data class Membership(
         }
 
 
-    // Use the combination of tier and billing cycle to determine the price to show.
-    val priceKey: String
+    // Use the combination of tier and billing cycle to uniquely identify this membership.
+    // It is used as key to retrieve a price;
+    // It is also used as the ITEM_ID for firebase's ADD_TO_CART event.
+    val id: String
         get() = "${tier}_$billingCycle"
+
+    val price: Double?
+        get() = prices[id]
 
     // Compare expireDate against another instance.
     // Pick whichever is later.

@@ -11,6 +11,7 @@ import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isNetworkConnected
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Request
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.activity_content.*
 import kotlinx.coroutines.*
@@ -140,6 +141,12 @@ class StoryActivity : AbsContentActivity() {
                 toast("${e.message}")
             }
         }
+
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.VIEW_ITEM, Bundle().apply {
+            putString(FirebaseAnalytics.Param.ITEM_ID, mChannelItem?.id)
+            putString(FirebaseAnalytics.Param.ITEM_NAME, mChannelItem?.headline)
+            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, mChannelItem?.type)
+        })
     }
 
     private suspend fun loadFromCache(): Boolean {

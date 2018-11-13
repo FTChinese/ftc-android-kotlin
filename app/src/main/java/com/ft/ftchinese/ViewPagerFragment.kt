@@ -15,6 +15,7 @@ import com.ft.ftchinese.util.isActiveNetworkWifi
 import com.ft.ftchinese.util.isNetworkConnected
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Request
+import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.fragment_view_pager.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.*
@@ -34,7 +35,7 @@ class ViewPagerFragment : Fragment(),
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
-    private var mListener: OnFragmentInteractionListener? = null
+//    private var mListener: OnFragmentInteractionListener? = null
 //    private var mNavigateListener: ChannelWebViewClient.OnPaginateListener? = null
 //    private lateinit var mWebViewClient: ChannelWebViewClient
 
@@ -51,6 +52,8 @@ class ViewPagerFragment : Fragment(),
     private var mRequest: Request? = null
 
     private var mSession: SessionManager? = null
+
+    private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
     // Hold string in raw/list.html
     private var mTemplate: String? = null
@@ -74,9 +77,9 @@ class ViewPagerFragment : Fragment(),
      * (http://developer.android.com/training/basics/fragments/communicating.html)
      * for more information.
      */
-    interface OnFragmentInteractionListener {
-        fun getSession(): SessionManager?
-    }
+//    interface OnFragmentInteractionListener {
+//
+//    }
 
     companion object {
         /**
@@ -107,9 +110,12 @@ class ViewPagerFragment : Fragment(),
 //        if (context is ChannelWebViewClient.OnPaginateListener) {
 //            mNavigateListener = context
 //        }
-        if (context is OnFragmentInteractionListener) {
-            mListener = context
-            mSession = mListener?.getSession()
+//        if (context is OnFragmentInteractionListener) {
+//            mListener = context
+//        }
+
+        if (context != null) {
+            mSession = SessionManager.getInstance(context)
         }
 
         info("onAttach finished")
@@ -369,6 +375,7 @@ class ViewPagerFragment : Fragment(),
         }
     }
 
+    // WVClient click paginatiion.
     override fun onPagination(pageKey: String, pageNumber: String) {
         val pageMeta = mPageMeta ?: return
 
@@ -379,6 +386,7 @@ class ViewPagerFragment : Fragment(),
         ChannelActivity.start(activity, listPage)
     }
 
+    // JSInterface page loaded event
     override fun onPageLoaded(message: String) {
         if (BuildConfig.DEBUG) {
             val fileName = mPageMeta?.name ?: return
@@ -387,6 +395,14 @@ class ViewPagerFragment : Fragment(),
                 Store.save(context, "$fileName.json", message)
             }
         }
+    }
+
+    // JSInterface click event.
+    override fun onSelectContent(channelItem: ChannelItem) {
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
+            putString(FirebaseAnalytics.Param.CONTENT_TYPE, channelItem.type)
+            putString(FirebaseAnalytics.Param.ITEM_ID, channelItem.id)
+        })
     }
 }
 

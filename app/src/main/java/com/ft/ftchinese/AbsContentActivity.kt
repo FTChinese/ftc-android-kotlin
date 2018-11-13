@@ -17,6 +17,7 @@ import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.FollowingManager
 import com.ft.ftchinese.models.SessionManager
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
 import com.tencent.mm.opensdk.modelmsg.WXWebpageObject
@@ -52,6 +53,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
     protected abstract var mChannelItem: ChannelItem?
 
     protected var mSessionManager: SessionManager? = null
+    protected var mFirebaseAnalytics: FirebaseAnalytics? = null
     protected var mFollowingManager: FollowingManager? = null
     protected var mArticleStore: ArticleStore? = null
 
@@ -109,6 +111,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
         mSessionManager = SessionManager.getInstance(this)
         mFollowingManager = FollowingManager.getInstance(this)
         mArticleStore = ArticleStore.getInstance(this)
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
         swipe_refresh.setOnRefreshListener(this)
 
@@ -287,7 +290,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
                         msg.title = articleTitle
                         msg.description = articleStandfirst
 
-                        val bmp = BitmapFactory.decodeResource(resources, R.drawable.brand_ftc_logo_square_48)
+                        val bmp = BitmapFactory.decodeResource(resources, R.drawable.ic_splash)
                         val thumbBmp = Bitmap.createScaledBitmap(bmp, 150, 150, true)
                         bmp.recycle()
                         msg.thumbData = bmpToByteArray(thumbBmp, true)
@@ -298,6 +301,12 @@ abstract class AbsContentActivity : AppCompatActivity(),
                         req.scene = if (app.id == ShareItem.WECHAT_FRIEND) SendMessageToWX.Req.WXSceneSession else SendMessageToWX.Req.WXSceneTimeline
 
                         api.sendReq(req)
+
+                        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.SHARE, Bundle().apply {
+                            putString(FirebaseAnalytics.Param.CONTENT_TYPE, mChannelItem?.type)
+                            putString(FirebaseAnalytics.Param.ITEM_ID, mChannelItem?.id)
+                            putString(FirebaseAnalytics.Param.METHOD, "wechat")
+                        })
                     }
 
                     ShareItem.OPEN_IN_BROWSER -> {
