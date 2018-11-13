@@ -24,7 +24,6 @@ import org.jetbrains.anko.support.v4.toast
  */
 class AccountActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {
-        mAccount = SessionManager.getInstance(this).loadUser()
         return AccountFragment.newInstance()
     }
 
