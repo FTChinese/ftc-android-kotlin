@@ -170,15 +170,6 @@ class MainActivity : AppCompatActivity(),
         setContentView(R.layout.activity_main)
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
-        val bundle = Bundle().apply {
-
-            val now = ISODateTimeFormat.dateTimeNoMillis().print(DateTime.now())
-            info("APP_OPEN event: $now")
-
-            putString(FirebaseAnalytics.Param.SUCCESS, now)
-        }
-
-        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle)
 
         // Register Wechat id
         WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false).registerApp(BuildConfig.WECAHT_APP_ID)
@@ -298,11 +289,19 @@ class MainActivity : AppCompatActivity(),
         val adImage = adView.findViewById<ImageView>(R.id.ad_image)
         val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
 
+        val bundle = Bundle().apply {
+            putString(FirebaseAnalytics.Param.CREATIVE_NAME, ad.title)
+            putString(FirebaseAnalytics.Param.CREATIVE_SLOT, AdSlot.APP_OPEN)
+        }
+
         adTimer.setOnClickListener {
             root_container.removeView(adView)
             showSystemUI()
             mShowAdJob?.cancel()
             info("Skipped ads")
+
+            // Log user skipping advertisement action.
+            mFirebaseAnalytics?.logEvent(FtcEvent.AD_SKIP, bundle)
         }
 
         adImage.setOnClickListener {
@@ -311,6 +310,8 @@ class MainActivity : AppCompatActivity(),
             root_container.removeView(adView)
             showSystemUI()
             mShowAdJob?.cancel()
+
+            mFirebaseAnalytics?.logEvent(FtcEvent.AD_CLICK, bundle)
             info("Clicked ads")
         }
 
@@ -343,6 +344,9 @@ class MainActivity : AppCompatActivity(),
         }
 
         root_container.removeView(adView)
+
+        mFirebaseAnalytics?.logEvent(FtcEvent.AD_VIEWED, bundle)
+
         info("Remove ad")
         showSystemUI()
     }
@@ -407,6 +411,17 @@ class MainActivity : AppCompatActivity(),
 
     override fun onResume() {
         super.onResume()
+
+        val bundle = Bundle().apply {
+
+            val now = ISODateTimeFormat.dateTimeNoMillis().print(DateTime.now())
+            info("APP_OPEN event: $now")
+
+            putString(FirebaseAnalytics.Param.SUCCESS, now)
+        }
+
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle)
+
         info("onResume finished")
     }
 
