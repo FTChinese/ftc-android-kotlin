@@ -29,7 +29,11 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
     private var mListener: OnJSInteractionListener? = null
 
     interface OnJSInteractionListener {
+        // Used for development only currently.
+        // Save the json data passed from js.
         fun onPageLoaded(message: String)
+
+        fun onSelectContent(channelItem: ChannelItem)
     }
 
 
@@ -172,6 +176,8 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
             }
             else -> WebContentActivity.start(activity, channelItem)
         }
+
+        mListener?.onSelectContent(channelItem)
     }
 
     /**
