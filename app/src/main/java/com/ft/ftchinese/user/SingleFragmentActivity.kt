@@ -5,7 +5,6 @@ import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.Account
 import kotlinx.android.synthetic.main.activity_fragment.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -24,15 +23,6 @@ import kotlinx.android.synthetic.main.simple_toolbar.*
 internal interface OnFragmentInteractionListener {
     // Show/hide progress bar
     fun onProgress(show: Boolean)
-
-    // Update user data
-    fun onUserSession(account: Account)
-
-    fun getUserSession(): Account?
-
-    fun updateEmail(email: String)
-
-    fun updateUserName(name: String)
 }
 
 abstract class SingleFragmentActivity : AppCompatActivity(), OnFragmentInteractionListener {
@@ -67,23 +57,6 @@ abstract class SingleFragmentActivity : AppCompatActivity(), OnFragmentInteracti
         } else {
             progress_bar.visibility = View.GONE
         }
-    }
-
-    override fun onUserSession(account: Account) {
-        val sessionManager = SessionManager.getInstance(applicationContext)
-        sessionManager.saveUser(account)
-    }
-
-    override fun getUserSession(): Account? {
-        return mAccount
-    }
-
-    override fun updateEmail(email: String) {
-        SessionManager.getInstance(applicationContext).updateEmail(email)
-    }
-
-    override fun updateUserName(name: String) {
-        SessionManager.getInstance(applicationContext).updateUserName(name)
     }
 }
 
