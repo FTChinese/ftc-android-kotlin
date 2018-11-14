@@ -179,6 +179,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
                     putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
                     putDouble(FirebaseAnalytics.Param.VALUE, subs.apiPrice)
+                    putString(FirebaseAnalytics.Param.METHOD, subs.paymentMethod)
                 })
 
             }
