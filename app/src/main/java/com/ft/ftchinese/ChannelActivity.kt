@@ -13,6 +13,7 @@ import com.ft.ftchinese.util.isActiveNetworkWifi
 import com.ft.ftchinese.util.isNetworkConnected
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Request
+import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.activity_chanel.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -31,8 +32,8 @@ import org.jetbrains.anko.toast
  * in a web page.
  */
 class ChannelActivity : AppCompatActivity(),
-        WVClient.OnClickListener,
         JSInterface.OnJSInteractionListener,
+        WVClient.OnClickListener,
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
@@ -46,6 +47,7 @@ class ChannelActivity : AppCompatActivity(),
     private var mRequest: Request? = null
 
     private var mSession: SessionManager? = null
+    private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
     // Content in raw/list.html
     private var mTemplate: String? = null
@@ -293,5 +295,12 @@ class ChannelActivity : AppCompatActivity(),
                 Store.save(this@ChannelActivity, "$fileName.json", message)
             }
         }
+    }
+
+    override fun onSelectContent(channelItem: ChannelItem) {
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
+            putString(FirebaseAnalytics.Param.CONTENT_TYPE, channelItem.type)
+            putString(FirebaseAnalytics.Param.ITEM_ID, channelItem.id)
+        })
     }
 }
