@@ -11,7 +11,6 @@ import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.util.FtcParam
 import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -156,7 +155,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
             putDouble(FirebaseAnalytics.Param.VALUE, mMembership?.price ?: 0.0)
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-            putString(FtcParam.PAYMENT_METHOD, mPaymentMethod)
+            putString(FirebaseAnalytics.Param.METHOD, mPaymentMethod)
         })
 
         when (mPaymentMethod) {
@@ -423,6 +422,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
                 putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
                 putDouble(FirebaseAnalytics.Param.VALUE, subs.apiPrice)
+                putString(FirebaseAnalytics.Param.METHOD, subs.paymentMethod)
             })
 
             // Send result to SubscriptionActivity.
