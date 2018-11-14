@@ -1,5 +1,6 @@
 package com.ft.ftchinese
 
+import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.*
@@ -9,32 +10,28 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.ft.ftchinese.database.ArticleCursorWrapper
 import com.ft.ftchinese.database.ArticleStore
-import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.MyftTab
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import kotlinx.coroutines.Job
 import org.jetbrains.anko.AnkoLogger
 
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_TAB_ID = "tab_id"
 
-/**
- * A simple [Fragment] subclass.
- * Activities that contain this fragment must implement the
- * [MyftFragment.OnFragmentInteractionListener] interface
- * to handle interaction events.
- * Use the [MyftFragment.newInstance] factory method to
- * create an instance of this fragment.
- *
- */
 class MyftFragment : Fragment(), AnkoLogger {
-    // TODO: Rename and change keys of parameters
     private var tabId: Int? = null
     private var job: Job? = null
+    private var mArticleStore: ArticleStore? = null
     private var cursor: ArticleCursorWrapper? = null
     private var mCursorAdapter: CursorAdapter? = null
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+
+        if (context != null) {
+            mArticleStore = ArticleStore.getInstance(context)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,13 +39,12 @@ class MyftFragment : Fragment(), AnkoLogger {
             tabId = it.getInt(ARG_TAB_ID)
         }
 
-        val ctx = context ?: return
         when (tabId) {
             MyftTab.READING_HISTORY -> {
-                cursor = ArticleStore.getInstance(ctx).queryHistory()
+                cursor = mArticleStore?.queryHistory()
             }
             MyftTab.STARRED_ARTICLE -> {
-                cursor = ArticleStore.getInstance(ctx).queryStarred()
+                cursor = mArticleStore?.queryStarred()
             }
         }
     }
@@ -95,7 +91,6 @@ class MyftFragment : Fragment(), AnkoLogger {
          * @param tabId Identify which tab is selected.
          * @return A new instance of fragment MyftFragment.
          */
-        // TODO: Rename and change keys and number of parameters
         @JvmStatic
         fun newInstance(tabId: Int) =
                 MyftFragment().apply {
