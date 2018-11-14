@@ -2,7 +2,6 @@ package com.ft.ftchinese.user
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -12,6 +11,9 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.util.Store
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
@@ -34,6 +36,14 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
     private var prefClearCache: Preference? = null
     private var prefClearHistory: Preference? = null
+    private var mArticleStore: ArticleStore? = null
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        if (context != null) {
+            mArticleStore = ArticleStore.getInstance(context)
+        }
+    }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         addPreferencesFromResource(R.xml.preferences)
@@ -58,10 +68,18 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
         }
 
         prefClearHistory?.setOnPreferenceClickListener {
-            val ctx = context ?: return@setOnPreferenceClickListener false
-            toast(R.string.prompt_reading_history)
-            ArticleStore.getInstance(ctx).dropHistory()
-            prefClearHistory?.summary = getString(R.string.summary_articles_read, 0)
+
+            GlobalScope.launch(Dispatchers.Main) {
+                val ok = mArticleStore?.truncateHistory() ?: false
+
+                if (ok) {
+                    prefClearHistory?.summary = getString(R.string.summary_articles_read, 0)
+                    toast(R.string.prompt_reading_history)
+                } else {
+                    toast("Cannot delete reading history now. Please retry later")
+                }
+            }
+
             true
         }
     }
@@ -73,8 +91,7 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
             prefClearCache?.summary = space
         }
 
-        val ctx = context ?: return
-        val total = ArticleStore.getInstance(ctx).countHistory()
+        val total = mArticleStore?.countHistory() ?: 0
         prefClearHistory?.summary = getString(R.string.summary_articles_read, total)
     }
 
