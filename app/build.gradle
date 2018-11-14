@@ -31,8 +31,8 @@ android {
         applicationId "com.ft.ftchinese"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 1
-        versionName "1.0.0"
+        versionCode 2
+        versionName "1.1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "WECAHT_APP_ID", props.getProperty("wechat.appId")
         buildConfigField "String", "ACCESS_TOKEN", props.getProperty("access_token")
@@ -73,7 +73,7 @@ android {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation (name: 'alipaySdk-15.5.7-20181023110917', ext: 'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.anko:anko:$anko_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
