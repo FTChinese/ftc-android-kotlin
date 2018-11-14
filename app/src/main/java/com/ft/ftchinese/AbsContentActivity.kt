@@ -161,7 +161,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
                     info("Unstar article: $mChannelItem")
                     val affectedRows = mArticleStore?.deleteStarred(mChannelItem) ?: return@launch
 
-                    // Turn is starting to false after deleted.
+                    // Turn mIsStarring to false after deleted.
                     if (affectedRows > 0) {
                         mIsStarring  = false
                     }
@@ -170,7 +170,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
                 }
 
                 // If is not starring, add it.
-                info("Start article: $mChannelItem")
+                info("Star article: $mChannelItem")
                 val rowId = mArticleStore?.addStarred(mChannelItem) ?: return@launch
 
                 // Turn is starring to true after added.
