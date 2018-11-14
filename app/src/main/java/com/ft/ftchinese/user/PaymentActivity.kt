@@ -343,15 +343,15 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                     apiPrice = aliOrder.price
             )
 
+            info("Subscrition order: $subs")
             mOrderManager?.save(subs)
 
             // Call ali sdk asynchronously.
             val payJob = async {
-                val payTask = PayTask(this@PaymentActivity)
-                payTask.payV2(aliOrder.param, true)
+                PayTask(this@PaymentActivity).payV2(aliOrder.param, true)
             }
 
-            // You will get hte pay result after Zhifubao's popup disappeared.
+            // You will get the pay result after Zhifubao's popup disappeared.
             val payResult = try {
                 /**
                  * Result is a map:
@@ -366,7 +366,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                 payJob.await()
 
             } catch (e: Exception) {
-                e.printStackTrace()
+                info("Call alipay error: $e")
 
                 isInProgress = false
                 isInputAllowed = true
@@ -383,9 +383,11 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
 
             // Verify response on server.
+            // {resultStatus=4000, result=, memo=系统繁忙，请稍后再试} Why?
             if (resultStatus != "9000") {
 
                 toast(msg)
+                isInputAllowed = true
 
                 return@launch
             }
