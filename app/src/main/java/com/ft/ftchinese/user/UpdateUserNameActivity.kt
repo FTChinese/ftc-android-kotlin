@@ -20,7 +20,6 @@ import org.jetbrains.anko.support.v4.toast
 
 class UpdateUserNameActivity : SingleFragmentActivity() {
     override fun createFragment(): Fragment {
-        mAccount = SessionManager.getInstance(this).loadUser()
         return UsernameFragment.newInstance()
     }
 
