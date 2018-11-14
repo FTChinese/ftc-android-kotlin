@@ -24,7 +24,7 @@ object Cols : BaseColumns {
         ${Cols.RADIO_URL} TEXT,
         ${Cols.PUBLISHED_AT} TEXT,
         ${Cols.READ_AT} TEXT DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (${Cols.ID}, ${Cols.TYPE}) ON CONFLICT REPLACE
+        UNIQUE (${Cols.ID}, ${Cols.TYPE}) ON CONFLICT IGNORE
     """.trimIndent()
 }
 
@@ -36,7 +36,7 @@ object StarredTable {
         ${Cols.stmtCreate})
     """.trimIndent()
 
-    val delete = "DROP TABLE IF EXISTS $NAME"
+    const val drop = "DROP TABLE IF EXISTS $NAME"
 }
 
 object HistoryTable {
@@ -47,5 +47,5 @@ object HistoryTable {
         ${Cols.stmtCreate})
     """.trimIndent()
 
-    const val delete = "DROP TABLE IF EXISTS $NAME"
+    const val drop = "DROP TABLE IF EXISTS $NAME"
 }

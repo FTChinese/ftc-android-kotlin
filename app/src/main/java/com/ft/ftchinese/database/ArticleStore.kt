@@ -2,55 +2,109 @@ package com.ft.ftchinese.database
 
 import android.content.ContentValues
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase
+import android.database.sqlite.SQLiteException
 import android.provider.BaseColumns
 import com.ft.ftchinese.models.ChannelItem
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.db.*
 import org.jetbrains.anko.info
 
 class ArticleStore private constructor(context: Context) : AnkoLogger {
 
-    private val mDatabase: SQLiteDatabase = ArticleDbHelper.getInstance(context)
-            .writableDatabase
+    private val mDbHelper = ArticleDbHelper.getInstance(context)
 
-    fun addHistory(item: ChannelItem?): Long {
-        if (item == null) return 0
+    fun addHistory(item: ChannelItem?) {
+        if (item == null) return
 
         val values = contentValues(item)
 
         info("Add a reading history: $values")
 
-        return mDatabase.insert(HistoryTable.NAME, null, values)
+        try {
+            // call getWritableDatabase in background.
+            // This also might throw SQLiteException.
+            mDbHelper.use {
+                insert(HistoryTable.NAME, null, values)
+            }
+        } catch (e: Exception) {
+            info("Error inserting $item: $e")
+        }
     }
 
-    fun queryHistory(whereClause: String? = null, whereArgs: Array<String>? = null): ArticleCursorWrapper {
-        val cursor = mDatabase.query(
-                HistoryTable.NAME,
-                null,
-                whereClause,
-                whereArgs,
-                null,
-                null,
-                "${BaseColumns._ID} DESC"
-        )
+    fun queryHistory(): ArticleCursorWrapper? {
+
+        val cursor = try {
+            mDbHelper.readableDatabase
+                    .query(
+                            HistoryTable.NAME,
+                            arrayOf(Cols.ID,
+                                    Cols.TYPE,
+                                    Cols.SUB_TYPE,
+                                    Cols.TITLE,
+                                    Cols.STANDFIRST,
+                                    Cols.AUDIO_URL,
+                                    Cols.RADIO_URL,
+                                    Cols.PUBLISHED_AT),
+                            null,
+                            null,
+                            null,
+                            null,
+                            "${BaseColumns._ID} DESC"
+                    )
+        } catch (e: SQLiteException) {
+            return null
+        }
 
         return ArticleCursorWrapper(cursor)
     }
 
-    fun countHistory(): Int {
-        val cursor = queryHistory()
-        val count = cursor.count
-        cursor.close()
-        return count
+    fun historyQuery(): Sequence<Map<String, Any?>> {
+        return mDbHelper.use {
+            select(HistoryTable.NAME)
+                    .column(Cols.ID)
+                    .column(Cols.TYPE)
+                    .column(Cols.SUB_TYPE)
+                    .column(Cols.TITLE)
+                    .column(Cols.STANDFIRST)
+                    .column(Cols.AUDIO_URL)
+                    .column(Cols.RADIO_URL)
+                    .column(Cols.PUBLISHED_AT)
+                    .column(Cols.READ_AT)
+                    .orderBy(BaseColumns._ID, SqlOrderDirection.DESC)
+                    .exec {
+                        asMapSequence()
+                    }
+        }
     }
 
-    fun dropHistory() {
-        try {
-            mDatabase.execSQL(HistoryTable.delete)
-            mDatabase.execSQL(HistoryTable.delete)
-        } catch (e: Exception) {
-            info("Drop reading_history table error: $e")
+    fun countHistory(): Int {
+        return mDbHelper.use {
+            val cursor = queryHistory()
+            val count = cursor?.count ?: 0
+            cursor?.close()
+            count
         }
+    }
+
+    suspend fun truncateHistory(): Boolean {
+        val ok = GlobalScope.async {
+            mDbHelper.use {
+                try {
+                    dropTable(HistoryTable.NAME, true)
+                    execSQL(HistoryTable.create)
+
+                    true
+                } catch (e: SQLiteException) {
+                    info("Cannot truncated reading_history: $e")
+
+                    false
+                }
+            }
+        }
+
+        return ok.await()
     }
 
     /**
@@ -65,18 +119,38 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
 
         info("Add a starred article: $values")
 
-        return  mDatabase.insert(StarredTable.NAME, null, values)
+        return try {
+            mDbHelper.use {
+                insert(StarredTable.NAME, null, values)
+            }
+        } catch (e: SQLiteException) {
+            info("Error inserting a starred article")
+            -1
+        }
+//        return  mDatabase.insert(StarredTable.NAME, null, values)
     }
 
+    /**
+     * @return the number of rows affected if a whereClause is passed in, 0
+     * otherwise.
+     */
     fun deleteStarred(item: ChannelItem?): Int {
         if (item == null) return 0
 
         val id = item.id
-        return mDatabase.delete(StarredTable.NAME, "${Cols.ID} = ?", arrayOf(id))
+        return try {
+            mDbHelper.use {
+                delete(StarredTable.NAME, "${Cols.ID} = ?", arrayOf(id))
+            }
+        } catch (e: SQLiteException) {
+            info("Error deleting starred: $e")
+
+            0
+        }
     }
 
     fun isStarring(item: ChannelItem?): Boolean {
-        info("Checking if is starring article $item")
+
         if (item == null) return false
         val id = item.id
         val query = """
@@ -88,46 +162,50 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
             )
         """.trimIndent()
 
-        val cursor = mDatabase.rawQuery(query, arrayOf(id))
+        return try {
+            mDbHelper.use {
+                val cursor = rawQuery(query, arrayOf(id))
+                cursor.moveToFirst()
 
-        cursor.moveToFirst()
-        val exists = cursor.getInt(0)
+                val exists = cursor.getInt(0)
+                cursor.close()
 
-        info("Is starring $exists")
-        cursor.close()
-        return exists == 1
+                info("Checking if is starring article $item: $exists")
+
+                exists == 1
+            }
+        } catch (e: SQLiteException) {
+            info("Error when checking is starring an article: $e")
+
+            false
+        }
     }
 
-    fun queryStarred(whereClause: String? = null, whereArgs: Array<String>? = null): ArticleCursorWrapper {
-        val cursor = mDatabase.query(
-                StarredTable.NAME,
-                null,
-                whereClause,
-                whereArgs,
-                null,
-                null,
-                "${BaseColumns._ID} DESC"
-        )
+    fun queryStarred(): ArticleCursorWrapper? {
+        val cursor = try {
+            mDbHelper.readableDatabase
+                    .query(
+                            HistoryTable.NAME,
+                            arrayOf(Cols.ID,
+                                    Cols.TYPE,
+                                    Cols.SUB_TYPE,
+                                    Cols.TITLE,
+                                    Cols.STANDFIRST,
+                                    Cols.AUDIO_URL,
+                                    Cols.RADIO_URL,
+                                    Cols.PUBLISHED_AT),
+                            null,
+                            null,
+                            null,
+                            null,
+                            "${BaseColumns._ID} DESC"
+                    )
+        } catch (e: SQLiteException) {
+            return null
+        }
 
         return ArticleCursorWrapper(cursor)
     }
-
-    //    fun loadAll(): List<ChannelItem> {
-//
-//        val items = mutableListOf<ChannelItem>()
-//        val cursor = queryHistory(null, null)
-//
-//        cursor.use {
-//            it.moveToNext()
-//
-//            while (!it.isAfterLast) {
-//                items.addHistory(it.loadItem())
-//                it.moveToNext()
-//            }
-//        }
-//
-//        return items
-//    }
 
     companion object {
 

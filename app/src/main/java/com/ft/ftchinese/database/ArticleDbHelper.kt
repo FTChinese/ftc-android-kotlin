@@ -1,16 +1,21 @@
 package com.ft.ftchinese.database
 
 import android.content.Context
+import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
+import android.provider.BaseColumns
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.db.INTEGER
+import org.jetbrains.anko.db.ManagedSQLiteOpenHelper
+import org.jetbrains.anko.db.PRIMARY_KEY
+import org.jetbrains.anko.db.createTable
 import org.jetbrains.anko.info
 
 /**
  * Create and manager database.
  * You must override the `onCreate()` and `onUpgrade()` methods.
  */
-class ArticleDbHelper private constructor(ctx: Context) : SQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION), AnkoLogger {
+class ArticleDbHelper private constructor(ctx: Context) : ManagedSQLiteOpenHelper(ctx, DB_NAME, null, DB_VERSION), AnkoLogger {
 
     /**
      * Gets called when the database first gets created on the device.
@@ -28,6 +33,12 @@ class ArticleDbHelper private constructor(ctx: Context) : SQLiteOpenHelper(ctx, 
         updateDatabase(db, oldVersion, newVersion)
     }
 
+    /**
+     * @param db The database
+     * @param oldVersion Previous version
+     * @param newVersion New version
+     * @throws SQLException if the SQL string is invalid
+     */
     private fun updateDatabase(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         if (oldVersion < 1) {
             info("Create table: ${HistoryTable.create}")
