@@ -43,7 +43,6 @@ import java.lang.Exception
 class MainActivity : AppCompatActivity(),
         NavigationView.OnNavigationItemSelectedListener,
         TabLayout.OnTabSelectedListener,
-//        ChannelWebViewClient.OnPaginateListener,
         AnkoLogger {
 
     private var mBottomDialog: BottomSheetDialog? = null
@@ -58,7 +57,6 @@ class MainActivity : AppCompatActivity(),
 
     private var mSession: SessionManager? = null
     private var mAdManager: LaunchAdManager? = null
-
 
     private var mNewsAdapter: TabPagerAdapter? = null
     private var mEnglishAdapter: TabPagerAdapter? = null
@@ -619,7 +617,6 @@ class MainActivity : AppCompatActivity(),
      * Update UI depending on user's login/logout state
      */
     private fun updateSessionUI() {
-//        mUser = Account.loadFromPref(this)
         val user = mSession?.loadUser()
         val isLoggedIn = user != null
 
