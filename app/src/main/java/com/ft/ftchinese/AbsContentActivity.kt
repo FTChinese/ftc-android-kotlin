@@ -312,6 +312,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
 
                         api.sendReq(req)
 
+                        // Log event
                         mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.SHARE, Bundle().apply {
                             putString(FirebaseAnalytics.Param.CONTENT_TYPE, mChannelItem?.type)
                             putString(FirebaseAnalytics.Param.ITEM_ID, mChannelItem?.id)
