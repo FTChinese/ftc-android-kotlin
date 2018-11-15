@@ -10,7 +10,7 @@ import android.support.v7.preference.PreferenceFragmentCompat
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleStore
-import com.ft.ftchinese.util.Store
+import com.ft.ftchinese.util.FileCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -37,11 +37,13 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
     private var prefClearCache: Preference? = null
     private var prefClearHistory: Preference? = null
     private var mArticleStore: ArticleStore? = null
+    private var mFileCache: FileCache? = null
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         if (context != null) {
             mArticleStore = ArticleStore.getInstance(context)
+            mFileCache = FileCache.getInstance(context)
         }
     }
 
@@ -56,7 +58,8 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
         prefClearCache?.setOnPreferenceClickListener {
 
-            val result = Store.clearFiles(context)
+            val result = mFileCache?.clear() ?: return@setOnPreferenceClickListener true
+
             if (result) {
                 toast(R.string.prompt_cache_cleared)
             } else {
@@ -85,7 +88,7 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
     }
 
     private fun updateCacheUI() {
-        val space = Store.filesSpace(context)
+        val space = mFileCache?.space()
 
         if (space != null) {
             prefClearCache?.summary = space

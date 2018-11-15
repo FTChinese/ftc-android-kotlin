@@ -196,6 +196,7 @@
     <string name="api_json_syntax">無法解析數據</string>
     <string name="api_empty_response">伺服器沒有回應</string>
 
+    <string name="pref_title_storage">存儲空間</string>
     <string name="pref_language">語言偏好</string>
     <string name="pref_clear_cache">清除页面快取</string>
     <string name="pref_clear_history">清空閱讀歷史</string>

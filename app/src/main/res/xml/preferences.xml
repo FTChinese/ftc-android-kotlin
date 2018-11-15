@@ -1,51 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <!--<ListPreference-->
-        <!--android:key="pref_key_language"-->
-        <!--android:entries="@array/settings_language_entries"-->
-        <!--android:entryValues="@array/settings_language_values"-->
-        <!--android:defaultValue="sc"-->
-        <!--android:title="@string/pref_language"/>-->
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <Preference
-        android:key="pref_clear_cache"
-        android:title="@string/pref_clear_cache">
-    </Preference>
+    <PreferenceCategory
+        app:title="@string/pref_title_storage">
+        <Preference
+            app:key="pref_clear_cache"
+            app:title="@string/pref_clear_cache">
+        </Preference>
 
-    <Preference
-        android:key="pref_clear_history"
-        android:title="@string/pref_clear_history">
-    </Preference>
-    <Preference
-        android:key="pref_version_name"
-        android:title="@string/pref_version_name">
-    </Preference>
+        <Preference
+            app:key="pref_clear_history"
+            app:title="@string/pref_clear_history">
+        </Preference>
+    </PreferenceCategory>
 
-    <!--<PreferenceCategory-->
-        <!--android:title="阅读偏好"-->
-        <!--android:key="pref_key_settings">-->
+    <PreferenceCategory>
+        <Preference
+            app:key="pref_version_name"
+            app:title="@string/pref_version_name">
+        </Preference>
+    </PreferenceCategory>
 
-
-        <!--<ListPreference-->
-            <!--android:key="pref_key_font"-->
-            <!--android:entries="@array/settings_font_entries"-->
-            <!--android:entryValues="@array/settings_font_values"-->
-            <!--android:defaultValue="m"-->
-            <!--android:title="字号设置"/>-->
-
-
-
-        <!--<SwitchPreference-->
-            <!--android:key="pref_key_night"-->
-            <!--android:title="夜间模式"/>-->
-    <!--</PreferenceCategory>-->
-
-
-    <!--<PreferenceCategory-->
-        <!--android:title="流量与缓存">-->
-
-        <!--<SwitchPreference-->
-            <!--android:key="pref_key_no_image_on_cellar"-->
-            <!--android:title="使用数据时不下载图片"/>-->
-    <!--</PreferenceCategory>-->
 </PreferenceScreen>
