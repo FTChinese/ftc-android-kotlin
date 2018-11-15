@@ -1,10 +1,14 @@
 package com.ft.ftchinese.user
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
 import android.view.View
 import android.widget.RadioButton
 import com.alipay.sdk.app.PayTask
@@ -92,7 +96,36 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             putLong(FirebaseAnalytics.Param.QUANTITY, 1)
         })
 
+        requestPermission()
         info("onCreate finished")
+    }
+
+    private fun requestPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE), PERMISSIONS_REQUEST_CODE)
+        } else {
+            toast("支付宝 SDK 已有所需的权限")
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            PERMISSIONS_REQUEST_CODE -> {
+                if (grantResults.isEmpty()) {
+                    toast("无法获取支付宝 SDK 所需的权限, 请到系统设置开启")
+                    return
+                }
+
+                for (x in grantResults) {
+                    if (x == PackageManager.PERMISSION_DENIED) {
+                        toast("无法获取支付宝 SDK 所需的权限, 请到系统设置开启")
+                        return
+                    }
+                }
+
+                toast("支付宝 SDK 所需的权限已经正常获取")
+            }
+        }
     }
 
     private fun updateUI(member: Membership) {
@@ -312,6 +345,8 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
                 isInProgress = false
 
+                info("Ali order retrieved from server: $aliOrder")
+
                 aliOrder
             } catch (resp: ErrorResponse) {
                 isInProgress = false
@@ -321,7 +356,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
                 return@launch
             } catch (e: Exception) {
-                e.printStackTrace()
+                info("API error when requesting Ali order: $e")
 
                 isInProgress = false
                 isInputAllowed = true
@@ -330,9 +365,6 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
                 return@launch
             } ?: return@launch
-
-
-            info("Alipay order: $aliOrder")
 
             // Save this subscription data.
             val subs = Subscription(
@@ -343,47 +375,16 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                     apiPrice = aliOrder.price
             )
 
-            info("Subscrition order: $subs")
+            info("Save subscription order: $subs")
             mOrderManager?.save(subs)
 
-            // Call ali sdk asynchronously.
-            val payJob = async {
-                PayTask(this@PaymentActivity).payV2(aliOrder.param, true)
-            }
-
-            // You will get the pay result after Zhifubao's popup disappeared.
-            val payResult = try {
-                /**
-                 * Result is a map:
-                 * {
-                 *  "memo": "",
-                 *  "result": "",
-                 *   "resultStatus": "9000"
-                 * }
-                 * NOTE result field is JSON but you cannot use it as JSON.
-                 * You could only use it as a string
-                 */
-                payJob.await()
-
-            } catch (e: Exception) {
-                info("Call alipay error: $e")
-
-                isInProgress = false
-                isInputAllowed = true
-
-                handleException(e)
-
-                return@launch
-            }
+            val payResult = launchAlipay(aliOrder.param)
 
             info("Alipay result: $payResult")
 
             val resultStatus = payResult["resultStatus"]
             val msg = payResult["memo"] ?: getString(R.string.wxpay_failed)
 
-
-            // Verify response on server.
-            // {resultStatus=4000, result=, memo=系统繁忙，请稍后再试} Why?
             if (resultStatus != "9000") {
 
                 toast(msg)
@@ -392,27 +393,11 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                 return@launch
             }
 
-            val appPayResp = payResult["result"] ?: return@launch
+            // We should send payResult["result"] to server to verify the pay result.
+            // But ali used JSON in a very weired way. You cannot parse it as JSON!
 
-            info("Ali pay result: $appPayResp")
-
-            // query server
-//            isInProgress = true
-//            val verifiedOrder = try {
-//                user.aliVerifyOrderAsync(appPayResp).await()
-//            } catch (resp: ErrorResponse) {
-//                info("Verify ali pay result: $resp")
-//                isInProgress = false
-//                handleApiError(resp)
-//                return@launch
-//            } catch (e: Exception) {
-//                isInProgress = false
-//                handleException(e)
-//                return@launch
-//            }
-//
-//            isInProgress = false
             toast(R.string.wxpay_done)
+
             // update subs.confirmedAt
             subs.confirmedAt = ISODateTimeFormat.dateTimeNoMillis().print(DateTime.now().withZone(DateTimeZone.UTC))
 
@@ -438,51 +423,23 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         }
     }
 
-//    private fun handleAlipayResult(result: Map<String, String>) {
-//        val msg = result["memo"]
-//        if (msg != null) {
-//            toast(msg)
-//        }
-//
-//        when (result["resultStatus"]) {
-//            // 订单支付成功
-//            "9000" -> {
-//
-//                val appPayResp = result["result"]
-//
-//                setResult(Activity.RESULT_OK)
-//                finish()
-//            }
-//            // 正在处理中，支付结果未知
-//            "8000" -> {
-//
-//            }
-//            // 订单支付失败
-//            "4000" -> {
-//
-//            }
-//            // 重复请求
-//            "5000" -> {
-//
-//            }
-//            // 用户中途取消
-//            "6001" -> {
-//
-//            }
-//            // 网络连接出错
-//            "6002" -> {
-//
-//            }
-//            // 支付结果未知（有可能已经支付成功），请查询商户订单列表中订单的支付状态
-//            "6004" -> {
-//
-//            }
-//            // 其它支付错误
-//            else -> {
-//
-//            }
-//        }
-//    }
+    /**
+     * Result is a map:
+     * {resultStatus=6001, result=, memo=操作已经取消。}
+     * {resultStatus=4000, result=, memo=系统繁忙，请稍后再试}
+     * See https://docs.open.alipay.com/204/105301/ in section 同步通知参数说明
+     * NOTE result field is JSON but you cannot use it as JSON.
+     * You could only use it as a string
+     */
+    private suspend fun launchAlipay(orderInfo: String): Map<String, String> {
+        // You must call payV2 in background! Otherwise it will simply give you resultStatus=4000
+        // without any clue.
+        val result = GlobalScope.async {
+            PayTask(this@PaymentActivity).payV2(orderInfo, true)
+        }
+
+        return result.await()
+    }
 
     private fun stripePay() {
 
@@ -508,8 +465,6 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         }
     }
 
-
-
     override fun onDestroy() {
         super.onDestroy()
 
@@ -519,6 +474,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
     companion object {
         private const val EXTRA_MEMBER_TIER = "member_tier"
         private const val EXTRA_BILLING_CYCLE = "billing_cycle"
+        private const val PERMISSIONS_REQUEST_CODE = 1002
 
         fun start(context: Context?, memberTier: String, billingCycle: String) {
             val intent = Intent(context, PaymentActivity::class.java)
