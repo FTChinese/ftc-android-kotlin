@@ -61,14 +61,14 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
         }
 
     override fun onRefresh() {
-        updateAccount(true)
+        updateAccount()
     }
 
     // Update user account data.
     // If user is manually refresh data, always use server data as the single source or truth;
     // If it is triggered by payment result, try to retreve user account data and compare it against the current one,
     // discard server data since Wechat or Alipay might not notified server the payment result.
-    private fun updateAccount(isManualRefresh: Boolean) {
+    private fun updateAccount() {
         if (!isNetworkConnected()) {
             swipe_refresh.isRefreshing = false
             isInProgress = false
@@ -78,10 +78,9 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
             return
         }
 
-
-
         val user = mSession?.loadUser()
 
+        // If use if not logged in, stop here.
         if (user == null) {
             swipe_refresh.isRefreshing = false
             isInProgress = false
@@ -90,6 +89,9 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
         }
 
         // If this action is not triggered by manually swipe refresh, show progress bar.
+        // This flag is also used to determine whether we should update local data.
+        val isManualRefresh = swipe_refresh.isRefreshing
+
         if (!isManualRefresh) {
             isInProgress = true
         }
@@ -113,19 +115,19 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
                     mSession?.saveUser(remoteAccount)
 
                     // Update ui.
-                    updateUI(remoteAccount)
+                    updateUI()
                 } else {
+                    // This might be triggered by payment activity.
                     // check remote server's membership against local one.
+                    // Conditionally save remote data to local.
                     if (remoteAccount.membership.isNewer(user.membership)) {
                         info("Remote user account is fresh.")
                         mSession?.saveUser(remoteAccount)
 
-                        updateUI(remoteAccount)
-                    } else {
 
-                        info("Local user account is fresh.")
-                        updateUI(user)
                     }
+
+                    updateUI()
                 }
             } catch (resp: ErrorResponse) {
                 info("$resp")
@@ -189,26 +191,26 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
             renewal_button.visibility = View.GONE
 
             login_button.setOnClickListener {
-                SignInActivity.start(this)
+                SignInActivity.startForResult(this)
             }
 
             standard_year_button.setOnClickListener {
-                SignInActivity.start(this)
+                SignInActivity.startForResult(this)
             }
 
             standard_month_button.setOnClickListener {
-                SignInActivity.start(this)
+                SignInActivity.startForResult(this)
             }
 
 
             premium_button.setOnClickListener {
-                SignInActivity.start(this)
+                SignInActivity.startForResult(this)
             }
 
         } else {
             login_button.visibility = View.GONE
 
-            updateUI(user)
+            updateUI()
 
             standard_year_button.setOnClickListener {
 
@@ -243,11 +245,23 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
         val shouldUpdate = intent.getBooleanExtra(EXTRA_SHOULD_UPDATE, false)
 
         if (shouldUpdate) {
-            updateAccount(false)
+            updateAccount()
         }
     }
 
-    private fun updateUI(user: Account) {
+    private fun updateUI() {
+
+        val user = mSession?.loadUser()
+
+        if (user == null) {
+            // Do not show membership box
+            membership_container.visibility = View.GONE
+            // Do not show renewal button
+            renewal_button.visibility = View.GONE
+
+            return
+        }
+
         if (user.isVip) {
             tier_tv.text = getString(R.string.member_tier_vip)
             expiration_tv.text = getString(R.string.vip_duration)
@@ -287,8 +301,11 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
 
         // When user selected wechat pay in PaymentActivity, it kills itself and tells MembershipActivity to finish too.
         // Otherwise after user clicked done button in WXPayEntryActivity, MembershipActivity will be started again, and user see this activity two times after clicked back button.
-        if (requestCode == RequestCode.PAYMENT) {
-            if (resultCode == Activity.RESULT_OK) {
+        when (requestCode) {
+            RequestCode.PAYMENT -> {
+                if (resultCode != Activity.RESULT_OK) {
+                    return
+                }
 
                 val paymentMethod = data?.getStringExtra(EXTRA_PAYMENT_METHOD)
                 when (paymentMethod) {
@@ -299,9 +316,20 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
                     }
                     Subscription.PAYMENT_METHOD_ALI -> {
                         // update ui
-                        updateAccount(isManualRefresh = false)
+                        updateAccount()
                     }
                 }
+            }
+
+            // If user logged in here, update UI.
+            RequestCode.SIGN_IN, RequestCode.SIGN_UP -> {
+                if (resultCode != Activity.RESULT_OK) {
+                    return
+                }
+
+                toast(R.string.prompt_logged_in)
+
+                updateUI()
             }
         }
     }
