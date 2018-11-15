@@ -4,7 +4,6 @@ import android.content.Context
 import com.ft.ftchinese.util.gson
 import com.google.gson.annotations.SerializedName
 import android.net.Uri
-import com.ft.ftchinese.util.Store
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Request
 import org.apache.commons.math3.distribution.EnumeratedDistribution
@@ -62,10 +61,6 @@ data class LaunchAd(
     // Save ad image. Returns the Request object so that
     // we can cancel it in if host activity is destroyed while downloading.
     fun cacheImage(filesDir: File): Request? {
-
-        if (Store.exists(filesDir, imageName)) {
-            return null
-        }
 
         return Fuel.download(imageUrl)
                 .destination { _, _ ->
@@ -211,19 +206,24 @@ class LaunchAdManager(context: Context) : AnkoLogger {
         editor.apply()
     }
 
+    /**
+     * Load which days of ads.
+     * If days = 0, it loads as least today's.
+     */
     fun load(days: Int = 0): List<LaunchAd> {
 
         val localDate = LocalDate.now()
         val formatter = ISODateTimeFormat.basicDate()
 
         // Format today to yyyyMMdd.
-        val today = formatter.print(localDate)
+//        val today = formatter.print(localDate)
 
-        val ads = sharedPreferences.getStringSet(today, mutableSetOf())
+//        val ads = sharedPreferences.getStringSet(today, mutableSetOf())
+        val ads = mutableListOf<String>()
 
         for (i in 0..days) {
             val key = formatter.print(localDate.plusDays(i))
-            val adData = sharedPreferences.getStringSet(key, setOf())
+            val adData = sharedPreferences.getStringSet(key, setOf()) ?: continue
             ads.union(adData)
         }
 

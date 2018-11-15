@@ -7,10 +7,7 @@ import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.View
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.util.Store
-import com.ft.ftchinese.util.gson
-import com.ft.ftchinese.util.isActiveNetworkWifi
-import com.ft.ftchinese.util.isNetworkConnected
+import com.ft.ftchinese.util.*
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Request
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -47,6 +44,7 @@ class ChannelActivity : AppCompatActivity(),
     private var mRequest: Request? = null
 
     private var mSession: SessionManager? = null
+    private var mFileCache: FileCache? = null
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
     // Content in raw/list.html
@@ -73,6 +71,8 @@ class ChannelActivity : AppCompatActivity(),
         }
 
         mSession = SessionManager.getInstance(this)
+        mFileCache = FileCache.getInstance(this)
+
         /**
          * Get the metadata for this page of article list
          */
@@ -88,6 +88,8 @@ class ChannelActivity : AppCompatActivity(),
 
             val jsInterface = JSInterface(this)
             jsInterface.mSession = mSession
+            jsInterface.mFileCache = mFileCache
+            jsInterface.mPageMeta = pageMeta
 
             val wvClient = WVClient(this)
             wvClient.mSession = mSession
@@ -123,15 +125,24 @@ class ChannelActivity : AppCompatActivity(),
                 info("loadContent: html fragment")
 
                 mLoadJob = GlobalScope.launch(Dispatchers.Main) {
-                    val cachedFrag = Store.load(this@ChannelActivity, mPageMeta?.fileName)
 
-                    if (cachedFrag != null) {
-                        loadFromCache(cachedFrag)
+                    val cacheName = mPageMeta?.fileName
 
+                    if (cacheName.isNullOrBlank()) {
+
+                        loadFromServer()
                         return@launch
                     }
 
-                    loadFromServer()
+                    val cachedFrag = mFileCache?.load(cacheName)
+                    if (cachedFrag.isNullOrBlank()) {
+
+                        loadFromServer()
+                        return@launch
+                    }
+
+                    loadFromCache(cachedFrag)
+
                 }
             }
 
@@ -143,7 +154,7 @@ class ChannelActivity : AppCompatActivity(),
 
     private suspend  fun loadFromCache(htmlFrag: String) {
         if (mTemplate == null) {
-            mTemplate = Store.readChannelTemplate(resources)
+            mTemplate = mFileCache?.readChannelTemplate()
         }
 
         renderAndLoad(htmlFrag)
@@ -182,7 +193,7 @@ class ChannelActivity : AppCompatActivity(),
         val url = mPageMeta?.contentUrl ?: return
 
         if (mTemplate == null) {
-            mTemplate = Store.readChannelTemplate(resources)
+            mTemplate = mFileCache?.readChannelTemplate()
         }
 
         if (!swipe_refresh.isRefreshing) {
@@ -190,7 +201,7 @@ class ChannelActivity : AppCompatActivity(),
         }
 
         mRequest = Fuel.get(url)
-                .responseString { request, response, result ->
+                .responseString { _, _, result ->
                     isInProgress = false
 
                     val (data, error) = result
@@ -207,7 +218,9 @@ class ChannelActivity : AppCompatActivity(),
     }
 
     private fun cacheData(data: String) {
-        mCacheJob = Store.save(this@ChannelActivity, mPageMeta?.fileName, data)
+        val fileName = mPageMeta?.fileName ?: return
+
+        mCacheJob = mFileCache?.save(fileName, data)
     }
     
     private fun renderAndLoad(htmlFragment: String) {
@@ -228,9 +241,21 @@ class ChannelActivity : AppCompatActivity(),
             mLoadJob?.cancel()
         }
 
-        mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
-            loadFromServer()
+        when (mPageMeta?.htmlType) {
+            HTML_TYPE_FRAGMENT -> {
+                mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
+                    if (mTemplate == null) {
+                        mTemplate = mFileCache?.readChannelTemplate()
+                    }
+                    loadFromServer()
+                }
+            }
+            HTML_TYPE_COMPLETE -> {
+                web_view.reload()
+                isInProgress = false
+            }
         }
+
     }
 
     override fun onStop() {
@@ -284,16 +309,6 @@ class ChannelActivity : AppCompatActivity(),
             loadContent()
         } else {
             ChannelActivity.start(this, listPage)
-        }
-    }
-
-    override fun onPageLoaded(message: String) {
-        if (BuildConfig.DEBUG) {
-            val fileName = mPageMeta?.name ?: return
-
-            GlobalScope.launch {
-                Store.save(this@ChannelActivity, "$fileName.json", message)
-            }
         }
     }
 

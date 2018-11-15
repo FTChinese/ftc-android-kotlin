@@ -9,87 +9,63 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import java.io.File
 import java.io.IOException
 
-object Store {
+class FileCache private constructor(private val context: Context) : AnkoLogger {
 
-    private const val TAG = "Store"
-
-    // Cache files to the data directory.
-    fun save(context: Context?, filename: String?, text: String?): Job? {
-
-        if (context == null || filename.isNullOrBlank() || text.isNullOrBlank()) {
-            return null
-        }
-        val file = File(context.filesDir, filename)
-
+    fun save(fileName: String, content: String): Job {
         return GlobalScope.launch {
             try {
-                file.writeText(text)
+                val file = File(context.filesDir, fileName)
 
-                Log.i(TAG, "Saved file: ${file.name}. Canonical path: ${file.canonicalPath}")
+                file.writeText(content)
             } catch (e: IOException) {
-                Log.i(TAG, "Failed to save ${file.name}. Reason: $e")
+                info("Cannot cache $fileName")
             }
         }
     }
 
-    fun exists(context: Context, filename: String): Boolean {
+    suspend fun load(fileName: String): String {
+        val job = GlobalScope.async {
+            try {
+                context.openFileInput(fileName)
+                        .bufferedReader()
+                        .readText()
+            } catch (e: IOException) {
+                ""
+            }
+
+        }
+
+        return job.await()
+    }
+
+    fun exists(fileName: String): Boolean {
         return try {
-            File(context.filesDir, filename).exists()
+            File(context.filesDir, fileName).exists()
         } catch (e: Exception) {
             false
         }
     }
 
-    fun exists(filesDir: File, fileName: String): Boolean {
+    fun space(): String {
         return try {
-            File(filesDir, fileName).exists()
-        } catch (e: java.lang.Exception) {
-            false
-        }
-    }
-
-    suspend fun load(context: Context?, filename: String?): String? {
-        Log.i(TAG, "Reading file: $filename")
-        if (context == null || filename.isNullOrBlank()) {
-            return null
-        }
-        return try {
-            GlobalScope.async {
-                context.openFileInput(filename).bufferedReader().readText()
-            }.await()
-
-        } catch (e: Exception) {
-            Log.i(TAG, e.toString())
-
-            null
-        }
-    }
-
-    fun filesSpace(context: Context?): String? {
-        if (context == null) return null
-
-        return try {
-            val filesSize = context.filesDir.listFiles()
+            val fileSize = context.filesDir
+                    .listFiles()
                     .map {
-
                         if (!it.isFile) 0 else it.length()
                     }
-                    .fold(0L) { total, next -> total + next}
-
-
-            BinaryByteUnit.format(filesSize)
+                    .fold(0L) { total, next -> total + next }
+            BinaryByteUnit.format(fileSize)
         } catch (e: Exception) {
-            Log.i(TAG, e.toString())
-            null
+            BinaryByteUnit.format(0L)
         }
     }
 
-    fun clearFiles(context: Context?): Boolean {
-        if (context == null) return false
-
+    fun clear(): Boolean {
         return try {
             for (name in context.fileList()) {
                 context.deleteFile(name)
@@ -104,26 +80,82 @@ object Store {
     /**
      * Read files from the the `raw` directory of the package.
      */
-    private fun readRawFile(resources: Resources, resId: Int): String? {
-
+    private fun readRawFile(resId: Int): String {
         return try {
-            val input = resources.openRawResource(resId)
-            input.bufferedReader().use { it.readText() }
-        } catch (e: ExceptionInInitializerError) {
-            null
+            context.resources
+                    .openRawResource(resId)
+                    .bufferedReader()
+                    .use {
+                        it.readText()
+                    }
+        } catch (e: Exception) {
+            ""
         }
     }
 
-    suspend fun readChannelTemplate(resources: Resources): String? {
+    suspend fun readChannelTemplate(): String {
         return GlobalScope.async {
-            readRawFile(resources, R.raw.list)
+            readRawFile(R.raw.list)
         }.await()
     }
 
-    suspend fun readStoryTemplate(resources: Resources): String? {
+    suspend fun readStoryTemplate(): String? {
         return GlobalScope.async {
-            readRawFile(resources, R.raw.story)
+            readRawFile(R.raw.story)
         }.await()
     }
+
+    companion object {
+        private var instance: FileCache? = null
+
+        fun getInstance(context: Context): FileCache {
+            if (instance == null) {
+                instance = FileCache(context.applicationContext)
+            }
+
+            return instance!!
+        }
+    }
 }
+//object Store {
+//
+//    private const val TAG = "Store"
+//
+//    // Cache files to the data directory.
+//    fun save(context: Context?, filename: String?, text: String?): Job? {
+//
+//        if (context == null || filename.isNullOrBlank() || text.isNullOrBlank()) {
+//            return null
+//        }
+//        val file = File(context.filesDir, filename)
+//
+//        return GlobalScope.launch {
+//            try {
+//                file.writeText(text)
+//
+//                Log.i(TAG, "Saved file: ${file.name}. Canonical path: ${file.canonicalPath}")
+//            } catch (e: IOException) {
+//                Log.i(TAG, "Failed to save ${file.name}. Reason: $e")
+//            }
+//        }
+//    }
+//
+//
+//    suspend fun load(context: Context?, filename: String?): String? {
+//        Log.i(TAG, "Reading file: $filename")
+//        if (context == null || filename.isNullOrBlank()) {
+//            return null
+//        }
+//        return try {
+//            GlobalScope.async {
+//                context.openFileInput(filename).bufferedReader().readText()
+//            }.await()
+//
+//        } catch (e: Exception) {
+//            Log.i(TAG, e.toString())
+//
+//            null
+//        }
+//    }
+//}
 

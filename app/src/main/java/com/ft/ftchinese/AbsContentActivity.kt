@@ -17,6 +17,7 @@ import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.FollowingManager
 import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.util.FileCache
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
@@ -53,6 +54,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
     protected abstract var mChannelItem: ChannelItem?
 
     protected var mSessionManager: SessionManager? = null
+    protected var mFileCache: FileCache? = null
     protected var mFirebaseAnalytics: FirebaseAnalytics? = null
     protected var mFollowingManager: FollowingManager? = null
     protected var mArticleStore: ArticleStore? = null

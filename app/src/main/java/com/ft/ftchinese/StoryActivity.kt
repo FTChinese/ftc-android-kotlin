@@ -6,7 +6,6 @@ import android.os.Bundle
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
-import com.ft.ftchinese.util.Store
 import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isNetworkConnected
 import com.github.kittinunf.fuel.Fuel
@@ -127,34 +126,37 @@ class StoryActivity : AbsContentActivity() {
 
         mLoadJob = GlobalScope.launch(Dispatchers.Main) {
 
-            try {
+            val cacheName = mChannelItem?.cacheFileName
 
-                val ok = loadFromCache()
-
-                if (!ok) {
-                    loadFromServer()
-                }
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-                toast("${e.message}")
+            if (cacheName.isNullOrBlank()) {
+                loadFromServer()
+                return@launch
             }
+
+            val cachedJson = mFileCache?.load(cacheName)
+
+            if (cachedJson.isNullOrBlank()) {
+                loadFromServer()
+                return@launch
+            }
+
+            renderAndLoad(cachedJson)
         }
 
         logViewItemEvent()
     }
 
-    private suspend fun loadFromCache(): Boolean {
-        if (mTemplate == null) {
-            mTemplate = Store.readStoryTemplate(resources)
-        }
-
-        val jsonData = Store.load(this, mChannelItem?.cacheFileName) ?: return false
-
-        renderAndLoad(jsonData)
-
-        return true
-    }
+//    private suspend fun loadFromCache(): Boolean {
+//        if (mTemplate == null) {
+//            mTemplate = mFileCache?.readStoryTemplate()
+//        }
+//
+//        val jsonData = Store.load(this, mChannelItem?.cacheFileName) ?: return false
+//
+//        renderAndLoad(jsonData)
+//
+//        return true
+//    }
 
     private suspend fun loadFromServer() {
 
@@ -166,7 +168,7 @@ class StoryActivity : AbsContentActivity() {
         val url = mChannelItem?.apiUrl ?: return
 
         if (mTemplate == null) {
-            mTemplate = Store.readStoryTemplate(resources)
+            mTemplate = mFileCache?.readStoryTemplate()
         }
 
         if (!swipe_refresh.isRefreshing) {
@@ -191,7 +193,10 @@ class StoryActivity : AbsContentActivity() {
     }
 
     private fun cacheData(data: String) {
-        mCacheJob = Store.save(this@StoryActivity, mChannelItem?.cacheFileName, data)
+
+        val fileName = mChannelItem?.cacheFileName ?: return
+
+        mCacheJob = mFileCache?.save(fileName, data)
     }
 
     private fun renderAndLoad(data: String) {
@@ -253,7 +258,7 @@ class StoryActivity : AbsContentActivity() {
 
         mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
             if (mTemplate == null) {
-                mTemplate = Store.readStoryTemplate(resources)
+                mTemplate = mFileCache?.readStoryTemplate()
             }
 
             loadFromServer()

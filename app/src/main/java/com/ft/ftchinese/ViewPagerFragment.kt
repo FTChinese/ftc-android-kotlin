@@ -9,10 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.util.Store
-import com.ft.ftchinese.util.gson
-import com.ft.ftchinese.util.isActiveNetworkWifi
-import com.ft.ftchinese.util.isNetworkConnected
+import com.ft.ftchinese.util.*
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Request
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -52,6 +49,7 @@ class ViewPagerFragment : Fragment(),
     private var mRequest: Request? = null
 
     private var mSession: SessionManager? = null
+    private var mFileCache: FileCache? = null
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
@@ -116,6 +114,7 @@ class ViewPagerFragment : Fragment(),
 
         if (context != null) {
             mSession = SessionManager.getInstance(context)
+            mFileCache = FileCache.getInstance(context)
         }
 
         info("onAttach finished")
@@ -158,9 +157,10 @@ class ViewPagerFragment : Fragment(),
         }
 
         // Setup webview.
-
         val jsInterface = JSInterface(activity)
         jsInterface.mSession = mSession
+        jsInterface.mFileCache = mFileCache
+        jsInterface.mPageMeta = mPageMeta
         jsInterface.setOnJSInteractionListener(this)
 
         val wvClient = WVClient(activity)
@@ -205,17 +205,23 @@ class ViewPagerFragment : Fragment(),
 
                 mLoadJob = GlobalScope.launch (Dispatchers.Main) {
 
-                    val cachedFrag = Store.load(context, mPageMeta?.fileName)
+                    val cacheName = mPageMeta?.fileName
 
-                    // If cached HTML fragment exists
-                    if (cachedFrag != null) {
+                    if (cacheName.isNullOrBlank()) {
 
-                        loadFromCache(cachedFrag)
-
+                        loadFromServer()
                         return@launch
                     }
 
-                    loadFromServer()
+                    val cachedFrag = mFileCache?.load(cacheName)
+
+                    if (cachedFrag.isNullOrBlank()) {
+
+                        loadFromServer()
+                        return@launch
+                    }
+
+                    loadFromCache(cachedFrag)
                 }
             }
             // For complete HTML, load it directly into Web view.
@@ -230,7 +236,7 @@ class ViewPagerFragment : Fragment(),
     private suspend fun loadFromCache(htmlFrag: String) {
 
         if (mTemplate == null) {
-            mTemplate = Store.readChannelTemplate(resources)
+            mTemplate = mFileCache?.readChannelTemplate()
         }
 
         renderAndLoad(htmlFrag)
@@ -267,7 +273,7 @@ class ViewPagerFragment : Fragment(),
         val url = mPageMeta?.contentUrl ?: return
 
         if (mTemplate == null) {
-            mTemplate = Store.readChannelTemplate(resources)
+            mTemplate = mFileCache?.readChannelTemplate()
         }
 
         if (!swipe_refresh.isRefreshing) {
@@ -292,7 +298,9 @@ class ViewPagerFragment : Fragment(),
 
 
     private fun cacheData(data: String) {
-        mCacheJob = Store.save(context, mPageMeta?.fileName, data)
+        val fileName = mPageMeta?.fileName ?: return
+
+        mCacheJob = mFileCache?.save(fileName, data)
     }
 
     private fun renderAndLoad(htmlFragment: String) {
@@ -360,7 +368,7 @@ class ViewPagerFragment : Fragment(),
                 info("onRefresh: crawlWeb html fragment")
                 mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
                     if (mTemplate == null) {
-                        mTemplate = Store.readChannelTemplate(resources)
+                        mTemplate = mFileCache?.readChannelTemplate()
                     }
 
                     info("Refreshing: fetch remote data")
@@ -386,19 +394,9 @@ class ViewPagerFragment : Fragment(),
         ChannelActivity.start(activity, listPage)
     }
 
-    // JSInterface page loaded event
-    override fun onPageLoaded(message: String) {
-        if (BuildConfig.DEBUG) {
-            val fileName = mPageMeta?.name ?: return
-
-            GlobalScope.launch {
-                Store.save(context, "$fileName.json", message)
-            }
-        }
-    }
-
     // JSInterface click event.
     override fun onSelectContent(channelItem: ChannelItem) {
+        info("Sekect content: $channelItem")
         mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
             putString(FirebaseAnalytics.Param.CONTENT_TYPE, channelItem.type)
             putString(FirebaseAnalytics.Param.ITEM_ID, channelItem.id)

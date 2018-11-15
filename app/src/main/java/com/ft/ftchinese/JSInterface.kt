@@ -5,8 +5,11 @@ import android.webkit.JavascriptInterface
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
+import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.util.gson
 import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -25,14 +28,12 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
     private var mChannelMeta: ChannelMeta? = null
     var mSession: SessionManager? = null
     var mFollowingManager: FollowingManager? = null
+    var mFileCache: FileCache? = null
+    var mPageMeta: PagerTab? = null
 
     private var mListener: OnJSInteractionListener? = null
 
     interface OnJSInteractionListener {
-        // Used for development only currently.
-        // Save the json data passed from js.
-        fun onPageLoaded(message: String)
-
         fun onSelectContent(channelItem: ChannelItem)
     }
 
@@ -75,6 +76,17 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
      * https://gitlab.com/neefrankie/android-helper
      */
     @JavascriptInterface fun onPageLoaded(message: String) {
+
+        if (BuildConfig.DEBUG) {
+            val name = mPageMeta?.name
+
+            if (name != null) {
+                info("Saving js posted data for $mPageMeta. Data: $message")
+                GlobalScope.launch {
+                    mFileCache?.save("$name.json", message)
+                }
+            }
+        }
 
         try {
             val channelData = gson.fromJson<ChannelContent>(message, ChannelContent::class.java)
@@ -196,7 +208,17 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
      */
     @JavascriptInterface fun onLoadedSponsors(message: String) {
 
-        mListener?.onPageLoaded(message)
+        // See what the sponsor data is.
+        if (BuildConfig.DEBUG) {
+            val name = mPageMeta?.name
+
+            if (name != null) {
+                info("Saving js posted data for $mPageMeta. Data: $message")
+                GlobalScope.launch {
+                    mFileCache?.save("${name}_sponsors.json", message)
+                }
+            }
+        }
 
         try {
             SponsorManager.sponsors = gson.fromJson(message, Array<Sponsor>::class.java)

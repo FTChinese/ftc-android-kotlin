@@ -20,10 +20,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.*
-import com.ft.ftchinese.util.AdSlot
-import com.ft.ftchinese.util.FtcEvent
-import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.util.Store
+import com.ft.ftchinese.util.*
 import com.github.kittinunf.fuel.core.Request
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -57,6 +54,7 @@ class MainActivity : AppCompatActivity(),
 
     private var mSession: SessionManager? = null
     private var mAdManager: LaunchAdManager? = null
+    private var mFileCache: FileCache? = null
 
     private var mNewsAdapter: TabPagerAdapter? = null
     private var mEnglishAdapter: TabPagerAdapter? = null
@@ -171,6 +169,7 @@ class MainActivity : AppCompatActivity(),
 
         mSession = SessionManager.getInstance(this)
         mAdManager = LaunchAdManager.getInstance(this)
+        mFileCache = FileCache.getInstance(this)
 
         // Show advertisement
         // Keep a reference the coroutine in case user exit at this moment
@@ -258,7 +257,7 @@ class MainActivity : AppCompatActivity(),
         val ad = adManager.getRandomAd(account?.membership) ?: return
 
         // Check if the required ad image is required.
-        if (!Store.exists(filesDir, ad.imageName)) {
+        if (mFileCache?.exists(ad.imageName) != true) {
             info("Ad image ${ad.imageName} not found")
             showSystemUI()
             return
@@ -360,6 +359,11 @@ class MainActivity : AppCompatActivity(),
 
         for (ad in adsToDownload) {
             info("Download ad image: ${ad.imageUrl}")
+
+            if (mFileCache?.exists(ad.imageName) == true) {
+                continue
+            }
+
             mDownloadAdRequest = ad.cacheImage(filesDir)
         }
     }

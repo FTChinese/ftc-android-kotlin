@@ -23,8 +23,8 @@ data class PagerTab (
 
     var shouldReload = false
 
-    val fileName: String
-        get() = if (name.isBlank()) "" else "$name.html"
+    val fileName: String?
+        get() = if (name.isBlank()) null else "$name.html"
 
 
     /**

@@ -1,17 +1,8 @@
 package com.ft.ftchinese.models
 
-import android.content.Context
 import android.net.Uri
-import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.Store
-import com.ft.ftchinese.util.gson
-import com.google.gson.JsonSyntaxException
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import java.util.*
-import java.io.IOException
 
 /**
  * The following data keys is used to parse JSON data passed from WebView by ContentWebViewInterface.postItems methods.
