@@ -137,7 +137,8 @@
     <string name="prompt_cache_cleared">缓存已清空</string>
     <string name="prompt_cache_not_cleared">无法清空缓存</string>
     <string name="prompt_reading_history">阅读历史已删除</string>
-
+    <string name="permission_alipay_denied">无法获取支付宝所需的权限, 请到系统设置开启</string>
+    <string name="permission_alipay_granted">已获取支付宝所需的权限</string>
     <string name="action_request_verify">重新发送验证邮件</string>
 
     <string name="action_login">登录</string>

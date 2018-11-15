@@ -20,8 +20,6 @@
     <string name="titlebar_bilingual">對照</string>
 
 
-
-
     <!-- Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -143,6 +141,9 @@
     <string name="prompt_cache_cleared">緩存已清空</string>
     <string name="prompt_cache_not_cleared">無法清空緩存</string>
     <string name="prompt_reading_history">閱讀歷史已刪除</string>
+
+    <string name="permission_alipay_denied">無法獲取支付寶所需的權限，請到系統設置開啟</string>
+    <string name="permission_alipay_granted">已獲取支付寶所需的權限</string>
 
     <string name="action_request_verify">重新發送驗證信件</string>
 

@@ -103,8 +103,6 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
     private fun requestPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE), PERMISSIONS_REQUEST_CODE)
-        } else {
-            toast("支付宝 SDK 已有所需的权限")
         }
     }
 
@@ -112,18 +110,18 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         when (requestCode) {
             PERMISSIONS_REQUEST_CODE -> {
                 if (grantResults.isEmpty()) {
-                    toast("无法获取支付宝 SDK 所需的权限, 请到系统设置开启")
+                    toast(R.string.permission_alipay_denied)
                     return
                 }
 
                 for (x in grantResults) {
                     if (x == PackageManager.PERMISSION_DENIED) {
-                        toast("无法获取支付宝 SDK 所需的权限, 请到系统设置开启")
+                        toast(R.string.permission_alipay_denied)
                         return
                     }
                 }
 
-                toast("支付宝 SDK 所需的权限已经正常获取")
+                toast(R.string.permission_alipay_granted)
             }
         }
     }
