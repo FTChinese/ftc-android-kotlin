@@ -396,10 +396,13 @@ class MainActivity : AppCompatActivity(),
         when (requestCode) {
             // If the result come from SignIn or SignUp, update UI to show mUser login state.
             RequestCode.SIGN_IN, RequestCode.SIGN_UP -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    toast("登录成功")
-                    updateSessionUI()
+
+                if (resultCode != Activity.RESULT_OK) {
+                    return
                 }
+
+                toast(R.string.prompt_logged_in)
+                updateSessionUI()
             }
         }
     }
