@@ -135,6 +135,7 @@
     <string name="prompt_confirm_password">確認新密碼</string>
     <string name="prompt_password_letter">請輸入您的登入FT中文網所用的電子信箱，我們會向該信箱發送郵件，幫您重設密碼</string>
     <string name="prompt_letter_sent">請檢查您的信件，點擊郵件中的「重設密碼」連接，在所打開的網頁中修改您的密碼。如果幾分鐘內沒有看到信件，請檢查是否被放進了垃圾信件列表。</string>
+    <string name="prompt_logged_in">登入成功</string>
     <string name="prompt_not_logged_in">您尚未登入，登入後可以查看</string>
     <string name="prompt_not_set">未設置</string>
     <string name="prompt_no_email_app">您的設備上沒有安裝信件程式，無法發送反饋信件</string>
