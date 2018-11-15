@@ -182,70 +182,64 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
 
         mSession = SessionManager.getInstance(this)
 
-        val user = mSession?.loadUser()
+        // If starter asked to update user account from server
+        val shouldUpdate = intent.getBooleanExtra(EXTRA_SHOULD_UPDATE, false)
 
-        if (user == null) {
-            // Do not show membership box
-            membership_container.visibility = View.GONE
-            // Do not show renewal button
-            renewal_button.visibility = View.GONE
+        if (shouldUpdate) {
+            updateAccount()
+        }
 
+        updateUI()
+
+        setUp()
+    }
+
+    private fun setUp() {
+        val isLoggedIn = mSession?.isLoggedIn() ?: false
+        if (!isLoggedIn) {
             login_button.setOnClickListener {
                 SignInActivity.startForResult(this)
             }
+        }
 
-            standard_year_button.setOnClickListener {
-                SignInActivity.startForResult(this)
-            }
-
-            standard_month_button.setOnClickListener {
-                SignInActivity.startForResult(this)
-            }
-
-
-            premium_button.setOnClickListener {
-                SignInActivity.startForResult(this)
-            }
-
-        } else {
-            login_button.visibility = View.GONE
-
-            updateUI()
-
-            standard_year_button.setOnClickListener {
-
+        standard_year_button.setOnClickListener {
+            if (isLoggedIn) {
                 PaymentActivity.startForResult(
                         activity = this,
                         requestCode = RequestCode.PAYMENT,
                         memberTier = Membership.TIER_STANDARD,
                         billingCycle = Membership.CYCLE_YEAR
                 )
+            } else {
+                SignInActivity.startForResult(this)
             }
 
-            standard_month_button.setOnClickListener {
+        }
+
+        standard_month_button.setOnClickListener {
+            if (isLoggedIn) {
                 PaymentActivity.startForResult(
                         activity = this,
                         requestCode = RequestCode.PAYMENT,
                         memberTier = Membership.TIER_STANDARD,
                         billingCycle = Membership.CYCLE_MONTH
                 )
+            } else {
+                SignInActivity.startForResult(this)
             }
+        }
 
-            premium_button.setOnClickListener {
+        premium_button.setOnClickListener {
+            if (isLoggedIn) {
                 PaymentActivity.startForResult(
                         activity = this,
                         requestCode = RequestCode.PAYMENT,
                         memberTier = Membership.TIER_PREMIUM,
                         billingCycle = Membership.CYCLE_YEAR
                 )
+            } else {
+                SignInActivity.startForResult(this)
             }
-        }
-
-        // If starter asked to update user account from server
-        val shouldUpdate = intent.getBooleanExtra(EXTRA_SHOULD_UPDATE, false)
-
-        if (shouldUpdate) {
-            updateAccount()
         }
     }
 
@@ -253,7 +247,10 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
 
         val user = mSession?.loadUser()
 
+        info("Updating UI for account: $user")
+
         if (user == null) {
+            login_container.visibility = View.VISIBLE
             // Do not show membership box
             membership_container.visibility = View.GONE
             // Do not show renewal button
@@ -262,12 +259,32 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
             return
         }
 
+        // Hide log in prompt if user is already logged in
+        login_container.visibility = View.GONE
+        // Do not show membership box
+        membership_container.visibility = View.VISIBLE
+        // Do not show renewal button
+        renewal_button.visibility = View.VISIBLE
+
         if (user.isVip) {
             tier_tv.text = getString(R.string.member_tier_vip)
             expiration_tv.text = getString(R.string.vip_duration)
             renewal_button.visibility = View.GONE
 
             return
+        }
+
+
+        // If membership is in renewal period.
+        if (user.membership.isRenewable) {
+            // Only show renewal button for a member whose membership will expire.
+            renewal_button.visibility = View.VISIBLE
+
+            renewal_button.setOnClickListener {
+                PaymentActivity.startForResult(this, RequestCode.PAYMENT, user.membership.tier, user.membership.billingCycle)
+            }
+        } else {
+            renewal_button.visibility = View.GONE
         }
 
         val cycleText = when(user.membership.billingCycle) {
@@ -283,17 +300,6 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
         }
 
         expiration_tv.text = user.membership.expireDate
-
-        if (user.membership.isRenewable) {
-            // Only show renewal button for a member whose membership will expire.
-            renewal_button.visibility = View.VISIBLE
-
-            renewal_button.setOnClickListener {
-                PaymentActivity.startForResult(this, RequestCode.PAYMENT, user.membership.tier, user.membership.billingCycle)
-            }
-        } else {
-            renewal_button.visibility = View.GONE
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
