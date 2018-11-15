@@ -13,7 +13,7 @@ class SignInActivity : SingleFragmentActivity() {
 
     companion object {
 
-        fun start(activity: Activity?) {
+        fun startForResult(activity: Activity?) {
             val intent = Intent(activity, SignInActivity::class.java)
 
             activity?.startActivityForResult(intent, RequestCode.SIGN_IN)

@@ -11,7 +11,6 @@ import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isNetworkConnected
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Request
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.activity_content.*
 import kotlinx.coroutines.*
@@ -77,7 +76,7 @@ class StoryActivity : AbsContentActivity() {
 
                 toast(R.string.prompt_restricted_login)
 
-                SignInActivity.start(this)
+                SignInActivity.startForResult(this)
                 return@setOnClickListener
             }
 
@@ -101,7 +100,7 @@ class StoryActivity : AbsContentActivity() {
 
                 toast(R.string.prompt_restricted_login)
 
-                SignInActivity.start(this)
+                SignInActivity.startForResult(this)
                 return@setOnClickListener
             }
 

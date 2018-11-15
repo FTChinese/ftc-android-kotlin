@@ -236,7 +236,7 @@ class WVClient(
 
                 if (account == null) {
                     activity?.toast(R.string.prompt_restricted_paid_user)
-                    SignInActivity.start(activity)
+                    SignInActivity.startForResult(activity)
 
                     return true
                 }

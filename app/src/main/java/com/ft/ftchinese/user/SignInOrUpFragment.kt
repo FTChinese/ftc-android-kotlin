@@ -145,7 +145,7 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
         }
 
         go_to_sign_in.setOnClickListener {
-            SignInActivity.start(activity)
+            SignInActivity.startForResult(activity)
         }
 
         // Wechat login response is handled in `wxapi.WXEntryActivity`

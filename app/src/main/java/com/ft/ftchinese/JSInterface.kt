@@ -142,7 +142,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
 
             if (account == null) {
                 activity?.toast(R.string.prompt_restricted_paid_user)
-                SignInActivity.start(activity)
+                SignInActivity.startForResult(activity)
 
                 return
             }

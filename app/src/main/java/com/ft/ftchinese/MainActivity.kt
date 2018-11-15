@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity(),
     private val drawerHeaderTitleListener = View.OnClickListener {
         // If user is not logged in, show login.
         if (mSession?.isLoggedIn() == false) {
-            SignInActivity.start(this)
+            SignInActivity.startForResult(this)
             return@OnClickListener
         }
 
@@ -548,7 +548,7 @@ class MainActivity : AppCompatActivity(),
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.action_login -> {
-                SignInActivity.start(this)
+                SignInActivity.startForResult(this)
             }
             R.id.action_sign_up -> {
                 SignUpActivity.start(this)
