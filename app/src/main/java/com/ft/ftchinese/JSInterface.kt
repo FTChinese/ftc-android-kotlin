@@ -134,7 +134,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
                     val listPage = PagerTab(
                             title = channelItem.headline,
                             name = "${channelItem.type}_${channelItem.id}",
-                            contentUrl = channelItem.uriForWebFrag.toString(),
+                            contentUrl = channelItem.apiUrl,
                             htmlType = HTML_TYPE_FRAGMENT
                     )
 
