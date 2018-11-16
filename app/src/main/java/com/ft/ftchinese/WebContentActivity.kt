@@ -4,11 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.util.gson
 import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.info
-import org.jetbrains.anko.toast
 
 /**
  * WebContentActivity might be launched in two circumstances:
@@ -20,7 +20,7 @@ import org.jetbrains.anko.toast
 class WebContentActivity : AbsContentActivity() {
 
     override val articleWebUrl: String
-        get() = mChannelItem?.canonicalUrl ?: ""
+        get() = mCanonicalUrl ?: ""
 
     override val articleTitle: String
         get() = ""
@@ -30,22 +30,34 @@ class WebContentActivity : AbsContentActivity() {
 
     override var mChannelItem: ChannelItem? = null
 
+    private var mCanonicalUrl: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val uri = intent.getParcelableExtra<Uri>(EXTRA_UNKNOWN_URI)
 
+
+
+        swipe_refresh.isEnabled = false
+
         if (uri != null) {
-            load(uri.toString())
+            mCanonicalUrl = uri.toString()
+
+            bottom_menu_container.visibility = View.GONE
+            load(buildUrl(uri))
 
             return
         }
 
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
+        info("Passed in data: $itemData")
         if (itemData != null) {
+
             try {
                 mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
+                mCanonicalUrl = mChannelItem?.canonicalUrl
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -59,6 +71,15 @@ class WebContentActivity : AbsContentActivity() {
         updateStarUI()
     }
 
+    private fun buildUrl(uri: Uri): String {
+        val builder = uri.buildUpon()
+        if (uri.getQueryParameter("webview") == null) {
+            builder.appendQueryParameter("webview", "ftcapp")
+        }
+
+        return builder.build().toString()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
 
@@ -66,9 +87,6 @@ class WebContentActivity : AbsContentActivity() {
     }
 
     override fun onRefresh() {
-        toast(R.string.prompt_refreshing)
-
-        web_view.reload()
     }
 
     fun load(url: String) {
