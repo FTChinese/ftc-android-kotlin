@@ -52,10 +52,13 @@ class StoryActivity : AbsContentActivity() {
         // Meta data about current article
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
+        info("Item data: $itemData")
+
         if (itemData != null) {
             try {
                 mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
 
+                info("Channel item: $mChannelItem")
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -127,36 +130,34 @@ class StoryActivity : AbsContentActivity() {
         mLoadJob = GlobalScope.launch(Dispatchers.Main) {
 
             val cacheName = mChannelItem?.cacheFileName
+            info("Cache file: $cacheName")
 
             if (cacheName.isNullOrBlank()) {
+                info("No cache file name")
                 loadFromServer()
                 return@launch
             }
 
             val cachedJson = mFileCache?.load(cacheName)
 
+            info("Cached json: $cachedJson")
+
             if (cachedJson.isNullOrBlank()) {
+                info("Cache file is not found or is blank")
                 loadFromServer()
                 return@launch
             }
 
+            if (mTemplate == null) {
+                mTemplate = mFileCache?.readStoryTemplate()
+            }
+
+            info("Use local cache")
             renderAndLoad(cachedJson)
         }
 
         logViewItemEvent()
     }
-
-//    private suspend fun loadFromCache(): Boolean {
-//        if (mTemplate == null) {
-//            mTemplate = mFileCache?.readStoryTemplate()
-//        }
-//
-//        val jsonData = Store.load(this, mChannelItem?.cacheFileName) ?: return false
-//
-//        renderAndLoad(jsonData)
-//
-//        return true
-//    }
 
     private suspend fun loadFromServer() {
 
@@ -175,16 +176,22 @@ class StoryActivity : AbsContentActivity() {
             isInProgress = true
         }
 
+        info("Start fetching data from $url")
+
         mRequest = Fuel.get(url)
                 .responseString { _, _, result ->
                     isInProgress = false
 
                     val (data, error) = result
 
+                    info("Error: $error")
+
                     if (error != null || data == null) {
                         toast(R.string.prompt_load_failure)
                         return@responseString
                     }
+
+                    info("Start rendering")
 
                     renderAndLoad(data)
 
@@ -204,9 +211,12 @@ class StoryActivity : AbsContentActivity() {
         val story = try {
             gson.fromJson<Story>(data, Story::class.java)
         } catch (e: JsonSyntaxException) {
+            info("Cannot parse JSON: $e")
             toast(R.string.prompt_load_failure)
             return
         }
+
+        info("Story: $story")
 
         showLanguageSwitch = story.isBilingual
 
@@ -214,6 +224,7 @@ class StoryActivity : AbsContentActivity() {
 
         val html = mChannelItem?.renderStory(mTemplate, story, mCurrentLanguage, follows = follows)
 
+        info("HTML: $html")
         if (html == null) {
             toast(R.string.prompt_load_failure)
             return
@@ -264,10 +275,6 @@ class StoryActivity : AbsContentActivity() {
             loadFromServer()
         }
     }
-
-//    private fun updateFavouriteIcon() {
-//        action_favourite.setImageResource(if (mIsStarring) R.drawable.ic_favorite_teal_24dp else R.drawable.ic_favorite_border_teal_24dp )
-//    }
 
     private fun saveHistory() {
         val item = mChannelItem ?: return
