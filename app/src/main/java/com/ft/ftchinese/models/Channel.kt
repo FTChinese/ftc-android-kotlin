@@ -107,7 +107,10 @@ data class ChannelItem(
         }
 
     val isMembershipRequired: Boolean
-        get() = isSevenDaysOld || type == TYPE_PREMIUM
+        get() = isSevenDaysOld ||
+                type == TYPE_PREMIUM ||
+                (type == TYPE_INTERACTIVE && subType == SUB_TYPE_RADIO) ||
+                (type == TYPE_INTERACTIVE && subType == SUB_TYPE_SPEED_READING)
 
     // File name used to cache/retrieve json data.
     val cacheFileName: String
@@ -128,25 +131,18 @@ data class ChannelItem(
             return "story"
         }
 
-    private val baseUri = Uri.parse(URL_MAILBOX)
     /**
      * URL used to fetch another list of articles.
      * See https://en.wikipedia.org/wiki/Uniform_Resource_Identifier for URI definition.
      */
     val uriForWebFrag: Uri
-        get() = baseUri.buildUpon()
+        get() = Uri.parse(URL_MAILBOX).buildUpon()
                 .appendPath(type)
                 .appendPath(id)
                 .appendQueryParameter("bodyonly", "yes")
                 .appendQueryParameter("webview", "ftcapp")
                 .build()
 
-    val uriForWebPage: Uri
-        get() = baseUri.buildUpon()
-                .appendPath(type)
-                .appendPath(id)
-                .appendQueryParameter("webview", "ftcapp")
-                .build()
     /**
      * URL used to fetch an article
      * See Page/FTChinese/Main/APIs.swift
@@ -154,21 +150,21 @@ data class ChannelItem(
      */
     val apiUrl: String?
         get() = when(type) {
-            TYPE_STORY, TYPE_PREMIUM -> "https://api.ftmailbox.com/index.php/jsapi/get_story_more_info/$id"
+            TYPE_STORY, TYPE_PREMIUM -> "$URL_MAILBOX/index.php/jsapi/get_story_more_info/$id"
 
             TYPE_INTERACTIVE -> when (subType) {
                 //"https://api003.ftmailbox.com/$type/$id?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes"
-                SUB_TYPE_RADIO -> "https://api003.ftmailbox.com/interactive/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
-                SUB_TYPE_SPEED_READING -> "https://api003.ftmailbox.com/interactive/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
+                SUB_TYPE_RADIO -> "$URL_MAILBOX/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
+                SUB_TYPE_SPEED_READING -> "$URL_FTC/interactive/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
 
-                SUB_TYPE_MBAGYM -> canonicalUrl
+                SUB_TYPE_MBAGYM -> "$URL_FTC/$type/$id"
 
-                else -> "https://api003.ftmailbox.com/interactive/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
+                else -> "$URL_MAILBOX/$type/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
             }
 
-            TYPE_VIDEO -> "https://api003.ftmailbox.com/$type/$id?bodyonly=yes&webview=ftcapp&004"
+            TYPE_VIDEO -> "$URL_FTC/$type/$id?bodyonly=yes&webview=ftcapp&004"
 
-            else -> uriForWebPage.toString()
+            else -> "$URL_MAILBOX/$type/$id?webview=ftcapp"
         }
 
     private fun pickAdZone(homepageZone: String, fallbackZone: String): String {
@@ -273,6 +269,7 @@ data class ChannelItem(
     fun renderStory(template: String?, story: Story?, language: Int, follows: JSFollows): String? {
 
         if (template == null || story == null) {
+
             return null
         }
 
