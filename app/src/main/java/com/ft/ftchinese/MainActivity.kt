@@ -215,8 +215,11 @@ class MainActivity : AppCompatActivity(),
 
         // Fetch ads schedule from remote server in background.
         // Keep a reference to this coroutine in case user exits before this task finished.
-        mDownloadAdJob = GlobalScope.launch {
-            checkAd()
+        // Always remember to check network status otherwise app will crash.
+        if (isNetworkConnected()) {
+            mDownloadAdJob = GlobalScope.launch {
+                checkAd()
+            }
         }
     }
 
