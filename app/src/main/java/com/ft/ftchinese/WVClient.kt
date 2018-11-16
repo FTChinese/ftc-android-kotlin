@@ -20,16 +20,10 @@ import org.jetbrains.anko.toast
  * /tag/汽车未来
  */
 val pathToTitle = mapOf(
-        // /channel/english.html?webview=ftcapp
-        "english.html" to "每日英语",
-        // /channel/mba.html?webview=ftcapp
-        "mba.html" to "FT商学院",
         // /m/marketing/intelligence.html?webview=ftcapp
         "intelligence.html" to "FT研究院",
         // /m/marketing/businesscase.html
         "businesscase.html" to "中国商业案例精选",
-        // /channel/weekly.html
-        "weekly.html" to "热门文章",
         // /channel/editorchoice-issue.html?issue=EditorChoice-20181029
         "editorchoice-issue.html" to "编辑精选",
         // /channel/chinabusinesswatch.html
@@ -46,6 +40,15 @@ val pathToTitle = mapOf(
         "markets.html" to "金融市场",
         "hxxf2016.html" to "透视中国PPP模式",
         "money.html" to "理财"
+)
+
+val noAccess = mapOf(
+        // /channel/english.html?webview=ftcapp
+        "english.html" to "每日英语",
+        // /channel/mba.html?webview=ftcapp
+        "mba.html" to "FT商学院",
+        // /channel/weekly.html
+        "weekly.html" to "热门文章"
 )
 
 /**
@@ -151,7 +154,6 @@ class WVClient(
     private fun handleInSiteLink(uri: Uri): Boolean {
         val pathSegments = uri.pathSegments
 
-        info("Handle in-site link $uri")
         /**
          * Handle pagination links.
          * What action to preform depends on whether you
@@ -216,57 +218,39 @@ class WVClient(
             ChannelItem.TYPE_STORY,
             ChannelItem.TYPE_PREMIUM,
             ChannelItem.TYPE_VIDEO,
-            ChannelItem.TYPE_INTERACTIVE,
-            ChannelItem.TYPE_PHOTO_NEWS -> {
-                val channelItem = ChannelItem(
-                        id = pathSegments[1],
-                        type = pathSegments[0],
-                        headline = ""
-                )
+            // Links on home page under FT商学院
+            ChannelItem.TYPE_PHOTO_NEWS,
+            // Links on home page under FT研究院
+            ChannelItem.TYPE_INTERACTIVE-> {
 
-                // If this article is not restricted.
-                // The logic here is similar to JSInterface#selectitem.
-                // It seems there's no way to merge them together
-                // since js event to activities, and url links to activities are all many-to-many relationship.
-                if (!channelItem.isMembershipRequired) {
-                    return startReading(channelItem)
-                }
+                WebContentActivity.start(activity, uri)
 
-                val account = mSession?.loadUser()
-
-                if (account == null) {
-                    activity?.toast(R.string.prompt_restricted_paid_user)
-                    SignInActivity.startForResult(activity)
-
-                    return true
-                }
-
-                if (!account.canAccessPaidContent) {
-                    activity?.toast(R.string.prompt_restricted_paid_user)
-                    SubscriptionActivity.start(activity)
-
-                    return true
-                }
-
-                return startReading(channelItem)
+                return true
             }
+
 
             /**
              * If the path looks like `/channel/english.html`
              * On home page '每日英语' section, the title is a link
              * Similar to TYPE_COLUMN
+             * Should load a full webpage without header under such cases.
              */
             ChannelItem.TYPE_CHANNEL -> {
-                val lastPathSegment = uri.lastPathSegment
+                val lastPathSegment = uri.lastPathSegment ?: return true
+
+                // Prevent multiple entry point for a single item.
+                if (noAccess.containsKey(lastPathSegment)) {
+                    return true
+                }
 
                 val listPage = PagerTab(
                         title = pathToTitle[lastPathSegment] ?: "",
                         name = uri.pathSegments.joinToString("_").removeSuffix(".html"),
-                        contentUrl = buildUrlForFragment(uri),
-                        htmlType = HTML_TYPE_FRAGMENT
+                        contentUrl = buildUrlForFullPage(uri),
+                        htmlType = HTML_TYPE_COMPLETE
                 )
 
-                info("Start channel activity for link: ${listPage.contentUrl}")
+                info("Start channel activity for $listPage")
 
                 ChannelActivity.start(activity, listPage)
 
@@ -314,9 +298,6 @@ class WVClient(
         when (channelItem.type) {
             ChannelItem.TYPE_STORY, ChannelItem.TYPE_PREMIUM -> {
                 StoryActivity.start(activity, channelItem)
-            }
-            else -> {
-                WebContentActivity.start(activity, channelItem)
             }
         }
         return true
@@ -408,6 +389,8 @@ class WVClient(
 
     private fun buildUrlForFullPage(uri: Uri): String {
         val builder = uri.buildUpon()
+        builder.scheme("https")
+                .authority(HOST_MAILBOX)
         if (uri.getQueryParameter("webview") == null) {
             builder.appendQueryParameter("webview", "ftcapp")
         }
