@@ -81,7 +81,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
             val name = mPageMeta?.name
 
             if (name != null) {
-                info("Saving js posted data for $mPageMeta. Data: $message")
+                info("Saving js posted data for $mPageMeta")
                 GlobalScope.launch {
                     mFileCache?.save("$name.json", message)
                 }
@@ -144,6 +144,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
                 }
             }
 
+            // Check access
             if (!channelItem.isMembershipRequired) {
                 startReading(channelItem)
 
@@ -213,7 +214,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
             val name = mPageMeta?.name
 
             if (name != null) {
-                info("Saving js posted data for $mPageMeta. Data: $message")
+                info("Saving js posted data for sponsors of $mPageMeta")
                 GlobalScope.launch {
                     mFileCache?.save("${name}_sponsors.json", message)
                 }
