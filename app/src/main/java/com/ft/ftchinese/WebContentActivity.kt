@@ -7,8 +7,10 @@ import android.os.Bundle
 import android.view.View
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.util.gson
+import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.info
+import org.jetbrains.anko.toast
 
 /**
  * WebContentActivity might be launched in two circumstances:
@@ -90,6 +92,12 @@ class WebContentActivity : AbsContentActivity() {
     }
 
     fun load(url: String) {
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
+
+            return
+        }
+
         web_view.loadUrl(url)
 
         logViewItemEvent()
