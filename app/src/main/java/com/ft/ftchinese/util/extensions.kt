@@ -3,16 +3,11 @@ package com.ft.ftchinese.util
 import android.app.Activity
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
 import android.net.NetworkInfo
-import android.util.Log
 import com.ft.ftchinese.R
 import com.google.gson.JsonSyntaxException
 import org.jetbrains.anko.toast
 import java.io.IOException
-
-private const val TAG = "Network"
 
 fun Activity.getActiveNetworkInfo(): NetworkInfo? {
     return try {
@@ -32,7 +27,6 @@ fun Activity.getActiveNetworkInfo(): NetworkInfo? {
 
 fun Activity.isNetworkConnected(): Boolean {
 
-    Log.i(TAG, "isNetworkConnected: ${getActiveNetworkInfo()?.isConnected}")
     return getActiveNetworkInfo()?.isConnected == true
 }
 

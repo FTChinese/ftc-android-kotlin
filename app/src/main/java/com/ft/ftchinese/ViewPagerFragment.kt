@@ -342,6 +342,12 @@ class ViewPagerFragment : Fragment(),
         val dataToLoad = mPageMeta?.render(mTemplate, htmlFragment)
 
         web_view.loadDataWithBaseURL(WEBVIEV_BASE_URL, dataToLoad, "text/html", null, null)
+
+        val fileName = mPageMeta?.fileName ?: return
+
+        if (dataToLoad != null) {
+            mFileCache?.save("full_$fileName", dataToLoad)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -399,7 +405,7 @@ class ViewPagerFragment : Fragment(),
 
     // JSInterface click event.
     override fun onSelectContent(channelItem: ChannelItem) {
-        info("Sekect content: $channelItem")
+        info("Select content: $channelItem")
         mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
             putString(FirebaseAnalytics.Param.CONTENT_TYPE, channelItem.type)
             putString(FirebaseAnalytics.Param.ITEM_ID, channelItem.id)

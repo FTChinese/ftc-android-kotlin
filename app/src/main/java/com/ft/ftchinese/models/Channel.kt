@@ -140,7 +140,7 @@ data class ChannelItem(
         get() = when(type) {
             TYPE_STORY, TYPE_PREMIUM -> "$URL_MAILBOX/index.php/jsapi/get_story_more_info/$id"
 
-            TYPE_COLUMN -> "$URL_MAILBOX/$type/$id?bodyonly=yes&webview=ftcapp"
+            TYPE_COLUMN -> "$URL_MAILBOX/$type/$id?bodyonly=yes&webview=ftcapp&bodyonly=yes"
 
             TYPE_INTERACTIVE -> when (subType) {
                 //"https://api003.ftmailbox.com/$type/$id?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes"

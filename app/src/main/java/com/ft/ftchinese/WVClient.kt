@@ -7,7 +7,6 @@ import android.support.customtabs.CustomTabsIntent
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SignUpActivity
 import com.ft.ftchinese.user.SubscriptionActivity
 import org.jetbrains.anko.AnkoLogger
@@ -234,28 +233,10 @@ class WVClient(
              * On home page '每日英语' section, the title is a link
              * Similar to TYPE_COLUMN
              * Should load a full webpage without header under such cases.
+             * Editor choice also use /channel path. You should handle it separately.
+             * When a links is clicked on Editor choice, retrieve a HTML fragment.
              */
-            ChannelItem.TYPE_CHANNEL -> {
-                val lastPathSegment = uri.lastPathSegment ?: return true
-
-                // Prevent multiple entry point for a single item.
-                if (noAccess.containsKey(lastPathSegment)) {
-                    return true
-                }
-
-                val listPage = PagerTab(
-                        title = pathToTitle[lastPathSegment] ?: "",
-                        name = uri.pathSegments.joinToString("_").removeSuffix(".html"),
-                        contentUrl = buildUrlForFullPage(uri),
-                        htmlType = HTML_TYPE_COMPLETE
-                )
-
-                info("Start channel activity for $listPage")
-
-                ChannelActivity.start(activity, listPage)
-
-                return true
-            }
+            ChannelItem.TYPE_CHANNEL -> openChannelLink(uri)
 
             /**
              * If the path looks like `/tag/中美贸易战`,
@@ -300,6 +281,61 @@ class WVClient(
                 StoryActivity.start(activity, channelItem)
             }
         }
+        return true
+    }
+
+    /**
+     * Handle paths like:
+     * `/channel/editorchoice-issue.html?issue=EditorChoice-xxx`,
+     * `/channel/chinabusinesswatch.html`
+     * `/channel/viewtop.html`
+     * `/channel/teawithft.html`
+     * `/channel/markets.html`
+     * `/channel/money.html`
+    */
+    private fun openChannelLink(uri: Uri): Boolean {
+        info("Open a channel link: $uri")
+
+        val lastPathSegment = uri.lastPathSegment ?: return true
+
+        // Prevent multiple entry point for a single item.
+        if (noAccess.containsKey(lastPathSegment)) {
+            return true
+        }
+
+        when (lastPathSegment) {
+            // Handle links on this page: https://api003.ftmailbox.com/channel/editorchoice.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018
+            // The link itself looks like:
+            // http://www.ftchinese.com/channel/editorchoice-issue.html?issue=EditorChoice-20181105
+            "editorchoice-issue.html" -> {
+                val issue = uri.getQueryParameter("issue")
+                        ?: uri.pathSegments.joinToString("_").removeSuffix(".html")
+
+                val listPage = PagerTab(
+                        title = pathToTitle[lastPathSegment] ?: "",
+                        name = issue,
+                        contentUrl = buildUrlForFragment(uri),
+                        htmlType = HTML_TYPE_FRAGMENT
+                )
+
+                info("Clicked an editor choice link: $listPage")
+                ChannelActivity.start(activity, listPage)
+            }
+            else -> {
+
+                val listPage = PagerTab(
+                        title = pathToTitle[lastPathSegment] ?: "",
+                        name = uri.pathSegments.joinToString("_").removeSuffix(".html"),
+                        contentUrl = buildUrlForFullPage(uri),
+                        htmlType = HTML_TYPE_COMPLETE
+                )
+
+                info("Start channel activity for $listPage")
+
+                ChannelActivity.start(activity, listPage)
+            }
+        }
+
         return true
     }
 
@@ -389,8 +425,9 @@ class WVClient(
 
     private fun buildUrlForFullPage(uri: Uri): String {
         val builder = uri.buildUpon()
-        builder.scheme("https")
+                .scheme("https")
                 .authority(HOST_MAILBOX)
+
         if (uri.getQueryParameter("webview") == null) {
             builder.appendQueryParameter("webview", "ftcapp")
         }
@@ -400,6 +437,8 @@ class WVClient(
 
     private fun buildUrlForFragment(uri: Uri, path: String? = null): String {
         val builder =  uri.buildUpon()
+                .scheme("https")
+                .authority(HOST_MAILBOX)
 
         if (uri.getQueryParameter("bodyonly") == null) {
             builder.appendQueryParameter("bodyonly", "yes")

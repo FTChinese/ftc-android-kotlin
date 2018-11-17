@@ -110,6 +110,8 @@ object Navigation {
              *   "adZone": "home/editorchoice"
              *   }
              * This page is not processed by JS. You have to intercept click on url and then open a ChannelActivity.
+             * Links on this page looks like:
+             * http://www.ftchinese.com/channel/editorchoice-issue.html?issue=EditorChoice-20181105
              * See ChannelWebViewClient.
              */
             PagerTab(title = "编辑精选", name = "news_editor_choice", contentUrl = "https://api003.ftmailbox.com/channel/editorchoice.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018", htmlType = HTML_TYPE_FRAGMENT),
