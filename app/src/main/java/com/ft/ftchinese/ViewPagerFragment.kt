@@ -197,6 +197,32 @@ class ViewPagerFragment : Fragment(),
         loadContent()
     }
 
+    override fun onRefresh() {
+
+
+        // If auto loading did not stop yet, stop it.
+        if (mLoadJob?.isActive == true) {
+            mLoadJob?.cancel()
+        }
+
+        when (mPageMeta?.htmlType) {
+            HTML_TYPE_FRAGMENT -> {
+                mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
+                    if (mTemplate == null) {
+                        mTemplate = mFileCache?.readChannelTemplate()
+                    }
+
+                    loadFromServer()
+                }
+            }
+            HTML_TYPE_COMPLETE -> {
+                info("onRefresh: reload")
+                web_view.reload()
+                isInProgress = false
+            }
+        }
+    }
+
     private fun loadContent() {
         // For partial HTML, we need to crawl its content and render it with a template file to get the template HTML page.
         when (mPageMeta?.htmlType) {
@@ -208,7 +234,7 @@ class ViewPagerFragment : Fragment(),
                     val cacheName = mPageMeta?.fileName
 
                     if (cacheName.isNullOrBlank()) {
-
+                        info("Cached file is not found. Fetch content from server")
                         loadFromServer()
                         return@launch
                     }
@@ -216,11 +242,12 @@ class ViewPagerFragment : Fragment(),
                     val cachedFrag = mFileCache?.load(cacheName)
 
                     if (cachedFrag.isNullOrBlank()) {
-
+                        info("Cached HTML fragment is not found or empty. Fetch from server")
                         loadFromServer()
                         return@launch
                     }
 
+                    info("Cached HTML fragment is found. Using cache.")
                     loadFromCache(cachedFrag)
                 }
             }
@@ -242,12 +269,15 @@ class ViewPagerFragment : Fragment(),
         renderAndLoad(htmlFrag)
 
         if (activity?.isActiveNetworkWifi() != true) {
+            info("Active network is not wifi. Stop update in background.")
             return
         }
 
         info("Network is wifi and cached exits. Fetch data to update cache only.")
 
         val url = mPageMeta?.contentUrl ?: return
+
+        info("Updating cache in background for url $url")
 
         mRequest = Fuel.get(url)
                 .responseString { _, _, result ->
@@ -264,11 +294,10 @@ class ViewPagerFragment : Fragment(),
 
     private suspend fun loadFromServer() {
         if (activity?.isNetworkConnected() != true) {
+            isInProgress = false
             toast(R.string.prompt_no_network)
             return
         }
-
-        info("Cache not found. Fetch from remote ${mPageMeta?.contentUrl}")
 
         val url = mPageMeta?.contentUrl ?: return
 
@@ -276,9 +305,14 @@ class ViewPagerFragment : Fragment(),
             mTemplate = mFileCache?.readChannelTemplate()
         }
 
+        // If this is not refresh action, show progress bar, else show prompt 'Refreshing'
         if (!swipe_refresh.isRefreshing) {
             isInProgress = true
+        } else {
+            toast(R.string.prompt_refreshing)
         }
+
+        info("Load content from server on url: $url")
 
         mRequest = Fuel.get(url)
                 .responseString { _, _, result ->
@@ -308,6 +342,12 @@ class ViewPagerFragment : Fragment(),
         val dataToLoad = mPageMeta?.render(mTemplate, htmlFragment)
 
         web_view.loadDataWithBaseURL(WEBVIEV_BASE_URL, dataToLoad, "text/html", null, null)
+
+        val fileName = mPageMeta?.fileName ?: return
+
+        if (dataToLoad != null) {
+            mFileCache?.save("full_$fileName", dataToLoad)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -350,38 +390,7 @@ class ViewPagerFragment : Fragment(),
         mRefreshJob = null
     }
 
-    override fun onRefresh() {
-        toast(R.string.prompt_refreshing)
 
-        if (activity?.isNetworkConnected() == false) {
-            toast(R.string.prompt_no_network)
-            return
-        }
-
-        // If auto loading did not stop yet, stop it.
-        if (mLoadJob?.isActive == true) {
-            mLoadJob?.cancel()
-        }
-
-        when (mPageMeta?.htmlType) {
-            HTML_TYPE_FRAGMENT -> {
-                info("onRefresh: crawlWeb html fragment")
-                mRefreshJob = GlobalScope.launch(Dispatchers.Main) {
-                    if (mTemplate == null) {
-                        mTemplate = mFileCache?.readChannelTemplate()
-                    }
-
-                    info("Refreshing: fetch remote data")
-                    loadFromServer()
-                }
-            }
-            HTML_TYPE_COMPLETE -> {
-                info("onRefresh: reload")
-                web_view.reload()
-                isInProgress = false
-            }
-        }
-    }
 
     // WVClient click paginatiion.
     override fun onPagination(pageKey: String, pageNumber: String) {
@@ -396,7 +405,7 @@ class ViewPagerFragment : Fragment(),
 
     // JSInterface click event.
     override fun onSelectContent(channelItem: ChannelItem) {
-        info("Sekect content: $channelItem")
+        info("Select content: $channelItem")
         mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
             putString(FirebaseAnalytics.Param.CONTENT_TYPE, channelItem.type)
             putString(FirebaseAnalytics.Param.ITEM_ID, channelItem.id)

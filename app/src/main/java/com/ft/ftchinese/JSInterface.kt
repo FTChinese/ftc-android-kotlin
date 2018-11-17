@@ -138,6 +138,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
                             htmlType = HTML_TYPE_FRAGMENT
                     )
 
+                    info("Open a column: $listPage")
                     ChannelActivity.start(activity, listPage)
 
                     return
