@@ -6,21 +6,23 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkInfo
+import android.util.Log
 import com.ft.ftchinese.R
 import com.google.gson.JsonSyntaxException
 import org.jetbrains.anko.toast
 import java.io.IOException
+
+private const val TAG = "Network"
 
 fun Activity.getActiveNetworkInfo(): NetworkInfo? {
     return try {
         // getSystemService() throws IllegalStateException and the returned value is nullable.
         val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE)
         if (connectivityManager is ConnectivityManager) {
-            // activeNetworkInfo is nullable and might throw error
             connectivityManager.activeNetworkInfo
+        } else {
+            null
         }
-
-        null
     } catch (e: Exception) {
         null
     }
@@ -30,6 +32,7 @@ fun Activity.getActiveNetworkInfo(): NetworkInfo? {
 
 fun Activity.isNetworkConnected(): Boolean {
 
+    Log.i(TAG, "isNetworkConnected: ${getActiveNetworkInfo()?.isConnected}")
     return getActiveNetworkInfo()?.isConnected == true
 }
 
