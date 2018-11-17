@@ -32,10 +32,6 @@ class ViewPagerFragment : Fragment(),
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
-//    private var mListener: OnFragmentInteractionListener? = null
-//    private var mNavigateListener: ChannelWebViewClient.OnPaginateListener? = null
-//    private lateinit var mWebViewClient: ChannelWebViewClient
-
     /**
      * Meta data about current page: the tab's title, where to load data, etc.
      * Passed in when the fragment is created.
@@ -105,13 +101,6 @@ class ViewPagerFragment : Fragment(),
         info("onAttach fragment")
         super.onAttach(context)
 
-//        if (context is ChannelWebViewClient.OnPaginateListener) {
-//            mNavigateListener = context
-//        }
-//        if (context is OnFragmentInteractionListener) {
-//            mListener = context
-//        }
-
         if (context != null) {
             mSession = SessionManager.getInstance(context)
             mFileCache = FileCache.getInstance(context)
@@ -126,11 +115,6 @@ class ViewPagerFragment : Fragment(),
         // Get metadata about current tab
         val pageMetadata = arguments?.getString(ARG_PAGE_META)
         mPageMeta = gson.fromJson<PagerTab>(pageMetadata, PagerTab::class.java)
-
-        // Set WebViewClient for current page
-//        mWebViewClient = ChannelWebViewClient(activity, mPageMeta)
-        // Set navigate mListener to enable in-app navigation when clicked a url which should to another tab.
-//        mWebViewClient.setOnPaginateListener(mNavigateListener)
 
         info("onCreate finished")
     }
@@ -316,6 +300,7 @@ class ViewPagerFragment : Fragment(),
 
         mRequest = Fuel.get(url)
                 .responseString { _, _, result ->
+                    // TODO: Error triggered: java.lang.IllegalStateException: progress_bar must not be null
                     isInProgress = false
 
                     val (data, error) = result
@@ -391,7 +376,6 @@ class ViewPagerFragment : Fragment(),
     }
 
 
-
     // WVClient click paginatiion.
     override fun onPagination(pageKey: String, pageNumber: String) {
         val pageMeta = mPageMeta ?: return
@@ -400,7 +384,19 @@ class ViewPagerFragment : Fragment(),
 
         info("Open a pagination: $listPage")
 
-        ChannelActivity.start(activity, listPage)
+        if (listPage.shouldReload) {
+            info("Realoding a pagination ${listPage}")
+
+            mPageMeta = listPage
+
+            loadContent()
+        } else {
+            ChannelActivity.start(activity, listPage)
+        }
+
+
+
+//        ChannelActivity.start(activity, listPage)
     }
 
     // JSInterface click event.

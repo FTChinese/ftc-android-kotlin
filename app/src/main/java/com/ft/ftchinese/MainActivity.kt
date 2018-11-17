@@ -16,6 +16,7 @@ import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.view.*
+import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
 import com.ft.ftchinese.models.*
@@ -161,6 +162,8 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setTheme(R.style.Origami)
         setContentView(R.layout.activity_main)
+
+        WebView.setWebContentsDebuggingEnabled(true)
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
 

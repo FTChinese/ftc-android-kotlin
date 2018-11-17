@@ -35,21 +35,21 @@ class ChannelActivity : AppCompatActivity(),
         AnkoLogger {
 
     // Passed from caller
-    private var mPageMeta: PagerTab? = null
-
-    private var mLoadJob: Job? = null
-    private var mCacheJob: Job? = null
-    private var mRefreshJob: Job? = null
-
-    private var mRequest: Request? = null
-
-    private var mSession: SessionManager? = null
-    private var mFileCache: FileCache? = null
-    private var mFirebaseAnalytics: FirebaseAnalytics? = null
-
-    // Content in raw/list.html
-    private var mTemplate: String? = null
-
+//    private var mPageMeta: PagerTab? = null
+//
+//    private var mLoadJob: Job? = null
+//    private var mCacheJob: Job? = null
+//    private var mRefreshJob: Job? = null
+//
+//    private var mRequest: Request? = null
+//
+//    private var mSession: SessionManager? = null
+//    private var mFileCache: FileCache? = null
+//    private var mFirebaseAnalytics: FirebaseAnalytics? = null
+//
+//    // Content in raw/list.html
+//    private var mTemplate: String? = null
+//
 //    private var isInProgress: Boolean = false
 //        set(value) {
 //            if (value) {
@@ -73,63 +73,63 @@ class ChannelActivity : AppCompatActivity(),
             setDisplayShowTitleEnabled(false)
         }
 
+        /**
+         * Get the metadata for this page of article list
+         */
+        val data = intent.getStringExtra(EXTRA_PAGE_META)
+        val pageMeta = gson.fromJson<PagerTab>(data, PagerTab::class.java)
+        /**
+         * Set toolbar's title so that user knows where he is now.
+         */
+        toolbar.title = pageMeta.title
+
         var fragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
         if (fragment == null) {
-            fragment = ViewPagerFragment.newInstance(Navigation.newsPages[1])
+            fragment = ViewPagerFragment.newInstance(pageMeta)
             supportFragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, fragment)
                     .commit()
         }
 //        mSession = SessionManager.getInstance(this)
 //        mFileCache = FileCache.getInstance(this)
-
-        /**
-         * Get the metadata for this page of article list
-         */
+//
+//        /**
+//         * Get the metadata for this page of article list
+//         */
 //        val data = intent.getStringExtra(EXTRA_PAGE_META)
-
-//        try {
-////            val pageMeta = gson.fromJson<PagerTab>(data, PagerTab::class.java)
+//        mPageMeta = gson.fromJson<PagerTab>(data, PagerTab::class.java)
+//        /**
+//         * Set toolbar's title so that user knows where he is now.
+//         */
+//        toolbar.title = mPageMeta?.title
 //
-//            val pageMeta = Navigation.newsPages[0]
-//            /**
-//             * Set toolbar's title so that user knows where he is now.
-//             */
-//            toolbar.title = pageMeta.title
+//        val jsInterface = JSInterface(this)
+//        jsInterface.mSession = mSession
+//        jsInterface.mFileCache = mFileCache
+//        jsInterface.mPageMeta = mPageMeta
+//        jsInterface.setOnJSInteractionListener(this)
 //
-//            val jsInterface = JSInterface(this)
-//            jsInterface.mSession = mSession
-//            jsInterface.mFileCache = mFileCache
-//            jsInterface.mPageMeta = pageMeta
-//            jsInterface.setOnJSInteractionListener(this)
+//        val wvClient = WVClient(this)
+//        wvClient.mSession = mSession
+//        wvClient.setOnClickListener(this)
 //
-//            val wvClient = WVClient(this)
-//            wvClient.mSession = mSession
-//            wvClient.setOnClickListener(this)
+//        web_view.apply {
+//            addJavascriptInterface(
+//                    // Set JS event listener to current class.
+//                    jsInterface,
+//                    JS_INTERFACE_NAME
+//            )
 //
-//            web_view.apply {
-//                addJavascriptInterface(
-//                        // Set JS event listener to current class.
-//                        jsInterface,
-//                        JS_INTERFACE_NAME
-//                )
+//            webViewClient = wvClient
 //
-//                webViewClient = wvClient
-//
-//                webChromeClient = ChromeClient()
-//            }
-//
-//            mPageMeta = pageMeta
-//            info("Initiating current page with data: $mPageMeta")
-//
-//            loadContent()
-//
-//        } catch (e: Exception) {
-//            info("$e")
-//
-//            return
+//            webChromeClient = ChromeClient()
 //        }
+//
+//        info("Initiating current page with data: $mPageMeta")
+//
+//        loadContent()
+
     }
 
 //    override fun onRefresh() {
@@ -159,7 +159,7 @@ class ChannelActivity : AppCompatActivity(),
 //        }
 //
 //    }
-//
+
 //    private fun loadContent() {
 //        when (mPageMeta?.htmlType) {
 //            HTML_TYPE_FRAGMENT -> {
