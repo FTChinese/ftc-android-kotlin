@@ -66,7 +66,7 @@ data class ChannelItem(
         // For column type, you should start a ChannelActivity instead of  StoryActivity.
         val type: String, // story | premium | video | interactive | column |
         val subType: String? = null, // speedreading | radio
-        val headline: String, // It seems it is not used.
+        var headline: String, // It seems it is not used. It will later be changed to JSON data's cheadline field
         val eaudio: String? = null,
         val shortlead: String? = null, // this is a url of mp3 for subType radio.
         val timeStamp: String? = null // "1536249600"
