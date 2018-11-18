@@ -163,7 +163,9 @@ class MainActivity : AppCompatActivity(),
         setTheme(R.style.Origami)
         setContentView(R.layout.activity_main)
 
-        WebView.setWebContentsDebuggingEnabled(true)
+        if (BuildConfig.DEBUG) {
+            WebView.setWebContentsDebuggingEnabled(true)
+        }
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
