@@ -55,10 +55,10 @@ class ViewPagerFragment : Fragment(),
     private var isInProgress: Boolean = false
         set(value) {
             if (value) {
-                progress_bar.visibility = View.VISIBLE
+                progress_bar?.visibility = View.VISIBLE
             } else {
-                progress_bar.visibility = View.GONE
-                swipe_refresh.isRefreshing = false
+                progress_bar?.visibility = View.GONE
+                swipe_refresh?.isRefreshing = false
             }
         }
     /**
@@ -261,7 +261,7 @@ class ViewPagerFragment : Fragment(),
 
         val url = mPageMeta?.contentUrl ?: return
 
-        info("Updating cache in background for url $url")
+        info("Updating cache in background")
 
         mRequest = Fuel.get(url)
                 .responseString { _, _, result ->
@@ -385,18 +385,15 @@ class ViewPagerFragment : Fragment(),
         info("Open a pagination: $listPage")
 
         if (listPage.shouldReload) {
-            info("Realoding a pagination ${listPage}")
+            info("Reloading a pagination $listPage")
 
             mPageMeta = listPage
 
             loadContent()
         } else {
+            info("Start a new activity for $listPage")
             ChannelActivity.start(activity, listPage)
         }
-
-
-
-//        ChannelActivity.start(activity, listPage)
     }
 
     // JSInterface click event.
