@@ -27,7 +27,7 @@ class StoryActivity : AbsContentActivity() {
         get() = mChannelItem?.canonicalUrl ?: ""
 
     override val articleTitle: String
-        get() = mChannelItem?.headline ?: ""
+        get() = mChannelItem?.headline ?: mChannelItem?.canonicalUrl ?: ""
 
     override val articleStandfirst: String
         get() = mChannelItem?.standfirst ?: ""
@@ -52,19 +52,29 @@ class StoryActivity : AbsContentActivity() {
         // Meta data about current article
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
-        info("Item data: $itemData")
-
-        if (itemData != null) {
-            try {
-                mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
-
-                info("Channel item: $mChannelItem")
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
+        if (itemData == null) {
+            toast(R.string.prompt_load_failure)
+            return
         }
 
+        try {
+            mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
+
+            info("Channel item: $mChannelItem")
+
+        } catch (e: Exception) {
+            info("Error parsing data: $e")
+
+            toast(R.string.prompt_load_failure)
+            return
+        }
+
+        loadContent()
+        updateStarUI()
+        setup()
+    }
+
+    private fun setup() {
         titlebar_cn.setOnClickListener {
             mCurrentLanguage = ChannelItem.LANGUAGE_CN
             loadContent()
@@ -118,11 +128,6 @@ class StoryActivity : AbsContentActivity() {
             mCurrentLanguage = ChannelItem.LANGUAGE_BI
             loadContent()
         }
-
-
-        info("Start loading article: $mChannelItem")
-        loadContent()
-        updateStarUI()
     }
 
     private fun loadContent() {
@@ -130,7 +135,7 @@ class StoryActivity : AbsContentActivity() {
         mLoadJob = GlobalScope.launch(Dispatchers.Main) {
 
             val cacheName = mChannelItem?.cacheFileName
-            info("Cache file: $cacheName")
+            info("Cache file name: $cacheName")
 
             if (cacheName.isNullOrBlank()) {
                 info("No cache file name")
@@ -139,8 +144,6 @@ class StoryActivity : AbsContentActivity() {
             }
 
             val cachedJson = mFileCache?.load(cacheName)
-
-            info("Cached json: $cachedJson")
 
             if (cachedJson.isNullOrBlank()) {
                 info("Cache file is not found or is blank")
@@ -162,6 +165,7 @@ class StoryActivity : AbsContentActivity() {
     private suspend fun loadFromServer() {
 
         if (!isNetworkConnected()) {
+            isInProgress = false
             toast(R.string.prompt_no_network)
             return
         }
@@ -174,6 +178,8 @@ class StoryActivity : AbsContentActivity() {
 
         if (!swipe_refresh.isRefreshing) {
             isInProgress = true
+        } else {
+            toast(R.string.prompt_refreshing)
         }
 
         info("Start fetching data from $url")
@@ -216,6 +222,8 @@ class StoryActivity : AbsContentActivity() {
             return
         }
 
+        mChannelItem?.headline = story.cheadline
+
         info("Story: $story")
 
         showLanguageSwitch = story.isBilingual
@@ -224,7 +232,6 @@ class StoryActivity : AbsContentActivity() {
 
         val html = mChannelItem?.renderStory(mTemplate, story, mCurrentLanguage, follows = follows)
 
-        info("HTML: $html")
         if (html == null) {
             toast(R.string.prompt_load_failure)
             return
