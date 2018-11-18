@@ -215,7 +215,16 @@ class WVClient(
              * url. No more information could be acquired.
              */
             ChannelItem.TYPE_STORY,
-            ChannelItem.TYPE_PREMIUM,
+            ChannelItem.TYPE_PREMIUM -> {
+                val lastPathSegment = uri.lastPathSegment ?: return true
+                val channelItem = ChannelItem(
+                        id = lastPathSegment,
+                        type = pathSegments[0],
+                        headline = ""
+                )
+                StoryActivity.start(activity, channelItem)
+                true
+            }
             ChannelItem.TYPE_VIDEO,
             // Links on home page under FT商学院
             ChannelItem.TYPE_PHOTO_NEWS,
@@ -224,7 +233,7 @@ class WVClient(
 
                 WebContentActivity.start(activity, uri)
 
-                return true
+                true
             }
 
 
@@ -244,7 +253,7 @@ class WVClient(
              */
             ChannelItem.TYPE_TAG -> {
                 val page = PagerTab(
-                        title = uri.lastPathSegment,
+                        title = uri.lastPathSegment ?: "",
                         name = uri.pathSegments.joinToString("_"),
                         contentUrl = buildUrlForFragment(uri),
                         htmlType = HTML_TYPE_FRAGMENT
@@ -252,7 +261,7 @@ class WVClient(
 
                 ChannelActivity.start(activity, page)
 
-                return true
+                true
             }
 
             /**
@@ -326,8 +335,8 @@ class WVClient(
                 val listPage = PagerTab(
                         title = pathToTitle[lastPathSegment] ?: "",
                         name = uri.pathSegments.joinToString("_").removeSuffix(".html"),
-                        contentUrl = buildUrlForFullPage(uri),
-                        htmlType = HTML_TYPE_COMPLETE
+                        contentUrl = buildUrlForFragment(uri),
+                        htmlType = HTML_TYPE_FRAGMENT
                 )
 
                 info("Start channel activity for $listPage")
