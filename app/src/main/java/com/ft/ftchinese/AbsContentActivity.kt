@@ -74,10 +74,10 @@ abstract class AbsContentActivity : AppCompatActivity(),
     protected var isInProgress: Boolean = false
         set(value) {
             if (value) {
-                progress_bar.visibility = View.VISIBLE
+                progress_bar?.visibility = View.VISIBLE
             } else {
-                swipe_refresh.isRefreshing = value
-                progress_bar.visibility = View.GONE
+                swipe_refresh?.isRefreshing = value
+                progress_bar?.visibility = View.GONE
             }
         }
 
