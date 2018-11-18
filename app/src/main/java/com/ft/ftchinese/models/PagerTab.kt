@@ -2,6 +2,7 @@ package com.ft.ftchinese.models
 
 import android.net.Uri
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import java.lang.NumberFormatException
 
 const val HTML_TYPE_FRAGMENT = 1
@@ -45,13 +46,18 @@ data class PagerTab (
     fun withPagination(pageKey: String, pageNumber: String): PagerTab {
         val currentUri = Uri.parse(contentUrl)
 
+        info("Current URI: $currentUri")
+
         // Current list page is already a started from a pagination link
         if (currentUri.getQueryParameter(pageKey) != null) {
             val newUri = currentUri.buildUpon().clearQuery()
 
             for (key in currentUri.queryParameterNames) {
+                info("URI query key: $key")
+
                 if (key == pageKey) {
                     newUri.appendQueryParameter(key, pageNumber)
+                    continue
                 }
 
                 val value = currentUri.getQueryParameter(key)
