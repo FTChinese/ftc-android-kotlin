@@ -43,7 +43,7 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
         super.onAttach(context)
         if (context != null) {
             mArticleStore = ArticleStore.getInstance(context)
-            mFileCache = FileCache.getInstance(context)
+            mFileCache = FileCache(context)
         }
     }
 

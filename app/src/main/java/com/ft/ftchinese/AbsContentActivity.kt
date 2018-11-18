@@ -113,7 +113,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
         mSessionManager = SessionManager.getInstance(this)
         mFollowingManager = FollowingManager.getInstance(this)
         mArticleStore = ArticleStore.getInstance(this)
-        mFileCache = FileCache.getInstance(this)
+        mFileCache = FileCache(this)
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
         swipe_refresh.setOnRefreshListener(this)

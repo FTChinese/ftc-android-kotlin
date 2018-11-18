@@ -103,7 +103,7 @@ class ViewPagerFragment : Fragment(),
 
         if (context != null) {
             mSession = SessionManager.getInstance(context)
-            mFileCache = FileCache.getInstance(context)
+            mFileCache = FileCache(context)
         }
 
         info("onAttach finished")

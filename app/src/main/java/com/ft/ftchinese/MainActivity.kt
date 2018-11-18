@@ -172,7 +172,7 @@ class MainActivity : AppCompatActivity(),
 
         mSession = SessionManager.getInstance(this)
         mAdManager = LaunchAdManager.getInstance(this)
-        mFileCache = FileCache.getInstance(this)
+        mFileCache = FileCache(this)
 
         // Show advertisement
         // Keep a reference the coroutine in case user exit at this moment
