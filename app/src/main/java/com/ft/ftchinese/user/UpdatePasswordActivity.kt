@@ -48,10 +48,10 @@ class PasswordFragment : Fragment(), AnkoLogger {
     private var isInputAllowed: Boolean
         get() = new_password.isEnabled
         set(value) {
-            old_password.isEnabled = value
-            new_password.isEnabled = value
-            confirm_password.isEnabled = value
-            save_button.isEnabled = value
+            old_password?.isEnabled = value
+            new_password?.isEnabled = value
+            confirm_password?.isEnabled = value
+            save_button?.isEnabled = value
         }
 
     override fun onAttach(context: Context?) {

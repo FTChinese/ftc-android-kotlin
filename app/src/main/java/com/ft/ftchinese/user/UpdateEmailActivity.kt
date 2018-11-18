@@ -53,8 +53,8 @@ internal class EmailFragment : Fragment(), AnkoLogger {
     private var isInputAllowed: Boolean
         get() = email.isEnabled
         set(value) {
-            email.isEnabled = value
-            save_button.isEnabled = value
+            email?.isEnabled = value
+            save_button?.isEnabled = value
         }
 
     override fun onAttach(context: Context?) {

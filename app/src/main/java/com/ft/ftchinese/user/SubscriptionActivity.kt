@@ -54,9 +54,9 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
     private var isInProgress: Boolean = false
         set(value) {
             if (value) {
-                progress_bar.visibility = View.VISIBLE
+                progress_bar?.visibility = View.VISIBLE
             } else {
-                progress_bar.visibility = View.GONE
+                progress_bar?.visibility = View.GONE
             }
         }
 

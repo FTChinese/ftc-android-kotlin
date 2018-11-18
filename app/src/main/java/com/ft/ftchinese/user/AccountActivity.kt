@@ -51,7 +51,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
     private var isInputAllowed: Boolean = true
         set(value) {
-            request_verify_button.isEnabled = value
+            request_verify_button?.isEnabled = value
         }
 
     /**

@@ -48,8 +48,8 @@ class UsernameFragment : Fragment(), AnkoLogger {
     private var isInputAllowed: Boolean
         get() = user_name.isEnabled
         set(value) {
-            user_name.isEnabled = value
-            save_button.isEnabled = value
+            user_name?.isEnabled = value
+            save_button?.isEnabled = value
         }
 
     override fun onAttach(context: Context?) {

@@ -52,9 +52,9 @@ abstract class SingleFragmentActivity : AppCompatActivity(), OnFragmentInteracti
 
     override fun onProgress(show: Boolean) {
         if (show) {
-            progress_bar.visibility = View.VISIBLE
+            progress_bar?.visibility = View.VISIBLE
         } else {
-            progress_bar.visibility = View.GONE
+            progress_bar?.visibility = View.GONE
         }
     }
 }

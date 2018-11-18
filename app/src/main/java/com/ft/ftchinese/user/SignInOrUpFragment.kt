@@ -45,7 +45,7 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
         get() = !email_sign_in_button.isEnabled
         set(value) {
             listener?.onProgress(value)
-            email_sign_in_button.isEnabled = !value
+            email_sign_in_button?.isEnabled = !value
         }
 
     // Enable or disabled input.
@@ -55,10 +55,10 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
     private var isInputAllowed: Boolean
         get() = email.isEnabled
         set(value) {
-            email.isEnabled = value
-            password.isEnabled = value
-            email_sign_in_button.isEnabled = value
-            email_sign_up_button.isEnabled = value
+            email?.isEnabled = value
+            password?.isEnabled = value
+            email_sign_in_button?.isEnabled = value
+            email_sign_up_button?.isEnabled = value
         }
 
     private var usedFor: Int? = null

@@ -42,14 +42,14 @@ internal class ForgotPasswordFragment : Fragment(), AnkoLogger {
 
             // If in progress, hide the message telling what to do next.
             if (value) {
-                letter_sent_feedback.visibility = View.GONE
+                letter_sent_feedback?.visibility = View.GONE
             }
         }
     private var isInputAllowed: Boolean
         get() = send_button.isEnabled
         set(value) {
-            send_button.isEnabled = value
-            email.isEnabled = value
+            send_button?.isEnabled = value
+            email?.isEnabled = value
         }
 
     override fun onAttach(context: Context?) {

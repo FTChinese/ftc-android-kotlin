@@ -48,15 +48,15 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
     private var isInProgress: Boolean = false
         set(value) {
             if (value) {
-                progress_bar.visibility = View.VISIBLE
+                progress_bar?.visibility = View.VISIBLE
             } else {
-                progress_bar.visibility = View.GONE
+                progress_bar?.visibility = View.GONE
             }
         }
 
     private var isInputAllowed: Boolean = true
         set(value) {
-            check_out.isEnabled = value
+            check_out?.isEnabled = value
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
