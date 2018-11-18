@@ -1,8 +1,6 @@
 package com.ft.ftchinese.util
 
 import android.content.Context
-import android.content.res.Resources
-import android.util.Log
 import com.ft.ftchinese.R
 import com.jakewharton.byteunits.BinaryByteUnit
 import kotlinx.coroutines.GlobalScope
@@ -14,7 +12,7 @@ import org.jetbrains.anko.info
 import java.io.File
 import java.io.IOException
 
-class FileCache private constructor(private val context: Context) : AnkoLogger {
+class FileCache (private val context: Context) : AnkoLogger {
 
     fun save(fileName: String, content: String): Job {
         return GlobalScope.launch {
@@ -104,58 +102,5 @@ class FileCache private constructor(private val context: Context) : AnkoLogger {
             readRawFile(R.raw.story)
         }.await()
     }
-
-    companion object {
-        private var instance: FileCache? = null
-
-        fun getInstance(context: Context): FileCache {
-            if (instance == null) {
-                instance = FileCache(context.applicationContext)
-            }
-
-            return instance!!
-        }
-    }
 }
-//object Store {
-//
-//    private const val TAG = "Store"
-//
-//    // Cache files to the data directory.
-//    fun save(context: Context?, filename: String?, text: String?): Job? {
-//
-//        if (context == null || filename.isNullOrBlank() || text.isNullOrBlank()) {
-//            return null
-//        }
-//        val file = File(context.filesDir, filename)
-//
-//        return GlobalScope.launch {
-//            try {
-//                file.writeText(text)
-//
-//                Log.i(TAG, "Saved file: ${file.name}. Canonical path: ${file.canonicalPath}")
-//            } catch (e: IOException) {
-//                Log.i(TAG, "Failed to save ${file.name}. Reason: $e")
-//            }
-//        }
-//    }
-//
-//
-//    suspend fun load(context: Context?, filename: String?): String? {
-//        Log.i(TAG, "Reading file: $filename")
-//        if (context == null || filename.isNullOrBlank()) {
-//            return null
-//        }
-//        return try {
-//            GlobalScope.async {
-//                context.openFileInput(filename).bufferedReader().readText()
-//            }.await()
-//
-//        } catch (e: Exception) {
-//            Log.i(TAG, e.toString())
-//
-//            null
-//        }
-//    }
-//}
 
