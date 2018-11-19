@@ -38,7 +38,6 @@ class AccountActivity : SingleFragmentActivity() {
 
 internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
 
-    private var mAccount: Account? = null
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
 
@@ -69,13 +68,10 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
-                val account = mAccount?.refresh()
+                val account = mSession?.loadUser()?.refresh()
 
                 // hide refreshing indicator
                 swipe_refresh.isRefreshing = false
-
-                mAccount = account
-
 
                 if (account != null) {
                     mSession?.saveUser(account)
@@ -144,7 +140,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
         info("onViewCreated")
 
-        val account = mAccount ?: return
+        val account = mSession?.loadUser() ?: return
 
         updateUI(account)
     }
@@ -153,7 +149,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         super.onResume()
 
         info("onResume")
-        val account = mAccount ?: return
+        val account = mSession?.loadUser() ?: return
         updateUI(account)
     }
 
@@ -191,7 +187,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
         // If the account if not found, do nothing.
         // In the future, we might need to take into account user logged in via social platforms.
-        val account = mAccount ?: return
+        val account = mSession?.loadUser() ?: return
 
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
