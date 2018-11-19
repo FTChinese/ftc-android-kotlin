@@ -33,6 +33,7 @@ android {
         targetSdkVersion 28
         versionCode 2
         versionName "1.1.0"
+        setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "WECAHT_APP_ID", props.getProperty("wechat.appId")
         buildConfigField "String", "ACCESS_TOKEN", props.getProperty("access_token")
@@ -58,6 +59,17 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+//    flavorDimensions "version"
+//    productFlavors {
+//        google {
+//            dimension "version"
+//        }
+//        xiaomi {
+//            dimension "version"
+//        }
+//    }
+
     testOptions {
         unitTests {
             returnDefaultValues = true
