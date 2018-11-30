@@ -1,7 +1,6 @@
 package com.ft.ftchinese
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -63,6 +62,8 @@ class MainActivity : AppCompatActivity(),
     private var mVideoAdapter: TabPagerAdapter? = null
     private var mMyftPagerAdapter: MyftPagerAdapter? = null
 
+    private var mChannelPages: Array<PagerTab>? = null
+
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
     /**
@@ -73,10 +74,8 @@ class MainActivity : AppCompatActivity(),
 
         when (item.itemId) {
             R.id.nav_news -> {
-                if (mNewsAdapter == null) {
-                    mNewsAdapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
-                }
-                view_pager.adapter = mNewsAdapter
+                setupHome()
+
                 displayLogo()
             }
 
@@ -85,6 +84,7 @@ class MainActivity : AppCompatActivity(),
                     mEnglishAdapter = TabPagerAdapter(Navigation.englishPages, supportFragmentManager)
                 }
                 view_pager.adapter = mEnglishAdapter
+                mChannelPages = Navigation.englishPages
 
                 displayTitle(R.string.nav_english)
             }
@@ -94,6 +94,7 @@ class MainActivity : AppCompatActivity(),
                     mFtaAdapter = TabPagerAdapter(Navigation.ftaPages, supportFragmentManager)
                 }
                 view_pager.adapter = mFtaAdapter
+                mChannelPages = Navigation.ftaPages
 
                 displayTitle(R.string.nav_ftacademy)
             }
@@ -103,6 +104,7 @@ class MainActivity : AppCompatActivity(),
                     mVideoAdapter = TabPagerAdapter(Navigation.videoPages, supportFragmentManager)
                 }
                 view_pager.adapter = mVideoAdapter
+                mChannelPages = Navigation.videoPages
 
                 displayTitle(R.string.nav_video)
             }
@@ -112,6 +114,7 @@ class MainActivity : AppCompatActivity(),
                     mMyftPagerAdapter = MyftPagerAdapter(MyftTab.pages, supportFragmentManager)
                 }
                 view_pager.adapter = mMyftPagerAdapter
+                mChannelPages = null
 
                 displayTitle(R.string.nav_myft)
             }
@@ -147,14 +150,6 @@ class MainActivity : AppCompatActivity(),
         mBottomDialog?.show()
     }
 
-    /**
-     * Implementation of OnNavigationItemReselectedListener.
-     * Currently do nothing.
-     */
-    private val bottomNavItemReseletedListener = BottomNavigationView.OnNavigationItemReselectedListener { item ->
-        info("Reselected bottom nav item: ${item.title}")
-    }
-
     lateinit var api: IWXAPI
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -162,6 +157,8 @@ class MainActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
         setTheme(R.style.Origami)
         setContentView(R.layout.activity_main)
+        setSupportActionBar(toolbar)
+        displayLogo()
 
         if (BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true)
@@ -182,9 +179,6 @@ class MainActivity : AppCompatActivity(),
             showAd()
         }
 
-        setSupportActionBar(toolbar)
-        displayLogo()
-
         updateSessionUI()
 
         val toggle = ActionBarDrawerToggle(
@@ -193,10 +187,8 @@ class MainActivity : AppCompatActivity(),
         toggle.syncState()
 
         // Set ViewPager adapter
-        if (mNewsAdapter == null) {
-            mNewsAdapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
-        }
-        view_pager.adapter = mNewsAdapter
+        setupHome()
+
 
         // Link ViewPager and TabLayout
         tab_layout.setupWithViewPager(view_pager)
@@ -204,7 +196,6 @@ class MainActivity : AppCompatActivity(),
 
         // Bottom navigation listener
         bottom_nav.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)
-        bottom_nav.setOnNavigationItemReselectedListener(bottomNavItemReseletedListener)
 
         // Set a listener that will be notified when a menu item is selected.
         drawer_nav.setNavigationItemSelectedListener(this)
@@ -226,6 +217,14 @@ class MainActivity : AppCompatActivity(),
                 checkAd()
             }
         }
+    }
+
+    private fun setupHome() {
+        if (mNewsAdapter == null) {
+            mNewsAdapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
+        }
+        view_pager.adapter = mNewsAdapter
+        mChannelPages = Navigation.newsPages
     }
 
     private fun displayLogo() {
@@ -340,6 +339,8 @@ class MainActivity : AppCompatActivity(),
             }
         }
 
+        mFirebaseAnalytics?.logEvent(FtcEvent.AD_VIEWED, bundle)
+
         for (i in 5 downTo 1) {
             adTimer.text = getString(R.string.prompt_ad_timer, i)
             delay(1000)
@@ -347,9 +348,6 @@ class MainActivity : AppCompatActivity(),
 
         root_container.removeView(adView)
 
-        mFirebaseAnalytics?.logEvent(FtcEvent.AD_VIEWED, bundle)
-
-        info("Remove ad")
         showSystemUI()
     }
 
@@ -595,7 +593,14 @@ class MainActivity : AppCompatActivity(),
      */
     override fun onTabSelected(tab: TabLayout.Tab?) {
         info("Tab selected: ${tab?.position}")
-//        mSelectedTabPosition = tab_layout.selectedTabPosition
+        val position = tab?.position ?: return
+        val pages = mChannelPages ?: return
+
+        info("View item list event: ${pages[position]}")
+
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.VIEW_ITEM_LIST, Bundle().apply {
+            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, pages[position].title)
+        })
     }
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
@@ -605,28 +610,6 @@ class MainActivity : AppCompatActivity(),
     override fun onTabUnselected(tab: TabLayout.Tab?) {
         info("Tab unselected: ${tab?.position}")
     }
-
-    /**
-     * Implementation of ChannelWebViewClient.OnPaginateListener
-     * Use cases:
-     * When mUser clicked links on the frontpage like `每日英语`,
-     * the app should actually jump to the second item in bottom navigation instead of opening a separate activity.
-     */
-//    override fun selectBottomNavItem(itemId: Int) {
-//        val item = bottom_nav.menu.findItem(itemId)
-//
-//        if (item != null) {
-//            item.isChecked = true
-//            // You should also call this method to make view visible.
-//            // Set `isChecked` only changes the menu item's own state
-//            bottomNavItemSelectedListener.onNavigationItemSelected(item)
-//        }
-//
-//    }
-
-//    override fun selectTabLayoutTab(tabIndex: Int) {
-//        tab_layout.getTabAt(tabIndex)?.select()
-//    }
 
     /**
      * Update UI depending on user's login/logout state
@@ -664,13 +647,6 @@ class MainActivity : AppCompatActivity(),
             startActivity(intent)
         } else {
             toast("您的设备上没有安装邮件程序，无法发送反馈邮件")
-        }
-    }
-
-    companion object {
-        fun start(context: Context?) {
-            val intent = Intent(context, MainActivity::class.java)
-            context?.startActivity(intent)
         }
     }
 
