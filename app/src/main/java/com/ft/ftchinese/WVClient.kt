@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.support.customtabs.CustomTabsIntent
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.ft.ftchinese.models.*
@@ -73,18 +75,15 @@ class WVClient(
         mListener = listener
     }
 
-    // Handle clicks on a link in a web page loaded into url
-    // Returns true if you handled url links yourself;
-    // returns false Android will try to handle it.
-    override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-        info("shouldOverrideUrlLoading: $url")
+    override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
+        info("Error when requesting ${request?.url}. Error code: ${error?.errorCode}, description: ${error?.description}")
+    }
 
-        // If url is null, do nothing.
-        if (url == null) {
-            return true
-        }
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
 
-        val uri = Uri.parse(url)
+        val uri = request?.url ?: return true
+
+        info("shouldOverrideUrlLoading: $uri")
 
         // At the comment section of story page there is a login form.
         // Handle login in web view.
@@ -144,7 +143,12 @@ class WVClient(
      */
     private fun handleFtaLink(uri: Uri): Boolean {
         if (uri.lastPathSegment == "subscription.html") {
-            SubscriptionActivity.start(activity)
+            val ccode = uri.getQueryParameter("ccode")
+            SubscriptionActivity.start(context = activity, source = PaywallSource(
+                    id = uri.host,
+                    category = uri.lastPathSegment,
+                    name = ccode
+            ))
         }
 
         return true
@@ -409,17 +413,19 @@ class WVClient(
     }
 
     private fun feedbackEmail(): Boolean {
+        val pm = activity?.packageManager ?: return true
+
         val intent = Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.parse("mailto:")
             putExtra(Intent.EXTRA_EMAIL, "ftchinese.feedback@gmail.com")
             putExtra(Intent.EXTRA_SUBJECT, "Feedback on FTC Android App")
         }
 
-        return if (intent.resolveActivity(activity?.packageManager) != null) {
-            activity?.startActivity(intent)
+        return if (intent.resolveActivity(pm) != null) {
+            activity.startActivity(intent)
             true
         } else {
-            activity?.toast(R.string.prompt_no_email_app)
+            activity.toast(R.string.prompt_no_email_app)
             true
         }
     }

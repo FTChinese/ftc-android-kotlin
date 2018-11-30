@@ -163,7 +163,13 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
 
             if (!account.canAccessPaidContent) {
                 activity?.toast(R.string.prompt_restricted_paid_user)
-                SubscriptionActivity.start(activity)
+                SubscriptionActivity.start(
+                        context = activity,
+                        source = PaywallSource(
+                            id = channelItem.id,
+                            category = channelItem.type,
+                            name = channelItem.headline)
+                )
 
                 return
             }

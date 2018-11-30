@@ -252,7 +252,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     fun onClickDone(view: View) {
         // Start MembershipActivity manually here.
         // This is the only way to refresh user data.
-        SubscriptionActivity.start(this, true)
+        SubscriptionActivity.start(this, true, null)
 
         finish()
     }
@@ -268,7 +268,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     // On iOS you do not need to handle it since there's no back button.
     override fun onBackPressed() {
         super.onBackPressed()
-        SubscriptionActivity.start(this, true)
+        SubscriptionActivity.start(this, true, null)
         finish()
     }
 

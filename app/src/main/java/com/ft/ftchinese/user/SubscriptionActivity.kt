@@ -9,9 +9,9 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.util.handleException
-import com.ft.ftchinese.util.isNetworkConnected
+import com.ft.ftchinese.util.*
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.activity_subscription.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -20,6 +20,12 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import java.lang.Exception
+
+private var defaultPaywallEntry = PaywallSource(
+        id = "drawer",
+        category = "drawer",
+        name = "drawer"
+)
 
 /**
  * There are three entry point for SuscriptionActivity:
@@ -50,6 +56,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
 
     private var mSession: SessionManager? = null
     private var mJob: Job? = null
+    private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
     private var isInProgress: Boolean = false
         set(value) {
@@ -192,6 +199,29 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
         updateUI()
 
         setUp()
+
+        try {
+            val sourceStr = intent.getStringExtra(EXTRA_PAYWALL_SOURCE) ?: return
+
+            val source = gson.fromJson<PaywallSource>(sourceStr, PaywallSource::class.java) ?: return
+
+            mFirebaseAnalytics?.logEvent(FtcEvent.PAYWALL_FROM, Bundle().apply {
+                putString(FirebaseAnalytics.Param.ITEM_ID, source.id)
+                putString(FirebaseAnalytics.Param.ITEM_CATEGORY, source.category)
+                putString(FirebaseAnalytics.Param.ITEM_NAME, source.name)
+                if (source.variant != null) {
+                    val lang = when (source.variant) {
+                        ChannelItem.LANGUAGE_EN -> "english"
+                        ChannelItem.LANGUAGE_BI -> "bilingual"
+                        else -> "chinese"
+                    }
+                    putString(FirebaseAnalytics.Param.ITEM_VARIANT, lang)
+                }
+            })
+
+        } catch (e: JsonSyntaxException) {
+            info(e)
+        }
     }
 
     private fun setUp() {
@@ -348,8 +378,18 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
 
     companion object {
         private const val EXTRA_SHOULD_UPDATE = "should_update_account"
-        fun start(context: Context?, shouldUpdate: Boolean = false) {
+        private const val EXTRA_PAYWALL_SOURCE = "extra_paywall_source"
+        /**
+         * WxPayEntryActivity will call this function after successful payment.
+         * It is meaningless to record such kind of automatically invocation.
+         * Pass null to source to indicate that we do not want to record this action.
+         */
+        fun start(context: Context?, shouldUpdate: Boolean = false, source: PaywallSource? = defaultPaywallEntry) {
             val intent = Intent(context, SubscriptionActivity::class.java).apply {
+                if (source != null) {
+                    putExtra(EXTRA_PAYWALL_SOURCE, gson.toJson(source))
+                }
+
                 putExtra(EXTRA_SHOULD_UPDATE, shouldUpdate)
             }
 

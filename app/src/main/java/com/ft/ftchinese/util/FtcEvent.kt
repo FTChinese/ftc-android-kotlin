@@ -14,6 +14,7 @@ object FtcEvent {
     const val AD_VIEWED = "ftc_ad_viewed"
     // When a user skips an ad.
     const val AD_SKIP = "ftc_ad_skip"
+    const val PAYWALL_FROM = "pay_wall_source"
 }
 
 object AdSlot {

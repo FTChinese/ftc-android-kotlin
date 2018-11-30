@@ -82,52 +82,65 @@ class StoryActivity : AbsContentActivity() {
 
         titlebar_en.setOnClickListener {
             val user = mSessionManager?.loadUser()
+            mCurrentLanguage = ChannelItem.LANGUAGE_EN
 
             if (user == null) {
-                enableLanguageSwitch = false
-
-                toast(R.string.prompt_restricted_login)
-
-                SignInActivity.startForResult(this)
+                showSignIn()
                 return@setOnClickListener
             }
 
             if (!user.canAccessPaidContent) {
-                enableLanguageSwitch = false
-
-                toast(R.string.prompt_restricted_paid_user)
-                SubscriptionActivity.start(this)
+                showSubs()
                 return@setOnClickListener
             }
 
-            mCurrentLanguage = ChannelItem.LANGUAGE_EN
             loadContent()
         }
 
         titlebar_bi.setOnClickListener {
             val user = mSessionManager?.loadUser()
+            mCurrentLanguage = ChannelItem.LANGUAGE_BI
 
             if (user == null) {
-                enableLanguageSwitch = false
-
-                toast(R.string.prompt_restricted_login)
-
-                SignInActivity.startForResult(this)
+                showSignIn()
                 return@setOnClickListener
             }
 
             if (!user.canAccessPaidContent) {
-                enableLanguageSwitch = false
-
-                toast(R.string.prompt_restricted_paid_user)
-
-                SubscriptionActivity.start(this)
+                showSubs()
                 return@setOnClickListener
             }
 
-            mCurrentLanguage = ChannelItem.LANGUAGE_BI
+
             loadContent()
         }
+    }
+
+    private fun showSignIn() {
+        enableLanguageSwitch = false
+
+        toast(R.string.prompt_restricted_login)
+
+        SignInActivity.startForResult(this)
+    }
+
+    private fun showSubs() {
+        enableLanguageSwitch = false
+
+        toast(R.string.prompt_restricted_paid_user)
+
+        val channelItem = mChannelItem
+        if (channelItem == null) {
+            SubscriptionActivity.start(this)
+            return
+        }
+
+        SubscriptionActivity.start(context = this, source = PaywallSource(
+                id = channelItem.id,
+                category = channelItem.type,
+                name = channelItem.headline,
+                variant = mCurrentLanguage
+        ))
     }
 
     private fun loadContent() {
