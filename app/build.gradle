@@ -31,8 +31,8 @@ android {
         applicationId "com.ft.ftchinese"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 2
-        versionName "1.1.0"
+        versionCode 3
+        versionName "1.1.1"
         setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "WECAHT_APP_ID", props.getProperty("wechat.appId")
