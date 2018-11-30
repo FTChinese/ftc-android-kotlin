@@ -3,6 +3,7 @@ package com.ft.ftchinese
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.support.customtabs.CustomTabsIntent
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -76,7 +77,11 @@ class WVClient(
     }
 
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-        info("Error when requesting ${request?.url}. Error code: ${error?.errorCode}, description: ${error?.description}")
+        info("Error when requesting ${request?.url}")
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            info("Error code: ${error?.errorCode}, description: ${error?.description}")
+        }
     }
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
