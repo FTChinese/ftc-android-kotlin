@@ -158,7 +158,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
         // Handle star/unstar action
         action_favourite.setOnClickListener {
             // Save to SQL
-            GlobalScope.launch {
+            GlobalScope.launch(Dispatchers.Main) {
                 // If is starring currently, remove it
                 if (mIsStarring) {
                     info("Unstar article: $mChannelItem")
