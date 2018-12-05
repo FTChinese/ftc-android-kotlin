@@ -48,7 +48,7 @@ data class ChannelList(
  *
  * In short it used those attributes:
  * `data-id` for `id`
- * `data-tier` for tier. Possible values: `story`, `interactive`,
+ * `data-type` for tier. Possible values: `story`, `interactive`,
  * The content of `a.item-headline-link` inside `div.item-container-app` for `headline`
  * `data-audio` for `shortlead`
  * `data-caudio` for `caudio`
@@ -115,6 +115,9 @@ data class ChannelItem(
     // File name used to cache/retrieve json data.
     val cacheFileName: String
         get() = "${type}_$id.json"
+
+    val cacheHTMLName: String
+        get() = "${type}_$id.html"
 
     private val commentsId: String
         get() = when(subType) {
