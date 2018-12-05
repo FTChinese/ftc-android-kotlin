@@ -85,6 +85,7 @@ class Story (
     val createdAt: String
         get() = DateFormat.format("yyyy年M月d日 HH:mm", last_publish_time.toLong() * 1000) as String
 
+    // HTML for the {related-stories}
     fun htmlForRelatedStories(): String {
 
         val listItems = relative_story.mapIndexed { index, relatedStory ->
@@ -102,13 +103,14 @@ class Story (
         """.trimIndent()
     }
 
+    // HTML for the {related-topics}
     fun htmlForRelatedTopics(): String {
         return tags.mapIndexed { index, s ->
             """
             <li class="story-theme mp${index+1}">
                 <a target="_blank" href="/tag/$s\">$s</a>
                 <div class="icon-right">
-                    <button class="myft-follow plus" data-tag="$s" data-tier="tag">关注</button>
+                    <button class="myft-follow plus" data-tag="$s" data-type="tag">关注</button>
                 </div>
             </li>
             """.trimIndent()
@@ -125,6 +127,7 @@ class Story (
         """.trimIndent()
     }
 
+    // HTML for {story-theme}
     fun htmlForTheme(): String {
         val firstTag = tags[0]
 
