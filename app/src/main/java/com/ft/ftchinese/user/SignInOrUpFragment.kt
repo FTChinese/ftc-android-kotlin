@@ -147,18 +147,6 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
         go_to_sign_in.setOnClickListener {
             SignInActivity.startForResult(activity)
         }
-
-        // Wechat login response is handled in `wxapi.WXEntryActivity`
-//        wechat_sign_in_button.setOnClickListener {
-//
-//            // SendAuth is an empty class. Its only purpose is to wrap tow inner class: Req and Resp.
-//            val req = SendAuth.Req()
-//            // scope max length is 1024. Not documented.
-//            req.scope = "snsapi_userinfo"
-//            // state max length is 1024. It is not documented in official API.
-//            req.state = generateNonce(5)
-//            wxApi?.sendReq(req)
-//        }
     }
 
     private fun populateAutoComplete() {
