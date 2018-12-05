@@ -26,7 +26,7 @@ private val FOLLOW_TYPE_COLUMN = followTypes[5]
  */
 data class Following(
         var type: String, // JS uses this value. Possible values: `tag`, `topic`, `industry`, `area`, `augthor`, `column`. `augthor` is a typo in JS code, but you have to keep that typo on.
-        var tag: String, // This is the string show along with the FOLLOW button
+        var tag: String, // This is the string shown along with the FOLLOW button
         var action: String // `follow` or `unfollow`. Used to determine if user if follow or unfollow something.
 ) {
     val bodyUrl: String
@@ -38,16 +38,30 @@ data class Following(
  * into/from shared preference for 关注 button in WebView.
  * It is used by the inner class ContentWebViewInterface in
  * AbsContentActivity, and FollowingActivity.
+ *
+ * Storage mechanism: use Following#type as preference's key. It value is a HashSet.
+ * The HashSet saves the value of Following#tag under the save Following#type.
  */
 class FollowingManager(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(PREF_FILE_FOLLOWING, Context.MODE_PRIVATE)
     private val editor = sharedPreferences.edit()
 
     fun save(following: Following) {
+        // Since Following#type is used as key, it must not be empty or null.
+        // Even though Kotlin says call null check is redundant,
+        // Gson does not work well with Kotlin's type system.
+        // It insist on parsing Java's null value into Kotlin's non-null field.
+        if (following.type.isNullOrBlank()) {
+            return
+        }
+
+        // Use Following#type as preferences' key
         val hs = sharedPreferences.getStringSet(following.type, HashSet<String>())
 
+        // Create a new HashSet from the original one.
         val newHs = HashSet(hs)
 
+        // Use the value of Following#tag as the the value of a HashSet
         when (following.action) {
             ACTION_FOLLOW -> {
                 newHs.add(following.tag)
@@ -58,6 +72,7 @@ class FollowingManager(context: Context) {
             }
         }
 
+        // Save the updated HashSet
         editor.putStringSet(following.type, newHs)
         editor.apply()
     }
