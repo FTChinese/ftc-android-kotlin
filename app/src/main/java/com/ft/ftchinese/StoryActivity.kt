@@ -260,6 +260,13 @@ class StoryActivity : AbsContentActivity() {
         web_view.loadDataWithBaseURL("http://www.ftchinese.com", html, "text/html", null, null)
 
         saveHistory()
+
+        if (BuildConfig.DEBUG) {
+            val fileName = mChannelItem?.cacheHTMLName ?: return
+            GlobalScope.launch {
+                mFileCache?.save(fileName, html)
+            }
+        }
     }
 
     override fun onStop() {
