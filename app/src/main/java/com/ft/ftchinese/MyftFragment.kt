@@ -105,7 +105,7 @@ class MyftFragment : Fragment(), AnkoLogger {
         val secondaryText: TextView = itemView.findViewById(R.id.secondary_text_view)
     }
 
-    inner class CursorAdapter(var mCursor: ArticleCursorWrapper) : RecyclerView.Adapter<ViewHolder>() {
+    inner class CursorAdapter(private var mCursor: ArticleCursorWrapper) : RecyclerView.Adapter<ViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.card_primary_secondary, parent, false)
