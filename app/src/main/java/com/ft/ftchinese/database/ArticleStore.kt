@@ -185,7 +185,7 @@ class ArticleStore private constructor(context: Context) : AnkoLogger {
         val cursor = try {
             mDbHelper.readableDatabase
                     .query(
-                            HistoryTable.NAME,
+                            StarredTable.NAME,
                             arrayOf(Cols.ID,
                                     Cols.TYPE,
                                     Cols.SUB_TYPE,
