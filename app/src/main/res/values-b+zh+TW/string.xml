@@ -54,6 +54,8 @@
     <string name="premium_tier_description">\u2714 享受“標準會員”所有權益\n\u2714 編輯精選，總編/各領域主編每週五為您推薦本週必讀資訊，分享他們的思考與觀點\n\u2714 FT中文網2019年度論壇門票2張</string>
     <string name="premium_small_print">注：所有活動門票不可折算現金、不能轉讓、不含差旅與食宿</string>
     <string name="paywall_buy_now">立即訂閱</string>
+    <string name="customer_service_title">聯繫客服</string>
+    <string name="customer_service_email">subscriber.service@ftchinese.com</string>
     <string name="payment_methods_title">選擇支付方式</string>
     <string name="product_overview">成為FT會員</string>
     <string name="pay_by_ali">支付寶支付</string>

@@ -3,6 +3,7 @@ package com.ft.ftchinese.user
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
@@ -269,6 +270,22 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
                 )
             } else {
                 SignInActivity.startForResult(this)
+            }
+        }
+
+        customer_service.setOnClickListener {
+            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("mailto:")
+                putExtra(Intent.EXTRA_EMAIL, "subscriber.service@ftchinese.com")
+                putExtra(Intent.EXTRA_SUBJECT, "FT中文网会员订阅")
+            }
+
+
+
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
+            } else {
+                toast(R.string.prompt_no_email_app)
             }
         }
     }
