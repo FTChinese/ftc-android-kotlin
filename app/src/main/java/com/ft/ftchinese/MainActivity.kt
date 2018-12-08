@@ -646,7 +646,7 @@ class MainActivity : AppCompatActivity(),
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         } else {
-            toast("您的设备上没有安装邮件程序，无法发送反馈邮件")
+            toast(R.string.prompt_no_email_app)
         }
     }
 
