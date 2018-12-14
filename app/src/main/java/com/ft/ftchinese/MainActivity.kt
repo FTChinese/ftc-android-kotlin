@@ -167,7 +167,8 @@ class MainActivity : AppCompatActivity(),
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
         // Register Wechat id
-        WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false).registerApp(BuildConfig.WECAHT_APP_ID)
+        api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
+        api.registerApp(BuildConfig.WX_SUBS_APPID)
 
         mSession = SessionManager.getInstance(this)
         mAdManager = LaunchAdManager.getInstance(this)
@@ -205,8 +206,7 @@ class MainActivity : AppCompatActivity(),
                 ?.findViewById<TextView>(R.id.nav_header_title)
                 ?.setOnClickListener(drawerHeaderTitleListener)
 
-        api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false)
-        api.registerApp(BuildConfig.WECAHT_APP_ID)
+
 
 
         // Fetch ads schedule from remote server in background.

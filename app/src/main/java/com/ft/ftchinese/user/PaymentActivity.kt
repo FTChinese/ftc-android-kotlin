@@ -74,7 +74,8 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         }
 
         // Initialize wechat pay
-        wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID)
+        wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
+        wxApi?.registerApp(BuildConfig.WX_SUBS_APPID)
 
 
         val memberTier = intent.getStringExtra(EXTRA_MEMBER_TIER) ?: Membership.TIER_STANDARD

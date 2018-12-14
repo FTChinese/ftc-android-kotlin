@@ -272,7 +272,7 @@ abstract class AbsContentActivity : AppCompatActivity(),
                 ShareItem("更多", R.drawable.ic_more_horiz_black_24dp, ShareItem.MORE_OPTIONS)
         )
 
-        private var api: IWXAPI = WXAPIFactory.createWXAPI(this@AbsContentActivity, BuildConfig.WECAHT_APP_ID, false)
+        private var api: IWXAPI = WXAPIFactory.createWXAPI(this@AbsContentActivity, BuildConfig.WX_SUBS_APPID, false)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(this@AbsContentActivity)

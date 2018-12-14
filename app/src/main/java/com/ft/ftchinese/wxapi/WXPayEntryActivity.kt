@@ -60,7 +60,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
         setSupportActionBar(toolbar)
 
-        api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID)
+        api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
 
         mSession = SessionManager.getInstance(this)
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
