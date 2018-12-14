@@ -111,18 +111,18 @@
             app:layout_constraintStart_toStartOf="@+id/password_container"
             app:layout_constraintTop_toBottomOf="@+id/go_to_sign_in" />
 
-        <!--<ImageView-->
-            <!--android:id="@+id/wechat_sign_in_button"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_marginEnd="8dp"-->
-            <!--android:layout_marginStart="8dp"-->
-            <!--android:layout_marginTop="32dp"-->
-            <!--android:contentDescription="@string/action_wx_login"-->
-            <!--app:layout_constraintEnd_toEndOf="parent"-->
-            <!--app:layout_constraintStart_toStartOf="parent"-->
-            <!--app:layout_constraintTop_toBottomOf="@+id/email_sign_in_button"-->
-            <!--app:srcCompat="@drawable/wx_login_button_48" />-->
+        <ImageView
+            android:id="@+id/wechat_sign_in_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="32dp"
+            android:contentDescription="@string/action_wx_login"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/email_sign_in_button"
+            app:srcCompat="@drawable/wx_login_button_48" />
 
 
 

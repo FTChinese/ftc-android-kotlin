@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.models.WxManager
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.gson
 import com.google.gson.annotations.SerializedName
@@ -35,7 +36,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
         setSupportActionBar(toolbar)
 
-        api = WXAPIFactory.createWXAPI(this, BuildConfig.WECAHT_APP_ID, false)
+        api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
 
         try {
             api?.handleIntent(intent, this)
@@ -87,9 +88,23 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 if (resp is SendAuth.Resp) {
                     info("code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
 
-                    val codeResp = WxCodeResp(resp.code, resp.state)
+                    val wxManager = WxManager.getInstance(this)
+                    val state = wxManager.loadState()
 
-                    login(codeResp)
+                    if (state == null) {
+                        toast("State code not found. Suspicious login attempt")
+                        return
+                    }
+
+                    if (state != resp.state) {
+                        toast("State code not matchi")
+                        return
+                    }
+
+                    toast("Prepare to get access token")
+//                    val codeResp = WxCodeResp(resp.code, resp.state)
+
+//                    login(codeResp)
                 }
             }
 
@@ -106,7 +121,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         val url = wxSnsUri.buildUpon()
                 .appendPath("oauth2")
                 .appendPath("access_token")
-                .appendQueryParameter("appid", BuildConfig.WECAHT_APP_ID)
+                .appendQueryParameter("appid", BuildConfig.WX_SUBS_APPID)
                 .appendQueryParameter("secret", "")
                 .appendQueryParameter("code", resp.code)
                 .appendQueryParameter("grant_type", "authorization_code")

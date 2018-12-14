@@ -20,10 +20,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
+import com.ft.ftchinese.util.generateNonce
 import com.ft.ftchinese.util.isNetworkConnected
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.tencent.mm.opensdk.modelmsg.SendAuth
+import com.tencent.mm.opensdk.openapi.IWXAPI
+import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.fragment_sign_in_or_up.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
@@ -37,8 +42,9 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
 
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
     private var mSession: SessionManager? = null
+    private var mWxManager: WxManager? = null
 
-//    private var wxApi: IWXAPI? = null
+    private var wxApi: IWXAPI? = null
 
     // Show or hide progress bar.
     private var isInProgress: Boolean
@@ -74,6 +80,7 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
         if (context != null) {
             mFirebaseAnalytics = FirebaseAnalytics.getInstance(context)
             mSession = SessionManager.getInstance(context)
+            mWxManager = WxManager.getInstance(context)
         }
     }
 
@@ -81,7 +88,8 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
         super.onCreate(savedInstanceState)
 
         // Init Wechat API
-//        wxApi = WXAPIFactory.createWXAPI(context, BuildConfig.WECAHT_APP_ID)
+        wxApi = WXAPIFactory.createWXAPI(context, BuildConfig.WX_SUBS_APPID)
+        wxApi?.registerApp(BuildConfig.WX_SUBS_APPID)
 
         // Decide whether this is used for login or signup.
         usedFor = arguments?.getInt(ARG_FRAGMENT_USAGE)
@@ -108,7 +116,7 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
             // For signup, hide login button, and reset password and sign up button.
             USED_FOR_SIGN_UP -> {
                 email_sign_in_button.visibility = View.GONE
-//                wechat_sign_in_button.visibility = View.GONE
+                wechat_sign_in_button.visibility = View.GONE
                 go_to_reset_password.visibility = View.GONE
                 go_to_sign_up.visibility = View.GONE
             }
@@ -146,6 +154,18 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
 
         go_to_sign_in.setOnClickListener {
             SignInActivity.startForResult(activity)
+        }
+
+        // Respond to wechat login button
+        wechat_sign_in_button.setOnClickListener {
+
+            val nonce = generateNonce(5)
+            mWxManager?.saveState(nonce)
+
+            val req = SendAuth.Req()
+            req.scope = "snsapi_userinfo"
+            req.state = nonce
+            wxApi?.sendReq(req)
         }
     }
 
