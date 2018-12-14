@@ -1,14 +1,3 @@
-## Test locally against API
-
-1. Install MySQL.
-2. Use `https://gitlab.com/ftchinese/sql-schema` to setup schema and populate data.
-3. Install Golang
-4. Clone this repository `https://gitlab.com/ftchinese/next-api` into golang's designated path, which should be `~/go/src/gitlab.com/ftchinese`.
-5. `cd` into `~/go/src/gitlab.com/ftchinese/next-api`
-6. Execute `make`.
-7. Use [Serveo](https://serveo.net/) for forward external request to your localhost: `ssh -R 80:localhost:8000 serveo.net`
-8. Change `private const val BASE = "https://lacerta.serveo.net"` in this package `util/ApiEndpoint` to the URL Serveo gives you.
-
 ## Logo on ActionBar
 
 Reference: https://developer.android.com/training/multiscreen/screendensities
@@ -43,21 +32,6 @@ values-b+zh+HK
 values-b+zh+MO
 ```
 
-## Server-side App Launch Ad API
-
-* It should use HTTP header (like etag) to tell client whether the resource is outdated and client should update local data;
-
-* Use JSON. Use meaningful JSON.
-
-DO NOT USE strings `yes` or `no` to indicate Boolean values! Use `true` or `false` please.
-
-DO NOT USE strings for numeric values! Use number as number. Why convert numbers to strings and force client to do the conversion back?
-
-DO NOT USE strings for array. If you mean an array, use an array. DO NOT USE a dot/comma...-separated string as array.
-
-JSON keys should indicate the meaning of their value.
-
-
 ## Files
 
 Add those two files in the root of the project:
@@ -80,6 +54,69 @@ storeFile="......."
 
 Add `google-service.json` to the `app` directory.
 
+## Wechat Login Process
+
+### Step 1: Launch Wechat
+In the `SignInOrUpFragment`, declare a property `private var wxApi: IWXAPI? = null`. Initialize wechat api in `onCreate`:
+
+```kotlin
+wxApi = WXAPIFactory.createWXAPI(context, your_app_id)
+wxApi?.registerApp(your_app_id)
+```
+
+Respond to click on wechat login button:
+```kotlin
+wechat_sign_in_button.setOnClickListener {
+    val nonce = generateNonce(5)
+    val req = SendAuth.Req()
+    req.scope = "snsapi_userinfo"
+    req.state = nonce
+    wxApi?.sendReq(req)
+}
+```
+
+Then user will be redirected to wechat app.
+
+### Step 2: Get Code in WxEntryActivity
+
+Wechat will redirect user back to the `WxEntryActivity` in your app after user clicked `确认登陆` button.
+
+You should handle the response in `onResp()` function.
+```kotlin
+override fun onResp(resp: BaseResp?) {
+    when (resp?.type) {
+        ConstantsAPI.COMMAND_SENDAUTH -> {
+            info("Wx auth")
+            // process login here
+        }
+        ConstantsAPI.COMMAND_SENDMESSAGE_TO_WX -> {
+            finish()
+        }
+        else -> {
+            finish()
+        }
+    }
+}
+```
+
+In such case, the `resp` is type `SendAuth.Resp` -- the actual meaning of `SDK通过SendAuth的Resp返回数据给调用方` in Wechat's official documentation.
+
+Then you need to distinguish the response's `ErrCode` first:
+
+* `ERR_OK = 0`(用户同意) 
+* `ERR_AUTH_DENIED = -4`（用户拒绝授权） 
+* `ERR_USER_CANCEL = -2`（用户取消）
+
+In case `ERR_OK = 0`, cast the `BaseResp` into `SendAuth.Resp`. Only with `SendAuth.Resp` could you get the `code`, `state`, `lang` and `country` fields.
+
+### Step 3: Ask API for Access Token
+
+Post the `code` to API, and API uses the code to ask for Wechat API for access token.
+
+Access token, refresh token should not be saved by client.
+
+### Step 4: Use `unionid` to Get User Data
+ 
 ## Problems
 
 Alipay has a Maven repository `implementation 'com.alipay.sdk:alipay-sdk-java:3.3.49.ALL'`. It's the server-side SDK. DO NOT USE IT for Android!
