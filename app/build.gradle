@@ -1,9 +1,6 @@
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
-apply plugin: 'com.google.gms.google-services'
 
 // NOTE: this does not work in Android Studio, although Google and Kotlin all says it works.
 //apply plugin: 'kotlin-kapt'
@@ -104,6 +101,9 @@ dependencies {
     //  Network
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.beust:klaxon:5.0.2'
+    implementation "com.github.kittinunf.fuel:fuel:1.16.0"
+//    implementation "com.github.kittinunf.fuel:fuel-coroutines:1.16.0"
     implementation "com.github.kittinunf.fuel:fuel-android:1.16.0"
 
     //  ORM. Unfortunately it does not work with Kotlin.
@@ -115,12 +115,12 @@ dependencies {
 
     // Utilities
     implementation 'com.jakewharton.byteunits:byteunits:0.9.1'
-    implementation 'joda-time:joda-time:2.10'
+    implementation 'com.jakewharton.threetenabp:threetenabp:1.1.1'
     implementation 'org.apache.commons:commons-math3:3.6.1'
 
     // Firebase
     implementation 'com.google.firebase:firebase-core:16.0.6'
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.7'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.9.8'
 
     //    Test
     testImplementation 'junit:junit:4.12'
