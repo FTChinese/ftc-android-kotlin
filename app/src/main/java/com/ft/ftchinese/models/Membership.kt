@@ -1,110 +1,75 @@
 package com.ft.ftchinese.models
 
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
+import org.threeten.bp.LocalDate
 
-private val prices = mapOf(
-        "standard_year" to 198.00,
-        "standard_month" to 28.00,
-        "premium_year" to 1998.00
-)
+//private val prices = mapOf(
+//        "standard_year" to 258.00,
+//        "standard_month" to 28.00,
+//        "premium_year" to 1998.00
+//)
 
 data class Membership(
-        val tier: String,
-        val billingCycle: String = CYCLE_YEAR,
+        @KTier
+        val tier: Tier? = null,
+        @KCycle
+        val cycle: Cycle? = null,
         // ISO8601 format. Example: 2019-08-05
-        val expireDate: String
+        @KDate
+        val expireDate: LocalDate? = null
 ) {
     /**
      * Compare expireAt against now.
+     * Return true if expireDate is before now,
+     * or if expireDate is null.
      */
     val isExpired: Boolean
-        get() {
-            if (expireDate.isBlank()) return true
+        get() = expireDate
+                    ?.isBefore(LocalDate.now())
+                    ?: true
 
-            // If expire date is before now, it is expired;
-            // otherwise it is still valid.
-            return DateTime.parse(expireDate, ISODateTimeFormat.date()).isBeforeNow
-        }
 
     // Determine is renewal button is visible.
     // Only check subscribed user.
     val isRenewable: Boolean
         get() {
 
-            if (expireDate.isBlank()) return false
+            if (expireDate == null || cycle == null) return false
 
-            val expire = DateTime.parse(expireDate, ISODateTimeFormat.date())
-
-            return when (billingCycle) {
-                CYCLE_YEAR -> {
-                    return expire.isBefore(DateTime.now().plusYears(1).plusDays(1))
-                }
-                CYCLE_MONTH -> {
-                    return expire.isBefore(DateTime.now().plusMonths(1).plusDays(1))
-                }
-                else -> false
-            }
-
+            return expireDate
+                    .isBefore(cycle.endDate(LocalDate.now()))
         }
 
     val isPaidMember: Boolean
         get() {
-            return tier == Membership.TIER_STANDARD || tier == Membership.TIER_PREMIUM
+            return tier == Tier.STANDARD || tier == Tier.PREMIUM
         }
 
 
     // Use the combination of tier and billing cycle to uniquely identify this membership.
     // It is used as key to retrieve a price;
     // It is also used as the ITEM_ID for firebase's ADD_TO_CART event.
-    val id: String
-        get() = "${tier}_$billingCycle"
+    val key: String
+        get() = "${tier?.string()}_${cycle?.string()}"
 
-    val price: Double?
-        get() = prices[id]
+//    val price: Double?
+//        get() = prices[id]
 
     // Compare expireDate against another instance.
     // Pick whichever is later.
     fun isNewer(m: Membership): Boolean {
-        if (expireDate.isBlank() && m.expireDate.isBlank()) {
+        if (expireDate == null && m.expireDate == null) {
             return false
         }
 
-        if (m.expireDate.isBlank()) {
+        if (m.expireDate == null) {
             return true
         }
 
-        if (expireDate.isBlank()) {
+        if (expireDate == null) {
             return false
         }
 
-        val selfExpire = DateTime.parse(expireDate, ISODateTimeFormat.date())
-        val anotherExpire = DateTime.parse(expireDate, ISODateTimeFormat.date())
-
-        return selfExpire.isAfter(anotherExpire)
-    }
-
-    fun extendedExpireDate(cycle: String): String {
-        val inst = DateTime.parse(expireDate, ISODateTimeFormat.date())
-
-        val newInst = when (cycle) {
-            CYCLE_YEAR -> inst.plusYears(1)
-            CYCLE_MONTH -> inst.plusMonths(1)
-            else -> inst
-        }
-
-
-        return ISODateTimeFormat
-                .date()
-                .print(newInst)
-    }
-
-    companion object {
-        const val TIER_STANDARD = "standard"
-        const val TIER_PREMIUM = "premium"
-
-        const val CYCLE_YEAR = "year"
-        const val CYCLE_MONTH = "month"
+        return expireDate.isAfter(m.expireDate)
     }
 }
 
