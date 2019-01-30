@@ -23,6 +23,7 @@ import com.ft.ftchinese.user.*
 import com.ft.ftchinese.util.*
 import com.github.kittinunf.fuel.core.Request
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.jakewharton.threetenabp.AndroidThreeTen
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -30,8 +31,8 @@ import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
+import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.format.DateTimeFormatter
 import java.lang.Exception
 
 /**
@@ -159,6 +160,8 @@ class MainActivity : AppCompatActivity(),
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         displayLogo()
+
+        AndroidThreeTen.init(this)
 
         if (BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true)
@@ -422,7 +425,7 @@ class MainActivity : AppCompatActivity(),
 
         val bundle = Bundle().apply {
 
-            val now = ISODateTimeFormat.dateTimeNoMillis().print(DateTime.now())
+            val now = ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT)
             info("APP_OPEN event: $now")
 
             putString(FirebaseAnalytics.Param.SUCCESS, now)
