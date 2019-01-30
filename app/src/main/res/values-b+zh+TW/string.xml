@@ -30,21 +30,20 @@
 
     <string name="membership_title">　我的訂閱</string>
     <string name="label_member_tier">會員類型</string>
-    <string name="member_tier_free">尚未成為會員</string>
-    <string name="member_tier_standard">標準會員</string>
-    <string name="member_tier_premium">高級會員</string>
-    <string name="member_tier_vip">超級會員</string>
+    <string name="tier_free">尚未成為會員</string>
+    <string name="tier_standard">標準會員</string>
+    <string name="tier_premium">高級會員</string>
+    <string name="tier_vip">超級會員</string>
 
     <string name="membership_renew">我要續訂</string>
 
-    <string name="price_standard_annual">¥198.00/年</string>
-    <string name="price_standard_month">¥18/月</string>
-    <string name="price_premium">¥1,998.00/年</string>
-    <string name="price_formatter">¥%1$,.2f</string>
+    <string name="formatter_price_cycle">¥%1$,.2f/%2$s</string>
+    <string name="formatter_tier_cycle">%1$s/%2$s</string>
+    <string name="formatter_price">¥%1$,.2f</string>
 
-    <string name="billing_cycle_year">年</string>
-    <string name="billing_cycle_month">月</string>
-    <string name="vip_duration">無限期</string>
+    <string name="cycle_year">年</string>
+    <string name="cycle_month">月</string>
+    <string name="cycle_vip">無限期</string>
 
     <string name="label_member_duration">會員期限</string>
     <string name="label_member_price">支付金額</string>
@@ -62,7 +61,7 @@
     <string name="pay_by_wechat">微信支付</string>
     <string name="pay_by_stripe">Stripe支付</string>
     <string name="unknown_payment_method">請選擇支付方式</string>
-    <string name="check_out_text">%1$s %2$s</string>
+    <string name="formatter_check_out">%1$s %2$s</string>
     <string name="check_out_default">支付</string>
     <string name="request_order">創建訂單&#8230;</string>
     <string name="done">完成</string>
@@ -80,8 +79,8 @@
     <string name="wxpay_failed">支付失敗</string>
     <string name="wxpay_cancelled">支付已取消</string>
     <string name="wxpay_error">无法支付</string>
-    <string name="wxpay_member_tier">您已經訂閱了FT中文網 %1$s/%2$s</string>
-    <string name="wxpay_exppire_date">會員有效期：%1$s</string>
+    <string name="wxpay_tier_cycle">您已經訂閱了FT中文網 %1$s/%2$s</string>
+    <string name="wxpay_expire_date">會員有效期：%1$s</string>
     <string name="wxshare_done">分享成功</string>
 
     <string name="action_title_account">帳號與安全</string>
@@ -162,6 +161,7 @@
     <string name="progress_updating">更新資料&#8230;</string>
     <string name="progress_refresh_account">更新账号資料&#8230;</string>
     <string name="progress_request_verification">正在發送驗證信件&#8230;</string>
+    <string name="progress_logging">正在登入&#8230;</string>
 
     <string name="link_reset_password">忘記密碼？</string>
     <string name="link_sign_up">註冊帳號</string>
