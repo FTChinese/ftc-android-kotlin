@@ -5,6 +5,9 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import com.ft.ftchinese.R
+import com.ft.ftchinese.models.KEY_PREMIUM_YEAR
+import com.ft.ftchinese.models.KEY_STANDARD_MONTH
+import com.ft.ftchinese.models.KEY_STANDARD_YEAR
 import com.google.gson.JsonSyntaxException
 import org.jetbrains.anko.toast
 import java.io.IOException
@@ -50,6 +53,27 @@ fun Activity.isActiveNetworkMobile(): Boolean {
         ConnectivityManager.TYPE_MOBILE,
         ConnectivityManager.TYPE_MOBILE_DUN -> true
         else -> false
+    }
+}
+
+fun Activity.getTierCycleText(key: String?): String? {
+    return when (key) {
+        KEY_STANDARD_YEAR -> getString(
+                R.string.formatter_tier_cycle,
+                getString(R.string.tier_standard),
+                getString(R.string.cycle_year)
+        )
+        KEY_STANDARD_MONTH -> getString(
+                R.string.formatter_tier_cycle,
+                getString(R.string.tier_standard),
+                getString(R.string.cycle_month)
+        )
+        KEY_PREMIUM_YEAR -> getString(
+                R.string.formatter_tier_cycle,
+                getString(R.string.tier_premium),
+                getString(R.string.cycle_year)
+        )
+        else -> null
     }
 }
 
