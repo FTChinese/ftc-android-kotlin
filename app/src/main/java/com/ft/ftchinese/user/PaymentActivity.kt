@@ -239,7 +239,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         val tier = mTier ?: return
         val cycle = mCycle ?: return
         val payMethod = mPayMethod ?: return
-        val user = mSession?.loadUser() ?: return
+        val user = mSession?.loadAccount() ?: return
 
         showProgress(true)
         allowInput(false)
@@ -326,7 +326,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         val tier = mTier ?: return
         val cycle = mCycle ?: return
         val payMethod = mPayMethod ?: return
-        val user = mSession?.loadUser() ?: return
+        val user = mSession?.loadAccount() ?: return
 
         showProgress(true)
         allowInput(false)
