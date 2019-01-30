@@ -81,7 +81,7 @@ class StoryActivity : AbsContentActivity() {
         }
 
         titlebar_en.setOnClickListener {
-            val user = mSessionManager?.loadUser()
+            val user = mSessionManager?.loadAccount()
             mCurrentLanguage = ChannelItem.LANGUAGE_EN
 
             if (user == null) {
@@ -98,7 +98,7 @@ class StoryActivity : AbsContentActivity() {
         }
 
         titlebar_bi.setOnClickListener {
-            val user = mSessionManager?.loadUser()
+            val user = mSessionManager?.loadAccount()
             mCurrentLanguage = ChannelItem.LANGUAGE_BI
 
             if (user == null) {
