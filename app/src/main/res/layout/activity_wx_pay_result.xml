@@ -35,7 +35,7 @@
         app:layout_constraintTop_toBottomOf="@+id/heading_tv">
 
         <TextView
-            android:id="@+id/tier_tv"
+            android:id="@+id/tier_cycle_tv"
             style="@style/FTCText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
