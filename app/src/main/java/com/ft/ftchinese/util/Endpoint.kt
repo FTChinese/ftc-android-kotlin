@@ -14,14 +14,20 @@ object  NextApi {
     const val UPDATE_USER_NAME = "$BASE/user/name"
     const val UPDATE_PASSWORD = "$BASE/user/password"
     const val STARRED = "$BASE/user/starred"
+    const val WX_ACCOUNT = "$BASE/wx/account"
+    const val WX_SIGNUP = "$BASE/wx/signup"
+    const val WX_BIND = "$BASE/wx/bind"
 }
 
 object SubscribeApi {
-    private const val BASE = "http://www.ftacademy.cn/api/v1"
-//        private const val BASE = "https://lacerta.serveo.net"
+//    private const val BASE = "http://www.ftacademy.cn/api/v1"
+        private const val BASE = "http://www.ftacademy.cn/api/sandbox"
 
     const val WX_UNIFIED_ORDER = "$BASE/wxpay/unified-order"
     const val WX_ORDER_QUERY = "$BASE/wxpay/query"
     const val ALI_ORDER = "$BASE/alipay/app-order"
     const val ALI_VERIFY_APP_PAY = "$BASE/alipay/verify/app-pay"
+
+    const val WX_LOGIN = "$BASE/wx/oauth/login"
+    const val WX_REFRESH = "$BASE/wx/oauth/refresh"
 }
