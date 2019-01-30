@@ -3,12 +3,7 @@ package com.ft.ftchinese.models
 import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.SubscribeApi
-import com.ft.ftchinese.util.gson
-import com.google.gson.JsonSyntaxException
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 const val PREFERENCE_USER_ACCOUNT = "user_account"
 
@@ -20,19 +15,59 @@ const val PREFERENCE_USER_ACCOUNT = "user_account"
  */
 data class Account(
         val id: String,
-        val unionId: String? = null,
-        var userName: String? = null,
-        var email: String,
+        val unionId: String?,
+        val userName: String?,
+        val email: String,
         val isVerified: Boolean = false,
-        val avatarUrl: String? = null,
+        val avatarUrl: String?,
         val isVip: Boolean = false,
-        val wechat: Wechat = Wechat(null, null),
-        val membership: Membership = Membership(null, null, null)
+        val wechat: Wechat,
+        val membership: Membership
 ): AnkoLogger {
+
+    /**
+     * Check if user can access paid content.
+     */
     val canAccessPaidContent: Boolean
         get() {
             return (membership.isPaidMember && !membership.isExpired) || isVip
         }
+
+    /**
+     * Test if this account has email and union id bound.
+     */
+    val isBound: Boolean
+        get() = (id != "") && (unionId != null)
+
+    val displayName: String
+        get() {
+            if (userName != null) {
+                return userName
+            }
+
+            if (wechat.nickname != null) {
+                return wechat.nickname
+            }
+
+            if (email != "") {
+                return email.split("@")[0]
+            }
+
+            return "用户名未设置"
+        }
+
+    val loginMethod: LoginMethod?
+        get() {
+            if (id.isNotBlank()) {
+                return LoginMethod.EMAIL
+            }
+            if (!unionId.isNullOrBlank()) {
+                return LoginMethod.WECHAT
+            }
+
+            return null
+        }
+
     /**
      * @return Account. Always returns a new one rather than modifying the existing one to make it immutable.
      */
@@ -49,61 +84,59 @@ data class Account(
         return json.parse<Account>(body)
     }
 
-    suspend fun requestVerification(): Int {
-        val response = GlobalScope.async {
-            Fetch().post(NextApi.REQUEST_VERIFICATION)
-                    .noCache()
-                    .setClient()
-                    .setUserId(this@Account.id)
-                    .body(null)
-                    .end()
-        }.await()
+    fun requestVerification(): Int {
+        val response = Fetch().post(NextApi.REQUEST_VERIFICATION)
+                .noCache()
+                .setClient()
+                .setUserId(this@Account.id)
+                .body(null)
+                .end()
 
         return response.code()
     }
 
-    suspend fun wxPlaceOrder(tier: Tier, cycle: Cycle): WxPrepayOrder? {
-        val response = GlobalScope.async {
-            Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${tier.string()}/${cycle.string()}")
-                    .noCache()
-                    .setUserId(this@Account.id)
-                    .setClient()
-                    .body(null)
-                    .end()
-        }.await()
+    /**
+     * @TODO set user id or union id based on login method
+     */
+    fun wxPlaceOrder(tier: Tier, cycle: Cycle): WxPrepayOrder? {
+        val response = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${tier.string()}/${cycle.string()}")
+                .noCache()
+                .setUserId(this@Account.id)
+                .setClient()
+                .body(null)
+                .end()
 
 
-        val body = response.body()?.string()
-        return gson.fromJson<WxPrepayOrder>(body, WxPrepayOrder::class.java)
+        val body = response.body()?.string() ?: return null
+        return json.parse<WxPrepayOrder>(body)
     }
 
-    suspend fun wxQueryOrder(orderId: String): WxQueryOrder {
-        val resp = GlobalScope.async {
-            Fetch().get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
-                    .noCache()
-                    .setUserId(this@Account.id)
-                    .setClient()
-                    .end()
-        }.await()
+    /**
+     * @TODO set user id or union id based on login method.
+     */
+    fun wxQueryOrder(orderId: String): WxQueryOrder? {
+        val resp = Fetch().get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
+                .noCache()
+                .setUserId(this@Account.id)
+                .setClient()
+                .end()
 
-        val body = resp.body()?.string()
+        val body = resp.body()?.string() ?: return null
 
-        return gson.fromJson<WxQueryOrder>(body, WxQueryOrder::class.java)
+        return json.parse<WxQueryOrder>(body)
     }
 
-    suspend fun aliPlaceOrder(tier: Tier, cycle: Cycle): AlipayOrder? {
+    fun aliPlaceOrder(tier: Tier, cycle: Cycle): AlipayOrder? {
 
-        val response = GlobalScope.async {
-            Fetch().post("${SubscribeApi.ALI_ORDER}/${tier.string()}/${cycle.string()}")
-                    .setUserId(this@Account.id)
-                    .setClient()
-                    .body(null)
-                    .end()
-        }.await()
+        val response = Fetch().post("${SubscribeApi.ALI_ORDER}/${tier.string()}/${cycle.string()}")
+                .setUserId(this@Account.id)
+                .setClient()
+                .body(null)
+                .end()
 
 
-        val body = response.body()?.string()
-        return gson.fromJson<AlipayOrder>(body, AlipayOrder::class.java)
+        val body = response.body()?.string() ?: return null
+        return json.parse<AlipayOrder>(body)
     }
 
     fun starArticle(articleId: String): Boolean {
