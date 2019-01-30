@@ -1,8 +1,5 @@
 package com.ft.ftchinese.models
 
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
-
 data class AdModel(
         val imageString: String,
         val link: String,
@@ -29,16 +26,11 @@ enum class AdPosition(val position: String) {
 }
 
 object AdVendorSwitch {
-    var on = false
+    var on = true
 }
 
 object AdParser {
     fun getAdCode(position: AdPosition): String {
-
-        // After 2019-01-01 it should always be true.
-        if (DateTime.parse("2019-01-01", ISODateTimeFormat.date()).isBeforeNow) {
-            AdVendorSwitch.on = true
-        }
 
         val adCode: String = if (AdVendorSwitch.on) {
             when (position) {
