@@ -6,45 +6,46 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
-        android:networkSecurityConfig="@xml/network_security_config"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Origami">
+
         <!-- WXPayEntryActivity does not need parent activity since that is useless. -->
         <activity
             android:name=".wxapi.WXPayEntryActivity"
             android:exported="true"
             android:label="@string/title_wxpay_result"
-            android:launchMode="singleTop" >
+            android:launchMode="singleTop">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:scheme="wxacddf1c20516eb69"/>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="wxacddf1c20516eb69" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".wxapi.WXEntryActivity"
             android:exported="true"
             android:launchMode="singleTop">
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <data android:scheme="sdksample"/>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="sdksample" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation"
@@ -94,18 +95,18 @@
         </activity>
         <activity
             android:name=".user.SignInActivity"
+            android:label="@string/title_login"
             android:parentActivityName=".MainActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:label="@string/title_login">
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
         <activity
             android:name=".user.SignUpActivity"
+            android:label="@string/title_sign_up"
             android:parentActivityName=".MainActivity"
-            android:windowSoftInputMode="adjustResize"
-            android:label="@string/title_sign_up">
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
@@ -124,6 +125,14 @@
             android:label="@string/action_title_account"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
+        <activity
+            android:name=".user.WxAccountActivity"
+            android:label="@string/action_title_account"
+            android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
@@ -171,7 +180,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".MainActivity" />
         </activity>
-        <activity android:name=".user.PaymentActivity"
+        <activity
+            android:name=".user.PaymentActivity"
             android:label="@string/title_payment"
             android:parentActivityName=".user.SubscriptionActivity">
             <meta-data
