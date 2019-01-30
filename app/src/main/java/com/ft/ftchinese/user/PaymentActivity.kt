@@ -15,6 +15,7 @@ import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
+import com.ft.ftchinese.util.getTierCycleText
 import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -28,17 +29,18 @@ import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-import org.joda.time.DateTime
-import org.joda.time.DateTimeZone
-import org.joda.time.format.ISODateTimeFormat
 
 const val EXTRA_PAYMENT_METHOD = "payment_method"
 
 class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
-    private var mMembership: Membership? = null
-    private var mPaymentMethod: String? = null
-    private var mPriceText: String? = null
+//    private var mMembership: Membership? = null
+
+    private var mTier: Tier? = null
+    private var mCycle: Cycle? = null
+    private var mPayMethod: PayMethod? = null
+
+    private var mPrice: Double? = null
     private var wxApi: IWXAPI? = null
     private var mSession: SessionManager? = null
     private var mOrderManager: OrderManager? = null
@@ -59,6 +61,21 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             check_out?.isEnabled = value
         }
 
+    private val priceText: String
+        get() = getString(R.string.formatter_price, mPrice)
+
+    private fun allowInput(value: Boolean) {
+        check_out?.isEnabled = value
+    }
+
+    private fun showProgress(value: Boolean) {
+        if (value) {
+            progress_bar?.visibility = View.VISIBLE
+        } else {
+            progress_bar?.visibility = View.GONE
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -78,28 +95,106 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         wxApi?.registerApp(BuildConfig.WX_SUBS_APPID)
 
 
-        val memberTier = intent.getStringExtra(EXTRA_MEMBER_TIER) ?: Membership.TIER_STANDARD
-        val billingCycle = intent.getStringExtra(EXTRA_BILLING_CYCLE) ?: Membership.CYCLE_YEAR
+        val tierStr = intent.getStringExtra(EXTRA_MEMBER_TIER)
+        val cycleStr = intent.getStringExtra(EXTRA_BILLING_CYCLE)
 
-        // Create a membership instance based on the value passed from MemberActivity
-        val membership = Membership(tier = memberTier, billingCycle = billingCycle, expireDate = "")
+        mTier = Tier.fromString(tierStr)
+        mCycle = Cycle.fromString(cycleStr)
+        mPrice = pricingPlans.findPlan(mTier, mCycle)?.netPrice
 
-        // Keep it for later use.
-        mMembership = membership
-
-        updateUI(membership)
-
-        // When user started this activity, we can assume he is adding to cart.
-        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle().apply {
-            putString(FirebaseAnalytics.Param.ITEM_ID, membership.id)
-            putString(FirebaseAnalytics.Param.ITEM_NAME, memberTier)
-            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, billingCycle)
-            putLong(FirebaseAnalytics.Param.QUANTITY, 1)
-        })
+        updateUI()
 
         requestPermission()
+
+        logAddCartEvent()
+
         info("onCreate finished")
     }
+
+    private fun updateUI() {
+
+        tier_cycle_tv.text = getTierCycleText(tierCycleKey(mTier, mCycle))
+
+        price_tv.text = priceText
+    }
+
+    // Event listener for selecting payment method.
+    fun onSelectPayMethod(view: View) {
+        if (view is RadioButton) {
+
+            when (view.id) {
+                R.id.pay_by_ali -> {
+                    mPayMethod = PayMethod.ALIPAY
+
+                    check_out.text = getString(
+                            R.string.formatter_check_out,
+                            getString(R.string.pay_by_ali),
+                            mPrice)
+                }
+                R.id.pay_by_wechat -> {
+                    mPayMethod = PayMethod.WXPAY
+
+                    check_out.text = getString(
+                            R.string.formatter_check_out,
+                            getString(R.string.pay_by_wechat),
+                            mPrice)
+                }
+//                R.id.pay_by_stripe -> {
+//
+//                    updateUIForCheckOut(R.string.pay_by_stripe)
+//                }
+            }
+        }
+    }
+
+    // Event listener for checkout.
+    fun onCheckOut(view: View) {
+        if (mPayMethod == null) {
+            toast(R.string.unknown_payment_method)
+            return
+        }
+
+        toast(R.string.request_order)
+
+        logCheckOutEvent()
+
+        when (mPayMethod) {
+            PayMethod.ALIPAY -> {
+                // The commented code are used for testing UI only.
+//                val intent = Intent().apply {
+//                    putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_ALI)
+//                }
+//
+//                // Destroy this activity and tells parent activity to update user data.
+//                setResult(Activity.RESULT_OK, intent)
+//                finish()
+
+                aliPay()
+            }
+
+            PayMethod.WXPAY -> {
+                // The commented codes are used for testing WXPayEntryActivity ui only.
+//                WXPayEntryActivity.start(this)
+//
+//                val intent = Intent().apply {
+//                    putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_WX)
+//                }
+//
+//                setResult(Activity.RESULT_OK, intent)
+//                finish()
+
+                wxPay()
+            }
+            PayMethod.STRIPE -> {
+                stripePay()
+            }
+            else -> {
+                toast("Unknown payment method")
+            }
+        }
+    }
+
+
 
     private fun requestPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -127,105 +222,6 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         }
     }
 
-    private fun updateUI(member: Membership) {
-
-        val cycleText = when(member.billingCycle) {
-            Membership.CYCLE_YEAR -> getString(R.string.billing_cycle_year)
-            Membership.CYCLE_MONTH -> getString(R.string.billing_cycle_month)
-            else -> ""
-        }
-
-        member_tier_tv.text = when(member.tier) {
-            Membership.TIER_STANDARD -> getString(R.string.member_tier_standard) + "/" + cycleText
-            Membership.TIER_PREMIUM -> getString(R.string.member_tier_premium) + "/" + cycleText
-            else -> ""
-        }
-
-        val priceText = getString(R.string.price_formatter, member.price)
-        member_price_tv.text = priceText
-
-        mPriceText = priceText
-    }
-
-    fun onSelectPaymentMethod(view: View) {
-        if (view is RadioButton) {
-
-            when (view.id) {
-                R.id.pay_by_ali -> {
-                    mPaymentMethod = Subscription.PAYMENT_METHOD_ALI
-
-                    updateUIForCheckOut(R.string.pay_by_ali)
-                }
-                R.id.pay_by_wechat -> {
-                    mPaymentMethod = Subscription.PAYMENT_METHOD_WX
-
-                    updateUIForCheckOut(R.string.pay_by_wechat)
-                }
-//                R.id.pay_by_stripe -> {
-//
-//                    updateUIForCheckOut(R.string.pay_by_stripe)
-//                }
-            }
-        }
-    }
-
-    private fun updateUIForCheckOut(resId: Int) {
-        val methodStr = getString(resId)
-
-        check_out.text = getString(R.string.check_out_text, methodStr, mPriceText)
-    }
-
-    fun onCheckOutClicked(view: View) {
-        if (mPaymentMethod == null) {
-            toast(R.string.unknown_payment_method)
-            return
-        }
-
-        toast(R.string.request_order)
-
-        // Begin to checkout event
-        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
-            putDouble(FirebaseAnalytics.Param.VALUE, mMembership?.price ?: 0.0)
-            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-            putString(FirebaseAnalytics.Param.METHOD, mPaymentMethod)
-        })
-
-        when (mPaymentMethod) {
-            Subscription.PAYMENT_METHOD_ALI -> {
-                // The commented code are used for testing UI only.
-//                val intent = Intent().apply {
-//                    putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_ALI)
-//                }
-//
-//                // Destroy this activity and tells parent activity to update user data.
-//                setResult(Activity.RESULT_OK, intent)
-//                finish()
-
-                aliPay()
-            }
-
-            Subscription.PAYMENT_METHOD_WX -> {
-                // The commented codes are used for testing WXPayEntryActivity ui only.
-//                WXPayEntryActivity.start(this)
-//
-//                val intent = Intent().apply {
-//                    putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_WX)
-//                }
-//
-//                setResult(Activity.RESULT_OK, intent)
-//                finish()
-
-                wxPay()
-            }
-            Subscription.PAYMENT_METHOD_STRIPE -> {
-                stripePay()
-            }
-            else -> {
-                toast("Unknown payment method")
-            }
-        }
-    }
-
     private fun wxPay() {
         if (!isNetworkConnected()) {
             toast(R.string.prompt_no_network)
@@ -240,25 +236,26 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             return
         }
 
-        val member = mMembership ?: return
-        val payMethod = mPaymentMethod ?: return
+        val tier = mTier ?: return
+        val cycle = mCycle ?: return
+        val payMethod = mPayMethod ?: return
         val user = mSession?.loadUser() ?: return
 
-        isInProgress = true
-        isInputAllowed = false
+        showProgress(true)
+        allowInput(false)
 
         job = GlobalScope.launch(Dispatchers.Main) {
 
             try {
                 // Request server to create order
-                val wxOrder = user.wxPlaceOrder(member)
+                val wxOrder = user.wxPlaceOrder(tier, cycle)
 
-                isInProgress = false
+                showProgress(false)
 
                 if (wxOrder == null) {
                     toast(R.string.create_order_failed)
 
-                    isInputAllowed = true
+                    allowInput(true)
 
                     return@launch
                 }
@@ -283,10 +280,10 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                 if (result != null && result) {
                     val subs = Subscription(
                             orderId = wxOrder.ftcOrderId,
-                            tierToBuy = member.tier,
-                            billingCycle = member.billingCycle,
-                            paymentMethod = payMethod,
-                            apiPrice = wxOrder.price
+                            tier = tier,
+                            cycle = cycle,
+                            payMethod = payMethod,
+                            netPrice = wxOrder.price
                     )
 
                     // Save subscription details to shared preference so that we could use it in WXPayEntryActivity
@@ -295,7 +292,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
                 // Tell parent activity to kill itself.
                 val intent = Intent().apply {
-                    putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_WX)
+                    putExtra(EXTRA_PAYMENT_METHOD, payMethod.string())
                 }
 
                 // Tell MembershipActivity to kill itself.
@@ -304,16 +301,15 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                 finish()
 
             } catch (ex: ErrorResponse) {
-                isInProgress = false
-                isInputAllowed = true
-
+                showProgress(false)
+                allowInput(true)
                 handleApiError(ex)
 
             } catch (e: Exception) {
                 e.printStackTrace()
 
-                isInProgress = false
-                isInputAllowed = true
+                showProgress(false)
+                allowInput(true)
 
                 handleException(e)
             }
@@ -327,12 +323,13 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             return
         }
 
-        val member = mMembership ?: return
-        val payMethod = mPaymentMethod ?: return
+        val tier = mTier ?: return
+        val cycle = mCycle ?: return
+        val payMethod = mPayMethod ?: return
         val user = mSession?.loadUser() ?: return
 
-        isInProgress = true
-        isInputAllowed = false
+        showProgress(true)
+        allowInput(false)
 
         job = GlobalScope.launch(Dispatchers.Main) {
 
@@ -340,16 +337,16 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
             // Get order from server
             val aliOrder = try {
-                val aliOrder = user.aliPlaceOrder(mMembership)
+                val aliOrder = user.aliPlaceOrder(tier, cycle)
 
-                isInProgress = false
+                showProgress(false)
 
                 info("Ali order retrieved from server: $aliOrder")
 
                 aliOrder
             } catch (resp: ErrorResponse) {
-                isInProgress = false
-                isInputAllowed = true
+                showProgress(false)
+                allowInput(true)
 
                 handleApiError(resp)
 
@@ -357,8 +354,8 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             } catch (e: Exception) {
                 info("API error when requesting Ali order: $e")
 
-                isInProgress = false
-                isInputAllowed = true
+                showProgress(false)
+                allowInput(true)
 
                 handleException(e)
 
@@ -368,10 +365,10 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             // Save this subscription data.
             val subs = Subscription(
                     orderId = aliOrder.ftcOrderId,
-                    tierToBuy = member.tier,
-                    billingCycle = member.billingCycle,
-                    paymentMethod = payMethod,
-                    apiPrice = aliOrder.price
+                    tier = tier,
+                    cycle = cycle,
+                    payMethod = payMethod,
+                    netPrice = aliOrder.price
             )
 
             info("Save subscription order: $subs")
@@ -392,34 +389,50 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                 return@launch
             }
 
-            // We should send payResult["result"] to server to verify the pay result.
-            // But ali used JSON in a very weired way. You cannot parse it as JSON!
-
             toast(R.string.wxpay_done)
 
-            // update subs.confirmedAt
-            subs.confirmedAt = ISODateTimeFormat.dateTimeNoMillis().print(DateTime.now().withZone(DateTimeZone.UTC))
-
             // Update membership
-            val updatedMembership = subs.updateMembership(user.membership)
+            val updatedMembership = subs.confirm(user.membership)
             mSession?.updateMembership(updatedMembership)
 
             // Purchase event
-            mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
-                putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-                putDouble(FirebaseAnalytics.Param.VALUE, subs.apiPrice)
-                putString(FirebaseAnalytics.Param.METHOD, subs.paymentMethod)
+            logPurchaseEvent(subs.netPrice, payMethod)
+
+            // Tell parent Activity user's payment method.
+            setResult(Activity.RESULT_OK, Intent().apply {
+                putExtra(EXTRA_PAYMENT_METHOD, payMethod.string())
             })
 
-            // Send result to SubscriptionActivity.
-            val intent = Intent().apply {
-                putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_ALI)
-            }
-
             // Destroy this activity and tells parent activity to update user data.
-            setResult(Activity.RESULT_OK, intent)
             finish()
         }
+    }
+
+    // When user started this activity, we can assume he is adding to cart.
+    private fun logAddCartEvent() {
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle().apply {
+            putString(FirebaseAnalytics.Param.ITEM_ID, "${mTier?.string()}_${mCycle?.string()}")
+            putString(FirebaseAnalytics.Param.ITEM_NAME, mTier?.string())
+            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, mCycle?.string())
+            putLong(FirebaseAnalytics.Param.QUANTITY, 1)
+        })
+    }
+
+    private fun logCheckOutEvent() {
+        // Begin to checkout event
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
+            putDouble(FirebaseAnalytics.Param.VALUE, mPrice ?: 0.0)
+            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
+            putString(FirebaseAnalytics.Param.METHOD, mPayMethod?.string())
+        })
+    }
+
+    private fun logPurchaseEvent(price: Double, payMethod: PayMethod) {
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
+            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
+            putDouble(FirebaseAnalytics.Param.VALUE, price)
+            putString(FirebaseAnalytics.Param.METHOD, payMethod.string())
+        })
     }
 
     /**
@@ -482,10 +495,10 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             context?.startActivity(intent)
         }
 
-        fun startForResult(activity: Activity?, requestCode: Int, memberTier: String, billingCycle: String) {
+        fun startForResult(activity: Activity?, requestCode: Int, tier: Tier, cycle: Cycle) {
             val intent = Intent(activity, PaymentActivity::class.java)
-            intent.putExtra(EXTRA_MEMBER_TIER, memberTier)
-            intent.putExtra(EXTRA_BILLING_CYCLE, billingCycle)
+            intent.putExtra(EXTRA_MEMBER_TIER, tier.string())
+            intent.putExtra(EXTRA_BILLING_CYCLE, cycle.string())
 
             activity?.startActivityForResult(intent, requestCode)
         }
