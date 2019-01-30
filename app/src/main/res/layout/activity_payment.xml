@@ -39,47 +39,47 @@
                 android:paddingBottom="16dp">
 
                 <TextView
-                    android:id="@+id/member_tier_label"
+                    android:id="@+id/tier_cycle_label"
                     style="@style/FTCText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/label_member_tier"
-                    app:layout_constraintEnd_toStartOf="@+id/member_tier_tv"
+                    app:layout_constraintEnd_toStartOf="@+id/tier_cycle_tv"
                     app:layout_constraintHorizontal_chainStyle="spread_inside"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/member_tier_tv"
+                    android:id="@+id/tier_cycle_tv"
                     style="@style/FTCText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
-                    app:layout_constraintBaseline_toBaselineOf="@id/member_tier_label"
+                    app:layout_constraintBaseline_toBaselineOf="@id/tier_cycle_label"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/member_tier_label" />
+                    app:layout_constraintStart_toEndOf="@+id/tier_cycle_label" />
 
                 <TextView
-                    android:id="@+id/member_price_label"
+                    android:id="@+id/price_label"
                     style="@style/FTCText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="@string/label_member_price"
-                    app:layout_constraintEnd_toStartOf="@+id/member_price_tv"
+                    app:layout_constraintEnd_toStartOf="@+id/price_tv"
                     app:layout_constraintHorizontal_chainStyle="spread_inside"
-                    app:layout_constraintStart_toStartOf="@+id/member_tier_label"
-                    app:layout_constraintTop_toBottomOf="@+id/member_tier_label" />
+                    app:layout_constraintStart_toStartOf="@+id/tier_cycle_label"
+                    app:layout_constraintTop_toBottomOf="@+id/tier_cycle_label" />
 
                 <TextView
-                    android:id="@+id/member_price_tv"
+                    android:id="@+id/price_tv"
                     style="@style/FTCText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/colorClaret"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/member_price_label"
-                    app:layout_constraintEnd_toEndOf="@+id/member_tier_tv"
-                    app:layout_constraintStart_toEndOf="@+id/member_price_label" />
+                    app:layout_constraintBaseline_toBaselineOf="@+id/price_label"
+                    app:layout_constraintEnd_toEndOf="@+id/tier_cycle_tv"
+                    app:layout_constraintStart_toEndOf="@+id/price_label" />
 
             </android.support.constraint.ConstraintLayout>
 
@@ -108,7 +108,7 @@
                     android:drawablePadding="20dp"
                     android:text="@string/pay_by_ali"
                     android:textSize="18sp"
-                    android:onClick="onSelectPaymentMethod"/>
+                    android:onClick="onSelectPayMethod"/>
 
                 <RadioButton
                     android:id="@+id/pay_by_wechat"
@@ -119,7 +119,7 @@
                     android:drawablePadding="20dp"
                     android:text="@string/pay_by_wechat"
                     android:textSize="18sp"
-                    android:onClick="onSelectPaymentMethod"/>
+                    android:onClick="onSelectPayMethod"/>
 
                 <!--<RadioButton-->
                     <!--android:id="@+id/pay_by_stripe"-->
@@ -143,7 +143,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:text="@string/check_out_default"
-        android:onClick="onCheckOutClicked"/>
+        android:onClick="onCheckOut"/>
 
     <ProgressBar
         android:id="@+id/progress_bar"
