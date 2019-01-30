@@ -263,7 +263,7 @@ class MainActivity : AppCompatActivity(),
 
         // Pick an ad based on its probability distribution factor.
         val adManager = mAdManager ?: return
-        val account = mSession?.loadUser()
+        val account = mSession?.loadAccount()
         val ad = adManager.getRandomAd(account?.membership) ?: return
 
         // Check if the required ad image is required.
@@ -570,7 +570,14 @@ class MainActivity : AppCompatActivity(),
                 SignUpActivity.start(this)
             }
             R.id.action_account -> {
-                AccountActivity.start(this)
+                val account = mSession?.loadAccount() ?: return false
+
+                if (account.loginMethod == LoginMethod.WECHAT) {
+                    WxAccountActivity.start(this)
+                } else {
+                    AccountActivity.start(this)
+                }
+
             }
             R.id.action_subscription -> {
                 SubscriptionActivity.start(this)
@@ -618,8 +625,8 @@ class MainActivity : AppCompatActivity(),
      * Update UI depending on user's login/logout state
      */
     private fun updateSessionUI() {
-        val user = mSession?.loadUser()
-        val isLoggedIn = user != null
+        val account = mSession?.loadAccount()
+        val isLoggedIn = account != null
 
         info("Account is logged in: $isLoggedIn")
 
@@ -630,7 +637,7 @@ class MainActivity : AppCompatActivity(),
         val headerTitle = drawer_nav.getHeaderView(0).findViewById<TextView>(R.id.nav_header_title)
 
         if (isLoggedIn) {
-            headerTitle.text = user?.userName ?: user?.email
+            headerTitle.text = account?.displayName
         } else {
             headerTitle.text = getString(R.string.nav_not_logged_in)
         }
