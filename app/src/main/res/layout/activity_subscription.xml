@@ -50,13 +50,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/label_member_tier"
-                        app:layout_constraintEnd_toStartOf="@id/tier_tv"
+                        app:layout_constraintEnd_toStartOf="@id/tier_cycle_tv"
                         app:layout_constraintHorizontal_chainStyle="spread_inside"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/membership_title" />
 
                     <TextView
-                        android:id="@+id/tier_tv"
+                        android:id="@+id/tier_cycle_tv"
                         style="@style/FTCText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -65,25 +65,25 @@
                         app:layout_constraintStart_toEndOf="@+id/tier_label" />
 
                     <TextView
-                        android:id="@+id/expiration_label"
+                        android:id="@+id/expire_date_label"
                         style="@style/FTCText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:text="@string/label_member_duration"
-                        app:layout_constraintEnd_toStartOf="@id/expiration_tv"
+                        app:layout_constraintEnd_toStartOf="@id/expire_date_tv"
                         app:layout_constraintHorizontal_chainStyle="spread_inside"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/tier_label" />
 
                     <TextView
-                        android:id="@+id/expiration_tv"
+                        android:id="@+id/expire_date_tv"
                         style="@style/FTCText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:layout_constraintBaseline_toBaselineOf="@id/expiration_label"
-                        app:layout_constraintEnd_toEndOf="@+id/tier_tv"
-                        app:layout_constraintStart_toEndOf="@id/expiration_label" />
+                        app:layout_constraintBaseline_toBaselineOf="@id/expire_date_label"
+                        app:layout_constraintEnd_toEndOf="@+id/tier_cycle_tv"
+                        app:layout_constraintStart_toEndOf="@id/expire_date_label" />
 
 
                 </android.support.constraint.ConstraintLayout>
@@ -148,11 +148,11 @@
                         android:padding="16dp">
 
                         <TextView
+                            android:id="@+id/tier_standard_title"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:background="@drawable/bottom_border_teal"
                             android:layout_marginBottom="8dp"
-                            android:text="@string/member_tier_standard"
                             style="@style/FTCTitle" />
 
                         <TextView
@@ -170,8 +170,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:layout_marginBottom="8dp"
-                            android:layout_marginTop="8dp"
-                            android:text="@string/price_standard_annual"/>
+                            android:layout_marginTop="8dp" />
 
                         <Button
                             android:id="@+id/standard_month_button"
@@ -180,8 +179,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:layout_marginBottom="8dp"
-                            android:layout_marginTop="8dp"
-                            android:text="@string/price_standard_month"/>
+                            android:layout_marginTop="8dp" />
 
                     </LinearLayout>
 
@@ -201,11 +199,11 @@
                         android:padding="16dp">
 
                         <TextView
+                            android:id="@+id/tier_premium_title"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="8dp"
                             android:background="@drawable/bottom_border_teal"
-                            android:text="@string/member_tier_premium"
                             style="@style/FTCTitle" />
 
 
@@ -230,8 +228,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:layout_marginBottom="8dp"
-                            android:layout_marginTop="8dp"
-                            android:text="@string/price_premium"/>
+                            android:layout_marginTop="8dp" />
 
                     </LinearLayout>
 
