@@ -4,16 +4,16 @@ import android.content.Context
 import com.ft.ftchinese.util.gson
 import com.google.gson.annotations.SerializedName
 import android.net.Uri
+import com.ft.ftchinese.util.parseLocalDate
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Request
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.joda.time.DateTime
-import org.joda.time.LocalDate
-import org.joda.time.format.ISODateTimeFormat
+import org.threeten.bp.format.DateTimeFormatter
 import java.io.File
+import java.util.*
 
 private const val apiUrl = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
 private const val PREF_AD_SCHEDULE = "ad_schedule"
@@ -84,7 +84,7 @@ data class LaunchAd(
         if (impressionUrl3 != null && impressionUrl3.isNotEmpty()) {
             urls.add(impressionUrl3)
         }
-        val timestamp = DateTime.now().millis / 1000
+        val timestamp = Date().time / 1000
 
         urls.forEach {
             val urlStr = it.replace("[timestamp]", "$timestamp")
@@ -118,7 +118,7 @@ class LaunchSchedule(
     fun transform(): Map<String, Set<LaunchAd>> {
         val prefSchedule = mutableMapOf<String, MutableSet<LaunchAd>>()
 
-        val today = LocalDate.now()
+        val today = org.threeten.bp.LocalDate.now()
 
         for (adItem in sections) {
             if (adItem.android != "yes") {
@@ -133,7 +133,8 @@ class LaunchSchedule(
                 // else append to key.
                 // Throws IllegalArgumentException
                 try {
-                    val planned = LocalDate.parse(date, ISODateTimeFormat.basicDate())
+                    // yyyyMMdd
+                    val planned = parseLocalDate(date)
                     // Record those equal to or later than today.
                     if (today.isBefore(planned)) {
                         continue
@@ -210,10 +211,9 @@ class LaunchAdManager(context: Context) : AnkoLogger {
      * Load which days of ads.
      * If days = 0, it loads as least today's.
      */
-    fun load(days: Int = 0): List<LaunchAd> {
+    fun load(days: Long = 0): List<LaunchAd> {
 
-        val localDate = LocalDate.now()
-        val formatter = ISODateTimeFormat.basicDate()
+        val localDate = org.threeten.bp.LocalDate.now()
 
         // Format today to yyyyMMdd.
 //        val today = formatter.print(localDate)
@@ -222,7 +222,8 @@ class LaunchAdManager(context: Context) : AnkoLogger {
         val ads = mutableListOf<String>()
 
         for (i in 0..days) {
-            val key = formatter.print(localDate.plusDays(i))
+            val key = localDate.plusDays(i).format(DateTimeFormatter.BASIC_ISO_DATE)
+
             val adData = sharedPreferences.getStringSet(key, setOf()) ?: continue
             ads.union(adData)
         }
@@ -250,7 +251,7 @@ class LaunchAdManager(context: Context) : AnkoLogger {
         }
 
         // If user is not targeted do not show the ad.
-        val tier = if (membership.tier.isBlank()) "free" else membership.tier
+        val tier = if (membership.tier == null) "free" else membership.tier.string()
 
         if (tier != ad.targetUser) {
             return null
