@@ -41,17 +41,20 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     private var job: Job? = null
     private var mListener: OnFragmentInteractionListener? = null
 
-    private var mSession: SessionManager? = null
+    private var sessionManager: SessionManager? = null
 
     private var isInProgress: Boolean = false
         set(value) {
             mListener?.onProgress(value)
         }
 
-    private var isInputAllowed: Boolean = true
-        set(value) {
-            request_verify_button?.isEnabled = value
-        }
+    private fun allowInput(v: Boolean) {
+        request_verify_button?.isEnabled = v
+    }
+
+    private fun stopRefresh() {
+        swipe_refresh.isRefreshing = false
+    }
 
     /**
      * Refresh account data.
@@ -60,6 +63,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
     override fun onRefresh() {
         if (activity?.isNetworkConnected() != true) {
             toast(R.string.prompt_no_network)
+            stopRefresh()
 
             return
         }
@@ -68,13 +72,15 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
-                val account = mSession?.loadUser()?.refresh()
+                val account = withContext(Dispatchers.IO) {
+                    sessionManager?.loadAccount()?.refresh()
+                }
 
                 // hide refreshing indicator
                 swipe_refresh.isRefreshing = false
 
                 if (account != null) {
-                    mSession?.saveUser(account)
+                    sessionManager?.saveAccount(account)
                     updateUI(account)
                 }
 
@@ -102,7 +108,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         }
 
         if (context != null) {
-            mSession = SessionManager.getInstance(context)
+            sessionManager = SessionManager.getInstance(context)
         }
     }
 
@@ -140,7 +146,9 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
         info("onViewCreated")
 
-        val account = mSession?.loadUser() ?: return
+        val account = sessionManager?.loadAccount() ?: return
+
+        info(account)
 
         updateUI(account)
     }
@@ -149,7 +157,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         super.onResume()
 
         info("onResume")
-        val account = mSession?.loadUser() ?: return
+        val account = sessionManager?.loadAccount() ?: return
         updateUI(account)
     }
 
@@ -171,6 +179,13 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
             user_name_text.text = account.userName
         }
 
+        // Not bound to wechat
+        if (account.unionId.isNullOrBlank()) {
+
+        } else {
+            // Already bound to wechat
+            wechat_status.text = getString(R.string.status_bound)
+        }
     }
 
     private fun requestVerification() {
@@ -181,13 +196,13 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
         }
 
         isInProgress = true
-        isInputAllowed = false
+        allowInput(false)
 
         toast(R.string.progress_request_verification)
 
         // If the account if not found, do nothing.
         // In the future, we might need to take into account user logged in via social platforms.
-        val account = mSession?.loadUser() ?: return
+        val account = sessionManager?.loadAccount() ?: return
 
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
@@ -207,7 +222,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
                 info("API error response: $ex")
 
                 isInProgress = false
-                isInputAllowed = true
+                allowInput(true)
 
                 handleErrorResponse(ex)
 
@@ -215,7 +230,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
                 e.printStackTrace()
 
                 isInProgress = false
-                isInputAllowed = true
+                allowInput(true)
 
                 handleException(e)
             }
