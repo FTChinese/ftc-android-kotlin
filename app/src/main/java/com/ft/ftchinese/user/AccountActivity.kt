@@ -167,7 +167,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
             email_text.text = account.email
         }
 
-        if (account.userName.isNotBlank()) {
+        if (account.userName != null) {
             user_name_text.text = account.userName
         }
 
