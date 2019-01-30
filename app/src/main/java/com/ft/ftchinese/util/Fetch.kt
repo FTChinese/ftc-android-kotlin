@@ -68,6 +68,21 @@ class Fetch : AnkoLogger {
         return this
     }
 
+    fun setAppId(): Fetch {
+       headers.set("X-App-Id", BuildConfig.WX_SUBS_APPID)
+        return this
+    }
+
+    fun setUnionId(unionId: String): Fetch {
+        headers.set("X-Union-Id", unionId)
+        return this
+    }
+
+    fun setSessionId(sessId: String): Fetch {
+        headers.set("X-Session-Id", sessId)
+        return this
+    }
+
     fun noCache(): Fetch {
         cacheControl = CacheControl.Builder()
                 .noCache()
