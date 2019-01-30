@@ -83,7 +83,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
             attemptSave()
         }
 
-        current_email.text = mSession?.loadUser()?.email
+        current_email.text = mSession?.loadAccount()?.email
     }
 
     private fun attemptSave() {
@@ -100,7 +100,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
             // If email is invalid
             email.error = getString(R.string.error_field_required)
             cancel = true
-        } else if (emailStr == mSession?.loadUser()?.email) {
+        } else if (emailStr == mSession?.loadAccount()?.email) {
             // If new email equals the current one
             email.error = getString(R.string.error_email_unchanged)
             cancel = true
@@ -122,7 +122,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
         }
 
         // If user id is not found, we could not perform updating.
-        val uuid = mSession?.loadUser()?.id ?: return
+        val uuid = mSession?.loadAccount()?.id ?: return
 
         isInProgress = true
         isInputAllowed = false

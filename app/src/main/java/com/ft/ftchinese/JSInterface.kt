@@ -152,7 +152,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
                 return
             }
 
-            val account = mSession?.loadUser()
+            val account = mSession?.loadAccount()
 
             if (account == null) {
                 activity?.toast(R.string.prompt_restricted_paid_user)

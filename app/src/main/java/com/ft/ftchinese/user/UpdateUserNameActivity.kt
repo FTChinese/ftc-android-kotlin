@@ -77,7 +77,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
             attemptSave()
         }
 
-        current_name.text = mSession?.loadUser()?.userName
+        current_name.text = mSession?.loadAccount()?.userName
     }
 
     private fun attemptSave() {
@@ -89,7 +89,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
         if (userNameStr.isBlank()) {
             user_name.error = getString(R.string.error_field_required)
             cancel = true
-        } else if (userNameStr == mSession?.loadUser()?.userName) {
+        } else if (userNameStr == mSession?.loadAccount()?.userName) {
             user_name.error = getString(R.string.error_name_unchanged)
             cancel = true
         }
@@ -110,7 +110,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
             return
         }
 
-        val uuid = mSession?.loadUser()?.id ?: return
+        val uuid = mSession?.loadAccount()?.id ?: return
 
         isInProgress = true
         isInputAllowed = false

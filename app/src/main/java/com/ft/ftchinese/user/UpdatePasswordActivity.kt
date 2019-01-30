@@ -133,7 +133,7 @@ class PasswordFragment : Fragment(), AnkoLogger {
             return
         }
 
-        val uuid = mSession?.loadUser()?.id ?: return
+        val uuid = mSession?.loadAccount()?.id ?: return
 
         isInProgress = true
         isInputAllowed = false

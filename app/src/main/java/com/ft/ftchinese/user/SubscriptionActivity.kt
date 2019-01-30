@@ -85,7 +85,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
             return
         }
 
-        val user = mSession?.loadUser()
+        val user = mSession?.loadAccount()
 
         // If use is not logged in, stop here.
         if (user == null) {
@@ -126,7 +126,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
                     // Save update user info
 
                     info("Save user account and update ui")
-                    mSession?.saveUser(remoteAccount)
+                    mSession?.saveAccount(remoteAccount)
 
                     // Update ui.
                     updateUIForMember()
@@ -136,7 +136,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
                     // Conditionally save remote data to local.
                     if (remoteAccount.membership.isNewer(user.membership)) {
                         info("Remote user account is fresh.")
-                        mSession?.saveUser(remoteAccount)
+                        mSession?.saveAccount(remoteAccount)
 
 
                     }
@@ -233,7 +233,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
 
     private fun updateUIForMember() {
 
-        val user = mSession?.loadUser()
+        val user = mSession?.loadAccount()
 
         info("Updating UI for account: $user")
 
