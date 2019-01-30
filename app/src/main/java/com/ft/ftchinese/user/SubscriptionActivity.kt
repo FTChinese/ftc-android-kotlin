@@ -59,14 +59,13 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
     private var mJob: Job? = null
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
-    private var isInProgress: Boolean = false
-        set(value) {
-            if (value) {
-                progress_bar?.visibility = View.VISIBLE
-            } else {
-                progress_bar?.visibility = View.GONE
-            }
+    private fun showProgress(value: Boolean) {
+        if (value) {
+            progress_bar?.visibility = View.VISIBLE
+        } else {
+            progress_bar?.visibility = View.GONE
         }
+    }
 
     override fun onRefresh() {
         updateAccount()
@@ -79,7 +78,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
     private fun updateAccount() {
         if (!isNetworkConnected()) {
             swipe_refresh.isRefreshing = false
-            isInProgress = false
+            showProgress(false)
 
             toast(R.string.prompt_no_network)
 
@@ -88,10 +87,10 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
 
         val user = mSession?.loadUser()
 
-        // If use if not logged in, stop here.
+        // If use is not logged in, stop here.
         if (user == null) {
             swipe_refresh.isRefreshing = false
-            isInProgress = false
+            showProgress(false)
 
             return
         }
@@ -101,18 +100,25 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
         val isManualRefresh = swipe_refresh.isRefreshing
 
         if (!isManualRefresh) {
-            isInProgress = true
+            showProgress(true)
         }
 
         toast(R.string.progress_refresh_account)
 
         mJob = GlobalScope.launch(Dispatchers.Main) {
             try {
-                val remoteAccount = user.refresh()
+                val remoteAccount = withContext(Dispatchers.IO) {
+                    user.refresh()
+                }
+
 
                 info("Retrieved user account data.")
                 swipe_refresh.isRefreshing = false
-                isInProgress = false
+                showProgress(false)
+
+                if (remoteAccount == null) {
+                    return@launch
+                }
 
                 toast(R.string.success_updated)
 
@@ -123,7 +129,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
                     mSession?.saveUser(remoteAccount)
 
                     // Update ui.
-                    updateUI()
+                    updateUIForMember()
                 } else {
                     // This might be triggered by payment activity.
                     // check remote server's membership against local one.
@@ -135,20 +141,20 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
 
                     }
 
-                    updateUI()
+                    updateUIForMember()
                 }
             } catch (resp: ErrorResponse) {
                 info("$resp")
 
                 swipe_refresh.isRefreshing = false
-                isInProgress = false
+                showProgress(false)
 
                 handleApiError(resp)
 
             } catch (e: Exception) {
                 e.printStackTrace()
                 swipe_refresh.isRefreshing = false
-                isInProgress = false
+                showProgress(false)
 
                 handleException(e)
             }
@@ -197,9 +203,9 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
             updateAccount()
         }
 
-        updateUI()
+        updateUIForMember()
 
-        setUp()
+        updateUIForPrice()
 
         try {
             val sourceStr = intent.getStringExtra(EXTRA_PAYWALL_SOURCE) ?: return
@@ -225,72 +231,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
         }
     }
 
-    private fun setUp() {
-        val isLoggedIn = mSession?.isLoggedIn() ?: false
-        if (!isLoggedIn) {
-            login_button.setOnClickListener {
-                SignInActivity.startForResult(this)
-            }
-        }
-
-        standard_year_button.setOnClickListener {
-            if (isLoggedIn) {
-                PaymentActivity.startForResult(
-                        activity = this,
-                        requestCode = RequestCode.PAYMENT,
-                        memberTier = Membership.TIER_STANDARD,
-                        billingCycle = Membership.CYCLE_YEAR
-                )
-            } else {
-                SignInActivity.startForResult(this)
-            }
-
-        }
-
-        standard_month_button.setOnClickListener {
-            if (isLoggedIn) {
-                PaymentActivity.startForResult(
-                        activity = this,
-                        requestCode = RequestCode.PAYMENT,
-                        memberTier = Membership.TIER_STANDARD,
-                        billingCycle = Membership.CYCLE_MONTH
-                )
-            } else {
-                SignInActivity.startForResult(this)
-            }
-        }
-
-        premium_button.setOnClickListener {
-            if (isLoggedIn) {
-                PaymentActivity.startForResult(
-                        activity = this,
-                        requestCode = RequestCode.PAYMENT,
-                        memberTier = Membership.TIER_PREMIUM,
-                        billingCycle = Membership.CYCLE_YEAR
-                )
-            } else {
-                SignInActivity.startForResult(this)
-            }
-        }
-
-        customer_service.setOnClickListener {
-            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:")
-                putExtra(Intent.EXTRA_EMAIL, "subscriber.service@ftchinese.com")
-                putExtra(Intent.EXTRA_SUBJECT, "FT中文网会员订阅")
-            }
-
-
-
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
-            } else {
-                toast(R.string.prompt_no_email_app)
-            }
-        }
-    }
-
-    private fun updateUI() {
+    private fun updateUIForMember() {
 
         val user = mSession?.loadUser()
 
@@ -314,13 +255,17 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
         renewal_button.visibility = View.VISIBLE
 
         if (user.isVip) {
-            tier_tv.text = getString(R.string.member_tier_vip)
-            expiration_tv.text = getString(R.string.vip_duration)
+            tier_cycle_tv.text = getString(R.string.tier_vip)
+            expire_date_tv.text = getString(R.string.cycle_vip)
             renewal_button.visibility = View.GONE
 
             return
         }
 
+        tier_cycle_tv.text = getTierCycleText(user.membership.key)
+                ?: getString(R.string.tier_free)
+
+        expire_date_tv.text = formatLocalDate(user.membership.expireDate)
 
         // If membership is in renewal period.
         if (user.membership.isRenewable) {
@@ -328,25 +273,113 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
             renewal_button.visibility = View.VISIBLE
 
             renewal_button.setOnClickListener {
-                PaymentActivity.startForResult(this, RequestCode.PAYMENT, user.membership.tier, user.membership.billingCycle)
+                PaymentActivity.startForResult(
+                        this,
+                        RequestCode.PAYMENT,
+                        user.membership.tier ?: Tier.STANDARD,
+                        user.membership.cycle ?: Cycle.YEAR)
             }
         } else {
             renewal_button.visibility = View.GONE
         }
+    }
 
-        val cycleText = when(user.membership.billingCycle) {
-            Membership.CYCLE_YEAR -> getString(R.string.billing_cycle_year)
-            Membership.CYCLE_MONTH -> getString(R.string.billing_cycle_month)
-            else -> ""
+    private fun updateUIForPrice() {
+        val isLoggedIn = mSession?.isLoggedIn() ?: false
+        if (!isLoggedIn) {
+            login_button.setOnClickListener {
+                SignInActivity.startForResult(this)
+            }
         }
 
-        tier_tv.text = when (user.membership.tier) {
-            Membership.TIER_STANDARD -> getString(R.string.member_tier_standard) + "/" + cycleText
-            Membership.TIER_PREMIUM -> getString(R.string.member_tier_premium) + "/" + cycleText
-            else -> getString(R.string.member_tier_free)
+        // Set text for each card's title
+        tier_standard_title.text = getString(R.string.tier_standard)
+        tier_premium_title.text = getString(R.string.tier_premium)
+
+        // Set text on each button
+        standard_year_button.text = getPriceCycleText(Tier.STANDARD, Cycle.YEAR)
+        standard_month_button.text = getPriceCycleText(Tier.STANDARD, Cycle.MONTH)
+        premium_button.text = getPriceCycleText(Tier.PREMIUM, Cycle.YEAR)
+
+        // Add event handler to each button.
+        standard_year_button.setOnClickListener {
+            if (isLoggedIn) {
+                PaymentActivity.startForResult(
+                        activity = this,
+                        requestCode = RequestCode.PAYMENT,
+                        tier = Tier.STANDARD,
+                        cycle = Cycle.YEAR
+                )
+            } else {
+                SignInActivity.startForResult(this)
+            }
+
         }
 
-        expiration_tv.text = user.membership.expireDate
+        standard_month_button.setOnClickListener {
+            if (isLoggedIn) {
+                PaymentActivity.startForResult(
+                        activity = this,
+                        requestCode = RequestCode.PAYMENT,
+                        tier = Tier.STANDARD,
+                        cycle = Cycle.MONTH
+                )
+            } else {
+                SignInActivity.startForResult(this)
+            }
+        }
+
+        premium_button.setOnClickListener {
+            if (isLoggedIn) {
+                PaymentActivity.startForResult(
+                        activity = this,
+                        requestCode = RequestCode.PAYMENT,
+                        tier = Tier.PREMIUM,
+                        cycle = Cycle.YEAR
+                )
+            } else {
+                SignInActivity.startForResult(this)
+            }
+        }
+
+        customer_service.setOnClickListener {
+            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("mailto:")
+                putExtra(Intent.EXTRA_EMAIL, "subscriber.service@ftchinese.com")
+                putExtra(Intent.EXTRA_SUBJECT, "FT中文网会员订阅")
+            }
+
+
+
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
+            } else {
+                toast(R.string.prompt_no_email_app)
+            }
+        }
+    }
+
+    private fun getPriceCycleText(tier: Tier, cycle: Cycle): String? {
+        val key = tierCycleKey(tier, cycle)
+        val price = pricingPlans.findPlan(key)?.netPrice
+        return when (key) {
+            KEY_STANDARD_YEAR -> getString(
+                    R.string.formatter_price_cycle,
+                    price,
+                    getString(R.string.cycle_year)
+            )
+            KEY_STANDARD_MONTH -> getString(
+                    R.string.formatter_price_cycle,
+                    price,
+                    getString(R.string.cycle_month)
+            )
+            KEY_PREMIUM_YEAR -> getString(
+                    R.string.formatter_price_cycle,
+                    price,
+                    getString(R.string.cycle_year)
+            )
+            else -> null
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -360,17 +393,18 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
                     return
                 }
 
-                val paymentMethod = data?.getStringExtra(EXTRA_PAYMENT_METHOD)
+                val paymentMethod = PayMethod.fromString(data?.getStringExtra(EXTRA_PAYMENT_METHOD))
                 when (paymentMethod) {
-                    Subscription.PAYMENT_METHOD_WX -> {
+                    PayMethod.WXPAY -> {
                         // If user selected wechat pay, kill this activity.
                         // After paid, WXPayEntryActivity will call this activity again.
                         finish()
                     }
-                    Subscription.PAYMENT_METHOD_ALI -> {
+                    PayMethod.ALIPAY -> {
                         // update ui
                         updateAccount()
                     }
+                    PayMethod.STRIPE -> {}
                 }
             }
 
@@ -382,7 +416,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
 
                 toast(R.string.prompt_logged_in)
 
-                updateUI()
+                updateUIForMember()
             }
         }
     }
