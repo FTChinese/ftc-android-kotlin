@@ -79,8 +79,8 @@ class FollowingFragment : Fragment(), AnkoLogger {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = mFollows[position]
 
-            holder.primaryText?.text = item.tag
-            holder.secondaryText?.visibility = View.GONE
+            holder.primaryText.text = item.tag
+            holder.secondaryText.visibility = View.GONE
 
             holder.itemView.setOnClickListener {
                 val channelMeta = PagerTab(
