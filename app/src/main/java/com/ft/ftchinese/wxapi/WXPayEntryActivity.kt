@@ -8,7 +8,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SubscriptionActivity
-import com.ft.ftchinese.util.handleException
+import com.ft.ftchinese.util.*
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
@@ -31,27 +31,25 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     private var mOrderManager: OrderManager? = null
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
 
-    private var isInProgress: Boolean = false
-        set(value) {
-            if (value) {
-                progress_bar.visibility = View.VISIBLE
-                done_button.visibility = View.GONE
-                heading_tv.visibility = View.GONE
-            } else {
-                progress_bar.visibility = View.GONE
-                done_button.visibility = View.VISIBLE
-                heading_tv.visibility = View.VISIBLE
-            }
+    private fun showProgress(value: Boolean) {
+        if (value) {
+            progress_bar.visibility = View.VISIBLE
+            done_button.visibility = View.GONE
+            heading_tv.visibility = View.GONE
+        } else {
+            progress_bar.visibility = View.GONE
+            done_button.visibility = View.VISIBLE
+            heading_tv.visibility = View.VISIBLE
         }
+    }
 
-    private var isSuccess: Boolean = true
-        set(value) {
-            if (value) {
-                member_container.visibility = View.VISIBLE
-            } else {
-                member_container.visibility = View.GONE
-            }
+    private fun showSuccesss(value: Boolean) {
+        if (value) {
+            member_container.visibility = View.VISIBLE
+        } else {
+            member_container.visibility = View.GONE
         }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +70,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 //        if (isUiTest) {
 //            val member = Membership(
 //                    tier = Membership.TIER_STANDARD,
-//                    billingCycle = Membership.CYCLE_MONTH,
+//                    cycle = Membership.CYCLE_MONTH,
 //                    expireDate = "2018-12-12"
 //            )
 //            isInProgress = false
@@ -110,13 +108,13 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 // 错误
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
                 -1 -> {
-                    isInProgress = false
+                    showProgress(false)
                     heading_tv.text = getString(R.string.wxpay_error)
                 }
                 // 用户取消
                 // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
                 -2 -> {
-                    isInProgress = false
+                    showProgress(false)
                     heading_tv.text = getString(R.string.wxpay_cancelled)
                 }
             }
@@ -126,30 +124,33 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     private fun verifyOrder() {
         val subs = mOrderManager?.load() ?: return
 
-        val user = mSession?.loadUser() ?: return
+        val user = mSession?.loadAccount() ?: return
 
-        isInProgress = true
+        showProgress(true)
 
         job = GlobalScope.launch(Dispatchers.Main) {
 
             try {
-                val payResult = user.wxQueryOrder(subs.orderId)
+                val payResult = withContext(Dispatchers.IO) {
+                    user.wxQueryOrder(subs.orderId)
+                }
 
-                isInProgress = false
+                showProgress(false)
 
-                // confirmedAt is ISO8601 string.
-                subs.confirmedAt = payResult.paidAt
+                if (payResult == null) {
+                    return@launch
+                }
 
                 handleQueryResult(payResult, subs)
 
-            } catch (resp: ErrorResponse) {
-                isInProgress = false
+            } catch (resp: ClientError) {
+                showProgress(false)
 
-                handleApiErr(resp)
+                handleClientError(resp)
             } catch (e: Exception) {
                 e.printStackTrace()
 
-                isInProgress = false
+                showProgress(false)
                 handleException(e)
             }
         }
@@ -157,18 +158,18 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
     private fun handleQueryResult(queryResult: WxQueryOrder, subs: Subscription) {
 
-        val currentMember = mSession?.loadUser()?.membership ?: return
+        val currentMember = mSession?.loadAccount()?.membership ?: return
 
         var resultText = ""
 
         when (queryResult.paymentState) {
             // If payment success, update user sessions's member tier, expire date, billing cycle.
             "SUCCESS" -> {
-                isSuccess = true
+                showSuccesss(true)
                 resultText = getString(R.string.wxpay_done)
 
 
-                val updatedMember = subs.updateMembership(currentMember)
+                val updatedMember = subs.confirm(currentMember)
 
                 info("New membership: $updatedMember")
 
@@ -178,8 +179,8 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 // Log purchase event.
                 mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
                     putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-                    putDouble(FirebaseAnalytics.Param.VALUE, subs.apiPrice)
-                    putString(FirebaseAnalytics.Param.METHOD, subs.paymentMethod)
+                    putDouble(FirebaseAnalytics.Param.VALUE, subs.netPrice)
+                    putString(FirebaseAnalytics.Param.METHOD, subs.payMethod.string())
                 })
 
             }
@@ -208,39 +209,21 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
     private fun updateUI(member: Membership) {
 
-        val tierText = when (member.tier) {
-            Membership.TIER_STANDARD -> getString(R.string.member_tier_standard)
-            Membership.TIER_PREMIUM -> getString(R.string.member_tier_premium)
-            else -> ""
-        }
+        tier_cycle_tv.text = getTierCycleText(member.key)
 
-        val cycleText = when (member.billingCycle) {
-            Membership.CYCLE_YEAR -> getString(R.string.billing_cycle_year)
-            Membership.CYCLE_MONTH -> getString(R.string.billing_cycle_month)
-            else -> ""
-        }
-
-        tier_tv.text = getString(R.string.wxpay_member_tier, tierText, cycleText)
-
-        expire_tv.text = getString(R.string.wxpay_exppire_date, member.expireDate)
+        expire_tv.text = getString(
+                R.string.wxpay_expire_date,
+                formatLocalDate(member.expireDate)
+        )
     }
 
-    private fun handleApiErr(resp: ErrorResponse) {
+    private fun handleClientError(resp: ClientError) {
         when (resp.statusCode) {
-            400 -> {
-                toast(R.string.api_bad_request)
-            }
-            401 -> {
-                toast(R.string.api_unauthorized)
-            }
             404 -> {
                 toast(R.string.order_not_found)
             }
-            422 -> {
-                toast(resp.message)
-            }
             else -> {
-                toast(R.string.api_server_error)
+                handleApiError(resp)
             }
         }
     }
