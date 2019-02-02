@@ -2,12 +2,6 @@ package com.ft.ftchinese.models
 
 import org.threeten.bp.LocalDate
 
-//private val prices = mapOf(
-//        "standard_year" to 258.00,
-//        "standard_month" to 28.00,
-//        "premium_year" to 1998.00
-//)
-
 data class Membership(
         @KTier
         val tier: Tier? = null,
