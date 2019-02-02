@@ -9,8 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.EmailUpdate
-import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.util.handleApiError
+import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_email.*
 import kotlinx.coroutines.*
@@ -133,11 +135,13 @@ internal class EmailFragment : Fragment(), AnkoLogger {
             try {
                 info("Start updating email")
 
-                val statusCode = emailUpdate.send(uuid)
+                val done = withContext(Dispatchers.IO) {
+                    emailUpdate.send(uuid)
+                }
 
                 isInProgress = false
 
-                if (statusCode == 204) {
+                if (done) {
 
                     mSession?.updateEmail(emailStr)
 
@@ -145,19 +149,19 @@ internal class EmailFragment : Fragment(), AnkoLogger {
 
                     toast(R.string.success_saved)
                 } else {
-                    toast("API response status: $statusCode")
+
                 }
-            } catch (e: ErrorResponse) {
+            } catch (e: ClientError) {
                 isInProgress = false
                 isInputAllowed = true
 
-                handleApiError(e)
+                activity?.handleApiError(e)
 
             } catch (e: Exception) {
                 isInProgress = false
                 isInputAllowed = true
 
-                handleException(e)
+                activity?.handleException(e)
             }
         }
     }

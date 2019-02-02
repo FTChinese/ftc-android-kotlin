@@ -23,8 +23,7 @@ import android.widget.ArrayAdapter
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.util.generateNonce
-import com.ft.ftchinese.util.isNetworkConnected
+import com.ft.ftchinese.util.*
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -68,6 +67,18 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
         }
 
     private var usedFor: Int? = null
+
+    private fun showProgress(value: Boolean) {
+        listener?.onProgress(value)
+        email_sign_in_button?.isEnabled = !value
+    }
+
+    private fun allowInput(value: Boolean) {
+        email?.isEnabled = value
+        password?.isEnabled = value
+        email_sign_in_button?.isEnabled = value
+        email_sign_up_button?.isEnabled = value
+    }
 
     // Cast parent activity to OnFragmentInteractionListener
     override fun onAttach(context: Context?) {
@@ -160,12 +171,16 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
         wechat_sign_in_button.setOnClickListener {
 
             val nonce = generateNonce(5)
+            info("Wechat OAuth state: $nonce")
+
             mWxManager?.saveState(nonce)
 
             val req = SendAuth.Req()
             req.scope = "snsapi_userinfo"
             req.state = nonce
             wxApi?.sendReq(req)
+
+            activity?.finish()
         }
     }
 
@@ -274,13 +289,13 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
             return
         }
 
-        isInProgress = true
-        isInputAllowed = false
+        showProgress(true)
+        allowInput(false)
 
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
 
-                var user: Account? = null
+                var account: Account? = null
 
                 val bundle = Bundle().apply {
                     putString(FirebaseAnalytics.Param.METHOD, "email")
@@ -290,18 +305,22 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
                     USED_FOR_SIGN_IN -> {
                         mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
                         info("Start log in")
-                        user = Login(email, password).send()
+                        account = withContext(Dispatchers.IO) {
+                            Login(email, password).send()
+                        }
                     }
                     USED_FOR_SIGN_UP -> {
                         mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.SIGN_UP, bundle)
                         info("Start signing up")
-                        user = SignUp(email, password).send()
+                        account = withContext(Dispatchers.IO) {
+                            SignUp(email, password).send()
+                        }
                     }
                 }
 
-                isInProgress = false
+                showProgress(false)
 
-                if (user == null) {
+                if (account == null) {
                     isInputAllowed = true
 
                     when (usedFor) {
@@ -313,48 +332,37 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
                     return@launch
                 }
 
-                mSession?.saveUser(user)
+                mSession?.saveAccount(account)
                 activity?.setResult(Activity.RESULT_OK)
                 activity?.finish()
 
-            } catch (e: ErrorResponse) {
-                isInProgress = false
-                isInputAllowed = true
+            } catch (e: ClientError) {
+                showProgress(false)
+                allowInput(true)
 
                 info("API error response: $e")
 
-                handleErrorResponse(e)
+                handleClientError(e)
 
             } catch (e: Exception) {
-                isInProgress = false
-                isInputAllowed = true
+                showProgress(false)
+                allowInput(true)
 
-                handleException(e)
+                activity?.handleException(e)
             }
         }
     }
 
-    private fun handleErrorResponse(resp: ErrorResponse) {
+    private fun handleClientError(resp: ClientError) {
+
         // Hide progress bar, enable input.
         when (resp.statusCode) {
             // User is not found, or password is wrong
             404, 403 -> {
                 toast(R.string.api_wrong_credentials)
             }
-            // Since client already checked email and password cannot be empty, it won't get missing error.
-            // For 422, it could only be email or password too long or too short.
-            422 -> {
-                info("Map key: ${resp.error.msgKey}")
-                val resId = apiErrResId[resp.error.msgKey]
-
-                if (resId != null) {
-                    toast(resId)
-                } else {
-                    toast(R.string.api_invalid_credentials)
-                }
-            }
             else -> {
-                handleApiError(resp)
+                activity?.handleApiError(resp)
             }
         }
     }

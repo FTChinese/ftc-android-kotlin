@@ -15,9 +15,7 @@ import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.util.getTierCycleText
-import com.ft.ftchinese.util.handleException
-import com.ft.ftchinese.util.isNetworkConnected
+import com.ft.ftchinese.util.*
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
@@ -46,20 +44,6 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
     private var mOrderManager: OrderManager? = null
     private var mFirebaseAnalytics: FirebaseAnalytics? = null
     private var job: Job? = null
-
-    private var isInProgress: Boolean = false
-        set(value) {
-            if (value) {
-                progress_bar?.visibility = View.VISIBLE
-            } else {
-                progress_bar?.visibility = View.GONE
-            }
-        }
-
-    private var isInputAllowed: Boolean = true
-        set(value) {
-            check_out?.isEnabled = value
-        }
 
     private val priceText: String
         get() = getString(R.string.formatter_price, mPrice)
@@ -300,10 +284,10 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
                 finish()
 
-            } catch (ex: ErrorResponse) {
+            } catch (e: ClientError) {
                 showProgress(false)
                 allowInput(true)
-                handleApiError(ex)
+                handleClientError(e)
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -344,11 +328,11 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                 info("Ali order retrieved from server: $aliOrder")
 
                 aliOrder
-            } catch (resp: ErrorResponse) {
+            } catch (e: ClientError) {
                 showProgress(false)
                 allowInput(true)
 
-                handleApiError(resp)
+                handleClientError(e)
 
                 return@launch
             } catch (e: Exception) {
@@ -384,7 +368,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             if (resultStatus != "9000") {
 
                 toast(msg)
-                isInputAllowed = true
+                allowInput(true)
 
                 return@launch
             }
@@ -405,6 +389,17 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
             // Destroy this activity and tells parent activity to update user data.
             finish()
+        }
+    }
+
+    private fun handleClientError(resp: ClientError) {
+        when (resp.statusCode) {
+            403 -> {
+                toast(R.string.renewal_not_allowed)
+            }
+            else -> {
+                handleApiError(resp)
+            }
         }
     }
 
@@ -446,35 +441,13 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
     private suspend fun launchAlipay(orderInfo: String): Map<String, String> {
         // You must call payV2 in background! Otherwise it will simply give you resultStatus=4000
         // without any clue.
-        val result = GlobalScope.async {
+        return  withContext(Dispatchers.IO) {
             PayTask(this@PaymentActivity).payV2(orderInfo, true)
         }
-
-        return result.await()
     }
 
     private fun stripePay() {
 
-    }
-
-    private fun handleApiError(resp: ErrorResponse) {
-        when (resp.statusCode) {
-            400 -> {
-                toast(R.string.api_bad_request)
-            }
-            401 -> {
-                toast(R.string.api_unauthorized)
-            }
-            403 -> {
-                toast(R.string.renewal_not_allowed)
-            }
-            422 -> {
-                toast(resp.message)
-            }
-            else -> {
-                toast(R.string.api_server_error)
-            }
-        }
     }
 
     override fun onDestroy() {

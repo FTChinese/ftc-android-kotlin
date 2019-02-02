@@ -8,9 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.PasswordUpdate
 import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.util.handleApiError
+import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_password.*
 import kotlinx.coroutines.*
@@ -144,32 +146,34 @@ class PasswordFragment : Fragment(), AnkoLogger {
             try {
                 info("Start updating password")
 
-                val statusCode = passwordUpdate.send(uuid)
+                val done = withContext(Dispatchers.IO) {
+                    passwordUpdate.send(uuid)
+                }
 
                 isInProgress = false
 
-                if (statusCode == 204) {
+                if (done) {
                     toast(R.string.success_saved)
                 } else {
-                    toast("API response status: $statusCode")
+
                 }
 
-            } catch (e: ErrorResponse) {
+            } catch (e: ClientError) {
                 isInProgress = false
                 isInputAllowed = true
 
-                handleErrorResponse(e)
+                handleClientError(e)
 
             } catch (e: Exception) {
                 isInProgress = false
                 isInputAllowed = true
 
-                handleException(e)
+                activity?.handleException(e)
             }
         }
     }
 
-    private fun handleErrorResponse(resp: ErrorResponse) {
+    private fun handleClientError(resp: ClientError) {
         when (resp.statusCode) {
             // 422 could be password_invalid
             404 -> {
@@ -180,7 +184,7 @@ class PasswordFragment : Fragment(), AnkoLogger {
                 toast(R.string.error_incorrect_old_password)
             }
             else -> {
-                handleApiError(resp)
+                activity?.handleApiError(resp)
             }
         }
     }

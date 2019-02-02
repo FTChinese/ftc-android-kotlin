@@ -8,8 +8,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.PasswordReset
+import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.util.handleApiError
+import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_forgot_password.*
 import kotlinx.coroutines.*
@@ -35,22 +37,20 @@ internal class ForgotPasswordFragment : Fragment(), AnkoLogger {
 
     private var job: Job? = null
     private var listener: OnFragmentInteractionListener? = null
-    private var isInProgress: Boolean
-        get() = !send_button.isEnabled
-        set(value) {
-            listener?.onProgress(value)
 
-            // If in progress, hide the message telling what to do next.
-            if (value) {
-                letter_sent_feedback?.visibility = View.GONE
-            }
+    private fun showProgress(value: Boolean) {
+        listener?.onProgress(value)
+
+        // If in progress, hide the message telling what to do next.
+        if (value) {
+            letter_sent_feedback?.visibility = View.GONE
         }
-    private var isInputAllowed: Boolean
-        get() = send_button.isEnabled
-        set(value) {
-            send_button?.isEnabled = value
-            email?.isEnabled = value
-        }
+    }
+
+    private fun allowInput(value: Boolean) {
+        send_button?.isEnabled = value
+        email?.isEnabled = value
+    }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
@@ -99,8 +99,8 @@ internal class ForgotPasswordFragment : Fragment(), AnkoLogger {
     }
 
     private fun sendLetter(emailStr: String) {
-        isInProgress = true
-        isInputAllowed = false
+        showProgress(true)
+        allowInput(false)
 
         if (activity?.isNetworkConnected() != true) {
             toast(R.string.prompt_no_network)
@@ -112,30 +112,33 @@ internal class ForgotPasswordFragment : Fragment(), AnkoLogger {
             val passwordReset = PasswordReset(emailStr)
 
             try {
-                val statusCode = passwordReset.send()
-
-                if (statusCode == 204) {
-                    toast(R.string.success_letter_sent)
-
-                    isInProgress = false
-                } else {
-                    toast("API response status: $statusCode")
-                    isInProgress = false
-                    isInputAllowed = true
+                val done = withContext(Dispatchers.IO) {
+                    passwordReset.send()
                 }
 
-            } catch (e: ErrorResponse) {
-                isInProgress = false
-                isInputAllowed = true
+                if (done) {
+                    toast(R.string.success_letter_sent)
+
+                    showProgress(false)
+                } else {
+                    toast("Sending email failed. Pleans try again")
+                    showProgress(false)
+                    allowInput(true)
+                }
+
+            } catch (e: ClientError) {
+                showProgress(false)
+                allowInput(true)
 
                 info("API error response: ${e.message}")
-                handleErrorResponse(e)
+                handleClientError(e)
 
             } catch (e: Exception) {
-                isInProgress = false
-                isInputAllowed = true
 
-                handleException(e)
+                showProgress(false)
+                allowInput(true)
+
+                activity?.handleException(e)
             }
         }
     }
@@ -143,15 +146,14 @@ internal class ForgotPasswordFragment : Fragment(), AnkoLogger {
     /**
      * Handle restful api error response
      */
-    private fun handleErrorResponse(resp: ErrorResponse) {
+    private fun handleClientError(resp: ClientError) {
         when (resp.statusCode) {
-            // 422 could be email_invalid
             // Email is not found
             404 -> {
                 toast(R.string.api_email_not_found)
             }
             else -> {
-                handleApiError(resp)
+                activity?.handleApiError(resp)
             }
         }
     }

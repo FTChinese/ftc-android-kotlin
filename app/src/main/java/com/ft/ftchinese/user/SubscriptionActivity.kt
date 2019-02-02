@@ -12,7 +12,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.*
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.activity_subscription.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -143,13 +142,13 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
 
                     updateUIForMember()
                 }
-            } catch (resp: ErrorResponse) {
+            } catch (resp: ClientError) {
                 info("$resp")
 
                 swipe_refresh.isRefreshing = false
                 showProgress(false)
 
-                handleApiError(resp)
+                handleClientError(resp)
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -161,24 +160,14 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
         }
     }
 
-    private fun handleApiError(resp: ErrorResponse) {
+    private fun handleClientError(resp: ClientError) {
         when (resp.statusCode) {
-            400 -> {
-                toast(R.string.api_bad_request)
-            }
-            // If request header does not contain X-User-Id
-            401 -> {
-                toast(R.string.api_unauthorized)
-            }
-            422 -> {
-                toast(resp.message)
-            }
             // If this account is not found. It's rare but possible. For example, use logged in at one place, then deleted account at another place.
             404 -> {
                 toast(R.string.api_account_not_found)
             }
             else -> {
-                toast(R.string.api_server_error)
+                handleApiError(resp)
             }
         }
     }
@@ -207,28 +196,27 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
 
         updateUIForPrice()
 
-        try {
-            val sourceStr = intent.getStringExtra(EXTRA_PAYWALL_SOURCE) ?: return
+        val sourceStr = intent.getStringExtra(EXTRA_PAYWALL_SOURCE) ?: return
 
-            val source = gson.fromJson<PaywallSource>(sourceStr, PaywallSource::class.java) ?: return
+        val source = json.parse<PaywallSource>(sourceStr) ?: return
 
-            mFirebaseAnalytics?.logEvent(FtcEvent.PAYWALL_FROM, Bundle().apply {
-                putString(FirebaseAnalytics.Param.ITEM_ID, source.id)
-                putString(FirebaseAnalytics.Param.ITEM_CATEGORY, source.category)
-                putString(FirebaseAnalytics.Param.ITEM_NAME, source.name)
-                if (source.variant != null) {
-                    val lang = when (source.variant) {
-                        ChannelItem.LANGUAGE_EN -> "english"
-                        ChannelItem.LANGUAGE_BI -> "bilingual"
-                        else -> "chinese"
-                    }
-                    putString(FirebaseAnalytics.Param.ITEM_VARIANT, lang)
+        logEvent(source)
+    }
+
+    private fun logEvent(source: PaywallSource) {
+        mFirebaseAnalytics?.logEvent(FtcEvent.PAYWALL_FROM, Bundle().apply {
+            putString(FirebaseAnalytics.Param.ITEM_ID, source.id)
+            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, source.category)
+            putString(FirebaseAnalytics.Param.ITEM_NAME, source.name)
+            if (source.variant != null) {
+                val lang = when (source.variant) {
+                    ChannelItem.LANGUAGE_EN -> "english"
+                    ChannelItem.LANGUAGE_BI -> "bilingual"
+                    else -> "chinese"
                 }
-            })
-
-        } catch (e: JsonSyntaxException) {
-            info(e)
-        }
+                putString(FirebaseAnalytics.Param.ITEM_VARIANT, lang)
+            }
+        })
     }
 
     private fun updateUIForMember() {
@@ -438,7 +426,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
         fun start(context: Context?, shouldUpdate: Boolean = false, source: PaywallSource? = defaultPaywallEntry) {
             val intent = Intent(context, SubscriptionActivity::class.java).apply {
                 if (source != null) {
-                    putExtra(EXTRA_PAYWALL_SOURCE, gson.toJson(source))
+                    putExtra(EXTRA_PAYWALL_SOURCE, json.toJsonString(source))
                 }
 
                 putExtra(EXTRA_SHOULD_UPDATE, shouldUpdate)

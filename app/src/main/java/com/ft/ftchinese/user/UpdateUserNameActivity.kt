@@ -8,9 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.UserNameUpdate
+import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.util.handleApiError
+import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_username.*
 import kotlinx.coroutines.*
@@ -123,11 +125,13 @@ class UsernameFragment : Fragment(), AnkoLogger {
             try {
                 info("Start updating mAccount userName")
 
-                val statusCode = userNameUpdate.send(uuid)
+                val done = withContext(Dispatchers.IO) {
+                    userNameUpdate.send(uuid)
+                }
 
                 isInProgress = false
 
-                if (statusCode == 204) {
+                if (done) {
 
                     mSession?.updateUserName(userName)
 
@@ -135,19 +139,19 @@ class UsernameFragment : Fragment(), AnkoLogger {
 
                     toast(R.string.success_saved)
                 } else {
-                    toast("API response status: $statusCode")
+
                 }
-            } catch (e: ErrorResponse) {
+            } catch (e: ClientError) {
                 isInProgress = false
                 isInputAllowed = true
 
-                handleApiError(e)
+                activity?.handleApiError(e)
 
             } catch (e: Exception) {
                 isInProgress = false
                 isInputAllowed = true
 
-                handleException(e)
+                activity?.handleException(e)
             }
         }
     }
