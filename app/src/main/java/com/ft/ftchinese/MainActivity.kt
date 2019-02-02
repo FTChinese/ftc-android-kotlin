@@ -33,6 +33,7 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
+import java.io.ByteArrayInputStream
 import java.lang.Exception
 
 /**
@@ -55,7 +56,7 @@ class MainActivity : AppCompatActivity(),
 
     private var mSession: SessionManager? = null
     private var mAdManager: LaunchAdManager? = null
-    private var mFileCache: FileCache? = null
+    private var cache: FileCache? = null
 
     private var mNewsAdapter: TabPagerAdapter? = null
     private var mEnglishAdapter: TabPagerAdapter? = null
@@ -175,7 +176,7 @@ class MainActivity : AppCompatActivity(),
 
         mSession = SessionManager.getInstance(this)
         mAdManager = LaunchAdManager.getInstance(this)
-        mFileCache = FileCache(this)
+        cache = FileCache(this)
 
         // Show advertisement
         // Keep a reference the coroutine in case user exit at this moment
@@ -267,7 +268,7 @@ class MainActivity : AppCompatActivity(),
         val ad = adManager.getRandomAd(account?.membership) ?: return
 
         // Check if the required ad image is required.
-        if (mFileCache?.exists(ad.imageName) != true) {
+        if (cache?.exists(ad.imageName) != true) {
             info("Ad image ${ad.imageName} not found")
             showSystemUI()
             return
@@ -319,16 +320,10 @@ class MainActivity : AppCompatActivity(),
             info("Clicked ads")
         }
 
+        adImage.setImageDrawable(
+                cache?.readDrawable(ad.imageName)
+        )
 
-        val readImageJob = GlobalScope.async {
-            Drawable.createFromStream(openFileInput(ad.imageName), ad.imageName)
-        }
-
-        val drawable = readImageJob.await()
-
-        info("Retrieved drawable: ${ad.imageName}")
-
-        adImage.setImageDrawable(drawable)
         adTimer.visibility = View.VISIBLE
         info("Show timer")
 
@@ -369,7 +364,7 @@ class MainActivity : AppCompatActivity(),
         for (ad in adsToDownload) {
             info("Download ad image: ${ad.imageUrl}")
 
-            if (mFileCache?.exists(ad.imageName) == true) {
+            if (cache?.exists(ad.imageName) == true) {
                 continue
             }
 
@@ -626,24 +621,50 @@ class MainActivity : AppCompatActivity(),
      */
     private fun updateSessionUI() {
         val account = mSession?.loadAccount()
-        val isLoggedIn = account != null
-
-        info("Account is logged in: $isLoggedIn")
 
         val menu = drawer_nav.menu
         // If seems this is the only way to get the header view.
         // You cannot mUser `import kotlinx.android.synthetic.activity_main_search.drawer_nav_header.*`,
         // which will give you null pointer exception.
-        val headerTitle = drawer_nav.getHeaderView(0).findViewById<TextView>(R.id.nav_header_title)
+        val headerView = drawer_nav.getHeaderView(0)
+        val headerTitle = headerView.findViewById<TextView>(R.id.nav_header_title)
+        val headerImage = headerView.findViewById<ImageView>(R.id.nav_header_image)
 
-        if (isLoggedIn) {
-            headerTitle.text = account?.displayName
+        if (account != null) {
+            headerTitle.text = account.displayName
+            showAvatar(headerImage, account.wechat)
         } else {
             headerTitle.text = getString(R.string.nav_not_logged_in)
         }
 
+        val isLoggedIn = account != null
+
         menu.setGroupVisible(R.id.drawer_group_sign_in_up, !isLoggedIn)
         menu.findItem(R.id.action_account).isVisible = isLoggedIn
+    }
+
+    private fun showAvatar(image: ImageView, wechat: Wechat) {
+        val drawable = cache?.readDrawable(wechat.avatarName)
+        if (drawable != null) {
+            image.setImageDrawable(drawable)
+        }
+
+        if (wechat.avatarUrl == null) {
+            return
+        }
+
+        GlobalScope.launch(Dispatchers.Main) {
+            val bytes = withContext(Dispatchers.IO) {
+                wechat.downloadAvatar(filesDir)
+            } ?: return@launch
+
+            image.setImageDrawable(
+                    Drawable.createFromStream(
+                            ByteArrayInputStream(bytes),
+                            wechat.avatarName
+                    )
+            )
+        }
     }
 
     private fun feedbackEmail() {
