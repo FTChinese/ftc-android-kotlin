@@ -130,6 +130,13 @@
     <string name="prompt_user_name">用户名</string>
     <string name="prompt_new_name">新用户名</string>
     <string name="prompt_password">密码</string>
+    <string name="label_wechat">微信</string>
+    <string name="heading_bind">账号绑定</string>
+    <string name="status_bound">已绑定</string>
+    <string name="status_not_bound">尚未绑定</string>
+    <string name="formatter_wx_name">微信用户 %1$s</string>
+    <string name="prompt_bind_email">您目前使用了微信账号登录FT中文网。为保障账号安全，建议您绑定在FT中文网注册的邮箱账号。</string>
+    <string name="action_bind_email">绑定邮箱</string>
     <string name="prompt_change_password">修改密码</string>
     <string name="prompt_old_password">当前密码</string>
     <string name="prompt_new_password">新密码</string>
