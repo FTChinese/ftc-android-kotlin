@@ -19,11 +19,11 @@ private const val PREF_MEMBER_CYCLE = "member_billing_cycle"
 private const val PREF_MEMBER_EXPIRE = "member_expire"
 private const val PREF_IS_LOGGED_IN = "is_logged_in"
 
-class SessionManager(context: Context) {
+class SessionManager private constructor(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(SESSION_PREF_NAME, Context.MODE_PRIVATE)
     private val editor = sharedPreferences.edit()
 
-    fun saveUser(acnt: Account) {
+    fun saveAccount(acnt: Account) {
         editor.putString(PREF_USER_ID, acnt.id)
         editor.putString(PREF_UNION_ID, acnt.unionId)
         editor.putString(PREF_USER_NAME, acnt.userName)
@@ -62,8 +62,9 @@ class SessionManager(context: Context) {
         editor.apply()
     }
 
-    fun loadUser(): Account? {
+    fun loadAccount(): Account? {
         val userId = sharedPreferences.getString(PREF_USER_ID, null) ?: return null
+        val unionId = sharedPreferences.getString(PREF_UNION_ID, null)
         val userName = sharedPreferences.getString(PREF_USER_NAME, null)
         val email = sharedPreferences.getString(PREF_EMAIL, "") ?: ""
         val isVerified = sharedPreferences.getBoolean(PREF_IS_VERIFIED, false)
@@ -90,6 +91,7 @@ class SessionManager(context: Context) {
 
         return Account(
                 id = userId,
+                unionId = unionId,
                 userName = userName,
                 email = email,
                 isVerified = isVerified,
@@ -110,7 +112,7 @@ class SessionManager(context: Context) {
     }
 
     companion object {
-        var instance: SessionManager? = null
+        private var instance: SessionManager? = null
 
         @Synchronized fun getInstance(ctx: Context): SessionManager {
             if (instance == null) {
