@@ -1,16 +1,31 @@
 package com.ft.ftchinese.util
 
+import com.beust.klaxon.Json
+import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.models.ErrorResponse
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
 import okhttp3.*
 import okhttp3.Request
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import java.io.File
 import java.io.IOException
 
-val gson = Gson()
+
+data class ClientError(
+        @Json(ignored = true)
+        var statusCode: Int, // HTTP status code
+        override val message: String,
+        val error: Reason? = null
+) : Exception(message)
+
+data class Reason(
+        val field: String,
+        val code: String
+) {
+    val key: String = "$field}_$code"
+}
+
+class NetworkException(msg: String?, cause: Throwable?) : IOException(msg, cause)
 
 class Fetch : AnkoLogger {
 
@@ -18,9 +33,10 @@ class Fetch : AnkoLogger {
     private val headers = Headers.Builder()
     private val reqBuilder = Request.Builder()
     private var reqBody: RequestBody? = null
+    private var request: Request? = null
+    private var call: Call? = null
 
-    private val contentType: MediaType? = MediaType.parse("application/json")
-    private var cacheControl: CacheControl? = null
+    private var disableCache = false
 
     fun get(url: String): Fetch {
         reqBuilder.url(url)
@@ -51,9 +67,22 @@ class Fetch : AnkoLogger {
         return this
     }
 
+    fun cancel() {
+        call?.cancel()
+    }
+
+    fun getRequest(): Request? {
+        return request
+    }
+
     fun header(name: String, value: String): Fetch {
         headers.set(name, value)
         return this
+    }
+
+    fun setAcessKey(): Fetch {
+        headers.set("Authorization", "Bearer ${BuildConfig.ACCESS_TOKEN}")
+        return  this
     }
 
     fun setClient(): Fetch {
@@ -84,86 +113,138 @@ class Fetch : AnkoLogger {
     }
 
     fun noCache(): Fetch {
-        cacheControl = CacheControl.Builder()
-                .noCache()
-                .noStore()
-                .noTransform()
-                .build()
-
+        disableCache = true
         return this
     }
 
-    fun body(o: Any?): Fetch {
-        reqBody = if (o == null) {
-            RequestBody.create(null, "")
-        } else {
-            RequestBody.create(contentType, gson.toJson(o))
+    /**
+     * Use this to send json content.
+     */
+    fun jsonBody(body: String): Fetch {
+
+        val contentType = MediaType.parse("application/json; charset=utf-8")
+
+        if (contentType == null) {
+            headers.set("Content-Type", "application/json; charset=utf-8")
         }
+
+        reqBody = RequestBody.create(contentType, body)
 
         return this
     }
 
     /**
-     * Send the request and get response body as a string.
-     * No JSON parsing is performed.
-     * @return String if request successfully, or null otherwise.
-     * @throws IllegalStateException If url is empty
-     * @throws IOException If request cannot be executed, or response body cannot be read
+     * Use this to transmit binary files.
      */
-    fun string(): String? {
-        reqBuilder.headers(headers.build())
+    fun body(body: ByteArray): Fetch {
+        reqBody = RequestBody.create(null, body)
 
-        if (cacheControl != null) {
-            reqBuilder.cacheControl(cacheControl!!)
-        }
-
-        val response = client.newCall(reqBuilder.build()).execute()
-
-        info("Response code: ${response.code()}. Message: ${response.message()}")
-
-        if (response.isSuccessful) {
-            return response.body()?.string()
-        }
-
-        return null
+        return this
     }
 
     /**
-     * @return Response
-     * See execute for thrown errors.
+     * For POST, PUT, PATCH, PROPPATCH and REPORT method,
+     * okhttp does not allow nullable body.
      */
-    fun end(): Response {
-        headers.set("Authorization", "Bearer ${BuildConfig.ACCESS_TOKEN}")
-        reqBuilder.headers(headers.build())
+    fun body(): Fetch {
+        reqBody = RequestBody.create(null, "")
 
-        if (cacheControl != null) {
-            reqBuilder.cacheControl(cacheControl!!)
+        return this
+    }
+
+    /**
+     * Download a file and return the the contents as bytes.
+     * If a File is provided as destination, the downloaded content will also saved.
+     * Use this to download binary files.
+     */
+    fun download(dest: File? = null): ByteArray? {
+
+        val resp = end()
+
+        val input = resp.body()?.bytes()
+
+        try {
+            if (dest != null && input != null) {
+                dest.writeBytes(input)
+            }
+        } catch (e: Exception) {
+            info(e.message)
         }
 
-        reqBuilder.method(method, reqBody)
+        return input
+    }
 
-        return execute(reqBuilder)
+    fun responseString(): String? {
+        val resp = end()
+
+        return resp.body()?.string()
+    }
+
+    /**
+     * Used for next-api and subscription-api.
+     * For successful response (HTTP code 200 - 300),
+     * return the json string.
+     * For client error response (HTTP code > 400)
+     */
+    fun responseApi(): Pair<Response, String?> {
+        /**
+         * @throws NetworkException when sending request.
+         */
+        val resp = end()
+
+        /**
+         * Success response.
+         * @throws IOException when reading body.
+         */
+        if (resp.code() in 200 until 400) {
+            return Pair(resp, resp.body()?.string())
+        }
+
+        /**
+         * @throws IOException when turning to string.
+         * @throws ClientError
+         */
+        val body = resp.body()
+                ?.string()
+                ?: throw ClientError(
+                        statusCode = resp.code(),
+                        message = resp.message()
+                )
+
+        val clientErr = Klaxon()
+                .parse<ClientError>(body)
+                ?: throw ClientError(
+                        statusCode = resp.code(),
+                        message = resp.message()
+                )
+
+        clientErr.statusCode = resp.code()
+        throw clientErr
     }
 
     /**
      * @return okhttp3.Response
-     * @throws IllegalStateException If request url is empty
-     * @throws NetworkException if there's network failure. Use this show network failed on UI.
-     * @throws EmptyResponseException if http response status is above 400 but no response body is returned.
-     * @throws ErrorResponse If HTTP response status is above 400.
-     * @throws IOException If API returned error response but the response body could not be turned into string.
-     * @throws JsonSyntaxException If API returned error response and the response body is not valid JSON.
      */
-    private fun execute(builder: Request.Builder): Response {
+    private fun end(): Response {
+        reqBuilder.headers(headers.build())
 
-        // If url is null, `build()` throws IllegalStateException
+        if (disableCache) {
+            reqBuilder.cacheControl(CacheControl.Builder()
+                    .noCache()
+                    .noStore()
+                    .noTransform()
+                    .build())
+        }
 
         /**
-         * @throws IllegalStateException if url is null
+         * @throws NullPointerException if method is null, or request url is null.
+         * @throws IllegalStateException if method is empty, if body exists for GET method, or if body not exists for POST, PATCH, PUT method.
          */
-        val request = builder.build()
+        val req = reqBuilder
+                .method(method, reqBody)
+                .build()
 
-        info("URL: ${request.url()}. Method: ${request.method()}. Headers: ${request.headers()}")
+        this.request = req
 
         /**
          * @throws IOException if the request could not be executed due to cancellation, a connectivity
@@ -171,45 +252,15 @@ class Fetch : AnkoLogger {
          * remote server accepted the request before the failure.
          * @throws IllegalStateException when the call has already been executed.
          */
-        val response = try {
-            client.newCall(request).execute()
+        val call = client.newCall(req)
+        this.call = call
+
+        return try {
+            call.execute()
         } catch (e: IOException) {
-            throw NetworkException()
+            // This is used to distinguish network failure from reading body error.
+            throw NetworkException(e.message, e.cause)
         }
-
-
-        info("Response code: ${response.code()}. Message: ${response.message()}")
-
-        // If response is successful, return the response so that response body could be processed by the caller.
-        if (response.isSuccessful) {
-            return response
-        }
-
-        // If the response if not successful (status code >= 400), API returns body containing error details.
-        // Error response could also be empty, check it!
-        // Wrap the response body and rethrow it.
-
-        /**
-         * Pay attention to `body(): ResponseBody?`. It's nullable. So `body` is an optional.
-         * @throws IOException when turning to string.
-         */
-        val body = response.body()?.string()
-
-        if (body.isNullOrBlank()) {
-            throw EmptyResponseException()
-        }
-
-        /**
-         * @throws JsonSyntaxException if json is not a valid representation for an object of tier
-         * classOfT
-         * `errResp` is null if body is null or if body is empty
-         */
-        val errResp = gson.fromJson<ErrorResponse>(body, ErrorResponse::class.java)
-
-        // Add response status to ErrorResponse, otherwise HTTP response status is no accessible outside the function.
-        errResp.statusCode = response.code()
-
-        throw errResp
     }
 
     companion object {
@@ -217,6 +268,3 @@ class Fetch : AnkoLogger {
     }
 }
 
-class EmptyResponseException : RuntimeException()
-
-class NetworkException : IOException()
