@@ -8,7 +8,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.KEY_PREMIUM_YEAR
 import com.ft.ftchinese.models.KEY_STANDARD_MONTH
 import com.ft.ftchinese.models.KEY_STANDARD_YEAR
-import com.google.gson.JsonSyntaxException
 import org.jetbrains.anko.toast
 import java.io.IOException
 
@@ -119,6 +118,38 @@ fun Activity.getTierCycleText(key: String?): String? {
 //    }
 //}
 
+fun Activity.handleApiError(resp: ClientError) {
+    // Here handles 422 response.
+    // Currently only 422's response has `error` field.
+    if (resp.error != null) {
+        when (resp.error.key) {
+            "email_already_exists" -> toast(R.string.api_email_taken)
+            "email_invalid" -> toast(R.string.error_invalid_email)
+            "password_invalid" -> toast(R.string.error_invalid_password)
+            "email_server_missing" -> toast(R.string.api_email_server_down)
+            else -> toast(resp.message)
+        }
+        return
+    }
+
+    when (resp.statusCode) {
+        400 -> {
+            toast(R.string.api_bad_request)
+        }
+        // If request header does not contain X-User-Id
+        401 -> {
+            toast(R.string.api_unauthorized)
+        }
+        429 -> {
+            toast(R.string.api_too_many_request)
+        }
+        // All other errors are treated as server error.
+        else -> {
+            toast(R.string.api_server_error)
+        }
+    }
+}
+
 fun Activity.handleException(e: Exception) {
     e.printStackTrace()
     when (e) {
@@ -128,14 +159,8 @@ fun Activity.handleException(e: Exception) {
         is NetworkException -> {
             toast(R.string.api_network_failure)
         }
-        is EmptyResponseException -> {
-            toast(R.string.api_empty_response)
-        }
         is IOException -> {
             toast(R.string.api_io_error)
-        }
-        is JsonSyntaxException -> {
-            toast(R.string.api_json_syntax)
         }
         else -> {
             toast(e.toString())
