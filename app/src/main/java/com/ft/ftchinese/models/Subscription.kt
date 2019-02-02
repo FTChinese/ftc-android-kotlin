@@ -44,12 +44,6 @@ data class WxQueryOrder(
         val paymentStateDesc: String
 )
 
-data class AliVerifiedOrder(
-        val ftcOrderId: String,
-        val aliOrderId: String,
-        val paidAt: String // ISO8601
-)
-
 /**
  * This is used to store subscription order locally,
  * and also used to to parse orders retrieved from API.
@@ -63,10 +57,13 @@ data class Subscription(
         var netPrice: Double,
         @KPayMethod
         val payMethod: PayMethod,
+        @KDateTime
         val createdAt: ZonedDateTime = ZonedDateTime.now(),
         @Json(ignored = true)
         var confirmedAt: ZonedDateTime? = null,
+        @KDate
         var startDate: LocalDate? = null,
+        @KDate
         var endDate: LocalDate? = null
 ) {
 

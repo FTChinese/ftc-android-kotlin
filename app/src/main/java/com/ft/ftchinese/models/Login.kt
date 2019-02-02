@@ -2,12 +2,7 @@ package com.ft.ftchinese.models
 
 import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.gson
-import com.google.gson.JsonSyntaxException
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import java.io.IOException
 
 data class Login(
@@ -16,23 +11,22 @@ data class Login(
 ) : AnkoLogger {
     /**
      * @return Account
-     * @throws ErrorResponse If HTTP response status is above 400.
+     * @throws ClientError If HTTP response status is above 400.
      * @throws IllegalStateException If request url is empty.
      * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.
-     * @throws JsonSyntaxException If the content returned by API could not be parsed into valid JSON, regardless of if response is successful or not
      */
-    suspend fun send(): Account {
-        val response = GlobalScope.async {
-            Fetch().post(NextApi.LOGIN)
-                    .setClient()
-                    .noCache()
-                    .body(this@Login)
-                    .end()
-        }.await()
+    fun send(): Account? {
+        val (_, body) = Fetch().post(NextApi.LOGIN)
+                .setClient()
+                .noCache()
+                .jsonBody(json.toJsonString(this))
+                .responseApi()
 
-        val body = response.body()?.string()
-        info("Response body: $body")
 
-        return gson.fromJson<Account>(body, Account::class.java)
+        return if (body == null) {
+            null
+        } else {
+            json.parse<Account>(body)
+        }
     }
 }

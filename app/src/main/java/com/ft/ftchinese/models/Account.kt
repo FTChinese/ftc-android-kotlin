@@ -5,7 +5,6 @@ import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.SubscribeApi
 import org.jetbrains.anko.AnkoLogger
 
-const val PREFERENCE_USER_ACCOUNT = "user_account"
 
 /**
  * A user's essential data.
@@ -72,101 +71,112 @@ data class Account(
      * @return Account. Always returns a new one rather than modifying the existing one to make it immutable.
      */
     fun refresh(): Account? {
-        val response =  Fetch().get(NextApi.ACCOUNT)
-                    .noCache()
-                    .setUserId(this@Account.id)
-                    .end()
+        val (_, body) =  Fetch()
+                .get(NextApi.ACCOUNT)
+                .noCache()
+                .setUserId(this.id)
+                .responseApi()
 
-        val body = response.body()
-                ?.string()
-                ?: return null
 
-        return json.parse<Account>(body)
+        return if (body == null) {
+            null
+        } else {
+            json.parse<Account>(body)
+        }
     }
 
-    fun requestVerification(): Int {
-        val response = Fetch().post(NextApi.REQUEST_VERIFICATION)
+    fun requestVerification(): Boolean {
+        val (response, _) = Fetch().post(NextApi.REQUEST_VERIFICATION)
                 .noCache()
                 .setClient()
                 .setUserId(this@Account.id)
-                .body(null)
-                .end()
+                .body()
+                .responseApi()
 
-        return response.code()
+        return response.code() == 204
     }
 
     /**
      * @TODO set user id or union id based on login method
      */
     fun wxPlaceOrder(tier: Tier, cycle: Cycle): WxPrepayOrder? {
-        val response = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${tier.string()}/${cycle.string()}")
+        val (_, body) = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${tier.string()}/${cycle.string()}")
                 .noCache()
                 .setUserId(this@Account.id)
                 .setClient()
-                .body(null)
-                .end()
+                .body()
+                .responseApi()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<WxPrepayOrder>(body)
+        }
+    }
 
 
-        val body = response.body()?.string() ?: return null
-        return json.parse<WxPrepayOrder>(body)
+    fun wxQueryOrder(orderId: String): WxQueryOrder? {
+        val (_, body) = Fetch()
+                .get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
+                .noCache()
+                .setUserId(id)
+                .setClient()
+                .responseApi()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<WxQueryOrder>(body)
+        }
     }
 
     /**
      * @TODO set user id or union id based on login method.
      */
-    fun wxQueryOrder(orderId: String): WxQueryOrder? {
-        val resp = Fetch().get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
-                .noCache()
-                .setUserId(this@Account.id)
-                .setClient()
-                .end()
-
-        val body = resp.body()?.string() ?: return null
-
-        return json.parse<WxQueryOrder>(body)
-    }
-
     fun aliPlaceOrder(tier: Tier, cycle: Cycle): AlipayOrder? {
 
-        val response = Fetch().post("${SubscribeApi.ALI_ORDER}/${tier.string()}/${cycle.string()}")
-                .setUserId(this@Account.id)
+        val (_, body) = Fetch().post("${SubscribeApi.ALI_ORDER}/${tier.string()}/${cycle.string()}")
+                .setUserId(id)
                 .setClient()
-                .body(null)
-                .end()
+                .body()
+                .responseApi()
 
 
-        val body = response.body()?.string() ?: return null
-        return json.parse<AlipayOrder>(body)
+        return if (body == null) {
+            null
+        } else {
+            json.parse<AlipayOrder>(body)
+        }
     }
 
     fun starArticle(articleId: String): Boolean {
 
-        val response = Fetch().put("${NextApi.STARRED}/$articleId")
+        val (response, _) = Fetch().put("${NextApi.STARRED}/$articleId")
                 .noCache()
-                .body(null)
-                .setUserId(this@Account.id)
-                .end()
+                .body()
+                .setUserId(id)
+                .responseApi()
 
         return response.code() == 204
     }
 
     fun unstarArticle(articleId: String): Boolean {
 
-        val response = Fetch().delete("${NextApi.STARRED}/$articleId")
+        val (response, _) = Fetch().delete("${NextApi.STARRED}/$articleId")
                 .noCache()
-                .setUserId(this@Account.id)
-                .body(null)
-                .end()
+                .setUserId(id)
+                .body()
+                .responseApi()
 
         return response.code() == 204
     }
 
     fun isStarring(articleId: String): Boolean {
 
-        val response = Fetch().get("${NextApi.STARRED}/$articleId")
+        val (response, _) = Fetch().get("${NextApi.STARRED}/$articleId")
                 .noCache()
-                .setUserId(this@Account.id)
-                .end()
+                .setUserId(id)
+                .responseApi()
 
         return response.code() == 204
     }
