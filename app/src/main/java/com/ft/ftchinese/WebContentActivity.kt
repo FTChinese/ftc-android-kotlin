@@ -6,7 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.util.gson
+import com.ft.ftchinese.models.json
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.info
@@ -58,7 +58,7 @@ class WebContentActivity : AbsContentActivity() {
         if (itemData != null) {
 
             try {
-                mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
+                mChannelItem = json.parse<ChannelItem>(itemData)
                 mCanonicalUrl = mChannelItem?.canonicalUrl
 
             } catch (e: Exception) {
@@ -122,7 +122,7 @@ class WebContentActivity : AbsContentActivity() {
         // The type and id must be known.
         fun start(context: Context?, channelItem: ChannelItem) {
             val intent = Intent(context, WebContentActivity::class.java).apply {
-                putExtra(EXTRA_CHANNEL_ITEM, gson.toJson(channelItem))
+                putExtra(EXTRA_CHANNEL_ITEM, json.toJsonString(channelItem))
             }
 
             context?.startActivity(intent)
