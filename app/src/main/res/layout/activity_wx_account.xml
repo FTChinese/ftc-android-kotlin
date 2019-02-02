@@ -29,6 +29,7 @@
                 android:layout_marginEnd="8dp"
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_account_circle_black_24dp"
+                android:foreground="@drawable/rounded_fg"
                 app:layout_constraintDimensionRatio="h,1:1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
