@@ -6,8 +6,6 @@ import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.FileCache
-import com.ft.ftchinese.util.gson
-import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
@@ -88,17 +86,10 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
             }
         }
 
-        try {
-            val channelData = gson.fromJson<ChannelContent>(message, ChannelContent::class.java)
+        val channelData = json.parse<ChannelContent>(message) ?: return
 
-            mChannelItems = channelData.sections[0].lists[0].items
-            mChannelMeta = channelData.meta
-
-        } catch (e: JsonSyntaxException) {
-            info("Cannot parse JSON after a channel loaded")
-        } catch (e: Exception) {
-            info("$e")
-        }
+        mChannelItems = channelData.sections[0].lists[0].items
+        mChannelMeta = channelData.meta
     }
 
     /**
@@ -228,12 +219,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
             }
         }
 
-        try {
-            SponsorManager.sponsors = gson.fromJson(message, Array<Sponsor>::class.java)
-
-        } catch (e: Exception) {
-            info("$e")
-        }
+        SponsorManager.sponsors = json.parse<Array<Sponsor>>(message) ?: return
     }
 
     /**
@@ -244,13 +230,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
      * }
      */
     @JavascriptInterface fun onNewAdSwitchData(message: String) {
-        try {
-            val adSwitch = gson.fromJson<AdSwitch>(message, AdSwitch::class.java)
-
-
-        } catch (e: Exception) {
-            info("$e")
-        }
+        val adSwitch = json.parse<AdSwitch>(message) ?: return
     }
 
     @JavascriptInterface fun onSharePageFromApp(message: String) {
@@ -320,7 +300,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
         info("Clicked a follow button")
         info("Received follow message: $message")
 
-        val following = gson.fromJson<Following>(message, Following::class.java)
+        val following = json.parse<Following>(message) ?: return
         mFollowingManager?.save(following)
     }
 }

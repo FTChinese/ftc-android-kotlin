@@ -1,9 +1,8 @@
 package com.ft.ftchinese.models
 
 import android.content.Context
-import com.ft.ftchinese.util.gson
-import com.google.gson.annotations.SerializedName
 import android.net.Uri
+import com.beust.klaxon.Json
 import com.ft.ftchinese.util.parseLocalDate
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Request
@@ -32,17 +31,17 @@ data class LaunchMeta(
 data class LaunchAd(
         val type: String,
         val title: String,
-        @SerializedName("fileName") val imageUrl: String,
-        @SerializedName("click") val linkUrl: String,
-        @SerializedName("impression_1") val impressionUrl1: String,
-        @SerializedName("impression_2") val impressionUrl2: String?,
-        @SerializedName("impression_3") val impressionUrl3: String?,
+        @Json("fileName") val imageUrl: String,
+        @Json("click") val linkUrl: String,
+        @Json("impression_1") val impressionUrl1: String,
+        @Json("impression_2") val impressionUrl2: String?,
+        @Json("impression_3") val impressionUrl3: String?,
         val iphone: String,
         val android: String,
         val ipad: String,
         // targetUser is an enum: all, free, standard, premium.
         // It indicates which groups of user can see the launch ad.
-        @SerializedName("audienceCohort") val targetUser: String?,
+        @Json("audienceCohort") val targetUser: String?,
         val dates: String,
         // weight actually means https://en.wikipedia.org/wiki/Probability_distribution#Discrete_probability_distribution
         val weight: String
@@ -174,11 +173,7 @@ class LaunchAdManager(context: Context) : AnkoLogger {
                         return@responseString
                     }
 
-                    val schedule = try {
-                        gson.fromJson<LaunchSchedule>(data, LaunchSchedule::class.java)
-                    } catch (e: Exception) {
-                        return@responseString
-                    }
+                    val schedule = json.parse<LaunchSchedule>(data) ?: return@responseString
 
                     save(schedule)
                 }
@@ -198,7 +193,7 @@ class LaunchAdManager(context: Context) : AnkoLogger {
 
         prefSchedule.forEach { (key, value) ->
             val strSet = value.map {
-                gson.toJson(it)
+                json.toJsonString(it)
             }.toSet()
 
             editor.putStringSet(key, strSet)
@@ -228,7 +223,9 @@ class LaunchAdManager(context: Context) : AnkoLogger {
             ads.union(adData)
         }
 
-        return ads.map { gson.fromJson(it, LaunchAd::class.java) }
+        return ads.mapNotNull {
+            json.parse<LaunchAd>(it)
+        }
     }
 
     // Reference https://stackoverflow.com/questions/9330394/how-to-pick-an-item-by-its-probability

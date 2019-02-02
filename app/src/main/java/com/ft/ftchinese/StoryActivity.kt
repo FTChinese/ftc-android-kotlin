@@ -6,11 +6,9 @@ import android.os.Bundle
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
-import com.ft.ftchinese.util.gson
 import com.ft.ftchinese.util.isNetworkConnected
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Request
-import com.google.gson.JsonSyntaxException
 import kotlinx.android.synthetic.main.activity_content.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.info
@@ -57,14 +55,9 @@ class StoryActivity : AbsContentActivity() {
             return
         }
 
-        try {
-            mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
+        mChannelItem = json.parse<ChannelItem>(itemData)
 
-            info("Channel item: $mChannelItem")
-
-        } catch (e: Exception) {
-            info("Error parsing data: $e")
-
+        if (mChannelItem == null) {
             toast(R.string.prompt_load_failure)
             return
         }
@@ -227,10 +220,9 @@ class StoryActivity : AbsContentActivity() {
 
     private fun renderAndLoad(data: String) {
 
-        val story = try {
-            gson.fromJson<Story>(data, Story::class.java)
-        } catch (e: JsonSyntaxException) {
-            info("Cannot parse JSON: $e")
+        val story = json.parse<Story>(data)
+
+        if (story == null) {
             toast(R.string.prompt_load_failure)
             return
         }
@@ -320,7 +312,7 @@ class StoryActivity : AbsContentActivity() {
          */
         fun start(context: Context?, channelItem: ChannelItem) {
             val intent = Intent(context, StoryActivity::class.java)
-            intent.putExtra(EXTRA_CHANNEL_ITEM, gson.toJson(channelItem))
+            intent.putExtra(EXTRA_CHANNEL_ITEM, json.toJsonString(channelItem))
             context?.startActivity(intent)
         }
     }

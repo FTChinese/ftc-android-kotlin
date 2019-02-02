@@ -9,9 +9,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.ErrorResponse
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.Account
+import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.util.handleApiError
+import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_account.*
 import kotlinx.coroutines.*
@@ -43,10 +45,9 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
     private var sessionManager: SessionManager? = null
 
-    private var isInProgress: Boolean = false
-        set(value) {
-            mListener?.onProgress(value)
-        }
+    private fun showProgress(value: Boolean) {
+        mListener?.onProgress(value)
+    }
 
     private fun allowInput(v: Boolean) {
         request_verify_button?.isEnabled = v
@@ -85,17 +86,17 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
                 }
 
                 toast(R.string.success_updated)
-            } catch (e: ErrorResponse) {
+            } catch (e: ClientError) {
                 info(e.message)
                 swipe_refresh.isRefreshing = false
 
-                handleApiError(e)
+                handleClientError(e)
 
             } catch (e: Exception) {
                 e.printStackTrace()
 
                 swipe_refresh.isRefreshing = false
-                handleException(e)
+                activity?.handleException(e)
             }
         }
     }
@@ -195,7 +196,7 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
             return
         }
 
-        isInProgress = true
+        showProgress(true)
         allowInput(false)
 
         toast(R.string.progress_request_verification)
@@ -206,50 +207,42 @@ internal class AccountFragment : Fragment(), SwipeRefreshLayout.OnRefreshListene
 
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
-                val statusCode = account.requestVerification()
-
-                // If request succeeds, disable request verification button.
-                isInProgress = false
-
-                if (statusCode == 204) {
-                    toast(R.string.success_letter_sent)
-
-                } else {
-                    toast("API response status: $statusCode")
+                val done = withContext(Dispatchers.IO) {
+                    account.requestVerification()
                 }
 
-            } catch (ex: ErrorResponse) {
-                info("API error response: $ex")
+                // If request succeeds, disable request verification button.
+                showProgress(false)
+                allowInput(!done)
 
-                isInProgress = false
+                toast(R.string.success_letter_sent)
+
+            } catch (e: ClientError) {
+                showProgress(false)
                 allowInput(true)
 
-                handleErrorResponse(ex)
+                handleClientError(e)
 
             } catch (e: Exception) {
                 e.printStackTrace()
 
-                isInProgress = false
+                showProgress(false)
                 allowInput(true)
 
-                handleException(e)
+                activity?.handleException(e)
             }
         }
     }
 
-    private fun handleErrorResponse(resp: ErrorResponse) {
+    private fun handleClientError(resp: ClientError) {
         when (resp.statusCode) {
-            // If request header does not contain X-User-Id
-            401 -> {
-                toast(R.string.api_unauthorized)
-            }
-            // If this account is not found. It's rare but possible. For example, use logged in at one place, then deleted account at another place.
+            // If this account is not found. It's rare but possible. For example, user logged in at one place, then deleted account at another place.
             404 -> {
                 toast(R.string.api_account_not_found)
             }
             // All other errors are treated as server error.
             else -> {
-                handleApiError(resp)
+                activity?.handleApiError(resp)
             }
         }
     }

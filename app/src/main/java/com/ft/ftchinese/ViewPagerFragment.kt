@@ -88,7 +88,7 @@ class ViewPagerFragment : Fragment(),
          */
         fun newInstance(page: PagerTab) = ViewPagerFragment().apply {
             arguments = Bundle().apply {
-                putString(ARG_PAGE_META, gson.toJson(page))
+                putString(ARG_PAGE_META, json.toJsonString(page))
             }
         }
 
@@ -113,8 +113,8 @@ class ViewPagerFragment : Fragment(),
         super.onCreate(savedInstanceState)
 
         // Get metadata about current tab
-        val pageMetadata = arguments?.getString(ARG_PAGE_META)
-        mPageMeta = gson.fromJson<PagerTab>(pageMetadata, PagerTab::class.java)
+        val pageMetadata = arguments?.getString(ARG_PAGE_META) ?: return
+        mPageMeta = json.parse<PagerTab>(pageMetadata)
 
         info("onCreate finished")
     }

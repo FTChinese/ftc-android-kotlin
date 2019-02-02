@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
 import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.util.gson
+import com.ft.ftchinese.models.json
 import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.info
 
@@ -28,7 +28,7 @@ class RadioActivity : AbsContentActivity() {
 
         fun start(context: Context?, channelItem: ChannelItem) {
             val intent = Intent(context, RadioActivity::class.java)
-            intent.putExtra(EXTRA_CHANNEL_ITEM, gson.toJson(channelItem))
+            intent.putExtra(EXTRA_CHANNEL_ITEM, json.toJsonString(channelItem))
             context?.startActivity(intent)
         }
     }
@@ -66,7 +66,7 @@ class RadioActivity : AbsContentActivity() {
 
         val itemData = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
 
-        mChannelItem = gson.fromJson(itemData, ChannelItem::class.java)
+        mChannelItem = json.parse<ChannelItem>(itemData) ?: return
         info("Creating radio activity for $mChannelItem, API URL: ${mChannelItem?.apiUrl}")
 
         updateStarUI()
