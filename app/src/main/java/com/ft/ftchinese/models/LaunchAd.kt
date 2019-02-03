@@ -3,9 +3,14 @@ package com.ft.ftchinese.models
 import android.content.Context
 import android.net.Uri
 import com.beust.klaxon.Json
+import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.parseLocalDate
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Request
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.jetbrains.anko.AnkoLogger
@@ -162,21 +167,20 @@ class LaunchAdManager(context: Context) : AnkoLogger {
     /**
      * Download latest ad schedule upon app launch
      */
-    fun fetchAndCache(): Request {
+    fun fetchAndCache(): Job {
 
-        return Fuel.get(apiUrl)
-                .responseString { _, _, result ->
-                    val (data, error) = result
+        return GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val body = Fetch().get(apiUrl)
+                        .responseString() ?: return@launch
 
-                    if (error != null || data == null) {
-                        info("Cannot get ad schedule data: $error")
-                        return@responseString
-                    }
+                val schedule = json.parse<LaunchSchedule>(body) ?: return@launch
 
-                    val schedule = json.parse<LaunchSchedule>(data) ?: return@responseString
-
-                    save(schedule)
-                }
+                save(schedule)
+            } catch (e: Exception) {
+                info(e.message)
+            }
+        }
     }
 
     private fun save(schedule: LaunchSchedule) {

@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity(),
     private var mShowAdJob: Job? = null
     private var mDownloadAdJob: Job? = null
 
-    private var mAdScheduleRequest: Request? = null
+    private var mAdScheduleJob: Job? = null
     private var mDownloadAdRequest: Request? = null
 
     private var mSession: SessionManager? = null
@@ -356,7 +356,7 @@ class MainActivity : AppCompatActivity(),
 
         info("Fetch ad schedule data")
 
-        mAdScheduleRequest = adManager.fetchAndCache()
+        mAdScheduleJob = adManager.fetchAndCache()
 
         val adsToDownload = adManager.load(days = 1)
         info("Ad to download: $adsToDownload")
@@ -437,7 +437,7 @@ class MainActivity : AppCompatActivity(),
 
         mShowAdJob?.cancel()
         mDownloadAdJob?.cancel()
-        mAdScheduleRequest?.cancel()
+        mAdScheduleJob?.cancel()
         mDownloadAdRequest?.cancel()
     }
 
@@ -447,7 +447,7 @@ class MainActivity : AppCompatActivity(),
 
         mShowAdJob?.cancel()
         mDownloadAdJob?.cancel()
-        mAdScheduleRequest?.cancel()
+        mAdScheduleJob?.cancel()
         mDownloadAdRequest?.cancel()
     }
 
@@ -456,12 +456,12 @@ class MainActivity : AppCompatActivity(),
 
         mShowAdJob?.cancel()
         mDownloadAdJob?.cancel()
-        mAdScheduleRequest?.cancel()
+        mAdScheduleJob?.cancel()
         mDownloadAdRequest?.cancel()
 
         mShowAdJob = null
         mDownloadAdJob = null
-        mAdScheduleRequest = null
+        mAdScheduleJob = null
         mDownloadAdRequest = null
 
         mSession = null
