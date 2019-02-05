@@ -6,9 +6,9 @@ import android.os.Bundle
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
+import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.isNetworkConnected
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.Request
+import com.ft.ftchinese.util.json
 import kotlinx.android.synthetic.main.activity_content.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.info
@@ -36,10 +36,10 @@ class StoryActivity : AbsContentActivity() {
     override var mChannelItem: ChannelItem? = null
 
     private var mLoadJob: Job? = null
-    private var mCacheJob: Job? = null
+//    private var mCacheJob: Job? = null
     private var mRefreshJob: Job? = null
 
-    private var mRequest: Request? = null
+//    private var mRequest: Request? = null
 
     private var mTemplate: String? = null
 
@@ -110,7 +110,7 @@ class StoryActivity : AbsContentActivity() {
     }
 
     private fun showSignIn() {
-        enableLanguageSwitch = false
+        enableLangSwitch(false)
 
         toast(R.string.prompt_restricted_login)
 
@@ -118,7 +118,7 @@ class StoryActivity : AbsContentActivity() {
     }
 
     private fun showSubs() {
-        enableLanguageSwitch = false
+        enableLangSwitch(false)
 
         toast(R.string.prompt_restricted_paid_user)
 
@@ -149,7 +149,9 @@ class StoryActivity : AbsContentActivity() {
                 return@launch
             }
 
-            val cachedJson = mFileCache?.load(cacheName)
+            val cachedJson = withContext(Dispatchers.IO) {
+                mFileCache?.loadText(cacheName)
+            }
 
             if (cachedJson.isNullOrBlank()) {
                 info("Cache file is not found or is blank")
@@ -171,7 +173,7 @@ class StoryActivity : AbsContentActivity() {
     private suspend fun loadFromServer() {
 
         if (!isNetworkConnected()) {
-            isInProgress = false
+            showProgress(false)
             toast(R.string.prompt_no_network)
             return
         }
@@ -183,39 +185,58 @@ class StoryActivity : AbsContentActivity() {
         }
 
         if (!swipe_refresh.isRefreshing) {
-            isInProgress = true
+            showProgress(true)
         } else {
             toast(R.string.prompt_refreshing)
         }
 
         info("Start fetching data from $url")
 
-        mRequest = Fuel.get(url)
-                .responseString { _, _, result ->
-                    isInProgress = false
+        try {
+            val data = withContext(Dispatchers.IO) {
+                Fetch().get(url).responseString()
+            }
+            showProgress(false)
 
-                    val (data, error) = result
+            if (data.isNullOrBlank()) {
+                return
+            }
 
-                    info("Error: $error")
+            renderAndLoad(data)
 
-                    if (error != null || data == null) {
-                        toast(R.string.prompt_load_failure)
-                        return@responseString
-                    }
+            cacheData(data)
+        } catch (e: Exception) {
+            info(e.message)
+        }
 
-                    info("Start rendering")
-
-                    renderAndLoad(data)
-
-                    cacheData(data)
-                }
+//        mRequest = Fuel.get(url)
+//                .responseString { _, _, result ->
+//                    isInProgress = false
+//
+//                    val (data, error) = result
+//
+//                    info("Error: $error")
+//
+//                    if (error != null || data == null) {
+//                        toast(R.string.prompt_load_failure)
+//                        return@responseString
+//                    }
+//
+//                    info("Start rendering")
+//
+//                    renderAndLoad(data)
+//
+//                    cacheData(data)
+//                }
     }
 
-    private fun cacheData(data: String) {
+    private suspend fun cacheData(data: String) {
 
         val fileName = mChannelItem?.cacheFileName ?: return
 
-        mCacheJob = mFileCache?.save(fileName, data)
+        withContext(Dispatchers.IO) {
+            mFileCache?.saveText(fileName, data)
+        }
     }
 
     private fun renderAndLoad(data: String) {
@@ -231,7 +252,7 @@ class StoryActivity : AbsContentActivity() {
 
         info("Story: $story")
 
-        showLanguageSwitch = story.isBilingual
+        showLangSwitch(story.isBilingual)
 
         val follows = mFollowingManager?.loadForJS() ?: JSFollows(mapOf())
 
@@ -256,7 +277,7 @@ class StoryActivity : AbsContentActivity() {
         if (BuildConfig.DEBUG) {
             val fileName = mChannelItem?.cacheHTMLName ?: return
             GlobalScope.launch {
-                mFileCache?.save(fileName, html)
+                mFileCache?.saveText(fileName, html)
             }
         }
     }

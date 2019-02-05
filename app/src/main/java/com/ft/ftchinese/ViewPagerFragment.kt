@@ -10,8 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.*
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.Request
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.fragment_view_pager.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -42,7 +40,7 @@ class ViewPagerFragment : Fragment(),
     private var mCacheJob: Job? = null
     private var mRefreshJob: Job? = null
 
-    private var mRequest: Request? = null
+//    private var mRequest: Request? = null
 
     private var mSession: SessionManager? = null
     private var mFileCache: FileCache? = null
@@ -52,15 +50,15 @@ class ViewPagerFragment : Fragment(),
     // Hold string in raw/list.html
     private var mTemplate: String? = null
 
-    private var isInProgress: Boolean = false
-        set(value) {
-            if (value) {
-                progress_bar?.visibility = View.VISIBLE
-            } else {
-                progress_bar?.visibility = View.GONE
-                swipe_refresh?.isRefreshing = false
-            }
+    private fun showProgress(value: Boolean) {
+        if (value) {
+            progress_bar?.visibility = View.VISIBLE
+        } else {
+            progress_bar?.visibility = View.GONE
+            swipe_refresh?.isRefreshing = false
         }
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -202,7 +200,7 @@ class ViewPagerFragment : Fragment(),
             HTML_TYPE_COMPLETE -> {
                 info("onRefresh: reload")
                 web_view.reload()
-                isInProgress = false
+                showProgress(false)
             }
         }
     }
@@ -223,7 +221,9 @@ class ViewPagerFragment : Fragment(),
                         return@launch
                     }
 
-                    val cachedFrag = mFileCache?.load(cacheName)
+                    val cachedFrag = withContext(Dispatchers.IO) {
+                        mFileCache?.loadText(cacheName)
+                    }
 
                     if (cachedFrag.isNullOrBlank()) {
                         info("Cached HTML fragment is not found or empty. Fetch from server")
@@ -247,7 +247,9 @@ class ViewPagerFragment : Fragment(),
     private suspend fun loadFromCache(htmlFrag: String) {
 
         if (mTemplate == null) {
-            mTemplate = mFileCache?.readChannelTemplate()
+            mTemplate = withContext(Dispatchers.IO) {
+                mFileCache?.readChannelTemplate()
+            }
         }
 
         renderAndLoad(htmlFrag)
@@ -263,22 +265,30 @@ class ViewPagerFragment : Fragment(),
 
         info("Updating cache in background")
 
-        mRequest = Fuel.get(url)
-                .responseString { _, _, result ->
-                    val (data, error) = result
-
-                    if (error != null || data == null) {
-                        info("Cannot update cache in background. Reason: $error")
-                        return@responseString
-                    }
-
-                    cacheData(data)
-                }
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                val data = Fetch().get(url).responseString() ?: return@launch
+                cacheData(data)
+            } catch (e: Exception) {
+                info("Cannot update cache in background. Reason: ${e.message}")
+            }
+        }
+//        mRequest = Fuel.get(url)
+//                .responseString { _, _, result ->
+//                    val (data, error) = result
+//
+//                    if (error != null || data == null) {
+//
+//                        return@responseString
+//                    }
+//
+//                    cacheData(data)
+//                }
     }
 
     private suspend fun loadFromServer() {
         if (activity?.isNetworkConnected() != true) {
-            isInProgress = false
+            showProgress(false)
             toast(R.string.prompt_no_network)
             return
         }
@@ -286,40 +296,59 @@ class ViewPagerFragment : Fragment(),
         val url = mPageMeta?.contentUrl ?: return
 
         if (mTemplate == null) {
-            mTemplate = mFileCache?.readChannelTemplate()
+            mTemplate = withContext(Dispatchers.IO) {
+                mFileCache?.readChannelTemplate()
+            }
         }
 
         // If this is not refresh action, show progress bar, else show prompt 'Refreshing'
         if (!swipe_refresh.isRefreshing) {
-            isInProgress = true
+            showProgress(true)
         } else {
             toast(R.string.prompt_refreshing)
         }
 
         info("Load content from server on url: $url")
 
-        mRequest = Fuel.get(url)
-                .responseString { _, _, result ->
-                    // TODO: Error triggered: java.lang.IllegalStateException: progress_bar must not be null
-                    isInProgress = false
+        try {
+            val data = withContext(Dispatchers.IO) {
+                Fetch().get(url).responseString()
+            }
 
-                    val (data, error) = result
-                    if (error != null || data == null) {
-                        toast(R.string.prompt_load_failure)
-                        return@responseString
+            showProgress(false)
+            if (data == null) {
+                return
+            }
 
-                    }
+            renderAndLoad(data)
 
-                    renderAndLoad(data)
-                    cacheData(data)
-                }
+            GlobalScope.launch(Dispatchers.IO) {
+                cacheData(data)
+            }
+        } catch (e: Exception) {
+            info(e.message)
+        }
+
+//        mRequest = Fuel.get(url)
+//                .responseString { _, _, result ->
+//
+//                    val (data, error) = result
+//                    if (error != null || data == null) {
+//                        toast(R.string.prompt_load_failure)
+//                        return@responseString
+//
+//                    }
+//
+//                    renderAndLoad(data)
+//                    cacheData(data)
+//                }
     }
 
 
     private fun cacheData(data: String) {
         val fileName = mPageMeta?.fileName ?: return
 
-        mCacheJob = mFileCache?.save(fileName, data)
+        mFileCache?.saveText(fileName, data)
     }
 
     private fun renderAndLoad(htmlFragment: String) {
@@ -331,7 +360,7 @@ class ViewPagerFragment : Fragment(),
         val fileName = mPageMeta?.fileName ?: return
 
         if (dataToLoad != null) {
-            mFileCache?.save("full_$fileName", dataToLoad)
+            mFileCache?.saveText("full_$fileName", dataToLoad)
         }
     }
 
@@ -345,7 +374,7 @@ class ViewPagerFragment : Fragment(),
         super.onPause()
         info("onPause finished")
 
-        mRequest?.cancel()
+//        mRequest?.cancel()
         mCacheJob?.cancel()
         mLoadJob?.cancel()
         mRefreshJob?.cancel()
@@ -355,7 +384,7 @@ class ViewPagerFragment : Fragment(),
         super.onStop()
         info("onStop finished")
 
-        mRequest?.cancel()
+//        mRequest?.cancel()
         mCacheJob?.cancel()
         mLoadJob?.cancel()
         mRefreshJob?.cancel()
@@ -364,12 +393,12 @@ class ViewPagerFragment : Fragment(),
     override fun onDestroy() {
         super.onDestroy()
 
-        mRequest?.cancel()
+//        mRequest?.cancel()
         mCacheJob?.cancel()
         mLoadJob?.cancel()
         mRefreshJob?.cancel()
-
-        mRequest = null
+//
+//        mRequest = null
         mCacheJob = null
         mLoadJob = null
         mRefreshJob = null
