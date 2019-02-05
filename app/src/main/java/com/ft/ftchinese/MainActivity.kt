@@ -19,6 +19,7 @@ import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
 import com.ft.ftchinese.models.*
+import com.ft.ftchinese.splash.ScheduleManager
 import com.ft.ftchinese.user.*
 import com.ft.ftchinese.util.*
 import com.github.kittinunf.fuel.core.Request
@@ -55,7 +56,7 @@ class MainActivity : AppCompatActivity(),
     private var mDownloadAdRequest: Request? = null
 
     private var mSession: SessionManager? = null
-    private var mAdManager: LaunchAdManager? = null
+//    private var mAdManager: LaunchAdManager? = null
     private var cache: FileCache? = null
 
     private var mNewsAdapter: TabPagerAdapter? = null
@@ -175,7 +176,7 @@ class MainActivity : AppCompatActivity(),
         api.registerApp(BuildConfig.WX_SUBS_APPID)
 
         mSession = SessionManager.getInstance(this)
-        mAdManager = LaunchAdManager.getInstance(this)
+//        mAdManager = LaunchAdManager.getInstance(this)
         cache = FileCache(this)
 
         // Show advertisement
@@ -217,8 +218,8 @@ class MainActivity : AppCompatActivity(),
         // Keep a reference to this coroutine in case user exits before this task finished.
         // Always remember to check network status otherwise app will crash.
         if (isNetworkConnected()) {
-            mDownloadAdJob = GlobalScope.launch {
-                checkAd()
+            mDownloadAdJob = GlobalScope.launch(Dispatchers.IO) {
+                ScheduleManager(this@MainActivity).crawl()
             }
         }
     }
@@ -263,13 +264,13 @@ class MainActivity : AppCompatActivity(),
     private suspend fun showAd() {
 
         // Pick an ad based on its probability distribution factor.
-        val adManager = mAdManager ?: return
+        val scheduleManager = ScheduleManager(this)
         val account = mSession?.loadAccount()
-        val ad = adManager.getRandomAd(account?.membership) ?: return
+        val screenAd = scheduleManager.pickRandomAd(account?.membership?.tier) ?: return
 
         // Check if the required ad image is required.
-        if (cache?.exists(ad.imageName) != true) {
-            info("Ad image ${ad.imageName} not found")
+        if (cache?.exists(screenAd.imageName) != true) {
+            info("Ad image ${screenAd.imageName} not found")
             showSystemUI()
             return
         }
@@ -295,7 +296,7 @@ class MainActivity : AppCompatActivity(),
         val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
 
         val bundle = Bundle().apply {
-            putString(FirebaseAnalytics.Param.CREATIVE_NAME, ad.title)
+            putString(FirebaseAnalytics.Param.CREATIVE_NAME, screenAd.title)
             putString(FirebaseAnalytics.Param.CREATIVE_SLOT, AdSlot.APP_OPEN)
         }
 
@@ -311,7 +312,7 @@ class MainActivity : AppCompatActivity(),
 
         adImage.setOnClickListener {
             val customTabsInt = CustomTabsIntent.Builder().build()
-            customTabsInt.launchUrl(this, Uri.parse(ad.linkUrl))
+            customTabsInt.launchUrl(this, Uri.parse(screenAd.linkUrl))
             root_container.removeView(adView)
             showSystemUI()
             mShowAdJob?.cancel()
@@ -320,20 +321,22 @@ class MainActivity : AppCompatActivity(),
             info("Clicked ads")
         }
 
-        adImage.setImageDrawable(
-                cache?.readDrawable(ad.imageName)
-        )
+        // Read image and show it.
+        val drawable = withContext(Dispatchers.IO) {
+            cache?.readDrawable(screenAd.imageName)
+        }
+
+        adImage.setImageDrawable(drawable)
 
         adTimer.visibility = View.VISIBLE
         info("Show timer")
 
         // send impressions in background.
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.IO) {
             try {
-                ad.sendImpression()
+                screenAd.sendImpression()
             } catch (e: Exception) {
-                e.printStackTrace()
-                info("Send launch screen impression failed")
+                info("Send launch screen impression failed: ${e.message}")
             }
         }
 
@@ -347,29 +350,6 @@ class MainActivity : AppCompatActivity(),
         root_container.removeView(adView)
 
         showSystemUI()
-    }
-
-    // Get advertisement schedule from server
-    private fun checkAd() {
-
-        val adManager = mAdManager ?: return
-
-        info("Fetch ad schedule data")
-
-        mAdScheduleJob = adManager.fetchAndCache()
-
-        val adsToDownload = adManager.load(days = 1)
-        info("Ad to download: $adsToDownload")
-
-        for (ad in adsToDownload) {
-            info("Download ad image: ${ad.imageUrl}")
-
-            if (cache?.exists(ad.imageName) == true) {
-                continue
-            }
-
-            mDownloadAdRequest = ad.cacheImage(filesDir)
-        }
     }
 
     override fun onRestart() {
@@ -465,7 +445,7 @@ class MainActivity : AppCompatActivity(),
         mDownloadAdRequest = null
 
         mSession = null
-        mAdManager = null
+//        mAdManager = null
 
     }
 
