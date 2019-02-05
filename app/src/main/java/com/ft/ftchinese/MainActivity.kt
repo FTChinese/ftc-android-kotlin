@@ -22,7 +22,6 @@ import com.ft.ftchinese.models.*
 import com.ft.ftchinese.splash.ScheduleManager
 import com.ft.ftchinese.user.*
 import com.ft.ftchinese.util.*
-import com.github.kittinunf.fuel.core.Request
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -53,10 +52,8 @@ class MainActivity : AppCompatActivity(),
     private var mDownloadAdJob: Job? = null
 
     private var mAdScheduleJob: Job? = null
-    private var mDownloadAdRequest: Request? = null
 
     private var mSession: SessionManager? = null
-//    private var mAdManager: LaunchAdManager? = null
     private var cache: FileCache? = null
 
     private var mNewsAdapter: TabPagerAdapter? = null
@@ -418,7 +415,6 @@ class MainActivity : AppCompatActivity(),
         mShowAdJob?.cancel()
         mDownloadAdJob?.cancel()
         mAdScheduleJob?.cancel()
-        mDownloadAdRequest?.cancel()
     }
 
     override fun onStop() {
@@ -428,7 +424,6 @@ class MainActivity : AppCompatActivity(),
         mShowAdJob?.cancel()
         mDownloadAdJob?.cancel()
         mAdScheduleJob?.cancel()
-        mDownloadAdRequest?.cancel()
     }
 
     override fun onDestroy() {
@@ -437,15 +432,12 @@ class MainActivity : AppCompatActivity(),
         mShowAdJob?.cancel()
         mDownloadAdJob?.cancel()
         mAdScheduleJob?.cancel()
-        mDownloadAdRequest?.cancel()
 
         mShowAdJob = null
         mDownloadAdJob = null
         mAdScheduleJob = null
-        mDownloadAdRequest = null
 
         mSession = null
-//        mAdManager = null
 
     }
 
