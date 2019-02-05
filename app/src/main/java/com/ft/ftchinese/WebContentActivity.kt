@@ -6,7 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.models.json
+import com.ft.ftchinese.util.json
 import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.activity_content.*
 import org.jetbrains.anko.info
