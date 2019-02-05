@@ -71,33 +71,30 @@ abstract class AbsContentActivity : AppCompatActivity(),
             }
         }
 
-    protected var isInProgress: Boolean = false
-        set(value) {
-            if (value) {
-                progress_bar?.visibility = View.VISIBLE
-            } else {
-                swipe_refresh?.isRefreshing = value
-                progress_bar?.visibility = View.GONE
-            }
+    protected fun showProgress(value: Boolean) {
+        if (value) {
+            progress_bar?.visibility = View.VISIBLE
+        } else {
+            swipe_refresh?.isRefreshing = value
+            progress_bar?.visibility = View.GONE
         }
+    }
 
-    protected var showLanguageSwitch = false
-        set(value) {
-            if (value) {
-                language_group.visibility = View.VISIBLE
-            } else {
-                language_group.visibility = View.GONE
-            }
+    protected fun showLangSwitch(value: Boolean) {
+        if (value) {
+            language_group.visibility = View.VISIBLE
+        } else {
+            language_group.visibility = View.GONE
         }
+    }
 
-    protected var enableLanguageSwitch = true
-        set(value) {
-            if (!value) {
-                titlebar_cn.isChecked = true
-                titlebar_en.isChecked = false
-                titlebar_bi.isChecked = false
-            }
+    protected fun enableLangSwitch(value: Boolean) {
+        if (!value) {
+            titlebar_cn.isChecked = true
+            titlebar_en.isChecked = false
+            titlebar_bi.isChecked = false
         }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
