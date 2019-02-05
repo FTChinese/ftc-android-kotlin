@@ -1,5 +1,8 @@
 package com.ft.ftchinese.models
 
+import com.ft.ftchinese.util.KCycle
+import com.ft.ftchinese.util.KDate
+import com.ft.ftchinese.util.KTier
 import org.threeten.bp.LocalDate
 
 data class Membership(
