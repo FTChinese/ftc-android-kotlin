@@ -1,5 +1,8 @@
 package com.ft.ftchinese.models
 
+import com.ft.ftchinese.util.KCycle
+import com.ft.ftchinese.util.KTier
+
 const val KEY_STANDARD_YEAR = "standard_year"
 const val KEY_STANDARD_MONTH = "standard_month"
 const val KEY_PREMIUM_YEAR = "premium_year"
