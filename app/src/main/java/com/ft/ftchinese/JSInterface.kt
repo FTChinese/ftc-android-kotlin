@@ -6,6 +6,7 @@ import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.SignInActivity
 import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.FileCache
+import com.ft.ftchinese.util.json
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
@@ -81,7 +82,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
             if (name != null) {
                 info("Saving js posted data for $mPageMeta")
                 GlobalScope.launch {
-                    mFileCache?.save("$name.json", message)
+                    mFileCache?.saveText("$name.json", message)
                 }
             }
         }
@@ -214,7 +215,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
             if (name != null) {
                 info("Saving js posted data for sponsors of $mPageMeta")
                 GlobalScope.launch {
-                    mFileCache?.save("${name}_sponsors.json", message)
+                    mFileCache?.saveText("${name}_sponsors.json", message)
                 }
             }
         }
