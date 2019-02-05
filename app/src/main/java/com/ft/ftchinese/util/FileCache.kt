@@ -23,7 +23,7 @@ class FileCache (private val context: Context) : AnkoLogger {
         }
     }
 
-    fun readText(name: String?): String? {
+    fun loadText(name: String?): String? {
         if (name.isNullOrBlank()) {
             return null
         }
@@ -31,7 +31,7 @@ class FileCache (private val context: Context) : AnkoLogger {
         return try {
             context.openFileInput(name).bufferedReader().readText()
         } catch (e: Exception) {
-            info("Cannot open file ${name} due to: ${e.message}")
+            info("Cannot open file $name due to: ${e.message}")
             null
         }
     }
@@ -65,35 +65,6 @@ class FileCache (private val context: Context) : AnkoLogger {
             false
         }
     }
-
-    fun save(fileName: String, content: String): Job {
-        return GlobalScope.launch {
-            try {
-                val file = File(context.filesDir, fileName)
-
-                file.writeText(content)
-            } catch (e: Exception) {
-                info("Cannot cache $fileName")
-            }
-        }
-    }
-
-    suspend fun load(fileName: String): String {
-        val job = GlobalScope.async {
-            try {
-                context.openFileInput(fileName)
-                        .bufferedReader()
-                        .readText()
-            } catch (e: IOException) {
-                ""
-            }
-
-        }
-
-        return job.await()
-    }
-
-
 
     fun space(): String {
         return try {
