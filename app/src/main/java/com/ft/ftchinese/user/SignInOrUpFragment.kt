@@ -127,7 +127,6 @@ class SignInOrUpFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor>, An
             // For signup, hide login button, and reset password and sign up button.
             USED_FOR_SIGN_UP -> {
                 email_sign_in_button.visibility = View.GONE
-                wechat_sign_in_button.visibility = View.GONE
                 go_to_reset_password.visibility = View.GONE
                 go_to_sign_up.visibility = View.GONE
             }
