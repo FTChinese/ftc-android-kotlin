@@ -1,5 +1,6 @@
 package com.ft.ftchinese.models
 
+import com.ft.ftchinese.util.json
 import org.junit.Test
 
 class JsonTest {
