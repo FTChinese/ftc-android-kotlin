@@ -100,7 +100,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
             cancel = true
         } else if (!isEmailValid(emailStr)) {
             // If email is invalid
-            email.error = getString(R.string.error_field_required)
+            email.error = getString(R.string.error_invalid_email)
             cancel = true
         } else if (emailStr == mSession?.loadAccount()?.email) {
             // If new email equals the current one
