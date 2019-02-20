@@ -1,6 +1,7 @@
 package com.ft.ftchinese.models
 
 import android.content.Context
+import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.util.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -15,7 +16,10 @@ private const val PREF_SESSION_ID = "session_id"
 private const val PREF_UNION_ID = "union_id"
 private const val PREF_CREATED = "created_at"
 
-class WxManager private constructor(context: Context) {
+/**
+ * Manages local-cached wechat session data.
+ */
+class WxSessionManager private constructor(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
     private val editor = sharedPreferences.edit()
 
@@ -50,11 +54,11 @@ class WxManager private constructor(context: Context) {
     }
 
     companion object {
-        private var instance: WxManager? = null
+        private var instance: WxSessionManager? = null
 
-        @Synchronized fun getInstance(ctx: Context): WxManager {
+        @Synchronized fun getInstance(ctx: Context): WxSessionManager {
             if (instance == null) {
-                instance = WxManager(ctx)
+                instance = WxSessionManager(ctx)
             }
 
             return instance!!
@@ -62,6 +66,9 @@ class WxManager private constructor(context: Context) {
     }
 }
 
+/**
+ * Handles wechat login
+ */
 data class WxLogin(
         val code: String
 ) {
@@ -92,18 +99,7 @@ data class WxSession(
         @KDateTime
         val createdAt: ZonedDateTime
 ) {
-    fun getAccount(): Account? {
-        val (_, body) = Fetch().get(NextApi.WX_ACCOUNT)
-                .noCache()
-                .setUnionId(unionId)
-                .responseApi()
 
-        if (body == null) {
-            return null
-        }
-
-        return json.parse<Account>(body)
-    }
 
     /**
      * Check if createAt is 30 days old.
@@ -117,16 +113,49 @@ data class WxSession(
             true
         }
 
-
     /**
      * Refresh Wechat user info.
      */
-    fun refreshInfo() {
-        Fetch().get(SubscribeApi.WX_REFRESH)
+    fun refreshInfo(): Boolean {
+        val (resp, _) = Fetch().get(SubscribeApi.WX_REFRESH)
                 .noCache()
                 .setAppId()
                 .setSessionId(this@WxSession.sessionId)
                 .responseApi()
+
+        return resp.code() == 204
+    }
+
+    /**
+     * Fetch user account data by wechat union id.
+     */
+    fun fetchAccount(): Account? {
+        val (_, body) = Fetch()
+                .get(NextApi.WX_ACCOUNT)
+                .noCache()
+                .setUnionId(unionId)
+                .responseApi()
+
+        if (body == null) {
+            return null
+        }
+
+        return json.parse<Account>(body)
+    }
+
+    /**
+     * Send request to bind this wechat account to an ftc account
+     */
+    fun bindFtcAccount(userId: String): Boolean {
+        val (resp, _) = Fetch().put(NextApi.WX_BIND)
+                .noCache()
+                .setUnionId(unionId)
+                .jsonBody(Klaxon().toJsonString(mapOf(
+                        "userId" to userId
+                )))
+                .responseApi()
+
+        return resp.code() == 204
     }
 }
 
@@ -143,15 +172,16 @@ data class Wechat(
     /**
      * Download user's Wechat avatar.
      */
-    fun downloadAvatar(filesDir: File): ByteArray? {
+    fun downloadAvatar(filesDir: File?): ByteArray? {
         if (avatarUrl.isNullOrBlank()) {
             return null
         }
 
+        val f = if (filesDir != null) File(filesDir, avatarName) else null
         return try {
             Fetch()
                     .get(avatarUrl)
-                    .download(File(filesDir, avatarName))
+                    .download(f)
         } catch (e: Exception) {
             info(e.message)
             null
