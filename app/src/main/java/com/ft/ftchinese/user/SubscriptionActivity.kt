@@ -276,7 +276,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
         val isLoggedIn = mSession?.isLoggedIn() ?: false
         if (!isLoggedIn) {
             login_button.setOnClickListener {
-                SignInActivity.startForResult(this)
+                CredentialsActivity.startForResult(this)
             }
         }
 
@@ -299,7 +299,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
                         cycle = Cycle.YEAR
                 )
             } else {
-                SignInActivity.startForResult(this)
+                CredentialsActivity.startForResult(this)
             }
 
         }
@@ -313,7 +313,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
                         cycle = Cycle.MONTH
                 )
             } else {
-                SignInActivity.startForResult(this)
+                CredentialsActivity.startForResult(this)
             }
         }
 
@@ -326,7 +326,7 @@ class SubscriptionActivity : AppCompatActivity(), SwipeRefreshLayout.OnRefreshLi
                         cycle = Cycle.YEAR
                 )
             } else {
-                SignInActivity.startForResult(this)
+                CredentialsActivity.startForResult(this)
             }
         }
 
