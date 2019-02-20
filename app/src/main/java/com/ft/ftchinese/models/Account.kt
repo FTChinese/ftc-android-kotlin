@@ -1,9 +1,6 @@
 package com.ft.ftchinese.models
 
-import com.ft.ftchinese.util.NextApi
-import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.SubscribeApi
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.util.*
 import org.jetbrains.anko.AnkoLogger
 
 
@@ -21,10 +18,38 @@ data class Account(
         val isVerified: Boolean = false,
         val avatarUrl: String?,
         val isVip: Boolean = false,
+        @KLoginMethod
+        val loginMethod: LoginMethod? = null,
         val wechat: Wechat,
         val membership: Membership
 ): AnkoLogger {
 
+    /**
+     * Tests whether two accounts are the same one.
+     */
+    fun isEqual(other: Account): Boolean {
+        return this.id == other.id
+    }
+
+    /**
+     * Checks whether an ftc account is bound to a wechat account.
+     */
+    val isCoupled: Boolean
+        get() = id.isNotBlank() && !unionId.isNullOrBlank()
+
+    /**
+     * Is this account a wechat-only one?
+     * -- logged in with wecaht and not bound to FTC account.
+     */
+    val isWxOnly: Boolean
+        get() = !unionId.isNullOrBlank() && id.isBlank()
+
+    /**
+     * Is this account an FTC-only one?
+     * -- logged in with email and not bound to a wechat account.
+     */
+    val isFtcOnly: Boolean
+        get() = id.isNotBlank() && unionId.isNullOrBlank()
     /**
      * Check if user can access paid content.
      */
@@ -34,11 +59,12 @@ data class Account(
         }
 
     /**
-     * Test if this account has email and union id bound.
+     * Get a name used to display on UI.
+     * If userName is set, use userName;
+     * otherwise use wechat nickname;
+     * otherwise use the name part of email address;
+     * finally tell user userName is not set.
      */
-    val isBound: Boolean
-        get() = (id != "") && (unionId != null)
-
     val displayName: String
         get() {
             if (userName != null) {
@@ -56,28 +82,34 @@ data class Account(
             return "用户名未设置"
         }
 
-    val loginMethod: LoginMethod?
-        get() {
-            if (id.isNotBlank()) {
-                return LoginMethod.EMAIL
-            }
-            if (!unionId.isNullOrBlank()) {
-                return LoginMethod.WECHAT
-            }
-
-            return null
-        }
-
     /**
      * @return Account. Always returns a new one rather than modifying the existing one to make it immutable.
+     * Data is retrieved from different endpoints based on
+     * login method so that account data is always
+     * consistent with that of user's initial login.
      */
     fun refresh(): Account? {
-        val (_, body) =  Fetch()
-                .get(NextApi.ACCOUNT)
-                .noCache()
-                .setUserId(this.id)
-                .responseApi()
+        val fetch = Fetch().noCache()
 
+        val (_, body) = when (loginMethod) {
+            LoginMethod.EMAIL -> {
+                fetch.get(NextApi.ACCOUNT)
+                        .noCache()
+                        .setUserId(id)
+                        .responseApi()
+            }
+            LoginMethod.WECHAT -> {
+                if (unionId == null) {
+                    return null
+                }
+
+                fetch.get(NextApi.WX_ACCOUNT)
+                        .noCache()
+                        .setUnionId(unionId)
+                        .responseApi()
+            }
+            else -> return null
+        }
 
         return if (body == null) {
             null
