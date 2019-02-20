@@ -6,7 +6,7 @@
     android:id="@+id/swipe_refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".user.AccountActivity">
+    tools:context=".user.FtcAccountFragment">
 
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -29,7 +29,7 @@
                     android:id="@+id/prompt_verify_email"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/prompt_verify_email"
+                    android:text="@string/instruct_verify_email"
                     style="@style/FTCText"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +41,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="@string/action_request_verify"
+                    android:text="@string/btn_request_verify"
                     app:layout_constraintEnd_toEndOf="@+id/prompt_verify_email"
                     app:layout_constraintTop_toBottomOf="@+id/prompt_verify_email" />
 
@@ -61,7 +61,7 @@
                     android:id="@+id/prompt_email"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/prompt_email"
+                    android:text="@string/label_email"
                     android:textAppearance="@style/TextAppearance.AppCompat"
                     android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -96,7 +96,7 @@
                     android:id="@+id/prompt_user_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/prompt_user_name"
+                    android:text="@string/label_user_name"
                     android:textAppearance="@style/TextAppearance.AppCompat"
                     android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -128,10 +128,10 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/prompt_password"
+                    android:id="@+id/label_password"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/prompt_password"
+                    android:text="@string/label_password"
                     android:textAppearance="@style/TextAppearance.AppCompat"
                     android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -145,12 +145,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
-                    android:text="@string/prompt_change_password"
+                    android:text="@string/action_change_password"
                     android:textAppearance="@style/TextAppearance.AppCompat"
                     android:textSize="18sp"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/prompt_password"
+                    app:layout_constraintBaseline_toBaselineOf="@+id/label_password"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/prompt_password" />
+                    app:layout_constraintStart_toEndOf="@id/label_password" />
 
             </android.support.constraint.ConstraintLayout>
 
@@ -158,7 +158,7 @@
                 style="@style/SectionHead"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/heading_bind" />
+                android:text="@string/heading_bind_account" />
 
             <android.support.constraint.ConstraintLayout
                 android:id="@+id/wechat_container"
@@ -169,7 +169,7 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:id="@+id/prompt_wechat"
+                    android:id="@+id/label_wechat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/label_wechat"
@@ -186,12 +186,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
-                    android:text="@string/status_not_bound"
+                    android:text="@string/action_bind_account"
                     android:textAppearance="@style/TextAppearance.AppCompat"
                     android:textSize="18sp"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/prompt_wechat"
+                    app:layout_constraintBaseline_toBaselineOf="@+id/label_wechat"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/prompt_wechat" />
+                    app:layout_constraintStart_toEndOf="@id/label_wechat" />
 
             </android.support.constraint.ConstraintLayout>
 
