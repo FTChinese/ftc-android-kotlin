@@ -27,7 +27,7 @@ import kotlin.Exception
 
 class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     private var api: IWXAPI? = null
-    private var wxManager: WxManager? = null
+    private var wxManager: WxSessionManager? = null
     private var sessionManager: SessionManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,7 +94,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 if (resp is SendAuth.Resp) {
                     info("code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
 
-                    wxManager = WxManager.getInstance(this)
+                    wxManager = WxSessionManager.getInstance(this)
                     sessionManager = SessionManager.getInstance(this)
 
                     val state = wxManager?.loadState()
@@ -142,7 +142,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 wxManager?.saveSession(sess)
 
                 val acnt = withContext(Dispatchers.IO) {
-                    sess.getAccount()
+                    sess.fetchAccount()
                 }
 
                 if (acnt == null) {
