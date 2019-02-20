@@ -1,7 +1,6 @@
 package com.ft.ftchinese.user
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -14,30 +13,17 @@ import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.handleApiError
 import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
-import kotlinx.android.synthetic.main.fragment_email.*
+import kotlinx.android.synthetic.main.fragment_update_email.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
-class UpdateEmailActivity : SingleFragmentActivity() {
-    override fun createFragment(): Fragment {
-        return EmailFragment.newInstance()
-    }
 
-    companion object {
-        fun start(context: Context?) {
-            val intent = Intent(context, UpdateEmailActivity::class.java)
-
-            context?.startActivity(intent)
-        }
-    }
-}
-
-internal class EmailFragment : Fragment(), AnkoLogger {
+class UpdateEmailFragment : Fragment(), AnkoLogger {
 
     private var job: Job? = null
-    private var mListener: OnFragmentInteractionListener? = null
+    private var mListener: OnAccountInteractionListener? = null
     private var mSession: SessionManager? = null
 
     /**
@@ -53,16 +39,16 @@ internal class EmailFragment : Fragment(), AnkoLogger {
         }
 
     private var isInputAllowed: Boolean
-        get() = email.isEnabled
+        get() = email_input.isEnabled
         set(value) {
-            email?.isEnabled = value
+            email_input?.isEnabled = value
             save_button?.isEnabled = value
         }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
-        if (context is OnFragmentInteractionListener) {
+        if (context is OnAccountInteractionListener) {
             mListener = context
         }
 
@@ -75,7 +61,7 @@ internal class EmailFragment : Fragment(), AnkoLogger {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
 
-        return inflater.inflate(R.layout.fragment_email, container, false)
+        return inflater.inflate(R.layout.fragment_update_email, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -89,27 +75,13 @@ internal class EmailFragment : Fragment(), AnkoLogger {
     }
 
     private fun attemptSave() {
-        email.error = null
-        val emailStr = email.text.toString()
+        email_input.error = null
+        val emailStr = email_input.text.toString().trim()
 
-        var cancel = false
-
-        // If email is empty
-        if (emailStr.isBlank()) {
-            email.error = getString(R.string.error_field_required)
-            cancel = true
-        } else if (!isEmailValid(emailStr)) {
-            // If email is invalid
-            email.error = getString(R.string.error_invalid_email)
-            cancel = true
-        } else if (emailStr == mSession?.loadAccount()?.email) {
-            // If new email equals the current one
-            email.error = getString(R.string.error_email_unchanged)
-            cancel = true
-        }
-
-        if (cancel) {
-            email.requestFocus()
+        val msgId = Validator.ensureEmail(emailStr)
+        if (msgId != null) {
+            email_input.error = getString(msgId)
+            email_input.requestFocus()
             return
         }
 
@@ -173,6 +145,6 @@ internal class EmailFragment : Fragment(), AnkoLogger {
     }
 
     companion object {
-        fun newInstance() = EmailFragment()
+        fun newInstance() = UpdateEmailFragment()
     }
 }

@@ -1,43 +1,29 @@
 package com.ft.ftchinese.user
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.PasswordUpdate
+import com.ft.ftchinese.models.Passwords
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.handleApiError
 import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
-import kotlinx.android.synthetic.main.fragment_password.*
+import kotlinx.android.synthetic.main.fragment_update_password.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
-class UpdatePasswordActivity : SingleFragmentActivity() {
-    override fun createFragment(): Fragment {
-        return PasswordFragment.newInstance()
-    }
 
-    companion object {
-        fun start(context: Context?) {
-            val intent = Intent(context, UpdatePasswordActivity::class.java)
-
-            context?.startActivity(intent)
-        }
-    }
-}
-
-class PasswordFragment : Fragment(), AnkoLogger {
+class UpdatePasswordFragment : Fragment(), AnkoLogger {
 
     private var job: Job? = null
-    private var mListener: OnFragmentInteractionListener? = null
+    private var mListener: OnAccountInteractionListener? = null
 
     private var mSession: SessionManager? = null
 
@@ -58,7 +44,7 @@ class PasswordFragment : Fragment(), AnkoLogger {
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        if (context is OnFragmentInteractionListener) {
+        if (context is OnAccountInteractionListener) {
             mListener = context
         }
 
@@ -70,7 +56,7 @@ class PasswordFragment : Fragment(), AnkoLogger {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
 
-        return inflater.inflate(R.layout.fragment_password, container, false)
+        return inflater.inflate(R.layout.fragment_update_password, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -141,7 +127,7 @@ class PasswordFragment : Fragment(), AnkoLogger {
         isInputAllowed = false
 
         job = GlobalScope.launch(Dispatchers.Main) {
-            val passwordUpdate = PasswordUpdate(oldPassword, newPassword)
+            val passwordUpdate = Passwords(oldPassword, newPassword)
 
             try {
                 info("Start updating password")
@@ -195,6 +181,6 @@ class PasswordFragment : Fragment(), AnkoLogger {
     }
 
     companion object {
-        fun newInstance() = PasswordFragment()
+        fun newInstance() = UpdatePasswordFragment()
     }
 }

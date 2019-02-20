@@ -1,7 +1,6 @@
 package com.ft.ftchinese.user
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -14,30 +13,16 @@ import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.handleApiError
 import com.ft.ftchinese.util.handleException
 import com.ft.ftchinese.util.isNetworkConnected
-import kotlinx.android.synthetic.main.fragment_username.*
+import kotlinx.android.synthetic.main.fragment_update_username.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
-class UpdateUserNameActivity : SingleFragmentActivity() {
-    override fun createFragment(): Fragment {
-        return UsernameFragment.newInstance()
-    }
-
-    companion object {
-        fun start(context: Context?) {
-            val intent = Intent(context, UpdateUserNameActivity::class.java)
-
-            context?.startActivity(intent)
-        }
-    }
-}
-
-class UsernameFragment : Fragment(), AnkoLogger {
+class UpdateNameFragment : Fragment(), AnkoLogger {
 
     private var job: Job? = null
-    private var mListener: OnFragmentInteractionListener? = null
+    private var mListener: OnAccountInteractionListener? = null
 
     private var mSession: SessionManager? = null
 
@@ -57,7 +42,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
-        if (context is OnFragmentInteractionListener) {
+        if (context is OnAccountInteractionListener) {
             mListener = context
         }
 
@@ -69,7 +54,7 @@ class UsernameFragment : Fragment(), AnkoLogger {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
 
-        return inflater.inflate(R.layout.fragment_username, container, false)
+        return inflater.inflate(R.layout.fragment_update_username, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -164,6 +149,6 @@ class UsernameFragment : Fragment(), AnkoLogger {
 
     companion object {
 
-        fun newInstance() = UsernameFragment()
+        fun newInstance() = UpdateNameFragment()
     }
 }
