@@ -7,10 +7,10 @@
         android:checkableBehavior="single">
         <item
             android:id="@+id/action_login"
-            android:title="@string/action_login" />
-        <item
-            android:id="@+id/action_sign_up"
-            android:title="@string/action_sign_up"/>
+            android:title="@string/title_login_signup" />
+        <!--<item-->
+            <!--android:id="@+id/action_sign_up"-->
+            <!--android:title="@string/action_sign_up"/>-->
     </group>
 
     <group android:checkableBehavior="single"
