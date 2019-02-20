@@ -4,13 +4,16 @@ import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.json
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
+import org.json.JSONException
+import org.json.JSONObject
 
 data class Credentials(
         val email: String,
         val password: String
 ) : AnkoLogger {
 
-    fun login(): Account? {
+    fun login(): String? {
         val (_, body) = Fetch()
                 .post(NextApi.LOGIN)
                 .setClient()
@@ -18,16 +21,23 @@ data class Credentials(
                 .jsonBody(json.toJsonString(this))
                 .responseApi()
 
-        if (body == null) {
-            return null
+        return if (body == null) {
+            null
+        } else {
+            decodeUserId(body)
         }
-
-        val user = json.parse<FtcUser>(body)
-
-        return user?.fetchAccount()
     }
 
-    fun signUp(): Account? {
+    private fun decodeUserId(json: String): String? {
+        return try {
+            JSONObject(json).getString("id")
+        } catch (e: JSONException) {
+            info(e)
+            null
+        }
+    }
+
+    fun signUp(): String? {
         val (_, body) = Fetch()
                 .post(NextApi.SIGN_UP)
                 .setClient()
@@ -38,7 +48,7 @@ data class Credentials(
         return if (body == null) {
             null
         } else {
-            json.parse<Account>(body)
+            decodeUserId(body)
         }
     }
 }
