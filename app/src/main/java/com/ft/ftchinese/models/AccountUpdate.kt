@@ -41,7 +41,7 @@ data class UserNameUpdate(
     }
 }
 
-data class PasswordUpdate(
+data class Passwords(
         val oldPassword: String,
         val newPassword: String
 ) {
