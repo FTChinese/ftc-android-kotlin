@@ -15,9 +15,8 @@ data class Membership(
         val expireDate: LocalDate? = null
 ) {
     /**
-     * Compare expireAt against now.
-     * Return true if expireDate is before now,
-     * or if expireDate is null.
+     * Check if membership is expired.
+     * @return true if expireDate is before now, or membership does not exist.
      */
     val isExpired: Boolean
         get() = expireDate
