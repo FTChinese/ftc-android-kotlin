@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.LoginMethod
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
@@ -65,20 +64,12 @@ class AccountActivity : AppCompatActivity(),
     private fun attachFragment() {
         val account = SessionManager.getInstance(this).loadAccount() ?: return
 
-        // If FTC account is already bound to a wechat account,
-        // always show the full account UI;
-        // otherwise show UI based on login method.
-        // If user logged in only with wechat, we have nothing to show exception wechat name and avatar;
-        // if user logged in with email or mobile phone,
-        // show the full account UI, leaving those empty fields empty and persuade user to submit those data.
-        // Actually just wechat-only user is treated specially.
-        val fragment: Fragment = if (account.isCoupled) {
-            FtcAccountFragment.newInstance()
+        info("Account: $account")
+
+        val fragment: Fragment = if (account.isWxOnly) {
+            WxAccountFragment.newInstance()
         } else {
-            when (account.loginMethod) {
-                LoginMethod.WECHAT -> WxAccountFragment.newInstance()
-                else -> FtcAccountFragment.newInstance()
-            }
+            FtcAccountFragment.newInstance()
         }
 
         supportFragmentManager
