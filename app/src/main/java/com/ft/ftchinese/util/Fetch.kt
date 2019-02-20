@@ -13,7 +13,7 @@ import java.io.IOException
 
 data class ClientError(
         @Json(ignored = true)
-        var statusCode: Int, // HTTP status code
+        var statusCode: Int = 400, // HTTP status code
         override val message: String,
         val error: Reason? = null
 ) : Exception(message)
@@ -210,16 +210,21 @@ class Fetch : AnkoLogger {
                         statusCode = resp.code(),
                         message = resp.message()
                 )
+        info("API error response: $body")
 
-        val clientErr = Klaxon()
-                .parse<ClientError>(body)
-                ?: throw ClientError(
-                        statusCode = resp.code(),
-                        message = resp.message()
-                )
+        // Avoid throwing JSON parse error.
+        val clientErr = try {
+            Klaxon().parse<ClientError>(body)
+        } catch (e: Exception) {
+            ClientError(message = resp.message())
+        }
 
-        clientErr.statusCode = resp.code()
-        throw clientErr
+        clientErr?.statusCode = resp.code()
+
+        throw clientErr ?: ClientError(
+                statusCode = resp.code(),
+                message = resp.message()
+        )
     }
 
     /**
