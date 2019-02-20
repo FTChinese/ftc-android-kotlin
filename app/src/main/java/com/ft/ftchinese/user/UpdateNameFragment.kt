@@ -7,8 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
+import com.ft.ftchinese.models.FtcUser
 import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.UserNameUpdate
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.handleApiError
 import com.ft.ftchinese.util.handleException
@@ -102,16 +102,15 @@ class UpdateNameFragment : Fragment(), AnkoLogger {
         isInProgress = true
         isInputAllowed = false
 
+        val user = FtcUser(uuid)
+
         job = GlobalScope.launch(Dispatchers.Main) {
-
-
-            val userNameUpdate = UserNameUpdate(userName)
 
             try {
                 info("Start updating mAccount userName")
 
                 val done = withContext(Dispatchers.IO) {
-                    userNameUpdate.send(uuid)
+                    user.updateUserName(userName)
                 }
 
                 isInProgress = false

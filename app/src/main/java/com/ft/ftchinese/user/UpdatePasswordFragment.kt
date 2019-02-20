@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
+import com.ft.ftchinese.models.FtcUser
 import com.ft.ftchinese.models.Passwords
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.ClientError
@@ -127,13 +128,13 @@ class UpdatePasswordFragment : Fragment(), AnkoLogger {
         isInputAllowed = false
 
         job = GlobalScope.launch(Dispatchers.Main) {
-            val passwordUpdate = Passwords(oldPassword, newPassword)
 
             try {
                 info("Start updating password")
 
                 val done = withContext(Dispatchers.IO) {
-                    passwordUpdate.send(uuid)
+                    FtcUser(uuid).updatePassword(
+                            Passwords(oldPassword, newPassword))
                 }
 
                 isInProgress = false

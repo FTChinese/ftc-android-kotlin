@@ -7,7 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.EmailUpdate
+import com.ft.ftchinese.models.FtcUser
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.handleApiError
@@ -102,13 +102,14 @@ class UpdateEmailFragment : Fragment(), AnkoLogger {
         isInputAllowed = false
 
         job = GlobalScope.launch(Dispatchers.Main) {
-            val emailUpdate = EmailUpdate(emailStr)
+
+            val user = FtcUser(uuid)
 
             try {
                 info("Start updating email")
 
                 val done = withContext(Dispatchers.IO) {
-                    emailUpdate.send(uuid)
+                    user.updateEmail(emailStr)
                 }
 
                 isInProgress = false
