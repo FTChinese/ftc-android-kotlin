@@ -4,6 +4,7 @@ import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.models.Cycle
+import com.ft.ftchinese.models.LoginMethod
 import com.ft.ftchinese.models.PayMethod
 import com.ft.ftchinese.models.Tier
 import org.threeten.bp.LocalDate
@@ -26,6 +27,9 @@ annotation class KCycle
 
 @Target(AnnotationTarget.FIELD)
 annotation class KPayMethod
+
+@Target(AnnotationTarget.FIELD)
+annotation class KLoginMethod
 
 val dateConverter = object : Converter {
     override fun canConvert(cls: Class<*>): Boolean {
@@ -135,9 +139,28 @@ val payMethodConverter = object : Converter {
     }
 }
 
+val loginMethodConverter = object : Converter {
+    override fun canConvert(cls: Class<*>): Boolean {
+        return cls == LoginMethod::class.java
+    }
+
+    override fun fromJson(jv: JsonValue): Any? {
+        return LoginMethod.fromString(jv.string)
+    }
+
+    override fun toJson(value: Any): String {
+        return if (value is LoginMethod) {
+            value.string()
+        } else {
+            """null"""
+        }
+    }
+}
+
 val json = Klaxon()
         .fieldConverter(KDate::class, dateConverter)
         .fieldConverter(KDateTime::class, dateTimeConverter)
         .fieldConverter(KTier::class, tierConverter)
         .fieldConverter(KCycle::class, cycleConverter)
         .fieldConverter(KPayMethod::class, payMethodConverter)
+        .fieldConverter(KLoginMethod::class, loginMethodConverter)
