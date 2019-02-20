@@ -18,6 +18,7 @@ private const val PREF_MEMBER_TIER = "member_tier"
 private const val PREF_MEMBER_CYCLE = "member_billing_cycle"
 private const val PREF_MEMBER_EXPIRE = "member_expire"
 private const val PREF_IS_LOGGED_IN = "is_logged_in"
+private const val PREF_LOGIN_METHOD = "login_method"
 
 class SessionManager private constructor(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(SESSION_PREF_NAME, Context.MODE_PRIVATE)
@@ -36,6 +37,7 @@ class SessionManager private constructor(context: Context) {
         editor.putString(PREF_MEMBER_TIER, acnt.membership.tier?.string())
         editor.putString(PREF_MEMBER_CYCLE, acnt.membership.cycle?.string())
         editor.putString(PREF_MEMBER_EXPIRE, formatLocalDate(acnt.membership.expireDate))
+        editor.putString(PREF_LOGIN_METHOD, acnt.loginMethod.toString())
 
         editor.putBoolean(PREF_IS_LOGGED_IN, true)
 
@@ -78,6 +80,8 @@ class SessionManager private constructor(context: Context) {
         val cycle = sharedPreferences.getString(PREF_MEMBER_CYCLE, null)
         val expireDate = sharedPreferences.getString(PREF_MEMBER_EXPIRE, null)
 
+        val loginMethod = sharedPreferences.getString(PREF_LOGIN_METHOD, null)
+
         val membership = Membership(
                 tier = Tier.fromString(tier),
                 cycle = Cycle.fromString(cycle),
@@ -98,7 +102,8 @@ class SessionManager private constructor(context: Context) {
                 avatarUrl = avatarUrl,
                 isVip = isVip,
                 wechat = wechat,
-                membership = membership
+                membership = membership,
+                loginMethod = LoginMethod.fromString(loginMethod)
         )
     }
 
