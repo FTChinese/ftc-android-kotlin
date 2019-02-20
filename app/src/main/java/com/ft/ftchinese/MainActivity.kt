@@ -135,7 +135,7 @@ class MainActivity : AppCompatActivity(),
     private val drawerHeaderTitleListener = View.OnClickListener {
         // If user is not logged in, show login.
         if (mSession?.isLoggedIn() == false) {
-            SignInActivity.startForResult(this)
+            CredentialsActivity.startForResult(this)
             return@OnClickListener
         }
 
@@ -531,20 +531,11 @@ class MainActivity : AppCompatActivity(),
         // Handle navigation view item clicks here.
         when (item.itemId) {
             R.id.action_login -> {
-                SignInActivity.startForResult(this)
-            }
-            R.id.action_sign_up -> {
-                SignUpActivity.start(this)
+//                SignInActivity.startForResult(this)
+                CredentialsActivity.startForResult(this)
             }
             R.id.action_account -> {
-                val account = mSession?.loadAccount() ?: return false
-
-                if (account.loginMethod == LoginMethod.WECHAT) {
-                    WxAccountActivity.start(this)
-                } else {
-                    AccountActivity.start(this)
-                }
-
+                AccountActivity.start(this)
             }
             R.id.action_subscription -> {
                 SubscriptionActivity.start(this)

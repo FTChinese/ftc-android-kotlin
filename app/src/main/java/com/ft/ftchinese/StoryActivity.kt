@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.user.SignInActivity
+import com.ft.ftchinese.user.CredentialsActivity
 import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.isNetworkConnected
@@ -114,7 +114,7 @@ class StoryActivity : AbsContentActivity() {
 
         toast(R.string.prompt_restricted_login)
 
-        SignInActivity.startForResult(this)
+        CredentialsActivity.startForResult(this)
     }
 
     private fun showSubs() {

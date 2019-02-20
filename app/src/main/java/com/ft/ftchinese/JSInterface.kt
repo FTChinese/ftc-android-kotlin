@@ -3,7 +3,7 @@ package com.ft.ftchinese
 import android.app.Activity
 import android.webkit.JavascriptInterface
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.user.SignInActivity
+import com.ft.ftchinese.user.CredentialsActivity
 import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.util.json
@@ -148,7 +148,7 @@ class JSInterface(private val activity: Activity?) : AnkoLogger {
 
             if (account == null) {
                 activity?.toast(R.string.prompt_restricted_paid_user)
-                SignInActivity.startForResult(activity)
+                CredentialsActivity.startForResult(activity)
 
                 return
             }
