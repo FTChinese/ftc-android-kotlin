@@ -22,7 +22,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/prompt_current_name"
+            android:text="@string/label_current_name"
             android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
         <TextView
@@ -50,7 +50,7 @@
             android:id="@+id/user_name"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:hint="@string/prompt_new_name"
+            android:hint="@string/label_new_name"
             android:maxLines="1"
             android:singleLine="true" />
 
@@ -61,7 +61,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="@string/action_save"
+        android:text="@string/btn_save"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/user_name_container"
         app:layout_constraintStart_toStartOf="@+id/user_name_container" />
