@@ -1,6 +1,5 @@
 package com.ft.ftchinese.user
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -9,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Credentials
-import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.handleApiError
 import com.ft.ftchinese.util.handleException
@@ -22,7 +20,6 @@ import org.jetbrains.anko.support.v4.toast
 class SignUpFragment : Fragment(), AnkoLogger {
     private var job: Job? = null
     private var listener: OnCredentialsListener? = null
-    private var sessionManager: SessionManager? = null
     private var email: String? = null
 
     private fun showProgress(show: Boolean) {
@@ -39,10 +36,6 @@ class SignUpFragment : Fragment(), AnkoLogger {
 
         if (context is OnCredentialsListener) {
             listener = context
-        }
-
-        if (context != null) {
-            sessionManager = SessionManager.getInstance(context)
         }
     }
 
@@ -100,23 +93,19 @@ class SignUpFragment : Fragment(), AnkoLogger {
 
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
-                val account = withContext(Dispatchers.IO) {
+                val userId = withContext(Dispatchers.IO) {
                     Credentials(email, password).signUp()
                 }
 
                 showProgress(false)
 
-                if (account == null) {
+                if (userId == null) {
                     toast(R.string.error_not_loaded)
                     enableInput(true)
                     return@launch
                 }
 
-                sessionManager?.saveAccount(account)
-
-                activity?.setResult(Activity.RESULT_OK)
-
-                activity?.finish()
+                listener?.onLoadAccount(userId)
                 
             } catch (e: ClientError) {
                 showProgress(false)

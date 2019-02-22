@@ -1,6 +1,5 @@
 package com.ft.ftchinese.user
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -9,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Credentials
-import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.handleApiError
 import com.ft.ftchinese.util.handleException
@@ -17,12 +15,13 @@ import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_sign_in.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 class SignInFragment : Fragment(), AnkoLogger {
     private var job: Job? = null
     private var listener: OnCredentialsListener? = null
-    private var sessionManager: SessionManager? = null
+//    private var sessionManager: SessionManager? = null
     private var email: String? = null
 
     private fun showProgress(show: Boolean) {
@@ -41,9 +40,9 @@ class SignInFragment : Fragment(), AnkoLogger {
             listener = context
         }
 
-        if (context != null) {
-            sessionManager = SessionManager.getInstance(context)
-        }
+//        if (context != null) {
+//            sessionManager = SessionManager.getInstance(context)
+//        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -110,23 +109,21 @@ class SignInFragment : Fragment(), AnkoLogger {
 
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
-                val account = withContext(Dispatchers.IO) {
+                val userId = withContext(Dispatchers.IO) {
                     Credentials(email, password).login()
                 }
 
                 showProgress(false)
 
-                if (account == null) {
+                if (userId == null) {
                     toast(R.string.error_not_loaded)
                     enableInput(true)
                     return@launch
                 }
 
-                sessionManager?.saveAccount(account)
+                info("Login success: $userId")
 
-                activity?.setResult(Activity.RESULT_OK)
-
-                activity?.finish()
+                listener?.onLoadAccount(userId)
 
             } catch (e: ClientError) {
                 showProgress(false)
