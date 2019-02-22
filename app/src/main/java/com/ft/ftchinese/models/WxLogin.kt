@@ -66,18 +66,23 @@ class WxSessionManager private constructor(context: Context) {
     }
 }
 
-/**
- * Handles wechat login
- */
-data class WxLogin(
-        val code: String
-) {
-    fun send(): WxSession? {
+object WxOAuth {
+    const val SCOPE = "snsapi_userinfo"
+
+    fun stateCode(): String {
+        return generateNonce(5)
+    }
+
+    fun login(code: String): WxSession? {
+        val data = json.toJsonString(mapOf(
+                "code" to code
+        ))
+
         val (_, body) = Fetch().post(SubscribeApi.WX_LOGIN)
                 .setClient()
                 .setAppId()
                 .noCache()
-                .jsonBody(json.toJsonString(this))
+                .jsonBody(data)
                 .responseApi()
 
         return if (body == null) {
@@ -136,11 +141,11 @@ data class WxSession(
                 .setUnionId(unionId)
                 .responseApi()
 
-        if (body == null) {
+        return if (body == null) {
             return null
+        } else {
+            json.parse<Account>(body)
         }
-
-        return json.parse<Account>(body)
     }
 
     /**
