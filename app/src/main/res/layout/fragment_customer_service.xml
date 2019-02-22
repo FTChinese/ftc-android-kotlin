@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/heading_tv"
+        style="@style/SectionHead"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/customer_service_title"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/email_tv"/>
+
+
+    <TextView
+        android:id="@+id/email_tv"
+        style="@style/FTCText"
+        android:textColor="@color/colorTeal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/customer_service_email"
+        app:layout_constraintStart_toStartOf="@id/heading_tv"
+        app:layout_constraintEnd_toEndOf="@id/heading_tv"
+        app:layout_constraintTop_toBottomOf="@+id/heading_tv"/>
+
+</android.support.constraint.ConstraintLayout>
