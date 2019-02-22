@@ -97,7 +97,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
     private fun updateUI() {
 
-        tier_cycle_tv.text = getTierCycleText(tierCycleKey(mTier, mCycle))
+        value_primary_tv.text = getTierCycleText(tierCycleKey(mTier, mCycle))
 
         price_tv.text = priceText
     }
