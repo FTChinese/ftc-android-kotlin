@@ -5,9 +5,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.KEY_PREMIUM_YEAR
-import com.ft.ftchinese.models.KEY_STANDARD_MONTH
-import com.ft.ftchinese.models.KEY_STANDARD_YEAR
+import com.ft.ftchinese.models.*
 import org.jetbrains.anko.toast
 import java.io.IOException
 
@@ -55,7 +53,14 @@ fun Activity.isActiveNetworkMobile(): Boolean {
     }
 }
 
-fun Activity.getTierCycleText(key: String?): String? {
+/**
+ * Generate strings for membership tier and cycle.
+ * 标准会员/年
+ * 标准会员/月
+ * 高级会员/年
+ * 尚未成为会员
+ */
+fun Activity.getTierCycleText(key: String?): String {
     return when (key) {
         KEY_STANDARD_YEAR -> getString(
                 R.string.formatter_tier_cycle,
@@ -70,6 +75,37 @@ fun Activity.getTierCycleText(key: String?): String? {
         KEY_PREMIUM_YEAR -> getString(
                 R.string.formatter_tier_cycle,
                 getString(R.string.tier_premium),
+                getString(R.string.cycle_year)
+        )
+        else -> getString(R.string.tier_free)
+    }
+}
+
+/**
+ * Build strings user on the price button:
+ * ¥258.00/年
+ * ¥28.00/月
+ * ¥1,998.00/年
+ */
+fun Activity.getPriceCycleText(tier: Tier, cycle: Cycle): String? {
+    val key = tierCycleKey(tier, cycle)
+
+    val plan = pricingPlans.findPlan(key) ?: return null
+
+    return when (key) {
+        KEY_STANDARD_YEAR -> getString(
+                R.string.formatter_price_cycle,
+                plan.netPrice,
+                getString(R.string.cycle_year)
+        )
+        KEY_STANDARD_MONTH -> getString(
+                R.string.formatter_price_cycle,
+                plan.netPrice,
+                getString(R.string.cycle_month)
+        )
+        KEY_PREMIUM_YEAR -> getString(
+                R.string.formatter_price_cycle,
+                plan.netPrice,
                 getString(R.string.cycle_year)
         )
         else -> null
