@@ -130,9 +130,11 @@
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Headline</item>
     </style>
 
+    <style name="FTCLink" parent="FTCText">
+        <item name="android:textColor">@color/colorTeal</item>
+    </style>
+
     <style name="SectionHead">
-        <item name="android:paddingLeft">16dp</item>
-        <item name="android:paddingRight">16dp</item>
         <item name="android:textSize">18sp</item>
     </style>
 
