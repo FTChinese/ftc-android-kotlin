@@ -8,9 +8,6 @@
         <item
             android:id="@+id/action_login"
             android:title="@string/title_login_signup" />
-        <!--<item-->
-            <!--android:id="@+id/action_sign_up"-->
-            <!--android:title="@string/action_sign_up"/>-->
     </group>
 
     <group android:checkableBehavior="single"
@@ -18,11 +15,15 @@
         <item
             android:id="@+id/action_account"
             android:icon="@drawable/ic_account_box_black_24dp"
-            android:title="@string/action_title_account" />
+            android:title="@string/title_account" />
         <item
             android:id="@+id/action_subscription"
             android:icon="@drawable/ic_card_membership_black_24dp"
-            android:title="@string/action_subscription" />
+            android:title="@string/title_subscription" />
+
+        <item
+            android:id="@+id/action_my_subs"
+            android:title="@string/title_my_subs"/>
     </group>
 
     <group android:checkableBehavior="single"
