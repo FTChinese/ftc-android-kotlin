@@ -3,34 +3,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/list_item_background"
-    android:padding="16dp">
+    android:layout_height="wrap_content">
 
     <!-- See https://developer.android.com/reference/android/support/constraint/ConstraintLayout#Chains -->
     <TextView
-        android:id="@+id/label_text"
+        style="@style/FTCText"
+        android:id="@+id/label_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/value_text"
-        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        android:text="Label Text"
+        android:layout_marginBottom="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/value_tv"
+        app:layout_constraintHorizontal_chainStyle="spread_inside" />
 
     <TextView
-        android:id="@+id/value_text"
+        style="@style/FTCText"
+        android:id="@+id/value_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
-        android:text="TextView"
-        android:textAppearance="@style/TextAppearance.AppCompat"
-        android:textSize="18sp"
-        app:layout_constraintBaseline_toBaselineOf="@+id/label_text"
+        android:text="Value Text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/label_text" />
+        app:layout_constraintStart_toEndOf="@id/label_tv"
+        app:layout_constraintBaseline_toBaselineOf="@+id/label_tv" />
 
 </android.support.constraint.ConstraintLayout>
