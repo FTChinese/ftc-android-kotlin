@@ -67,7 +67,7 @@ class WxAccountFragment : Fragment(),
         updateUI()
 
         bind_email_btn.setOnClickListener {
-            BindFtcActivity.startForResult(activity, RequestCode.BOUND)
+            BindEmailActivity.startForResult(activity, RequestCode.BOUND)
         }
     }
 
