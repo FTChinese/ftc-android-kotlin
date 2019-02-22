@@ -530,25 +530,13 @@ class MainActivity : AppCompatActivity(),
 
         // Handle navigation view item clicks here.
         when (item.itemId) {
-            R.id.action_login -> {
-//                SignInActivity.startForResult(this)
-                CredentialsActivity.startForResult(this)
-            }
-            R.id.action_account -> {
-                AccountActivity.start(this)
-            }
-            R.id.action_subscription -> {
-                SubscriptionActivity.start(this)
-            }
-            R.id.action_about -> {
-                AboutUsActivity.start(this)
-            }
-            R.id.action_feedback -> {
-                feedbackEmail()
-            }
-            R.id.action_settings -> {
-                SettingsActivity.start(this)
-            }
+            R.id.action_login ->  CredentialsActivity.startForResult(this)
+            R.id.action_account -> AccountActivity.start(this)
+            R.id.action_subscription -> SubscriptionActivity.start(this)
+            R.id.action_my_subs -> MySubsActivity.start(this)
+            R.id.action_about -> AboutUsActivity.start(this)
+            R.id.action_feedback -> feedbackEmail()
+            R.id.action_settings -> SettingsActivity.start(this)
         }
 
         drawer_layout.closeDrawer(GravityCompat.START)
@@ -598,6 +586,7 @@ class MainActivity : AppCompatActivity(),
             showAvatar(headerImage, account.wechat)
         } else {
             headerTitle.text = getString(R.string.nav_not_logged_in)
+            headerImage.setImageResource(R.drawable.ic_account_circle_black_24dp)
         }
 
         val isLoggedIn = account != null
@@ -606,10 +595,10 @@ class MainActivity : AppCompatActivity(),
         menu.findItem(R.id.action_account).isVisible = isLoggedIn
     }
 
-    private fun showAvatar(image: ImageView, wechat: Wechat) {
+    private fun showAvatar(imageView: ImageView, wechat: Wechat) {
         val drawable = cache?.readDrawable(wechat.avatarName)
         if (drawable != null) {
-            image.setImageDrawable(drawable)
+            imageView.setImageDrawable(drawable)
         }
 
         if (wechat.avatarUrl == null) {
@@ -621,7 +610,7 @@ class MainActivity : AppCompatActivity(),
                 wechat.downloadAvatar(filesDir)
             } ?: return@launch
 
-            image.setImageDrawable(
+            imageView.setImageDrawable(
                     Drawable.createFromStream(
                             ByteArrayInputStream(bytes),
                             wechat.avatarName
