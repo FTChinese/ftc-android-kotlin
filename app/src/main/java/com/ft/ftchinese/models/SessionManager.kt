@@ -3,6 +3,7 @@ package com.ft.ftchinese.models
 import android.content.Context
 import com.ft.ftchinese.util.formatLocalDate
 import com.ft.ftchinese.util.parseLocalDate
+import org.jetbrains.anko.AnkoLogger
 
 private const val SESSION_PREF_NAME = "user"
 private const val PREF_USER_ID = "id"
@@ -20,7 +21,7 @@ private const val PREF_MEMBER_EXPIRE = "member_expire"
 private const val PREF_IS_LOGGED_IN = "is_logged_in"
 private const val PREF_LOGIN_METHOD = "login_method"
 
-class SessionManager private constructor(context: Context) {
+class SessionManager private constructor(context: Context) : AnkoLogger {
     private val sharedPreferences = context.getSharedPreferences(SESSION_PREF_NAME, Context.MODE_PRIVATE)
     private val editor = sharedPreferences.edit()
 
@@ -37,7 +38,7 @@ class SessionManager private constructor(context: Context) {
         editor.putString(PREF_MEMBER_TIER, acnt.membership.tier?.string())
         editor.putString(PREF_MEMBER_CYCLE, acnt.membership.cycle?.string())
         editor.putString(PREF_MEMBER_EXPIRE, formatLocalDate(acnt.membership.expireDate))
-        editor.putString(PREF_LOGIN_METHOD, acnt.loginMethod.toString())
+        editor.putString(PREF_LOGIN_METHOD, acnt.loginMethod?.string())
 
         editor.putBoolean(PREF_IS_LOGGED_IN, true)
 
@@ -81,6 +82,7 @@ class SessionManager private constructor(context: Context) {
         val expireDate = sharedPreferences.getString(PREF_MEMBER_EXPIRE, null)
 
         val loginMethod = sharedPreferences.getString(PREF_LOGIN_METHOD, null)
+
 
         val membership = Membership(
                 tier = Tier.fromString(tier),
