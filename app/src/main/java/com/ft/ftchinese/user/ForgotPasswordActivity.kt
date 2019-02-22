@@ -48,6 +48,10 @@ class ForgotPasswordActivity : AppCompatActivity(),
 
     }
 
+    override fun onLoadAccount(userId: String) {
+
+    }
+
     companion object {
         fun start(context: Context?, email: String) {
             val intent = Intent(context, ForgotPasswordActivity::class.java).apply {
