@@ -10,259 +10,55 @@
     <include
         layout="@layout/simple_toolbar" />
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh"
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        <android.support.v4.widget.NestedScrollView
+        <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/login_button"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/paywall_login_prompt"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintStart_toStartOf="@id/product_standard"
+                app:layout_constraintEnd_toEndOf="@id/product_standard"
+                app:layout_constraintTop_toTopOf="parent"/>
 
-                <android.support.constraint.ConstraintLayout
-                    android:id="@+id/membership_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="16dp"
-                    android:background="@drawable/bottom_border_grey"
-                    android:paddingBottom="16dp">
+            <FrameLayout
+                android:id="@+id/product_standard"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="32dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/login_button"/>
 
-                    <TextView
-                        android:id="@+id/membership_title"
-                        style="@style/FTCTitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/membership_title"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/tier_label"
-                        style="@style/FTCText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/label_member_tier"
-                        app:layout_constraintEnd_toStartOf="@id/tier_cycle_tv"
-                        app:layout_constraintHorizontal_chainStyle="spread_inside"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/membership_title" />
-
-                    <TextView
-                        android:id="@+id/tier_cycle_tv"
-                        style="@style/FTCText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintBaseline_toBaselineOf="@+id/tier_label"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/tier_label" />
-
-                    <TextView
-                        android:id="@+id/expire_date_label"
-                        style="@style/FTCText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/label_member_duration"
-                        app:layout_constraintEnd_toStartOf="@id/expire_date_tv"
-                        app:layout_constraintHorizontal_chainStyle="spread_inside"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/tier_label" />
-
-                    <TextView
-                        android:id="@+id/expire_date_tv"
-                        style="@style/FTCText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintBaseline_toBaselineOf="@id/expire_date_label"
-                        app:layout_constraintEnd_toEndOf="@+id/tier_cycle_tv"
-                        app:layout_constraintStart_toEndOf="@id/expire_date_label" />
+            <FrameLayout
+                android:id="@+id/product_premium"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="32dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@id/product_standard"
+                app:layout_constraintEnd_toEndOf="@id/product_standard"
+                app:layout_constraintTop_toBottomOf="@+id/product_standard"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
 
-                </android.support.constraint.ConstraintLayout>
-
-                <!-- Only show this button who is a member and will expire -->
-                <Button
-                    android:id="@+id/renewal_button"
-                    style="@style/OrigamiButton.Primary.Small"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:visibility="gone"
-                    android:text="@string/membership_renew" />
-
-                <TextView
-                    android:id="@+id/paywall_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/paywall_title"
-                    android:textAlignment="center"
-                    style="@style/FTCText" />
-
-                <LinearLayout
-                    android:id="@+id/login_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center_horizontal"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/login_prompt"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/paywall_login_prompt"
-                        style="@style/FTCText" />
-
-                    <Button
-                        android:id="@+id/login_button"
-                        style="@style/OrigamiButton.Inline"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/btn_login"/>
-                </LinearLayout>
-
-                <android.support.v7.widget.CardView
-                    android:id="@+id/standard_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:id="@+id/tier_standard_title"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bottom_border_teal"
-                            android:layout_marginBottom="8dp"
-                            style="@style/FTCTitle" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:lineSpacingExtra="8sp"
-                            android:text="@string/standard_tier_description"
-                            style="@style/FTCText" />
-
-                        <Button
-                            android:id="@+id/standard_year_button"
-                            style="@style/OrigamiButton.Primary.Small"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginBottom="8dp"
-                            android:layout_marginTop="8dp" />
-
-                        <Button
-                            android:id="@+id/standard_month_button"
-                            style="@style/OrigamiButton.Secondary.Small"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginBottom="8dp"
-                            android:layout_marginTop="8dp" />
-
-                    </LinearLayout>
-
-                </android.support.v7.widget.CardView>
-
-                <android.support.v7.widget.CardView
-                    android:id="@+id/premium_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:divider="@drawable/divider"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:id="@+id/tier_premium_title"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:background="@drawable/bottom_border_teal"
-                            style="@style/FTCTitle" />
+        </android.support.constraint.ConstraintLayout>
 
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:lineSpacingExtra="8sp"
-                            android:text="@string/premium_tier_description"
-                            style="@style/FTCText" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:text="@string/premium_small_print" />
-
-                        <Button
-                            android:id="@+id/premium_button"
-                            style="@style/OrigamiButton.Primary.Small"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_horizontal"
-                            android:layout_marginBottom="8dp"
-                            android:layout_marginTop="8dp" />
-
-                    </LinearLayout>
-
-                </android.support.v7.widget.CardView>
-
-
-                <TextView
-                    style="@style/SectionHead"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp"
-                    android:textSize="18sp"
-                    android:text="@string/customer_service_title" />
-
-
-                <Button
-                    android:id="@+id/customer_service"
-                    style="@style/OrigamiButton.Inline"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="32dp"
-                    android:text="@string/customer_service_email"
-                    android:textAlignment="viewStart" />
-
-
-            </LinearLayout>
-
-
-        </android.support.v4.widget.NestedScrollView>
-
-    </android.support.v4.widget.SwipeRefreshLayout>
+    </android.support.v4.widget.NestedScrollView>
 
     <include
         layout="@layout/progress_bar"/>
