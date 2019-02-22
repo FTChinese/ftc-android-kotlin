@@ -7,14 +7,16 @@ import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.models.WxOAuth
 import com.ft.ftchinese.models.WxSessionManager
-import com.ft.ftchinese.util.ClientError
-import com.ft.ftchinese.util.handleApiError
-import com.ft.ftchinese.util.handleException
-import com.ft.ftchinese.util.isNetworkConnected
+import com.ft.ftchinese.util.*
+import com.tencent.mm.opensdk.modelmsg.SendAuth
+import com.tencent.mm.opensdk.openapi.IWXAPI
+import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.fragment_ftc_account.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
@@ -30,6 +32,7 @@ class FtcAccountFragment : Fragment(),
 
     private var sessionManager: SessionManager? = null
     private var wxSessManager: WxSessionManager? = null
+    private var wxApi: IWXAPI? = null
 
     private fun showProgress(value: Boolean) {
         listener?.onProgress(value)
@@ -122,6 +125,9 @@ class FtcAccountFragment : Fragment(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        wxApi = WXAPIFactory.createWXAPI(context, BuildConfig.WX_SUBS_APPID)
+        wxApi?.registerApp(BuildConfig.WX_SUBS_APPID)
+
         info("onCreate finished")
     }
 
@@ -134,6 +140,8 @@ class FtcAccountFragment : Fragment(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val account = sessionManager?.loadAccount() ?: return
 
         // Set swipe refresh listener
         swipe_refresh.setOnRefreshListener(this)
@@ -151,9 +159,19 @@ class FtcAccountFragment : Fragment(),
             UpdateAccountActivity.startForPassword(context)
         }
 
-        info("onViewCreated")
 
-        val account = sessionManager?.loadAccount() ?: return
+        wechat_container.setOnClickListener {
+            if (account.isCoupled) {
+                WxAccountActivity.start(context)
+
+                return@setOnClickListener
+            }
+
+            if (account.isFtcOnly) {
+                bindWechat()
+                return@setOnClickListener
+            }
+        }
 
         info(account)
 
@@ -186,20 +204,28 @@ class FtcAccountFragment : Fragment(),
             user_name_text.text = account.userName
         }
 
-        // Not bound to wechat
-        if (account.unionId.isNullOrBlank()) {
-            wechat_container.setOnClickListener {
-                // Start wechat OAuth process.
-            }
-        } else {
-            // Already bound to wechat
-            wechat_status.text = getString(R.string.action_bound_account)
-            wechat_container.setOnClickListener {
-                WxAccountActivity.start(context)
-            }
+        if (account.isCoupled) {
+            wechat_bound_tv.text = getString(R.string.action_bound_account)
         }
     }
 
+    /**
+     * Launch Wechat OAuth workflow to request a code from wechat.
+     * It will jump to wxapi.WXEntryActivity.
+     */
+    private fun bindWechat() {
+        val stateCode = WxOAuth.stateCode()
+
+        wxSessManager?.saveState(stateCode)
+
+        val req = SendAuth.Req()
+        req.scope = WxOAuth.SCOPE
+        req.state = stateCode
+    }
+
+    /**
+     * Resend verification email to user.
+     */
     private fun requestVerification() {
         if (activity?.isNetworkConnected() != true) {
             toast(R.string.prompt_no_network)
