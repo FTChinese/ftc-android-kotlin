@@ -5,8 +5,7 @@ import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.Account
-import kotlinx.android.synthetic.main.activity_fragment.*
+import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 
 /**
