@@ -7,6 +7,8 @@ import android.view.View
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
+import com.ft.ftchinese.user.AccountsMergeActivity
+import com.ft.ftchinese.user.CredentialsActivity
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.handleException
 import com.tencent.mm.opensdk.constants.ConstantsAPI
@@ -16,7 +18,7 @@ import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.android.synthetic.main.activity_wx_entry.*
+import kotlinx.android.synthetic.main.activity_wechat.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.*
@@ -27,21 +29,22 @@ import kotlin.Exception
 
 class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     private var api: IWXAPI? = null
-    private var wxManager: WxSessionManager? = null
     private var sessionManager: SessionManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_wx_entry)
+        setContentView(R.layout.activity_wechat)
 
         setSupportActionBar(toolbar)
+
+        hideUI()
 
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
 
         try {
             api?.handleIntent(intent, this)
         } catch (e: Exception) {
-            e.printStackTrace()
+            info(e)
         }
 
         info("onCreate called")
@@ -58,13 +61,51 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
     }
 
+    private fun hideUI() {
+        heading_tv.visibility = View.GONE
+        done_button.visibility = View.GONE
+    }
+
+    private fun showLoginFailed() {
+        heading_tv.visibility = View.VISIBLE
+        heading_tv.text = getString(R.string.prompt_login_failed)
+        done_button.visibility = View.VISIBLE
+
+        done_button.setOnClickListener {
+
+            CredentialsActivity.startForResult(this)
+
+            finish()
+        }
+    }
+
+    private fun showLoggingIn() {
+        heading_tv.visibility = View.VISIBLE
+        heading_tv.text = getString(R.string.progress_logging)
+    }
+
+    private fun showLoginSuccess(msg: String) {
+        heading_tv.visibility = View.VISIBLE
+        heading_tv.text = getString(R.string.prompt_logged_in)
+
+        message_tv.text = msg
+
+        done_button.visibility = View.VISIBLE
+        done_button.setOnClickListener {
+            finish()
+        }
+    }
+
+
     override fun onResp(resp: BaseResp?) {
         info("Wx login response type: ${resp?.type}, error code: ${resp?.errCode}")
 
         when (resp?.type) {
             // Wechat Login.
             ConstantsAPI.COMMAND_SENDAUTH -> {
-                heading_tv.text = getString(R.string.progress_logging)
+
+                setTitle(R.string.title_wx_login)
+
                 info("Wx auth")
                 processLogin(resp)
             }
@@ -83,6 +124,9 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     }
 
     private fun processLogin(resp: BaseResp) {
+
+        showLoggingIn()
+
         when (resp.errCode) {
             BaseResp.ErrCode.ERR_OK -> {
                 info("User authorized")
@@ -93,20 +137,25 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 // SDK通过SendAuth的Resp返回数据给调用方
                 if (resp is SendAuth.Resp) {
                     info("code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
-
-                    wxManager = WxSessionManager.getInstance(this)
+                    // Cannot initialize in onCreate method due to WXEntryActivity weird design.
                     sessionManager = SessionManager.getInstance(this)
 
-                    val state = wxManager?.loadState()
+                    val state = sessionManager?.loadWxState()
 
                     info("State: $state")
                     if (state == null) {
+
+                        showLoginFailed()
+
                         toast("State code not found. Suspicious login attempt")
                         return
                     }
 
                     if (state != resp.state) {
-                        toast("State code not match")
+
+                        showLoginFailed()
+
+                        toast(R.string.oauth_state_mismatch)
                         return
                     }
 
@@ -116,66 +165,100 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
             }
 
             BaseResp.ErrCode.ERR_USER_CANCEL -> {
-                info("OAuth Login Canceled")
+
+                info(R.string.oauth_canceled)
             }
             BaseResp.ErrCode.ERR_AUTH_DENIED -> {
-                info("OAuth Login Denied")
+                info(R.string.oauth_denied)
             }
         }
     }
+
 
     private fun login(code: String) {
         showProgress(true)
 
         GlobalScope.launch(Dispatchers.Main) {
             try {
+                // Get session data from API.
                 val sess = withContext(Dispatchers.IO) {
-                    WxLogin(code).send()
+
+                    WxOAuth.login(code)
                 }
+
                 if (sess == null) {
                     showProgress(false)
 
-                    toast("Login failed")
+                    showLoginFailed()
 
                     return@launch
                 }
-                wxManager?.saveSession(sess)
 
-                val acnt = withContext(Dispatchers.IO) {
-                    sess.fetchAccount()
-                }
+                // Save session data.
+                sessionManager?.saveWxSession(sess)
 
-                if (acnt == null) {
-                    showProgress(false)
-                    toast("Failed to fetch account data")
-                    return@launch
-                }
+                loadAccount(sess)
 
-                showProgress(false)
-
-                sessionManager?.saveAccount(acnt)
-
-                info("Killing activity")
-                finish()
             } catch (e: ClientError) {
                 info("API error: $e")
 
                 showProgress(false)
+                showLoginFailed()
 
-                handleClientError(e)
+                toast(e.message)
             } catch (e: Exception) {
+
+                showProgress(false)
+                showLoginFailed()
+
                 handleException(e)
             }
         }
-//
     }
 
-    private fun handleClientError(err: ClientError) {
-        toast(err.message)
+    /**
+     * Load account after fetched wechat session.
+     */
+    private suspend fun loadAccount(sess: WxSession) {
+        val account = withContext(Dispatchers.IO) {
+            sess.fetchAccount()
+        }
+
+        if (account == null) {
+            showProgress(false)
+
+            showLoginFailed()
+
+            return
+        }
+
+        showProgress(false)
+
+        info("Wx login account: $account")
+
+        val wxIntent = sessionManager?.loadWxIntent() ?: WxOAuthIntent.LOGIN
+
+        info("Wechat OAuth intent: $wxIntent")
+
+        /**
+         * If wehcat oauth is used for binding accounts,
+         * never save the fetched account!
+         */
+        if (wxIntent == WxOAuthIntent.BINDING) {
+            info("Launch binding")
+            AccountsMergeActivity.startForResult(this, account)
+
+            finish()
+            return
+        }
+
+        sessionManager?.saveAccount(account)
+
+        showLoginSuccess(getString(R.string.greeting_wx_login, account.wechat.nickname))
     }
 
-    private fun showProgress(v: Boolean) {
-        if (v) {
+    private fun showProgress(show: Boolean) {
+        if (show) {
             progress_bar.visibility = View.VISIBLE
         } else {
             progress_bar.visibility = View.GONE
