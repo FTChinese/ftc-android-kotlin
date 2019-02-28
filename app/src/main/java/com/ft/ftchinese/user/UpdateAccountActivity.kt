@@ -7,11 +7,20 @@ import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
+import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.util.handleApiError
+import com.ft.ftchinese.util.handleException
+import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
+import kotlinx.coroutines.*
+import org.jetbrains.anko.toast
 
 class UpdateAccountActivity : AppCompatActivity(),
-        OnAccountInteractionListener {
+        OnUpdateAccountListener {
+
+    private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +63,51 @@ class UpdateAccountActivity : AppCompatActivity(),
             progress_bar.visibility = View.VISIBLE
         } else {
             progress_bar.visibility = View.GONE
+        }
+    }
+
+    override fun onUpdateAccount() {
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        onProgress(true)
+
+        toast(R.string.progress_refresh_account)
+
+        val sessionManager = SessionManager.getInstance(this)
+        val account = sessionManager.loadAccount()
+
+        if (account == null) {
+            onProgress(false)
+            return
+        }
+
+        job = GlobalScope.launch(Dispatchers.Main) {
+            try {
+                val updatedAccount = withContext(Dispatchers.IO) {
+                    account.refresh()
+                }
+
+                onProgress(false)
+
+                if (updatedAccount == null) {
+                    finish()
+                    return@launch
+                }
+
+                sessionManager.saveAccount(updatedAccount)
+
+                finish()
+            } catch (e: ClientError) {
+                onProgress(false)
+
+                handleApiError(e)
+            } catch (e: Exception) {
+                
+                handleException(e)
+            }
         }
     }
 
