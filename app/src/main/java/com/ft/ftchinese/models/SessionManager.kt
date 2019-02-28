@@ -1,7 +1,9 @@
 package com.ft.ftchinese.models
 
 import android.content.Context
+import com.ft.ftchinese.util.formatISODateTime
 import com.ft.ftchinese.util.formatLocalDate
+import com.ft.ftchinese.util.parseISODateTime
 import com.ft.ftchinese.util.parseLocalDate
 import org.jetbrains.anko.AnkoLogger
 
@@ -21,38 +23,32 @@ private const val PREF_MEMBER_EXPIRE = "member_expire"
 private const val PREF_IS_LOGGED_IN = "is_logged_in"
 private const val PREF_LOGIN_METHOD = "login_method"
 
+private const val PREF_OAUTH_STATE = "wx_oauth_state"
+private const val PREF_WX_SESSION_ID = "wx_session_id"
+private const val PREF_WX_UNION_ID = "wx_union_id"
+private const val PREF_WX_OAUTH_TIME = "wx_oauth_time"
+private const val PREF_WX_OAUTH_INTENT = "wx_oauth_intent"
+
 class SessionManager private constructor(context: Context) : AnkoLogger {
     private val sharedPreferences = context.getSharedPreferences(SESSION_PREF_NAME, Context.MODE_PRIVATE)
     private val editor = sharedPreferences.edit()
 
-    fun saveAccount(acnt: Account) {
-        editor.putString(PREF_USER_ID, acnt.id)
-        editor.putString(PREF_UNION_ID, acnt.unionId)
-        editor.putString(PREF_USER_NAME, acnt.userName)
-        editor.putString(PREF_EMAIL, acnt.email)
-        editor.putBoolean(PREF_IS_VERIFIED, acnt.isVerified)
-        editor.putString(PREF_AVATAR_URL, acnt.avatarUrl)
-        editor.putBoolean(PREF_IS_VIP, acnt.isVip)
-        editor.putString(PREF_WX_NICKNAME, acnt.wechat.nickname)
-        editor.putString(PREF_WX_AVATAR, acnt.wechat.avatarUrl)
-        editor.putString(PREF_MEMBER_TIER, acnt.membership.tier?.string())
-        editor.putString(PREF_MEMBER_CYCLE, acnt.membership.cycle?.string())
-        editor.putString(PREF_MEMBER_EXPIRE, formatLocalDate(acnt.membership.expireDate))
-        editor.putString(PREF_LOGIN_METHOD, acnt.loginMethod?.string())
+    fun saveAccount(account: Account) {
+        editor.putString(PREF_USER_ID, account.id)
+        editor.putString(PREF_UNION_ID, account.unionId)
+        editor.putString(PREF_USER_NAME, account.userName)
+        editor.putString(PREF_EMAIL, account.email)
+        editor.putBoolean(PREF_IS_VERIFIED, account.isVerified)
+        editor.putString(PREF_AVATAR_URL, account.avatarUrl)
+        editor.putBoolean(PREF_IS_VIP, account.isVip)
+        editor.putString(PREF_WX_NICKNAME, account.wechat.nickname)
+        editor.putString(PREF_WX_AVATAR, account.wechat.avatarUrl)
+        editor.putString(PREF_MEMBER_TIER, account.membership.tier?.string())
+        editor.putString(PREF_MEMBER_CYCLE, account.membership.cycle?.string())
+        editor.putString(PREF_MEMBER_EXPIRE, formatLocalDate(account.membership.expireDate))
+        editor.putString(PREF_LOGIN_METHOD, account.loginMethod?.string())
 
         editor.putBoolean(PREF_IS_LOGGED_IN, true)
-
-        editor.apply()
-    }
-
-    fun updateEmail(email: String) {
-        editor.putString(PREF_EMAIL, email)
-
-        editor.apply()
-    }
-
-    fun updateUserName(name: String) {
-        editor.putString(PREF_USER_NAME, name)
 
         editor.apply()
     }
@@ -111,6 +107,51 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
 
     fun isLoggedIn(): Boolean {
         return sharedPreferences.getBoolean(PREF_IS_LOGGED_IN, false)
+    }
+
+    fun saveWxState(state: String) {
+        editor.putString(PREF_OAUTH_STATE, state)
+        editor.apply()
+    }
+
+    fun loadWxState(): String? {
+        return sharedPreferences.getString(PREF_OAUTH_STATE, null)
+    }
+
+    fun saveWxIntent(intent: WxOAuthIntent) {
+        editor.putString(PREF_WX_OAUTH_INTENT, intent.name)
+        editor.apply()
+    }
+
+    fun loadWxIntent(): WxOAuthIntent? {
+        val intent = sharedPreferences.getString(PREF_WX_OAUTH_INTENT, null) ?: return null
+
+        return try {
+            WxOAuthIntent.valueOf(intent)
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+    }
+
+    fun saveWxSession(session: WxSession) {
+        editor.putString(PREF_WX_SESSION_ID, session.sessionId)
+        editor.putString(PREF_WX_UNION_ID, session.unionId)
+        editor.putString(PREF_WX_OAUTH_TIME, formatISODateTime(session.createdAt))
+        editor.apply()
+    }
+
+    fun loadWxSession(): WxSession? {
+        val id = sharedPreferences.getString(PREF_WX_SESSION_ID, null) ?: return null
+        val unionId = sharedPreferences.getString(PREF_WX_UNION_ID, null) ?: return null
+        val created = sharedPreferences.getString(PREF_WX_OAUTH_TIME, null)
+
+        val createdAt = parseISODateTime(created) ?: return null
+
+        return WxSession(
+                sessionId = id,
+                unionId = unionId,
+                createdAt = createdAt
+        )
     }
 
     fun logout() {
