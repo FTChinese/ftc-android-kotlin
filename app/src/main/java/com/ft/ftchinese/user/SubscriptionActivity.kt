@@ -45,7 +45,7 @@ private var defaultPaywallEntry = PaywallSource(
  *
  * Ali does not requires extra activity to be called. We can passed message from PaymentActivity back to SubscripionActivity. `onResult` should distinguish between Wechat pay and Alipay: the former ask the SubscriptionActivity to kill itself,  while the latter does not.
  *
- * When SubscriptionActivity received OK message from PaymentActvitiy, it should start retrieving user data from server.
+ * When SubscriptionActivity received OK message from PaymentActvitiy, it should startForResult retrieving user data from server.
  */
 class SubscriptionActivity : AppCompatActivity(), AnkoLogger {
 
@@ -116,8 +116,6 @@ class SubscriptionActivity : AppCompatActivity(), AnkoLogger {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         info("onActivityResult requestCode: $requestCode, resultCode: $resultCode")
 
-        // When user selected wechat pay in PaymentActivity, it kills itself and tells MembershipActivity to finish too.
-        // Otherwise after user clicked done button in WXPayEntryActivity, MembershipActivity will be started again, and user see this activity two times after clicked back button.
         when (requestCode) {
             RequestCode.PAYMENT -> {
                 if (resultCode != Activity.RESULT_OK) {
@@ -139,20 +137,17 @@ class SubscriptionActivity : AppCompatActivity(), AnkoLogger {
     }
 
     companion object {
-        private const val EXTRA_SHOULD_UPDATE = "should_update_account"
         private const val EXTRA_PAYWALL_SOURCE = "extra_paywall_source"
         /**
          * WxPayEntryActivity will call this function after successful payment.
          * It is meaningless to record such kind of automatically invocation.
          * Pass null to source to indicate that we do not want to record this action.
          */
-        fun start(context: Context?, shouldUpdate: Boolean = false, source: PaywallSource? = defaultPaywallEntry) {
+        fun start(context: Context?, source: PaywallSource? = defaultPaywallEntry) {
             val intent = Intent(context, SubscriptionActivity::class.java).apply {
                 if (source != null) {
                     putExtra(EXTRA_PAYWALL_SOURCE, json.toJsonString(source))
                 }
-
-                putExtra(EXTRA_SHOULD_UPDATE, shouldUpdate)
             }
 
             context?.startActivity(intent)
