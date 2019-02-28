@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.WxSessionManager
 import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.fragment_email.*
 import kotlinx.coroutines.*
@@ -21,7 +20,6 @@ class EmailFragment : Fragment(),
 
     private var listener: OnCredentialsListener? = null
     private var job: Job? = null
-    private var wxSessionManager: WxSessionManager? = null
 
     private fun showProgress(show: Boolean) {
         listener?.onProgress(show)
@@ -36,10 +34,6 @@ class EmailFragment : Fragment(),
         super.onAttach(context)
         if (context is OnCredentialsListener) {
             listener = context
-        }
-
-        if (context != null) {
-            wxSessionManager = WxSessionManager.getInstance(context)
         }
     }
 
@@ -120,7 +114,7 @@ class EmailFragment : Fragment(),
                     return@launch
                 }
 
-                listener?.onLogIn(email)
+                listener?.onEmailFound(email)
 
             } catch (e: ClientError) {
 
@@ -128,7 +122,7 @@ class EmailFragment : Fragment(),
 
                 if (e.statusCode == 404) {
                     // Show signup UI.
-                    listener?.onSignUp(email)
+                    listener?.onEmailNotFound(email)
 
                     return@launch
                 }
