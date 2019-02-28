@@ -1,5 +1,6 @@
 package com.ft.ftchinese.models
 
+import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.json
@@ -7,6 +8,10 @@ import com.ft.ftchinese.util.json
 data class FtcUser(
         val id: String
 ) {
+    /**
+     * Fetch account data after user logged in or signed up.
+     * Account retrieved from here always has loginMethod set to `email`.
+     */
    fun fetchAccount(): Account? {
        val(_, body) = Fetch().get(NextApi.ACCOUNT)
                .noCache()
@@ -57,6 +62,18 @@ data class FtcUser(
                 .setClient()
                 .setUserId(id)
                 .body()
+                .responseApi()
+
+        return resp.code() == 204
+    }
+
+    fun bindWechat(unionId: String): Boolean {
+        val (resp, _) = Fetch().put(NextApi.WX_BIND)
+                .setUnionId(unionId)
+                .noCache()
+                .jsonBody(Klaxon().toJsonString(mapOf(
+                        "userId" to id
+                )))
                 .responseApi()
 
         return resp.code() == 204
