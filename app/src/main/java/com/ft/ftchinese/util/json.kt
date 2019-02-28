@@ -48,7 +48,7 @@ val dateConverter = object : Converter {
 
     override fun toJson(value: Any): String {
         return if (value is LocalDate) {
-            value.format(DateTimeFormatter.ISO_LOCAL_DATE)
+            """ "${value.format(DateTimeFormatter.ISO_LOCAL_DATE)}" """
         } else {
             """null"""
         }
@@ -75,10 +75,11 @@ val dateTimeConverter = object : Converter {
 
     override fun toJson(value: Any): String {
         return if (value is ZonedDateTime) {
-            value
+            """ "${value
                     .truncatedTo(ChronoUnit.SECONDS)
                     .withZoneSameInstant(ZoneOffset.UTC)
-                    .format(DateTimeFormatter.ISO_DATE_TIME)
+                    .format(DateTimeFormatter.ISO_DATE_TIME)}" """
+
         } else {
             """null"""
         }
@@ -96,7 +97,7 @@ val tierConverter = object : Converter {
 
     override fun toJson(value: Any): String {
         return if (value is Tier) {
-            value.string()
+            """ "${value.string()}" """
         } else {
             """null"""
         }
@@ -114,7 +115,7 @@ val cycleConverter = object : Converter {
 
     override fun toJson(value: Any): String {
         return if (value is Cycle) {
-            value.string()
+            """ "${value.string()}" """
         } else {
             """null"""
         }
@@ -132,7 +133,7 @@ val payMethodConverter = object : Converter {
 
     override fun toJson(value: Any): String {
         return if (value is PayMethod) {
-            value.string()
+            """ "${value.string()}" """
         } else {
             """null"""
         }
@@ -150,7 +151,7 @@ val loginMethodConverter = object : Converter {
 
     override fun toJson(value: Any): String {
         return if (value is LoginMethod) {
-            value.string()
+            """ "${value.string()}" """
         } else {
             """null"""
         }
