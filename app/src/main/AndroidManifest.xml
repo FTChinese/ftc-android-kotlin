@@ -127,52 +127,18 @@
         <activity
             android:name=".user.BindEmailActivity"
             android:label="@string/title_bind_email"
-            android:parentActivityName=".user.AccountActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".user.AccountActivity" />
-        </activity>
+            android:parentActivityName=".user.AccountActivity"/>
+        <activity android:name=".user.AccountsMergeActivity"
+            android:label="@string/title_merge_accounts"
+            android:parentActivityName=".user.AccountActivity"/>
         <activity
             android:name=".user.WxAccountActivity"
             android:label="@string/title_wx_account"
-            android:parentActivityName=".user.AccountActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".user.AccountActivity"/>
-        </activity>
-
+            android:parentActivityName=".user.AccountActivity"/>
         <activity
             android:name=".user.UpdateAccountActivity"
             android:parentActivityName=".user.AccountActivity"
             android:windowSoftInputMode="adjustResize"/>
-
-        <!--<activity-->
-            <!--android:name=".user.UpdateEmailActivity"-->
-            <!--android:label="@string/title_change_email"-->
-            <!--android:parentActivityName=".user.AccountActivity"-->
-            <!--android:windowSoftInputMode="adjustResize">-->
-            <!--<meta-data-->
-                <!--android:name="android.support.PARENT_ACTIVITY"-->
-                <!--android:value=".user.AccountActivity" />-->
-        <!--</activity>-->
-        <!--<activity-->
-            <!--android:name=".user.UpdateUserNameActivity"-->
-            <!--android:label="@string/title_change_username"-->
-            <!--android:parentActivityName=".user.AccountActivity"-->
-            <!--android:windowSoftInputMode="adjustResize">-->
-            <!--<meta-data-->
-                <!--android:name="android.support.PARENT_ACTIVITY"-->
-                <!--android:value=".user.AccountActivity" />-->
-        <!--</activity>-->
-        <!--<activity-->
-            <!--android:name=".user.UpdatePasswordActivity"-->
-            <!--android:label="@string/title_change_password"-->
-            <!--android:parentActivityName=".user.AccountActivity"-->
-            <!--android:windowSoftInputMode="adjustResize">-->
-            <!--<meta-data-->
-                <!--android:name="android.support.PARENT_ACTIVITY"-->
-                <!--android:value=".user.AccountActivity" />-->
-        <!--</activity>-->
         <activity
             android:name=".user.SubscriptionActivity"
             android:label="@string/title_subscription"
