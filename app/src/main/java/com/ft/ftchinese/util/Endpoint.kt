@@ -2,9 +2,12 @@ package com.ft.ftchinese.util
 
 object NextApi {
 //    private const val BASE = "http://api.ftchinese.com/v1"
-    private const val BASE = "https://warm-sheep-32.localtunnel.me"
-    const val LOGIN = "$BASE/users/auth"
-    const val SIGN_UP = "$BASE/users/new"
+    private const val BASE = "http://192.168.10.195:8000"
+    const val EMAIL_EXISTS = "$BASE/users/exists"
+    const val AUTH = "$BASE/users/auth"
+    const val LOGIN = "$BASE/users/login"
+    const val NEW_ACCOUNT = "$BASE/users/new"
+    const val SIGN_UP = "$BASE/users/signup"
     const val PASSWORD_RESET = "$BASE/users/password-reset/letter"
     // Refresh account data.
     const val ACCOUNT = "$BASE/user/account"
@@ -23,7 +26,7 @@ object NextApi {
 object SubscribeApi {
 //    private const val BASE = "http://www.ftacademy.cn/api/v1"
 //        private const val BASE = "http://www.ftacademy.cn/api/sandbox"
-    private const val BASE = "https://fuzzy-vampirebat-93.localtunnel.me"
+    private const val BASE = "http://192.168.10.195:8200"
     const val WX_UNIFIED_ORDER = "$BASE/wxpay/unified-order"
     const val WX_ORDER_QUERY = "$BASE/wxpay/query"
     const val ALI_ORDER = "$BASE/alipay/app-order"
