@@ -9,10 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.Account
-import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.WxOAuth
-import com.ft.ftchinese.models.WxSessionManager
+import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.*
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -28,10 +25,9 @@ class FtcAccountFragment : Fragment(),
         AnkoLogger {
 
     private var job: Job? = null
-    private var listener: OnAccountInteractionListener? = null
+    private var listener: OnSwitchAccountListener? = null
 
     private var sessionManager: SessionManager? = null
-    private var wxSessManager: WxSessionManager? = null
     private var wxApi: IWXAPI? = null
 
     private fun showProgress(value: Boolean) {
@@ -46,79 +42,17 @@ class FtcAccountFragment : Fragment(),
         swipe_refresh.isRefreshing = false
     }
 
-    /**
-     * Refresh account data.
-     * It is necessary to inform parent activity of data change?
-     */
-    override fun onRefresh() {
-        if (activity?.isNetworkConnected() != true) {
-            toast(R.string.prompt_no_network)
-            stopRefresh()
 
-            return
-        }
-
-        toast(R.string.progress_refresh_account)
-
-        val account = sessionManager?.loadAccount()
-        info(account)
-
-        if (account == null) {
-            stopRefresh()
-            return
-        }
-
-        job = GlobalScope.launch(Dispatchers.Main) {
-            try {
-                val updatedAccount = withContext(Dispatchers.IO) {
-                    account.refresh()
-                }
-
-                // hide refreshing indicator
-                stopRefresh()
-
-                if (updatedAccount == null) {
-                    return@launch
-                }
-
-                info(updatedAccount)
-                sessionManager?.saveAccount(updatedAccount)
-                // If after refreshing, user account changed, e.g.
-                // previously email and wechat is bound, somehow on
-                // another platform the two account unbound.
-                if (!updatedAccount.isWxOnly) {
-                    listener?.onAccountUpdate()
-                    return@launch
-                }
-
-                updateUI(updatedAccount)
-
-                toast(R.string.success_updated)
-            } catch (e: ClientError) {
-                info(e)
-                stopRefresh()
-
-                handleClientError(e)
-
-            } catch (e: Exception) {
-                info(e)
-
-                stopRefresh()
-                activity?.handleException(e)
-            }
-        }
-    }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
-        if (context is OnAccountInteractionListener) {
+        if (context is OnSwitchAccountListener) {
             listener = context
         }
 
         if (context != null) {
             sessionManager = SessionManager.getInstance(context)
-            wxSessManager = WxSessionManager.getInstance(context)
         }
     }
 
@@ -160,20 +94,7 @@ class FtcAccountFragment : Fragment(),
         }
 
 
-        wechat_container.setOnClickListener {
-            if (account.isCoupled) {
-                WxAccountActivity.start(context)
-
-                return@setOnClickListener
-            }
-
-            if (account.isFtcOnly) {
-                bindWechat()
-                return@setOnClickListener
-            }
-        }
-
-        info(account)
+        info("onViewCreated: $account")
 
         updateUI(account)
     }
@@ -196,16 +117,104 @@ class FtcAccountFragment : Fragment(),
             }
         }
 
-        if (account.email.isNotBlank()) {
-            email_text.text = account.email
+        email_text.text = if (account.email.isNotBlank()) {
+            account.email
+        } else {
+            getString(R.string.prompt_not_set)
         }
 
-        if (!account.userName.isNullOrBlank()) {
-            user_name_text.text = account.userName
+        user_name_text.text = if (account.userName.isNullOrBlank()) {
+            getString(R.string.prompt_not_set)
+        } else {
+            account.userName
+        }
+
+        wechat_bound_tv.text = if (account.isCoupled) {
+            getString(R.string.action_bound_account)
+        } else {
+            getString(R.string.action_bind_account)
         }
 
         if (account.isCoupled) {
-            wechat_bound_tv.text = getString(R.string.action_bound_account)
+            wechat_container.setOnClickListener {
+                WxAccountActivity.start(context)
+            }
+        } else if (account.isFtcOnly) {
+            wechat_container.setOnClickListener {
+                bindWechat()
+            }
+        }
+    }
+
+    /**
+     * Refresh account data.
+     * It is necessary to inform parent activity of data change?
+     */
+    override fun onRefresh() {
+        if (activity?.isNetworkConnected() != true) {
+            toast(R.string.prompt_no_network)
+            stopRefresh()
+
+            return
+        }
+
+        toast(R.string.progress_refresh_account)
+
+        val account = sessionManager?.loadAccount()
+
+        info("Starting refreshing account: $account")
+
+        if (account == null) {
+            stopRefresh()
+            return
+        }
+
+        job = GlobalScope.launch(Dispatchers.Main) {
+            try {
+                val updatedAccount = withContext(Dispatchers.IO) {
+                    account.refresh()
+                }
+
+                // hide refreshing indicator
+                stopRefresh()
+
+                if (updatedAccount == null) {
+                    return@launch
+                }
+
+                info("Refreshed account: $updatedAccount")
+                sessionManager?.saveAccount(updatedAccount)
+
+                /**
+                 * If after refreshing, user account changed, e.g.
+                 * previously email and wechat is bound, somehow on
+                 * another platform the two account unbound.
+                 */
+                if (updatedAccount.isWxOnly) {
+                    info("A wechat only account. Switch UI.")
+                    listener?.onSwitchAccount()
+                    return@launch
+                }
+
+                updateUI(updatedAccount)
+
+                toast(R.string.prompt_updated)
+            } catch (e: ClientError) {
+                info(e)
+                stopRefresh()
+
+                /**
+                 * TODO logout current session if API responded 404.
+                 * This is possible if user account is deleted on another platform.
+                 */
+                handleClientError(e)
+
+            } catch (e: Exception) {
+                info(e)
+
+                stopRefresh()
+                activity?.handleException(e)
+            }
         }
     }
 
@@ -216,11 +225,14 @@ class FtcAccountFragment : Fragment(),
     private fun bindWechat() {
         val stateCode = WxOAuth.stateCode()
 
-        wxSessManager?.saveState(stateCode)
+        sessionManager?.saveWxState(stateCode)
+        sessionManager?.saveWxIntent(WxOAuthIntent.BINDING)
 
         val req = SendAuth.Req()
         req.scope = WxOAuth.SCOPE
         req.state = stateCode
+
+        wxApi?.sendReq(req)
     }
 
     /**
@@ -245,14 +257,14 @@ class FtcAccountFragment : Fragment(),
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    account.requestVerification()
+                    FtcUser(account.id).requestVerification()
                 }
 
                 // If request succeeds, disable request verification button.
                 showProgress(false)
                 allowInput(!done)
 
-                toast(R.string.success_letter_sent)
+                toast(R.string.prompt_letter_sent)
 
             } catch (e: ClientError) {
                 showProgress(false)
