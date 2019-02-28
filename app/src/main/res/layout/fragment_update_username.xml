@@ -5,65 +5,61 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/current_name_container"
+    <TextView
+        android:id="@+id/label_name_tv"
+        style="@style/FTCText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
+        android:text="@string/label_current_name"
         android:layout_marginTop="16dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/user_name_container"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/label_current_name"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title" />
-
-        <TextView
-            android:id="@+id/current_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/prompt_not_set"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-    </LinearLayout>
+    <TextView
+        style="@style/FTCText"
+        android:id="@+id/value_name_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/prompt_not_set"
+        app:layout_constraintStart_toStartOf="@id/label_name_tv"
+        app:layout_constraintEnd_toEndOf="@id/label_name_tv"
+        app:layout_constraintTop_toBottomOf="@id/label_name_tv"/>
 
     <android.support.design.widget.TextInputLayout
         android:id="@+id/user_name_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/current_name_container">
+        app:layout_constraintEnd_toEndOf="@id/label_name_tv"
+        app:layout_constraintStart_toStartOf="@id/label_name_tv"
+        app:layout_constraintTop_toBottomOf="@+id/value_name_tv">
 
         <EditText
-            android:id="@+id/user_name"
+            android:id="@+id/user_name_input"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:hint="@string/label_new_name"
+            android:inputType="text"
             android:maxLines="1"
             android:singleLine="true" />
 
     </android.support.design.widget.TextInputLayout>
 
     <Button
-        android:id="@+id/save_button"
+        android:id="@+id/save_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         android:text="@string/btn_save"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/user_name_container"
-        app:layout_constraintStart_toStartOf="@+id/user_name_container" />
+        app:layout_constraintEnd_toEndOf="@+id/label_name_tv"
+        app:layout_constraintStart_toStartOf="@+id/label_name_tv"
+        app:layout_constraintTop_toBottomOf="@+id/user_name_container"
+        app:layout_constraintVertical_bias="1.0" />
 
 </android.support.constraint.ConstraintLayout>
