@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        style="@style/FTCTextCenter"
+        android:id="@+id/heading_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Membership Heading"
+        android:paddingBottom="8dp"
+        android:background="@drawable/bottom_border_grey"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/member_rv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="@id/heading_tv"
+        app:layout_constraintEnd_toEndOf="@id/heading_tv"
+        app:layout_constraintTop_toBottomOf="@id/heading_tv"/>
+
+</android.support.constraint.ConstraintLayout>
