@@ -8,14 +8,12 @@ import android.view.View
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.FtcUser
 import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.WxSessionManager
-import com.ft.ftchinese.util.isNetworkConnected
+import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
 class BindEmailActivity : AppCompatActivity(),
@@ -23,8 +21,7 @@ class BindEmailActivity : AppCompatActivity(),
         AnkoLogger {
 
     private var job: Job? = null
-    private var sessionManager: SessionManager? = null
-    private var wxSessionManager: WxSessionManager? = null
+    private lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,12 +33,12 @@ class BindEmailActivity : AppCompatActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
+        sessionManager = SessionManager.getInstance(this)
+
         supportFragmentManager
                 .beginTransaction()
                 .replace(R.id.fragment_container, EmailFragment.newInstance())
                 .commit()
-
-        sessionManager = SessionManager.getInstance(this)
     }
 
     override fun onProgress(show: Boolean) {
@@ -52,7 +49,8 @@ class BindEmailActivity : AppCompatActivity(),
         }
     }
 
-    override fun onLogIn(email: String) {
+
+    override fun onEmailFound(email: String) {
 
         val transaction = supportFragmentManager
                 .beginTransaction()
@@ -62,10 +60,12 @@ class BindEmailActivity : AppCompatActivity(),
         transaction.commit()
     }
 
-    override fun onSignUp(email: String) {
+    override fun onEmailNotFound(email: String) {
 
         val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.fragment_container, SignUpFragment.newInstance(email))
+
+        transaction.replace(R.id.fragment_container, SignUpFragment.newInstance(email, HOST_BINDING_ACTIVITY))
+
         transaction.addToBackStack(null)
         transaction.commit()
     }
@@ -73,7 +73,7 @@ class BindEmailActivity : AppCompatActivity(),
     /**
      * Fetch email account.
      */
-    override fun onLoadAccount(userId: String) {
+    override fun onLoggedIn(userId: String) {
         info("Load account for $userId")
 
         if (!isNetworkConnected()) {
@@ -81,20 +81,124 @@ class BindEmailActivity : AppCompatActivity(),
             return
         }
 
+        onProgress(true)
+
+        /**
+         * TODO handle errors.
+         */
+        try {
+            job = GlobalScope.launch(Dispatchers.Main) {
+                val ftcAccount = withContext(Dispatchers.IO) {
+                    /**
+                     * Must load account via /user/account since at this point the two account are still independent of each other.
+                     */
+                    FtcUser(userId).fetchAccount()
+                }
+
+                onProgress(false)
+
+                info("Account: $ftcAccount")
+
+                if (ftcAccount == null) {
+                    toast(R.string.error_not_loaded)
+                    return@launch
+                }
+
+                info("FTC Account: $ftcAccount")
+
+                AccountsMergeActivity.startForResult(this@BindEmailActivity, ftcAccount)
+            }
+        } catch (e: ClientError) {
+            onProgress(false)
+            when (e.statusCode) {
+                404 -> toast("Account not found")
+                else -> handleApiError(e)
+            }
+        } catch (e: Exception) {
+            onProgress(false)
+            handleException(e)
+        }
+
+    }
+
+    /**
+     * Handle result from AccountsMergeActivity
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        info("onActivityResult: requestCode $requestCode, $resultCode")
+
+        if (requestCode != RequestCode.BOUND) {
+            return
+        }
+
+        if (resultCode != Activity.RESULT_OK) {
+            return
+        }
+
+        info("Bound to an existing ftc account")
+        /**
+         * Pass result to WxAccountFragment.
+         */
+        setResult(Activity.RESULT_OK)
+        finish()
+    }
+
+    /**
+     * Handle wehcat user creating a new FTC account.
+     */
+    override fun onSignedUp(userId: String) {
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        info("Wechat user sign up")
+
+        onProgress(true)
+
+        /**
+         * TODO handle errors.
+         */
         job = GlobalScope.launch(Dispatchers.Main) {
-            val ftcAccount = withContext(Dispatchers.IO) {
-                FtcUser(userId).fetchAccount()
+            try {
+                val ftcAccount = withContext(Dispatchers.IO) {
+                    /**
+                     * Refresh account data via /wx/account endpoint so that login method won't be changed.
+                     */
+                    sessionManager.loadWxSession()?.fetchAccount()
+                }
+
+                onProgress(false)
+
+                info("Wx sign up account: $ftcAccount")
+
+                if (ftcAccount == null) {
+                    toast(R.string.error_not_loaded)
+                    return@launch
+                }
+
+                sessionManager.saveAccount(ftcAccount)
+
+                info("Saved wx sign up account. Notify calling activity")
+
+                setResult(Activity.RESULT_OK)
+                finish()
+            } catch (e: ClientError) {
+
+                onProgress(false)
+
+                when (e.statusCode) {
+                    404 -> toast("Account not found")
+                    else -> handleApiError(e)
+                }
+
+            } catch (e: Exception) {
+                onProgress(false)
+
+                handleException(e)
             }
-
-            info("Account: $ftcAccount")
-
-            if (ftcAccount == null) {
-                toast(R.string.error_not_loaded)
-                return@launch
-            }
-
-            info("FTC Account: $ftcAccount")
-
 
         }
     }
