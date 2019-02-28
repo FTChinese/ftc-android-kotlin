@@ -15,15 +15,6 @@ import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
-interface OnCredentialsListener {
-    fun onProgress(show: Boolean)
-    fun onLogIn(email: String)
-    fun onSignUp(email: String)
-    fun onLoadAccount(userId: String)
-}
-
-const val ARG_EMAIL = "arg_email"
-
 class CredentialsActivity : AppCompatActivity(),
         OnCredentialsListener,
         AnkoLogger {
@@ -58,7 +49,7 @@ class CredentialsActivity : AppCompatActivity(),
         }
     }
 
-    override fun onLogIn(email: String) {
+    override fun onEmailFound(email: String) {
         toast("Login for email $email")
         supportActionBar?.setTitle(R.string.title_login)
 
@@ -70,19 +61,28 @@ class CredentialsActivity : AppCompatActivity(),
         transaction.commit()
     }
 
-    override fun onSignUp(email: String) {
+    override fun onEmailNotFound(email: String) {
         toast("Sign up for email $email")
         supportActionBar?.setTitle(R.string.title_sign_up)
 
         val transaction = supportFragmentManager
                 .beginTransaction()
 
-        transaction.replace(R.id.fragment_container, SignUpFragment.newInstance(email))
+        transaction.replace(R.id.fragment_container, SignUpFragment.newInstance(email, HOST_SIGN_UP_ACTIVITY))
+
         transaction.addToBackStack(null)
         transaction.commit()
     }
 
-    override fun onLoadAccount(userId: String) {
+    override fun onLoggedIn(userId: String) {
+        loadAccount(userId)
+    }
+
+    override fun onSignedUp(userId: String) {
+        loadAccount(userId)
+    }
+
+    private fun loadAccount(userId: String) {
         val user = FtcUser(id = userId)
 
         job = GlobalScope.launch(Dispatchers.Main) {
