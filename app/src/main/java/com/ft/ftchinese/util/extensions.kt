@@ -54,13 +54,20 @@ fun Activity.isActiveNetworkMobile(): Boolean {
 }
 
 /**
- * Generate strings for membership tier and cycle.
+ * Generate human readable membership type.
  * 标准会员/年
  * 标准会员/月
  * 高级会员/年
  * 尚未成为会员
  */
-fun Activity.getTierCycleText(key: String?): String {
+fun Activity.getMemberTypeText(membership: Membership): String {
+    return getProductText(membership.tier, membership.cycle)
+            ?: getString(R.string.tier_free)
+}
+
+fun Activity.getProductText(tier: Tier?, cycle: Cycle?): String? {
+    val key = tierCycleKey(tier, cycle) ?: return null
+
     return when (key) {
         KEY_STANDARD_YEAR -> getString(
                 R.string.formatter_tier_cycle,
@@ -77,7 +84,7 @@ fun Activity.getTierCycleText(key: String?): String {
                 getString(R.string.tier_premium),
                 getString(R.string.cycle_year)
         )
-        else -> getString(R.string.tier_free)
+        else -> null
     }
 }
 
