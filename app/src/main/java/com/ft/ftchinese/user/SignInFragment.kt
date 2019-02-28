@@ -87,9 +87,9 @@ class SignInFragment : Fragment(), AnkoLogger {
     private fun isPasswordValid(pw: String): Boolean {
         password_input.error = null
 
-        val msgId = Validator.ensurePassword(pw)
-        if (msgId != null) {
-            password_input.error = getString(msgId)
+        // To be backward compatible, only checks password is not empty.
+        if (pw.isBlank()) {
+            password_input.error = getString(R.string.error_field_required)
             password_input.requestFocus()
 
             return false
@@ -123,7 +123,7 @@ class SignInFragment : Fragment(), AnkoLogger {
 
                 info("Login success: $userId")
 
-                listener?.onLoadAccount(userId)
+                listener?.onLoggedIn(userId)
 
             } catch (e: ClientError) {
                 showProgress(false)
