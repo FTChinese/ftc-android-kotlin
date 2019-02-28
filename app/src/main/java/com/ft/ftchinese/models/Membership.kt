@@ -45,7 +45,7 @@ data class Membership(
     // It is used as key to retrieve a price;
     // It is also used as the ITEM_ID for firebase's ADD_TO_CART event.
     val key: String
-        get() = "${tier?.string()}_${cycle?.string()}"
+        get() = tierCycleKey(tier, cycle) ?: ""
 
 //    val price: Double?
 //        get() = prices[id]
