@@ -10,8 +10,7 @@
 
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:orientation="vertical"
@@ -58,12 +57,11 @@
 
                 <!-- See https://developer.android.com/reference/android/support/constraint/ConstraintLayout#Chains -->
                 <TextView
+                    style="@style/FTCText"
                     android:id="@+id/prompt_email"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/label_email"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/email_text"
                     app:layout_constraintHorizontal_chainStyle="spread_inside"
@@ -71,13 +69,11 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    style="@style/FTCText"
                     android:id="@+id/email_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
-                    android:text="@string/prompt_not_set"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    android:textSize="18sp"
                     app:layout_constraintBaseline_toBaselineOf="@+id/prompt_email"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/prompt_email" />
@@ -93,12 +89,11 @@
                 android:padding="16dp">
 
                 <TextView
+                    style="@style/FTCText"
                     android:id="@+id/prompt_user_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/label_user_name"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/user_name_text"
                     app:layout_constraintHorizontal_chainStyle="spread_inside"
@@ -106,13 +101,11 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    style="@style/FTCText"
                     android:id="@+id/user_name_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
-                    android:text="@string/prompt_not_set"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    android:textSize="18sp"
                     app:layout_constraintBaseline_toBaselineOf="@+id/prompt_user_name"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/prompt_user_name" />
@@ -128,12 +121,11 @@
                 android:padding="16dp">
 
                 <TextView
+                    style="@style/FTCText"
                     android:id="@+id/label_password"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/label_password"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/password_text"
                     app:layout_constraintHorizontal_chainStyle="spread_inside"
@@ -141,13 +133,12 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    style="@style/FTCText"
                     android:id="@+id/password_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
                     android:text="@string/action_change_password"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    android:textSize="18sp"
                     app:layout_constraintBaseline_toBaselineOf="@+id/label_password"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/label_password" />
@@ -158,7 +149,9 @@
                 style="@style/SectionHead"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/heading_bind_account" />
+                android:text="@string/heading_bind_account"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"/>
 
             <android.support.constraint.ConstraintLayout
                 android:id="@+id/wechat_container"
@@ -169,12 +162,11 @@
                 android:padding="16dp">
 
                 <TextView
+                    style="@style/FTCText"
                     android:id="@+id/label_wechat"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/label_wechat"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/wechat_bound_tv"
                     app:layout_constraintHorizontal_chainStyle="spread_inside"
@@ -182,13 +174,12 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    style="@style/FTCText"
                     android:id="@+id/wechat_bound_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
-                    android:text="@string/action_bind_account"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    android:textSize="18sp"
+
                     app:layout_constraintBaseline_toBaselineOf="@+id/label_wechat"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/label_wechat" />
