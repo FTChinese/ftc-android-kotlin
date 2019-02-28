@@ -26,4 +26,16 @@ object Validator {
 
         return null
     }
+
+    fun ensureUserName(name: String): Int? {
+        if (name.isBlank()) {
+            return R.string.error_field_required
+        }
+
+        if (name.length > 256) {
+            return R.string.error_too_long
+        }
+
+        return null
+    }
 }
