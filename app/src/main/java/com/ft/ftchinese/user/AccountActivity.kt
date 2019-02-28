@@ -1,5 +1,6 @@
 package com.ft.ftchinese.user
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -8,16 +9,12 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-interface OnAccountInteractionListener {
-    fun onProgress(show: Boolean)
-
-    fun onAccountUpdate() {}
-}
 
 /**
  * Show user's account details.
@@ -27,8 +24,10 @@ interface OnAccountInteractionListener {
  * If user logged in with wechat account and it is bound to an FTC account, show FtcAccountFragment.
  */
 class AccountActivity : AppCompatActivity(),
-        OnAccountInteractionListener,
+        OnSwitchAccountListener,
         AnkoLogger {
+
+    private lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +38,8 @@ class AccountActivity : AppCompatActivity(),
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
         }
+
+        sessionManager = SessionManager.getInstance(this)
 
         attachFragment()
         info("AccountActivity.onCreate")
@@ -52,7 +53,26 @@ class AccountActivity : AppCompatActivity(),
         }
     }
 
-    override fun onAccountUpdate() {
+    override fun onSwitchAccount() {
+        attachFragment()
+    }
+
+    /**
+     * Receive message from BindEmailActivity to reattach fragment.
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        info("onActivityResult: requestCode $requestCode, $resultCode")
+
+        if (requestCode != RequestCode.BOUND) {
+            return
+        }
+
+        if (resultCode != Activity.RESULT_OK) {
+            return
+        }
+
         attachFragment()
     }
 
@@ -62,13 +82,15 @@ class AccountActivity : AppCompatActivity(),
      * and the login method.
      */
     private fun attachFragment() {
-        val account = SessionManager.getInstance(this).loadAccount() ?: return
+        val account = sessionManager.loadAccount() ?: return
 
         info("Account: $account")
 
         val fragment: Fragment = if (account.isWxOnly) {
+            info("Using WxAccountFragment")
             WxAccountFragment.newInstance()
         } else {
+            info("Using FtcAccountFragment")
             FtcAccountFragment.newInstance()
         }
 
