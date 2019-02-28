@@ -2,23 +2,17 @@ package com.ft.ftchinese.user
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Typeface
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.activity_my_subscription.*
-import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
@@ -36,14 +30,6 @@ class MySubsActivity : AppCompatActivity(),
     private lateinit var viewAdapter: RowAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var sessionManager: SessionManager
-
-    private fun showProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
-    }
 
     private fun stopRefresh() {
         swipe_refresh.isRefreshing = false
@@ -82,7 +68,7 @@ class MySubsActivity : AppCompatActivity(),
                     return@launch
                 }
 
-                toast(R.string.success_updated)
+                toast(R.string.prompt_updated)
 
                 sessionManager.saveAccount(refreshedAccount)
 
@@ -150,14 +136,14 @@ class MySubsActivity : AppCompatActivity(),
         val tierText = if (account.isVip) {
             getString(R.string.tier_vip)
         } else {
-            getTierCycleText(account.membership.key)
+            getMemberTypeText(account.membership)
         }
 
         val endDateText = if (account.isVip) {
             getString(R.string.cycle_vip)
         } else {
             formatLocalDate(account.membership.expireDate)
-        } ?: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+        }
 
         val row1 = TableRow(
                 header = getString(R.string.label_member_tier),
@@ -182,44 +168,3 @@ class MySubsActivity : AppCompatActivity(),
     }
 }
 
-class RowAdapter(private var rows: Array<TableRow>) :
-        RecyclerView.Adapter<RowAdapter.ViewHolder>() {
-
-    class ViewHolder (view: View): RecyclerView.ViewHolder(view) {
-        val labelView: TextView = view.findViewById(R.id.label_tv)
-        val valueView: TextView = view.findViewById(R.id.value_tv)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.list_item_table_row, parent, false)
-
-        return ViewHolder(view)
-    }
-
-    override fun getItemCount() = rows.size
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val row = rows[position]
-        holder.labelView.text = row.header
-        holder.valueView.text = row.data
-        if (row.color != null) {
-            holder.valueView.setTextColor(row.color)
-        }
-
-        if (row.isBold) {
-            holder.valueView.setTypeface(holder.valueView.typeface, Typeface.BOLD)
-        }
-    }
-
-    fun refreshData(rows: Array<TableRow>) {
-        this.rows = rows
-    }
-}
-
-data class TableRow(
-        val header: String,
-        val data: String,
-        val isBold: Boolean = false,
-        val color: Int? = null
-)
