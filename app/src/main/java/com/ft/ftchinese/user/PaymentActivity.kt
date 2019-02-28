@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.widget.RadioButton
 import com.alipay.sdk.app.PayTask
@@ -22,6 +23,7 @@ import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_payment.*
+import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
@@ -34,19 +36,19 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
 //    private var mMembership: Membership? = null
 
-    private var mTier: Tier? = null
-    private var mCycle: Cycle? = null
-    private var mPayMethod: PayMethod? = null
+    private var tier: Tier? = null
+    private var cycle: Cycle? = null
+    private var payMethod: PayMethod? = null
 
-    private var mPrice: Double? = null
+    private var price: Double? = null
     private var wxApi: IWXAPI? = null
-    private var mSession: SessionManager? = null
-    private var mOrderManager: OrderManager? = null
-    private var mFirebaseAnalytics: FirebaseAnalytics? = null
+    private var sessionManager: SessionManager? = null
+    private var orderManager: OrderManager? = null
+    private var firebaseAnalytics: FirebaseAnalytics? = null
     private var job: Job? = null
 
     private val priceText: String
-        get() = getString(R.string.formatter_price, mPrice)
+        get() = getString(R.string.formatter_price, price)
 
     private fun allowInput(value: Boolean) {
         check_out?.isEnabled = value
@@ -65,9 +67,9 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment)
 
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
-        mSession = SessionManager.getInstance(this)
-        mOrderManager = OrderManager.getInstance(this)
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        sessionManager = SessionManager.getInstance(this)
+        orderManager = OrderManager.getInstance(this)
 
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -82,9 +84,9 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
         val tierStr = intent.getStringExtra(EXTRA_MEMBER_TIER)
         val cycleStr = intent.getStringExtra(EXTRA_BILLING_CYCLE)
 
-        mTier = Tier.fromString(tierStr)
-        mCycle = Cycle.fromString(cycleStr)
-        mPrice = pricingPlans.findPlan(mTier, mCycle)?.netPrice
+        tier = Tier.fromString(tierStr)
+        cycle = Cycle.fromString(cycleStr)
+        price = pricingPlans.findPlan(tier, cycle)?.netPrice
 
         updateUI()
 
@@ -96,10 +98,27 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
     }
 
     private fun updateUI() {
+        product_price_rv.apply {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(this@PaymentActivity)
+            adapter = RowAdapter(buildRows())
+        }
+    }
 
-        value_primary_tv.text = getTierCycleText(tierCycleKey(mTier, mCycle))
+    private fun buildRows(): Array<TableRow> {
+        val row1 = TableRow(
+                header = getString(R.string.label_member_tier),
+                data = getProductText(tier, cycle) ?: "",
+                isBold = true
+        )
 
-        price_tv.text = priceText
+        val row2 = TableRow(
+                header = getString(R.string.label_price),
+                data = priceText,
+                color = ContextCompat.getColor(this, R.color.colorClaret)
+        )
+
+        return arrayOf(row1, row2)
     }
 
     // Event listener for selecting payment method.
@@ -108,20 +127,20 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
             when (view.id) {
                 R.id.pay_by_ali -> {
-                    mPayMethod = PayMethod.ALIPAY
+                    payMethod = PayMethod.ALIPAY
 
                     check_out.text = getString(
                             R.string.formatter_check_out,
                             getString(R.string.pay_by_ali),
-                            mPrice)
+                            priceText)
                 }
                 R.id.pay_by_wechat -> {
-                    mPayMethod = PayMethod.WXPAY
+                    payMethod = PayMethod.WXPAY
 
                     check_out.text = getString(
                             R.string.formatter_check_out,
                             getString(R.string.pay_by_wechat),
-                            mPrice)
+                            priceText)
                 }
 //                R.id.pay_by_stripe -> {
 //
@@ -133,7 +152,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
     // Event listener for checkout.
     fun onCheckOut(view: View) {
-        if (mPayMethod == null) {
+        if (payMethod == null) {
             toast(R.string.unknown_payment_method)
             return
         }
@@ -142,7 +161,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
         logCheckOutEvent()
 
-        when (mPayMethod) {
+        when (payMethod) {
             PayMethod.ALIPAY -> {
                 // The commented code are used for testing UI only.
 //                val intent = Intent().apply {
@@ -158,7 +177,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
             PayMethod.WXPAY -> {
                 // The commented codes are used for testing WXPayEntryActivity ui only.
-//                WXPayEntryActivity.start(this)
+//                WXPayEntryActivity.startForResult(this)
 //
 //                val intent = Intent().apply {
 //                    putExtra(EXTRA_PAYMENT_METHOD, Subscription.PAYMENT_METHOD_WX)
@@ -220,10 +239,10 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             return
         }
 
-        val tier = mTier ?: return
-        val cycle = mCycle ?: return
-        val payMethod = mPayMethod ?: return
-        val user = mSession?.loadAccount() ?: return
+        val tier = tier ?: return
+        val cycle = cycle ?: return
+        val payMethod = payMethod ?: return
+        val user = sessionManager?.loadAccount() ?: return
 
         showProgress(true)
         allowInput(false)
@@ -271,16 +290,11 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
                     )
 
                     // Save subscription details to shared preference so that we could use it in WXPayEntryActivity
-                    mOrderManager?.save(subs)
-                }
-
-                // Tell parent activity to kill itself.
-                val intent = Intent().apply {
-                    putExtra(EXTRA_PAYMENT_METHOD, payMethod.string())
+                    orderManager?.save(subs)
                 }
 
                 // Tell MembershipActivity to kill itself.
-                setResult(Activity.RESULT_OK, intent)
+                setResult(Activity.RESULT_OK)
 
                 finish()
 
@@ -307,10 +321,10 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             return
         }
 
-        val tier = mTier ?: return
-        val cycle = mCycle ?: return
-        val payMethod = mPayMethod ?: return
-        val user = mSession?.loadAccount() ?: return
+        val tier = tier ?: return
+        val cycle = cycle ?: return
+        val payMethod = payMethod ?: return
+        val user = sessionManager?.loadAccount() ?: return
 
         showProgress(true)
         allowInput(false)
@@ -356,7 +370,7 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             )
 
             info("Save subscription order: $subs")
-            mOrderManager?.save(subs)
+            orderManager?.save(subs)
 
             val payResult = launchAlipay(aliOrder.param)
 
@@ -377,57 +391,19 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
 
             // Update membership
             val updatedMembership = subs.confirm(user.membership)
-            mSession?.updateMembership(updatedMembership)
+            sessionManager?.updateMembership(updatedMembership)
 
             // Purchase event
             logPurchaseEvent(subs.netPrice, payMethod)
 
             // Tell parent Activity user's payment method.
-            setResult(Activity.RESULT_OK, Intent().apply {
-                putExtra(EXTRA_PAYMENT_METHOD, payMethod.string())
-            })
+            setResult(Activity.RESULT_OK)
+
+            MySubsActivity.start(this@PaymentActivity)
 
             // Destroy this activity and tells parent activity to update user data.
             finish()
         }
-    }
-
-    private fun handleClientError(resp: ClientError) {
-        when (resp.statusCode) {
-            403 -> {
-                toast(R.string.renewal_not_allowed)
-            }
-            else -> {
-                handleApiError(resp)
-            }
-        }
-    }
-
-    // When user started this activity, we can assume he is adding to cart.
-    private fun logAddCartEvent() {
-        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle().apply {
-            putString(FirebaseAnalytics.Param.ITEM_ID, "${mTier?.string()}_${mCycle?.string()}")
-            putString(FirebaseAnalytics.Param.ITEM_NAME, mTier?.string())
-            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, mCycle?.string())
-            putLong(FirebaseAnalytics.Param.QUANTITY, 1)
-        })
-    }
-
-    private fun logCheckOutEvent() {
-        // Begin to checkout event
-        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
-            putDouble(FirebaseAnalytics.Param.VALUE, mPrice ?: 0.0)
-            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-            putString(FirebaseAnalytics.Param.METHOD, mPayMethod?.string())
-        })
-    }
-
-    private fun logPurchaseEvent(price: Double, payMethod: PayMethod) {
-        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
-            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-            putDouble(FirebaseAnalytics.Param.VALUE, price)
-            putString(FirebaseAnalytics.Param.METHOD, payMethod.string())
-        })
     }
 
     /**
@@ -445,6 +421,46 @@ class PaymentActivity : AppCompatActivity(), AnkoLogger {
             PayTask(this@PaymentActivity).payV2(orderInfo, true)
         }
     }
+
+    private fun handleClientError(resp: ClientError) {
+        when (resp.statusCode) {
+            403 -> {
+                toast(R.string.renewal_not_allowed)
+            }
+            else -> {
+                handleApiError(resp)
+            }
+        }
+    }
+
+    // When user started this activity, we can assume he is adding to cart.
+    private fun logAddCartEvent() {
+        firebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle().apply {
+            putString(FirebaseAnalytics.Param.ITEM_ID, tierCycleKey(tier, cycle))
+            putString(FirebaseAnalytics.Param.ITEM_NAME, tier?.string())
+            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, cycle?.string())
+            putLong(FirebaseAnalytics.Param.QUANTITY, 1)
+        })
+    }
+
+    private fun logCheckOutEvent() {
+        // Begin to checkout event
+        firebaseAnalytics?.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
+            putDouble(FirebaseAnalytics.Param.VALUE, price ?: 0.0)
+            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
+            putString(FirebaseAnalytics.Param.METHOD, payMethod?.string())
+        })
+    }
+
+    private fun logPurchaseEvent(price: Double, payMethod: PayMethod) {
+        firebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
+            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
+            putDouble(FirebaseAnalytics.Param.VALUE, price)
+            putString(FirebaseAnalytics.Param.METHOD, payMethod.string())
+        })
+    }
+
+
 
     private fun stripePay() {
 
