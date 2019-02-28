@@ -1,6 +1,5 @@
 package com.ft.ftchinese.models
 
-import android.content.Context
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.util.*
 import org.jetbrains.anko.AnkoLogger
@@ -9,62 +8,6 @@ import org.threeten.bp.DateTimeException
 import org.threeten.bp.ZonedDateTime
 import java.io.File
 import java.lang.Exception
-
-private const val PREF_FILE_NAME = "wechat"
-private const val PREF_OAUTH_STATE = "oauth_state"
-private const val PREF_SESSION_ID = "session_id"
-private const val PREF_UNION_ID = "union_id"
-private const val PREF_CREATED = "created_at"
-
-/**
- * Manages local-cached wechat session data.
- */
-class WxSessionManager private constructor(context: Context) {
-    private val sharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
-    private val editor = sharedPreferences.edit()
-
-    fun saveState(state: String) {
-        editor.putString(PREF_OAUTH_STATE, state)
-        editor.apply()
-    }
-
-    fun loadState(): String? {
-        return sharedPreferences.getString(PREF_OAUTH_STATE, null)
-    }
-
-    fun saveSession(sess: WxSession) {
-        editor.putString(PREF_SESSION_ID, sess.sessionId)
-        editor.putString(PREF_UNION_ID, sess.unionId)
-        editor.putString(PREF_CREATED, formatISODateTime(sess.createdAt))
-        editor.apply()
-    }
-
-    fun loadSession(): WxSession? {
-        val sessionId = sharedPreferences.getString(PREF_SESSION_ID, null) ?: return null
-        val unionId = sharedPreferences.getString(PREF_UNION_ID, null) ?: return null
-        val created = sharedPreferences.getString(PREF_CREATED, null)
-
-        val createdAt = parseISODateTime(created) ?: return null
-
-        return WxSession(
-                sessionId = sessionId,
-                unionId = unionId,
-                createdAt = createdAt
-        )
-    }
-
-    companion object {
-        private var instance: WxSessionManager? = null
-
-        @Synchronized fun getInstance(ctx: Context): WxSessionManager {
-            if (instance == null) {
-                instance = WxSessionManager(ctx)
-            }
-
-            return instance!!
-        }
-    }
-}
 
 object WxOAuth {
     const val SCOPE = "snsapi_userinfo"
@@ -91,6 +34,16 @@ object WxOAuth {
             json.parse<WxSession>(body)
         }
     }
+}
+
+/**
+ * The reason why you want to perform wechat OAuth:
+ * for LOGIN, account data will be saved;
+ * for BINDING, account data will be used for display; never save it!
+ */
+enum class WxOAuthIntent {
+    LOGIN,
+    BINDING;
 }
 
 /**
@@ -122,23 +75,31 @@ data class WxSession(
      * Refresh Wechat user info.
      */
     fun refreshInfo(): Boolean {
-        val (resp, _) = Fetch().get(SubscribeApi.WX_REFRESH)
+        val (resp, _) = Fetch().put(SubscribeApi.WX_REFRESH)
                 .noCache()
                 .setAppId()
-                .setSessionId(this@WxSession.sessionId)
+                .jsonBody(Klaxon().toJsonString(mapOf(
+                        "sessionId" to sessionId
+                )))
                 .responseApi()
 
         return resp.code() == 204
     }
 
     /**
-     * Fetch user account data by wechat union id.
+     * Fetch user account data after wechat OAuth succeeded.
+     * Account retrieved from here always has loginMethod set to `wechat`.
+     * Only used for initial login.
+     * DO NOT use this to refresh account data since WxSession only exists
+     * if user logged in via wechat OAuth.
+     * If user logged in wiht email + password (and the the email is bound to this wechat),
+     * WxSession actually never exist.
      */
     fun fetchAccount(): Account? {
         val (_, body) = Fetch()
                 .get(NextApi.WX_ACCOUNT)
-                .noCache()
                 .setUnionId(unionId)
+                .noCache()
                 .responseApi()
 
         return if (body == null) {
@@ -146,21 +107,6 @@ data class WxSession(
         } else {
             json.parse<Account>(body)
         }
-    }
-
-    /**
-     * Send request to bind this wechat account to an ftc account
-     */
-    fun bindFtcAccount(userId: String): Boolean {
-        val (resp, _) = Fetch().put(NextApi.WX_BIND)
-                .noCache()
-                .setUnionId(unionId)
-                .jsonBody(Klaxon().toJsonString(mapOf(
-                        "userId" to userId
-                )))
-                .responseApi()
-
-        return resp.code() == 204
     }
 }
 
@@ -173,6 +119,9 @@ data class Wechat(
         val avatarUrl: String? = null
 ): AnkoLogger {
     val avatarName: String = "wx_avatar.jpg"
+
+    val isEmpty: Boolean
+        get() = nickname.isNullOrBlank() && avatarUrl.isNullOrBlank()
 
     /**
      * Download user's Wechat avatar.
