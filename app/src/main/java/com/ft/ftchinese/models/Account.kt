@@ -12,11 +12,11 @@ import org.jetbrains.anko.AnkoLogger
  */
 data class Account(
         val id: String,
-        val unionId: String?,
-        val userName: String?,
+        val unionId: String? = null,
+        val userName: String? = null,
         val email: String,
         val isVerified: Boolean = false,
-        val avatarUrl: String?,
+        val avatarUrl: String? = null,
         val isVip: Boolean = false,
         @KLoginMethod
         val loginMethod: LoginMethod? = null,
@@ -57,6 +57,9 @@ data class Account(
         get() {
             return (membership.isPaidMember && !membership.isExpired) || isVip
         }
+
+    val isMember: Boolean
+        get() = membership.isPaidMember
 
     /**
      * Get a name used to display on UI.
@@ -116,17 +119,6 @@ data class Account(
         } else {
             json.parse<Account>(body)
         }
-    }
-
-    fun requestVerification(): Boolean {
-        val (response, _) = Fetch().post(NextApi.REQUEST_VERIFICATION)
-                .noCache()
-                .setClient()
-                .setUserId(this@Account.id)
-                .body()
-                .responseApi()
-
-        return response.code() == 204
     }
 
     /**
