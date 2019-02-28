@@ -69,16 +69,5 @@ class AdScheduleTest {
     ]
 }""".trimIndent()
 
-    @Test fun parseJson() {
-        val adSchedule = json.parse<AdAgenda>(data)
-        println(adSchedule)
-    }
 
-    @Test
-    fun transform() {
-    }
-
-    @Test
-    fun getMeta() {
-    }
 }
