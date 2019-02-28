@@ -8,8 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.WxOAuth
-import com.ft.ftchinese.models.WxSessionManager
+import com.ft.ftchinese.models.WxOAuthIntent
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -20,13 +21,13 @@ import org.jetbrains.anko.info
 class WxLoginFragment : Fragment(), AnkoLogger {
 
     private var wxApi: IWXAPI? = null
-    private var wxSessionManager: WxSessionManager? = null
+    private var sessionManager: SessionManager? = null
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
         if (context != null) {
-            wxSessionManager = WxSessionManager.getInstance(context)
+            sessionManager = SessionManager.getInstance(context)
         }
     }
 
@@ -50,7 +51,8 @@ class WxLoginFragment : Fragment(), AnkoLogger {
             val nonce = WxOAuth.stateCode()
             info("Wechat oauth state: $nonce")
 
-            wxSessionManager?.saveState(nonce)
+            sessionManager?.saveWxState(nonce)
+            sessionManager?.saveWxIntent(WxOAuthIntent.LOGIN)
 
             val req = SendAuth.Req()
             req.scope = WxOAuth.SCOPE
