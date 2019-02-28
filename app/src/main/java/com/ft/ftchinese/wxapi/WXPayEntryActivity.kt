@@ -7,6 +7,7 @@ import android.view.View
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
+import com.ft.ftchinese.user.MySubsActivity
 import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.*
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -16,7 +17,7 @@ import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.android.synthetic.main.activity_wx_pay_result.*
+import kotlinx.android.synthetic.main.activity_wechat.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.*
@@ -34,27 +35,15 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     private fun showProgress(value: Boolean) {
         if (value) {
             progress_bar.visibility = View.VISIBLE
-            done_button.visibility = View.GONE
-            heading_tv.visibility = View.GONE
         } else {
             progress_bar.visibility = View.GONE
-            done_button.visibility = View.VISIBLE
-            heading_tv.visibility = View.VISIBLE
-        }
-    }
-
-    private fun showSuccesss(value: Boolean) {
-        if (value) {
-            member_container.visibility = View.VISIBLE
-        } else {
-            member_container.visibility = View.GONE
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_wx_pay_result)
+        setContentView(R.layout.activity_wechat)
 
         setSupportActionBar(toolbar)
 
@@ -62,6 +51,8 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
         mSession = SessionManager.getInstance(this)
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
+
+        showUI(false)
 
         // Only used to test WXPayEntryActivity's UI.
         // Comment them for production.
@@ -146,7 +137,14 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
             } catch (resp: ClientError) {
                 showProgress(false)
 
-                handleClientError(resp)
+                when (resp.statusCode) {
+                    404 -> {
+                        toast(R.string.order_not_found)
+                    }
+                    else -> {
+                        handleApiError(resp)
+                    }
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
 
@@ -165,24 +163,18 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         when (queryResult.paymentState) {
             // If payment success, update user sessions's member tier, expire date, billing cycle.
             "SUCCESS" -> {
-                showSuccesss(true)
-                resultText = getString(R.string.wxpay_done)
-
 
                 val updatedMember = subs.confirm(currentMember)
 
                 info("New membership: $updatedMember")
 
-                updateUI(updatedMember)
+                showSuccessUI(getString(R.string.wxpay_done))
                 mSession?.updateMembership(updatedMember)
 
-                // Log purchase event.
-                mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
-                    putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-                    putDouble(FirebaseAnalytics.Param.VALUE, subs.netPrice)
-                    putString(FirebaseAnalytics.Param.METHOD, subs.payMethod.string())
-                })
 
+                logPurchaseEvent(subs)
+
+                return
             }
             "REFUND" -> {
                 resultText = getString(R.string.wxpay_refund)
@@ -204,40 +196,55 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
             }
         }
 
-        heading_tv.text = resultText
+        showFailureUI(resultText)
     }
 
-    private fun updateUI(member: Membership) {
-
-        tier_cycle_tv.text = getTierCycleText(member.key)
-
-        expire_tv.text = getString(
-                R.string.wxpay_expire_date,
-                formatLocalDate(member.expireDate)
-        )
-    }
-
-    private fun handleClientError(resp: ClientError) {
-        when (resp.statusCode) {
-            404 -> {
-                toast(R.string.order_not_found)
-            }
-            else -> {
-                handleApiError(resp)
-            }
+    private fun showUI(show: Boolean) {
+        if (show) {
+            heading_tv.visibility = View.VISIBLE
+            done_button.visibility = View.VISIBLE
+        } else {
+            heading_tv.visibility = View.GONE
+            done_button.visibility = View.GONE
         }
+    }
+
+
+    private fun showSuccessUI(heading: String) {
+        showUI(true)
+        heading_tv.text = heading
+        done_button.setOnClickListener {
+            // Start MembershipActivity manually here.
+            // This is the only way to refresh user data.
+            MySubsActivity.start(this)
+
+            finish()
+        }
+    }
+
+    private fun showFailureUI(heading: String) {
+        showUI(true)
+
+        heading_tv.text = heading
+
+        done_button.setOnClickListener {
+            SubscriptionActivity.start(this)
+            finish()
+        }
+    }
+
+    // Log purchase event.
+    private fun logPurchaseEvent(subs: Subscription) {
+
+        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
+            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
+            putDouble(FirebaseAnalytics.Param.VALUE, subs.netPrice)
+            putString(FirebaseAnalytics.Param.METHOD, subs.payMethod.string())
+        })
     }
 
     override fun onReq(req: BaseReq?) {
 
-    }
-
-    fun onClickDone(view: View) {
-        // Start MembershipActivity manually here.
-        // This is the only way to refresh user data.
-        SubscriptionActivity.start(this, true, null)
-
-        finish()
     }
 
     override fun onDestroy() {
@@ -246,19 +253,19 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         job?.cancel()
     }
 
-    // Force back button to start MembershipActivity so that use feels he is returning to previous MembershipActivity while actually the old instance already killed.
+    // Force back button to startForResult MembershipActivity so that use feels he is returning to previous MembershipActivity while actually the old instance already killed.
     // This hacking is used to refresh user data.
     // On iOS you do not need to handle it since there's no back button.
     override fun onBackPressed() {
         super.onBackPressed()
-        SubscriptionActivity.start(this, true, null)
+        SubscriptionActivity.start(this, null)
         finish()
     }
 
     // For test only.
 //    companion object {
 //        private const val EXTRA_IS_TEST = "ui_test"
-//        fun start(activity: Activity?) {
+//        fun startForResult(activity: Activity?) {
 //            val intent = Intent(activity, WXPayEntryActivity::class.java)
 //            intent.putExtra(EXTRA_IS_TEST, false)
 //
