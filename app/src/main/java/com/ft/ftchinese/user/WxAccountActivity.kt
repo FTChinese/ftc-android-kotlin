@@ -4,21 +4,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.View
 import com.ft.ftchinese.R
-import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 
-class WxAccountActivity : AppCompatActivity(),
-        OnAccountInteractionListener{
-
-    override fun onProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
-    }
+/**
+ * This is only used to present wechat account information
+ * if it is bound to a ftc account, and user clicked the
+ * `wechat_container` button in AccountActivity.
+ */
+class WxAccountActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
