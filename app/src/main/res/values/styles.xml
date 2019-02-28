@@ -120,14 +120,18 @@
 
     <style name="Origami.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <style name="FTCTitle">
+        <item name="android:textAlignment">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Headline</item>
+    </style>
+
     <style name="FTCText">
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body1</item>
         <item name="android:textSize">18sp</item>
     </style>
 
-    <style name="FTCTitle">
+    <style name="FTCTextCenter" parent="FTCText">
         <item name="android:textAlignment">center</item>
-        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Headline</item>
     </style>
 
     <style name="FTCLink" parent="FTCText">
