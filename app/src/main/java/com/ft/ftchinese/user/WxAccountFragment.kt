@@ -1,8 +1,6 @@
 package com.ft.ftchinese.user
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -13,10 +11,7 @@ import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.Wechat
-import com.ft.ftchinese.models.WxSessionManager
-import com.ft.ftchinese.util.FileCache
-import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.util.isNetworkConnected
+import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.fragment_wx_account.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
@@ -25,15 +20,15 @@ import org.jetbrains.anko.support.v4.toast
 import java.io.ByteArrayInputStream
 
 /**
- * Used by both WxAccountActivity and AccountActivity.
+ * Used by both [WxAccountActivity] and [AccountActivity]
  */
 class WxAccountFragment : Fragment(),
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
-    private var listener: OnAccountInteractionListener? = null
+    private var listener: OnSwitchAccountListener? = null
     private var sessionManager: SessionManager? = null
-    private var wxSessManager: WxSessionManager? = null
+//    private var wxSessManager: WxSessionManager? = null
     // Load drawable from filesDir.
     private var cache: FileCache? = null
     private var job: Job? = null
@@ -42,13 +37,13 @@ class WxAccountFragment : Fragment(),
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
-        if (context is OnAccountInteractionListener) {
+        if (context is OnSwitchAccountListener) {
             listener = context
         }
 
         if (context != null) {
             sessionManager = SessionManager.getInstance(context)
-            wxSessManager = WxSessionManager.getInstance(context)
+//            wxSessManager = WxSessionManager.getInstance(context)
             cache = FileCache(context)
         }
     }
@@ -71,6 +66,9 @@ class WxAccountFragment : Fragment(),
         }
     }
 
+    /**
+     * Handle result from BindEmailActivity.
+     */
     private fun updateUI() {
         val account = sessionManager?.loadAccount()
 
@@ -79,8 +77,12 @@ class WxAccountFragment : Fragment(),
             return
         }
 
-        info(account)
+        info("Show wechat acount: $account")
 
+        if (account.wechat.isEmpty) {
+            toast(R.string.wechat_not_found)
+            return
+        }
 
         loadAvatar(account.wechat)
 
@@ -130,6 +132,9 @@ class WxAccountFragment : Fragment(),
         }
     }
 
+    private fun stopRefresh() {
+        swipe_refresh.isRefreshing = false
+    }
     /**
      * Refresh takes two steps:
      * 1. Ask API to refresh wechat userinfo;
@@ -138,50 +143,85 @@ class WxAccountFragment : Fragment(),
     override fun onRefresh() {
         if (activity?.isNetworkConnected() != true) {
             toast(R.string.prompt_no_network)
-            swipe_refresh.isRefreshing = false
+            stopRefresh()
 
             return
         }
 
-        toast(R.string.progress_refresh_account)
-
-        val wxSession = wxSessManager?.loadSession() ?: return
-
+        /**
+         * If a user logged in with email account, the this account is bound to a wechat account,
+         * WxSession data should not ever exist. If there is not WxSession data, you are not able to
+         * access wechat oauth API.
+         */
         job = GlobalScope.launch(Dispatchers.Main) {
-            val account = withContext(Dispatchers.IO) {
-                wxSession.fetchAccount()
+            try {
+
+                refreshInfo()
+
+                toast(R.string.progress_fetching)
+
+                val account = withContext(Dispatchers.IO) {
+                    sessionManager?.loadAccount()?.refresh()
+                }
+
+                stopRefresh()
+
+                if (account == null) {
+                    return@launch
+                }
+
+                sessionManager?.saveAccount(account)
+
+                info("Refreshed account: $account")
+
+                /**
+                 * Switch account fragment.
+                 * This is only meaningful when hosted inside AccountActivity.
+                 */
+                if (account.isCoupled && context is OnSwitchAccountListener) {
+                    info("A bound account. Ask hosting activity to switch UI.")
+                    listener?.onSwitchAccount()
+                    return@launch
+                }
+
+                /**
+                 * If after refreshing, we found out this wechat account is bound to an FTC account,
+                 * ask hosting activity to switch fragment;
+                 * otherwise simply update ui.
+                 */
+                toast(R.string.prompt_updated)
+
+                updateUI()
+
+            } catch (e: ClientError) {
+                stopRefresh()
+                info(e)
+
+                activity?.handleApiError(e)
+            } catch (e: Exception) {
+                stopRefresh()
+                info(e)
+
+                activity?.handleException(e)
             }
-
-            swipe_refresh.isRefreshing = false
-
-            if (account == null) {
-                return@launch
-            }
-
-            sessionManager?.saveAccount(account)
-
-            toast(R.string.success_updated)
-
-            updateUI()
         }
     }
 
-
     /**
-     * After accounts bound, update based on latest account data.
+     * This is an optional operation.
      */
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+    private suspend fun refreshInfo() {
+        val wxSession = sessionManager?.loadWxSession() ?: return
 
-        if (requestCode != RequestCode.BOUND) {
-            return
+        info("Wx session: $wxSession")
+
+        toast(R.string.progress_updating)
+
+        val refreshed = withContext(Dispatchers.IO) {
+            wxSession.refreshInfo()
         }
 
-        if (resultCode != Activity.RESULT_OK) {
-            return
-        }
-
-        listener?.onAccountUpdate()
+        info("Refresh wechat info result: $refreshed")
     }
 
     override fun onDestroy() {
