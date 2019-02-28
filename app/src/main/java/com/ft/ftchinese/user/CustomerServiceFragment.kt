@@ -11,7 +11,6 @@ import com.ft.ftchinese.R
 import kotlinx.android.synthetic.main.fragment_customer_service.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
-import org.jetbrains.anko.toast
 
 class CustomerServiceFragment : Fragment(), AnkoLogger {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
