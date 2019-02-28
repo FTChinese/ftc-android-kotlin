@@ -24,33 +24,28 @@ import org.jetbrains.anko.support.v4.toast
 class UpdatePasswordFragment : Fragment(), AnkoLogger {
 
     private var job: Job? = null
-    private var mListener: OnAccountInteractionListener? = null
+    private var listener: OnUpdateAccountListener? = null
+    private var sessionManager: SessionManager? = null
 
-    private var mSession: SessionManager? = null
+    private fun showProgress(show: Boolean) {
+        listener?.onProgress(show)
+    }
 
-    private var isInProgress: Boolean
-        get() = !save_button.isEnabled
-        set(value) {
-            mListener?.onProgress(value)
-        }
-
-    private var isInputAllowed: Boolean
-        get() = new_password.isEnabled
-        set(value) {
-            old_password?.isEnabled = value
-            new_password?.isEnabled = value
-            confirm_password?.isEnabled = value
-            save_button?.isEnabled = value
-        }
+    private fun allowInput(value: Boolean) {
+        old_password_input.isEnabled = value
+        new_password_input.isEnabled = value
+        confirm_password_input.isEnabled = value
+        save_btn.isEnabled = value
+    }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
-        if (context is OnAccountInteractionListener) {
-            mListener = context
+        if (context is OnUpdateAccountListener) {
+            listener = context
         }
 
         if (context != null) {
-            mSession = SessionManager.getInstance(context)
+            sessionManager = SessionManager.getInstance(context)
         }
     }
 
@@ -63,58 +58,58 @@ class UpdatePasswordFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        save_button.setOnClickListener {
+        save_btn.setOnClickListener {
             info("Saving password...")
-            attemptSave()
+
+            val passwords = validate() ?: return@setOnClickListener
+
+            save(passwords)
         }
     }
 
-    private fun attemptSave() {
-        old_password.error = null
-        new_password.error = null
-        confirm_password.error = null
+    private fun validate(): Passwords? {
+        old_password_input.error = null
+        new_password_input.error = null
+        confirm_password_input.error = null
 
-        val oldPassword = old_password.text.toString().trim()
-        val newPassword = new_password.text.toString().trim()
-        val confirmPassword = confirm_password.text.toString().trim()
-
-        var cancel = false
-        var focusView: View? = null
+        val oldPassword = old_password_input.text.toString().trim()
+        val newPassword = new_password_input.text.toString().trim()
+        val confirmPassword = confirm_password_input.text.toString().trim()
 
         if (oldPassword.isBlank()) {
-            old_password.error = getString(R.string.error_invalid_password)
-            focusView = old_password
-            cancel = true
+            old_password_input.error = getString(R.string.error_invalid_password)
+            old_password_input.requestFocus()
+            return null
         }
 
-        if (newPassword.isBlank()) {
-            new_password.error = getString(R.string.error_invalid_password)
-            focusView = new_password
-            cancel = true
+        var msgId = Validator.ensurePassword(newPassword)
+        if (msgId != null) {
+            new_password_input.error = getString(msgId)
+            new_password_input.requestFocus()
+            return null
         }
 
-        if (confirmPassword.isBlank()) {
-            confirm_password.error = getString(R.string.error_invalid_password)
-            focusView = confirm_password
-            cancel = true
+
+        msgId = Validator.ensurePassword(confirmPassword)
+        if (msgId != null) {
+            confirm_password_input.error = getString(msgId)
+            confirm_password_input.requestFocus()
+            return null
         }
 
         if (newPassword != confirmPassword) {
-            confirm_password.error = getString(R.string.error_mismatched_confirm_password)
-            focusView = confirm_password
-            cancel = true
+            confirm_password_input.error = getString(R.string.error_mismatched_confirm_password)
+            confirm_password_input.requestFocus()
+            return null
         }
 
-        if (cancel) {
-            focusView?.requestFocus()
-
-            return
-        }
-
-        save(oldPassword, newPassword)
+        return Passwords(
+                oldPassword = oldPassword,
+                newPassword = newPassword
+        )
     }
 
-    private fun save(oldPassword: String, newPassword: String) {
+    private fun save(passwords: Passwords) {
 
         if (activity?.isNetworkConnected() != true) {
             toast(R.string.prompt_no_network)
@@ -122,10 +117,10 @@ class UpdatePasswordFragment : Fragment(), AnkoLogger {
             return
         }
 
-        val uuid = mSession?.loadAccount()?.id ?: return
+        val uuid = sessionManager?.loadAccount()?.id ?: return
 
-        isInProgress = true
-        isInputAllowed = false
+        showProgress(true)
+        allowInput(false)
 
         job = GlobalScope.launch(Dispatchers.Main) {
 
@@ -133,45 +128,38 @@ class UpdatePasswordFragment : Fragment(), AnkoLogger {
                 info("Start updating password")
 
                 val done = withContext(Dispatchers.IO) {
-                    FtcUser(uuid).updatePassword(
-                            Passwords(oldPassword, newPassword))
+                    FtcUser(uuid).updatePassword(passwords)
                 }
 
-                isInProgress = false
+                showProgress(false)
 
-                if (done) {
-                    toast(R.string.success_saved)
-                } else {
+                info("Change password result: $done")
 
-                }
+                toast(R.string.prompt_saved)
 
             } catch (e: ClientError) {
-                isInProgress = false
-                isInputAllowed = true
+                showProgress(false)
+                allowInput(true)
 
-                handleClientError(e)
+                when (e.statusCode) {
+                    // 422 could be password_invalid
+                    404 -> {
+                        toast(R.string.api_account_not_found)
+                    }
+                    // Wrong old password
+                    403 -> {
+                        toast(R.string.error_incorrect_old_password)
+                    }
+                    else -> {
+                        activity?.handleApiError(e)
+                    }
+                }
 
             } catch (e: Exception) {
-                isInProgress = false
-                isInputAllowed = true
+                showProgress(false)
+                allowInput(true)
 
                 activity?.handleException(e)
-            }
-        }
-    }
-
-    private fun handleClientError(resp: ClientError) {
-        when (resp.statusCode) {
-            // 422 could be password_invalid
-            404 -> {
-                toast(R.string.api_account_not_found)
-            }
-            // Wrong old password
-            403 -> {
-                toast(R.string.error_incorrect_old_password)
-            }
-            else -> {
-                activity?.handleApiError(resp)
             }
         }
     }

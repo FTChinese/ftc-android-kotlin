@@ -22,32 +22,28 @@ import org.jetbrains.anko.support.v4.toast
 class UpdateNameFragment : Fragment(), AnkoLogger {
 
     private var job: Job? = null
-    private var mListener: OnAccountInteractionListener? = null
+    private var listener: OnUpdateAccountListener? = null
 
-    private var mSession: SessionManager? = null
+    private var sessionManager: SessionManager? = null
 
-    private var isInProgress: Boolean
-        get() = !save_button.isEnabled
-        set(value) {
-            mListener?.onProgress(value)
-        }
+    private fun showProgress(show: Boolean) {
+        listener?.onProgress(show)
+    }
 
-    private var isInputAllowed: Boolean
-        get() = user_name.isEnabled
-        set(value) {
-            user_name?.isEnabled = value
-            save_button?.isEnabled = value
-        }
+    private fun allowInput(value: Boolean) {
+        user_name_input.isEnabled = value
+        save_btn.isEnabled = value
+    }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
-        if (context is OnAccountInteractionListener) {
-            mListener = context
+        if (context is OnUpdateAccountListener) {
+            listener = context
         }
 
         if (context != null) {
-            mSession = SessionManager.getInstance(context)
+            sessionManager = SessionManager.getInstance(context)
         }
     }
 
@@ -60,33 +56,43 @@ class UpdateNameFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        save_button.setOnClickListener {
-            attemptSave()
-        }
+        value_name_tv.text = sessionManager?.loadAccount()?.userName
 
-        current_name.text = mSession?.loadAccount()?.userName
+        save_btn.setOnClickListener {
+
+            val userName = user_name_input.text.toString().trim()
+
+            val isValid = isNameValid(userName)
+
+            if (!isValid) {
+                return@setOnClickListener
+            }
+
+            save(userName)
+        }
     }
 
-    private fun attemptSave() {
-        user_name.error = null
-        val userNameStr = user_name.text.toString()
+    private fun isNameValid(userName: String): Boolean {
+        user_name_input.error = null
 
-        var cancel = false
+        val msgId = Validator.ensureUserName(userName)
+        if (msgId != null) {
+            user_name_input.error = getString(msgId)
+            user_name_input.requestFocus()
 
-        if (userNameStr.isBlank()) {
-            user_name.error = getString(R.string.error_field_required)
-            cancel = true
-        } else if (userNameStr == mSession?.loadAccount()?.userName) {
-            user_name.error = getString(R.string.error_name_unchanged)
-            cancel = true
+            return false
         }
 
-        if (cancel) {
-            user_name.requestFocus()
-            return
+        val currentName = value_name_tv.text.toString()
+
+        if (currentName == userName) {
+            user_name_input.error = getString(R.string.error_name_unchanged)
+            user_name_input.requestFocus()
+
+            return false
         }
 
-        save(userNameStr)
+        return true
     }
 
     private fun save(userName: String) {
@@ -97,43 +103,39 @@ class UpdateNameFragment : Fragment(), AnkoLogger {
             return
         }
 
-        val uuid = mSession?.loadAccount()?.id ?: return
+        val uuid = sessionManager?.loadAccount()?.id ?: return
 
-        isInProgress = true
-        isInputAllowed = false
-
-        val user = FtcUser(uuid)
+        showProgress(true)
+        allowInput(false)
 
         job = GlobalScope.launch(Dispatchers.Main) {
 
             try {
-                info("Start updating mAccount userName")
+                info("Start updating userName")
 
                 val done = withContext(Dispatchers.IO) {
-                    user.updateUserName(userName)
+                    FtcUser(uuid).updateUserName(userName)
                 }
 
-                isInProgress = false
+                showProgress(false)
 
                 if (done) {
 
-                    mSession?.updateUserName(userName)
+                    toast(R.string.prompt_saved)
 
-                    current_name.text = userName
-
-                    toast(R.string.success_saved)
+                    listener?.onUpdateAccount()
                 } else {
 
                 }
             } catch (e: ClientError) {
-                isInProgress = false
-                isInputAllowed = true
+                showProgress(false)
+                allowInput(true)
 
                 activity?.handleApiError(e)
 
             } catch (e: Exception) {
-                isInProgress = false
-                isInputAllowed = true
+                showProgress(false)
+                allowInput(true)
 
                 activity?.handleException(e)
             }

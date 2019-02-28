@@ -23,37 +23,27 @@ import org.jetbrains.anko.support.v4.toast
 class UpdateEmailFragment : Fragment(), AnkoLogger {
 
     private var job: Job? = null
-    private var mListener: OnAccountInteractionListener? = null
-    private var mSession: SessionManager? = null
+    private var listener: OnUpdateAccountListener? = null
+    private var sessionManager: SessionManager? = null
 
-    /**
-     * Set progress indicator.
-     * By default, the progress bar is not visible and data input and save button is enabled.
-     * In case of any error, progress bar should go away and data input and save button should be re-enabled.
-     * In case of successfully uploaded data, progress bar should go away but the data input and save button should be disabled to prevent mAccount re-submitting the same data.
-     */
-    private var isInProgress: Boolean
-        get() = !save_button.isEnabled
-        set(value) {
-            mListener?.onProgress(value)
-        }
+    private fun showProgress(show: Boolean) {
+        listener?.onProgress(show)
+    }
 
-    private var isInputAllowed: Boolean
-        get() = email_input.isEnabled
-        set(value) {
-            email_input?.isEnabled = value
-            save_button?.isEnabled = value
-        }
+    private fun allowInput(value: Boolean) {
+        email_input.isEnabled = value
+        save_btn.isEnabled = value
+    }
 
     override fun onAttach(context: Context?) {
         super.onAttach(context)
 
-        if (context is OnAccountInteractionListener) {
-            mListener = context
+        if (context is OnUpdateAccountListener) {
+            listener = context
         }
 
         if (context != null) {
-            mSession = SessionManager.getInstance(context)
+            sessionManager = SessionManager.getInstance(context)
         }
     }
 
@@ -67,25 +57,40 @@ class UpdateEmailFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        save_button.setOnClickListener {
-            attemptSave()
-        }
+        value_email_tv.text = sessionManager?.loadAccount()?.email
 
-        current_email.text = mSession?.loadAccount()?.email
+        save_btn.setOnClickListener {
+            val email = email_input.text.toString().trim()
+            val isValid = isEmailValid(email)
+
+            if (!isValid) {
+                return@setOnClickListener
+            }
+
+            save(email)
+        }
     }
 
-    private fun attemptSave() {
+    private fun isEmailValid(email: String): Boolean {
         email_input.error = null
-        val emailStr = email_input.text.toString().trim()
 
-        val msgId = Validator.ensureEmail(emailStr)
+        val msgId = Validator.ensureEmail(email)
         if (msgId != null) {
             email_input.error = getString(msgId)
             email_input.requestFocus()
-            return
+            return false
         }
 
-        save(emailStr)
+        val currentEmail = value_email_tv.text.toString()
+
+        if (currentEmail == email) {
+            email_input.error = getString(R.string.error_email_unchanged)
+            email_input.requestFocus()
+
+            return false
+        }
+
+        return true
     }
 
     private fun save(emailStr: String) {
@@ -96,43 +101,39 @@ class UpdateEmailFragment : Fragment(), AnkoLogger {
         }
 
         // If user id is not found, we could not perform updating.
-        val uuid = mSession?.loadAccount()?.id ?: return
+        val uuid = sessionManager?.loadAccount()?.id ?: return
 
-        isInProgress = true
-        isInputAllowed = false
+        showProgress(true)
+        allowInput(false)
 
         job = GlobalScope.launch(Dispatchers.Main) {
-
-            val user = FtcUser(uuid)
 
             try {
                 info("Start updating email")
 
                 val done = withContext(Dispatchers.IO) {
-                    user.updateEmail(emailStr)
+                    FtcUser(uuid).updateEmail(emailStr)
                 }
 
-                isInProgress = false
+                showProgress(false)
 
                 if (done) {
 
-                    mSession?.updateEmail(emailStr)
+                    toast(R.string.prompt_saved)
 
-                    current_email.text = emailStr
-
-                    toast(R.string.success_saved)
+                    listener?.onUpdateAccount()
                 } else {
 
                 }
             } catch (e: ClientError) {
-                isInProgress = false
-                isInputAllowed = true
+                showProgress(false)
+                allowInput(true)
 
                 activity?.handleApiError(e)
 
             } catch (e: Exception) {
-                isInProgress = false
-                isInputAllowed = true
+                showProgress(false)
+                allowInput(true)
 
                 activity?.handleException(e)
             }
