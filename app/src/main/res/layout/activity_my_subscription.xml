@@ -24,14 +24,12 @@
                 android:id="@+id/member_rv"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/renew_btn"/>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <!-- Only show this button who is a member and will expire -->
             <Button
@@ -69,8 +67,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"/>
-
-    <include layout="@layout/progress_bar"/>
 
 </android.support.constraint.ConstraintLayout>
 
