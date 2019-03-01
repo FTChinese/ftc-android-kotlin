@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0"?>
 <resources>
-    <string name="app_name">FTChinese</string>
+    <string name="app_name">FT中文網</string>
     <string name="action_search">搜尋</string>
-    <string name="action_listen_story">分享</string>
+    <string name="action_listen_story">朗读</string>
     <string name="action_favorite">收藏</string>
 
     <string name="share_template">[FT中文網]%1$s - %2$s</string>
@@ -19,49 +19,65 @@
     <string name="titlebar_en">英文</string>
     <string name="titlebar_bilingual">對照</string>
 
-
     <!-- Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_not_logged_in">您尚未登入</string>
     <string name="nav_header_desc">導覽列</string>
 
-
-
-    <string name="membership_title">　我的訂閱</string>
     <string name="label_member_tier">會員類型</string>
+
     <string name="tier_free">尚未成為會員</string>
     <string name="tier_standard">標準會員</string>
     <string name="tier_premium">高級會員</string>
     <string name="tier_vip">超級會員</string>
 
+    <string-array name="standard_benefits">
+        <item>专享訂閱内容每日仅需0.7元(或按月訂閱每日0.9元)</item>
+        <item>精選深度分析</item>
+        <item>中英雙語内容</item>
+        <item>金融英語速讀訓練</item>
+        <item>英語原聲電台</item>
+        <item>無限瀏覽7日前所有歷史文章（近8萬篇）</item>
+    </string-array>
+
+    <string-array name="premium_benefits">
+        <item>专享訂閱内容每日仅需5.5元</item>
+        <item>享受“標準會員”所有權益</item>
+        <item>編輯精選，總編/各領域主編每週五為您推薦本週必讀資訊，分享他們的思考與觀點</item>
+        <item>FT中文網2019年度論壇門票2張，价值3999元/张 （不含差旅与食宿）</item>
+    </string-array>
+
+    <string name="premium_small_print">注：所有活動門票不可折算現金、不能轉讓、不含差旅與食宿</string>
+
     <string name="membership_renew">我要續訂</string>
 
+    <!-- Example: ¥1,998.00/年 -->
     <string name="formatter_price_cycle">¥%1$,.2f/%2$s</string>
+    <!-- Example: 标准会员/年-->
     <string name="formatter_tier_cycle">%1$s/%2$s</string>
+    <!-- Example: ¥1,998.00 -->
     <string name="formatter_price">¥%1$,.2f</string>
+    <!-- Example: 支付宝支付 ¥1,998.00-->
+    <string name="formatter_check_out">%1$s %2$s</string>
 
     <string name="cycle_year">年</string>
     <string name="cycle_month">月</string>
     <string name="cycle_vip">無限期</string>
 
     <string name="label_member_duration">會員期限</string>
-    <string name="label_member_price">支付金額</string>
+    <string name="label_price">支付金额</string>
     <string name="paywall_title">購買會員服務，閱讀FT獨家內容</string>
-    <string name="paywall_login_prompt">已經購買過？</string>
-    <string name="standard_tier_description">\u2714 精選深度分析\n\u2714 中英雙語內容\n\u2714 金融英語速讀訓練\n\u2714 英語原聲電台\n\u2714 無限瀏覽7日前所有歷史文章（近8萬篇）</string>
-    <string name="premium_tier_description">\u2714 享受“標準會員”所有權益\n\u2714 編輯精選，總編/各領域主編每週五為您推薦本週必讀資訊，分享他們的思考與觀點\n\u2714 FT中文網2019年度論壇門票2張</string>
-    <string name="premium_small_print">注：所有活動門票不可折算現金、不能轉讓、不含差旅與食宿</string>
-    <string name="paywall_buy_now">立即訂閱</string>
-    <string name="customer_service_title">聯繫客服</string>
+    <string name="paywall_login_prompt">已經購買過？登入</string>
+
+    <string name="heading_customer_service">联系客服</string>
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
-    <string name="payment_methods_title">選擇支付方式</string>
-    <string name="product_overview">成為FT會員</string>
+    <string name="heading_pay_method">選擇支付方式</string>
+    <string name="heading_become_member">成為FT會員</string>
     <string name="pay_by_ali">支付寶支付</string>
     <string name="pay_by_wechat">微信支付</string>
     <string name="pay_by_stripe">Stripe支付</string>
     <string name="unknown_payment_method">請選擇支付方式</string>
-    <string name="formatter_check_out">%1$s %2$s</string>
     <string name="check_out_default">支付</string>
     <string name="request_order">創建訂單&#8230;</string>
     <string name="done">完成</string>
@@ -76,15 +92,13 @@
     <string name="wxpay_closed">交易已關閉</string>
     <string name="wxpay_revoked">已撤銷</string>
     <string name="wxpay_pending">正在支付</string>
-    <string name="wxpay_failed">支付失敗</string>
+    <string name="wxpay_failed">支付失败</string>
     <string name="wxpay_cancelled">支付已取消</string>
     <string name="wxpay_error">无法支付</string>
     <string name="wxpay_tier_cycle">您已經訂閱了FT中文網 %1$s/%2$s</string>
     <string name="wxpay_expire_date">會員有效期：%1$s</string>
     <string name="wxshare_done">分享成功</string>
 
-    <string name="action_title_account">帳號與安全</string>
-    <string name="action_subscription">會員訂閱</string>
     <string name="aciton_help">幫助</string>
     <string name="action_feedback">意見回應</string>
     <string name="action_logout">退出登入</string>
@@ -99,14 +113,51 @@
     <!-- Strings related to login -->
     <string name="title_login">登入FT中文網</string>
     <string name="title_sign_up">建立FT中文網帳號</string>
+    <string name="title_login_signup">登入/註冊</string>
     <string name="title_reset_password">找回密碼</string>
     <string name="title_activity_profile">我的資料</string>
     <string name="title_change_password">修改密碼</string>
     <string name="title_change_email">修改登入信箱</string>
     <string name="title_change_username">修改使用者名稱</string>
     <string name="title_about_us">關於我們</string>
-    <string name="title_payment">付費中心 </string>
+    <string name="title_payment">付費中心</string>
     <string name="title_wxpay_result">支付结果</string>
+    <string name="title_wx_account">微信帳號</string>
+    <string name="title_bind_email">绑定信箱帳號</string>
+    <string name="title_merge_accounts">合並帳號</string>
+    <string name="title_account">帳號與安全</string>
+    <string name="title_subscription">會員訂閱</string>
+    <string name="title_my_subs">我的訂閱</string>
+    <string name="title_wx_login">微信登入</string>
+
+    <string name="btn_login">登入</string>
+    <string name="btn_sign_up">註冊</string>
+    <string name="btn_password_letter">寄送電子郵件</string>
+    <string name="btn_save">保存</string>
+    <string name="btn_next">下一步</string>
+    <string name="btn_verify_password">驗證密碼</string>
+    <string name="btn_bind_email">绑定信箱</string>
+    <string name="btn_request_verify">重新寄送驗證郵件</string>
+
+    <string name="action_wx_login">微信登入</string>
+    <string name="action_sign_in_short">Sign in</string>
+
+    <string name="action_bound_account">已綁定</string>
+    <string name="action_bind_account">尚未綁定</string>
+
+    <string name="heading_bind_account">帳號綁定</string>
+
+    <string name="label_email">信箱</string>
+    <string name="label_wechat">微信</string>
+    <string name="label_current_email">目前信箱</string>
+    <string name="label_new_email">新信箱</string>
+    <string name="label_current_name">目前使用者名稱</string>
+    <string name="label_user_name">使用者名稱</string>
+    <string name="label_new_name">新使用者名稱</string>
+    <string name="label_password">密碼</string>
+    <string name="label_old_password">目前密碼</string>
+    <string name="label_new_password">新密碼</string>
+    <string name="label_confirm_password">確認新密碼</string>
 
     <string name="about_title1">關於FT中文網(FTChinese.com)</string>
     <string name="about_text1">FT中文網(http://www.FTChinese.com) 是英國《金融時報》集團旗下唯一的中文商業財經網站，旨在為中國商業菁英和決策者們提供每日不可或缺的商業財經新聞、深度分析以及評論。憑借英國《金融時報》遍布全球的豐富報導資源，FT中文網深入分析對中國經濟和全球商業具有影響力的重大事件，並揭示事件的來龍去脈，以真正富有國際視野的權威報道成為中國高級管理人員“必讀”的商業財經資訊網站。FT中文網目前擁有逾270 萬註冊用戶，手機產品已覆蓋iOS、Android和Windows系統。2018年4月，FT中文網正式推出付費訂閱業務，為專屬會員提供精選資訊與個性化服務。</string>
@@ -122,80 +173,73 @@
     <string name="prompt_restricted_paid_user">僅限會員閱讀</string>
     <string name="prompt_restricted_login">會員登入后可以閱讀</string>
 
-    <string name="prompt_verify_email">您的信箱尚未驗證，為保障您的帳號安全，請及時驗證信箱。我們已經給您的登入信箱發送了驗證信件，点击信件中的連接即可。</string>
-    <string name="prompt_email">信箱</string>
-    <string name="prompt_new_email">新信箱</string>
-    <string name="prompt_current_email">目前信箱</string>
-    <string name="prompt_current_name">目前使用者名稱</string>
-    <string name="prompt_user_name">使用者名稱</string>
-    <string name="prompt_new_name">新使用者名稱</string>
-    <string name="prompt_password">密碼</string>
-    <string name="label_wechat">微信</string>
-    <string name="heading_bind">帳號綁定</string>
-    <string name="status_bound">已綁定</string>
-    <string name="status_not_bound">尚未綁定</string>
-    <string name="formatter_wx_name">微信用户 %1$s</string>
-    <string name="prompt_bind_email">您目前使用了微信账号登录FT中文网。为保障账号安全，建议您绑定在FT中文网注册的邮箱账号。</string>
-    <string name="action_bind_email">绑定邮箱</string>
-    <string name="prompt_change_password">修改密碼</string>
-    <string name="prompt_old_password">目前密碼</string>
-    <string name="prompt_new_password">新密碼</string>
-    <string name="prompt_confirm_password">確認新密碼</string>
-    <string name="prompt_password_letter">請輸入您的登入FT中文網所用的電子信箱，我們會向該信箱發送郵件，幫您重設密碼</string>
-    <string name="prompt_letter_sent">請檢查您的信件，點擊郵件中的「重設密碼」連接，在所打開的網頁中修改您的密碼。如果幾分鐘內沒有看到信件，請檢查是否被放進了垃圾信件列表。</string>
     <string name="prompt_logged_in">登入成功</string>
+    <string name="prompt_login_failed">登入失敗，請重试</string>
+    <string name="prompt_sign_up">注冊失敗，請重试</string>
     <string name="prompt_not_logged_in">您尚未登入，登入後可以查看</string>
     <string name="prompt_not_set">未設置</string>
     <string name="prompt_no_email_app">您的設備上沒有安裝信件程式，無法發送反饋信件</string>
     <string name="prompt_cache_cleared">緩存已清空</string>
     <string name="prompt_cache_not_cleared">無法清空緩存</string>
     <string name="prompt_reading_history">閱讀歷史已刪除</string>
-
     <string name="permission_alipay_denied">無法獲取支付寶所需的權限，請到系統設置開啟</string>
     <string name="permission_alipay_granted">已獲取支付寶所需的權限</string>
+    <string name="prompt_saved">保存成功!</string>
+    <string name="prompt_updated">更新成功!</string>
+    <string name="prompt_letter_sent">信件已發送</string>
+    <string name="prompt_bound">帳號已绑定</string>
+    <string name="prompt_account_updated">帳號已更新</string>
 
-    <string name="action_request_verify">重新發送驗證信件</string>
+    <string name="instruct_password_letter">請輸入您的登入FT中文網所用的電子信箱，我們會向該信箱發送郵件，幫您重設密碼码</string>
+    <string name="instruct_verify_email">您的信箱尚未驗證，為保障您的帳號安全，請及時驗證信箱。我們已經給您的登入信箱發送了驗證信件，点击信件中的連接即可。</string>
+    <string name="instruct_letter_sent">請檢查您的信件，點擊郵件中的「重設密碼」連接，在所打開的網頁中修改您的密碼。如果幾分鐘內沒有看到信件，請檢查是否被放進了垃圾信件列表。</string>
+    <string name="instruct_bind_email">您目前使用了微信帳號登入FT中文。为保障帳號安全，建议您綁定在FT中文网註冊的信箱帳號。</string>
+    <string name="instruct_bind_login">信箱 %1$s 已经註冊了FT中文網帳號，请输入密码驗證身份，即可綁定微信帳號和信箱</string>
+    <string name="instruct_sign_up">信箱 %1$s 尚未註冊FT中文網帳號，请設置密碼建立帳號</string>
+    <string name="instruct_sign_in">信箱 %1$s 已经註冊了FT中文網帳號，请输入登入密碼</string>
 
-    <string name="action_login">登入</string>
-    <string name="action_wx_login">微信登入</string>
-    <string name="action_sign_up">註冊</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="action_password_letter">寄送電子郵件</string>
-    <string name="action_save">保存</string>
-    <string name="success_saved">保存成功!</string>
-    <string name="success_updated">更新成功!</string>
-    <string name="success_letter_sent">信件已發送</string>
+    <string name="greeting_wx_login">你好，%1$s！欢迎登入FT中文網。</string>
+    <string name="wechat_not_found">没有找到您的微信帳號信息</string>
+    <string name="formatter_wx_name">微信用户 %1$s</string>
+
     <string name="progress_updating">更新資料&#8230;</string>
-    <string name="progress_refresh_account">更新账号資料&#8230;</string>
-    <string name="progress_request_verification">正在發送驗證信件&#8230;</string>
+    <string name="progress_refresh_account">更新帳號資料&#8230;</string>
+    <string name="progress_fetching">获取資料&#8230;</string>
+    <string name="progress_request_verification">正在寄送驗證信件&#8230;</string>
     <string name="progress_logging">正在登入&#8230;</string>
 
-    <string name="link_reset_password">忘記密碼？</string>
+    <string name="link_reset_password">忘記密碼?</string>
     <string name="link_sign_up">註冊帳號</string>
     <string name="link_login">已有帳號？登入</string>
 
-    <string name="error_login">登入失敗，請重试</string>
-    <string name="error_sign_up">注冊失敗，請重试</string>
+
+
     <!-- Error message -->
     <string name="error_invalid_email">電子信箱錯誤</string>
     <string name="error_email_unchanged">您已經在使用該電子信箱</string>
     <string name="error_name_unchanged">不能與當前使用者名稱相同</string>
+    <string name="error_too_long">过长</string>
     <string name="error_invalid_password">密碼無效</string>
     <string name="error_mismatched_confirm_password">兩次輸入的新密碼不一致</string>
     <string name="error_incorrect_password">密碼錯誤</string>
     <string name="error_incorrect_old_password">當前密碼錯誤，不能設置新密碼</string>
     <string name="error_field_required">請填寫此項</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
+    <string name="permission_rationale">&quot;Contacts permissions are needed for providing email
+        completions.&quot;
     </string>
+    <string name="error_not_loaded">資料加载失敗，請重试</string>
+    <string name="oauth_canceled">授权取消！</string>
+    <string name="oauth_denied">授权被拒绝！</string>
+    <string name="oauth_state_mismatch">授权状态码錯誤！</string>
 
-    <string name="api_wrong_credentials">使用者名稱或密碼錯誤</string>
+    <!-- API error message -->
+    <string name="api_wrong_credentials">密碼錯誤</string>
     <string name="api_email_taken">電子信箱已經註冊</string>
     <string name="api_email_not_found">電子信箱尚未註冊</string>
     <string name="api_account_not_found">沒有找到您的帳號</string>
-    <string name="api_invalid_credentials">使用者名稱或密碼無效</string>
     <string name="api_bad_request">無效的請求</string>
-    <string name="api_too_many_request">請求過於頻繁，請稍後再試</string><string name="api_unauthorized">沒有訪問伺服器的權限</string>
+    <string name="api_too_many_request">請求過於頻繁，請稍後再試</string>
+    <string name="api_unauthorized">沒有訪問伺服器的權限</string>
     <string name="api_server_error">伺服器出錯，請稍後再試</string>
     <string name="api_email_server_down">信箱伺服器暫時不可用</string>
 
