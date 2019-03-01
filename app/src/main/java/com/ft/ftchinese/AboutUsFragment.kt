@@ -3,9 +3,9 @@ package com.ft.ftchinese
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +14,7 @@ import com.ft.ftchinese.user.SingleFragmentActivity
 import kotlinx.android.synthetic.main.fragment_recycler.*
 
 class AboutUsActivity : SingleFragmentActivity() {
-    override fun createFragment(): Fragment {
+    override fun createFragment(): androidx.fragment.app.Fragment {
         return AboutUsFragment.newInstance()
     }
 
@@ -26,7 +26,7 @@ class AboutUsActivity : SingleFragmentActivity() {
     }
 }
 
-class AboutUsFragment : Fragment() {
+class AboutUsFragment : androidx.fragment.app.Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,17 +42,17 @@ class AboutUsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         recycler_view.apply {
             setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(context)
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
             adapter = Adapter()
         }
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
         val primaryText: TextView? = view.findViewById(R.id.primary_text)
         val secondaryText: TextView? = view.findViewById(R.id.secondary_text)
     }
 
-    inner class Adapter : RecyclerView.Adapter<ViewHolder>() {
+    inner class Adapter : androidx.recyclerview.widget.RecyclerView.Adapter<ViewHolder>() {
         private val items = arrayOf(
                 TextItem(getString(R.string.about_title1), getString(R.string.about_text1)),
                 TextItem(getString(R.string.about_title2), getString(R.string.about_text2))

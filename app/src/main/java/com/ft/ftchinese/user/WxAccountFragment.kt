@@ -3,8 +3,8 @@ package com.ft.ftchinese.user
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.fragment.app.Fragment
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,17 +34,14 @@ class WxAccountFragment : Fragment(),
     private var job: Job? = null
 
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
+
+        sessionManager = SessionManager.getInstance(context)
+        cache = FileCache(context)
 
         if (context is OnSwitchAccountListener) {
             listener = context
-        }
-
-        if (context != null) {
-            sessionManager = SessionManager.getInstance(context)
-//            wxSessManager = WxSessionManager.getInstance(context)
-            cache = FileCache(context)
         }
     }
 

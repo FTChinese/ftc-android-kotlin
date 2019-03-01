@@ -1,8 +1,8 @@
 package com.ft.ftchinese.user
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -26,7 +26,7 @@ internal interface OnFragmentInteractionListener {
 
 abstract class SingleFragmentActivity : AppCompatActivity(), OnFragmentInteractionListener {
 
-    protected abstract fun createFragment(): Fragment
+    protected abstract fun createFragment(): androidx.fragment.app.Fragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

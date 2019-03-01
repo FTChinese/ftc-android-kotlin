@@ -3,8 +3,8 @@ package com.ft.ftchinese.user
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.SessionManager
@@ -34,7 +34,7 @@ class UpdateAccountActivity : AppCompatActivity(),
 
         val fragType = intent.getIntExtra(TARGET_FRAG, 0)
 
-        val fragment: Fragment = when (fragType) {
+        val fragment: androidx.fragment.app.Fragment = when (fragType) {
             FRAG_EMAIL -> {
                 supportActionBar?.setTitle(R.string.title_change_email)
                 UpdateEmailFragment.newInstance()

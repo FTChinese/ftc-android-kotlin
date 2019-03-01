@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v4.widget.DrawerLayout
+    <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -18,11 +18,11 @@
         <!--layout="@layout/app_bar_main"-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="match_parent" />-->
-        <android.support.constraint.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <android.support.v7.widget.Toolbar
+            <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="0dp"
                 android:layout_height="?attr/actionBarSize"
@@ -30,7 +30,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <android.support.v4.view.ViewPager
+            <androidx.viewpager.widget.ViewPager
                 android:id="@+id/view_pager"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -40,7 +40,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/toolbar">
 
-                <android.support.design.widget.TabLayout
+                <com.google.android.material.tabs.TabLayout
                     android:id="@+id/tab_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -50,7 +50,7 @@
                     app:tabIndicatorColor="@color/colorClaret"
                     app:tabSelectedTextColor="@color/colorClaret" />
 
-            </android.support.v4.view.ViewPager>
+            </androidx.viewpager.widget.ViewPager>
 
             <!--DO NOT put a progress bar here since ViewPager might prepopuldate a the next tab and progress bar will be visible always.-->
             <!--<ProgressBar-->
@@ -65,7 +65,7 @@
                 <!--app:layout_constraintStart_toStartOf="parent"-->
                 <!--app:layout_constraintTop_toTopOf="parent" />-->
 
-            <android.support.design.widget.BottomNavigationView
+            <com.google.android.material.bottomnavigation.BottomNavigationView
                 android:id="@+id/bottom_nav"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -77,9 +77,9 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:menu="@menu/activity_main_bottom"/>
 
-        </android.support.constraint.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <android.support.design.widget.NavigationView
+        <com.google.android.material.navigation.NavigationView
             android:id="@+id/drawer_nav"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -90,6 +90,6 @@
             app:headerLayout="@layout/drawer_nav_header"
             app:menu="@menu/activity_main_drawer" />
 
-    </android.support.v4.widget.DrawerLayout>
+    </androidx.drawerlayout.widget.DrawerLayout>
 </FrameLayout>
 

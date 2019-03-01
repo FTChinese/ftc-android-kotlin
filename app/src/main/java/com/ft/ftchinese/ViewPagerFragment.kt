@@ -2,8 +2,8 @@ package com.ft.ftchinese
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.fragment.app.Fragment
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -60,49 +60,14 @@ class ViewPagerFragment : Fragment(),
     }
 
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     *
-     * See the Android Training lesson [Communicating with Other Fragments]
-     * (http://developer.android.com/training/basics/fragments/communicating.html)
-     * for more information.
-     */
-//    interface OnFragmentInteractionListener {
-//
-//    }
-
-    companion object {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private const val ARG_PAGE_META = "arg_page_meta"
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        fun newInstance(page: PagerTab) = ViewPagerFragment().apply {
-            arguments = Bundle().apply {
-                putString(ARG_PAGE_META, json.toJsonString(page))
-            }
-        }
-
-    }
-
-    /**
      * Bind listeners here.
      */
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         info("onAttach fragment")
         super.onAttach(context)
 
-        if (context != null) {
-            mSession = SessionManager.getInstance(context)
-            mFileCache = FileCache(context)
-        }
+        mSession = SessionManager.getInstance(context)
+        mFileCache = FileCache(context)
 
         info("onAttach finished")
     }
@@ -432,6 +397,25 @@ class ViewPagerFragment : Fragment(),
             putString(FirebaseAnalytics.Param.CONTENT_TYPE, channelItem.type)
             putString(FirebaseAnalytics.Param.ITEM_ID, channelItem.id)
         })
+    }
+
+    companion object {
+        /**
+         * The fragment argument representing the section number for this
+         * fragment.
+         */
+        private const val ARG_PAGE_META = "arg_page_meta"
+
+        /**
+         * Returns a new instance of this fragment for the given section
+         * number.
+         */
+        fun newInstance(page: PagerTab) = ViewPagerFragment().apply {
+            arguments = Bundle().apply {
+                putString(ARG_PAGE_META, json.toJsonString(page))
+            }
+        }
+
     }
 }
 

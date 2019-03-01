@@ -2,8 +2,8 @@ package com.ft.ftchinese
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.*
+import androidx.fragment.app.Fragment
+import androidx.appcompat.widget.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,12 +25,12 @@ class MyftFragment : Fragment(), AnkoLogger {
     private var cursor: ArticleCursorWrapper? = null
     private var mCursorAdapter: CursorAdapter? = null
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        if (context != null) {
-            mArticleStore = ArticleStore.getInstance(context)
-        }
+
+        mArticleStore = ArticleStore.getInstance(context)
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,7 +58,7 @@ class MyftFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recycler_view.layoutManager = LinearLayoutManager(context)
+        recycler_view.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
 
         updateUI()
     }
@@ -100,12 +100,12 @@ class MyftFragment : Fragment(), AnkoLogger {
                 }
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
         val primaryText: TextView = itemView.findViewById(R.id.primary_text_view)
         val secondaryText: TextView = itemView.findViewById(R.id.secondary_text_view)
     }
 
-    inner class CursorAdapter(private var mCursor: ArticleCursorWrapper) : RecyclerView.Adapter<ViewHolder>() {
+    inner class CursorAdapter(private var mCursor: ArticleCursorWrapper) : androidx.recyclerview.widget.RecyclerView.Adapter<ViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.card_primary_secondary, parent, false)

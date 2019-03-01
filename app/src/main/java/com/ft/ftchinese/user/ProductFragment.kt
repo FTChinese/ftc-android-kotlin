@@ -2,7 +2,7 @@ package com.ft.ftchinese.user
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,13 +21,11 @@ class ProductFragment : Fragment(), AnkoLogger {
     private lateinit var sessionManager: SessionManager
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        if (context != null) {
-            sessionManager = SessionManager.getInstance(context)
-            firebaseAnalytics = FirebaseAnalytics.getInstance(context)
-        }
+        sessionManager = SessionManager.getInstance(context)
+        firebaseAnalytics = FirebaseAnalytics.getInstance(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

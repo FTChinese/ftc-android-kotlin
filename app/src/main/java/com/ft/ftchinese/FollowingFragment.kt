@@ -1,9 +1,9 @@
 package com.ft.ftchinese
 
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.os.Bundle
-import android.support.v7.widget.GridLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +16,7 @@ import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-class FollowingFragment : Fragment(), AnkoLogger {
+class FollowingFragment : androidx.fragment.app.Fragment(), AnkoLogger {
 
     private var mAdapter: Adapter? = null
     private var mFollowingManager: FollowingManager? = null
@@ -39,7 +39,7 @@ class FollowingFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recycler_view.layoutManager = GridLayoutManager(context, 3)
+        recycler_view.layoutManager = androidx.recyclerview.widget.GridLayoutManager(context, 3)
         updateUI()
     }
 
@@ -60,12 +60,12 @@ class FollowingFragment : Fragment(), AnkoLogger {
         fun newInstance() = FollowingFragment()
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
         val primaryText: TextView = itemView.findViewById(R.id.primary_text_view)
         val secondaryText: TextView = itemView.findViewById(R.id.secondary_text_view)
     }
 
-    inner class Adapter(var mFollows: List<Following>) : RecyclerView.Adapter<ViewHolder>() {
+    inner class Adapter(var mFollows: List<Following>) : androidx.recyclerview.widget.RecyclerView.Adapter<ViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
                     .inflate(R.layout.card_primary_secondary, parent, false)

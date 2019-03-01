@@ -2,7 +2,7 @@ package com.ft.ftchinese
 
 import android.content.Context
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.json

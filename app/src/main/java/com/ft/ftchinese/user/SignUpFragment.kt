@@ -2,7 +2,7 @@ package com.ft.ftchinese.user
 
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -36,15 +36,13 @@ class SignUpFragment : Fragment(), AnkoLogger {
         sign_up_btn.isEnabled = enable
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
+
+        sessionManager = SessionManager.getInstance(context)
 
         if (context is OnCredentialsListener) {
             listener = context
-        }
-
-        if (context != null) {
-            sessionManager = SessionManager.getInstance(context)
         }
     }
 

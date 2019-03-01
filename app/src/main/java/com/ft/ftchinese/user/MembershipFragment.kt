@@ -1,8 +1,8 @@
 package com.ft.ftchinese.user
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.widget.LinearLayoutManager
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +14,7 @@ import com.ft.ftchinese.util.json
 import kotlinx.android.synthetic.main.fragment_membership.*
 import org.jetbrains.anko.AnkoLogger
 
-class MembershipFragment : Fragment(), AnkoLogger {
+class MembershipFragment : androidx.fragment.app.Fragment(), AnkoLogger {
 
     private var membership: Membership? = null
     private var heading: String? = null
@@ -41,7 +41,7 @@ class MembershipFragment : Fragment(), AnkoLogger {
 
         val rows = buildRows(membership)
 
-        val viewManager = LinearLayoutManager(context)
+        val viewManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         val viewAdapter = RowAdapter(rows)
 
         member_rv.apply {

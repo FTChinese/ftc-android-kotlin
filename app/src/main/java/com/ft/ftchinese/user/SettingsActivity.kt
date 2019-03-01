@@ -4,9 +4,8 @@ import android.content.Context
 import android.content.Intent
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.preference.Preference
-import android.support.v7.preference.PreferenceFragmentCompat
+import androidx.preference.Preference
+import androidx.preference.PreferenceFragmentCompat
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleStore
@@ -19,7 +18,7 @@ import org.jetbrains.anko.support.v4.toast
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
 class SettingsActivity : SingleFragmentActivity() {
-    override fun createFragment(): Fragment {
+    override fun createFragment(): androidx.fragment.app.Fragment {
         return SettingsFragment.newInstance()
     }
 
@@ -39,12 +38,11 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
     private var mArticleStore: ArticleStore? = null
     private var mFileCache: FileCache? = null
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
-        if (context != null) {
-            mArticleStore = ArticleStore.getInstance(context)
-            mFileCache = FileCache(context)
-        }
+
+        mArticleStore = ArticleStore.getInstance(context)
+        mFileCache = FileCache(context)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -52,7 +50,7 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
         prefClearCache = findPreference("pref_clear_cache")
         prefClearHistory = findPreference("pref_clear_history")
-        findPreference("pref_version_name").summary = BuildConfig.VERSION_NAME
+        findPreference<Preference>("pref_version_name").summary = BuildConfig.VERSION_NAME
 
         updateCacheUI()
 
@@ -97,31 +95,6 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
         val total = mArticleStore?.countHistory() ?: 0
         prefClearHistory?.summary = getString(R.string.summary_articles_read, total)
     }
-
-    // Reference: https://developer.android.com/guide/topics/ui/settings#ReadingPrefs
-//    override fun onResume() {
-//        super.onResume()
-//
-//        preferenceScreen.sharedPreferences
-//                .registerOnSharedPreferenceChangeListener(this)
-//    }
-//
-//    override fun onPause() {
-//        super.onPause()
-//        preferenceScreen.sharedPreferences
-//                .unregisterOnSharedPreferenceChangeListener(this)
-//    }
-//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        super.onViewCreated(view, savedInstanceState)
-//
-//
-//    }
-
-//    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-//        if (key == SettingsActivity.PREF_KEY_LANGUAGE) {
-//
-//        }
-//    }
 
     companion object {
         fun newInstance(): SettingsFragment {

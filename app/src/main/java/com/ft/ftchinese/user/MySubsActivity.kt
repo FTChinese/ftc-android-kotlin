@@ -3,11 +3,11 @@ package com.ft.ftchinese.user
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.content.ContextCompat
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.core.content.ContextCompat
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.SessionManager
@@ -22,13 +22,13 @@ import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
 
 class MySubsActivity : AppCompatActivity(),
-        SwipeRefreshLayout.OnRefreshListener,
+        androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
     private var job: Job? = null
 
     private lateinit var viewAdapter: RowAdapter
-    private lateinit var viewManager: RecyclerView.LayoutManager
+    private lateinit var viewManager: androidx.recyclerview.widget.RecyclerView.LayoutManager
     private lateinit var sessionManager: SessionManager
 
     private fun stopRefresh() {
@@ -117,7 +117,7 @@ class MySubsActivity : AppCompatActivity(),
 
         val rows = buildRows(account)
 
-        viewManager = LinearLayoutManager(this)
+        viewManager = androidx.recyclerview.widget.LinearLayoutManager(this)
         viewAdapter = RowAdapter(rows)
 
         member_rv.apply {

@@ -4,8 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.SessionManager
@@ -86,7 +85,7 @@ class AccountActivity : AppCompatActivity(),
 
         info("Account: $account")
 
-        val fragment: Fragment = if (account.isWxOnly) {
+        val fragment: androidx.fragment.app.Fragment = if (account.isWxOnly) {
             info("Using WxAccountFragment")
             WxAccountFragment.newInstance()
         } else {

@@ -5,11 +5,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.support.design.widget.BottomSheetDialog
-import android.support.v4.widget.SwipeRefreshLayout
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
@@ -39,7 +39,7 @@ import java.io.ByteArrayOutputStream
  * Subclass must call `onCreate`.
  */
 abstract class AbsContentActivity : AppCompatActivity(),
-        SwipeRefreshLayout.OnRefreshListener,
+        androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
     private var mBottomDialog: BottomSheetDialog? = null
@@ -185,12 +185,12 @@ abstract class AbsContentActivity : AppCompatActivity(),
                 mBottomDialog = BottomSheetDialog(this)
                 mBottomDialog?.setContentView(R.layout.fragment_share_menu)
 
-                val shareRecyclerView: RecyclerView? = mBottomDialog?.findViewById(R.id.share_recycler_view)
+                val shareRecyclerView: androidx.recyclerview.widget.RecyclerView? = mBottomDialog?.findViewById(R.id.share_recycler_view)
 
                 shareRecyclerView?.apply {
                     setHasFixedSize(true)
-                    layoutManager = LinearLayoutManager(this@AbsContentActivity).apply {
-                        orientation = LinearLayoutManager.HORIZONTAL
+                    layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this@AbsContentActivity).apply {
+                        orientation = androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
                     }
                     adapter = ShareAdapter()
                 }
@@ -255,12 +255,12 @@ abstract class AbsContentActivity : AppCompatActivity(),
         }
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    inner class ViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
         val iconView: ImageView = itemView.findViewById(R.id.share_icon_view)
         val textView: TextView = itemView.findViewById(R.id.share_text_view)
     }
 
-    inner class ShareAdapter : RecyclerView.Adapter<ViewHolder>() {
+    inner class ShareAdapter : androidx.recyclerview.widget.RecyclerView.Adapter<ViewHolder>() {
 
         private val apps = arrayOf(
                 ShareItem("好友", R.drawable.wechat, ShareItem.WECHAT_FRIEND),

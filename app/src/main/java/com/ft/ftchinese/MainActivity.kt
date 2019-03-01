@@ -5,15 +5,11 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
-import android.support.customtabs.CustomTabsIntent
-import android.support.design.widget.*
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
-import android.support.v4.app.FragmentStatePagerAdapter
-import android.support.v4.view.GravityCompat
-import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.fragment.app.FragmentPagerAdapter
+import androidx.core.view.GravityCompat
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AppCompatActivity
 import android.view.*
 import android.webkit.WebView
 import android.widget.ImageView
@@ -22,6 +18,10 @@ import com.ft.ftchinese.models.*
 import com.ft.ftchinese.splash.ScheduleManager
 import com.ft.ftchinese.user.*
 import com.ft.ftchinese.util.*
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.navigation.NavigationView
+import com.google.android.material.tabs.TabLayout
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.jakewharton.threetenabp.AndroidThreeTen
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity(),
 
         // If mUser already logged in, show logout.
         if (mBottomDialog == null) {
-            mBottomDialog = BottomSheetDialog(this)
+            mBottomDialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
             mBottomDialog?.setContentView(R.layout.fragment_logout)
         }
 
@@ -441,12 +441,6 @@ class MainActivity : AppCompatActivity(),
 
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
-        super.onSaveInstanceState(outState)
-
-        info("onSaveInstanceSate finished")
-    }
-
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
@@ -637,9 +631,9 @@ class MainActivity : AppCompatActivity(),
      * A [FragmentPagerAdapter] that returns a fragment corresponding to
      * one of the sections/tabs/mPages.
      */
-    inner class TabPagerAdapter(private var mPages: Array<PagerTab>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+    inner class TabPagerAdapter(private var mPages: Array<PagerTab>, fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
 
-        override fun getItem(position: Int): Fragment {
+        override fun getItem(position: Int): androidx.fragment.app.Fragment {
             info("TabPagerAdapter getItem $position. Data passed to ChannelFragment: ${mPages[position]}")
             return ViewPagerFragment.newInstance(mPages[position])
         }
@@ -653,9 +647,9 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    inner class MyftPagerAdapter(private val pages: Array<MyftTab>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+    inner class MyftPagerAdapter(private val pages: Array<MyftTab>, fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
 
-        override fun getItem(position: Int): Fragment {
+        override fun getItem(position: Int): androidx.fragment.app.Fragment {
             val page = pages[position]
             return if (page.id == MyftTab.FOLLOWING) {
                 FollowingFragment.newInstance()

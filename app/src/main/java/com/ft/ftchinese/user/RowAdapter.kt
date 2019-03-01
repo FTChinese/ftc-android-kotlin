@@ -1,7 +1,7 @@
 package com.ft.ftchinese.user
 
 import android.graphics.Typeface
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,9 +12,9 @@ import com.ft.ftchinese.R
  * A two column table-like recycler view.
  */
 class RowAdapter(private var rows: Array<TableRow>) :
-        RecyclerView.Adapter<RowAdapter.ViewHolder>() {
+        androidx.recyclerview.widget.RecyclerView.Adapter<RowAdapter.ViewHolder>() {
 
-    class ViewHolder (view: View): RecyclerView.ViewHolder(view) {
+    class ViewHolder (view: View): androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
         val labelView: TextView = view.findViewById(R.id.label_tv)
         val valueView: TextView = view.findViewById(R.id.value_tv)
     }
