@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 // NOTE: this does not work in Android Studio, although Google and Kotlin all says it works.
-//apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-kapt'
 
 // See:
 // https://stackoverflow.com/questions/37101589/how-to-read-a-properties-files-and-use-the-values-in-project-gradle-script/37101792
@@ -84,6 +84,8 @@ android {
 }
 
 dependencies {
+    def room_version = "2.1.0-alpha04"
+
     implementation(name: 'alipaySdk-15.5.7-20181023110917', ext: 'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.anko:anko:$anko_version"
@@ -101,9 +103,12 @@ dependencies {
     //  Network
     implementation 'com.squareup.okhttp3:okhttp:3.12.0'
     implementation 'com.beust:klaxon:5.0.2'
+
     //  ORM. Unfortunately it does not work with Kotlin.
-    //  implementation "android.arch.persistence.room:runtime:$room_version"
-    //  kapt "android.arch.persistence.room:compiler:$room_version"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation "androidx.room:room-coroutines:$room_version"
+
     // Wechat
     implementation 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:5.3.1'
     // Utilities
@@ -121,4 +126,5 @@ dependencies {
     testImplementation 'org.hamcrest:hamcrest-junit:2.0.0.0'
     testImplementation 'org.mockito:mockito-core:2.23.0'
     testImplementation 'org.robolectric:robolectric:4.0.2'
+    testImplementation "androidx.room:room-testing:$room_version"
 }
