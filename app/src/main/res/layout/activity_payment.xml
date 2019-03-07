@@ -57,42 +57,31 @@
         app:layout_constraintTop_toBottomOf="@id/heading_pay_tv">
 
         <RadioButton
-            android:id="@+id/pay_by_ali"
+            android:id="@+id/alipay_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:drawableStart="@drawable/alipay"
             android:drawablePadding="20dp"
-            android:text="@string/pay_by_ali"
+            android:text="@string/pay_method_ali"
             android:textSize="18sp"
             android:onClick="onSelectPayMethod"/>
 
         <RadioButton
-            android:id="@+id/pay_by_wechat"
+            android:id="@+id/wxpay_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:drawableStart="@drawable/wechat_pay"
             android:drawablePadding="20dp"
-            android:text="@string/pay_by_wechat"
+            android:text="@string/pay_method_wechat"
             android:textSize="18sp"
             android:onClick="onSelectPayMethod"/>
-
-        <!--<RadioButton-->
-        <!--android:id="@+id/pay_by_stripe"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginTop="8dp"-->
-        <!--android:drawableStart="@drawable/stripe"-->
-        <!--android:drawablePadding="20dp"-->
-        <!--android:text="@string/pay_by_stripe"-->
-        <!--android:textSize="18sp"-->
-        <!--android:onClick="onSelectPaymentMethod"/>-->
     </RadioGroup>
 
 
     <Button
-        android:id="@+id/check_out"
+        android:id="@+id/check_out_btn"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         app:layout_constraintEnd_toEndOf="parent"
@@ -102,62 +91,6 @@
         android:onClick="onCheckOut"/>
 
     <include layout="@layout/progress_bar"/>
-
-            <!--<android.support.constraint.ConstraintLayout-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginBottom="16dp"-->
-                <!--android:paddingBottom="16dp">-->
-
-                <!--<TextView-->
-                    <!--android:id="@+id/tier_cycle_label"-->
-                    <!--style="@style/FTCText"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:text="@string/label_member_tier"-->
-                    <!--app:layout_constraintEnd_toStartOf="@+id/value_primary_tv"-->
-                    <!--app:layout_constraintHorizontal_chainStyle="spread_inside"-->
-                    <!--app:layout_constraintStart_toStartOf="parent"-->
-                    <!--app:layout_constraintTop_toTopOf="parent" />-->
-
-                <!--<TextView-->
-                    <!--android:id="@+id/value_primary_tv"-->
-                    <!--style="@style/FTCText"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:textStyle="bold"-->
-                    <!--app:layout_constraintBaseline_toBaselineOf="@id/tier_cycle_label"-->
-                    <!--app:layout_constraintEnd_toEndOf="parent"-->
-                    <!--app:layout_constraintStart_toEndOf="@+id/tier_cycle_label" />-->
-
-                <!--<TextView-->
-                    <!--android:id="@+id/price_label"-->
-                    <!--style="@style/FTCText"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_marginTop="8dp"-->
-                    <!--android:text="@string/label_member_price"-->
-                    <!--app:layout_constraintEnd_toStartOf="@+id/price_tv"-->
-                    <!--app:layout_constraintHorizontal_chainStyle="spread_inside"-->
-                    <!--app:layout_constraintStart_toStartOf="@+id/tier_cycle_label"-->
-                    <!--app:layout_constraintTop_toBottomOf="@+id/tier_cycle_label" />-->
-
-                <!--<TextView-->
-                    <!--android:id="@+id/price_tv"-->
-                    <!--style="@style/FTCText"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:textColor="@color/colorClaret"-->
-                    <!--app:layout_constraintBaseline_toBaselineOf="@+id/price_label"-->
-                    <!--app:layout_constraintEnd_toEndOf="@+id/value_primary_tv"-->
-                    <!--app:layout_constraintStart_toEndOf="@+id/price_label" />-->
-
-            <!--</android.support.constraint.ConstraintLayout>-->
-
-
-
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
