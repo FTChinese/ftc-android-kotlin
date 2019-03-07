@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.database.ArticleCursorWrapper
 import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.models.MyftTab
@@ -58,7 +59,7 @@ class MyftFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recycler_view.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+        recycler_view.layoutManager = LinearLayoutManager(context)
 
         updateUI()
     }
