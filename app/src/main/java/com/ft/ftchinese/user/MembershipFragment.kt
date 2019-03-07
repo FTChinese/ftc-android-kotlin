@@ -14,7 +14,11 @@ import com.ft.ftchinese.util.json
 import kotlinx.android.synthetic.main.fragment_membership.*
 import org.jetbrains.anko.AnkoLogger
 
-class MembershipFragment : androidx.fragment.app.Fragment(), AnkoLogger {
+/**
+ * Used by [AccountsMergeActivity] to show details of each
+ * account-to-be-merged.
+ */
+class MembershipFragment : Fragment(), AnkoLogger {
 
     private var membership: Membership? = null
     private var heading: String? = null
@@ -41,7 +45,7 @@ class MembershipFragment : androidx.fragment.app.Fragment(), AnkoLogger {
 
         val rows = buildRows(membership)
 
-        val viewManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+        val viewManager = LinearLayoutManager(context)
         val viewAdapter = RowAdapter(rows)
 
         member_rv.apply {
