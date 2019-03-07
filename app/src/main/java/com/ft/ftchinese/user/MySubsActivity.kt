@@ -1,15 +1,17 @@
 package com.ft.ftchinese.user
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Account
+import com.ft.ftchinese.models.Membership
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.activity_my_subscription.*
@@ -18,21 +20,26 @@ import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-import org.threeten.bp.LocalDate
-import org.threeten.bp.format.DateTimeFormatter
 
 class MySubsActivity : AppCompatActivity(),
-        androidx.swiperefreshlayout.widget.SwipeRefreshLayout.OnRefreshListener,
+        SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
     private var job: Job? = null
 
     private lateinit var viewAdapter: RowAdapter
-    private lateinit var viewManager: androidx.recyclerview.widget.RecyclerView.LayoutManager
     private lateinit var sessionManager: SessionManager
 
     private fun stopRefresh() {
         swipe_refresh.isRefreshing = false
+    }
+
+    private fun showRenewal(value: Boolean) {
+        if (value) {
+            renew_btn.visibility = View.VISIBLE
+        } else {
+            renew_btn.visibility = View.GONE
+        }
     }
 
     /**
@@ -61,6 +68,8 @@ class MySubsActivity : AppCompatActivity(),
                     account.refresh()
                 }
 
+                stopRefresh()
+
                 info("Refreshed account: $refreshedAccount")
 
                 if (refreshedAccount == null) {
@@ -72,10 +81,7 @@ class MySubsActivity : AppCompatActivity(),
 
                 sessionManager.saveAccount(refreshedAccount)
 
-                val rows = buildRows(refreshedAccount)
-
-                viewAdapter.refreshData(rows)
-                viewAdapter.notifyDataSetChanged()
+                updateUI(refreshedAccount)
 
             } catch (e: ClientError) {
                 info("$e")
@@ -113,22 +119,61 @@ class MySubsActivity : AppCompatActivity(),
 
         sessionManager = SessionManager.getInstance(this)
 
+        initUI()
+
+        order_list_btn.setOnClickListener {
+            MyOrdersActivity.start(this)
+        }
+    }
+
+    private fun initUI() {
         val account = sessionManager.loadAccount() ?: return
 
-        val rows = buildRows(account)
-
-        viewManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-        viewAdapter = RowAdapter(rows)
+        viewAdapter = RowAdapter(buildRows(account))
 
         member_rv.apply {
             setHasFixedSize(true)
-            layoutManager = viewManager
+            layoutManager = LinearLayoutManager(this@MySubsActivity)
             adapter = viewAdapter
         }
 
         supportFragmentManager.beginTransaction()
                 .replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
                 .commit()
+
+
+        updateUIRenewal(account.membership)
+    }
+
+    private fun updateUIRenewal(membership: Membership) {
+
+        if (!membership.isRenewable) {
+            showRenewal(false)
+            return
+        }
+
+        showRenewal(true)
+
+        val tier = membership.tier ?: return
+        val cycle = membership.cycle ?: return
+
+        renew_btn.setOnClickListener {
+
+            RenewalActivity.startForResult(
+                    activity = this,
+                    requestCode = RequestCode.PAYMENT,
+                    tier = tier,
+                    cycle = cycle)
+        }
+    }
+
+    private fun updateUI(account: Account) {
+        val rows = buildRows(account)
+
+        viewAdapter.refreshData(rows)
+        viewAdapter.notifyDataSetChanged()
+
+        updateUIRenewal(account.membership)
     }
 
     private fun buildRows(account: Account): Array<TableRow> {
@@ -159,6 +204,22 @@ class MySubsActivity : AppCompatActivity(),
         )
 
         return arrayOf(row1, row2)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        info("onActivityResult requestCode: $requestCode, resultCode: $resultCode")
+
+        when (requestCode) {
+            RequestCode.PAYMENT -> {
+                if (resultCode != Activity.RESULT_OK) {
+                    return
+                }
+
+                finish()
+            }
+        }
     }
 
     companion object {
