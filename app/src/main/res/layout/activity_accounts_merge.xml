@@ -33,7 +33,7 @@
                 app:layout_constraintEnd_toEndOf="parent"/>
 
             <FrameLayout
-                android:id="@+id/frag_container_1"
+                android:id="@+id/frag_ftc_account"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
@@ -48,17 +48,17 @@
                 android:scaleType="fitCenter"
                 android:src="@drawable/ic_import_export_teal_24dp"
                 app:layout_constraintDimensionRatio="h,1:1"
-                app:layout_constraintTop_toBottomOf="@id/frag_container_1"
+                app:layout_constraintTop_toBottomOf="@id/frag_ftc_account"
                 app:layout_constraintStart_toStartOf="@id/heading_tv"
                 app:layout_constraintEnd_toEndOf="@id/heading_tv"/>
 
             <FrameLayout
-                android:id="@+id/frag_container_2"
+                android:id="@+id/frag_wx_account"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                app:layout_constraintStart_toStartOf="@+id/frag_container_1"
-                app:layout_constraintEnd_toEndOf="@+id/frag_container_1"
+                app:layout_constraintStart_toStartOf="@+id/frag_ftc_account"
+                app:layout_constraintEnd_toEndOf="@+id/frag_ftc_account"
                 app:layout_constraintTop_toBottomOf="@+id/link_icon"/>
 
             <TextView
@@ -69,7 +69,7 @@
                 android:layout_marginTop="16dp"
                 app:layout_constraintStart_toStartOf="@id/heading_tv"
                 app:layout_constraintEnd_toEndOf="@id/heading_tv"
-                app:layout_constraintTop_toBottomOf="@id/frag_container_2"/>
+                app:layout_constraintTop_toBottomOf="@id/frag_wx_account"/>
 
             <Button
                 android:id="@+id/start_binding_btn"
@@ -80,7 +80,8 @@
                 android:layout_marginBottom="32dp"
                 app:layout_constraintStart_toStartOf="@+id/heading_tv"
                 app:layout_constraintEnd_toEndOf="@+id/heading_tv"
-                app:layout_constraintTop_toBottomOf="@id/frag_container_2"/>
+                app:layout_constraintTop_toBottomOf="@id/result_tv"
+                app:layout_constraintBottom_toBottomOf="parent"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
