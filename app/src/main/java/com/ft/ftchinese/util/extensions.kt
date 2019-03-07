@@ -61,11 +61,11 @@ fun Activity.isActiveNetworkMobile(): Boolean {
  * 尚未成为会员
  */
 fun Activity.getMemberTypeText(membership: Membership): String {
-    return getProductText(membership.tier, membership.cycle)
+    return getTierCycleText(membership.tier, membership.cycle)
             ?: getString(R.string.tier_free)
 }
 
-fun Activity.getProductText(tier: Tier?, cycle: Cycle?): String? {
+fun Activity.getTierCycleText(tier: Tier?, cycle: Cycle?): String? {
     val key = tierCycleKey(tier, cycle) ?: return null
 
     return when (key) {
