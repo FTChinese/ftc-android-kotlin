@@ -76,4 +76,62 @@ class JsonTest {
 
         println(parsed)
     }
+
+    @Test fun parseArray() {
+        val data = """
+            [
+                {
+                    "orderId": "FTB6973E6A5C605A45",
+                    "tier": "standard",
+                    "cycle": "year",
+                    "netPrice": 258,
+                    "payMethod": "tenpay",
+                    "createdAt": "2019-03-04T06:53:53Z",
+                    "startDate": "2019-03-04",
+                    "endDate": "2020-03-05"
+                },
+                {
+                    "orderId": "FTA4ABF0AE64FD88C6",
+                    "tier": "standard",
+                    "cycle": "year",
+                    "netPrice": 258,
+                    "payMethod": "tenpay",
+                    "createdAt": "2019-03-04T06:53:53Z",
+                    "startDate": "2020-03-05",
+                    "endDate": "2021-03-06"
+                },
+                {
+                    "orderId": "FT6ACC2334C555CA75",
+                    "tier": "standard",
+                    "cycle": "year",
+                    "netPrice": 258,
+                    "payMethod": "tenpay",
+                    "createdAt": "2019-03-04T06:53:53Z",
+                    "startDate": "2020-03-04",
+                    "endDate": "2021-03-05"
+                }
+            ]
+        """.trimIndent()
+
+        val result = json.parseArray<Subscription>(data)
+
+        println(result)
+    }
+
+    @Test fun parseOrderQuery() {
+        val data = """
+        {
+            "ftcOrderId": "FT04C26A65244EB95E",
+            "paidAt": "2019-03-06T08:14:41Z",
+            "transactionId": "4200000258201903069372767934",
+            "paymentState": "SUCCESS",
+            "totalFee": 1,
+            "paymentStateDesc": "支付成功"
+        }
+        """.trimIndent()
+
+        val result = json.parse<WxOrderQuery>(data)
+
+        println(result)
+    }
 }
