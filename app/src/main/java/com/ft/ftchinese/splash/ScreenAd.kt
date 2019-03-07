@@ -5,23 +5,38 @@ import com.beust.klaxon.Json
 import com.ft.ftchinese.util.Fetch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.threeten.bp.LocalDate
 import java.io.File
 import java.util.*
 
 data class ScreenAd(
         val type: String,
         val title: String,
-        @Json("fileName") val imageUrl: String,
-        @Json("click") val linkUrl: String,
-        @Json("impression_1") val impressionUrl1: String,
-        @Json("impression_2") val impressionUrl2: String?,
-        @Json("impression_3") val impressionUrl3: String?,
+
+        @Json("fileName")
+        val imageUrl: String,
+
+        @Json("click")
+        val linkUrl: String,
+
+        @Json("impression_1")
+        val impressionUrl1: String,
+
+        @Json("impression_2")
+        val impressionUrl2: String?,
+
+        @Json("impression_3")
+        val impressionUrl3: String?,
+
         val iphone: String,
         val android: String,
         val ipad: String,
         // targetUser is an enum: all, free, standard, premium.
         // It indicates which groups of user can see the launch ad.
-        @Json("audienceCohort") val targetUser: String?,
+
+        @Json("audienceCohort")
+        val targetUser: String? = null,
+
         val dates: String,
         // weight actually means https://en.wikipedia.org/wiki/Probability_distribution#Discrete_probability_distribution
         val weight: String
@@ -29,13 +44,33 @@ data class ScreenAd(
     val scheduledOn: List<String>
         get() = dates.split(",")
 
+    var date: LocalDate? = null
+
     // The name used to cache image locally
     val imageName: String
         get() {
-            val uri = Uri.parse(imageUrl)
-            val segments = uri.pathSegments
-            return segments[segments.size - 1]
+            // NOTE: Uri.parse returns null if parsing failed
+            // including empty string.
+            return try {
+                val uri = Uri.parse(imageUrl) ?: return ""
+                val segments = uri.pathSegments
+                 segments[segments.size - 1]
+            } catch (e: Exception) {
+                ""
+            }
         }
+
+    fun downloadImage(filesDir: File) {
+        try {
+            val file = File(filesDir, imageName)
+            if (file.exists()) {
+                return
+            }
+            Fetch().get(imageUrl).download(file)
+        } catch (e: Exception) {
+            info(e)
+        }
+    }
 
     // Notify that we successfully showed ad to user.
     fun sendImpression()  {
