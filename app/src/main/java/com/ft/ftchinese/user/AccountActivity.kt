@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.view.View
+import androidx.fragment.app.Fragment
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.RequestCode
@@ -30,7 +31,7 @@ class AccountActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fragment)
+        setContentView(R.layout.activity_fragment_single)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -85,7 +86,7 @@ class AccountActivity : AppCompatActivity(),
 
         info("Account: $account")
 
-        val fragment: androidx.fragment.app.Fragment = if (account.isWxOnly) {
+        val fragment: Fragment = if (account.isWxOnly) {
             info("Using WxAccountFragment")
             WxAccountFragment.newInstance()
         } else {
@@ -95,7 +96,7 @@ class AccountActivity : AppCompatActivity(),
 
         supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.fragment_container, fragment)
+                .replace(R.id.single_frag_holder, fragment)
                 .commit()
     }
 
