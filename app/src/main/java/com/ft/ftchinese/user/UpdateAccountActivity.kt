@@ -3,7 +3,6 @@ package com.ft.ftchinese.user
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
@@ -24,7 +23,7 @@ class UpdateAccountActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fragment)
+        setContentView(R.layout.activity_fragment_single)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -54,7 +53,7 @@ class UpdateAccountActivity : AppCompatActivity(),
 
         supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.fragment_container, fragment)
+                .replace(R.id.single_frag_holder, fragment)
                 .commit()
     }
 
