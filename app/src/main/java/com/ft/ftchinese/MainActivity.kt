@@ -14,8 +14,13 @@ import android.view.*
 import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentStatePagerAdapter
+import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.splash.ScheduleManager
+import com.ft.ftchinese.splash.Schedule
+import com.ft.ftchinese.splash.SplashScreenManager
+import com.ft.ftchinese.splash.splashScheduleFile
 import com.ft.ftchinese.user.*
 import com.ft.ftchinese.util.*
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -34,7 +39,7 @@ import org.jetbrains.anko.toast
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import java.io.ByteArrayInputStream
-import java.lang.Exception
+import kotlin.Exception
 
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
@@ -44,7 +49,7 @@ class MainActivity : AppCompatActivity(),
         TabLayout.OnTabSelectedListener,
         AnkoLogger {
 
-    private var mBottomDialog: BottomSheetDialog? = null
+    private var bottomDialog: BottomSheetDialog? = null
     private var mBackKeyPressed = false
 
     private var mExitJob: Job? = null
@@ -52,9 +57,6 @@ class MainActivity : AppCompatActivity(),
     private var mDownloadAdJob: Job? = null
 
     private var mAdScheduleJob: Job? = null
-
-    private var mSession: SessionManager? = null
-    private var cache: FileCache? = null
 
     private var mNewsAdapter: TabPagerAdapter? = null
     private var mEnglishAdapter: TabPagerAdapter? = null
@@ -64,7 +66,12 @@ class MainActivity : AppCompatActivity(),
 
     private var mChannelPages: Array<PagerTab>? = null
 
-    private var mFirebaseAnalytics: FirebaseAnalytics? = null
+    private lateinit var cache: FileCache
+
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private lateinit var sessionManager: SessionManager
+    private lateinit var splashManager: SplashScreenManager
+    private lateinit var api: IWXAPI
 
     /**
      * Implementation of BottomNavigationView.OnNavigationItemSelectedListener
@@ -124,33 +131,84 @@ class MainActivity : AppCompatActivity(),
 
     private val logoutListener = View.OnClickListener {
 
-        mSession?.logout()
+        sessionManager.logout()
 
         updateSessionUI()
 
-        mBottomDialog?.dismiss()
+        bottomDialog?.dismiss()
         toast("账号已登出")
     }
 
     private val drawerHeaderTitleListener = View.OnClickListener {
         // If user is not logged in, show login.
-        if (mSession?.isLoggedIn() == false) {
+        if (!sessionManager.isLoggedIn()) {
             CredentialsActivity.startForResult(this)
             return@OnClickListener
         }
 
         // If mUser already logged in, show logout.
-        if (mBottomDialog == null) {
-            mBottomDialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
-            mBottomDialog?.setContentView(R.layout.fragment_logout)
+        if (bottomDialog == null) {
+            bottomDialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
+            bottomDialog?.setContentView(R.layout.fragment_logout)
         }
 
-        mBottomDialog?.findViewById<TextView>(R.id.action_logout)?.setOnClickListener(logoutListener)
+        bottomDialog?.findViewById<TextView>(R.id.action_logout)?.setOnClickListener(logoutListener)
 
-        mBottomDialog?.show()
+        bottomDialog?.show()
     }
 
-    lateinit var api: IWXAPI
+
+    /**
+     * Update UI depending on user's login/logout state
+     */
+    private fun updateSessionUI() {
+        val account = sessionManager.loadAccount()
+
+        val menu = drawer_nav.menu
+        // If seems this is the only way to get the header view.
+        // You cannot mUser `import kotlinx.android.synthetic.activity_main_search.drawer_nav_header.*`,
+        // which will give you null pointer exception.
+        val headerView = drawer_nav.getHeaderView(0)
+        val headerTitle = headerView.findViewById<TextView>(R.id.nav_header_title)
+        val headerImage = headerView.findViewById<ImageView>(R.id.nav_header_image)
+
+        if (account != null) {
+            headerTitle.text = account.displayName
+            showAvatar(headerImage, account.wechat)
+        } else {
+            headerTitle.text = getString(R.string.nav_not_logged_in)
+            headerImage.setImageResource(R.drawable.ic_account_circle_black_24dp)
+        }
+
+        val isLoggedIn = account != null
+
+        menu.setGroupVisible(R.id.drawer_group_sign_in_up, !isLoggedIn)
+        menu.findItem(R.id.action_account).isVisible = isLoggedIn
+    }
+
+    private fun showAvatar(imageView: ImageView, wechat: Wechat) {
+        val drawable = cache.readDrawable(wechat.avatarName)
+        if (drawable != null) {
+            imageView.setImageDrawable(drawable)
+        }
+
+        if (wechat.avatarUrl == null) {
+            return
+        }
+
+        GlobalScope.launch(Dispatchers.Main) {
+            val bytes = withContext(Dispatchers.IO) {
+                wechat.downloadAvatar(filesDir)
+            } ?: return@launch
+
+            imageView.setImageDrawable(
+                    Drawable.createFromStream(
+                            ByteArrayInputStream(bytes),
+                            wechat.avatarName
+                    )
+            )
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -166,21 +224,22 @@ class MainActivity : AppCompatActivity(),
             WebView.setWebContentsDebuggingEnabled(true)
         }
 
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
-
-        // Register Wechat id
-        api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
-        api.registerApp(BuildConfig.WX_SUBS_APPID)
-
-        mSession = SessionManager.getInstance(this)
-//        mAdManager = LaunchAdManager.getInstance(this)
         cache = FileCache(this)
+        splashManager = SplashScreenManager(this)
 
         // Show advertisement
         // Keep a reference the coroutine in case user exit at this moment
         mShowAdJob = GlobalScope.launch(Dispatchers.Main) {
             showAd()
         }
+
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+
+        // Register Wechat id
+        api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
+        api.registerApp(BuildConfig.WX_SUBS_APPID)
+
+        sessionManager = SessionManager.getInstance(this)
 
         updateSessionUI()
 
@@ -191,7 +250,6 @@ class MainActivity : AppCompatActivity(),
 
         // Set ViewPager adapter
         setupHome()
-
 
         // Link ViewPager and TabLayout
         tab_layout.setupWithViewPager(view_pager)
@@ -209,16 +267,7 @@ class MainActivity : AppCompatActivity(),
                 ?.setOnClickListener(drawerHeaderTitleListener)
 
 
-
-
-        // Fetch ads schedule from remote server in background.
-        // Keep a reference to this coroutine in case user exits before this task finished.
-        // Always remember to check network status otherwise app will crash.
-        if (isNetworkConnected()) {
-            mDownloadAdJob = GlobalScope.launch(Dispatchers.IO) {
-                ScheduleManager(this@MainActivity).crawl()
-            }
-        }
+        prepareSplash()
     }
 
     private fun setupHome() {
@@ -258,15 +307,92 @@ class MainActivity : AppCompatActivity(),
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
     }
 
+    private fun prepareSplash() {
+        val tier = sessionManager
+                .loadAccount()
+                ?.membership
+                ?.tier
+
+        info("Prepare splash screen for next round")
+
+        mDownloadAdJob = GlobalScope.launch(Dispatchers.IO) {
+
+            if (!cache.exists(splashScheduleFile)) {
+                info("Splash schedule is not found. Fetch from remote.")
+                // Cache is not found.
+                val schedule = fetchAdSchedule()
+                        ?: return@launch
+
+                splashManager.prepareNextRound(schedule, tier)
+                return@launch
+            }
+
+            val body = cache.loadText(splashScheduleFile)
+
+            info("Splash schedule cache found")
+
+            // If cache is not loaded, fetch remote data.
+            if (body == null) {
+                info("Splash cache is found but empty")
+
+                val schedule = fetchAdSchedule() ?: return@launch
+
+                splashManager.prepareNextRound(schedule, tier)
+                return@launch
+            }
+
+            // Read local cache
+            val schedule = try {
+                Klaxon().parse<Schedule>(body)
+            } catch (e: Exception) {
+                null
+            }
+
+            info("Splash schedule: $schedule")
+
+            splashManager.prepareNextRound(schedule, tier)
+
+            // After cache is used, update cache.
+            info("Updating splash cache")
+            fetchAdSchedule()
+        }
+    }
+
+    private fun fetchAdSchedule(): Schedule? {
+        if (!isActiveNetworkWifi()) {
+            return null
+        }
+
+        return try {
+            val body = Fetch()
+                    .get(launchScheduleUrl)
+                    .responseString()
+                    ?: return null
+
+            cache.saveText(splashScheduleFile, body)
+            Klaxon().parse<Schedule>(body)
+        } catch (e: Exception) {
+            info(e)
+            null
+        }
+    }
+
     private suspend fun showAd() {
 
         // Pick an ad based on its probability distribution factor.
-        val scheduleManager = ScheduleManager(this)
-        val account = mSession?.loadAccount()
-        val screenAd = scheduleManager.pickRandomAd(account?.membership?.tier) ?: return
+        val screenAd = splashManager.load()
 
-        // Check if the required ad image is required.
-        if (cache?.exists(screenAd.imageName) != true) {
+        if (screenAd == null) {
+            showSystemUI()
+            return
+        }
+
+        info("Splash screen ad: $screenAd")
+
+        val imageFileName = screenAd.imageName
+
+        // Check if the required ad image exists.
+        if (imageFileName.isBlank() || !cache.exists(imageFileName)) {
             info("Ad image ${screenAd.imageName} not found")
             showSystemUI()
             return
@@ -304,7 +430,7 @@ class MainActivity : AppCompatActivity(),
             info("Skipped ads")
 
             // Log user skipping advertisement action.
-            mFirebaseAnalytics?.logEvent(FtcEvent.AD_SKIP, bundle)
+            firebaseAnalytics.logEvent(FtcEvent.AD_SKIP, bundle)
         }
 
         adImage.setOnClickListener {
@@ -314,13 +440,13 @@ class MainActivity : AppCompatActivity(),
             showSystemUI()
             mShowAdJob?.cancel()
 
-            mFirebaseAnalytics?.logEvent(FtcEvent.AD_CLICK, bundle)
+            firebaseAnalytics.logEvent(FtcEvent.AD_CLICK, bundle)
             info("Clicked ads")
         }
 
         // Read image and show it.
         val drawable = withContext(Dispatchers.IO) {
-            cache?.readDrawable(screenAd.imageName)
+            cache.readDrawable(imageFileName)
         }
 
         adImage.setImageDrawable(drawable)
@@ -337,7 +463,7 @@ class MainActivity : AppCompatActivity(),
             }
         }
 
-        mFirebaseAnalytics?.logEvent(FtcEvent.AD_VIEWED, bundle)
+        firebaseAnalytics.logEvent(FtcEvent.AD_VIEWED, bundle)
 
         for (i in 5 downTo 1) {
             adTimer.text = getString(R.string.prompt_ad_timer, i)
@@ -358,13 +484,6 @@ class MainActivity : AppCompatActivity(),
         super.onStart()
         info("onStart finished")
         updateSessionUI()
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-
-        super.onRestoreInstanceState(savedInstanceState)
-
-        info("onRestoreInstanceSate finished")
     }
 
     /**
@@ -403,7 +522,7 @@ class MainActivity : AppCompatActivity(),
             putString(FirebaseAnalytics.Param.SUCCESS, now)
         }
 
-        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle)
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle)
 
         info("onResume finished")
     }
@@ -436,9 +555,6 @@ class MainActivity : AppCompatActivity(),
         mShowAdJob = null
         mDownloadAdJob = null
         mAdScheduleJob = null
-
-        mSession = null
-
     }
 
     override fun onBackPressed() {
@@ -548,7 +664,7 @@ class MainActivity : AppCompatActivity(),
 
         info("View item list event: ${pages[position]}")
 
-        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.VIEW_ITEM_LIST, Bundle().apply {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM_LIST, Bundle().apply {
             putString(FirebaseAnalytics.Param.ITEM_CATEGORY, pages[position].title)
         })
     }
@@ -559,58 +675,6 @@ class MainActivity : AppCompatActivity(),
 
     override fun onTabUnselected(tab: TabLayout.Tab?) {
         info("Tab unselected: ${tab?.position}")
-    }
-
-    /**
-     * Update UI depending on user's login/logout state
-     */
-    private fun updateSessionUI() {
-        val account = mSession?.loadAccount()
-
-        val menu = drawer_nav.menu
-        // If seems this is the only way to get the header view.
-        // You cannot mUser `import kotlinx.android.synthetic.activity_main_search.drawer_nav_header.*`,
-        // which will give you null pointer exception.
-        val headerView = drawer_nav.getHeaderView(0)
-        val headerTitle = headerView.findViewById<TextView>(R.id.nav_header_title)
-        val headerImage = headerView.findViewById<ImageView>(R.id.nav_header_image)
-
-        if (account != null) {
-            headerTitle.text = account.displayName
-            showAvatar(headerImage, account.wechat)
-        } else {
-            headerTitle.text = getString(R.string.nav_not_logged_in)
-            headerImage.setImageResource(R.drawable.ic_account_circle_black_24dp)
-        }
-
-        val isLoggedIn = account != null
-
-        menu.setGroupVisible(R.id.drawer_group_sign_in_up, !isLoggedIn)
-        menu.findItem(R.id.action_account).isVisible = isLoggedIn
-    }
-
-    private fun showAvatar(imageView: ImageView, wechat: Wechat) {
-        val drawable = cache?.readDrawable(wechat.avatarName)
-        if (drawable != null) {
-            imageView.setImageDrawable(drawable)
-        }
-
-        if (wechat.avatarUrl == null) {
-            return
-        }
-
-        GlobalScope.launch(Dispatchers.Main) {
-            val bytes = withContext(Dispatchers.IO) {
-                wechat.downloadAvatar(filesDir)
-            } ?: return@launch
-
-            imageView.setImageDrawable(
-                    Drawable.createFromStream(
-                            ByteArrayInputStream(bytes),
-                            wechat.avatarName
-                    )
-            )
-        }
     }
 
     private fun feedbackEmail() {
@@ -647,7 +711,7 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    inner class MyftPagerAdapter(private val pages: Array<MyftTab>, fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
+    inner class MyftPagerAdapter(private val pages: Array<MyftTab>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
         override fun getItem(position: Int): androidx.fragment.app.Fragment {
             val page = pages[position]
