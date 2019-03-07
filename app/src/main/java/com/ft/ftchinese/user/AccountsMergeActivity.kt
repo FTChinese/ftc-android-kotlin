@@ -92,34 +92,39 @@ class AccountsMergeActivity : AppCompatActivity(), AnkoLogger {
         )
 
         supportFragmentManager.beginTransaction()
-                .replace(R.id.frag_container_1, ftcMemberFrag)
-                .replace(R.id.frag_container_2, wxMemberFrag)
+                .replace(R.id.frag_ftc_account, ftcMemberFrag)
+                .replace(R.id.frag_wx_account, wxMemberFrag)
                 .commit()
 
 
         // If the two accounts are already bound.
         if (ftcAccount.isEqual(wxAccount)) {
-            result_tv.text = """
-                两个账号已经绑定，无需操作。如果您未看到绑定后的账号信息，请返回"账号与安全"后下拉刷新
-            """.trimIndent()
+            result_tv.text = getString(R.string.accounts_already_bound)
+
+            allowInput(false)
             return
         }
 
         // If FTC account is already bound to another wechat.
         if (ftcAccount.isCoupled) {
-            result_tv.text = "账号${ftcAccount.email}已经绑定了其他微信账号，只能绑定一个微信账号"
+            result_tv.text = getString(R.string.ftc_account_coupled, ftcAccount.email)
+
+            allowInput(false)
             return
         }
 
         if (wxAccount.isCoupled) {
-            result_tv.text = "微信账号${wxAccount.wechat.nickname}已经绑定了其他FT中文网账号，只能绑定一个FT中文网账号"
+            result_tv.text = getString(R.string.wx_account_coupled, wxAccount.wechat.nickname)
+
+            allowInput(false)
             return
         }
 
         // Both accounts have memberships and not expired yet.
-        // Tell user that
         if (!ftcAccount.membership.isExpired && !wxAccount.membership.isExpired) {
-            result_tv.text = "微信账号和FT中文网的账号均购买了会员服务，两个会员均未到期。合并账号会删除其中一个账号的会员信息。为保障您的权益，暂不支持绑定两个会员未过期的账号。您可以寻取客服帮助。"
+            result_tv.text = getString(R.string.accounts_member_valid)
+
+            allowInput(false)
             return
         }
 
