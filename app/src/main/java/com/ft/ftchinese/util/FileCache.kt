@@ -29,7 +29,9 @@ class FileCache (private val context: Context) : AnkoLogger {
         }
 
         return try {
-            context.openFileInput(name).bufferedReader().readText()
+            context.openFileInput(name)
+                    .bufferedReader()
+                    .readText()
         } catch (e: Exception) {
             info("Cannot open file $name due to: ${e.message}")
             null
