@@ -24,7 +24,7 @@
         <activity
             android:name=".wxapi.WXPayEntryActivity"
             android:exported="true"
-            android:label="@string/title_wxpay_result"
+            android:label="@string/title_wxpay"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -59,110 +59,77 @@
         </activity>
         <activity
             android:name=".ChannelActivity"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".StoryActivity"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".WebContentActivity"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".RadioActivity"
             android:configChanges="orientation"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".AboutUsActivity"
-            android:label="@string/title_about_us">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
-
+            android:label="@string/title_about_us" />
         <activity
             android:name=".user.CredentialsActivity"
             android:label="@string/title_login_signup"
             android:parentActivityName=".MainActivity"
-            android:windowSoftInputMode="adjustResize"/>
-
-        <!--<activity-->
-            <!--android:name=".user.SignInActivity"-->
-            <!--android:label="@string/title_login"-->
-            <!--android:parentActivityName=".MainActivity"-->
-            <!--android:windowSoftInputMode="adjustResize"/>-->
-
-        <!--<activity-->
-            <!--android:name=".user.SignUpActivity"-->
-            <!--android:label="@string/title_sign_up"-->
-            <!--android:parentActivityName=".MainActivity"-->
-            <!--android:windowSoftInputMode="adjustResize"/>-->
-
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".user.ForgotPasswordActivity"
             android:label="@string/title_reset_password"
             android:parentActivityName=".user.CredentialsActivity"
-            android:windowSoftInputMode="adjustResize"/>
-
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".user.AccountActivity"
             android:label="@string/title_account"
             android:parentActivityName=".MainActivity"
-            android:windowSoftInputMode="adjustResize"/>
-
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".user.BindEmailActivity"
             android:label="@string/title_bind_email"
-            android:parentActivityName=".user.AccountActivity"/>
-        <activity android:name=".user.AccountsMergeActivity"
+            android:parentActivityName=".user.AccountActivity" />
+        <activity
+            android:name=".user.AccountsMergeActivity"
             android:label="@string/title_merge_accounts"
-            android:parentActivityName=".user.AccountActivity"/>
+            android:parentActivityName=".user.AccountActivity" />
         <activity
             android:name=".user.WxAccountActivity"
             android:label="@string/title_wx_account"
-            android:parentActivityName=".user.AccountActivity"/>
+            android:parentActivityName=".user.AccountActivity" />
         <activity
             android:name=".user.UpdateAccountActivity"
             android:parentActivityName=".user.AccountActivity"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".user.SubscriptionActivity"
             android:label="@string/title_subscription"
-            android:parentActivityName=".MainActivity"/>
-        <activity android:name=".user.MySubsActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".user.MyOrdersActivity"
+            android:label="@string/title_my_orders"
+            android:parentActivityName=".user.MySubsActivity" />
+        <activity
+            android:name=".user.MySubsActivity"
             android:label="@string/title_my_subs"
-            android:parentActivityName=".MainActivity"/>
-
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".user.SettingsActivity"
             android:label="@string/action_settings"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".user.PaymentActivity"
             android:label="@string/title_payment"
-            android:parentActivityName=".user.SubscriptionActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-        </activity>
+            android:parentActivityName=".user.SubscriptionActivity" />
+
+        <activity
+            android:name=".user.RenewalActivity"
+            android:label="@string/title_renewal"
+            android:parentActivityName=".user.MySubsActivity"/>
+
     </application>
 
 </manifest>
