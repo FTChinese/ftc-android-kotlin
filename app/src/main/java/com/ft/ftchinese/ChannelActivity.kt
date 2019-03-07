@@ -45,12 +45,12 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
          */
         toolbar.title = pageMeta.title
 
-        var fragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        var fragment = supportFragmentManager.findFragmentById(R.id.channel_frag_holder)
 
         if (fragment == null) {
             fragment = ViewPagerFragment.newInstance(pageMeta)
             supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, fragment)
+                    .replace(R.id.channel_frag_holder, fragment)
                     .commit()
         }
 
