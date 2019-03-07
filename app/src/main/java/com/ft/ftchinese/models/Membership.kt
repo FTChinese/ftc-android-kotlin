@@ -31,8 +31,9 @@ data class Membership(
 
             if (expireDate == null || cycle == null) return false
 
+            // Add one day more for leniency.
             return expireDate
-                    .isBefore(cycle.endDate(LocalDate.now()))
+                    .isBefore(cycle.endDate(LocalDate.now()).plusDays(1))
         }
 
     val isPaidMember: Boolean
