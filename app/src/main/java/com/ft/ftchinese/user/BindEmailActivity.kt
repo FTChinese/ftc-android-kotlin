@@ -25,7 +25,7 @@ class BindEmailActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fragment)
+        setContentView(R.layout.activity_fragment_single)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -37,7 +37,7 @@ class BindEmailActivity : AppCompatActivity(),
 
         supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.fragment_container, EmailFragment.newInstance())
+                .replace(R.id.single_frag_holder, EmailFragment.newInstance())
                 .commit()
     }
 
@@ -55,7 +55,7 @@ class BindEmailActivity : AppCompatActivity(),
         val transaction = supportFragmentManager
                 .beginTransaction()
 
-        transaction.replace(R.id.fragment_container, SignInFragment.newInstance(email))
+        transaction.replace(R.id.single_frag_holder, SignInFragment.newInstance(email))
         transaction.addToBackStack(null)
         transaction.commit()
     }
@@ -64,7 +64,7 @@ class BindEmailActivity : AppCompatActivity(),
 
         val transaction = supportFragmentManager.beginTransaction()
 
-        transaction.replace(R.id.fragment_container, SignUpFragment.newInstance(email, HOST_BINDING_ACTIVITY))
+        transaction.replace(R.id.single_frag_holder, SignUpFragment.newInstance(email, HOST_BINDING_ACTIVITY))
 
         transaction.addToBackStack(null)
         transaction.commit()
