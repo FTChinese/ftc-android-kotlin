@@ -4,12 +4,14 @@ import android.content.Context
 import android.content.Intent
 
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleStore
 import com.ft.ftchinese.util.FileCache
+import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -17,9 +19,21 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
-class SettingsActivity : SingleFragmentActivity() {
-    override fun createFragment(): androidx.fragment.app.Fragment {
-        return SettingsFragment.newInstance()
+class SettingsActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_fragment_single)
+        setSupportActionBar(toolbar)
+
+        supportActionBar?.apply {
+            setDisplayShowTitleEnabled(true)
+            setDisplayHomeAsUpEnabled(true)
+        }
+
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.single_frag_holder, SettingsFragment.newInstance())
+                .commit()
     }
 
     companion object {
