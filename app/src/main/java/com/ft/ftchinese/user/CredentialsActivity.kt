@@ -24,7 +24,7 @@ class CredentialsActivity : AppCompatActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fragment)
+        setContentView(R.layout.activity_fragment_double)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -34,8 +34,8 @@ class CredentialsActivity : AppCompatActivity(),
 
         supportFragmentManager
                 .beginTransaction()
-                .replace(R.id.fragment_container, EmailFragment.newInstance())
-                .replace(R.id.frag_container_secondary, WxLoginFragment.newInstance())
+                .replace(R.id.double_frag_primary, EmailFragment.newInstance())
+                .replace(R.id.double_frag_secondary, WxLoginFragment.newInstance())
                 .commit()
 
         sessionManager = SessionManager.getInstance(this)
@@ -56,7 +56,7 @@ class CredentialsActivity : AppCompatActivity(),
         val transaction = supportFragmentManager
                 .beginTransaction()
 
-        transaction.replace(R.id.fragment_container, SignInFragment.newInstance(email))
+        transaction.replace(R.id.double_frag_primary, SignInFragment.newInstance(email))
         transaction.addToBackStack(null)
         transaction.commit()
     }
@@ -68,7 +68,7 @@ class CredentialsActivity : AppCompatActivity(),
         val transaction = supportFragmentManager
                 .beginTransaction()
 
-        transaction.replace(R.id.fragment_container, SignUpFragment.newInstance(email, HOST_SIGN_UP_ACTIVITY))
+        transaction.replace(R.id.double_frag_primary, SignUpFragment.newInstance(email, HOST_SIGN_UP_ACTIVITY))
 
         transaction.addToBackStack(null)
         transaction.commit()
