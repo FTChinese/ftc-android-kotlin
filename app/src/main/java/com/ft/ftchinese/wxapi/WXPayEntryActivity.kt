@@ -1,5 +1,6 @@
 package com.ft.ftchinese.wxapi
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -28,9 +29,9 @@ import org.jetbrains.anko.toast
 class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     private var api: IWXAPI? = null
     private var job: Job? = null
-    private var mSession: SessionManager? = null
-    private var mOrderManager: OrderManager? = null
-    private var mFirebaseAnalytics: FirebaseAnalytics? = null
+    private var sessionManager: SessionManager? = null
+    private var orderManager: OrderManager? = null
+    private var firebaseAnalytics: FirebaseAnalytics? = null
 
     private fun showProgress(value: Boolean) {
         if (value) {
@@ -49,32 +50,11 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
 
-        mSession = SessionManager.getInstance(this)
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        sessionManager = SessionManager.getInstance(this)
+        orderManager = OrderManager.getInstance(this)
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
         showUI(false)
-
-        // Only used to test WXPayEntryActivity's UI.
-        // Comment them for production.
-//        val isUiTest = intent.getBooleanExtra(EXTRA_IS_TEST, false)
-//
-//        if (isUiTest) {
-//            val member = Membership(
-//                    tier = Membership.TIER_STANDARD,
-//                    cycle = Membership.CYCLE_MONTH,
-//                    expireDate = "2018-12-12"
-//            )
-//            isInProgress = false
-//            isSuccess = true
-//            heading_tv.text = getString(R.string.wxpay_done)
-//            updateUI(member)
-//
-//            return
-//        } else {
-//            isInProgress = false
-//            heading_tv.text = getString(R.string.wxpay_cancelled)
-//            return
-//        }
 
         api?.handleIntent(intent, this)
     }
@@ -94,109 +74,146 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 // 成功
                 // 展示成功页面
                 0 -> {
-                    verifyOrder()
+                    info("Start query order")
+                    queryOrder()
                 }
                 // 错误
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
                 -1 -> {
                     showProgress(false)
-                    heading_tv.text = getString(R.string.wxpay_error)
+                    showFailureUI(getString(R.string.wxpay_failed))
                 }
                 // 用户取消
                 // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
                 -2 -> {
                     showProgress(false)
-                    heading_tv.text = getString(R.string.wxpay_cancelled)
+                    showFailureUI(getString(R.string.wxpay_cancelled))
                 }
             }
         }
     }
 
-    private fun verifyOrder() {
-        val subs = mOrderManager?.load() ?: return
+    private fun queryOrder() {
+        val subs = orderManager?.load()
+        info("Subscription prior to confirmation: $subs")
 
-        val user = mSession?.loadAccount() ?: return
+        if (subs == null) {
+            showDoneUI(
+                    heading = getString(R.string.wxpay_done),
+                    msg = getString(R.string.order_cannot_be_queried)
+            )
+
+            return
+        }
+
+
+        if (!isNetworkConnected()) {
+            info(R.string.prompt_no_network)
+            showDoneUI(
+                    heading = getString(R.string.wxpay_done),
+                    msg = getString(R.string.order_cannot_be_queried)
+            )
+            return
+        }
+
+        val account = sessionManager?.loadAccount()
+        info("Account prior to confirmation: $account")
+
+        if (account == null) {
+            showDoneUI(
+                    heading = getString(R.string.wxpay_done),
+                    msg = getString(R.string.order_cannot_be_queried)
+            )
+
+            return
+        }
 
         showProgress(true)
 
         job = GlobalScope.launch(Dispatchers.Main) {
 
+            info("Start querying order...")
+            updateProgress(getString(R.string.wxpay_query_order))
+
             try {
-                val payResult = withContext(Dispatchers.IO) {
-                    user.wxQueryOrder(subs.orderId)
+                val orderQuery = withContext(Dispatchers.IO) {
+                    account.wxQueryOrder(subs.orderId)
                 }
 
-                showProgress(false)
+                info("Order queried: $orderQuery")
 
-                if (payResult == null) {
+                // If order query is empty
+                if (orderQuery == null) {
+                    showDoneUI(
+                            heading = getString(R.string.wxpay_done),
+                            msg = getString(R.string.order_cannot_be_queried)
+                    )
                     return@launch
                 }
 
-                handleQueryResult(payResult, subs)
+                // Check the value of `trade_state`
+                when (orderQuery.paymentState) {
+                    // If payment success, update user sessions's member tier, expire date, billing cycle.
+                    "SUCCESS" -> confirmSubscription(account, subs)
+                    "REFUND" -> showFailureUI(getString(R.string.wxpay_refund))
+                    "NOTPAY" -> showFailureUI(getString(R.string.wxpay_not_paid))
+                    "CLOSED" -> showFailureUI(getString(R.string.wxpay_closed))
+                    "REVOKED" -> showFailureUI(getString(R.string.wxpay_revoked))
+                    "USERPAYING" -> showFailureUI(getString(R.string.wxpay_pending))
+                    "PAYERROR" -> showFailureUI(getString(R.string.wxpay_failed))
+                }
 
             } catch (resp: ClientError) {
-                showProgress(false)
 
-                when (resp.statusCode) {
-                    404 -> {
-                        toast(R.string.order_not_found)
-                    }
-                    else -> {
-                        handleApiError(resp)
-                    }
-                }
+                showFailureUI(getString(R.string.order_not_found))
+
+                handleApiError(resp)
+
+                info(resp)
             } catch (e: Exception) {
-                e.printStackTrace()
 
-                showProgress(false)
+                showFailureUI(getString(R.string.order_not_found))
+
                 handleException(e)
+
+                info(e)
             }
         }
     }
 
-    private fun handleQueryResult(queryResult: WxQueryOrder, subs: Subscription) {
+    private suspend fun confirmSubscription(account: Account, subs: Subscription) {
 
-        val currentMember = mSession?.loadAccount()?.membership ?: return
+        logPurchaseEvent(subs)
 
-        var resultText = ""
+        val updatedMember = subs.confirm(account.membership)
 
-        when (queryResult.paymentState) {
-            // If payment success, update user sessions's member tier, expire date, billing cycle.
-            "SUCCESS" -> {
+        info("New membership: $updatedMember")
 
-                val updatedMember = subs.confirm(currentMember)
+        sessionManager?.updateMembership(updatedMember)
 
-                info("New membership: $updatedMember")
+        updateProgress(getString(R.string.progress_refresh_account))
 
-                showSuccessUI(getString(R.string.wxpay_done))
-                mSession?.updateMembership(updatedMember)
-
-
-                logPurchaseEvent(subs)
-
-                return
-            }
-            "REFUND" -> {
-                resultText = getString(R.string.wxpay_refund)
-            }
-            "NOTPAY" -> {
-                resultText = getString(R.string.wxpay_not_paid)
-            }
-            "CLOSED" -> {
-                resultText = getString(R.string.wxpay_closed)
-            }
-            "REVOKED" -> {
-                resultText = getString(R.string.wxpay_revoked)
-            }
-            "USERPAYING" -> {
-                resultText = getString(R.string.wxpay_pending)
-            }
-            "PAYERROR" -> {
-                resultText = getString(R.string.wxpay_failed)
-            }
+        val refreshAccount = withContext(Dispatchers.IO) {
+            account.refresh()
         }
 
-        showFailureUI(resultText)
+        showProgress(false)
+
+        if (refreshAccount == null) {
+            showDoneUI(
+                    heading = getString(R.string.wxpay_done),
+                    msg = getString(R.string.order_cannot_be_queried)
+            )
+            return
+        }
+
+        toast(R.string.prompt_updated)
+
+        if (refreshAccount.membership.isNewer(updatedMember)) {
+            sessionManager?.saveAccount(refreshAccount)
+        }
+
+        showDoneUI(getString(R.string.subs_success))
     }
 
     private fun showUI(show: Boolean) {
@@ -209,34 +226,70 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         }
     }
 
+    private fun updateProgress(heading: String) {
+        heading_tv.visibility = View.VISIBLE
+        done_button.visibility = View.GONE
 
-    private fun showSuccessUI(heading: String) {
-        showUI(true)
         heading_tv.text = heading
-        done_button.setOnClickListener {
-            // Start MembershipActivity manually here.
-            // This is the only way to refresh user data.
-            MySubsActivity.start(this)
+    }
 
-            finish()
+    private fun showDoneUI(heading: String, msg: String? = null) {
+        showProgress(false)
+
+        heading_tv.visibility = View.VISIBLE
+        heading_tv.text = heading
+
+        if (msg != null) {
+            message_tv.visibility = View.VISIBLE
+            message_tv.text = msg
+        }
+
+        done_button.visibility = View.VISIBLE
+        done_button.setOnClickListener {
+            onClickDone()
         }
     }
 
     private fun showFailureUI(heading: String) {
-        showUI(true)
+        showProgress(false)
 
+        heading_tv.visibility = View.VISIBLE
         heading_tv.text = heading
 
+        done_button.visibility = View.VISIBLE
         done_button.setOnClickListener {
-            SubscriptionActivity.start(this)
-            finish()
+            onClickDone()
         }
+    }
+
+    /**
+     * After user paid by wechat, show the done button
+     * which starts [MySubsActivity] if the updated
+     * membership is valid or [SubscriptionActivity]
+     * if membership is still invalid.
+     */
+    private fun onClickDone() {
+        val account = sessionManager?.loadAccount()
+
+        if (account == null) {
+            finish()
+            return
+        }
+
+        if (account.membership.isPaidMember) {
+            MySubsActivity.start(this)
+        } else {
+            SubscriptionActivity.start(this)
+        }
+
+        setResult(Activity.RESULT_OK)
+        finish()
     }
 
     // Log purchase event.
     private fun logPurchaseEvent(subs: Subscription) {
 
-        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
+        firebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
             putDouble(FirebaseAnalytics.Param.VALUE, subs.netPrice)
             putString(FirebaseAnalytics.Param.METHOD, subs.payMethod.string())
@@ -258,18 +311,6 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     // On iOS you do not need to handle it since there's no back button.
     override fun onBackPressed() {
         super.onBackPressed()
-        SubscriptionActivity.start(this, null)
-        finish()
+        onClickDone()
     }
-
-    // For test only.
-//    companion object {
-//        private const val EXTRA_IS_TEST = "ui_test"
-//        fun startForResult(activity: Activity?) {
-//            val intent = Intent(activity, WXPayEntryActivity::class.java)
-//            intent.putExtra(EXTRA_IS_TEST, false)
-//
-//            activity?.startActivity(intent)
-//        }
-//    }
 }
