@@ -22,11 +22,12 @@ enum class Cycle {
 
     /**
      * Calculate the end date of a cycle.
+     *
      */
     fun endDate(d: LocalDate): LocalDate {
         return when (this) {
-            MONTH -> d.plusMonths(1).plusDays(1)
-            YEAR -> d.plusYears(1).plusDays(1)
+            MONTH -> d.plusMonths(1)
+            YEAR -> d.plusYears(1)
         }
     }
 
