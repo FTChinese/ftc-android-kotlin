@@ -118,7 +118,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
 
         check_out_btn.setOnClickListener {
             if (payMethod == null) {
-                toast(R.string.unknown_payment_method)
+                toast(R.string.pay_method_unknown)
                 return@setOnClickListener
             }
 
@@ -130,7 +130,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                 PayMethod.ALIPAY -> aliPay()
                 PayMethod.WXPAY -> wxPay()
                 PayMethod.STRIPE -> stripePay()
-                else -> toast(R.string.prompt_no_pay_method)
+                else -> toast(R.string.pay_method_unknown)
             }
         }
 
