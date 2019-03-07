@@ -97,7 +97,6 @@ data class Account(
         val (_, body) = when (loginMethod) {
             LoginMethod.EMAIL -> {
                 fetch.get(NextApi.ACCOUNT)
-                        .noCache()
                         .setUserId(id)
                         .responseApi()
             }
@@ -107,7 +106,6 @@ data class Account(
                 }
 
                 fetch.get(NextApi.WX_ACCOUNT)
-                        .noCache()
                         .setUnionId(unionId)
                         .responseApi()
             }
@@ -121,13 +119,39 @@ data class Account(
         }
     }
 
-    /**
-     * @TODO set user id or union id based on login method
-     */
+    fun getOrders(): List<Subscription> {
+        val fetch = Fetch().get(NextApi.ORDERS)
+
+        if (id.isNotBlank()) {
+            fetch.setUserId(id)
+        }
+
+        if (!unionId.isNullOrBlank()) {
+            fetch.setUnionId(unionId)
+        }
+
+        val (_, body) = fetch.noCache().responseApi()
+
+        return if (body == null) {
+            listOf()
+        } else {
+            json.parseArray(body)
+        } ?: listOf()
+    }
+
     fun wxPlaceOrder(tier: Tier, cycle: Cycle): WxPrepayOrder? {
-        val (_, body) = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${tier.string()}/${cycle.string()}")
+        val fetch = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${tier.string()}/${cycle.string()}")
+
+        if (id.isNotBlank()) {
+            fetch.setUserId(id)
+        }
+
+        if (!unionId.isNullOrBlank()) {
+            fetch.setUnionId(unionId)
+        }
+
+        val (_, body) = fetch
                 .noCache()
-                .setUserId(this@Account.id)
                 .setClient()
                 .body()
                 .responseApi()
@@ -140,28 +164,42 @@ data class Account(
     }
 
 
-    fun wxQueryOrder(orderId: String): WxQueryOrder? {
-        val (_, body) = Fetch()
-                .get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
+    fun wxQueryOrder(orderId: String): WxOrderQuery? {
+        val fetch = Fetch().get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
+
+        if (id.isNotBlank()) {
+            fetch.setUserId(id)
+        }
+
+        if (!unionId.isNullOrBlank()) {
+            fetch.setUnionId(unionId)
+        }
+
+        val (_, body) = fetch
                 .noCache()
-                .setUserId(id)
-                .setClient()
                 .responseApi()
 
         return if (body == null) {
             null
         } else {
-            json.parse<WxQueryOrder>(body)
+            json.parse<WxOrderQuery>(body)
         }
     }
 
-    /**
-     * @TODO set user id or union id based on login method.
-     */
     fun aliPlaceOrder(tier: Tier, cycle: Cycle): AlipayOrder? {
 
-        val (_, body) = Fetch().post("${SubscribeApi.ALI_ORDER}/${tier.string()}/${cycle.string()}")
-                .setUserId(id)
+        val fetch = Fetch().post("${SubscribeApi.ALI_ORDER}/${tier.string()}/${cycle.string()}")
+
+        if (id.isNotBlank()) {
+            fetch.setUnionId(id)
+        }
+
+        if (!unionId.isNullOrBlank()) {
+            fetch.setUnionId(unionId)
+        }
+
+        val (_, body) = fetch
+                .noCache()
                 .setClient()
                 .body()
                 .responseApi()
