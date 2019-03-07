@@ -69,22 +69,32 @@
     <string name="paywall_title">购买会员服务，阅读FT独家内容</string>
     <string name="paywall_login_prompt">已经购买过？登录</string>
 
+    <string name="order_id">订单号：%1$s</string>
+    <string name="order_member_type">会员类型: %1$s</string>
+    <string name="order_duration">会员期限：%1$s ~ %2$s</string>
+    <string name="order_price">支付金额：%1$s</string>
+    <string name="order_pay_method">支付方式：%1$s</string>
+    <string name="order_creation_time">创建时间：%1$s</string>
+
     <string name="heading_customer_service">联系客服</string>
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
     <string name="heading_pay_method">选择支付方式</string>
     <string name="heading_become_member">成为FT会员</string>
-    <string name="pay_by_ali">支付宝支付</string>
-    <string name="pay_by_wechat">微信支付</string>
-    <string name="pay_by_stripe">Stripe支付</string>
-    <string name="unknown_payment_method">请选择支付方式</string>
+    <string name="pay_method_ali">支付宝支付</string>
+    <string name="pay_method_wechat">微信支付</string>
+    <string name="pay_method_stripe">Stripe支付</string>
+    <string name="pay_method_unknown">请选择支付方式</string>
+
     <string name="check_out_default">支付</string>
     <string name="request_order">创建订单&#8230;</string>
     <string name="done">完成</string>
-    <string name="wxpay_not_supported">您的设备不支持微信支付</string>
     <string name="renewal_not_allowed">您已经是会员了，请勿重复购买</string>
-    <string name="create_order_failed">无法创建订单，请稍后再试</string>
-
+    <string name="order_cannot_be_created">无法创建订单，请稍后再试</string>
     <string name="order_not_found">没有查询到订单，请稍后刷新</string>
+    <string name="order_cannot_be_queried">暂时无法查询订单状态，请稍后在"账号与安全"中下拉刷新</string>
+
+    <string name="subs_success">订阅成功！</string>
+    <string name="wxpay_not_supported">您的设备不支持微信支付</string>
     <string name="wxpay_done">支付成功</string>
     <string name="wxpay_refund">转入退款</string>
     <string name="wxpay_not_paid">未支付</string>
@@ -93,12 +103,12 @@
     <string name="wxpay_pending">正在支付</string>
     <string name="wxpay_failed">支付失败</string>
     <string name="wxpay_cancelled">支付已取消</string>
-    <string name="wxpay_error">无法支付</string>
+    <string name="wxpay_query_order">查询支付状态&#8230;</string>
     <string name="wxpay_tier_cycle">您已经订阅了FT中文网 %1$s/%2$s</string>
     <string name="wxpay_expire_date">会员有效期：%1$s</string>
     <string name="wxshare_done">分享成功</string>
 
-    <string name="aciton_help">帮助</string>
+    <string name="action_help">帮助</string>
     <string name="action_feedback">反馈</string>
     <string name="action_logout">退出登录</string>
     <string name="action_settings">设置</string>
@@ -120,12 +130,14 @@
     <string name="title_change_username">修改用户名</string>
     <string name="title_about_us">关于我们</string>
     <string name="title_payment">收银台</string>
-    <string name="title_wxpay_result">支付结果</string>
+    <string name="title_renewal">会员续订</string>
+    <string name="title_wxpay">微信支付 </string>
     <string name="title_wx_account">微信账号</string>
     <string name="title_bind_email">绑定邮箱账号</string>
     <string name="title_merge_accounts">合并账号</string>
     <string name="title_account">账号与安全</string>
     <string name="title_subscription">会员订阅</string>
+    <string name="title_my_orders">我的订单</string>
     <string name="title_my_subs">我的订阅</string>
     <string name="title_wx_login">微信登录</string>
 
@@ -197,6 +209,11 @@
     <string name="instruct_sign_up">邮箱 %1$s 尚未注册FT中文网账号，请设置密码创建账号</string>
     <string name="instruct_sign_in">邮箱 %1$s 已经注册了FT中文网账号，请输入登录密码</string>
 
+    <string name="accounts_already_bound">两个账号已经绑定，无需操作。如果您未看到绑定后的账号信息，请返回"账号与安全"后下拉刷新</string>
+    <string name="ftc_account_coupled">账号 %1$s 已经绑定了其他微信账号。一个FT中文网账号只能绑定一个微信账号。</string>
+    <string name="wx_account_coupled">微信账号 %1$s 已经绑定了其他FT中文网账号。一个FT中文网账号只能绑定一个微信账号。</string>
+    <string name="accounts_member_valid">您的微信账号和FT中文网的账号均购买了会员服务，两个会员均未到期。合并账号会删除其中一个账号的会员信息。为保障您的权益，暂不支持绑定两个会员未过期的账号。您可以寻求客服帮助。</string>
+
     <string name="greeting_wx_login">你好，%1$s！欢迎登录FT中文网。</string>
     <string name="wechat_not_found">没有找到您的微信账号信息</string>
     <string name="formatter_wx_name">微信用户 %1$s</string>
@@ -210,8 +227,6 @@
     <string name="link_reset_password">忘记密码?</string>
     <string name="link_sign_up">注册账号</string>
     <string name="link_login">已有账号?登录</string>
-
-
 
     <!-- Error message -->
     <string name="error_invalid_email">邮箱地址无效</string>
@@ -286,4 +301,5 @@
         <item>sc</item>
         <item>tc</item>
     </string-array>
+
 </resources>
