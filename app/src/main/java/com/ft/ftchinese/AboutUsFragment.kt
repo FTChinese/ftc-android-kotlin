@@ -4,18 +4,29 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.ft.ftchinese.user.SingleFragmentActivity
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.fragment_recycler.*
+import kotlinx.android.synthetic.main.simple_toolbar.*
 
-class AboutUsActivity : SingleFragmentActivity() {
-    override fun createFragment(): androidx.fragment.app.Fragment {
-        return AboutUsFragment.newInstance()
+class AboutUsActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_fragment_single)
+        setSupportActionBar(toolbar)
+
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setDisplayShowTitleEnabled(true)
+        }
+
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.single_frag_holder, AboutUsFragment.newInstance())
+                .commit()
     }
 
     companion object {
@@ -26,7 +37,7 @@ class AboutUsActivity : SingleFragmentActivity() {
     }
 }
 
-class AboutUsFragment : androidx.fragment.app.Fragment() {
+class AboutUsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
