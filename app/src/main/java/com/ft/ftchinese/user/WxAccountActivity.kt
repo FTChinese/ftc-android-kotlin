@@ -16,7 +16,7 @@ class WxAccountActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fragment)
+        setContentView(R.layout.activity_fragment_single)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -25,7 +25,7 @@ class WxAccountActivity : AppCompatActivity() {
         }
 
         supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, WxAccountFragment.newInstance())
+                .replace(R.id.single_frag_holder, WxAccountFragment.newInstance())
                 .commit()
     }
 
