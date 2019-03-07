@@ -9,7 +9,7 @@
     <include layout="@layout/simple_toolbar"/>
 
     <FrameLayout
-        android:id="@+id/fragment_container"
+        android:id="@+id/channel_frag_holder"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
