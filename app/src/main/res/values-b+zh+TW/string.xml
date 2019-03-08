@@ -151,7 +151,9 @@
     <string name="btn_bind_email">绑定信箱</string>
     <string name="btn_request_verify">重新寄送驗證郵件</string>
 
+    <string name="wx_session_expired">登入登录已过期，请重新登入</string>
     <string name="action_wx_login">微信登入</string>
+    <string name="action_cancel">取消</string>
     <string name="action_sign_in_short">Sign in</string>
 
     <string name="action_bound_account">已綁定</string>

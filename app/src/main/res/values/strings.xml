@@ -119,7 +119,6 @@
     <string name="myft_starred_articles">收藏文章</string>
     <string name="myft_following">关注</string>
 
-    <!-- Strings related to login -->
     <string name="title_login">登录FT中文网</string>
     <string name="title_sign_up">创建FT中文网账号</string>
     <string name="title_login_signup">登录/注册</string>
@@ -150,7 +149,9 @@
     <string name="btn_bind_email">绑定邮箱</string>
     <string name="btn_request_verify">重新发送验证邮件</string>
 
+    <string name="wx_session_expired">微信登录已过期，请重新登录</string>
     <string name="action_wx_login">微信登录</string>
+    <string name="action_cancel">取消</string>
     <string name="action_sign_in_short">Sign in</string>
 
     <string name="action_bound_account">已绑定</string>
