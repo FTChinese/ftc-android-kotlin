@@ -46,22 +46,27 @@ class WxLoginFragment : Fragment(), AnkoLogger {
         super.onViewCreated(view, savedInstanceState)
 
         wechat_oauth_btn.setOnClickListener {
-            val nonce = WxOAuth.stateCode()
-            info("Wechat oauth state: $nonce")
-
-            sessionManager?.saveWxState(nonce)
-            sessionManager?.saveWxIntent(WxOAuthIntent.LOGIN)
-
-            val req = SendAuth.Req()
-            req.scope = WxOAuth.SCOPE
-            req.state = nonce
-
-            // DO NOT FORGET to call this!
-            wxApi?.sendReq(req)
-
-            activity?.finish()
+            authorize()
         }
     }
+
+    private fun authorize() {
+        val nonce = WxOAuth.stateCode()
+        info("Wechat oauth state: $nonce")
+
+        sessionManager?.saveWxState(nonce)
+        sessionManager?.saveWxIntent(WxOAuthIntent.LOGIN)
+
+        val req = SendAuth.Req()
+        req.scope = WxOAuth.SCOPE
+        req.state = nonce
+
+        // DO NOT FORGET to call this!
+        wxApi?.sendReq(req)
+
+        activity?.finish()
+    }
+
 
     companion object {
         fun newInstance() = WxLoginFragment()
