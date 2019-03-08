@@ -28,8 +28,8 @@ import org.jetbrains.anko.toast
 import kotlin.Exception
 
 class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
-    private var api: IWXAPI? = null
-    private var sessionManager: SessionManager? = null
+    private lateinit var api: IWXAPI
+    private lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +42,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
 
         try {
-            api?.handleIntent(intent, this)
+            api.handleIntent(intent, this)
         } catch (e: Exception) {
             info(e)
         }
@@ -54,7 +54,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         super.onNewIntent(intent)
 
         setIntent(intent)
-        api?.handleIntent(intent, this)
+        api.handleIntent(intent, this)
     }
 
     override fun onReq(req: BaseReq?) {
@@ -140,7 +140,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                     // Cannot initialize in onCreate method due to WXEntryActivity weird design.
                     sessionManager = SessionManager.getInstance(this)
 
-                    val state = sessionManager?.loadWxState()
+                    val state = sessionManager.loadWxState()
 
                     info("State: $state")
                     if (state == null) {
