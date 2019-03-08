@@ -23,12 +23,9 @@ import com.ft.ftchinese.splash.SplashScreenManager
 import com.ft.ftchinese.splash.splashScheduleFile
 import com.ft.ftchinese.user.*
 import com.ft.ftchinese.util.*
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.navigation.NavigationView
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.jakewharton.threetenabp.AndroidThreeTen
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -45,8 +42,8 @@ import kotlin.Exception
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
  */
 class MainActivity : AppCompatActivity(),
-        NavigationView.OnNavigationItemSelectedListener,
         TabLayout.OnTabSelectedListener,
+        WxExpireDialogFragment.WxExpireDialogListener,
         AnkoLogger {
 
     private var bottomDialog: BottomSheetDialog? = null
@@ -71,92 +68,14 @@ class MainActivity : AppCompatActivity(),
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var sessionManager: SessionManager
     private lateinit var splashManager: SplashScreenManager
-    private lateinit var api: IWXAPI
+    private lateinit var wxApi: IWXAPI
 
-    /**
-     * Implementation of BottomNavigationView.OnNavigationItemSelectedListener
-     */
-    private val bottomNavItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
-       info("Selected bottom nav item ${item.title}")
-
-        when (item.itemId) {
-            R.id.nav_news -> {
-                setupHome()
-
-                displayLogo()
-            }
-
-            R.id.nav_english -> {
-                if (mEnglishAdapter == null) {
-                    mEnglishAdapter = TabPagerAdapter(Navigation.englishPages, supportFragmentManager)
-                }
-                view_pager.adapter = mEnglishAdapter
-                mChannelPages = Navigation.englishPages
-
-                displayTitle(R.string.nav_english)
-            }
-
-            R.id.nav_ftacademy -> {
-                if (mFtaAdapter == null) {
-                    mFtaAdapter = TabPagerAdapter(Navigation.ftaPages, supportFragmentManager)
-                }
-                view_pager.adapter = mFtaAdapter
-                mChannelPages = Navigation.ftaPages
-
-                displayTitle(R.string.nav_ftacademy)
-            }
-
-            R.id.nav_video -> {
-                if (mVideoAdapter == null) {
-                    mVideoAdapter = TabPagerAdapter(Navigation.videoPages, supportFragmentManager)
-                }
-                view_pager.adapter = mVideoAdapter
-                mChannelPages = Navigation.videoPages
-
-                displayTitle(R.string.nav_video)
-            }
-
-            R.id.nav_myft -> {
-                if (mMyftPagerAdapter == null) {
-                    mMyftPagerAdapter = MyftPagerAdapter(MyftTab.pages, supportFragmentManager)
-                }
-                view_pager.adapter = mMyftPagerAdapter
-                mChannelPages = null
-
-                displayTitle(R.string.nav_myft)
-            }
-        }
-        true
-    }
-
-    private val logoutListener = View.OnClickListener {
-
-        sessionManager.logout()
-
-        updateSessionUI()
-
-        bottomDialog?.dismiss()
-        toast("账号已登出")
-    }
-
-    private val drawerHeaderTitleListener = View.OnClickListener {
-        // If user is not logged in, show login.
-        if (!sessionManager.isLoggedIn()) {
-            CredentialsActivity.startForResult(this)
-            return@OnClickListener
-        }
-
-        // If mUser already logged in, show logout.
-        if (bottomDialog == null) {
-            bottomDialog = com.google.android.material.bottomsheet.BottomSheetDialog(this)
-            bottomDialog?.setContentView(R.layout.fragment_logout)
-        }
-
-        bottomDialog?.findViewById<TextView>(R.id.action_logout)?.setOnClickListener(logoutListener)
-
-        bottomDialog?.show()
-    }
-
+    // Cache UI
+    private var drawerHeaderTitle: TextView? = null
+    private var drawerHeaderImage: ImageView? = null
+    private var menuItemAccount: MenuItem? = null
+    private var menuItemSubs: MenuItem? = null
+    private var menuItemMySubs: MenuItem? = null
 
     /**
      * Update UI depending on user's login/logout state
@@ -164,29 +83,48 @@ class MainActivity : AppCompatActivity(),
     private fun updateSessionUI() {
         val account = sessionManager.loadAccount()
 
-        val menu = drawer_nav.menu
-        // If seems this is the only way to get the header view.
-        // You cannot mUser `import kotlinx.android.synthetic.activity_main_search.drawer_nav_header.*`,
-        // which will give you null pointer exception.
-        val headerView = drawer_nav.getHeaderView(0)
-        val headerTitle = headerView.findViewById<TextView>(R.id.nav_header_title)
-        val headerImage = headerView.findViewById<ImageView>(R.id.nav_header_image)
+        if (account == null) {
+            drawerHeaderTitle?.text = getString(R.string.nav_not_logged_in)
+            drawerHeaderImage?.setImageResource(R.drawable.ic_account_circle_black_24dp)
 
-        if (account != null) {
-            headerTitle.text = account.displayName
-            showAvatar(headerImage, account.wechat)
-        } else {
-            headerTitle.text = getString(R.string.nav_not_logged_in)
-            headerImage.setImageResource(R.drawable.ic_account_circle_black_24dp)
+            // show signin/signup
+            drawer_nav.menu
+                    .setGroupVisible(R.id.drawer_group_sign_in_up, true)
+
+            // Do not show account
+            menuItemAccount?.isVisible = false
+            // Show subscription
+            menuItemSubs?.isVisible = true
+            // Do not show my subscription
+            menuItemMySubs?.isVisible = false
+            return
         }
 
-        val isLoggedIn = account != null
+        drawerHeaderTitle?.text = account.displayName
+        showAvatar(drawerHeaderImage, account.wechat)
 
-        menu.setGroupVisible(R.id.drawer_group_sign_in_up, !isLoggedIn)
-        menu.findItem(R.id.action_account).isVisible = isLoggedIn
+
+        // Hide signin/signup
+        drawer_nav.menu
+                .setGroupVisible(R.id.drawer_group_sign_in_up, false)
+        // Show account
+        menuItemAccount?.isVisible = true
+
+        // If user is not logged in, isMember always false.
+        val isMember = account.isMember
+
+        // Show subscription if user is a member; otherwise
+        // hide it
+        menuItemSubs?.isVisible = !isMember
+        // Show my subscription if user is a member; otherwise hide it.
+        menuItemMySubs?.isVisible = isMember
     }
 
-    private fun showAvatar(imageView: ImageView, wechat: Wechat) {
+    private fun showAvatar(imageView: ImageView?, wechat: Wechat) {
+        if (imageView == null) {
+            return
+        }
+
         val drawable = cache.readDrawable(wechat.avatarName)
         if (drawable != null) {
             imageView.setImageDrawable(drawable)
@@ -210,6 +148,8 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
+    override fun onWxAuthExpired() {}
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -217,8 +157,6 @@ class MainActivity : AppCompatActivity(),
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
         displayLogo()
-
-        AndroidThreeTen.init(this)
 
         if (BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true)
@@ -236,17 +174,19 @@ class MainActivity : AppCompatActivity(),
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
         // Register Wechat id
-        api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
-        api.registerApp(BuildConfig.WX_SUBS_APPID)
+        wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
+        wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
 
         sessionManager = SessionManager.getInstance(this)
 
-        updateSessionUI()
+        val menu = drawer_nav.menu
+        val headerView = drawer_nav.getHeaderView(0)
+        drawerHeaderTitle = headerView.findViewById(R.id.nav_header_title)
+        drawerHeaderImage = headerView.findViewById(R.id.nav_header_image)
 
-        val toggle = ActionBarDrawerToggle(
-                this, drawer_layout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close)
-        drawer_layout.addDrawerListener(toggle)
-        toggle.syncState()
+        menuItemAccount = menu.findItem(R.id.action_account)
+        menuItemSubs = menu.findItem(R.id.action_subscription)
+        menuItemMySubs = menu.findItem(R.id.action_my_subs)
 
         // Set ViewPager adapter
         setupHome()
@@ -255,19 +195,126 @@ class MainActivity : AppCompatActivity(),
         tab_layout.setupWithViewPager(view_pager)
         tab_layout.addOnTabSelectedListener(this)
 
-        // Bottom navigation listener
-        bottom_nav.setOnNavigationItemSelectedListener(bottomNavItemSelectedListener)
+        setupBottomNav()
+
+        setupDrawer()
+
+        updateSessionUI()
+
+        prepareSplash()
+    }
+
+    private fun setupBottomNav() {
+        bottom_nav.setOnNavigationItemSelectedListener {
+            info("Selected bottom nav item ${it.title}")
+
+            when (it.itemId) {
+                R.id.nav_news -> {
+                    setupHome()
+
+                    displayLogo()
+                }
+
+                R.id.nav_english -> {
+                    if (mEnglishAdapter == null) {
+                        mEnglishAdapter = TabPagerAdapter(Navigation.englishPages, supportFragmentManager)
+                    }
+                    view_pager.adapter = mEnglishAdapter
+                    mChannelPages = Navigation.englishPages
+
+                    displayTitle(R.string.nav_english)
+                }
+
+                R.id.nav_ftacademy -> {
+                    if (mFtaAdapter == null) {
+                        mFtaAdapter = TabPagerAdapter(Navigation.ftaPages, supportFragmentManager)
+                    }
+                    view_pager.adapter = mFtaAdapter
+                    mChannelPages = Navigation.ftaPages
+
+                    displayTitle(R.string.nav_ftacademy)
+                }
+
+                R.id.nav_video -> {
+                    if (mVideoAdapter == null) {
+                        mVideoAdapter = TabPagerAdapter(Navigation.videoPages, supportFragmentManager)
+                    }
+                    view_pager.adapter = mVideoAdapter
+                    mChannelPages = Navigation.videoPages
+
+                    displayTitle(R.string.nav_video)
+                }
+
+                R.id.nav_myft -> {
+                    if (mMyftPagerAdapter == null) {
+                        mMyftPagerAdapter = MyftPagerAdapter(MyftTab.pages, supportFragmentManager)
+                    }
+                    view_pager.adapter = mMyftPagerAdapter
+                    mChannelPages = null
+
+                    displayTitle(R.string.nav_myft)
+                }
+            }
+            true
+        }
+    }
+
+    private fun setupDrawer() {
+        val toggle = ActionBarDrawerToggle(
+                this,
+                drawer_layout,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close)
+        drawer_layout.addDrawerListener(toggle)
+        toggle.syncState()
 
         // Set a listener that will be notified when a menu item is selected.
-        drawer_nav.setNavigationItemSelectedListener(this)
+        drawer_nav.setNavigationItemSelectedListener {
+            when (it.itemId) {
+                R.id.action_login ->  CredentialsActivity.startForResult(this)
+                R.id.action_account -> AccountActivity.start(this)
+                R.id.action_subscription -> SubscriptionActivity.start(this)
+                R.id.action_my_subs -> MySubsActivity.start(this)
+                R.id.action_about -> AboutUsActivity.start(this)
+                R.id.action_feedback -> feedbackEmail()
+                R.id.action_settings -> SettingsActivity.start(this)
+            }
+
+            drawer_layout.closeDrawer(GravityCompat.START)
+
+            true
+        }
 
         // Set listener on the title text inside drawer's header view
         drawer_nav.getHeaderView(0)
                 ?.findViewById<TextView>(R.id.nav_header_title)
-                ?.setOnClickListener(drawerHeaderTitleListener)
+                ?.setOnClickListener {
+                    if (!sessionManager.isLoggedIn()) {
+                        CredentialsActivity.startForResult(this)
+                        return@setOnClickListener
+                    }
 
+                    // Setup bottom dialog
+                    if (bottomDialog == null) {
+                        bottomDialog = BottomSheetDialog(this)
+                        bottomDialog?.setContentView(R.layout.fragment_logout)
+                    }
 
-        prepareSplash()
+                    bottomDialog?.findViewById<TextView>(R.id.action_logout)?.setOnClickListener{
+                        logout()
+
+                        bottomDialog?.dismiss()
+                        toast("账号已登出")
+                    }
+
+                    bottomDialog?.show()
+                }
+    }
+
+    private fun logout() {
+        sessionManager.logout()
+        updateSessionUI()
     }
 
     private fun setupHome() {
@@ -290,21 +337,30 @@ class MainActivity : AppCompatActivity(),
         supportActionBar?.setTitle(title)
     }
 
-    // https://developer.android.com/training/system-ui/immersive
-//    private fun hideSystemUI() {
-//        root_container.systemUiVisibility =
-//                View.SYSTEM_UI_FLAG_LOW_PROFILE or
-//                View.SYSTEM_UI_FLAG_FULLSCREEN or
-//                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-//                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-//                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-//                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-//    }
-
     private fun showSystemUI() {
         supportActionBar?.show()
         root_container.systemUiVisibility =
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+
+
+        checkWxSession()
+    }
+
+    /**
+     * Check whether wechat session has expired.
+     * Wechat refresh token expires after 30 days.
+     */
+    private fun checkWxSession() {
+        val account = sessionManager.loadAccount() ?: return
+        if (account.loginMethod != LoginMethod.WECHAT) {
+            return
+        }
+
+        val wxSession = sessionManager.loadWxSession() ?: return
+        if (wxSession.isExpired) {
+            logout()
+            WxExpireDialogFragment().show(supportFragmentManager, "WxExpireDialog")
+        }
     }
 
     private fun prepareSplash() {
@@ -355,6 +411,7 @@ class MainActivity : AppCompatActivity(),
             // After cache is used, update cache.
             info("Updating splash cache")
             fetchAdSchedule()
+
         }
     }
 
@@ -484,6 +541,8 @@ class MainActivity : AppCompatActivity(),
         super.onStart()
         info("onStart finished")
         updateSessionUI()
+
+
     }
 
     /**
@@ -636,22 +695,22 @@ class MainActivity : AppCompatActivity(),
      * Listener for drawer menu selection
      * Implements NavigationView.OnNavigationItemSelectedListener
      */
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-
-        // Handle navigation view item clicks here.
-        when (item.itemId) {
-            R.id.action_login ->  CredentialsActivity.startForResult(this)
-            R.id.action_account -> AccountActivity.start(this)
-            R.id.action_subscription -> SubscriptionActivity.start(this)
-            R.id.action_my_subs -> MySubsActivity.start(this)
-            R.id.action_about -> AboutUsActivity.start(this)
-            R.id.action_feedback -> feedbackEmail()
-            R.id.action_settings -> SettingsActivity.start(this)
-        }
-
-        drawer_layout.closeDrawer(GravityCompat.START)
-        return true
-    }
+//    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+//
+//        // Handle navigation view item clicks here.
+//        when (item.itemId) {
+//            R.id.action_login ->  CredentialsActivity.startForResult(this)
+//            R.id.action_account -> AccountActivity.start(this)
+//            R.id.action_subscription -> SubscriptionActivity.start(this)
+//            R.id.action_my_subs -> MySubsActivity.start(this)
+//            R.id.action_about -> AboutUsActivity.start(this)
+//            R.id.action_feedback -> feedbackEmail()
+//            R.id.action_settings -> SettingsActivity.start(this)
+//        }
+//
+//        drawer_layout.closeDrawer(GravityCompat.START)
+//        return true
+//    }
 
     /**
      * Implementation of TabLayout.OnTabSelectedListener
