@@ -10,7 +10,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:drawableEnd="@drawable/ic_exit_to_app_black_24dp"
+        android:drawableEnd="@drawable/ic_power_settings_new_black_24dp"
         android:padding="16dp"
         android:text="@string/action_logout"
         app:layout_constraintEnd_toEndOf="parent"
