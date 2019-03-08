@@ -6,6 +6,7 @@ import com.ft.ftchinese.util.formatLocalDate
 import com.ft.ftchinese.util.parseISODateTime
 import com.ft.ftchinese.util.parseLocalDate
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 private const val SESSION_PREF_NAME = "user"
 private const val PREF_USER_ID = "id"
@@ -111,11 +112,16 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
 
     fun saveWxState(state: String) {
         editor.putString(PREF_OAUTH_STATE, state)
+        info("Save wx state: $state")
         editor.apply()
     }
 
     fun loadWxState(): String? {
-        return sharedPreferences.getString(PREF_OAUTH_STATE, null)
+        val state = sharedPreferences.getString(PREF_OAUTH_STATE, null)
+
+        info("State: $state")
+
+        return state
     }
 
     fun saveWxIntent(intent: WxOAuthIntent) {
@@ -155,6 +161,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
     }
 
     fun logout() {
+        info("logout called")
         editor.clear()
         editor.apply()
     }
