@@ -34,4 +34,12 @@ object SubscribeApi {
     const val WX_REFRESH = "$BASE/wx/oauth/refresh"
 }
 
-const val launchScheduleUrl = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
+const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
+
+const val FTC_OFFICIAL_URL = "http://www.ftchinese.com"
+
+const val MAILBOX_URL = "https://api003.ftmailbox.com"
+
+const val HOST_FTC = "www.ftchinese.com"
+const val HOST_MAILBOX = "api003.ftmailbox.com"
+const val HOST_FTA = "www.ftacademy.cn"
