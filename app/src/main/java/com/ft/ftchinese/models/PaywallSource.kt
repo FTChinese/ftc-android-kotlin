@@ -4,5 +4,5 @@ data class PaywallSource(
         val id: String,
         val category: String,
         val name: String,
-        val variant: Int? = null
+        val variant: Language? = null
 )
