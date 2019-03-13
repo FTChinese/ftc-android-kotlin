@@ -1,31 +1,29 @@
 package com.ft.ftchinese
 
-import androidx.fragment.app.Fragment
 import android.os.Bundle
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import com.ft.ftchinese.models.Following
 import com.ft.ftchinese.models.FollowingManager
 import com.ft.ftchinese.models.HTML_TYPE_FRAGMENT
-import com.ft.ftchinese.models.PagerTab
+import com.ft.ftchinese.models.ChannelSource
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-class FollowingFragment : androidx.fragment.app.Fragment(), AnkoLogger {
+class FollowingFragment : Fragment(), AnkoLogger {
 
-    private var mAdapter: Adapter? = null
-    private var mFollowingManager: FollowingManager? = null
+    private var adapter: Adapter? = null
+    private var followingManager: FollowingManager? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         try {
-            mFollowingManager = FollowingManager.getInstance(requireContext())
+            followingManager = FollowingManager.getInstance(requireContext())
         } catch (e: Exception) {
             info("Cannot initiate FollowingManager")
         }
@@ -44,14 +42,14 @@ class FollowingFragment : androidx.fragment.app.Fragment(), AnkoLogger {
     }
 
     private fun updateUI() {
-        val follows = mFollowingManager?.load() ?: return
+        val follows = followingManager?.load() ?: return
 
-        if (mAdapter == null) {
-            mAdapter = Adapter(follows)
-            recycler_view.adapter = mAdapter
+        if (adapter == null) {
+            adapter = Adapter(follows)
+            recycler_view.adapter = adapter
         } else {
-            mAdapter?.setFollows(follows)
-            mAdapter?.notifyDataSetChanged()
+            adapter?.setFollows(follows)
+            adapter?.notifyDataSetChanged()
         }
     }
 
@@ -83,7 +81,7 @@ class FollowingFragment : androidx.fragment.app.Fragment(), AnkoLogger {
             holder.secondaryText.visibility = View.GONE
 
             holder.itemView.setOnClickListener {
-                val channelMeta = PagerTab(
+                val channelMeta = ChannelSource(
                         title = item.tag,
                         name = "${item.type}_${item.tag}",
                         contentUrl = item.bodyUrl,
