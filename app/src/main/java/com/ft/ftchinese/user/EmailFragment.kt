@@ -130,7 +130,7 @@ class EmailFragment : Fragment(),
                 enableInput(true)
                 activity?.handleApiError(e)
 
-                error(e)
+                info(e)
             } catch (e: Exception) {
 
                 showProgress(false)
@@ -138,7 +138,7 @@ class EmailFragment : Fragment(),
 
                 activity?.handleException(e)
 
-                error(e)
+                info(e)
             }
         }
     }
