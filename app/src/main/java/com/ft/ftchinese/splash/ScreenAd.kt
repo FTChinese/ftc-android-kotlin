@@ -46,6 +46,14 @@ data class ScreenAd(
 
     var date: LocalDate? = null
 
+    fun isToday(): Boolean {
+        if (date?.isEqual(LocalDate.now()) == true) {
+            return true
+        }
+
+        return false
+    }
+
     // The name used to cache image locally
     val imageName: String
         get() {
