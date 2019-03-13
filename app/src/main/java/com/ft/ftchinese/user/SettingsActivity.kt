@@ -5,11 +5,12 @@ import android.content.Intent
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProviders
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.database.ArticleStore
+import com.ft.ftchinese.viewmodel.ReadArticleViewModel
 import com.ft.ftchinese.util.FileCache
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.Dispatchers
@@ -49,14 +50,20 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
     private var prefClearCache: Preference? = null
     private var prefClearHistory: Preference? = null
-    private var mArticleStore: ArticleStore? = null
-    private var mFileCache: FileCache? = null
+//    private var mArticleStore: ArticleStore? = null
+    private lateinit var cache: FileCache
+    private lateinit var model: ReadArticleViewModel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        mArticleStore = ArticleStore.getInstance(context)
-        mFileCache = FileCache(context)
+        cache = FileCache(context)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        model = ViewModelProviders.of(this).get(ReadArticleViewModel::class.java)
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -70,7 +77,7 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
         prefClearCache?.setOnPreferenceClickListener {
 
-            val result = mFileCache?.clear() ?: return@setOnPreferenceClickListener true
+            val result = cache.clear()
 
             if (result) {
                 toast(R.string.prompt_cache_cleared)
@@ -85,14 +92,12 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
         prefClearHistory?.setOnPreferenceClickListener {
 
             GlobalScope.launch(Dispatchers.Main) {
-                val ok = mArticleStore?.truncateHistory() ?: false
+                model.truncate()
 
-                if (ok) {
-                    prefClearHistory?.summary = getString(R.string.summary_articles_read, 0)
-                    toast(R.string.prompt_reading_history)
-                } else {
-                    toast("Cannot delete reading history now. Please retry later")
-                }
+                val totalItems = model.countRead()
+
+                prefClearHistory?.summary = getString(R.string.summary_articles_read, totalItems)
+                toast(R.string.prompt_reading_history)
             }
 
             true
@@ -100,14 +105,13 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
     }
 
     private fun updateCacheUI() {
-        val space = mFileCache?.space()
+        prefClearCache?.summary = cache.space()
 
-        if (space != null) {
-            prefClearCache?.summary = space
+        GlobalScope.launch(Dispatchers.Main) {
+            val total = model.countRead()
+
+            prefClearHistory?.summary = getString(R.string.summary_articles_read, total)
         }
-
-        val total = mArticleStore?.countHistory() ?: 0
-        prefClearHistory?.summary = getString(R.string.summary_articles_read, total)
     }
 
     companion object {
