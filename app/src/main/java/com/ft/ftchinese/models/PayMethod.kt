@@ -1,9 +1,10 @@
 package com.ft.ftchinese.models
 
-private val payMethodNames = arrayOf("alipay", "tenpay", "stripe")
+private val payMethodNames = arrayOf("alipay", "wechat", "stripe")
 private val payMethodValue = mapOf(
         "alipay" to PayMethod.ALIPAY,
-        "tenpay" to PayMethod.WXPAY,
+        "wechat" to PayMethod.WXPAY,
+        "tenpay" to PayMethod.WXPAY, // Backward compatibility.
         "stripe" to PayMethod.STRIPE
 )
 
