@@ -1,7 +1,11 @@
 package com.ft.ftchinese.models
 
-import android.content.Context
 import android.text.format.DateFormat
+import com.beust.klaxon.Json
+import com.ft.ftchinese.database.ReadArticle
+import com.ft.ftchinese.database.StarredArticle
+import com.ft.ftchinese.util.formatSQLDateTime
+import org.threeten.bp.LocalDateTime
 
 data class Bilingual(
         var cn: String,
@@ -15,62 +19,116 @@ data class StoryPic(
 
 data class RelatedStory(
         val id: String,
-        val cheadline: String,
-        val eheadline: String,
-        val last_publish_time: String
+
+        @Json(name = "cheadline")
+        val titleCN: String,
+
+        @Json(name = "eheadline")
+        val titleEN: String = "", // This might not exist.
+
+        @Json(name = "last_publish_time")
+        val publishedAt: String
 )
 
 class Story (
-        val id: String,
-        val fileupdatetime: String,
-        val cheadline: String,
-        val clongleadbody: String,
-        val cbyline_description: String,
-        val cauthor: String,
-        val cbyline_status: String,
-        val cbody: String,
-        val eheadline: String,
-        val ebyline_description: String,
-        val eauthor: String,
-        val ebyline_status: String,
-        val elongleadbody: String,
-        val ebyline: String,
-        val ebody: String,
+        val id: String = "",
+
+        @Json(name = "fileupdatetime")
+        val createdAt: String,
+
+        // Used as share's title
+        @Json(name = "cheadline")
+        val titleCN: String,
+
+        @Json(name = "clongleadbody")
+        val standfirstCN: String,
+
+        @Json(name = "cbody")
+        val bodyCN: String,
+
+        @Json(name = "eheadline")
+        val titleEN: String = "",
+
+        @Json(name = "elongleadbody")
+        val standfirstEN: String = "",
+
+        @Json(name = "ebody")
+        val bodyEN: String = "",
+
+        @Json(name = "ebyline_description")
+        val orgEN: String = "",
+
+        @Json(name = "cbyline_description")
+        val orgCN: String,
+
+        @Json(name = "cauthor")
+        val authorCN: String,
+
+        @Json(name = "cbyline_status")
+        val locationCN: String,
+
+        @Json(name = "eauthor")
+        val authorEN: String = "",
+
+        @Json(name = "ebyline_status")
+        val locationEN: String = "",
+
         val tag: String,
         val genre: String,
         val topic: String,
         val industry: String,
         val area: String,
-        val last_publish_time: String,
-        val story_pic: StoryPic,
-        val relative_story: Array<RelatedStory>
+
+        @Json(name = "last_publish_time")
+        val publishedAt: String,
+
+        @Json(name = "story_pic")
+        val cover: StoryPic,
+
+        @Json(name = "relative_story")
+        val relatedStory: List<RelatedStory>
 ) {
 
-    val title: Bilingual
-        get() = Bilingual(cheadline, eheadline)
+    fun toStarredArticle(channelItem: ChannelItem?): StarredArticle {
+        return StarredArticle(
+                id = id,
+                type = channelItem?.type ?: "",
+                subType = channelItem?.subType ?: "",
+                title = titleCN,
+                standfirst = standfirstCN,
+                keywords = keywords,
+                imageUrl = cover.smallbutton,
+                audioUrl = channelItem?.audioUrl ?: "",
+                radioUrl = channelItem?.radioUrl ?: "",
+                publishedAt = publishedAt,
+                webUrl = channelItem?.getCanonicalUrl() ?: ""
+        )
+    }
+
+    fun toReadArticle(channelItem: ChannelItem?): ReadArticle {
+        return ReadArticle(
+                id = id,
+                type = channelItem?.type ?: "",
+                subType = channelItem?.subType ?: "",
+                title = titleCN,
+                standfirst = standfirstCN,
+                keywords = keywords,
+                imageUrl = cover.smallbutton,
+                audioUrl = channelItem?.audioUrl ?: "",
+                radioUrl = channelItem?.radioUrl ?: "",
+                publishedAt = publishedAt,
+                readAt = formatSQLDateTime(LocalDateTime.now()),
+                webUrl = channelItem?.getCanonicalUrl() ?: ""
+        )
+    }
 
     val isBilingual: Boolean
-        get() = ebody.isNotBlank()
-
-    val standfirst: String
-        get() = clongleadbody
+        get() = bodyEN.isNotBlank()
 
     val byline: String
-        get() = "$cbyline_description $cauthor $cbyline_status"
+        get() = "$orgCN $authorCN $locationCN"
 
-    val bodyXML: Bilingual
-        get() = Bilingual(cbody, ebody)
-
-    val bodyAlignedXML: String
-        get() {
-            val alignedBody = alignBody()
-
-            return alignedBody.joinToString("") {
-                "${it.cn}${it.en}"
-            }
-        }
-
-    val tags: List<String>
+    private val tags: List<String>
         get() = tag.split(",")
 
     val keywords: String
@@ -79,18 +137,16 @@ class Story (
                 .replace(Regex("^,"), "")
                 .replace(Regex(",$"), "")
 
-    val updatedAt: String
-        get() = DateFormat.format("yyyy年M月d日 HH:mm", fileupdatetime.toLong() * 1000) as String
-
-    val createdAt: String
-        get() = DateFormat.format("yyyy年M月d日 HH:mm", last_publish_time.toLong() * 1000) as String
+    fun formatPublishTime(): String {
+        return DateFormat.format("yyyy年M月d日 HH:mm", publishedAt.toLong() * 1000) as String
+    }
 
     // HTML for the {related-stories}
     fun htmlForRelatedStories(): String {
 
-        val listItems = relative_story.mapIndexed { index, relatedStory ->
+        val listItems = relatedStory.mapIndexed { index, relatedStory ->
             """
-            <li class="mp${index+1}"><a target="_blank" href="/story/${relatedStory.id}\">${relatedStory.cheadline}</a></li>
+            <li class="mp${index+1}"><a target="_blank" href="/story/${relatedStory.id}\">${relatedStory.titleCN}</a></li>
             """.trimIndent()
         }
                 .joinToString("")
@@ -122,7 +178,7 @@ class Story (
     fun htmlForCoverImage(): String {
         return """
             <div class="story-image image" style="margin-bottom:0;">
-                <figure data-url="${story_pic.smallbutton}" class="loading"></figure>
+                <figure data-webUrl="${cover.smallbutton}" class="loading"></figure>
             </div>
         """.trimIndent()
     }
@@ -141,7 +197,7 @@ class Story (
 
     fun getCnBody(withAd: Boolean = true): String {
         if (!withAd) {
-            return cbody
+            return bodyCN
         }
 
         val arrBody = splitCnBody().toMutableList()
@@ -161,12 +217,12 @@ class Story (
     }
 
     fun getEnBody(withAd: Boolean = true): String {
-        if (ebody.isNullOrBlank()) {
+        if (bodyEN.isNullOrBlank()) {
             return ""
         }
 
         if (!withAd) {
-            return ebody
+            return bodyEN
         }
 
         val arrBody = splitEnBody().toMutableList()
@@ -186,7 +242,7 @@ class Story (
     }
 
     fun getBilingualBody(): String {
-        if (ebody.isNullOrBlank()) {
+        if (bodyEN.isBlank()) {
             return ""
         }
 
@@ -198,19 +254,19 @@ class Story (
     }
 
     private fun splitCnBody(): List<String> {
-        return cbody.split("\r\n")
+        return bodyCN.split("\r\n")
     }
 
     private fun splitEnBody(): List<String> {
-        return ebody.split("\r\n")
+        return bodyEN.split("\r\n")
     }
 
     /**
      * Align english text to chinese text paragraph by paragraph.
      */
     private fun alignBody(): List<Bilingual> {
-        val cnArray = cbody.split("\r\n")
-        val enArray = ebody.split("\r\n")
+        val cnArray = bodyCN.split("\r\n")
+        val enArray = bodyEN.split("\r\n")
 
         val bi = mutableListOf<Bilingual>()
 
