@@ -1,6 +1,9 @@
 package com.ft.ftchinese.models
 
-import android.net.Uri
+import com.beust.klaxon.Json
+import com.ft.ftchinese.database.StarredArticle
+import com.ft.ftchinese.util.FTC_OFFICIAL_URL
+import com.ft.ftchinese.util.MAILBOX_URL
 import org.jetbrains.anko.AnkoLogger
 import java.util.*
 
@@ -11,7 +14,7 @@ import java.util.*
  */
 data class ChannelContent(
         val meta: ChannelMeta,
-        val sections: Array<ChannelSection>
+        val sections: List<ChannelSection>
 )
 
 data class ChannelMeta(
@@ -29,7 +32,7 @@ data class ChannelSection(
         val name: String,
         val side: String,
         val sideAlign: String,
-        val lists: Array<ChannelList>
+        val lists: List<ChannelList>
 )
 
 data class ChannelList(
@@ -37,7 +40,7 @@ data class ChannelList(
         val title: String,
         val preferLead: String,
         val sponsorAdId: String,
-        val items: Array<ChannelItem>
+        val items: List<ChannelItem>
 )
 /**
  * ChannelItem represents an item in a page of ViewPager.
@@ -66,13 +69,26 @@ data class ChannelItem(
         // For column type, you should start a ChannelActivity instead of  StoryActivity.
         val type: String, // story | premium | video | interactive | column |
         val subType: String? = null, // speedreading | radio
-        var headline: String, // It seems it is not used. It will later be changed to JSON data's cheadline field
-        val eaudio: String? = null,
-        val shortlead: String? = null, // this is a url of mp3 for subType radio.
-        val timeStamp: String? = null // "1536249600"
+
+        @Json(name = "headline")
+        var title: String,
+
+        @Json(name = "eaudio")
+        val audioUrl: String? = null,
+
+        @Json(name = "shortlead")
+        val radioUrl: String? = null, // this is a webUrl of mp3 for subType radio.
+
+        @Json(name = "timeStamp")
+        val publishedAt: String? = null, // "1536249600"
+
+        @Json(ignored = true)
+        var webUrl: String = "",
+
+        @Json(ignored = true)
+        var isWebpage: Boolean = false
 ) : AnkoLogger {
 
-    var keywords: String? = null
     // These two properties are not parsed from JSON.
     // They are copy from ChannelMeta
     var channelTitle: String = ""
@@ -81,92 +97,114 @@ data class ChannelItem(
     var adZone: String = ""
     var hideAd: Boolean = false
 
-    // For a story, this is extracted from json
-    // retrieved from server;
-    // For other types of article, we have no way to get the value.
-    var standfirst: String? = null
+    fun toStarredArticle(): StarredArticle {
+        return StarredArticle(
+                id = id,
+                type = type,
+                subType = subType ?: "",
+                title = title,
+                standfirst = "",
+                keywords = "",
+                imageUrl = "",
+                audioUrl = audioUrl ?: "",
+                radioUrl = radioUrl ?: "",
+                publishedAt = publishedAt ?: "",
+                webUrl = getCanonicalUrl()
+        )
+    }
 
     // Used for sharing
-    val canonicalUrl: String
-        get() = "$URL_FTC/$type/$id"
-
-    private val isSevenDaysOld: Boolean
-        get() {
-            if (timeStamp == null) {
-                return false
-            }
-
-            val sevenDaysLater = Date((timeStamp.toLong() + 7 * 24 * 60 * 60) * 1000)
-            val now = Date()
-
-            if (sevenDaysLater.after(now)) {
-                return false
-            }
-
-            return true
+    fun getCanonicalUrl(): String {
+        if (webUrl.isNotBlank()) {
+            return webUrl
         }
 
-    val isMembershipRequired: Boolean
-        get() = isSevenDaysOld ||
+        return "$FTC_OFFICIAL_URL/$type/$id"
+    }
+
+    private fun isSevenDaysOld(): Boolean {
+        if (publishedAt == null) {
+            return false
+        }
+
+        val sevenDaysLater = Date((publishedAt.toLong() + 7 * 24 * 60 * 60) * 1000)
+        val now = Date()
+
+        if (sevenDaysLater.after(now)) {
+            return false
+        }
+
+        return true
+    }
+
+    // File name used to cache/retrieve json data.
+    fun cacheNameJson(): String {
+        return "${type}_$id.json"
+    }
+
+    fun cacheNameHtml(): String {
+        return "${type}_$id.html"
+    }
+
+    fun isMembershipRequired(): Boolean {
+        return isSevenDaysOld() ||
                 type == TYPE_PREMIUM ||
                 (type == TYPE_INTERACTIVE && subType == SUB_TYPE_RADIO) ||
                 (type == TYPE_INTERACTIVE && subType == SUB_TYPE_SPEED_READING)
+    }
 
-    // File name used to cache/retrieve json data.
-    val cacheFileName: String
-        get() = "${type}_$id.json"
-
-    val cacheHTMLName: String
-        get() = "${type}_$id.html"
-
-    private val commentsId: String
-        get() = when(subType) {
-                "interactive" -> "r_interactive_$id"
-                "video" -> "r_video_$id"
-                "story" -> id
-                "photo", "photonews" -> "r_photo_$id"
-                else -> "r_${type}_$id"
-            }
-
-
-    private val commentsOrder: String
-        get() {
-            return "story"
+    private fun getCommentsId(): String {
+        return when(subType) {
+            "interactive" -> "r_interactive_$id"
+            "video" -> "r_video_$id"
+            "story" -> id
+            "photo", "photonews" -> "r_photo_$id"
+            else -> "r_${type}_$id"
         }
+    }
+
+    private fun getCommentsOrder(): String {
+        return "story"
+    }
 
     /**
      * URL used to fetch an article
      * See Page/FTChinese/Main/APIs.swift
      * https://api003.ftmailbox.com/interactive/12339?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24
      */
-    val apiUrl: String
-        get() = when(type) {
-            TYPE_STORY, TYPE_PREMIUM -> "$URL_MAILBOX/index.php/jsapi/get_story_more_info/$id"
+    fun buildApiUrl(): String {
+        if (id.isBlank() || type.isBlank()) {
+            return ""
+        }
 
-            TYPE_COLUMN -> "$URL_MAILBOX/$type/$id?bodyonly=yes&webview=ftcapp&bodyonly=yes"
+        return when(type) {
+            TYPE_STORY, TYPE_PREMIUM -> "$MAILBOX_URL/index.php/jsapi/get_story_more_info/$id"
+
+            TYPE_COLUMN -> "$MAILBOX_URL/$type/$id?bodyonly=yes&webview=ftcapp&bodyonly=yes"
 
             TYPE_INTERACTIVE -> when (subType) {
                 //"https://api003.ftmailbox.com/$type/$id?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes"
-                SUB_TYPE_RADIO -> "$URL_MAILBOX/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
-                SUB_TYPE_SPEED_READING -> "$URL_FTC/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
+                SUB_TYPE_RADIO -> "$MAILBOX_URL/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
+                SUB_TYPE_SPEED_READING -> "$FTC_OFFICIAL_URL/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
 
-                SUB_TYPE_MBAGYM -> "$URL_FTC/$type/$id"
+                SUB_TYPE_MBAGYM -> "$FTC_OFFICIAL_URL/$type/$id"
 
-                else -> "$URL_MAILBOX/$type/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
+                else -> "$MAILBOX_URL/$type/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
             }
 
-            TYPE_VIDEO -> "$URL_FTC/$type/$id?bodyonly=yes&webview=ftcapp&004"
+            TYPE_VIDEO -> "$FTC_OFFICIAL_URL/$type/$id?bodyonly=yes&webview=ftcapp&004"
 
-            else -> "$URL_MAILBOX/$type/$id?webview=ftcapp"
+            else -> "$MAILBOX_URL/$type/$id?webview=ftcapp"
         }
+    }
 
-    private fun pickAdZone(homepageZone: String, fallbackZone: String): String {
-        if (!keywords.isNullOrBlank()) {
+    private fun pickAdZone(homepageZone: String, fallbackZone: String, keywords: String): String {
+        if (!keywords.isBlank()) {
             return fallbackZone
         }
 
         for (sponsor in SponsorManager.sponsors) {
-            if ((keywords?.contains(sponsor.tag) == true || keywords?.contains(sponsor.title) == true) && sponsor.zone.isNotEmpty() ) {
+            if ((keywords.contains(sponsor.tag) || keywords.contains(sponsor.title)) && sponsor.zone.isNotEmpty() ) {
                 return if (sponsor.zone.contains("/")) {
                     sponsor.zone
                 } else {
@@ -179,41 +217,41 @@ data class ChannelItem(
             return adZone
         }
 
-        if (keywords?.contains("lifestyle") == true) {
+        if (keywords.contains("lifestyle")) {
             return "lifestyle"
         }
 
-        if (keywords?.contains("management") == true) {
+        if (keywords.contains("management")) {
             return "management"
         }
 
-        if (keywords?.contains("opinion") == true) {
+        if (keywords.contains("opinion")) {
             return "opinion"
         }
 
-        if (keywords?.contains("创新经济") == true) {
+        if (keywords.contains("创新经济")) {
             return "创新经济"
         }
 
-        if (keywords?.contains("markets") == true) {
+        if (keywords.contains("markets")) {
             return "markets"
         }
 
-        if (keywords?.contains("economy") == true) {
+        if (keywords.contains("economy")) {
             return "economy"
         }
 
-        if (keywords?.contains("china") == true) {
+        if (keywords.contains("china")) {
             return "china"
         }
 
         return fallbackZone
     }
 
-    private fun pickAdchID(homepageId: String, fallbackId: String): String {
-        if (!keywords.isNullOrBlank()) {
+    private fun pickAdchID(homepageId: String, fallbackId: String, keywords: String): String {
+        if (!keywords.isBlank()) {
             for (sponsor in SponsorManager.sponsors) {
-                if ((keywords?.contains(sponsor.tag) == true || keywords?.contains(sponsor.title) == true) && sponsor.adid.isNotEmpty()) {
+                if ((keywords.contains(sponsor.tag) || keywords.contains(sponsor.title)) && sponsor.adid.isNotEmpty()) {
                     return sponsor.adid
                 }
             }
@@ -222,31 +260,31 @@ data class ChannelItem(
                 return adId
             }
 
-            if (keywords?.contains("lifestyle") == true) {
+            if (keywords.contains("lifestyle")) {
                 return "1800"
             }
 
-            if (keywords?.contains("management") == true) {
+            if (keywords.contains("management")) {
                 return "1700"
             }
 
-            if (keywords?.contains("opinion") == true) {
+            if (keywords.contains("opinion")) {
                 return "1600"
             }
 
-            if (keywords?.contains("创新经济") == true) {
+            if (keywords.contains("创新经济")) {
                 return "2100"
             }
 
-            if (keywords?.contains("markets") == true) {
+            if (keywords.contains("markets")) {
                 return "1400"
             }
 
-            if (keywords?.contains("economy") == true) {
+            if (keywords.contains("economy")) {
                 return "1300"
             }
 
-            if (keywords?.contains("china") == true) {
+            if (keywords.contains("china") == true) {
                 return "1100"
             }
 
@@ -259,26 +297,23 @@ data class ChannelItem(
         return fallbackId
     }
 
-    fun renderStory(template: String?, story: Story?, language: Int, follows: JSFollows): String? {
+    fun renderStory(template: String?, story: Story?, language: Language, follows: JSFollows): String? {
 
         if (template == null || story == null) {
 
             return null
         }
 
-        standfirst = story.clongleadbody
-        keywords = story.keywords
-
         var shouldHideAd = false
 
         if (hideAd) {
             shouldHideAd = true
-        } else if (!keywords.isNullOrBlank()) {
-            if (keywords?.contains(Keywords.removeAd) == true) {
+        } else if (story.keywords.isBlank()) {
+            if (story.keywords.contains(Keywords.removeAd)) {
                 shouldHideAd = true
             } else {
                 for (sponsor in SponsorManager.sponsors) {
-                    if (keywords?.contains(sponsor.tag) == true || keywords?.contains(sponsor.title) == true) {
+                    if (story.keywords.contains(sponsor.tag) || story.keywords.contains(sponsor.title)) {
                         shouldHideAd = sponsor.hideAd == "yes"
                         break
                     }
@@ -293,41 +328,41 @@ data class ChannelItem(
         var title = ""
 
         when (language) {
-            LANGUAGE_CN -> {
+            Language.CHINESE -> {
                 body = story.getCnBody(withAd = !shouldHideAd)
-                title = story.title.cn
+                title = story.titleCN
             }
-            LANGUAGE_EN -> {
+            Language.ENGLISH -> {
                 body = story.getEnBody(withAd = !shouldHideAd)
-                title = story.title.en ?: ""
+                title = story.titleEN
             }
-            LANGUAGE_BI -> {
-                body = story.bodyAlignedXML
-                title = "${story.title.cn}<br>${story.title.en}"
+            Language.BILINGUAL -> {
+                body = story.getBilingualBody()
+                title = "${story.titleCN}<br>${story.titleEN}"
             }
         }
 
         val storyHTMLOriginal = template
                 .replace("{story-tag}", story.tag)
-                .replace("{story-author}", story.cauthor)
+                .replace("{story-author}", story.authorCN)
                 .replace("{story-genre}", story.genre)
                 .replace("{story-area}", story.area)
                 .replace("{story-industry}", story.industry)
                 .replace("{story-main-topic}", "")
                 .replace("{story-sub-topic}", "")
-                .replace("{adchID}", pickAdchID(HOME_AD_CH_ID, DEFAULT_STORY_AD_CH_ID))
-                .replace("{comments-id}", commentsId)
+                .replace("{adchID}", pickAdchID(HOME_AD_CH_ID, DEFAULT_STORY_AD_CH_ID, story.keywords))
+                .replace("{comments-id}", getCommentsId())
                 .replace("{story-theme}", story.htmlForTheme())
                 .replace("{story-headline}", title)
-                .replace("{story-lead}", story.standfirst)
+                .replace("{story-lead}", story.standfirstCN)
                 .replace("{story-image}", story.htmlForCoverImage())
-                .replace("{story-time}", story.createdAt)
+                .replace("{story-time}", story.formatPublishTime())
                 .replace("{story-byline}", story.byline)
                 .replace("{story-body}", body)
                 .replace("{story-id}", story.id)
                 .replace("{related-stories}", story.htmlForRelatedStories())
                 .replace("{related-topics}", story.htmlForRelatedTopics())
-                .replace("{comments-order}", commentsOrder)
+                .replace("{comments-order}", getCommentsOrder())
                 .replace("{story-container-style}", "")
                 .replace("'{follow-tags}'", follows.tag)
                 .replace("'{follow-topic}'", follows.topic)
@@ -335,7 +370,7 @@ data class ChannelItem(
                 .replace("'{follow-area}'", follows.area)
                 .replace("'{follow-augthor}'", follows.author)
                 .replace("'{follow-column}'", follows.column)
-                .replace("{ad-zone}", pickAdZone(HOME_AD_ZONE, DEFAULT_STORY_AD_ZONE))
+                .replace("{ad-zone}", pickAdZone(HOME_AD_ZONE, DEFAULT_STORY_AD_ZONE, story.keywords))
                 .replace("{ad-mpu}", adMPU)
                 //                        .replace("{font-class}", "")
                 .replace("{{googletagservices-js}}", JSCodes.googletagservices)
@@ -364,7 +399,7 @@ data class ChannelItem(
         const val TYPE_TAG = "tag"
         const val TYPE_M = "m"
 
-        const val SUB_TYPE_RADIO = "radio"
+        const val SUB_TYPE_RADIO = "radioUrl"
         const val SUB_TYPE_USER_COMMENT = ""
         const val SUB_TYPE_MBAGYM = "mbagym"
         const val SUB_TYPE_SPEED_READING = "speedreading"
@@ -380,3 +415,8 @@ data class ChannelItem(
     }
 }
 
+enum class Language {
+    ENGLISH,
+    CHINESE,
+    BILINGUAL
+}
