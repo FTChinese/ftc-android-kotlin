@@ -34,7 +34,7 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
          * Get the metadata for this page of article list
          */
         val data = intent.getStringExtra(EXTRA_PAGE_META)
-        val pageMeta = json.parse<PagerTab>(data)
+        val pageMeta = json.parse<ChannelSource>(data)
 
         if (pageMeta == null) {
             toast(R.string.prompt_load_failure)
@@ -48,7 +48,7 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
         var fragment = supportFragmentManager.findFragmentById(R.id.channel_frag_holder)
 
         if (fragment == null) {
-            fragment = ViewPagerFragment.newInstance(pageMeta)
+            fragment = ChannelFragment.newInstance(pageMeta)
             supportFragmentManager.beginTransaction()
                     .replace(R.id.channel_frag_holder, fragment)
                     .commit()
@@ -65,7 +65,7 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
     companion object {
         private const val EXTRA_PAGE_META = "extra_list_page_metadata"
 
-        fun start(context: Context?, page: PagerTab) {
+        fun start(context: Context?, page: ChannelSource) {
             val intent = Intent(context, ChannelActivity::class.java).apply {
                 putExtra(EXTRA_PAGE_META, json.toJsonString(page))
             }
