@@ -120,7 +120,6 @@
     <string name="myft_starred_articles">收藏文章</string>
     <string name="myft_following">關注</string>
 
-    <!-- Strings related to login -->
     <string name="title_login">登入FT中文網</string>
     <string name="title_sign_up">建立FT中文網帳號</string>
     <string name="title_login_signup">登入/註冊</string>
@@ -151,7 +150,7 @@
     <string name="btn_bind_email">绑定信箱</string>
     <string name="btn_request_verify">重新寄送驗證郵件</string>
 
-    <string name="wx_session_expired">登入登录已过期，请重新登入</string>
+    <string name="wx_session_expired">微信登录已过期，請重新登入</string>
     <string name="action_wx_login">微信登入</string>
     <string name="action_cancel">取消</string>
     <string name="action_sign_in_short">Sign in</string>
@@ -184,12 +183,15 @@
     <string name="prompt_refreshing">更新頁面</string>
     <string name="prompt_no_network">網路無連結，請檢查網路設置</string>
     <string name="prompt_load_failure">無法下載頁面，請稍後再試</string>
-    <string name="prompt_restricted_paid_user">僅限會員閱讀</string>
+    <string name="prompt_login_to_read">訂閱會員登入後可以閱讀</string>
+    <string name="prompt_subscribe_to_read">僅限會員閱讀</string>
+    <string name="prompt_membership_expired">會員訂閱已过期，請續訂</string>
     <string name="prompt_restricted_login">會員登入后可以閱讀</string>
 
     <string name="prompt_logged_in">登入成功</string>
+    <string name="prompt_signed_up">註冊成功</string>
     <string name="prompt_login_failed">登入失敗，請重试</string>
-    <string name="prompt_sign_up">注冊失敗，請重试</string>
+    <string name="prompt_sign_up_failed">注冊失敗，請重试</string>
     <string name="prompt_not_logged_in">您尚未登入，登入後可以查看</string>
     <string name="prompt_not_set">未設置</string>
     <string name="prompt_no_email_app">您的設備上沒有安裝信件程式，無法發送反饋信件</string>
