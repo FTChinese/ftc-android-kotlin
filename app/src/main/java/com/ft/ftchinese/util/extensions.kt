@@ -6,6 +6,9 @@ import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
+import com.ft.ftchinese.user.CredentialsActivity
+import com.ft.ftchinese.user.MySubsActivity
+import com.ft.ftchinese.user.SubscriptionActivity
 import org.jetbrains.anko.toast
 import java.io.IOException
 
@@ -117,6 +120,32 @@ fun Activity.getPriceCycleText(tier: Tier, cycle: Cycle): String? {
         )
         else -> null
     }
+}
+
+fun Activity.shouldGrantAccess(account: Account?, paywallSource: PaywallSource?): Boolean {
+    if (account == null) {
+      toast(R.string.prompt_login_to_read)
+      CredentialsActivity.startForResult(this)
+      return false
+    }
+
+    if (account.isVip) {
+        return true
+    }
+
+    if (!account.isMember) {
+        toast(R.string.prompt_subsribe_to_read)
+        SubscriptionActivity.start(this, paywallSource)
+        return false
+    }
+
+    if (account.membership.isExpired) {
+        toast(R.string.prompt_membership_expired)
+        MySubsActivity.start(this)
+        return false
+    }
+
+    return true
 }
 
 // Using API 28. Unfortunately it also requires that you must increase min supported api.
