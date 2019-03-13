@@ -42,7 +42,7 @@ data class Following(
  * Storage mechanism: use Following#type as preference's key. It value is a HashSet.
  * The HashSet saves the value of Following#tag under the save Following#type.
  */
-class FollowingManager(context: Context) {
+class FollowingManager private constructor(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(PREF_FILE_FOLLOWING, Context.MODE_PRIVATE)
     private val editor = sharedPreferences.edit()
 
