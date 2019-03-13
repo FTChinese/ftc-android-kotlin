@@ -2,6 +2,7 @@ package com.ft.ftchinese
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import androidx.browser.customtabs.CustomTabsIntent
@@ -12,9 +13,14 @@ import android.webkit.WebViewClient
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.CredentialsActivity
 import com.ft.ftchinese.user.SubscriptionActivity
+import com.ft.ftchinese.util.HOST_FTA
+import com.ft.ftchinese.util.HOST_FTC
+import com.ft.ftchinese.util.HOST_MAILBOX
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
+
+val hostNames = arrayOf(HOST_FTC, HOST_MAILBOX)
 
 /**
  * Those links need to start a ChannelActivity.
@@ -54,26 +60,86 @@ val noAccess = mapOf(
 )
 
 /**
- * WVClient is use mostly to handle url clicks loaded into
+ * WVClient is use mostly to handle webUrl clicks loaded into
  * ViewPagerFragment.
  */
 class WVClient(
         private val activity: Activity?
 ) : WebViewClient(), AnkoLogger {
 
-    var mSession: SessionManager? = null
-
     // Pass click events to host.
-    private var mListener: OnClickListener? = null
+    private var mListener: OnWebViewInteractionListener? = null
 
-    interface OnClickListener {
+    interface OnWebViewInteractionListener {
 
         // Let host to handle clicks on pagination links.
-        fun onPagination(pageKey: String, pageNumber: String)
+        fun onPagination(pageKey: String, pageNumber: String) {}
+
+        fun onOpenGraphEvaluated(result: String) {}
     }
 
-    fun setOnClickListener(listener: OnClickListener?) {
+    fun setOnClickListener(listener: OnWebViewInteractionListener?) {
         mListener = listener
+    }
+
+    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+        super.onPageStarted(view, url, favicon)
+
+        info("Start loading $url")
+
+
+    }
+
+    override fun onPageFinished(view: WebView?, url: String?) {
+        super.onPageFinished(view, url)
+
+        info("Finished loading $url")
+
+        view?.evaluateJavascript("""
+        (function getOpenGraph() {
+            var metaElms = document.getElementsByTagName('meta');
+            var graph = {};
+            var standfirst = "";
+            for (var index = 0; index < metaElms.length; index++) {
+                var elm = metaElms[index];
+                if (elm.hasAttribute("name")) {
+                    var nameVal = elm.getAttribute("name")
+                    switch (nameVal) {
+                        case "keywords":
+                            graph.keywords = elm.getAttribute("content");
+                            break;
+                        case "description":
+                            standfirst = elm.getAttribute("content");
+                            break;
+                    }
+                    continue;
+                }
+                if (!elm.hasAttribute('property')) {
+                    continue;
+                }
+                var prop = elm.getAttribute('property');
+                if (!prop.startsWith('og:')) {
+                    continue;
+                }
+                var key = prop.split(":")[1];
+                var value = elm.getAttribute('content');
+                graph[key] = value;
+            }
+
+            if (!graph["title"]) {
+                graph["title"] = document.title;
+            }
+
+            if (!graph["description"]) {
+                graph["description"] = standfirst;
+            }
+
+            return graph;
+        })();
+        """.trimIndent()) {
+            info("JS evaluatation result: $it")
+            mListener?.onOpenGraphEvaluated(it)
+        }
     }
 
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
@@ -104,25 +170,22 @@ class WVClient(
             // 通过邮件反馈 link: mailto:ftchinese.feedback@gmail.com?subject=Feedback
             "mailto" -> feedbackEmail()
 
-            // The `免费注册` button is wrapped in a link with url set to `ftcregister://www.ftchinese.com/`
-            "ftcregister" -> {
+            // The `免费注册` button is wrapped in a link with webUrl set to `ftcregister://www.ftchinese.com/`
+            // The `微信登录` button is wrapped in a link with webUrl set to `weixinlogin://www.ftchinese.com/`
+            "ftcregister",
+            "weixinlogin" -> {
 //                SignUpActivity.start(activity)
                 CredentialsActivity.startForResult(activity)
                 return true
             }
-            // The `微信登录` button is wrapped in a link with url set to `weixinlogin://www.ftchinese.com/`
-            "weixinlogin" -> {
-                info("Request wechat login")
-                return true
-            }
 
             /**
-             * If the clicked url is of the pattern `.../story/xxxxxx`, you should use `StoryActivity`
+             * If the clicked webUrl is of the pattern `.../story/xxxxxx`, you should use `StoryActivity`
              * and fetch JSON from server and concatenate it with a html bundle into the package `raw/story.html`,
              * then call `WebView.loadDataWithBaseUrl()` to load the string into WebView.
-             * In such a case, you need to provide a base url so that contents in the WebView know where to fetch resources (like advertisement).
-             * The base url for such contents should be `www.ftchinese.com`.
-             * If you load a url directly into, the host might be something else, like `api003.ftmailbox.com`, depending your url you use.
+             * In such a case, you need to provide a base webUrl so that contents in the WebView know where to fetch resources (like advertisement).
+             * The base webUrl for such contents should be `www.ftchinese.com`.
+             * If you load a webUrl directly into, the host might be something else, like `api003.ftmailbox.com`, depending your webUrl you use.
              * Here we check origin or the clicked URL: for "www.ftchinese.com" or "api003.ftmailbox.com", we load them directly into the app.
              * For external links (mostly ads), open in external browser.
              */
@@ -161,7 +224,12 @@ class WVClient(
     }
 
     private fun handleInSiteLink(uri: Uri): Boolean {
+
+        info("Handle in-site link")
+
         val pathSegments = uri.pathSegments
+
+        info("Path segments: $pathSegments")
 
         /**
          * Handle pagination links.
@@ -171,8 +239,8 @@ class WVClient(
          *
          * Handle the pagination link of each channel
          * There's a problem with each channel's pagination: they used relative urls.
-         * When loaded in WebView with base url `http://www.ftchinese.com`,
-         * the url will become something `http://www.ftchinese.com/china.html?page=2`,
+         * When loaded in WebView with base webUrl `http://www.ftchinese.com`,
+         * the webUrl will become something `http://www.ftchinese.com/china.html?page=2`,
          * which should actually be `http://www.ftchiese.com/channel/china.html?page=2`
          *
          * However,
@@ -222,7 +290,7 @@ class WVClient(
              * Handle various article-like urls first.
              * If the path looks like `/story/001078593`
              * We could only get an article's type and id from
-             * url. No more information could be acquired.
+             * webUrl. No more information could be acquired.
              */
             ChannelItem.TYPE_STORY,
             ChannelItem.TYPE_PREMIUM -> {
@@ -230,9 +298,13 @@ class WVClient(
                 val channelItem = ChannelItem(
                         id = lastPathSegment,
                         type = pathSegments[0],
-                        headline = ""
+                        title = "",
+                        webUrl = uri.toString()
                 )
-                StoryActivity.start(activity, channelItem)
+//                StoryActivity.start(activity, channelItem)
+
+                ArticleActivity.start(activity, channelItem)
+
                 true
             }
             ChannelItem.TYPE_VIDEO,
@@ -241,7 +313,16 @@ class WVClient(
             // Links on home page under FT研究院
             ChannelItem.TYPE_INTERACTIVE-> {
 
-                WebContentActivity.start(activity, uri)
+//                WebContentActivity.start(activity, uri)
+                val lastPathSegment = uri.lastPathSegment ?: return true
+                val channelItem = ChannelItem(
+                        id = lastPathSegment,
+                        type = pathSegments[0],
+                        title = "",
+                        webUrl = uri.toString()
+                )
+
+                ArticleActivity.startWeb(activity, channelItem)
 
                 true
             }
@@ -262,7 +343,7 @@ class WVClient(
              * start a new page listing articles
              */
             ChannelItem.TYPE_TAG -> {
-                val page = PagerTab(
+                val page = ChannelSource(
                         title = uri.lastPathSegment ?: "",
                         name = uri.pathSegments.joinToString("_"),
                         contentUrl = buildUrlForFragment(uri),
@@ -281,8 +362,14 @@ class WVClient(
             ChannelItem.TYPE_M -> openMLink(uri)
 
             else -> {
-                info("Open a web page directly. Original url is: $uri")
-                WebContentActivity.start(activity, uri)
+                info("Open a web page directly. Original webUrl is: $uri")
+//                WebContentActivity.start(activity, uri)
+                ArticleActivity.startWeb(activity, ChannelItem(
+                        id = "",
+                        type = "",
+                        title = "",
+                        webUrl = uri.toString()
+                ))
 
                 true
             }
@@ -297,7 +384,9 @@ class WVClient(
 
         when (channelItem.type) {
             ChannelItem.TYPE_STORY, ChannelItem.TYPE_PREMIUM -> {
-                StoryActivity.start(activity, channelItem)
+//                StoryActivity.start(activity, channelItem)
+
+                ArticleActivity.start(activity, channelItem)
             }
         }
         return true
@@ -330,7 +419,7 @@ class WVClient(
                 val issue = uri.getQueryParameter("issue")
                         ?: uri.pathSegments.joinToString("_").removeSuffix(".html")
 
-                val listPage = PagerTab(
+                val listPage = ChannelSource(
                         title = pathToTitle[lastPathSegment] ?: "",
                         name = issue,
                         contentUrl = buildUrlForFragment(uri),
@@ -342,7 +431,7 @@ class WVClient(
             }
             else -> {
 
-                val listPage = PagerTab(
+                val listPage = ChannelSource(
                         title = pathToTitle[lastPathSegment] ?: "",
                         name = uri.pathSegments.joinToString("_").removeSuffix(".html"),
                         contentUrl = buildUrlForFragment(uri),
@@ -375,7 +464,7 @@ class WVClient(
                     uri.pathSegments.joinToString("_").removeSuffix(".html")
                 }
 
-                val listPage = PagerTab(
+                val listPage = ChannelSource(
                         title = pathToTitle[pageName] ?: "",
                         name = name,
                         contentUrl = buildUrlForFullPage(uri),
@@ -389,7 +478,7 @@ class WVClient(
             // Links like /m/marketing/intelligence.html?webview=ftcapp
             ChannelItem.SUB_TYPE_MARKETING -> {
                 val key = uri.lastPathSegment ?: ""
-                val listPage = PagerTab(
+                val listPage = ChannelSource(
                         title = pathToTitle[key] ?: "",
                         name = uri.pathSegments.joinToString("_").removeSuffix(".html"),
                         contentUrl = buildUrlForFullPage(uri),
@@ -404,7 +493,7 @@ class WVClient(
             else -> {
                 val key = uri.lastPathSegment
 
-                val listPage = PagerTab(
+                val listPage = ChannelSource(
                         title = pathToTitle[key] ?: "",
                         name = "",
                         contentUrl = buildUrlForFullPage(uri),
