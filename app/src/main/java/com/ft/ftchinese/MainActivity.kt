@@ -14,8 +14,6 @@ import android.view.*
 import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentStatePagerAdapter
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.splash.Schedule
@@ -61,7 +59,7 @@ class MainActivity : AppCompatActivity(),
     private var mVideoAdapter: TabPagerAdapter? = null
     private var mMyftPagerAdapter: MyftPagerAdapter? = null
 
-    private var mChannelPages: Array<PagerTab>? = null
+    private var mChannelPages: Array<ChannelSource>? = null
 
     private lateinit var cache: FileCache
 
@@ -247,7 +245,7 @@ class MainActivity : AppCompatActivity(),
 
                 R.id.nav_myft -> {
                     if (mMyftPagerAdapter == null) {
-                        mMyftPagerAdapter = MyftPagerAdapter(MyftTab.pages, supportFragmentManager)
+                        mMyftPagerAdapter = MyftPagerAdapter(supportFragmentManager)
                     }
                     view_pager.adapter = mMyftPagerAdapter
                     mChannelPages = null
@@ -422,7 +420,7 @@ class MainActivity : AppCompatActivity(),
 
         return try {
             val body = Fetch()
-                    .get(launchScheduleUrl)
+                    .get(LAUNCH_SCHEDULE_URL)
                     .responseString()
                     ?: return null
 
@@ -439,7 +437,7 @@ class MainActivity : AppCompatActivity(),
         // Pick an ad based on its probability distribution factor.
         val screenAd = splashManager.load()
 
-        if (screenAd == null) {
+        if (screenAd == null || !screenAd.isToday()) {
             showSystemUI()
             return
         }
@@ -692,27 +690,6 @@ class MainActivity : AppCompatActivity(),
         }
 
     /**
-     * Listener for drawer menu selection
-     * Implements NavigationView.OnNavigationItemSelectedListener
-     */
-//    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-//
-//        // Handle navigation view item clicks here.
-//        when (item.itemId) {
-//            R.id.action_login ->  CredentialsActivity.startForResult(this)
-//            R.id.action_account -> AccountActivity.start(this)
-//            R.id.action_subscription -> SubscriptionActivity.start(this)
-//            R.id.action_my_subs -> MySubsActivity.start(this)
-//            R.id.action_about -> AboutUsActivity.start(this)
-//            R.id.action_feedback -> feedbackEmail()
-//            R.id.action_settings -> SettingsActivity.start(this)
-//        }
-//
-//        drawer_layout.closeDrawer(GravityCompat.START)
-//        return true
-//    }
-
-    /**
      * Implementation of TabLayout.OnTabSelectedListener
      * Tab index starts from 0
      */
@@ -754,11 +731,11 @@ class MainActivity : AppCompatActivity(),
      * A [FragmentPagerAdapter] that returns a fragment corresponding to
      * one of the sections/tabs/mPages.
      */
-    inner class TabPagerAdapter(private var mPages: Array<PagerTab>, fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
+    inner class TabPagerAdapter(private var mPages: Array<ChannelSource>, fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
 
         override fun getItem(position: Int): androidx.fragment.app.Fragment {
             info("TabPagerAdapter getItem $position. Data passed to ChannelFragment: ${mPages[position]}")
-            return ViewPagerFragment.newInstance(mPages[position])
+            return ChannelFragment.newInstance(mPages[position])
         }
 
         override fun getCount(): Int {
@@ -770,25 +747,25 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-    inner class MyftPagerAdapter(private val pages: Array<MyftTab>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
-
-        override fun getItem(position: Int): androidx.fragment.app.Fragment {
-            val page = pages[position]
-            return if (page.id == MyftTab.FOLLOWING) {
-                FollowingFragment.newInstance()
-            } else {
-                MyftFragment.newInstance(page.id)
-            }
-        }
-
-        override fun getCount(): Int {
-            return pages.size
-        }
-
-        override fun getPageTitle(position: Int): CharSequence? {
-            return pages[position].title
-        }
-    }
+//    inner class MyftPagerAdapter(private val pages: Array<MyftTab>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
+//
+//        override fun getItem(position: Int): androidx.fragment.app.Fragment {
+//            val page = pages[position]
+//            return if (page.id == MyftTab.FOLLOWING) {
+//                FollowingFragment.newInstance()
+//            } else {
+//                MyftFragment.newInstance(page.id)
+//            }
+//        }
+//
+//        override fun getCount(): Int {
+//            return pages.size
+//        }
+//
+//        override fun getPageTitle(position: Int): CharSequence? {
+//            return pages[position].title
+//        }
+//    }
 }
 
 
