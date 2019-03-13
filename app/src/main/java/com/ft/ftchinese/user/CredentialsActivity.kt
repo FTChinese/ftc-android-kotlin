@@ -13,6 +13,7 @@ import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 class CredentialsActivity : AppCompatActivity(),
@@ -50,7 +51,7 @@ class CredentialsActivity : AppCompatActivity(),
     }
 
     override fun onEmailFound(email: String) {
-        toast("Login for email $email")
+        info("Login for email $email")
         supportActionBar?.setTitle(R.string.title_login)
 
         val transaction = supportFragmentManager
@@ -75,6 +76,7 @@ class CredentialsActivity : AppCompatActivity(),
     }
 
     override fun onLoggedIn(userId: String) {
+
         loadAccount(userId)
     }
 
@@ -85,10 +87,15 @@ class CredentialsActivity : AppCompatActivity(),
     private fun loadAccount(userId: String) {
         val user = FtcUser(id = userId)
 
+        toast(R.string.progress_fetching)
+        onProgress(true)
+
         job = GlobalScope.launch(Dispatchers.Main) {
             val account = withContext(Dispatchers.IO) {
                 user.fetchAccount()
             }
+
+            onProgress(false)
 
             if (account == null) {
                 toast(R.string.error_not_loaded)
