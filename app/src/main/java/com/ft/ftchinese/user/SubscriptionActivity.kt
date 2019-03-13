@@ -80,12 +80,7 @@ class SubscriptionActivity : AppCompatActivity(), AnkoLogger {
             putString(FirebaseAnalytics.Param.ITEM_CATEGORY, source.category)
             putString(FirebaseAnalytics.Param.ITEM_NAME, source.name)
             if (source.variant != null) {
-                val lang = when (source.variant) {
-                    ChannelItem.LANGUAGE_EN -> "english"
-                    ChannelItem.LANGUAGE_BI -> "bilingual"
-                    else -> "chinese"
-                }
-                putString(FirebaseAnalytics.Param.ITEM_VARIANT, lang)
+                putString(FirebaseAnalytics.Param.ITEM_VARIANT, source.variant.name)
             }
         })
     }
