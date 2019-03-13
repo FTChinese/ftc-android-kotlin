@@ -46,6 +46,9 @@ android {
             }
         }
     }
+    dataBinding {
+        enabled true
+    }
     signingConfigs {
         release {
             keyAlias keystoreProperties['keyAlias']
@@ -90,11 +93,17 @@ android {
 
 dependencies {
     def room_version = "2.1.0-alpha04"
+    def lifecycle_version = "2.0.0"
 
     implementation(name: 'alipaySdk-15.5.7-20181023110917', ext: 'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.anko:anko:$anko_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+
+    // ViewModel and LiveData
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+    kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
+
     //  UI
     implementation "androidx.appcompat:appcompat:1.0.2"
     implementation "com.google.android.material:material:1.1.0-alpha04"
@@ -105,6 +114,8 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.1.0-alpha02"
     implementation "androidx.cardview:cardview:$support_version"
     implementation "com.makeramen:roundedimageview:2.3.0"
+
+    implementation 'androidx.core:core-ktx:1.0.1'
 
     //  Network
     implementation 'com.squareup.okhttp3:okhttp:3.12.0'
@@ -137,4 +148,6 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:2.23.0'
     testImplementation 'org.robolectric:robolectric:4.0.2'
     testImplementation "androidx.room:room-testing:$room_version"
+    // optional - Test helpers for LiveData
+    testImplementation "androidx.arch.core:core-testing:$lifecycle_version"
 }
