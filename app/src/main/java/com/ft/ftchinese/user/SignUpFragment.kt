@@ -120,12 +120,12 @@ class SignUpFragment : Fragment(), AnkoLogger {
                 showProgress(false)
 
                 if (userId == null) {
-                    toast(R.string.error_not_loaded)
+                    toast(R.string.prompt_sign_up_failed)
                     enableInput(true)
                     return@launch
                 }
 
-                info("Wechat user signed up successfully")
+                toast(R.string.prompt_signed_up)
 
                 /**
                  * Tell hosting activity to fetch account.

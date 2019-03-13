@@ -112,7 +112,7 @@ class SignInFragment : Fragment(), AnkoLogger {
                 showProgress(false)
 
                 if (userId == null) {
-                    toast(R.string.error_not_loaded)
+                    toast(R.string.prompt_login_failed)
                     enableInput(true)
                     return@launch
                 }
