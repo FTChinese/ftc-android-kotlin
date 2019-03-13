@@ -9,16 +9,16 @@ const val HTML_TYPE_FRAGMENT = 1
 const val HTML_TYPE_COMPLETE = 2
 
 /**
- * PagerTab contains the data used by a page in ViewPager
+ * ChannelSource specifies how to display a channel page and where to fetch its data.
  */
-data class PagerTab (
+data class ChannelSource (
         val title: String, // A Tab's title
         // name is used to cache files.
         // If empty, do not cache it, nor should you try to
         // find cache.
         val name: String,  // Cache filename used by this tab
         val contentUrl: String, // This is used to fetch html fragment containing a list of articles.
-        val htmlType: Int // Flag used to tell whether the url should be loaded directly
+        val htmlType: Int // Flag used to tell whether the webUrl should be loaded directly
 
 ) : AnkoLogger {
 
@@ -43,7 +43,7 @@ data class PagerTab (
      * For `news_china`, the second page should be `new_china_2`.
      * For `news_china_3`, the next page should be `new_china_4`.
      */
-    fun withPagination(pageKey: String, pageNumber: String): PagerTab {
+    fun withPagination(pageKey: String, pageNumber: String): ChannelSource {
         val currentUri = Uri.parse(contentUrl)
 
         info("Current URI: $currentUri")
@@ -64,7 +64,7 @@ data class PagerTab (
                 newUri.appendQueryParameter(key, value)
             }
 
-            return PagerTab(
+            return ChannelSource(
                     title = title,
                     name = generatePagedName(pageNumber),
                     contentUrl = newUri.build().toString(),
@@ -73,13 +73,13 @@ data class PagerTab (
                 shouldReload = true
             }
         } else {
-            // Current page is not started from a pagination link, url does not contain `page=xxx`.
+            // Current page is not started from a pagination link, webUrl does not contain `page=xxx`.
             val newUrl = currentUri.buildUpon()
                     .appendQueryParameter(pageKey, pageNumber)
                     .build()
                     .toString()
 
-            return PagerTab(
+            return ChannelSource(
                     title = title,
                     name = "${name}_$pageNumber",
                     contentUrl = newUrl,
