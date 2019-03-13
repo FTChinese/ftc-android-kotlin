@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/article_toolbar"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" >
+
+        <RadioGroup
+            android:id="@+id/language_radio_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:divider="@drawable/divider"
+            android:showDividers="middle"
+            android:background="@drawable/button_secondary"
+            android:checkedButton="@id/lang_cn_btn">
+
+            <RadioButton
+                android:id="@+id/lang_cn_btn"
+                style="@style/TitleBarButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@null"
+                android:text="@string/titlebar_cn" />
+
+            <RadioButton
+                android:id="@+id/lang_en_btn"
+                style="@style/TitleBarButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@null"
+                android:text="@string/titlebar_en"/>
+
+            <RadioButton
+                android:id="@+id/lang_bi_btn"
+                style="@style/TitleBarButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@null"
+                android:text="@string/titlebar_bilingual"/>
+        </RadioGroup>
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <FrameLayout
+        android:id="@+id/fragment_article"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/article_toolbar"
+        app:layout_constraintBottom_toTopOf="@id/fragment_bottom_toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <FrameLayout
+        android:id="@+id/fragment_bottom_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <include layout="@layout/progress_bar"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
