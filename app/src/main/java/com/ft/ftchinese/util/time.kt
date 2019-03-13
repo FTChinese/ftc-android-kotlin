@@ -2,6 +2,7 @@ package com.ft.ftchinese.util
 
 import org.threeten.bp.DateTimeException
 import org.threeten.bp.LocalDate
+import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.format.DateTimeParseException
@@ -50,5 +51,13 @@ fun formatISODateTime(dt: ZonedDateTime?): String? {
         dt?.format(DateTimeFormatter.ISO_DATE_TIME)
     } catch (e: DateTimeException) {
         null
+    }
+}
+
+fun formatSQLDateTime(dt: LocalDateTime): String {
+    return try {
+        dt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+    } catch (e: Exception) {
+        ""
     }
 }
