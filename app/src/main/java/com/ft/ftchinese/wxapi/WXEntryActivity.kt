@@ -195,7 +195,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
                 }
 
                 // Save session data.
-                sessionManager?.saveWxSession(sess)
+                sessionManager.saveWxSession(sess)
 
                 loadAccount(sess)
 
@@ -236,7 +236,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
         info("Wx login account: $account")
 
-        val wxIntent = sessionManager?.loadWxIntent() ?: WxOAuthIntent.LOGIN
+        val wxIntent = sessionManager.loadWxIntent() ?: WxOAuthIntent.LOGIN
 
         info("Wechat OAuth intent: $wxIntent")
 
@@ -252,7 +252,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
             return
         }
 
-        sessionManager?.saveAccount(account)
+        sessionManager.saveAccount(account)
 
         showLoginSuccess(getString(R.string.greeting_wx_login, account.wechat.nickname))
     }
