@@ -228,7 +228,7 @@ data class Sponsor(
 )
 
 object SponsorManager {
-    var sponsors: Array<Sponsor> = arrayOf()
+    var sponsors: List<Sponsor> = listOf()
 }
 
 object Keywords {
@@ -254,7 +254,7 @@ object JSCodes {
     fun getCleanHTML(storyHTML: String): String {
         return if (storyHTML.contains("<div class=\"story-theme\"><a target=\"_blank\" href=\"/tag/\"></a><button class=\"myft-follow plus\" data-tag=\"\" data-type=\"tag\">关注</button></div>")) {
             storyHTML.replace("\"<div class=\"story-theme\"><a target=\"_blank\" href=\"/tag/\"></a><button class=\"myft-follow plus\" data-tag=\"\" data-type=\"tag\">关注</button></div>\"", "")
-                    .replace("<div class=\"story-image image\" style=\"margin-bottom:0;\"><figure data-url=\"\" class=\"loading\"></figure></div>", "")
+                    .replace("<div class=\"story-image image\" style=\"margin-bottom:0;\"><figure data-webUrl=\"\" class=\"loading\"></figure></div>", "")
                     .replace("<div class=\"story-box last-child\" ><h2 class=\"box-title\"><a>相关话题</a></h2><ul class=\"top10\"><li class=\"story-theme mp1\"><a target=\"_blank\" href=\"/tag/\"></a><div class=\"icon-right\"><button class=\"myft-follow plus\" data-tag=\"\" data-type=\"tag\">关注</button></div></li></ul></div>", "")
         } else {
             storyHTML
