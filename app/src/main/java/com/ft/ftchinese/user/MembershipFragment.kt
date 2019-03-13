@@ -32,7 +32,11 @@ class MembershipFragment : Fragment(), AnkoLogger {
         heading = arguments?.getString(ARG_HEADING)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
 
         return inflater.inflate(R.layout.fragment_membership, container, false)
