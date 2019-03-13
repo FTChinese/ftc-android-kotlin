@@ -134,7 +134,7 @@ fun Activity.shouldGrantAccess(account: Account?, paywallSource: PaywallSource?)
     }
 
     if (!account.isMember) {
-        toast(R.string.prompt_subsribe_to_read)
+        toast(R.string.prompt_subscribe_to_read)
         SubscriptionActivity.start(this, paywallSource)
         return false
     }
