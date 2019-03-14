@@ -224,7 +224,7 @@ data class Sponsor(
         val adid: String,
         val zone: String,
         val channel: String,
-        val hideAd: String
+        val hideAd: String = "yes"
 )
 
 object SponsorManager {
