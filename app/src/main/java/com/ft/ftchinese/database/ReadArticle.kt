@@ -48,6 +48,9 @@ data class ReadArticle(
         @ColumnInfo(name = "read_at")
         val readAt: String = "",
 
+        @ColumnInfo(name = "tier")
+        var tier: String = "", // "", standard, premium
+
         @ColumnInfo(name = "canonical_url")
         var webUrl: String = "",
 
