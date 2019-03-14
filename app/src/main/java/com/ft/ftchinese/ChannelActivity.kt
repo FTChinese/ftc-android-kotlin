@@ -17,8 +17,6 @@ import org.jetbrains.anko.toast
  */
 class ChannelActivity : AppCompatActivity(), AnkoLogger {
 
-    private var mFirebaseAnalytics: FirebaseAnalytics? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_channel)
@@ -34,28 +32,26 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
          * Get the metadata for this page of article list
          */
         val data = intent.getStringExtra(EXTRA_PAGE_META)
-        val pageMeta = json.parse<ChannelSource>(data)
+        val channelSource = json.parse<ChannelSource>(data)
 
-        if (pageMeta == null) {
+        if (channelSource == null) {
             toast(R.string.prompt_load_failure)
             return
         }
         /**
          * Set toolbar's title so that user knows where he is now.
          */
-        toolbar.title = pageMeta.title
+        toolbar.title = channelSource.title
 
-        var fragment = supportFragmentManager.findFragmentById(R.id.channel_frag_holder)
+        supportFragmentManager.beginTransaction()
+                .replace(R.id.channel_frag_holder, ChannelFragment.newInstance(channelSource))
+                .commit()
 
-        if (fragment == null) {
-            fragment = ChannelFragment.newInstance(pageMeta)
-            supportFragmentManager.beginTransaction()
-                    .replace(R.id.channel_frag_holder, fragment)
-                    .commit()
-        }
-
-        mFirebaseAnalytics?.logEvent(FirebaseAnalytics.Event.VIEW_ITEM_LIST, Bundle().apply {
-            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, pageMeta.title)
+        FirebaseAnalytics.getInstance(this)
+            .logEvent(
+                    FirebaseAnalytics.Event.VIEW_ITEM_LIST, Bundle().apply {
+            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, channelSource.title
+            )
         })
     }
 
