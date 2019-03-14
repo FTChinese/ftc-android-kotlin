@@ -1,6 +1,7 @@
 package com.ft.ftchinese.models
 
 import android.net.Uri
+import com.ft.ftchinese.util.KTier
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.lang.NumberFormatException
@@ -18,7 +19,9 @@ data class ChannelSource (
         // find cache.
         val name: String,  // Cache filename used by this tab
         val contentUrl: String, // This is used to fetch html fragment containing a list of articles.
-        val htmlType: Int // Flag used to tell whether the webUrl should be loaded directly
+        val htmlType: Int, // Flag used to tell whether the webUrl should be loaded directly
+        @KTier
+        val requiredTier: Tier? = null
 
 ) : AnkoLogger {
 
