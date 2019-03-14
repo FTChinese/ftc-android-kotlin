@@ -81,26 +81,16 @@ object Navigation {
                     name = "news_china",
                     contentUrl = "$MAILBOX_URL/channel/china.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
-            /**
-             * "meta": {
-                "title": "独家",
-                "description": "",
-                "theme": "default",
-                "adid": "1100",
-                "adZone": "home/exclusive"
-                }
-                [
-                    {
-                    "id": "001080064",
-                    "type": "premium",
-                    "headline": "投资者将追问软银与沙特关系"
-                    }
-                ]
-             */
             ChannelSource(
-                    title = "独家",
-                    name = "news_scoop",
-                    contentUrl = "$MAILBOX_URL/channel/exclusive.html?webview=ftcapp&bodyonly=yes&ad=no&001",
+                    title = "标准订阅",
+                    name = "news_standard_only",
+                    contentUrl = "$MAILBOX_URL/channel/standardsubscription.html?webview=ftcapp&bodyonly=yes&ad=no&001",
+                    htmlType = HTML_TYPE_FRAGMENT,
+                    requiredTier = Tier.STANDARD),
+            ChannelSource(
+                    title = "高端订阅",
+                    name = "news_premium_only",
+                    contentUrl = "$MAILBOX_URL/channel/premiumsubscription.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
