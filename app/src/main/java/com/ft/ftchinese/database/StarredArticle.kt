@@ -3,6 +3,7 @@ package com.ft.ftchinese.database
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.ft.ftchinese.models.ChannelItem
+import com.ft.ftchinese.models.Tier
 
 
 @Entity(
@@ -48,7 +49,13 @@ data class StarredArticle(
         @ColumnInfo(name = "starred_at")
         var starredAt: String = "",
 
-        @ColumnInfo(name = "canonical_url")
+        // Indicates which tier of membership could
+        // access this article.
+        // Empty means free user.
+        @ColumnInfo(name = "tier")
+        var tier: String = "", // "", standard, premium
+
+        @ColumnInfo(name = "web_url")
         var webUrl: String = "",
 
         @ColumnInfo(name = "is_webpage")
@@ -66,6 +73,14 @@ data class StarredArticle(
                 webUrl = webUrl,
                 isWebpage = isWebpage
         )
+    }
+
+    fun requireStandard(): Boolean {
+        return tier == Tier.STANDARD.string()
+    }
+
+    fun requiePremium(): Boolean {
+        return tier == Tier.PREMIUM.string()
     }
 }
 
