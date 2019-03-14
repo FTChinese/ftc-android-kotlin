@@ -443,7 +443,8 @@ class ChannelFragment : Fragment(),
                 ?: return
 
         info("Selected item: $channelItem")
-
+        
+        channelItem.withMeta(channelMeta)
         /**
          * {
          * "id": "007000049",

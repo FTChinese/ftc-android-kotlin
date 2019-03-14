@@ -101,6 +101,18 @@ data class ChannelItem(
     var adZone: String = ""
     var hideAd: Boolean = false
 
+    fun withMeta(meta: ChannelMeta?): ChannelItem {
+        if (meta == null) {
+            return this;
+        }
+        channelTitle = meta.title
+        theme = meta.theme
+        adId = meta.adid
+        adZone = meta.adZone
+        
+        return this
+    }
+    
     fun toStarredArticle(): StarredArticle {
         return StarredArticle(
                 id = id,
