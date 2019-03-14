@@ -25,7 +25,8 @@ private val MIGRATION_7_8 = object : Migration(7, 8) {
                 `radio_url`     TEXT NOT NULL,
                 `published_at`  TEXT NOT NULL,
                 `starred_at`    TEXT NOT NULL,
-                `canonical_url` TEXT NOT NULL,
+                `tier`          TEXT NOT NULL,
+                `web_url`       TEXT NOT NULL,
                 `is_webpage`    INTEGER NOT NULL
             )
         """.trimIndent())
@@ -43,7 +44,8 @@ private val MIGRATION_7_8 = object : Migration(7, 8) {
                 radio_url,
                 published_at,
                 starred_at,
-                canonical_url,
+                tier,
+                web_url,
                 is_webpage
             )
             SELECT id,
@@ -57,6 +59,7 @@ private val MIGRATION_7_8 = object : Migration(7, 8) {
                 IFNULL(radio_url, ''),
                 IFNULL(published_at, ''),
                 IFNULL(read_at, ''),
+                '',
                 '',
                 0
             FROM starred_article
