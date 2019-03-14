@@ -305,6 +305,8 @@ class StoryFragment : Fragment(),
 
     @JavascriptInterface
     fun follow(message: String) {
+        info("Clicked follow: $message")
+
         try {
             val following = json.parse<Following>(message) ?: return
 
