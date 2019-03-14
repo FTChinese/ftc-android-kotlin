@@ -70,6 +70,31 @@ class WVClient(
     // Pass click events to host.
     private var mListener: OnWebViewInteractionListener? = null
 
+    private val sessionManager = if (activity != null) {
+        SessionManager.getInstance(activity)
+    } else {
+        null
+    }
+
+    private fun getPrivilegeCode(): String {
+        val prvl = if (activity != null) {
+            val account = sessionManager?.loadAccount()
+
+            when (account?.membership?.tier) {
+                Tier.STANDARD -> """['premium']"""
+                Tier.PREMIUM -> """['premium', 'EditorChoice']"""
+                else -> "[]"
+            }
+        } else {
+            "[]"
+        }
+
+        return """
+        window.gPrivileges=$prvl;
+        updateHeadlineLocks();
+        """.trimIndent()
+    }
+
     interface OnWebViewInteractionListener {
 
         // Let host to handle clicks on pagination links.
@@ -86,14 +111,21 @@ class WVClient(
         super.onPageStarted(view, url, favicon)
 
         info("Start loading $url")
-
-
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
         super.onPageFinished(view, url)
 
         info("Finished loading $url")
+
+        view?.evaluateJavascript("""
+            (function() {
+            ${getPrivilegeCode()}
+            return window.gPrivileges;
+            })()
+        """.trimIndent()) {
+            info("Privilege result: $it")
+        }
 
         view?.evaluateJavascript("""
         (function getOpenGraph() {
@@ -137,7 +169,7 @@ class WVClient(
             return graph;
         })();
         """.trimIndent()) {
-            info("JS evaluatation result: $it")
+            info("JS evaluation result: $it")
             mListener?.onOpenGraphEvaluated(it)
         }
     }
@@ -301,7 +333,6 @@ class WVClient(
                         title = "",
                         webUrl = uri.toString()
                 )
-//                StoryActivity.start(activity, channelItem)
 
                 ArticleActivity.start(activity, channelItem)
 
@@ -323,10 +354,8 @@ class WVClient(
                 )
 
                 ArticleActivity.startWeb(activity, channelItem)
-
                 true
             }
-
 
             /**
              * If the path looks like `/channel/english.html`
@@ -384,8 +413,6 @@ class WVClient(
 
         when (channelItem.type) {
             ChannelItem.TYPE_STORY, ChannelItem.TYPE_PREMIUM -> {
-//                StoryActivity.start(activity, channelItem)
-
                 ArticleActivity.start(activity, channelItem)
             }
         }
@@ -416,18 +443,20 @@ class WVClient(
             // The link itself looks like:
             // http://www.ftchinese.com/channel/editorchoice-issue.html?issue=EditorChoice-20181105
             "editorchoice-issue.html" -> {
+                info("Clicked an editor choice link: $uri")
                 val issue = uri.getQueryParameter("issue")
                         ?: uri.pathSegments.joinToString("_").removeSuffix(".html")
 
-                val listPage = ChannelSource(
+                val channelSource = ChannelSource(
                         title = pathToTitle[lastPathSegment] ?: "",
                         name = issue,
                         contentUrl = buildUrlForFragment(uri),
-                        htmlType = HTML_TYPE_FRAGMENT
+                        htmlType = HTML_TYPE_FRAGMENT,
+                        requiredTier = Tier.PREMIUM
                 )
 
-                info("Clicked an editor choice link: $listPage")
-                ChannelActivity.start(activity, listPage)
+                info("Channel source for editor choice: $channelSource")
+                ChannelActivity.start(activity, channelSource)
             }
             else -> {
 
