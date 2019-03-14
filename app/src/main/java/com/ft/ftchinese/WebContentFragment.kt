@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.models.ChannelItem
 import com.ft.ftchinese.models.OpenGraphMeta
+import com.ft.ftchinese.models.Tier
 import com.ft.ftchinese.util.isNetworkConnected
 import com.ft.ftchinese.util.json
 import com.ft.ftchinese.viewmodel.LoadArticleViewModel
@@ -54,6 +55,7 @@ class WebContentFragment : Fragment(),
     }
 
     private fun mergeOpenGraph(og: OpenGraphMeta?): StarredArticle {
+
         return StarredArticle(
                 id = if (channelItem?.id.isNullOrBlank()) {
                     og?.extractId()
@@ -77,6 +79,11 @@ class WebContentFragment : Fragment(),
                 audioUrl = channelItem?.audioUrl ?: "",
                 radioUrl = channelItem?.radioUrl ?: "",
                 webUrl = channelItem?.getCanonicalUrl() ?: og?.url ?: "",
+                tier =  if (og?.keywords?.contains("会员专享") == true) {
+                    Tier.STANDARD.string()
+                } else {
+                    ""
+                },
                 isWebpage = true
         )
     }
