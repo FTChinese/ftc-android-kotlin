@@ -122,7 +122,7 @@ fun Activity.getPriceCycleText(tier: Tier, cycle: Cycle): String? {
     }
 }
 
-fun Activity.shouldGrantAccess(account: Account?, paywallSource: PaywallSource?): Boolean {
+fun Activity.shouldGrantStandard(account: Account?, paywallSource: PaywallSource?): Boolean {
     if (account == null) {
       toast(R.string.prompt_login_to_read)
       CredentialsActivity.startForResult(this)
@@ -142,6 +142,21 @@ fun Activity.shouldGrantAccess(account: Account?, paywallSource: PaywallSource?)
     if (account.membership.isExpired) {
         toast(R.string.prompt_membership_expired)
         MySubsActivity.start(this)
+        return false
+    }
+
+    return true
+}
+
+fun Activity.shouldGrantPremium(account: Account?, paywallSource: PaywallSource?): Boolean {
+    val grant = shouldGrantStandard(account, paywallSource)
+
+    if (!grant) {
+        return false
+    }
+
+    if (account?.membership?.tier != Tier.PREMIUM) {
+        toast(R.string.prompt_premium_only)
         return false
     }
 
