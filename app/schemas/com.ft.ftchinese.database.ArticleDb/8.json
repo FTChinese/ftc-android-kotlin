@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 8,
-    "identityHash": "2193042ef36a850117e91fc3267437cf",
+    "identityHash": "029c340ef7a1cb772da1b58ac3b82cc3",
     "entities": [
       {
         "tableName": "starred_article",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` TEXT NOT NULL, `type` TEXT NOT NULL, `sub_type` TEXT NOT NULL, `title` TEXT NOT NULL, `standfirst` TEXT NOT NULL, `keywords` TEXT NOT NULL, `image_url` TEXT NOT NULL, `audio_url` TEXT NOT NULL, `radio_url` TEXT NOT NULL, `published_at` TEXT NOT NULL, `starred_at` TEXT NOT NULL, `canonical_url` TEXT NOT NULL, `is_webpage` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` TEXT NOT NULL, `type` TEXT NOT NULL, `sub_type` TEXT NOT NULL, `title` TEXT NOT NULL, `standfirst` TEXT NOT NULL, `keywords` TEXT NOT NULL, `image_url` TEXT NOT NULL, `audio_url` TEXT NOT NULL, `radio_url` TEXT NOT NULL, `published_at` TEXT NOT NULL, `starred_at` TEXT NOT NULL, `tier` TEXT NOT NULL, `web_url` TEXT NOT NULL, `is_webpage` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "_id",
@@ -81,8 +81,14 @@
             "notNull": true
           },
           {
-            "fieldPath": "url",
-            "columnName": "canonical_url",
+            "fieldPath": "tier",
+            "columnName": "tier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "webUrl",
+            "columnName": "web_url",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -114,7 +120,7 @@
       },
       {
         "tableName": "reading_history",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` TEXT NOT NULL, `type` TEXT NOT NULL, `sub_type` TEXT NOT NULL, `title` TEXT NOT NULL, `standfirst` TEXT NOT NULL, `keywords` TEXT NOT NULL, `image_url` TEXT NOT NULL, `audio_url` TEXT NOT NULL, `radio_url` TEXT NOT NULL, `published_at` TEXT NOT NULL, `read_at` TEXT NOT NULL, `canonical_url` TEXT NOT NULL, `is_webpage` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`_id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id` TEXT NOT NULL, `type` TEXT NOT NULL, `sub_type` TEXT NOT NULL, `title` TEXT NOT NULL, `standfirst` TEXT NOT NULL, `keywords` TEXT NOT NULL, `image_url` TEXT NOT NULL, `audio_url` TEXT NOT NULL, `radio_url` TEXT NOT NULL, `published_at` TEXT NOT NULL, `read_at` TEXT NOT NULL, `tier` TEXT NOT NULL, `canonical_url` TEXT NOT NULL, `is_webpage` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "_id",
@@ -189,7 +195,13 @@
             "notNull": true
           },
           {
-            "fieldPath": "url",
+            "fieldPath": "tier",
+            "columnName": "tier",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "webUrl",
             "columnName": "canonical_url",
             "affinity": "TEXT",
             "notNull": true
@@ -224,7 +236,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"2193042ef36a850117e91fc3267437cf\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"029c340ef7a1cb772da1b58ac3b82cc3\")"
     ]
   }
 }
