@@ -45,8 +45,6 @@ class ChannelFragment : Fragment(),
     private lateinit var cache: FileCache
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
-//    private lateinit var model: JSViewModel
-
     // Hold string in raw/list.html
     private var template: String? = null
 
@@ -106,7 +104,6 @@ class ChannelFragment : Fragment(),
             javaScriptEnabled = true
             loadsImagesAutomatically = true
         }
-
 
         val wvClient = WVClient(activity)
         wvClient.setOnClickListener(this)
@@ -338,7 +335,9 @@ class ChannelFragment : Fragment(),
     }
 
 
-    // WVClient click pagination.
+    /**
+     * WVClient click pagination.
+     */
     override fun onPagination(pageKey: String, pageNumber: String) {
         val pageMeta = channelSource ?: return
 
@@ -358,6 +357,9 @@ class ChannelFragment : Fragment(),
         }
     }
 
+    /**
+     * Log when user clicked an article from a list.
+     */
     private fun logSelectContent(item: ChannelItem) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
             putString(FirebaseAnalytics.Param.CONTENT_TYPE, item.type)
@@ -365,6 +367,9 @@ class ChannelFragment : Fragment(),
         })
     }
 
+    /**
+     * Collection data when a web page is loaded into a web view.
+     */
     @JavascriptInterface
     fun onPageLoaded(message: String) {
 
@@ -452,25 +457,76 @@ class ChannelFragment : Fragment(),
             return
         }
 
-        if (!channelItem.isMembershipRequired()) {
-            openArticle(channelItem)
+        val account = sessionManager.loadAccount()
+
+        val paywallSource = PaywallSource(
+                id = channelItem.id,
+                category = channelItem.type,
+                name = channelItem.title
+        )
+
+        when (channelSource?.requiredTier) {
+            Tier.STANDARD -> {
+                val grant = activity?.shouldGrantStandard(account, paywallSource) ?: return
+
+                if (!grant) {
+                    return
+                }
+
+                openArticle(channelItem)
+                return
+            }
+            Tier.PREMIUM -> {
+                val granted = activity?.shouldGrantPremium(
+                        account,
+                        paywallSource
+                ) ?: return
+
+                if (!granted) {
+                    return
+                }
+
+                openArticle(channelItem)
+                return
+            }
+        }
+
+        info("Channel source do not require membership")
+
+        if (channelItem.requireStandard()) {
+            info("Content required standard member")
+            val granted = activity?.shouldGrantStandard(
+                    account,
+                    paywallSource
+            ) ?: return
+
+            if (granted) {
+                openArticle(channelItem)
+            }
+
             return
         }
 
-        val account = sessionManager.loadAccount()
+        info("Article do not require standard")
 
-        val grant = activity?.shouldGrantAccess(
-                account,
-                PaywallSource(
-                        id = channelItem.id,
-                        category = channelItem.type,
-                        name = channelItem.title
-                )
-        ) ?: return
+        if (channelItem.requirePremium()) {
+            info("Content required premium member")
 
-        if (grant) {
-            openArticle(channelItem)
+            val granted = activity?.shouldGrantPremium(
+                    account,
+                    paywallSource
+            ) ?: return
+
+            if (granted) {
+                openArticle(channelItem)
+            }
+
+            return
         }
+
+        info("Article do not require premium")
+
+        openArticle(channelItem)
     }
 
     private fun openColumn(item: ChannelItem) {
