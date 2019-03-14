@@ -38,6 +38,7 @@
         <item>中英雙語内容</item>
         <item>金融英語速讀訓練</item>
         <item>英語原聲電台</item>
+        <item>FT研究院专题报告（不含行业报告）</item>
         <item>無限瀏覽7日前所有歷史文章（近8萬篇）</item>
     </string-array>
 
@@ -185,6 +186,7 @@
     <string name="prompt_load_failure">無法下載頁面，請稍後再試</string>
     <string name="prompt_login_to_read">訂閱會員登入後可以閱讀</string>
     <string name="prompt_subscribe_to_read">僅限會員閱讀</string>
+    <string name="prompt_premium_only">僅限高級會員閱讀</string>
     <string name="prompt_membership_expired">會員訂閱已过期，請續訂</string>
     <string name="prompt_restricted_login">會員登入后可以閱讀</string>
 
