@@ -5,6 +5,7 @@ import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.util.FTC_OFFICIAL_URL
 import com.ft.ftchinese.util.MAILBOX_URL
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import java.util.*
 
 /**
@@ -82,6 +83,9 @@ data class ChannelItem(
         @Json(name = "timeStamp")
         val publishedAt: String? = null, // "1536249600"
 
+        // "线下活动,企业公告,会员专享"
+        val tag: String = "",
+
         @Json(ignored = true)
         var webUrl: String = "",
 
@@ -146,11 +150,49 @@ data class ChannelItem(
         return "${type}_$id.html"
     }
 
-    fun isMembershipRequired(): Boolean {
-        return isSevenDaysOld() ||
-                type == TYPE_PREMIUM ||
-                (type == TYPE_INTERACTIVE && subType == SUB_TYPE_RADIO) ||
-                (type == TYPE_INTERACTIVE && subType == SUB_TYPE_SPEED_READING)
+    fun requireStandard(): Boolean {
+        if (isSevenDaysOld()) {
+            return true
+        }
+
+        if (tag.contains("会员专享")) {
+            return true
+        }
+
+        if (type == TYPE_INTERACTIVE) {
+            info("An interactive")
+            return when (subType) {
+                SUB_TYPE_RADIO,
+                SUB_TYPE_SPEED_READING -> true
+                else -> false
+            }
+        }
+
+        return false
+    }
+
+    fun requirePremium(): Boolean {
+        if (isSevenDaysOld()) {
+            return true
+        }
+
+        if (type == "premium") {
+            return true
+        }
+
+        if (tag.contains("会员专享")) {
+            return true
+        }
+
+        if (type == TYPE_INTERACTIVE) {
+            return when (subType) {
+                SUB_TYPE_RADIO,
+                SUB_TYPE_SPEED_READING -> true
+                else -> false
+            }
+        }
+
+        return false
     }
 
     private fun getCommentsId(): String {
@@ -284,7 +326,7 @@ data class ChannelItem(
                 return "1300"
             }
 
-            if (keywords.contains("china") == true) {
+            if (keywords.contains("china")) {
                 return "1100"
             }
 
@@ -305,16 +347,20 @@ data class ChannelItem(
         }
 
         var shouldHideAd = false
+        var sponsorTitle: String? = null
 
         if (hideAd) {
             shouldHideAd = true
-        } else if (story.keywords.isBlank()) {
+        } else if (!story.keywords.isBlank()) {
+            info("Story keywords: ${story.keywords}")
+
             if (story.keywords.contains(Keywords.removeAd)) {
                 shouldHideAd = true
             } else {
                 for (sponsor in SponsorManager.sponsors) {
                     if (story.keywords.contains(sponsor.tag) || story.keywords.contains(sponsor.title)) {
-                        shouldHideAd = sponsor.hideAd == "yes"
+                        shouldHideAd = (sponsor.hideAd == "yes")
+                        sponsorTitle = sponsor.title
                         break
                     }
                 }
@@ -326,6 +372,7 @@ data class ChannelItem(
 
         var body = ""
         var title = ""
+        var lang = ""
 
         when (language) {
             Language.CHINESE -> {
@@ -339,9 +386,11 @@ data class ChannelItem(
             Language.BILINGUAL -> {
                 body = story.getBilingualBody()
                 title = "${story.titleCN}<br>${story.titleEN}"
+                lang = "ce"
             }
         }
 
+        // {story-language-class}
         val storyHTMLOriginal = template
                 .replace("{story-tag}", story.tag)
                 .replace("{story-author}", story.authorCN)
@@ -352,7 +401,7 @@ data class ChannelItem(
                 .replace("{story-sub-topic}", "")
                 .replace("{adchID}", pickAdchID(HOME_AD_CH_ID, DEFAULT_STORY_AD_CH_ID, story.keywords))
                 .replace("{comments-id}", getCommentsId())
-                .replace("{story-theme}", story.htmlForTheme())
+                .replace("{story-theme}", story.htmlForTheme(sponsorTitle))
                 .replace("{story-headline}", title)
                 .replace("{story-lead}", story.standfirstCN)
                 .replace("{story-image}", story.htmlForCoverImage())
@@ -374,6 +423,7 @@ data class ChannelItem(
                 .replace("{ad-mpu}", adMPU)
                 //                        .replace("{font-class}", "")
                 .replace("{{googletagservices-js}}", JSCodes.googletagservices)
+                .replace("{story-language-class}", lang)
 
         val storyHTML = AdParser.updateAdCode(storyHTMLOriginal, shouldHideAd)
 
@@ -384,11 +434,6 @@ data class ChannelItem(
     }
 
     companion object {
-        private const val PREF_NAME_FAVOURITE = "favourite"
-
-        const val LANGUAGE_CN = 0
-        const val LANGUAGE_EN = 1
-        const val LANGUAGE_BI = 2
         const val TYPE_STORY = "story"
         const val TYPE_PREMIUM = "premium"
         const val TYPE_VIDEO = "video"
@@ -399,7 +444,7 @@ data class ChannelItem(
         const val TYPE_TAG = "tag"
         const val TYPE_M = "m"
 
-        const val SUB_TYPE_RADIO = "radioUrl"
+        const val SUB_TYPE_RADIO = "radio"
         const val SUB_TYPE_USER_COMMENT = ""
         const val SUB_TYPE_MBAGYM = "mbagym"
         const val SUB_TYPE_SPEED_READING = "speedreading"
