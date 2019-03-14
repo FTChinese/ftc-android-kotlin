@@ -79,6 +79,12 @@ class Story (
         val industry: String,
         val area: String,
 
+        // 0 - free
+        // 1 - standard
+        // 2 - premium
+        @Json(name = "accessright")
+        val accesibleBy: String,
+
         @Json(name = "last_publish_time")
         val publishedAt: String,
 
@@ -101,10 +107,19 @@ class Story (
                 audioUrl = channelItem?.audioUrl ?: "",
                 radioUrl = channelItem?.radioUrl ?: "",
                 publishedAt = publishedAt,
+                tier = requireMemberTier()?.string() ?: "",
                 webUrl = channelItem?.getCanonicalUrl() ?: ""
         )
     }
 
+    private fun requireMemberTier(): Tier? {
+        return when (accesibleBy) {
+            "0" -> null
+            "1" -> Tier.STANDARD
+            "2" -> Tier.PREMIUM
+            else -> null
+        }
+    }
     fun toReadArticle(channelItem: ChannelItem?): ReadArticle {
         return ReadArticle(
                 id = id,
@@ -118,6 +133,7 @@ class Story (
                 radioUrl = channelItem?.radioUrl ?: "",
                 publishedAt = publishedAt,
                 readAt = formatSQLDateTime(LocalDateTime.now()),
+                tier = requireMemberTier()?.string() ?: "",
                 webUrl = channelItem?.getCanonicalUrl() ?: ""
         )
     }
@@ -184,8 +200,8 @@ class Story (
     }
 
     // HTML for {story-theme}
-    fun htmlForTheme(): String {
-        val firstTag = tags[0]
+    fun htmlForTheme(sponsorTitle: String?): String {
+        val firstTag = sponsorTitle ?: tags[0]
 
         return """
             <div class="story-theme">
