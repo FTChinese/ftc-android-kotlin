@@ -5,6 +5,8 @@ import com.beust.klaxon.Json
 import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.util.formatSQLDateTime
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import org.threeten.bp.LocalDateTime
 
 data class Bilingual(
@@ -93,7 +95,7 @@ class Story (
 
         @Json(name = "relative_story")
         val relatedStory: List<RelatedStory>
-) {
+) : AnkoLogger {
 
     fun toStarredArticle(channelItem: ChannelItem?): StarredArticle {
         return StarredArticle(
@@ -205,7 +207,7 @@ class Story (
 
         return """
             <div class="story-theme">
-                <a target="_blank" href="/tag/$firstTag">$firstTag</a>
+                <a target="_blank" href="/tag/$firstTag">${sponsorTitle ?: firstTag}</a>
                 <button class="myft-follow plus" data-tag="$firstTag" data-type="tag">关注</button>
             </div>
         """.trimIndent()
@@ -233,7 +235,7 @@ class Story (
     }
 
     fun getEnBody(withAd: Boolean = true): String {
-        if (bodyEN.isNullOrBlank()) {
+        if (bodyEN.isBlank()) {
             return ""
         }
 

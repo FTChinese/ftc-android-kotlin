@@ -258,6 +258,10 @@ data class ChannelItem(
         }
 
         for (sponsor in SponsorManager.sponsors) {
+            if (sponsor.tag.isBlank()) {
+                continue
+            }
+
             if ((keywords.contains(sponsor.tag) || keywords.contains(sponsor.title)) && sponsor.zone.isNotEmpty() ) {
                 return if (sponsor.zone.contains("/")) {
                     sponsor.zone
@@ -371,17 +375,26 @@ data class ChannelItem(
                 shouldHideAd = true
             } else {
                 for (sponsor in SponsorManager.sponsors) {
+                    info("Sponsor: $sponsor")
+                    if (sponsor.tag.isBlank()) {
+                        continue
+                    }
                     if (story.keywords.contains(sponsor.tag) || story.keywords.contains(sponsor.title)) {
                         shouldHideAd = (sponsor.hideAd == "yes")
-                        sponsorTitle = sponsor.title
+                        if (sponsor.title.isNotBlank()) {
+                            sponsorTitle = sponsor.title
+                        }
                         break
                     }
                 }
             }
         }
 
+        info("Should hide ad: $shouldHideAd")
 
         val adMPU = if (shouldHideAd) "" else AdParser.getAdCode(AdPosition.MIDDLE_ONE)
+
+        info("Ad MPU: $adMPU")
 
         var body = ""
         var title = ""
@@ -405,9 +418,11 @@ data class ChannelItem(
 
 
         val adZone = pickAdZone(HOME_AD_ZONE, DEFAULT_STORY_AD_ZONE, story.keywords)
-        info("Adzone: $adZone")
+        val adChId = pickAdchID(HOME_AD_CH_ID, DEFAULT_STORY_AD_CH_ID, story.keywords)
 
-        // {story-language-class}
+        info("Ad zone: $adZone")
+        info("Ad channel id: $adChId")
+
         val storyHTMLOriginal = template
                 .replace("{story-tag}", story.tag)
                 .replace("{story-author}", story.authorCN)
@@ -416,7 +431,7 @@ data class ChannelItem(
                 .replace("{story-industry}", story.industry)
                 .replace("{story-main-topic}", "")
                 .replace("{story-sub-topic}", "")
-                .replace("{adchID}", pickAdchID(HOME_AD_CH_ID, DEFAULT_STORY_AD_CH_ID, story.keywords))
+                .replace("{adchID}", adChId)
                 .replace("{comments-id}", getCommentsId())
                 .replace("{story-theme}", story.htmlForTheme(sponsorTitle))
                 .replace("{story-headline}", title)
@@ -436,7 +451,7 @@ data class ChannelItem(
                 .replace("'{follow-area}'", follows.area)
                 .replace("'{follow-augthor}'", follows.author)
                 .replace("'{follow-column}'", follows.column)
-                .replace("{ad-zone}", pickAdZone(HOME_AD_ZONE, DEFAULT_STORY_AD_ZONE, story.keywords))
+                .replace("{ad-zone}", adZone)
                 .replace("{ad-mpu}", adMPU)
                 //                        .replace("{font-class}", "")
                 .replace("{{googletagservices-js}}", JSCodes.googletagservices)
@@ -447,7 +462,6 @@ data class ChannelItem(
         val storyHTMLCheckingVideo = JSCodes.getInlineVideo(storyHTML)
 
         return JSCodes.getCleanHTML(storyHTMLCheckingVideo)
-
     }
 
     companion object {
