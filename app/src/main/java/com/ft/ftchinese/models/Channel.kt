@@ -253,7 +253,7 @@ data class ChannelItem(
     }
 
     private fun pickAdZone(homepageZone: String, fallbackZone: String, keywords: String): String {
-        if (!keywords.isBlank()) {
+        if (keywords.isBlank()) {
             return fallbackZone
         }
 
@@ -303,6 +303,7 @@ data class ChannelItem(
     }
 
     private fun pickAdchID(homepageId: String, fallbackId: String, keywords: String): String {
+
         if (!keywords.isBlank()) {
             for (sponsor in SponsorManager.sponsors) {
                 if ((keywords.contains(sponsor.tag) || keywords.contains(sponsor.title)) && sponsor.adid.isNotEmpty()) {
@@ -401,6 +402,10 @@ data class ChannelItem(
                 lang = "ce"
             }
         }
+
+
+        val adZone = pickAdZone(HOME_AD_ZONE, DEFAULT_STORY_AD_ZONE, story.keywords)
+        info("Adzone: $adZone")
 
         // {story-language-class}
         val storyHTMLOriginal = template
