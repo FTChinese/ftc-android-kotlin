@@ -333,6 +333,11 @@ object Navigation {
     )
 
     val englishPages = arrayOf(
+            ChannelSource(
+                title = "最新",
+                name = "english_latest",
+                contentUrl = "$MAILBOX_URL/channel/english.html?webview=ftcapp&bodyonly=yes&001",
+                htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
              *   "title": "FT英语电台",
@@ -352,7 +357,11 @@ object Navigation {
                     }
              *  ]
              */
-            ChannelSource(title = "英语电台", name = "english_radio", contentUrl = "$MAILBOX_URL/channel/radio.html?webview=ftcapp&bodyonly=yes", htmlType = HTML_TYPE_FRAGMENT),
+            ChannelSource(
+                    title = "英语电台",
+                    name = "english_radio",
+                    contentUrl = "$MAILBOX_URL/channel/radio.html?webview=ftcapp&bodyonly=yes",
+                    htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
                 "title": "金融英语速读",
