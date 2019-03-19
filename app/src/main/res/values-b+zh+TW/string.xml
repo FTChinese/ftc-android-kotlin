@@ -208,6 +208,7 @@
     <string name="prompt_letter_sent">信件已發送</string>
     <string name="prompt_bound">帳號已绑定</string>
     <string name="prompt_account_updated">帳號已更新</string>
+    <string name="prompt_no_keyword">請输入关键字后搜尋</string>
 
     <string name="instruct_password_letter">請輸入您的登入FT中文網所用的電子信箱，我們會向該信箱發送郵件，幫您重設密碼码</string>
     <string name="instruct_verify_email">您的信箱尚未驗證，為保障您的帳號安全，請及時驗證信箱。我們已經給您的登入信箱發送了驗證信件，点击信件中的連接即可。</string>

@@ -207,6 +207,7 @@
     <string name="prompt_letter_sent">邮件已发送</string>
     <string name="prompt_bound">账号已绑定</string>
     <string name="prompt_account_updated">账号已更新</string>
+    <string name="prompt_no_keyword">请输入关键字后搜索</string>
 
     <string name="instruct_password_letter">请输入您的登录FT中文网所用的电子邮箱，我们会向该邮箱发送邮件，帮您重置密码</string>
     <string name="instruct_verify_email">您的邮箱尚未验证，为保障您的账号安全，请及时验证邮箱。我们已经给您的登录邮箱发送了验证邮件，点击邮件中的链接即可。</string>

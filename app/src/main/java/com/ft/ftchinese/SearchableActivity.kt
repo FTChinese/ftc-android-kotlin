@@ -13,6 +13,7 @@ import kotlinx.android.synthetic.main.activity_searchable.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.jetbrains.anko.toast
 
 class SearchableActivity : AppCompatActivity(),
         AnkoLogger {
@@ -20,6 +21,21 @@ class SearchableActivity : AppCompatActivity(),
     private var template: String? = null
     private lateinit var cache: FileCache
     private var keyword: String? = null
+
+    private val wvClient = object : WVClient(this) {
+        override fun onPageFinished(view: WebView?, url: String?) {
+            if (keyword == null) {
+                toast(R.string.prompt_no_keyword)
+                return
+            }
+
+            view?.evaluateJavascript("""
+                    search('$keyword');
+                    """.trimIndent()) {
+                info("evaluated search.")
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,15 +61,7 @@ class SearchableActivity : AppCompatActivity(),
                     JS_INTERFACE_NAME
             )
 
-            webViewClient = object : WVClient(this@SearchableActivity) {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    view?.evaluateJavascript("""
-                    search('$keyword');
-                    """.trimIndent()) {
-                        info("evaluated search.")
-                    }
-                }
-            }
+            webViewClient = wvClient
         }
 
         // Setup back key behavior.
@@ -83,7 +91,7 @@ class SearchableActivity : AppCompatActivity(),
         if (Intent.ACTION_SEARCH == intent.action) {
             intent.getStringExtra(SearchManager.QUERY)?.also {
                 info("Keyword: $it")
-
+                keyword = it
 
                 load(it)
             }
@@ -97,6 +105,8 @@ class SearchableActivity : AppCompatActivity(),
         }
 
         supportActionBar?.title = getString(R.string.title_search, keyword)
+
+        template = template?.replace("{search-html}", "")
 
         search_result_wv.loadDataWithBaseURL(
                 FTC_OFFICIAL_URL,
