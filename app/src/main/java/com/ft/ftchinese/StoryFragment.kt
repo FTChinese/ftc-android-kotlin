@@ -12,10 +12,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.ft.ftchinese.database.ReadArticle
-import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.OnProgressListener
+import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.*
 import com.ft.ftchinese.viewmodel.LoadArticleViewModel
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
@@ -40,6 +39,7 @@ class StoryFragment : Fragment(),
 
     private lateinit var cache: FileCache
     private lateinit var followingManager: FollowingManager
+    private lateinit var sessionManager: SessionManager
     private lateinit var loadModel: LoadArticleViewModel
     private lateinit var starModel: StarArticleViewModel
     private lateinit var readModel: ReadArticleViewModel
@@ -51,6 +51,7 @@ class StoryFragment : Fragment(),
 
         cache = FileCache(context)
         followingManager = FollowingManager.getInstance(context)
+        sessionManager = SessionManager.getInstance(context)
 
         if (context is OnProgressListener) {
             listener = context
@@ -229,6 +230,7 @@ class StoryFragment : Fragment(),
     }
 
     private fun renderAndLoad(data: String) {
+
         if (template == null) {
             template = cache.readStoryTemplate()
         }
@@ -243,6 +245,12 @@ class StoryFragment : Fragment(),
 
         if (story == null) {
             toast(R.string.prompt_load_failure)
+            return
+        }
+
+        // Check access here, again.
+        if (!grantAccess(story)) {
+            activity?.finish()
             return
         }
 
@@ -282,9 +290,26 @@ class StoryFragment : Fragment(),
 
         // Publish ReadArticle to ViewModel.
         val article = story.toStarredArticle(storyBrief)
-        info("Publish loaded article")
+        info("Publish loaded article. Access right: ${story.accesibleBy}")
         loadModel.loaded(article)
         starModel.loaded(article)
+    }
+
+    private fun grantAccess(story: Story): Boolean {
+        if (story.isFree()) {
+            info("A free article")
+            return true
+        }
+
+        val account = sessionManager.loadAccount()
+
+        if (activity?.shouldGrantStandard(account, null) == false) {
+            info("Cannot grant standard access to this article")
+            SubscriptionActivity.start(context, null)
+            return false
+        }
+
+        return true
     }
 
     override fun onRefresh() {
