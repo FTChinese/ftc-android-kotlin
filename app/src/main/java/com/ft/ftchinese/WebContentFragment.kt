@@ -1,5 +1,6 @@
 package com.ft.ftchinese
 
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.view.KeyEvent
@@ -10,11 +11,11 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.models.OpenGraphMeta
-import com.ft.ftchinese.models.Tier
+import com.ft.ftchinese.models.*
+import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.isNetworkConnected
 import com.ft.ftchinese.util.json
+import com.ft.ftchinese.util.shouldGrantStandard
 import com.ft.ftchinese.viewmodel.LoadArticleViewModel
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
 import com.ft.ftchinese.viewmodel.StarArticleViewModel
@@ -33,6 +34,8 @@ class WebContentFragment : Fragment(),
     private lateinit var starModel: StarArticleViewModel
     private lateinit var readModel: ReadArticleViewModel
 
+    private lateinit var sessionManager: SessionManager
+
     private var channelItem: ChannelItem? = null
 
     override fun onOpenGraphEvaluated(result: String) {
@@ -50,8 +53,31 @@ class WebContentFragment : Fragment(),
 
         info("Loaded article: $article")
 
+        // Check access here.
+        if (!grantAccess(article)) {
+            activity?.finish()
+            return
+        }
+
         loadModel.loaded(article)
         starModel.loaded(article)
+    }
+
+    private fun grantAccess(article: StarredArticle): Boolean {
+        if (article.isFree()) {
+            info("A free article")
+            return true
+        }
+
+        val account = sessionManager.loadAccount()
+
+        if (activity?.shouldGrantStandard(account, null) == false) {
+            info("Cannot grant standard access to this article")
+            SubscriptionActivity.start(context, null)
+            return false
+        }
+
+        return true
     }
 
     private fun mergeOpenGraph(og: OpenGraphMeta?): StarredArticle {
@@ -86,6 +112,12 @@ class WebContentFragment : Fragment(),
                 },
                 isWebpage = true
         )
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        sessionManager = SessionManager.getInstance(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -132,7 +164,7 @@ class WebContentFragment : Fragment(),
         }
 
         val wvClient = WVClient(activity)
-        wvClient.setOnClickListener(this)
+        wvClient.setWVInteractionListener(this)
 
         web_view.apply {
 
