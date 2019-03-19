@@ -120,6 +120,7 @@
     <string name="myft_starred_articles">收藏文章</string>
     <string name="myft_following">关注</string>
 
+    <string name="title_search">搜索 %1$s</string>
     <string name="title_login">登录FT中文网</string>
     <string name="title_sign_up">创建FT中文网账号</string>
     <string name="title_login_signup">登录/注册</string>
