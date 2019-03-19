@@ -19,15 +19,6 @@ class ChannelItemTest {
             isWebpage=true)
 
     @Test
-    fun requireStandard() {
-        println(item.requireStandard())
-    }
-
-    @Test
-    fun requirePremium() {
-    }
-
-    @Test
     fun renderStory() {
         val keywords = "教育,大学,招生,腐败,丑闻,china,usa,society,culture,comment"
 
