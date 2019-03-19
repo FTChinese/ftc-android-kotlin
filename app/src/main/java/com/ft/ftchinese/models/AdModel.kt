@@ -25,16 +25,11 @@ enum class AdPosition(val position: String) {
     BOTTOM_BANNER("Bottom-Banner")
 }
 
-object AdVendorSwitch {
-    var on = true
-}
-
 object AdParser {
     fun getAdCode(position: AdPosition): String {
 
-        val adCode: String = if (AdVendorSwitch.on) {
-            when (position) {
-                AdPosition.TOP_BANNER -> """
+        val adCode: String = when (position) {
+            AdPosition.TOP_BANNER -> """
                     <div class="o-ads" data-o-ads-name="banner1"
                     data-o-ads-center="true"
                     data-o-ads-formats-default="false"
@@ -46,15 +41,15 @@ object AdParser {
                     </div>
                 """.trimIndent()
 
-                AdPosition.MIDDLE_ONE -> """
+            AdPosition.MIDDLE_ONE -> """
                     <div  data-o-ads-name="mpu-middle1" class="o-ads" data-o-ads-formats-default="false"  data-o-ads-formats-small="FtcMobileMpu"  data-o-ads-formats-medium="false" data-o-ads-formats-large="FtcMobileMpu" data-o-ads-formats-extra="FtcMobileMpu" data-o-ads-targeting="cnpos=middle1;"></div>
                 """.trimIndent()
 
-                AdPosition.MIDDLE_TWO -> """
+            AdPosition.MIDDLE_TWO -> """
                     <div data-o-ads-name="mpu-middle2" class="o-ads" data-o-ads-formats-default="false"  data-o-ads-formats-small="FtcMobileMpu"  data-o-ads-formats-medium="false" data-o-ads-formats-large="FtcMobileMpu" data-o-ads-formats-extra="FtcMobileMpu" data-o-ads-targeting="cnpos=middle2;"></div>
                 """.trimIndent()
 
-                AdPosition.RIGHT_ONE -> """
+            AdPosition.RIGHT_ONE -> """
                     <div
                 data-o-ads-name="mpu-right1"
                 class="o-ads"
@@ -66,7 +61,7 @@ object AdParser {
                 </div>
                 """.trimIndent()
 
-                AdPosition.RIGHT_TWO -> """
+            AdPosition.RIGHT_TWO -> """
                     <div
                 data-o-ads-name="mpu-right2"
                 class="o-ads"
@@ -78,7 +73,7 @@ object AdParser {
                 </div>
                 """.trimIndent()
 
-                AdPosition.BOTTOM_BANNER -> """
+            AdPosition.BOTTOM_BANNER -> """
                     <div class="o-ads" data-o-ads-name="banner2"
                 data-o-ads-center="true"
                 data-o-ads-formats-default="false"
@@ -89,108 +84,8 @@ object AdParser {
                 data-o-ads-targeting="cnpos=top2;">
                 </div>
                 """.trimIndent()
-
-
-            }
-        } else {
-            when (position) {
-                AdPosition.TOP_BANNER -> """
-                    <div class="o-ads" data-o-ads-name="banner1"
-                data-o-ads-center="true"
-                data-o-ads-formats-default="false"
-                data-o-ads-formats-small="FtcMobileBanner"
-                data-o-ads-formats-medium="false"
-                data-o-ads-formats-large="FtcLeaderboard"
-                data-o-ads-formats-extra="FtcLeaderboard"
-                data-o-ads-targeting="cnpos=top1;" style="display:none;">
-                </div>
-                <script type="text/javascript">
-                document.write(writeAdNew({
-                devices: ['PC'],
-                pattern:'Leaderboard',
-                position:'Num1'
-                }));
-                document.write(writeAdNew({
-                devices: ['iPhoneWeb', 'AndroidWeb','iPhoneApp','AndroidApp'],
-                pattern:'Banner',
-                position:'Num1'
-                }));
-                </script>
-                """.trimIndent()
-
-                AdPosition.MIDDLE_ONE -> """
-                   <div  data-o-ads-name="mpu-middle1" class="o-ads" data-o-ads-formats-default="false"  data-o-ads-formats-small="FtcMobileMpu"  data-o-ads-formats-medium="false" data-o-ads-formats-large="FtcMobileMpu" data-o-ads-formats-extra="FtcMobileMpu" data-o-ads-targeting="cnpos=middle1;"></div>
-                <script type="text/javascript">document.write (writeAdNew({devices: ['PC','iPhoneWeb','AndroidWeb','iPhoneApp','AndroidApp'],pattern:'MPU',position:'Middle1',container:'mpuInStory'}));</script>
-                """.trimIndent()
-
-                AdPosition.MIDDLE_TWO -> """
-                    <div data-o-ads-name="mpu-middle2" class="o-ads" data-o-ads-formats-default="false"  data-o-ads-formats-small="FtcMobileMpu"  data-o-ads-formats-medium="false" data-o-ads-formats-large="FtcMobileMpu" data-o-ads-formats-extra="FtcMobileMpu" data-o-ads-targeting="cnpos=middle2;"></div>
-                <script type="text/javascript">document.write (writeAdNew({devices: ['iPhoneWeb','AndroidWeb','iPhoneApp','AndroidApp'],pattern:'MPU',position:'Middle2',container:'mpuInStory'}));</script>
-                """.trimIndent()
-
-                AdPosition.RIGHT_ONE -> """
-                    <div
-                data-o-ads-name="mpu-right1"
-                class="o-ads"
-                data-o-ads-formats-default="false"
-                data-o-ads-formats-small="false"
-                data-o-ads-formats-medium="FtcMobileMpu"
-                data-o-ads-formats-large="FtcMobileMpu"
-                data-o-ads-targeting="cnpos=right1;">
-                </div>
-                <script type="text/javascript">
-                document.write (writeAdNew({
-                devices: ['PC','PadWeb','PadApp'],
-                pattern:'MPU',
-                position:'Right1'
-                }));
-                </script>
-                """.trimIndent()
-
-                AdPosition.RIGHT_TWO -> """
-                    <div
-                data-o-ads-name="mpu-right2"
-                class="o-ads"
-                data-o-ads-formats-default="false"
-                data-o-ads-formats-small="false"
-                data-o-ads-formats-medium="FtcMobileMpu"
-                data-o-ads-formats-large="FtcMobileMpu"
-                data-o-ads-targeting="cnpos=right2;">
-                </div>
-                <script type="text/javascript">
-                document.write (writeAdNew({
-                devices: ['PC','PadWeb','PadApp'],
-                pattern:'MPU',
-                position:'Right2'
-                }));
-                </script>
-                """.trimIndent()
-
-                AdPosition.BOTTOM_BANNER -> """
-                    <div class="o-ads" data-o-ads-name="banner2"
-                data-o-ads-center="true"
-                data-o-ads-formats-default="false"
-                data-o-ads-formats-small="FtcMobileBanner"
-                data-o-ads-formats-medium="false"
-                data-o-ads-formats-large="FtcBanner"
-                data-o-ads-formats-extra="FtcBanner"
-                data-o-ads-targeting="cnpos=top2;">
-                </div>
-                <script>
-                document.write(writeAdNew({
-                devices: ['PC'],
-                pattern:'Banner',
-                position:'Num1'
-                }));
-                document.write(writeAdNew({
-                devices: ['iPhoneWeb','AndroidWeb','iPhoneApp','AndroidApp'],
-                pattern:'Banner',
-                position:'Num2'
-                }));
-                </script>
-                """.trimIndent()
-            }
         }
+
 
         return adCode.replace(Regex("[\n\r]+"), "")
     }
