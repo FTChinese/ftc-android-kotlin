@@ -1,6 +1,9 @@
 package com.ft.ftchinese
 
 import android.app.Activity
+import android.app.SearchManager
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -14,6 +17,7 @@ import android.view.*
 import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.widget.SearchView
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.splash.Schedule
@@ -154,7 +158,8 @@ class MainActivity : AppCompatActivity(),
         setTheme(R.style.Origami)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
-        displayLogo()
+
+        displayLogo(true)
 
         if (BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true)
@@ -210,7 +215,7 @@ class MainActivity : AppCompatActivity(),
                 R.id.nav_news -> {
                     setupHome()
 
-                    displayLogo()
+                    displayLogo(true)
                 }
 
                 R.id.nav_english -> {
@@ -323,10 +328,15 @@ class MainActivity : AppCompatActivity(),
         mChannelPages = Navigation.newsPages
     }
 
-    private fun displayLogo() {
-        supportActionBar?.setDisplayUseLogoEnabled(true)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-        supportActionBar?.setLogo(R.drawable.ic_menu_masthead)
+    private fun displayLogo(show: Boolean) {
+        if (show) {
+            supportActionBar?.setDisplayUseLogoEnabled(true)
+            supportActionBar?.setDisplayShowTitleEnabled(false)
+            supportActionBar?.setLogo(R.drawable.ic_menu_masthead)
+        } else {
+            supportActionBar?.setDisplayUseLogoEnabled(false)
+            supportActionBar?.setDisplayShowTitleEnabled(false)
+        }
     }
 
     private fun displayTitle(title: Int) {
@@ -645,36 +655,36 @@ class MainActivity : AppCompatActivity(),
     /**
      * Create menus on toolbar
      */
-//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-//        // Inflate the menu; this adds mFollows to the action bar if it is present.
-//
-//        menuInflater.inflate(R.menu.activity_main_search, menu)
-//
-//        val expandListener = object : MenuItem.OnActionExpandListener {
-//            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-//                info("Menu item action collapse")
-//                return true
-//            }
-//
-//            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-//                info("Menu item action expand")
-//                return true
-//            }
-//        }
-//
-//        // Configure action view.
-//        // See https://developer.android.com/training/appbar/action-views
-//        val searchItem = menu.findItem(R.id.action_search)
-//        searchItem.setOnActionExpandListener(expandListener)
-//
-//        val searchView = searchItem.actionView as SearchView
-//
-//        // Handle activity_main_search. See
-//        // guide https://developer.android.com/guide/topics/search/
-//        // API https://developer.android.com/reference/android/support/v7/widget/SearchView
-//
-//        return super.onCreateOptionsMenu(menu)
-//    }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds mFollows to the action bar if it is present.
+
+        menuInflater.inflate(R.menu.activity_main_search, menu)
+
+
+        // Get the SearchView and set the searchable configuration
+        val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
+
+        val searchView = (menu.findItem(R.id.action_search).actionView as SearchView)
+
+        // NOTE: If you followed example verbatim from
+        // https://developer.android.com/guide/topics/search/search-dialog.html#UsingSearchWidget,
+        // it won't work!
+        // The `componentName` passed to getSearchableInfo
+        // should be the target activity used to display
+        // search result.
+        // If you simply use `componentName`, it refers
+        // the the MainActivity here, which is not used
+        // to display search result.
+        val compoName = ComponentName(this, SearchableActivity::class.java)
+
+        searchView.apply {
+            // Assumes current activity is the searchable activity
+            setSearchableInfo(searchManager.getSearchableInfo(compoName))
+            setIconifiedByDefault(false)
+        }
+
+        return true
+    }
 
     /**
      * Respond to menu item on the toolbar being selected
