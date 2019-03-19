@@ -92,7 +92,7 @@ data class ReadArticle(
     }
 
     fun isFree(): Boolean {
-        return !requireMembership() || !isSevenDaysOld()
+        return !requireMembership() && !isSevenDaysOld()
     }
 }
 

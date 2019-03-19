@@ -14,7 +14,6 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.OnProgressListener
-import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.*
 import com.ft.ftchinese.viewmodel.LoadArticleViewModel
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
@@ -24,7 +23,6 @@ import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
-import org.threeten.bp.LocalDateTime
 
 private const val ARG_CHANNEL_ITEM = "arg_channel_item"
 
@@ -254,8 +252,6 @@ class StoryFragment : Fragment(),
             return
         }
 
-        info("Story $story")
-
         loadModel.showLangSwitcher(story.isBilingual)
 
         // Publish StarredArticle to ViewModel here.
@@ -305,7 +301,6 @@ class StoryFragment : Fragment(),
 
         if (activity?.shouldGrantStandard(account, null) == false) {
             info("Cannot grant standard access to this article")
-            SubscriptionActivity.start(context, null)
             return false
         }
 

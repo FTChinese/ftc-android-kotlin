@@ -96,7 +96,7 @@ data class StarredArticle(
     }
 
     fun isFree(): Boolean {
-        return !requireMembership() || !isSevenDaysOld()
+        return !requireMembership() && !isSevenDaysOld()
     }
 }
 

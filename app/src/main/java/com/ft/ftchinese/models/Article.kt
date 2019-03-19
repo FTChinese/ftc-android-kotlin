@@ -139,7 +139,7 @@ class Story (
     }
 
     fun isFree(): Boolean {
-        return (requireMemberTier() == null) || !isSevenDaysOld()
+        return (requireMemberTier() == null) && !isSevenDaysOld()
     }
 
     fun toReadArticle(channelItem: ChannelItem?): ReadArticle {

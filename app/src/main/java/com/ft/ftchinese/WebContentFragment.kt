@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.isNetworkConnected
 import com.ft.ftchinese.util.json
 import com.ft.ftchinese.util.shouldGrantStandard
@@ -73,7 +72,6 @@ class WebContentFragment : Fragment(),
 
         if (activity?.shouldGrantStandard(account, null) == false) {
             info("Cannot grant standard access to this article")
-            SubscriptionActivity.start(context, null)
             return false
         }
 
