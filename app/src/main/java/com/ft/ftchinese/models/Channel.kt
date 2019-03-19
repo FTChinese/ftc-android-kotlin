@@ -103,7 +103,7 @@ data class ChannelItem(
 
     fun withMeta(meta: ChannelMeta?): ChannelItem {
         if (meta == null) {
-            return this;
+            return this
         }
         channelTitle = meta.title
         theme = meta.theme
@@ -162,49 +162,29 @@ data class ChannelItem(
         return "${type}_$id.html"
     }
 
-    fun requireStandard(): Boolean {
+    fun isFree(): Boolean {
         if (isSevenDaysOld()) {
-            return true
+            return false
+        }
+
+        if (type == "premium") {
+            return false
         }
 
         if (tag.contains("会员专享")) {
-            return true
+            return false
         }
 
         if (type == TYPE_INTERACTIVE) {
             info("An interactive")
             return when (subType) {
                 SUB_TYPE_RADIO,
-                SUB_TYPE_SPEED_READING -> true
-                else -> false
+                SUB_TYPE_SPEED_READING -> false
+                else -> true
             }
         }
 
-        return false
-    }
-
-    fun requirePremium(): Boolean {
-        if (isSevenDaysOld()) {
-            return true
-        }
-
-        if (type == "premium") {
-            return true
-        }
-
-        if (tag.contains("会员专享")) {
-            return true
-        }
-
-        if (type == TYPE_INTERACTIVE) {
-            return when (subType) {
-                SUB_TYPE_RADIO,
-                SUB_TYPE_SPEED_READING -> true
-                else -> false
-            }
-        }
-
-        return false
+        return true
     }
 
     private fun getCommentsId(): String {
