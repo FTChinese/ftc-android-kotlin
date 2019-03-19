@@ -13,10 +13,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.user.CredentialsActivity
 import com.ft.ftchinese.user.OnProgressListener
 import com.ft.ftchinese.util.json
-import com.ft.ftchinese.util.shouldGrantPremium
 import com.ft.ftchinese.util.shouldGrantStandard
 import com.ft.ftchinese.viewmodel.LoadArticleViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -77,8 +75,6 @@ class ArticleActivity : AppCompatActivity(),
             article = it
 
             logViewItemEvent()
-
-            checkAccess(it)
         })
 
         // Observe whether the article is bilingual.
@@ -86,38 +82,6 @@ class ArticleActivity : AppCompatActivity(),
             info("Observer found content is bilingual: $it")
             updateLanguageSwitcher(it)
         })
-    }
-
-    private fun checkAccess(article: StarredArticle) {
-        if (article.tier.isBlank()) {
-            return
-        }
-
-        val account = sessionManager.loadAccount()
-
-        if (account == null) {
-            CredentialsActivity.startForResult(this)
-            finish()
-            return
-        }
-
-        if (article.requireStandard()) {
-            if (shouldGrantStandard(account, null)) {
-                return
-            }
-
-            finish()
-            return
-        }
-
-        if (article.requiePremium()) {
-            if (shouldGrantPremium(account, null)) {
-                return
-            }
-
-            finish()
-            return
-        }
     }
 
     private fun logViewItemEvent() {
