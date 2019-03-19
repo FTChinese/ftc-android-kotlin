@@ -1,9 +1,12 @@
 package com.ft.ftchinese.models
 
+import android.net.Uri
 import com.beust.klaxon.Json
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.util.FTC_OFFICIAL_URL
 import com.ft.ftchinese.util.MAILBOX_URL
+import com.ft.ftchinese.util.flavorQuery
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.util.*
@@ -211,7 +214,7 @@ data class ChannelItem(
             return ""
         }
 
-        return when(type) {
+        val url =  when(type) {
             TYPE_STORY, TYPE_PREMIUM -> "$MAILBOX_URL/index.php/jsapi/get_story_more_info/$id"
 
             TYPE_COLUMN -> "$MAILBOX_URL/$type/$id?bodyonly=yes&webview=ftcapp&bodyonly=yes"
@@ -229,6 +232,20 @@ data class ChannelItem(
             TYPE_VIDEO -> "$FTC_OFFICIAL_URL/$type/$id?bodyonly=yes&webview=ftcapp&004"
 
             else -> "$MAILBOX_URL/$type/$id?webview=ftcapp"
+        }
+
+        val queryValue = flavorQuery[BuildConfig.FLAVOR]
+
+//        http://www.ftchinese.com/?utm_source=marketing&utm_medium=androidmarket&utm_campaign=an_huawei
+        return try {
+            Uri.parse(url).buildUpon()
+                    .appendQueryParameter("utm_source", "marketing")
+                    .appendQueryParameter("utm_mediu", "androidmarket")
+                    .appendQueryParameter("utm_campaign", queryValue)
+                    .build()
+                    .toString()
+        } catch (e: Exception) {
+            ""
         }
     }
 

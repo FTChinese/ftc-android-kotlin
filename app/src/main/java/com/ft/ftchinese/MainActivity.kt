@@ -205,6 +205,8 @@ class MainActivity : AppCompatActivity(),
         updateSessionUI()
 
         prepareSplash()
+
+        info("onCreate finished. Build flavor: ${BuildConfig.FLAVOR}")
     }
 
     private fun setupBottomNav() {

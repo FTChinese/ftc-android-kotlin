@@ -1,8 +1,8 @@
 package com.ft.ftchinese.util
 
 object NextApi {
-    private const val BASE = "http://api.ftchinese.com/v1"
-//    private const val BASE = "http://192.168.10.195:8000"
+//    private const val BASE = "http://api.ftchinese.com/v1"
+    private const val BASE = "http://192.168.10.195:8000"
     const val EMAIL_EXISTS = "$BASE/users/exists"
     const val LOGIN = "$BASE/users/login"
     const val SIGN_UP = "$BASE/users/signup"
@@ -23,9 +23,9 @@ object NextApi {
 }
 
 object SubscribeApi {
-    private const val BASE = "http://www.ftacademy.cn/api/v1"
+//    private const val BASE = "http://www.ftacademy.cn/api/v1"
 //    private const val BASE = "http://www.ftacademy.cn/api/sandbox"
-//    private const val BASE = "http://192.168.10.195:8200"
+    private const val BASE = "http://192.168.10.195:8200"
     const val WX_UNIFIED_ORDER = "$BASE/wxpay/unified-order"
     const val WX_ORDER_QUERY = "$BASE/wxpay/query"
     const val ALI_ORDER = "$BASE/alipay/app-order"
@@ -43,3 +43,18 @@ const val MAILBOX_URL = "https://api003.ftmailbox.com"
 const val HOST_FTC = "www.ftchinese.com"
 const val HOST_MAILBOX = "api003.ftmailbox.com"
 const val HOST_FTA = "www.ftacademy.cn"
+
+val flavorQuery = mapOf(
+        "xiaomi" to "an_xiaomi",
+        "huawei" to "an_huawei",
+        "baidu" to "an_baidu",
+        "sanliuling" to "an_360shouji",
+        "ftc" to "an_ftc",
+        "tencent" to "an_tencent",
+        "samsung" to "an_samsung",
+        "meizu" to "an_meizu",
+        "wandoujia" to "an_wandoujia",
+        "anzhi" to "an_anzhi",
+        "jiuyi" to "an_jiuyi",
+        "anzhuoshichang" to "an_anzhuoshichang"
+)
