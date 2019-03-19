@@ -6,8 +6,8 @@ import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.util.formatSQLDateTime
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.threeten.bp.LocalDateTime
+import java.util.*
 
 data class Bilingual(
         var cn: String,
@@ -122,6 +122,26 @@ class Story (
             else -> null
         }
     }
+
+    private fun isSevenDaysOld(): Boolean {
+        if (publishedAt.isBlank()) {
+            return false
+        }
+
+        val sevenDaysLater = Date((publishedAt.toLong() + 7 * 24 * 60 * 60) * 1000)
+        val now = Date()
+
+        if (sevenDaysLater.after(now)) {
+            return false
+        }
+
+        return true
+    }
+
+    fun isFree(): Boolean {
+        return (requireMemberTier() == null) || !isSevenDaysOld()
+    }
+
     fun toReadArticle(channelItem: ChannelItem?): ReadArticle {
         return ReadArticle(
                 id = id,
