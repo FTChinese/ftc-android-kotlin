@@ -63,7 +63,7 @@ val noAccess = mapOf(
  * WVClient is use mostly to handle webUrl clicks loaded into
  * ViewPagerFragment.
  */
-class WVClient(
+open class WVClient(
         private val activity: Activity?
 ) : WebViewClient(), AnkoLogger {
 
@@ -103,7 +103,7 @@ class WVClient(
         fun onOpenGraphEvaluated(result: String) {}
     }
 
-    fun setOnClickListener(listener: OnWebViewInteractionListener?) {
+    fun setWVInteractionListener(listener: OnWebViewInteractionListener?) {
         mListener = listener
     }
 

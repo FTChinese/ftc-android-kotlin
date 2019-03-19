@@ -106,7 +106,7 @@ class ChannelFragment : Fragment(),
         }
 
         val wvClient = WVClient(activity)
-        wvClient.setOnClickListener(this)
+        wvClient.setWVInteractionListener(this)
 
         web_view.apply {
 
@@ -445,6 +445,9 @@ class ChannelFragment : Fragment(),
         info("Selected item: $channelItem")
         
         channelItem.withMeta(channelMeta)
+
+        info("Select item: $channelItem")
+
         /**
          * {
          * "id": "007000049",
@@ -465,6 +468,8 @@ class ChannelFragment : Fragment(),
                 category = channelItem.type,
                 name = channelItem.title
         )
+
+        info("Select item in channel source: $channelSource")
 
         when (channelSource?.requiredTier) {
             Tier.STANDARD -> {
@@ -494,40 +499,23 @@ class ChannelFragment : Fragment(),
 
         info("Channel source do not require membership")
 
-        if (channelItem.requireStandard()) {
-            info("Content required standard member")
-            val granted = activity?.shouldGrantStandard(
-                    account,
-                    paywallSource
-            ) ?: return
-
-            if (granted) {
-                openArticle(channelItem)
-            }
+        if (channelItem.isFree()) {
+            info("Open a free article")
+            openArticle(channelItem)
 
             return
         }
 
-        info("Article do not require standard")
 
-        if (channelItem.requirePremium()) {
-            info("Content required premium member")
+        info("Content required standard member")
+        val granted = activity?.shouldGrantStandard(
+                account,
+                paywallSource
+        ) ?: return
 
-            val granted = activity?.shouldGrantPremium(
-                    account,
-                    paywallSource
-            ) ?: return
-
-            if (granted) {
-                openArticle(channelItem)
-            }
-
-            return
+        if (granted) {
+            openArticle(channelItem)
         }
-
-        info("Article do not require premium")
-
-        openArticle(channelItem)
     }
 
     private fun openColumn(item: ChannelItem) {
@@ -543,6 +531,8 @@ class ChannelFragment : Fragment(),
     }
 
     private fun openArticle(item: ChannelItem) {
+        info("Open article for an channel item: $item")
+
         when (item.type) {
             ChannelItem.TYPE_STORY,
             ChannelItem.TYPE_PREMIUM -> {
@@ -551,7 +541,7 @@ class ChannelFragment : Fragment(),
             ChannelItem.TYPE_INTERACTIVE -> {
                 when (item.subType) {
                     ChannelItem.SUB_TYPE_RADIO -> {
-                        ArticleActivity.start(activity, item)
+                        ArticleActivity.startWeb(activity, item)
                     }
                     else -> {
                         ArticleActivity.startWeb(context, item)
