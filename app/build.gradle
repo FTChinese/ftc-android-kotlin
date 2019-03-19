@@ -67,15 +67,61 @@ android {
         }
     }
 
-//    flavorDimensions "version"
-//    productFlavors {
-//        google {
-//            dimension "version"
-//        }
-//        xiaomi {
-//            dimension "version"
-//        }
-//    }
+    flavorDimensions "appStore"
+    productFlavors {
+        google {
+            dimension "appStore"
+            versionNameSuffix "-google"
+        }
+        xiaomi {
+            dimension "appStore"
+            versionNameSuffix "-xiaomi"
+        }
+        huawei {
+            dimension "appStore"
+            versionNameSuffix "-huawei"
+        }
+        baidu {
+            dimension "appStore"
+            versionNameSuffix "-baidu"
+        }
+        sanliuling {
+            dimension "appStore"
+            versionNameSuffix "-360"
+        }
+        ftc {
+            dimension "appStore"
+            versionNameSuffix "-ftc"
+        }
+        tencent {
+            dimension "appStore"
+            versionNameSuffix "-tencent"
+        }
+        samsung {
+            dimension "appStore"
+            versionNameSuffix "-samsung"
+        }
+        meizu {
+            dimension "appStore"
+            versionNameSuffix "-meizu"
+        }
+        wandoujia {
+            dimension "appStore"
+            versionNameSuffix "-wandoujia"
+        }
+        anzhi {
+            dimension "appStore"
+            versionNameSuffix "-anzhi"
+        }
+        jiuyi {
+            dimension "appStore"
+            versionNameSuffix "-91"
+        }
+        anzhuoshichang {
+            dimension "appStore"
+            versionNameSuffix "-anzhuoshichang"
+        }
+    }
 
     testOptions {
         unitTests {
