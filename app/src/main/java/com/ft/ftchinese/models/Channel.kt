@@ -236,16 +236,20 @@ data class ChannelItem(
 
         val queryValue = flavorQuery[BuildConfig.FLAVOR]
 
-//        http://www.ftchinese.com/?utm_source=marketing&utm_medium=androidmarket&utm_campaign=an_huawei
-        return try {
-            Uri.parse(url).buildUpon()
-                    .appendQueryParameter("utm_source", "marketing")
-                    .appendQueryParameter("utm_mediu", "androidmarket")
-                    .appendQueryParameter("utm_campaign", queryValue)
-                    .build()
-                    .toString()
-        } catch (e: Exception) {
-            ""
+        return if (queryValue == null) {
+            url
+        } else {
+            // http://www.ftchinese.com/?utm_source=marketing&utm_medium=androidmarket&utm_campaign=an_huawei
+            return try {
+                Uri.parse(url).buildUpon()
+                        .appendQueryParameter("utm_source", "marketing")
+                        .appendQueryParameter("utm_mediu", "androidmarket")
+                        .appendQueryParameter("utm_campaign", queryValue)
+                        .build()
+                        .toString()
+            } catch (e: Exception) {
+                ""
+            }
         }
     }
 

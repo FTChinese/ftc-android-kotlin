@@ -211,11 +211,13 @@ class WebContentFragment : Fragment(),
 
         val queryValue = flavorQuery[BuildConfig.FLAVOR]
 
-        builder.appendQueryParameter("utm_source", "marketing")
-                .appendQueryParameter("utm_mediu", "androidmarket")
-                .appendQueryParameter("utm_campaign", queryValue)
-                .build()
-                .toString()
+        if (queryValue != null) {
+            builder.appendQueryParameter("utm_source", "marketing")
+                    .appendQueryParameter("utm_mediu", "androidmarket")
+                    .appendQueryParameter("utm_campaign", queryValue)
+                    .build()
+                    .toString()
+        }
 
         return builder.build().toString()
     }
