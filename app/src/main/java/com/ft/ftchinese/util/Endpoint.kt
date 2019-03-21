@@ -1,8 +1,8 @@
 package com.ft.ftchinese.util
 
 object NextApi {
-//    private const val BASE = "http://api.ftchinese.com/v1"
-    private const val BASE = "http://192.168.10.195:8000"
+    private const val BASE = "http://api.ftchinese.com/v1"
+//    private const val BASE = "http://192.168.10.195:8000"
     const val EMAIL_EXISTS = "$BASE/users/exists"
     const val LOGIN = "$BASE/users/login"
     const val SIGN_UP = "$BASE/users/signup"
@@ -23,8 +23,8 @@ object NextApi {
 }
 
 object SubscribeApi {
-//    private const val BASE = "http://www.ftacademy.cn/api/v1"
-    private const val BASE = "http://www.ftacademy.cn/api/sandbox"
+    private const val BASE = "http://www.ftacademy.cn/api/v1"
+//    private const val BASE = "http://www.ftacademy.cn/api/sandbox"
 //    private const val BASE = "http://192.168.10.195:8200"
     const val WX_UNIFIED_ORDER = "$BASE/wxpay/unified-order"
     const val WX_ORDER_QUERY = "$BASE/wxpay/query"
