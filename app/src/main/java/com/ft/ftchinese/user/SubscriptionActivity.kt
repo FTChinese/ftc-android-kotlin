@@ -71,6 +71,7 @@ class SubscriptionActivity : AppCompatActivity(),
 
         sessionManager = SessionManager.getInstance(this)
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        tracker = Analytics.getDefaultTracker(this)
 
         updateProductUI()
 
