@@ -1,10 +1,9 @@
 ##  (2019-03-21)
 
-
-
-
-## 2.0.0 (2019-03-21)
-
+* chore: switch to production api ([dc792ea](https://github.com/FTChinese/ftc-android-kotlin/commit/dc792ea))
+* chore: update kotlin to 1.3.20; update coroutines to 1.1.1; update anko to 0.10.8; update gradle bui ([e6790a9](https://github.com/FTChinese/ftc-android-kotlin/commit/e6790a9))
+* chore: update kotlin to 1.3.21 ([9921e0c](https://github.com/FTChinese/ftc-android-kotlin/commit/9921e0c))
+* chore: upgrade changelog ([41977ab](https://github.com/FTChinese/ftc-android-kotlin/commit/41977ab))
 * update: change to production api ([9faa6fe](https://github.com/FTChinese/ftc-android-kotlin/commit/9faa6fe))
 * update: sql schema ([ab163e7](https://github.com/FTChinese/ftc-android-kotlin/commit/ab163e7))
 * update: switch to sandbox for subscription ([729255e](https://github.com/FTChinese/ftc-android-kotlin/commit/729255e))
@@ -356,8 +355,6 @@
 * upgrade: support library to 1.0.0 ([f5b2f20](https://github.com/FTChinese/ftc-android-kotlin/commit/f5b2f20))
 * changed: update wechat to 5.3.1; update crashlytics to 2.9.9 ([3f5df5c](https://github.com/FTChinese/ftc-android-kotlin/commit/3f5df5c))
 * docs: explain what does isExpired do ([223d4ac](https://github.com/FTChinese/ftc-android-kotlin/commit/223d4ac))
-* chore: update kotlin to 1.3.20; update coroutines to 1.1.1; update anko to 0.10.8; update gradle bui ([e6790a9](https://github.com/FTChinese/ftc-android-kotlin/commit/e6790a9))
-* chore: update kotlin to 1.3.21 ([9921e0c](https://github.com/FTChinese/ftc-android-kotlin/commit/9921e0c))
 * dep: upgrade android gradle build to 3.3.1 ([51ecc4e](https://github.com/FTChinese/ftc-android-kotlin/commit/51ecc4e))
 * test: delete old test ([7870049](https://github.com/FTChinese/ftc-android-kotlin/commit/7870049))
 * test: json parser ([7ca8f2b](https://github.com/FTChinese/ftc-android-kotlin/commit/7ca8f2b))
