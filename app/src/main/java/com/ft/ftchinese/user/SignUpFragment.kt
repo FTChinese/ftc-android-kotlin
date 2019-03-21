@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Credentials
 import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.models.TokenManager
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.handleApiError
 import com.ft.ftchinese.util.handleException
@@ -16,7 +17,6 @@ import com.ft.ftchinese.util.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_sign_up.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 
@@ -25,7 +25,8 @@ class SignUpFragment : Fragment(), AnkoLogger {
     private var listener: OnCredentialsListener? = null
     private var email: String? = null
     private var hostType: Int? = null
-    private var sessionManager: SessionManager? = null
+    private lateinit var sessionManager: SessionManager
+    private lateinit var tokenManager: TokenManager
 
     private fun showProgress(show: Boolean) {
         listener?.onProgress(show)
@@ -40,6 +41,7 @@ class SignUpFragment : Fragment(), AnkoLogger {
         super.onAttach(context)
 
         sessionManager = SessionManager.getInstance(context)
+        tokenManager = TokenManager.getInstance(context)
 
         if (context is OnCredentialsListener) {
             listener = context
@@ -104,7 +106,7 @@ class SignUpFragment : Fragment(), AnkoLogger {
          * else use /users/signup
          */
         val unionId = when (hostType) {
-            HOST_BINDING_ACTIVITY -> sessionManager?.loadWxSession()?.unionId
+            HOST_BINDING_ACTIVITY -> sessionManager.loadWxSession()?.unionId
             else -> null
         }
 
@@ -114,7 +116,11 @@ class SignUpFragment : Fragment(), AnkoLogger {
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
                 val userId = withContext(Dispatchers.IO) {
-                    Credentials(email, password).signUp(unionId)
+                    Credentials(
+                            email = email,
+                            password = password,
+                            deviceToken = tokenManager.getToken()
+                    ).signUp(unionId)
                 }
 
                 showProgress(false)

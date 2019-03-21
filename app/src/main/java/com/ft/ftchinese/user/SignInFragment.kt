@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Credentials
+import com.ft.ftchinese.models.TokenManager
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.handleApiError
 import com.ft.ftchinese.util.handleException
@@ -24,6 +25,8 @@ class SignInFragment : Fragment(), AnkoLogger {
 //    private var sessionManager: SessionManager? = null
     private var email: String? = null
 
+    private lateinit var tokenManager: TokenManager
+
     private fun showProgress(show: Boolean) {
         listener?.onProgress(show)
     }
@@ -39,6 +42,8 @@ class SignInFragment : Fragment(), AnkoLogger {
         if (context is OnCredentialsListener) {
             listener = context
         }
+
+        tokenManager = TokenManager.getInstance(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -106,7 +111,11 @@ class SignInFragment : Fragment(), AnkoLogger {
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
                 val userId = withContext(Dispatchers.IO) {
-                    Credentials(email, password).login()
+                    Credentials(
+                            email = email,
+                            password = password,
+                            deviceToken = tokenManager.getToken()
+                    ).login()
                 }
 
                 showProgress(false)

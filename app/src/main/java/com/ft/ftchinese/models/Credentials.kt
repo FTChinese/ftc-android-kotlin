@@ -10,7 +10,8 @@ import org.json.JSONObject
 
 data class Credentials(
         val email: String,
-        val password: String
+        val password: String,
+        val deviceToken: String
 ) : AnkoLogger {
 
     fun login(): String? {
