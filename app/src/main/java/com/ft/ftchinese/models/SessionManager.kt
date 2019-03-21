@@ -8,7 +8,6 @@ import com.ft.ftchinese.util.parseLocalDate
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-// TODO change file name to account
 private const val SESSION_PREF_NAME = "account"
 private const val PREF_USER_ID = "id"
 private const val PREF_UNION_ID = "union_id"
