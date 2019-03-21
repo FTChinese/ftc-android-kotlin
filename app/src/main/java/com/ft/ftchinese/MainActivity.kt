@@ -602,7 +602,7 @@ class MainActivity : AppCompatActivity(),
 
     private fun checkDeviceToken() {
         val token = tokenManager.getToken()
-        info("Device token")
+        info("Device token $token")
     }
 
     private fun logAppOpen() {
