@@ -80,11 +80,14 @@ class Fetch : AnkoLogger {
         return this
     }
 
+    // Authorization: Bearer xxxxxxx
     fun setAcessKey(): Fetch {
         headers.set("Authorization", "Bearer ${BuildConfig.ACCESS_TOKEN}")
         return  this
     }
 
+    // X-Client-Type: android
+    // X-Client-Version: 2.0.0-google
     fun setClient(): Fetch {
         headers.set("X-Client-Type", "android")
                 .set("X-Client-Version", BuildConfig.VERSION_NAME)
@@ -107,11 +110,7 @@ class Fetch : AnkoLogger {
         return this
     }
 
-    fun setSessionId(sessId: String): Fetch {
-        headers.set("X-Session-Id", sessId)
-        return this
-    }
-
+    // Cache-Control: no-cache, no-store, no-transform
     fun noCache(): Fetch {
         disableCache = true
         return this
@@ -187,6 +186,8 @@ class Fetch : AnkoLogger {
      * For client error response (HTTP code > 400)
      */
     fun responseApi(): Pair<Response, String?> {
+        setAcessKey()
+
         /**
          * @throws NetworkException when sending request.
          */
