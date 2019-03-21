@@ -20,3 +20,15 @@ object FtcEvent {
 object AdSlot {
     const val APP_OPEN = "launch screen"
 }
+
+object GACategory {
+    const val APP_LAUNCH = "Android App Launch"
+    const val SUBSCRIPTION = "Subscription"
+}
+
+object GAAction {
+    const val SUCCESS = "Success"
+    const val DISPLAY = "Display"
+    const val TAP = "Tap Product"
+    const val PURCHASE = "Purchase"
+}

@@ -5,4 +5,8 @@ data class PaywallSource(
         val category: String,
         val name: String,
         val variant: Language? = null
-)
+) {
+    fun getGALable(): String {
+        return "$category/$id"
+    }
+}

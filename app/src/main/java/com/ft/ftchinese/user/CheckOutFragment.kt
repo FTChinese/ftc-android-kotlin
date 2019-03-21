@@ -17,6 +17,8 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.*
+import com.google.android.gms.analytics.HitBuilders
+import com.google.android.gms.analytics.Tracker
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -44,14 +46,15 @@ class CheckOutFragment : Fragment(), AnkoLogger {
     private var cycle: Cycle? = null
     private var payMethod: PayMethod? = null
     private var listener: OnProgressListener? = null
-
     private var price: Double? = null
-    private var wxApi: IWXAPI? = null
-    private var sessionManager: SessionManager? = null
-    private var orderManager: OrderManager? = null
-    private var firebaseAnalytics: FirebaseAnalytics? = null
+
     private var job: Job? = null
 
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private lateinit var orderManager: OrderManager
+    private lateinit var sessionManager: SessionManager
+    private lateinit var wxApi: IWXAPI
+    private lateinit var tracker: Tracker
 
     private val priceText: String
         get() = getString(R.string.formatter_price, price)
@@ -66,6 +69,21 @@ class CheckOutFragment : Fragment(), AnkoLogger {
 
     private fun allowAlipay(value: Boolean) {
         alipay_btn.isEnabled = value
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnProgressListener) {
+            listener = context
+        }
+
+        firebaseAnalytics = FirebaseAnalytics.getInstance(context)
+        sessionManager = SessionManager.getInstance(context)
+        orderManager = OrderManager.getInstance(context)
+
+        wxApi = WXAPIFactory.createWXAPI(context, BuildConfig.WX_SUBS_APPID)
+        wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
+        tracker = Analytics.getDefaultTracker(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -164,8 +182,8 @@ class CheckOutFragment : Fragment(), AnkoLogger {
             return
         }
 
-        val supportedApi = wxApi?.wxAppSupportAPI
-        if (supportedApi != null && supportedApi < com.tencent.mm.opensdk.constants.Build.PAY_SUPPORTED_SDK_INT) {
+        val supportedApi = wxApi.wxAppSupportAPI
+        if (supportedApi < com.tencent.mm.opensdk.constants.Build.PAY_SUPPORTED_SDK_INT) {
 
             toast(R.string.wxpay_not_supported)
             return
@@ -174,7 +192,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
         val tier = tier ?: return
         val cycle = cycle ?: return
         val payMethod = payMethod ?: return
-        val account = sessionManager?.loadAccount() ?: return
+        val account = sessionManager.loadAccount() ?: return
 
         showProgress(true)
         allowInput(false)
@@ -208,13 +226,13 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                 req.packageValue = wxOrder.`package`
                 req.sign = wxOrder.sign
 
-                wxApi?.registerApp(req.appId)
-                val result = wxApi?.sendReq(req)
+                wxApi.registerApp(req.appId)
+                val result = wxApi.sendReq(req)
 
                 info("Call sendReq result: $result")
 
                 // Save order details
-                if (result != null && result) {
+                if (result) {
                     val subs = Subscription(
                             orderId = wxOrder.ftcOrderId,
                             tier = tier,
@@ -224,7 +242,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                     )
 
                     // Save subscription details to shared preference so that we could use it in WXPayEntryActivity
-                    orderManager?.save(subs)
+                    orderManager.save(subs)
                 }
 
                 wxpayStart()
@@ -259,7 +277,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
 
         val tier = tier ?: return
         val cycle = cycle ?: return
-        val account = sessionManager?.loadAccount() ?: return
+        val account = sessionManager.loadAccount() ?: return
 
         showProgress(true)
         allowInput(false)
@@ -293,7 +311,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                 )
 
                 info("Save subscription order: $subs")
-                orderManager?.save(subs)
+                orderManager.save(subs)
 
                 val payResult = launchAlipay(aliOrder.param)
 
@@ -339,7 +357,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
 
         info("New membership: $updatedMembership")
 
-        sessionManager?.updateMembership(updatedMembership)
+        sessionManager.updateMembership(updatedMembership)
 
         toast(R.string.progress_refresh_account)
 
@@ -363,7 +381,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
          * late.
          */
         if (refreshedAccount.membership.isNewer(updatedMembership)) {
-            sessionManager?.saveAccount(refreshedAccount)
+            sessionManager.saveAccount(refreshedAccount)
         }
 
         activity?.setResult(Activity.RESULT_OK)
@@ -448,23 +466,11 @@ class CheckOutFragment : Fragment(), AnkoLogger {
         }
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is OnProgressListener) {
-            listener = context
-        }
 
-        firebaseAnalytics = FirebaseAnalytics.getInstance(context)
-        sessionManager = SessionManager.getInstance(context)
-        orderManager = OrderManager.getInstance(context)
-
-        wxApi = WXAPIFactory.createWXAPI(context, BuildConfig.WX_SUBS_APPID)
-        wxApi?.registerApp(BuildConfig.WX_SUBS_APPID)
-    }
 
     // When user started this activity, we can assume he is adding to cart.
     private fun logAddCartEvent() {
-        firebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle().apply {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle().apply {
             putString(FirebaseAnalytics.Param.ITEM_ID, tierCycleKey(tier, cycle))
             putString(FirebaseAnalytics.Param.ITEM_NAME, tier?.string())
             putString(FirebaseAnalytics.Param.ITEM_CATEGORY, cycle?.string())
@@ -474,29 +480,34 @@ class CheckOutFragment : Fragment(), AnkoLogger {
 
     private fun logCheckOutEvent() {
         // Begin to checkout event
-        firebaseAnalytics?.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
             putDouble(FirebaseAnalytics.Param.VALUE, price ?: 0.0)
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
             putString(FirebaseAnalytics.Param.METHOD, payMethod?.string())
         })
+
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.SUBSCRIPTION)
+                .setAction(GAAction.PURCHASE)
+                .build())
     }
 
     private fun logPurchaseEvent(subs: Subscription) {
-        firebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
             putDouble(FirebaseAnalytics.Param.VALUE, subs.netPrice)
             putString(FirebaseAnalytics.Param.METHOD, subs.payMethod.string())
         })
+
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.SUBSCRIPTION)
+                .setAction(GAAction.SUCCESS)
+                .build())
     }
 
     override fun onDetach() {
         super.onDetach()
         listener = null
-        firebaseAnalytics = null
-        sessionManager = null
-        orderManager = null
-
-        wxApi = null
 
         job?.cancel()
     }

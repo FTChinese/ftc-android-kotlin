@@ -9,6 +9,8 @@ import android.view.View
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.*
+import com.google.android.gms.analytics.HitBuilders
+import com.google.android.gms.analytics.Tracker
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.activity_subscription.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -47,10 +49,15 @@ private var defaultPaywallEntry = PaywallSource(
  *
  * When SubscriptionActivity received OK message from PaymentActvitiy, it should startForResult retrieving user data from server.
  */
-class SubscriptionActivity : AppCompatActivity(), AnkoLogger {
+class SubscriptionActivity : AppCompatActivity(),
+        ProductFragment.OnSelectProductListener,
+        AnkoLogger {
+
+    private var paywallSource: PaywallSource? = null
 
     private lateinit var sessionManager: SessionManager
     private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private lateinit var tracker: Tracker
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,12 +76,13 @@ class SubscriptionActivity : AppCompatActivity(), AnkoLogger {
 
         val sourceStr = intent.getStringExtra(EXTRA_PAYWALL_SOURCE) ?: return
 
-        val source = json.parse<PaywallSource>(sourceStr) ?: return
+        paywallSource = json.parse<PaywallSource>(sourceStr) ?: return
 
-        logEvent(source)
+        logDisplayPaywall()
     }
 
-    private fun logEvent(source: PaywallSource) {
+    private fun logDisplayPaywall() {
+        val source = paywallSource ?: return
         firebaseAnalytics.logEvent(FtcEvent.PAYWALL_FROM, Bundle().apply {
             putString(FirebaseAnalytics.Param.ITEM_ID, source.id)
             putString(FirebaseAnalytics.Param.ITEM_CATEGORY, source.category)
@@ -83,6 +91,23 @@ class SubscriptionActivity : AppCompatActivity(), AnkoLogger {
                 putString(FirebaseAnalytics.Param.ITEM_VARIANT, source.variant.name)
             }
         })
+
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.SUBSCRIPTION)
+                .setAction(GAAction.DISPLAY)
+                .setLabel(source.getGALable())
+                .build())
+    }
+
+    override fun onSelectProduct() {
+        val source = paywallSource ?: return
+
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.SUBSCRIPTION)
+                .setAction(GAAction.TAP)
+                .setLabel(source.getGALable())
+                .build())
+
     }
 
     private fun updateProductUI() {

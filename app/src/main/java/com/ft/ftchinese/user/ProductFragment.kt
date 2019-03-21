@@ -20,9 +20,18 @@ class ProductFragment : Fragment(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private var listener: OnSelectProductListener? = null
+
+    interface OnSelectProductListener {
+        fun onSelectProduct()
+    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
+
+        if (context is OnSelectProductListener) {
+            listener = context
+        }
 
         sessionManager = SessionManager.getInstance(context)
         firebaseAnalytics = FirebaseAnalytics.getInstance(context)
@@ -69,6 +78,8 @@ class ProductFragment : Fragment(), AnkoLogger {
                 return@setOnClickListener
             }
 
+            listener?.onSelectProduct()
+
             PaymentActivity.startForResult(
                     activity = activity,
                     requestCode = RequestCode.PAYMENT,
@@ -84,6 +95,8 @@ class ProductFragment : Fragment(), AnkoLogger {
                 CredentialsActivity.startForResult(activity)
                 return@setOnClickListener
             }
+
+            listener?.onSelectProduct()
 
             PaymentActivity.startForResult(
                     activity = activity,
@@ -115,6 +128,8 @@ class ProductFragment : Fragment(), AnkoLogger {
                 CredentialsActivity.startForResult(activity)
                 return@setOnClickListener
             }
+
+            listener?.onSelectProduct()
 
             PaymentActivity.startForResult(
                         activity = activity,
