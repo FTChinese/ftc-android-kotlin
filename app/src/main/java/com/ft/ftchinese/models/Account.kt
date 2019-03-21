@@ -2,6 +2,7 @@ package com.ft.ftchinese.models
 
 import com.ft.ftchinese.util.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 
 /**
@@ -50,13 +51,6 @@ data class Account(
      */
     val isFtcOnly: Boolean
         get() = id.isNotBlank() && unionId.isNullOrBlank()
-    /**
-     * Check if user can access paid content.
-     */
-    val canAccessPaidContent: Boolean
-        get() {
-            return (membership.isPaidMember && !membership.isExpired) || isVip
-        }
 
     val isMember: Boolean
         get() = membership.isPaidMember
@@ -190,8 +184,10 @@ data class Account(
 
         val fetch = Fetch().post("${SubscribeApi.ALI_ORDER}/${tier.string()}/${cycle.string()}")
 
+        info("Place alipay order. User id: $id, union id: $unionId")
+
         if (id.isNotBlank()) {
-            fetch.setUnionId(id)
+            fetch.setUserId(id)
         }
 
         if (!unionId.isNullOrBlank()) {
@@ -203,7 +199,6 @@ data class Account(
                 .setClient()
                 .body()
                 .responseApi()
-
 
         return if (body == null) {
             null
