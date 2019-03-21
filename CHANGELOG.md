@@ -1,5 +1,11 @@
 ##  (2019-03-21)
 
+
+
+
+## 2.0.0 (2019-03-21)
+
+* other: update change log ([638ac89](https://github.com/FTChinese/ftc-android-kotlin/commit/638ac89))
 * chore: switch to production api ([dc792ea](https://github.com/FTChinese/ftc-android-kotlin/commit/dc792ea))
 * chore: update kotlin to 1.3.20; update coroutines to 1.1.1; update anko to 0.10.8; update gradle bui ([e6790a9](https://github.com/FTChinese/ftc-android-kotlin/commit/e6790a9))
 * chore: update kotlin to 1.3.21 ([9921e0c](https://github.com/FTChinese/ftc-android-kotlin/commit/9921e0c))
