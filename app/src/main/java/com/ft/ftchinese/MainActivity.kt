@@ -25,6 +25,8 @@ import com.ft.ftchinese.splash.SplashScreenManager
 import com.ft.ftchinese.splash.splashScheduleFile
 import com.ft.ftchinese.user.*
 import com.ft.ftchinese.util.*
+import com.google.android.gms.analytics.HitBuilders
+import com.google.android.gms.analytics.Tracker
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -69,8 +71,10 @@ class MainActivity : AppCompatActivity(),
 
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var sessionManager: SessionManager
+    private lateinit var tokenManager: TokenManager
     private lateinit var splashManager: SplashScreenManager
     private lateinit var wxApi: IWXAPI
+    private lateinit var tracker: Tracker
 
     // Cache UI
     private var drawerHeaderTitle: TextView? = null
@@ -175,12 +179,14 @@ class MainActivity : AppCompatActivity(),
         }
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        tracker = Analytics.getDefaultTracker(this)
 
         // Register Wechat id
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
         wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
 
         sessionManager = SessionManager.getInstance(this)
+        tokenManager = TokenManager.getInstance(this)
 
         val menu = drawer_nav.menu
         val headerView = drawer_nav.getHeaderView(0)
@@ -207,6 +213,8 @@ class MainActivity : AppCompatActivity(),
         prepareSplash()
 
         info("onCreate finished. Build flavor: ${BuildConfig.FLAVOR}")
+
+        logAppOpen()
     }
 
     private fun setupBottomNav() {
@@ -465,6 +473,17 @@ class MainActivity : AppCompatActivity(),
             return
         }
 
+        // Read image and show it.
+        val drawable = withContext(Dispatchers.IO) {
+            cache.readDrawable(imageFileName)
+        }
+
+        if (drawable == null) {
+            info("Cannot load ad image")
+            showSystemUI()
+            return
+        }
+
         // Read this article on how inflate works:
         // https://www.bignerdranch.com/blog/understanding-androids-layoutinflater-inflate/
         val adView = View.inflate(this, R.layout.ad_view, null)
@@ -511,10 +530,6 @@ class MainActivity : AppCompatActivity(),
             info("Clicked ads")
         }
 
-        // Read image and show it.
-        val drawable = withContext(Dispatchers.IO) {
-            cache.readDrawable(imageFileName)
-        }
 
         adImage.setImageDrawable(drawable)
 
@@ -551,8 +566,6 @@ class MainActivity : AppCompatActivity(),
         super.onStart()
         info("onStart finished")
         updateSessionUI()
-
-
     }
 
     /**
@@ -583,6 +596,16 @@ class MainActivity : AppCompatActivity(),
     override fun onResume() {
         super.onResume()
 
+        checkDeviceToken()
+        info("onResume finished")
+    }
+
+    private fun checkDeviceToken() {
+        val token = tokenManager.getToken()
+        info("Device token")
+    }
+
+    private fun logAppOpen() {
         val bundle = Bundle().apply {
 
             val now = ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT)
@@ -593,7 +616,10 @@ class MainActivity : AppCompatActivity(),
 
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle)
 
-        info("onResume finished")
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.APP_LAUNCH)
+                .setAction(GAAction.SUCCESS)
+                .build())
     }
 
     override fun onPause() {
