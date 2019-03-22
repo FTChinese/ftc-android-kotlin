@@ -92,8 +92,8 @@ abstract class ArticleDb : RoomDatabase() {
                         context.applicationContext,
                         ArticleDb::class.java,
                         "article.db")
-                        .addMigrations(
-                                MIGRATION_7_8)
+//                        .addMigrations(
+//                                MIGRATION_7_8)
                         .fallbackToDestructiveMigration()
                         .build()
             }
