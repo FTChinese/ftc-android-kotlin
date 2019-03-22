@@ -264,9 +264,12 @@ class ChannelFragment : Fragment(),
             }
 
             showProgress(false)
-            if (data == null) {
+            if (data.isNullOrBlank()) {
+                toast(R.string.api_server_error)
                 return
             }
+
+            info("Data fetched from server: $data")
 
             renderAndLoad(data)
 
