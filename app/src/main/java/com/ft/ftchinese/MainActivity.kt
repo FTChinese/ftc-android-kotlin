@@ -53,6 +53,8 @@ class MainActivity : AppCompatActivity(),
     private var bottomDialog: BottomSheetDialog? = null
     private var mBackKeyPressed = false
 
+    private var avatarName: String? = null
+
     private var mExitJob: Job? = null
     private var mShowAdJob: Job? = null
     private var mDownloadAdJob: Job? = null
@@ -139,6 +141,8 @@ class MainActivity : AppCompatActivity(),
         if (wechat.avatarUrl == null) {
             return
         }
+
+        avatarName = wechat.avatarName
 
         GlobalScope.launch(Dispatchers.Main) {
             val bytes = withContext(Dispatchers.IO) {
@@ -327,6 +331,7 @@ class MainActivity : AppCompatActivity(),
 
     private fun logout() {
         sessionManager.logout()
+        cache.deleteFile(avatarName)
         updateSessionUI()
     }
 
