@@ -53,7 +53,7 @@ data class Account(
         get() = id.isNotBlank() && unionId.isNullOrBlank()
 
     val isMember: Boolean
-        get() = membership.isPaidMember
+        get() = membership.isPaidMember || isVip
 
     /**
      * Get a name used to display on UI.
