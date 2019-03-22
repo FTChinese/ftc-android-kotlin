@@ -216,7 +216,9 @@ class MainActivity : AppCompatActivity(),
 
         prepareSplash()
 
-        info("onCreate finished. Build flavor: ${BuildConfig.FLAVOR}")
+        if (BuildConfig.DEBUG) {
+            info("onCreate finished. Build flavor: ${BuildConfig.FLAVOR}. Is debug: ${BuildConfig.DEBUG}")
+        }
 
         logAppOpen()
     }
@@ -392,12 +394,17 @@ class MainActivity : AppCompatActivity(),
                 ?.membership
                 ?.tier
 
-        info("Prepare splash screen for next round")
+        if (BuildConfig.DEBUG) {
+            info("Prepare splash screen for next round")
+        }
+
 
         mDownloadAdJob = GlobalScope.launch(Dispatchers.IO) {
 
             if (!cache.exists(splashScheduleFile)) {
-                info("Splash schedule is not found. Fetch from remote.")
+                if (BuildConfig.DEBUG) {
+                    info("Splash schedule is not found. Fetch from remote.")
+                }
                 // Cache is not found.
                 val schedule = fetchAdSchedule()
                         ?: return@launch
@@ -408,11 +415,15 @@ class MainActivity : AppCompatActivity(),
 
             val body = cache.loadText(splashScheduleFile)
 
-            info("Splash schedule cache found")
+            if (BuildConfig.DEBUG) {
+                info("Splash schedule cache found")
+            }
 
             // If cache is not loaded, fetch remote data.
             if (body == null) {
-                info("Splash cache is found but empty")
+                if (BuildConfig.DEBUG) {
+                    info("Splash cache is found but empty")
+                }
 
                 val schedule = fetchAdSchedule() ?: return@launch
 
@@ -427,14 +438,19 @@ class MainActivity : AppCompatActivity(),
                 null
             }
 
-            info("Splash schedule: $schedule")
+            if (BuildConfig.DEBUG) {
+                info("Splash schedule: $schedule")
+            }
+
 
             splashManager.prepareNextRound(schedule, tier)
 
             // After cache is used, update cache.
-            info("Updating splash cache")
-            fetchAdSchedule()
+            if (BuildConfig.DEBUG) {
+                info("Updating splash cache")
+            }
 
+            fetchAdSchedule()
         }
     }
 
@@ -447,12 +463,18 @@ class MainActivity : AppCompatActivity(),
             val body = Fetch()
                     .get(LAUNCH_SCHEDULE_URL)
                     .responseString()
-                    ?: return null
+
+            if (body.isNullOrBlank()) {
+                return null
+            }
 
             cache.saveText(splashScheduleFile, body)
             Klaxon().parse<Schedule>(body)
         } catch (e: Exception) {
-            info(e)
+            if (BuildConfig.DEBUG) {
+                info(e)
+            }
+
             null
         }
     }
@@ -467,13 +489,19 @@ class MainActivity : AppCompatActivity(),
             return
         }
 
-        info("Splash screen ad: $screenAd")
+        if (BuildConfig.DEBUG) {
+            info("Splash screen ad: $screenAd")
+        }
+
 
         val imageFileName = screenAd.imageName
 
         // Check if the required ad image exists.
         if (imageFileName.isBlank() || !cache.exists(imageFileName)) {
-            info("Ad image ${screenAd.imageName} not found")
+            if (BuildConfig.DEBUG) {
+                info("Ad image ${screenAd.imageName} not found")
+            }
+
             showSystemUI()
             return
         }
@@ -484,7 +512,10 @@ class MainActivity : AppCompatActivity(),
         }
 
         if (drawable == null) {
-            info("Cannot load ad image")
+            if (BuildConfig.DEBUG) {
+                info("Cannot load ad image")
+            }
+
             showSystemUI()
             return
         }
@@ -493,7 +524,10 @@ class MainActivity : AppCompatActivity(),
         // https://www.bignerdranch.com/blog/understanding-androids-layoutinflater-inflate/
         val adView = View.inflate(this, R.layout.ad_view, null)
 
-        info("Starting to show ad. Hide system ui.")
+        if (BuildConfig.DEBUG) {
+            info("Starting to show ad. Hide system ui.")
+        }
+
         supportActionBar?.hide()
         adView.systemUiVisibility =
                 View.SYSTEM_UI_FLAG_LOW_PROFILE or
@@ -503,7 +537,10 @@ class MainActivity : AppCompatActivity(),
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
 
-        info("Added ad view")
+        if (BuildConfig.DEBUG) {
+            info("Added ad view")
+        }
+
         root_container.addView(adView)
 
         val adImage = adView.findViewById<ImageView>(R.id.ad_image)
@@ -518,7 +555,10 @@ class MainActivity : AppCompatActivity(),
             root_container.removeView(adView)
             showSystemUI()
             mShowAdJob?.cancel()
-            info("Skipped ads")
+            if (BuildConfig.DEBUG) {
+                info("Skipped ads")
+            }
+
 
             // Log user skipping advertisement action.
             firebaseAnalytics.logEvent(FtcEvent.AD_SKIP, bundle)
@@ -532,7 +572,10 @@ class MainActivity : AppCompatActivity(),
             mShowAdJob?.cancel()
 
             firebaseAnalytics.logEvent(FtcEvent.AD_CLICK, bundle)
-            info("Clicked ads")
+
+            if (BuildConfig.DEBUG) {
+                info("Clicked ads")
+            }
         }
 
 
@@ -546,7 +589,9 @@ class MainActivity : AppCompatActivity(),
             try {
                 screenAd.sendImpression()
             } catch (e: Exception) {
-                info("Send launch screen impression failed: ${e.message}")
+                if (BuildConfig.DEBUG) {
+                    info("Send launch screen impression failed: ${e.message}")
+                }
             }
         }
 
@@ -564,12 +609,17 @@ class MainActivity : AppCompatActivity(),
 
     override fun onRestart() {
         super.onRestart()
-        info("onRestart finished")
+        if (BuildConfig.DEBUG) {
+            info("onRestart finished")
+        }
     }
 
     override fun onStart() {
         super.onStart()
-        info("onStart finished")
+        if (BuildConfig.DEBUG) {
+            info("onStart finished")
+        }
+
         updateSessionUI()
     }
 
@@ -582,7 +632,9 @@ class MainActivity : AppCompatActivity(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        info("onActivityResult: requestCode $requestCode, resultCode $resultCode")
+        if (BuildConfig.DEBUG) {
+            info("onActivityResult: requestCode $requestCode, resultCode $resultCode")
+        }
 
         when (requestCode) {
             // If the result come from SignIn or SignUp, update UI to show mUser login state.
@@ -602,19 +654,27 @@ class MainActivity : AppCompatActivity(),
         super.onResume()
 
         checkDeviceToken()
-        info("onResume finished")
+
+        if (BuildConfig.DEBUG) {
+            info("onResume finished")
+        }
     }
 
     private fun checkDeviceToken() {
-        val token = tokenManager.getToken()
-        info("Device token $token")
+        if (BuildConfig.DEBUG) {
+            val token = tokenManager.getToken()
+            info("Device token $token")
+        }
     }
 
     private fun logAppOpen() {
         val bundle = Bundle().apply {
 
             val now = ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT)
-            info("APP_OPEN event: $now")
+
+            if (BuildConfig.DEBUG) {
+                info("APP_OPEN event: $now")
+            }
 
             putString(FirebaseAnalytics.Param.SUCCESS, now)
         }
@@ -629,7 +689,9 @@ class MainActivity : AppCompatActivity(),
 
     override fun onPause() {
         super.onPause()
-        info("onPause finished")
+        if (BuildConfig.DEBUG) {
+            info("onPause finished")
+        }
 
         mShowAdJob?.cancel()
         mDownloadAdJob?.cancel()
@@ -638,7 +700,9 @@ class MainActivity : AppCompatActivity(),
 
     override fun onStop() {
         super.onStop()
-        info("onStop finished")
+        if (BuildConfig.DEBUG) {
+            info("onStop finished")
+        }
 
         mShowAdJob?.cancel()
         mDownloadAdJob?.cancel()
@@ -724,7 +788,6 @@ class MainActivity : AppCompatActivity(),
      */
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
             R.id.action_search -> {
-                info("Clicked activity_main_search")
                 super.onOptionsItemSelected(item)
             }
             else -> {
@@ -737,11 +800,17 @@ class MainActivity : AppCompatActivity(),
      * Tab index starts from 0
      */
     override fun onTabSelected(tab: TabLayout.Tab?) {
-        info("Tab selected: ${tab?.position}")
+        if (BuildConfig.DEBUG) {
+            info("Tab selected: ${tab?.position}")
+        }
+
         val position = tab?.position ?: return
         val pages = mChannelPages ?: return
 
-        info("View item list event: ${pages[position]}")
+        if (BuildConfig.DEBUG) {
+            info("View item list event: ${pages[position]}")
+        }
+
 
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM_LIST, Bundle().apply {
             putString(FirebaseAnalytics.Param.ITEM_CATEGORY, pages[position].title)
@@ -749,11 +818,17 @@ class MainActivity : AppCompatActivity(),
     }
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
-        info("Tab reselected: ${tab?.position}")
+        if (BuildConfig.DEBUG) {
+            info("Tab reselected: ${tab?.position}")
+        }
+
     }
 
     override fun onTabUnselected(tab: TabLayout.Tab?) {
-        info("Tab unselected: ${tab?.position}")
+        if (BuildConfig.DEBUG) {
+            info("Tab unselected: ${tab?.position}")
+        }
+
     }
 
     private fun feedbackEmail() {
@@ -777,7 +852,10 @@ class MainActivity : AppCompatActivity(),
     inner class TabPagerAdapter(private var mPages: Array<ChannelSource>, fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
 
         override fun getItem(position: Int): androidx.fragment.app.Fragment {
-            info("TabPagerAdapter getItem $position. Data passed to ChannelFragment: ${mPages[position]}")
+            if (BuildConfig.DEBUG) {
+                info("TabPagerAdapter getItem $position. Data passed to ChannelFragment: ${mPages[position]}")
+            }
+
             return ChannelFragment.newInstance(mPages[position])
         }
 
