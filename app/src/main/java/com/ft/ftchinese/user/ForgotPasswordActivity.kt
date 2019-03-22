@@ -65,7 +65,7 @@ class ForgotPasswordActivity : AppCompatActivity(),
     }
 
     private fun sendLetter(email: String) {
-        if (isNetworkConnected()) {
+        if (!isNetworkConnected()) {
             toast(R.string.prompt_no_network)
 
             return
