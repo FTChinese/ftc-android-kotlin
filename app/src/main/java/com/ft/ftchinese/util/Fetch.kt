@@ -22,7 +22,7 @@ data class Reason(
         val field: String,
         val code: String
 ) {
-    val key: String = "$field}_$code"
+    val key: String = "${field}_$code"
 }
 
 class NetworkException(msg: String?, cause: Throwable?) : IOException(msg, cause)
