@@ -126,6 +126,7 @@ class UpdateNameFragment : Fragment(), AnkoLogger {
 
                 }
             } catch (e: ClientError) {
+                info(e)
                 showProgress(false)
                 allowInput(true)
 

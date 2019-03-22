@@ -271,6 +271,7 @@
     <string name="api_io_error">無法讀取數據</string>
     <string name="api_json_syntax">無法解析數據</string>
     <string name="api_empty_response">伺服器沒有回應</string>
+    <string name="api_name_taken">使用者名稱已被占用</string>
 
     <string name="pref_title_storage">存儲空間</string>
     <string name="pref_language">語言偏好</string>

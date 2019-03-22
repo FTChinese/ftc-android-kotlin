@@ -264,6 +264,7 @@
     <string name="api_unauthorized">没有访问服务器的权限</string>
     <string name="api_server_error">服务器错误，请稍后再试</string>
     <string name="api_email_server_down">邮件服务器暂时不可用</string>
+    <string name="api_name_taken">用户名已被占用</string>
 
     <string name="api_empty_url">请求地址错误</string>
     <string name="api_network_failure">网络错误</string>

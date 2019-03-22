@@ -214,6 +214,7 @@ fun Activity.handleApiError(resp: ClientError) {
             "email_invalid" -> toast(R.string.error_invalid_email)
             "password_invalid" -> toast(R.string.error_invalid_password)
             "email_server_missing" -> toast(R.string.api_email_server_down)
+            "name_already_exists" -> toast(R.string.api_name_taken)
             else -> toast(resp.message)
         }
         return
