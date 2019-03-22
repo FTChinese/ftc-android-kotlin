@@ -94,6 +94,18 @@ class FileCache (private val context: Context) : AnkoLogger {
         }
     }
 
+    fun deleteFile(name: String?) {
+        if (name == null) {
+            return
+        }
+
+        try {
+            context.deleteFile(name)
+        } catch (e: Exception) {
+            info(e)
+        }
+    }
+
     /**
      * Read files from the the `raw` directory of the package.
      */
