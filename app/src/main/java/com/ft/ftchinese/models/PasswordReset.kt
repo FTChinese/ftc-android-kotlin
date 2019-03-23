@@ -18,6 +18,7 @@ data class PasswordReset(
 
         val (response, _)= Fetch()
                 .post(NextApi.PASSWORD_RESET)
+                .setTimeout(30)
                 .noCache()
                 .jsonBody(json.toJsonString(this))
                 .responseApi()

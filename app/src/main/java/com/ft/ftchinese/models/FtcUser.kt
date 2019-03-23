@@ -57,7 +57,9 @@ data class FtcUser(
     }
 
     fun requestVerification(): Boolean {
-        val (resp, _) = Fetch().post(NextApi.REQUEST_VERIFICATION)
+        val (resp, _) = Fetch()
+                .post(NextApi.REQUEST_VERIFICATION)
+                .setTimeout(30)
                 .noCache()
                 .setClient()
                 .setUserId(id)

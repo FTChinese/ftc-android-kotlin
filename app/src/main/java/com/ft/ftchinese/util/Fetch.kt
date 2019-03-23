@@ -9,6 +9,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 
 data class ClientError(
@@ -35,6 +36,7 @@ class Fetch : AnkoLogger {
     private var reqBody: RequestBody? = null
     private var request: Request? = null
     private var call: Call? = null
+    private var timeout: Int = 0
 
     private var disableCache = false
 
@@ -69,6 +71,12 @@ class Fetch : AnkoLogger {
 
     fun cancel() {
         call?.cancel()
+    }
+
+    // Set timeout in seconds
+    fun setTimeout(timeout: Int): Fetch {
+        this.timeout = timeout
+        return this
     }
 
     fun getRequest(): Request? {
@@ -258,7 +266,14 @@ class Fetch : AnkoLogger {
          * remote server accepted the request before the failure.
          * @throws IllegalStateException when the call has already been executed.
          */
-        val call = client.newCall(req)
+        val call = if (timeout != 0) {
+            client.newBuilder()
+                    .readTimeout(timeout.toLong(), TimeUnit.SECONDS)
+                    .build()
+                    .newCall(req)
+        } else {
+            client.newCall(req)
+        }
         this.call = call
 
         return try {
