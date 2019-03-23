@@ -45,7 +45,7 @@ const val HOST_MAILBOX = "api003.ftmailbox.com"
 const val HOST_FTA = "www.ftacademy.cn"
 
 val flavorQuery = mapOf(
-        "google" to "play_store",
+        "play" to "play_store",
         "xiaomi" to "an_xiaomi",
         "huawei" to "an_huawei",
         "baidu" to "an_baidu",
@@ -56,6 +56,6 @@ val flavorQuery = mapOf(
         "meizu" to "an_meizu",
         "wandoujia" to "an_wandoujia",
         "anzhi" to "an_anzhi",
-        "jiuyi" to "an_jiuyi",
+        "jiuyi" to "an_91",
         "anzhuoshichang" to "an_anzhuoshichang"
 )

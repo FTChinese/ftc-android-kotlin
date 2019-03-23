@@ -67,9 +67,9 @@ android {
 
     flavorDimensions "appStore"
     productFlavors {
-        google {
+        // For google play. Take this as the official version.
+        play {
             dimension "appStore"
-            versionNameSuffix "-google"
         }
         xiaomi {
             dimension "appStore"
