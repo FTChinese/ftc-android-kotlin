@@ -78,7 +78,7 @@
 
     <style name="OrigamiButton.Secondary">
         <item name="android:background">@drawable/button_secondary</item>
-        <item name="android:textColor">@color/colorTeal</item>
+        <item name="android:textColor">@color/button_text_state</item>
     </style>
 
     <style name="OrigamiButton.Secondary.Small">
