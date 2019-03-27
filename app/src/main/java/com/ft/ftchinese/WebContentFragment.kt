@@ -55,6 +55,8 @@ class WebContentFragment : Fragment(),
 
         // Check access here.
         if (!grantAccess(article)) {
+            PaywallTracker.source = article.toChannelItem()
+
             activity?.finish()
             return
         }
@@ -71,7 +73,7 @@ class WebContentFragment : Fragment(),
 
         val account = sessionManager.loadAccount()
 
-        if (activity?.shouldGrantStandard(account, null) == false) {
+        if (activity?.shouldGrantStandard(account) == false) {
             info("Cannot grant standard access to this article")
             return false
         }
@@ -99,15 +101,15 @@ class WebContentFragment : Fragment(),
                     channelItem?.title
                 } ?: "",
                 standfirst = og?.description ?: "",
-                keywords = og?.keywords ?: "",
+                keywords = channelItem?.tag ?: og?.keywords ?: "",
                 imageUrl = og?.image ?: "",
                 audioUrl = channelItem?.audioUrl ?: "",
                 radioUrl = channelItem?.radioUrl ?: "",
                 webUrl = channelItem?.getCanonicalUrl() ?: og?.url ?: "",
-                tier =  if (og?.keywords?.contains("会员专享") == true) {
-                    Tier.STANDARD.string()
-                } else {
-                    ""
+                tier =  when {
+                    og?.keywords?.contains("会员专享") == true -> Tier.STANDARD.string()
+                    og?.keywords?.contains("高端专享") == true -> Tier.PREMIUM.string()
+                    else -> ""
                 },
                 isWebpage = true
         )
