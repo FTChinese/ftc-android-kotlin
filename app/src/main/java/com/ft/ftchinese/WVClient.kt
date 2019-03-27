@@ -245,11 +245,12 @@ open class WVClient(
     private fun handleFtaLink(uri: Uri): Boolean {
         if (uri.lastPathSegment == "subscription.html") {
             val ccode = uri.getQueryParameter("ccode")
-            SubscriptionActivity.start(context = activity, source = PaywallSource(
-                    id = uri.host,
-                    category = uri.lastPathSegment,
-                    name = ccode
-            ))
+            PaywallTracker.source = ChannelItem(
+                    id = ccode,
+                    type = "promotion",
+                    title = "subscription.html"
+            )
+            SubscriptionActivity.start(context = activity)
         }
 
         return true
