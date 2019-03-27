@@ -295,7 +295,11 @@ class MainActivity : AppCompatActivity(),
                 R.id.action_login ->  CredentialsActivity.startForResult(this)
                 R.id.action_account -> AccountActivity.start(this)
                 R.id.action_subscription -> {
-                    PaywallTracker.source = null
+                    PaywallTracker.source = ChannelItem(
+                            id = "Subscription Menu",
+                            type = "Drawer",
+                            title = ""
+                    )
                     SubscriptionActivity.start(this)
                 }
                 R.id.action_my_subs -> MySubsActivity.start(this)

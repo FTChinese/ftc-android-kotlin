@@ -10,9 +10,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.Account
-import com.ft.ftchinese.models.Membership
-import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.activity_my_subscription.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -158,6 +156,12 @@ class MySubsActivity : AppCompatActivity(),
         val cycle = membership.cycle ?: return
 
         renew_btn.setOnClickListener {
+
+            PaywallTracker.source = ChannelItem(
+                    id = "RenewButton",
+                    type = "MySubscription",
+                    title = ""
+            )
 
             RenewalActivity.startForResult(
                     activity = this,
