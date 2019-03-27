@@ -104,6 +104,34 @@ data class ChannelItem(
     var adZone: String = ""
     var hideAd: Boolean = false
 
+    var langVariant: Language? = null
+
+    fun buildGALabel(): String {
+        return when (type) {
+            TYPE_STORY -> when {
+                langVariant == Language.ENGLISH -> "EnglishText/story/$id/en"
+                langVariant == Language.BILINGUAL -> "EnglishText/story/$id/ce"
+                isSevenDaysOld() -> "Archive/story/$id"
+                else -> "ExclusiveContent/premium/$id"
+            }
+            TYPE_PREMIUM -> {
+                "ExclusiveContent/premium/$id"
+            }
+            TYPE_INTERACTIVE -> when (subType) {
+                SUB_TYPE_RADIO -> "Radio/interactive/$id"
+                SUB_TYPE_SPEED_READING -> "SpeedReading/interactive/$id"
+                else -> when {
+                    tag.contains("FT研究院") && tag.contains("会员专享") -> "StandardIntelligence/interactive/$id"
+                    tag.contains("FT研究院") && tag.contains("高端专享") -> "PremiumIntelligence/interactive/$id"
+                    tag.contains("会员专享") -> "Standard/interactive/$id"
+                    tag.contains("高端专享") -> "Premium/interactive/$id"
+                    else -> "$type/$id"
+                }
+            }
+            else -> "$type/$id"
+        }
+    }
+
     fun withMeta(meta: ChannelMeta?): ChannelItem {
         if (meta == null) {
             return this
@@ -175,6 +203,10 @@ data class ChannelItem(
         }
 
         if (tag.contains("会员专享")) {
+            return false
+        }
+
+        if (tag.contains("高端专享")) {
             return false
         }
 
