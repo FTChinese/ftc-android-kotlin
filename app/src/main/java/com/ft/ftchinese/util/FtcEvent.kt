@@ -23,12 +23,23 @@ object AdSlot {
 
 object GACategory {
     const val APP_LAUNCH = "Android App Launch"
-    const val SUBSCRIPTION = "Subscription"
+    const val SUBSCRIPTION = "Android Privileges"
+    const val LAUNCH_AD = "Android Launch Ad"
 }
 
 object GAAction {
     const val SUCCESS = "Success"
     const val DISPLAY = "Display"
-    const val TAP = "Tap Product"
-    const val PURCHASE = "Purchase"
+    const val TAP = "Tap"
+    const val BUY_STANDARD_YEAR = "Buy: ftc_standard"
+    const val BUY_STANDARD_SUCCESS = "Buy success: ftc_standard"
+    const val BUY_STANDARD_FAIL = "Buy fail: ftc_standard"
+    const val BUY_STANDARD_MONTH = "Buy: ftc_standard_month"
+    const val BUY_PREMIUM = "Buy: ftc_premium"
+    const val BUY_PREMIUM_SUCCESS = "Buy success: ftc_premium"
+    const val BUY_PREMIUM_FAIL = "Buy fail: ftc_premium"
+    const val LAUNCH_AD_SENT = "Request"
+    const val LAUNCH_AD_SUCCESS = "Sent"
+    const val LAUNCH_AD_FAIL = "Fail"
+    const val LAUNCH_AD_CLICK = "Click"
 }
