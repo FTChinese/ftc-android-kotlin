@@ -80,8 +80,7 @@ data class ScreenAd(
         }
     }
 
-    // Notify that we successfully showed ad to user.
-    fun sendImpression()  {
+    fun impressionDest(): List<String> {
         val urls = mutableListOf<String>()
         if (impressionUrl1.isNotEmpty()) {
             urls.add(impressionUrl1)
@@ -95,21 +94,13 @@ data class ScreenAd(
         }
         val timestamp = Date().time / 1000
 
-        urls.forEach {
+        return urls.map {
             val urlStr = it.replace("[timestamp]", "$timestamp")
-            val url = Uri.parse(urlStr)
+            Uri.parse(urlStr)
                     .buildUpon()
                     .appendQueryParameter("fttime", "$timestamp")
                     .build()
                     .toString()
-
-            info("Send impression to $url")
-
-            try {
-                Fetch().get(url).responseString()
-            } catch (e: Exception) {
-                info("Error sending impression: ${e.message}")
-            }
 
         }
     }

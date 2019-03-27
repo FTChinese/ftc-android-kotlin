@@ -21,6 +21,7 @@ import androidx.appcompat.widget.SearchView
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.splash.Schedule
+import com.ft.ftchinese.splash.ScreenAd
 import com.ft.ftchinese.splash.SplashScreenManager
 import com.ft.ftchinese.splash.splashScheduleFile
 import com.ft.ftchinese.user.*
@@ -293,7 +294,10 @@ class MainActivity : AppCompatActivity(),
             when (it.itemId) {
                 R.id.action_login ->  CredentialsActivity.startForResult(this)
                 R.id.action_account -> AccountActivity.start(this)
-                R.id.action_subscription -> SubscriptionActivity.start(this)
+                R.id.action_subscription -> {
+                    PaywallTracker.source = null
+                    SubscriptionActivity.start(this)
+                }
                 R.id.action_my_subs -> MySubsActivity.start(this)
                 R.id.action_about -> AboutUsActivity.start(this)
                 R.id.action_feedback -> feedbackEmail()
@@ -571,7 +575,14 @@ class MainActivity : AppCompatActivity(),
             showSystemUI()
             mShowAdJob?.cancel()
 
+            // Log click event
             firebaseAnalytics.logEvent(FtcEvent.AD_CLICK, bundle)
+
+            tracker.send(HitBuilders.EventBuilder()
+                    .setCategory(GACategory.LAUNCH_AD)
+                    .setAction(GAAction.LAUNCH_AD_CLICK)
+                    .setLabel(screenAd.linkUrl)
+                    .build())
 
             if (BuildConfig.DEBUG) {
                 info("Clicked ads")
@@ -585,15 +596,7 @@ class MainActivity : AppCompatActivity(),
         info("Show timer")
 
         // send impressions in background.
-        GlobalScope.launch(Dispatchers.IO) {
-            try {
-                screenAd.sendImpression()
-            } catch (e: Exception) {
-                if (BuildConfig.DEBUG) {
-                    info("Send launch screen impression failed: ${e.message}")
-                }
-            }
-        }
+        sendImpression(screenAd)
 
         firebaseAnalytics.logEvent(FtcEvent.AD_VIEWED, bundle)
 
@@ -605,6 +608,40 @@ class MainActivity : AppCompatActivity(),
         root_container.removeView(adView)
 
         showSystemUI()
+    }
+
+    private fun sendImpression(screenAd: ScreenAd) {
+        GlobalScope.launch(Dispatchers.IO) {
+
+
+            screenAd.impressionDest().forEach {
+                try {
+                    tracker.send(HitBuilders.EventBuilder()
+                            .setCategory(GACategory.LAUNCH_AD)
+                            .setAction(GAAction.LAUNCH_AD_SENT)
+                            .setLabel(it)
+                            .build())
+
+                    Fetch().get(it).responseString()
+
+                    tracker.send(HitBuilders.EventBuilder()
+                            .setCategory(GACategory.LAUNCH_AD)
+                            .setAction(GAAction.LAUNCH_AD_SUCCESS)
+                            .setLabel(it)
+                            .build())
+                } catch (e: Exception) {
+                    if (BuildConfig.DEBUG) {
+                        info("Send launch screen impression failed: ${e.message}")
+                    }
+
+                    tracker.send(HitBuilders.EventBuilder()
+                            .setCategory(GACategory.LAUNCH_AD)
+                            .setAction(GAAction.LAUNCH_AD_FAIL)
+                            .setLabel(it)
+                            .build())
+                }
+            }
+        }
     }
 
     override fun onRestart() {
