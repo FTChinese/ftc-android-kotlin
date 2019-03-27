@@ -68,6 +68,7 @@ data class ReadArticle(
                 audioUrl = audioUrl,
                 radioUrl = radioUrl,
                 publishedAt = publishedAt,
+                tag = keywords,
                 webUrl = webUrl
         )
     }

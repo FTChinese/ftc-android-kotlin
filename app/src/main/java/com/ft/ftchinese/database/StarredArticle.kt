@@ -71,6 +71,7 @@ data class StarredArticle(
                 audioUrl = audioUrl,
                 radioUrl = radioUrl,
                 publishedAt = publishedAt,
+                tag = keywords,
                 webUrl = webUrl,
                 isWebpage = isWebpage
         )
