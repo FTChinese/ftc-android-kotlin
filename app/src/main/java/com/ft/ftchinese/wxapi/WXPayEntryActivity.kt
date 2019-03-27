@@ -11,6 +11,8 @@ import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.MySubsActivity
 import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.*
+import com.google.android.gms.analytics.HitBuilders
+import com.google.android.gms.analytics.Tracker
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
@@ -32,6 +34,33 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     private var sessionManager: SessionManager? = null
     private var orderManager: OrderManager? = null
     private var firebaseAnalytics: FirebaseAnalytics? = null
+    private var tracker: Tracker? = null
+
+    private fun logBuySuccessEvent(tier: Tier, cycle: Cycle) {
+       val action = when (tier) {
+           Tier.STANDARD -> GAAction.BUY_STANDARD_SUCCESS
+           Tier.PREMIUM -> GAAction.BUY_PREMIUM_SUCCESS
+       }
+
+        tracker?.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.SUBSCRIPTION)
+                .setAction(action)
+                .setLabel(PaywallTracker.source?.buildGALabel())
+                .build())
+    }
+
+    private fun logBuyFailedEvent(tier: Tier, cycle: Cycle) {
+        val action = when (tier) {
+            Tier.STANDARD -> GAAction.BUY_STANDARD_FAIL
+            Tier.PREMIUM -> GAAction.BUY_PREMIUM_FAIL
+        }
+
+        tracker?.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.SUBSCRIPTION)
+                .setAction(action)
+                .setLabel(PaywallTracker.source?.buildGALabel())
+                .build())
+    }
 
     private fun showProgress(value: Boolean) {
         if (value) {
@@ -53,6 +82,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         sessionManager = SessionManager.getInstance(this)
         orderManager = OrderManager.getInstance(this)
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        tracker = Analytics.getDefaultTracker(this)
 
         showUI(false)
 
@@ -70,18 +100,24 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         info("onPayFinish, errCode = ${resp?.errCode}")
 
         if (resp?.type == ConstantsAPI.COMMAND_PAY_BY_WX) {
+            val subs = orderManager?.load()
+
             when (resp.errCode) {
                 // 成功
                 // 展示成功页面
                 0 -> {
                     info("Start query order")
-                    queryOrder()
+                    queryOrder(subs)
                 }
                 // 错误
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
                 -1 -> {
                     showProgress(false)
                     showFailureUI(getString(R.string.wxpay_failed))
+
+                    if (subs != null) {
+                        logBuyFailedEvent(subs.tier, subs.cycle)
+                    }
                 }
                 // 用户取消
                 // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
@@ -93,8 +129,8 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         }
     }
 
-    private fun queryOrder() {
-        val subs = orderManager?.load()
+    private fun queryOrder(subs: Subscription?) {
+//        val subs = orderManager?.load()
         info("Subscription prior to confirmation: $subs")
 
         if (subs == null) {
@@ -106,6 +142,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
             return
         }
 
+        logBuySuccessEvent(subs.tier, subs.cycle)
 
         if (!isNetworkConnected()) {
             info(R.string.prompt_no_network)
@@ -279,6 +316,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
         if (account.membership.isPaidMember) {
             MySubsActivity.start(this)
         } else {
+            PaywallTracker.source = null
             SubscriptionActivity.start(this)
         }
 
