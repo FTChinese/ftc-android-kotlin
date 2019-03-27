@@ -5,12 +5,18 @@ import androidx.lifecycle.ViewModel
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.models.Language
 
+/**
+ * This is used as communication channel between ArticleActivity
+ * and StoryFragment.
+ */
 class LoadArticleViewModel : ViewModel() {
 
     val isBilingual = MutableLiveData<Boolean>()
     val currentLang = MutableLiveData<Language>()
     val article = MutableLiveData<StarredArticle>()
 
+    // Tell host activity that content is loaded.
+    // Host could then log view event.
     fun loaded(data: StarredArticle) {
         article.value = data
     }
