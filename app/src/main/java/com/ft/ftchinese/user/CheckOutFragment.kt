@@ -212,6 +212,8 @@ class CheckOutFragment : Fragment(), AnkoLogger {
 
                     allowInput(true)
 
+                    logBuyFailedEvent()
+
                     return@launch
                 }
 
@@ -252,6 +254,8 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                 allowInput(true)
                 handleClientError(e)
 
+                logBuyFailedEvent()
+
             } catch (e: Exception) {
                 e.printStackTrace()
 
@@ -259,6 +263,8 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                 allowInput(true)
 
                 activity?.handleException(e)
+
+                logBuyFailedEvent()
             }
         }
     }
@@ -296,6 +302,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                 if (aliOrder == null) {
                     allowInput(true)
                     toast(R.string.order_cannot_be_created)
+                    logBuyFailedEvent()
                     return@launch
                 }
 
@@ -325,6 +332,8 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                     toast(msg)
                     allowInput(true)
 
+                    logBuyFailedEvent()
+
                     return@launch
                 }
 
@@ -338,6 +347,8 @@ class CheckOutFragment : Fragment(), AnkoLogger {
 
                 handleClientError(e)
 
+                logBuyFailedEvent()
+
             } catch (e: Exception) {
                 info("API error when requesting Ali order: $e")
 
@@ -345,6 +356,8 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                 allowInput(true)
 
                 activity?.handleException(e)
+
+                logBuyFailedEvent()
             }
         }
     }
@@ -476,6 +489,26 @@ class CheckOutFragment : Fragment(), AnkoLogger {
             putString(FirebaseAnalytics.Param.ITEM_CATEGORY, cycle?.string())
             putLong(FirebaseAnalytics.Param.QUANTITY, 1)
         })
+
+        // Log buy event
+        val action = when(tier) {
+            Tier.STANDARD -> {
+                when (cycle) {
+                    Cycle.YEAR -> GAAction.BUY_STANDARD_YEAR
+                    Cycle.MONTH -> GAAction.BUY_STANDARD_MONTH
+                    else -> return
+                }
+            }
+            Tier.PREMIUM -> {
+                GAAction.BUY_PREMIUM
+            }
+            else -> return
+        }
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.SUBSCRIPTION)
+                .setAction(action)
+                .setLabel(PaywallTracker.source?.buildGALabel())
+                .build())
     }
 
     private fun logCheckOutEvent() {
@@ -485,11 +518,6 @@ class CheckOutFragment : Fragment(), AnkoLogger {
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
             putString(FirebaseAnalytics.Param.METHOD, payMethod?.string())
         })
-
-        tracker.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(GAAction.PURCHASE)
-                .build())
     }
 
     private fun logPurchaseEvent(subs: Subscription) {
@@ -499,9 +527,32 @@ class CheckOutFragment : Fragment(), AnkoLogger {
             putString(FirebaseAnalytics.Param.METHOD, subs.payMethod.string())
         })
 
+        // Log buy success event
+        val action = when (tier) {
+            Tier.STANDARD -> GAAction.BUY_STANDARD_SUCCESS
+            Tier.PREMIUM -> GAAction.BUY_PREMIUM_SUCCESS
+            else -> return
+        }
+
         tracker.send(HitBuilders.EventBuilder()
                 .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(GAAction.SUCCESS)
+                .setAction(action)
+                .setLabel(PaywallTracker.source?.buildGALabel())
+                .build())
+    }
+
+    private fun logBuyFailedEvent() {
+        // Log buy success event
+        val action = when (tier) {
+            Tier.STANDARD -> GAAction.BUY_STANDARD_FAIL
+            Tier.PREMIUM -> GAAction.BUY_PREMIUM_FAIL
+            else -> return
+        }
+
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.SUBSCRIPTION)
+                .setAction(action)
+                .setLabel(PaywallTracker.source?.buildGALabel())
                 .build())
     }
 

@@ -299,7 +299,7 @@ class StoryFragment : Fragment(),
 
         val account = sessionManager.loadAccount()
 
-        if (activity?.shouldGrantStandard(account, null) == false) {
+        if (activity?.shouldGrantStandard(account) == false) {
             info("Cannot grant standard access to this article")
             return false
         }

@@ -18,12 +18,6 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-private var defaultPaywallEntry = PaywallSource(
-        id = "drawer",
-        category = "drawer",
-        name = "drawer"
-)
-
 /**
  * There are three entry point for SuscriptionActivity:
  * 1. User clicked Subscription button on sidebar or is trying to reading restricted contents;
@@ -50,10 +44,7 @@ private var defaultPaywallEntry = PaywallSource(
  * When SubscriptionActivity received OK message from PaymentActvitiy, it should startForResult retrieving user data from server.
  */
 class SubscriptionActivity : AppCompatActivity(),
-        ProductFragment.OnSelectProductListener,
         AnkoLogger {
-
-    private var paywallSource: PaywallSource? = null
 
     private lateinit var sessionManager: SessionManager
     private lateinit var firebaseAnalytics: FirebaseAnalytics
@@ -75,41 +66,28 @@ class SubscriptionActivity : AppCompatActivity(),
 
         updateProductUI()
 
-        val sourceStr = intent.getStringExtra(EXTRA_PAYWALL_SOURCE) ?: return
-
-        paywallSource = json.parse<PaywallSource>(sourceStr) ?: return
 
         logDisplayPaywall()
     }
 
     private fun logDisplayPaywall() {
-        val source = paywallSource ?: return
+        val channelItem = PaywallTracker.source ?: return
         firebaseAnalytics.logEvent(FtcEvent.PAYWALL_FROM, Bundle().apply {
-            putString(FirebaseAnalytics.Param.ITEM_ID, source.id)
-            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, source.category)
-            putString(FirebaseAnalytics.Param.ITEM_NAME, source.name)
-            if (source.variant != null) {
-                putString(FirebaseAnalytics.Param.ITEM_VARIANT, source.variant.name)
+            putString(FirebaseAnalytics.Param.ITEM_ID, channelItem.id)
+            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, channelItem.type)
+            putString(FirebaseAnalytics.Param.ITEM_NAME, channelItem.title)
+            if (channelItem.langVariant != null) {
+                putString(FirebaseAnalytics.Param.ITEM_VARIANT, channelItem.langVariant?.name)
             }
         })
 
         tracker.send(HitBuilders.EventBuilder()
                 .setCategory(GACategory.SUBSCRIPTION)
                 .setAction(GAAction.DISPLAY)
-                .setLabel(source.getGALable())
+                .setLabel(channelItem.buildGALabel())
                 .build())
     }
 
-    override fun onSelectProduct() {
-        val source = paywallSource ?: return
-
-        tracker.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(GAAction.TAP)
-                .setLabel(source.getGALable())
-                .build())
-
-    }
 
     private fun updateProductUI() {
 
@@ -158,18 +136,13 @@ class SubscriptionActivity : AppCompatActivity(),
     }
 
     companion object {
-        private const val EXTRA_PAYWALL_SOURCE = "extra_paywall_source"
         /**
          * WxPayEntryActivity will call this function after successful payment.
          * It is meaningless to record such kind of automatically invocation.
          * Pass null to source to indicate that we do not want to record this action.
          */
-        fun start(context: Context?, source: PaywallSource? = defaultPaywallEntry) {
-            val intent = Intent(context, SubscriptionActivity::class.java).apply {
-                if (source != null) {
-                    putExtra(EXTRA_PAYWALL_SOURCE, json.toJsonString(source))
-                }
-            }
+        fun start(context: Context?) {
+            val intent = Intent(context, SubscriptionActivity::class.java)
 
             context?.startActivity(intent)
         }

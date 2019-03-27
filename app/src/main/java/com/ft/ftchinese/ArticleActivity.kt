@@ -153,18 +153,15 @@ class ArticleActivity : AppCompatActivity(),
         lang_en_btn.setOnClickListener {
             val account = sessionManager.loadAccount()
 
-            val grant = shouldGrantStandard(
-                    account,
-                    PaywallSource(
-                            id = article?.id ?: "",
-                            category = article?.type ?: "",
-                            name = article?.title ?: "",
-                            variant = Language.ENGLISH
-                    )
-            )
+            val grant = shouldGrantStandard(account)
 
             if (!grant) {
                 disableLangSwitch()
+
+                val item = article?.toChannelItem()
+                item?.langVariant = Language.ENGLISH
+                PaywallTracker.source = item
+
                 return@setOnClickListener
             }
 
@@ -174,18 +171,15 @@ class ArticleActivity : AppCompatActivity(),
         lang_bi_btn.setOnClickListener {
             val account = sessionManager.loadAccount()
 
-            val grant = shouldGrantStandard(
-                    account,
-                    PaywallSource(
-                            id = article?.id ?: "",
-                            category = article?.type ?: "",
-                            name = article?.title ?: "",
-                            variant = Language.ENGLISH
-                    )
-            )
+            val grant = shouldGrantStandard(account)
 
             if (!grant) {
                 disableLangSwitch()
+
+                val item = article?.toChannelItem()
+                item?.langVariant = Language.BILINGUAL
+                PaywallTracker.source = item
+
                 return@setOnClickListener
             }
 

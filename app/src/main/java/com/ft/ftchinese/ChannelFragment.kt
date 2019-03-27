@@ -264,12 +264,12 @@ class ChannelFragment : Fragment(),
             }
 
             showProgress(false)
+
+            // If server returned empty data.
             if (data.isNullOrBlank()) {
                 toast(R.string.api_server_error)
                 return
             }
-
-            info("Data fetched from server: $data")
 
             renderAndLoad(data)
 
@@ -466,19 +466,15 @@ class ChannelFragment : Fragment(),
 
         val account = sessionManager.loadAccount()
 
-        val paywallSource = PaywallSource(
-                id = channelItem.id,
-                category = channelItem.type,
-                name = channelItem.title
-        )
-
         info("Select item in channel source: $channelSource")
 
         when (channelSource?.requiredTier) {
             Tier.STANDARD -> {
-                val grant = activity?.shouldGrantStandard(account, paywallSource) ?: return
+                val grant = activity?.shouldGrantStandard(account) ?: return
 
                 if (!grant) {
+                    PaywallTracker.source = channelItem
+
                     return
                 }
 
@@ -486,12 +482,11 @@ class ChannelFragment : Fragment(),
                 return
             }
             Tier.PREMIUM -> {
-                val granted = activity?.shouldGrantPremium(
-                        account,
-                        paywallSource
-                ) ?: return
+                val granted = activity?.shouldGrantPremium(account) ?: return
 
                 if (!granted) {
+                    PaywallTracker.source = channelItem
+
                     return
                 }
 
@@ -509,15 +504,13 @@ class ChannelFragment : Fragment(),
             return
         }
 
-
         info("Content required standard member")
-        val granted = activity?.shouldGrantStandard(
-                account,
-                paywallSource
-        ) ?: return
+        val granted = activity?.shouldGrantStandard(account) ?: return
 
         if (granted) {
             openArticle(channelItem)
+        } else {
+            PaywallTracker.source = channelItem
         }
     }
 
