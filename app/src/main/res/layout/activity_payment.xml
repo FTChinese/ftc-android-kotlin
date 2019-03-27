@@ -64,8 +64,7 @@
             android:drawableStart="@drawable/alipay"
             android:drawablePadding="20dp"
             android:text="@string/pay_method_ali"
-            android:textSize="18sp"
-            android:onClick="onSelectPayMethod"/>
+            android:textSize="18sp"/>
 
         <RadioButton
             android:id="@+id/wxpay_btn"
@@ -75,8 +74,7 @@
             android:drawableStart="@drawable/wechat_pay"
             android:drawablePadding="20dp"
             android:text="@string/pay_method_wechat"
-            android:textSize="18sp"
-            android:onClick="onSelectPayMethod"/>
+            android:textSize="18sp"/>
     </RadioGroup>
 
 
@@ -87,8 +85,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:text="@string/check_out_default"
-        android:onClick="onCheckOut"/>
+        android:text="@string/check_out_default"/>
 
     <include layout="@layout/progress_bar"/>
 
