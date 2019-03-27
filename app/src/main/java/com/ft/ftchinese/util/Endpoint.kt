@@ -1,5 +1,7 @@
 package com.ft.ftchinese.util
 
+import com.ft.ftchinese.BuildConfig
+
 object NextApi {
     private const val BASE = "http://api.ftchinese.com/v1"
 //    private const val BASE = "http://192.168.10.195:8000"
@@ -23,15 +25,19 @@ object NextApi {
 }
 
 object SubscribeApi {
-    private const val BASE = "http://www.ftacademy.cn/api/v1"
-//    private const val BASE = "http://www.ftacademy.cn/api/sandbox"
+    private val BASE = if (BuildConfig.DEBUG) {
+        "http://www.ftacademy.cn/api/sandbox"
+    } else {
+        "http://www.ftacademy.cn/api/v1"
+    }
+//    private const val BASE =
 //    private const val BASE = "http://192.168.10.195:8200"
-    const val WX_UNIFIED_ORDER = "$BASE/wxpay/unified-order"
-    const val WX_ORDER_QUERY = "$BASE/wxpay/query"
-    const val ALI_ORDER = "$BASE/alipay/app-order"
+    val WX_UNIFIED_ORDER = "$BASE/wxpay/unified-order"
+    val WX_ORDER_QUERY = "$BASE/wxpay/query"
+    val ALI_ORDER = "$BASE/alipay/app-order"
 
-    const val WX_LOGIN = "$BASE/wx/oauth/login"
-    const val WX_REFRESH = "$BASE/wx/oauth/refresh"
+    val WX_LOGIN = "$BASE/wx/oauth/login"
+    val WX_REFRESH = "$BASE/wx/oauth/refresh"
 }
 
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
