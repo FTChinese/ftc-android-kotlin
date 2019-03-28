@@ -371,7 +371,28 @@ object Navigation {
                 "adZone": "english/speedread"
                 }
              */
-            ChannelSource("金融英语速读", name = "english_speedreading", contentUrl = "$MAILBOX_URL/channel/speedread.html?webview=ftcapp&bodyonly=yes", htmlType = HTML_TYPE_FRAGMENT),
+            ChannelSource(
+                    "金融英语速读",
+                    name = "english_speedreading",
+                    contentUrl = "$MAILBOX_URL/channel/speedread.html?webview=ftcapp&bodyonly=yes",
+                    htmlType = HTML_TYPE_FRAGMENT),
+            /**
+             * [
+            "title": "音乐之生",
+            "api": "https://api003.ftmailbox.com/channel/json.html?pageid=speedread&dfadfadfadfadf",
+            "listapi": "https://api003.ftmailbox.com/channel/lifeofasong.html?webview=ftcapp&bodyonly=yes",
+            "url":"http://www.ftchinese.com/channel/lifeofasong.html?webview=ftcapp",
+            "screenName":"english/learnenglish",
+            "coverTheme": "",
+            "new": "yes"
+            ],
+             */
+            ChannelSource(
+                    title = "音乐之生",
+                    name = "english_music",
+                    contentUrl = "https://api003.ftmailbox.com/channel/lifeofasong.html?webview=ftcapp&bodyonly=yes",
+                    htmlType = HTML_TYPE_FRAGMENT
+            ),
             /**
              * "meta": {
                 "title": "双语阅读",
