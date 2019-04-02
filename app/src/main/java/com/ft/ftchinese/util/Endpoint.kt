@@ -32,9 +32,9 @@ object SubscribeApi {
     }
 //    private const val BASE =
 //    private const val BASE = "http://192.168.10.195:8200"
-    val WX_UNIFIED_ORDER = "$BASE/wxpay/unified-order"
+    val WX_UNIFIED_ORDER = "$BASE/wxpay/app"
     val WX_ORDER_QUERY = "$BASE/wxpay/query"
-    val ALI_ORDER = "$BASE/alipay/app-order"
+    val ALI_ORDER = "$BASE/alipay/app"
 
     val WX_LOGIN = "$BASE/wx/oauth/login"
     val WX_REFRESH = "$BASE/wx/oauth/refresh"
