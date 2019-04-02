@@ -133,9 +133,6 @@ data class Account(
         } ?: listOf()
     }
 
-    /**
-     * TODO: add wx app id for each request.
-     */
     fun wxPlaceOrder(tier: Tier, cycle: Cycle): WxPrepayOrder? {
         val fetch = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${tier.string()}/${cycle.string()}")
 
