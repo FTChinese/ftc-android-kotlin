@@ -133,6 +133,9 @@ data class Account(
         } ?: listOf()
     }
 
+    /**
+     * TODO: add wx app id for each request.
+     */
     fun wxPlaceOrder(tier: Tier, cycle: Cycle): WxPrepayOrder? {
         val fetch = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${tier.string()}/${cycle.string()}")
 
@@ -147,6 +150,7 @@ data class Account(
         val (_, body) = fetch
                 .noCache()
                 .setClient()
+                .setAppId()
                 .body()
                 .responseApi()
 
@@ -171,6 +175,7 @@ data class Account(
 
         val (_, body) = fetch
                 .noCache()
+                .setAppId()
                 .responseApi()
 
         return if (body == null) {
@@ -197,6 +202,7 @@ data class Account(
         val (_, body) = fetch
                 .noCache()
                 .setClient()
+                .setAppId()
                 .body()
                 .responseApi()
 
