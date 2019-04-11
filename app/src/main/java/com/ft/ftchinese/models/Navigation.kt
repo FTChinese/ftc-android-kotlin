@@ -51,7 +51,7 @@ object Navigation {
             ChannelSource(
                     title = "首页",
                     name = "news_home",
-                    contentUrl = "$MAILBOX_URL/?webview=ftcapp&bodyonly=yes&maxB=1&backupfile=localbackup&showIAP=yes&pagetype=home&001&android=${BuildConfig.VERSION_CODE}",
+                    contentUrl = "$MAILBOX_URL/?webview=ftcapp&bodyonly=yes&maxB=1&backupfile=localbackup&showIAP=yes&pagetype=home&001",
                     htmlType = HTML_TYPE_FRAGMENT
             ),
             /**
