@@ -1,4 +1,4 @@
-package com.ft.ftchinese.util
+package com.ft.ftchinese.base
 
 import android.app.Activity
 import android.content.Context
@@ -9,6 +9,8 @@ import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.CredentialsActivity
 import com.ft.ftchinese.user.MySubsActivity
 import com.ft.ftchinese.user.SubscriptionActivity
+import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.util.NetworkException
 import org.jetbrains.anko.toast
 import java.io.IOException
 
