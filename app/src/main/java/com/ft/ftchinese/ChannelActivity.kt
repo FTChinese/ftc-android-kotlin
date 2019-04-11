@@ -15,6 +15,7 @@ import org.jetbrains.anko.toast
  * This is used to show a channel page, which consists of a list of article summaries.
  * It is similar to `MainActivity` except that it does not wrap a TabLayout.
  */
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class ChannelActivity : AppCompatActivity(), AnkoLogger {
 
     override fun onCreate(savedInstanceState: Bundle?) {

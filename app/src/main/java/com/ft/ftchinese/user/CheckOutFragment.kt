@@ -15,10 +15,7 @@ import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.getTierCycleText
-import com.ft.ftchinese.base.handleApiError
-import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.base.*
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.*
 import com.google.android.gms.analytics.HitBuilders
@@ -44,7 +41,8 @@ private const val PERMISSIONS_REQUEST_CODE = 1002
  * create an instance of this fragment.
  *
  */
-class CheckOutFragment : Fragment(), AnkoLogger {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class CheckOutFragment : ScopedFragment(), AnkoLogger {
 
     private var tier: Tier? = null
     private var cycle: Cycle? = null
@@ -201,7 +199,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
         showProgress(true)
         allowInput(false)
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
 
             try {
                 // Request server to create order
@@ -221,16 +219,16 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                     return@launch
                 }
 
-                info("Prepay order: ${wxOrder.ftcOrderId}, ${wxOrder.prepayid}")
+                info("Prepay order: ${wxOrder.ftcOrderId}, ${wxOrder.prepayId}")
 
                 val req = PayReq()
-                req.appId = wxOrder.appid
-                req.partnerId = wxOrder.partnerid
-                req.prepayId = wxOrder.prepayid
-                req.nonceStr = wxOrder.noncestr
+                req.appId = wxOrder.appId
+                req.partnerId = wxOrder.partnerId
+                req.prepayId = wxOrder.prepayId
+                req.nonceStr = wxOrder.nonce
                 req.timeStamp = wxOrder.timestamp
-                req.packageValue = wxOrder.`package`
-                req.sign = wxOrder.sign
+                req.packageValue = wxOrder.pkg
+                req.sign = wxOrder.signature
 
                 wxApi.registerApp(req.appId)
                 val result = wxApi.sendReq(req)
@@ -244,7 +242,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                             tier = tier,
                             cycle = cycle,
                             payMethod = payMethod,
-                            netPrice = wxOrder.price
+                            netPrice = wxOrder.netPrice
                     )
 
                     // Save subscription details to shared preference so that we could use it in WXPayEntryActivity
@@ -294,7 +292,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
         showProgress(true)
         allowInput(false)
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
 
             toast(R.string.request_order)
 
@@ -320,13 +318,23 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                         tier = tier,
                         cycle = cycle,
                         payMethod = PayMethod.ALIPAY,
-                        netPrice = aliOrder.price
+                        netPrice = aliOrder.netPrice
                 )
 
                 info("Save subscription order: $subs")
                 orderManager.save(subs)
 
-                val payResult = launchAlipay(aliOrder.param)
+                /**
+                 * Result is a map:
+                 * {resultStatus=6001, result=, memo=操作已经取消。}
+                 * {resultStatus=4000, result=, memo=系统繁忙，请稍后再试}
+                 * See https://docs.open.alipay.com/204/105301/ in section 同步通知参数说明
+                 * NOTE result field is JSON but you cannot use it as JSON.
+                 * You could only use it as a string
+                 */
+                val payResult = withContext(Dispatchers.IO) {
+                    PayTask(activity).payV2(aliOrder.param, true)
+                }
 
                 info("Alipay result: $payResult")
 
@@ -413,21 +421,6 @@ class CheckOutFragment : Fragment(), AnkoLogger {
         activity?.finish()
     }
 
-    /**
-     * Result is a map:
-     * {resultStatus=6001, result=, memo=操作已经取消。}
-     * {resultStatus=4000, result=, memo=系统繁忙，请稍后再试}
-     * See https://docs.open.alipay.com/204/105301/ in section 同步通知参数说明
-     * NOTE result field is JSON but you cannot use it as JSON.
-     * You could only use it as a string
-     */
-    private suspend fun launchAlipay(orderInfo: String): Map<String, String> {
-        // You must call payV2 in background! Otherwise it will simply give you resultStatus=4000
-        // without any clue.
-        return withContext(Dispatchers.IO) {
-            PayTask(activity).payV2(orderInfo, true)
-        }
-    }
 
     private fun stripePay() {
 

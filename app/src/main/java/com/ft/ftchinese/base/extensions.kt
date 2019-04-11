@@ -6,9 +6,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.user.CredentialsActivity
-import com.ft.ftchinese.user.MySubsActivity
-import com.ft.ftchinese.user.SubscriptionActivity
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.NetworkException
 import org.jetbrains.anko.toast
@@ -27,8 +24,6 @@ fun Activity.getActiveNetworkInfo(): NetworkInfo? {
         null
     }
 }
-
-
 
 fun Activity.isNetworkConnected(): Boolean {
 
@@ -122,63 +117,6 @@ fun Activity.getPriceCycleText(tier: Tier, cycle: Cycle): String? {
         )
         else -> null
     }
-}
-
-fun Activity.shouldGrantStandard(account: Account?): Boolean {
-    if (account == null) {
-      toast(R.string.prompt_login_to_read)
-      CredentialsActivity.startForResult(this)
-      return false
-    }
-
-    if (account.isVip) {
-        return true
-    }
-
-    if (!account.isMember) {
-        toast(R.string.prompt_subscribe_to_read)
-        SubscriptionActivity.start(this)
-        return false
-    }
-
-    if (account.membership.isExpired) {
-        toast(R.string.prompt_membership_expired)
-        MySubsActivity.start(this)
-        return false
-    }
-
-    return true
-}
-
-fun Activity.shouldGrantPremium(account: Account?): Boolean {
-    if (account == null) {
-        toast(R.string.prompt_login_to_read)
-        CredentialsActivity.startForResult(this)
-        return false
-    }
-
-    if (account.isVip) {
-        return true
-    }
-
-    if (!account.isMember) {
-        toast(R.string.prompt_subscribe_to_read)
-        SubscriptionActivity.start(this)
-        return false
-    }
-
-    if (account.membership.isExpired) {
-        toast(R.string.prompt_membership_expired)
-        MySubsActivity.start(this)
-        return false
-    }
-
-    if (account.membership.tier != Tier.PREMIUM) {
-        toast(R.string.prompt_premium_only)
-        return false
-    }
-
-    return true
 }
 
 // Using API 28. Unfortunately it also requires that you must increase min supported api.

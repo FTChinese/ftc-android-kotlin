@@ -63,6 +63,7 @@ val noAccess = mapOf(
  * WVClient is use mostly to handle webUrl clicks loaded into
  * ViewPagerFragment.
  */
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 open class WVClient(
         private val activity: Activity?
 ) : WebViewClient(), AnkoLogger {
@@ -245,11 +246,16 @@ open class WVClient(
     private fun handleFtaLink(uri: Uri): Boolean {
         if (uri.lastPathSegment == "subscription.html") {
             val ccode = uri.getQueryParameter("ccode")
-            PaywallTracker.source = ChannelItem(
-                    id = ccode,
-                    type = "promotion",
-                    title = "subscription.html"
-            )
+            if (ccode == null) {
+                PaywallTracker.source = null
+            } else {
+                PaywallTracker.source = ChannelItem(
+                        id = ccode,
+                        type = "promotion",
+                        title = "subscription.html"
+                )
+            }
+
             SubscriptionActivity.start(context = activity)
         }
 
@@ -410,15 +416,15 @@ open class WVClient(
      * Loads a story page who has JSON api on server
      * StoryActivity accepts a ChannelItem parameter.
      */
-    private fun startReading(channelItem: ChannelItem): Boolean {
-
-        when (channelItem.type) {
-            ChannelItem.TYPE_STORY, ChannelItem.TYPE_PREMIUM -> {
-                ArticleActivity.start(activity, channelItem)
-            }
-        }
-        return true
-    }
+//    private fun startReading(channelItem: ChannelItem): Boolean {
+//
+//        when (channelItem.type) {
+//            ChannelItem.TYPE_STORY, ChannelItem.TYPE_PREMIUM -> {
+//                ArticleActivity.start(activity, channelItem)
+//            }
+//        }
+//        return true
+//    }
 
     /**
      * Handle paths like:
@@ -495,7 +501,7 @@ open class WVClient(
                 }
 
                 val listPage = ChannelSource(
-                        title = pathToTitle[pageName] ?: "",
+                        title = if (pageName != null) pathToTitle[pageName] ?: "" else "",
                         name = name,
                         contentUrl = buildUrlForFullPage(uri),
                         htmlType = HTML_TYPE_COMPLETE
@@ -521,7 +527,7 @@ open class WVClient(
             }
 
             else -> {
-                val key = uri.lastPathSegment
+                val key = uri.lastPathSegment ?: ""
 
                 val listPage = ChannelSource(
                         title = pathToTitle[key] ?: "",

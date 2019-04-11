@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.models.Credentials
 import com.ft.ftchinese.models.TokenManager
 import com.ft.ftchinese.util.ClientError
@@ -19,10 +20,11 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
-class SignInFragment : Fragment(), AnkoLogger {
-    private var job: Job? = null
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class SignInFragment : ScopedFragment(),
+        AnkoLogger {
+
     private var listener: OnCredentialsListener? = null
-//    private var sessionManager: SessionManager? = null
     private var email: String? = null
 
     private lateinit var tokenManager: TokenManager
@@ -108,7 +110,7 @@ class SignInFragment : Fragment(), AnkoLogger {
         showProgress(true)
         enableInput(false)
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             try {
                 val userId = withContext(Dispatchers.IO) {
                     Credentials(
@@ -146,12 +148,6 @@ class SignInFragment : Fragment(), AnkoLogger {
                 activity?.handleException(e)
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        job?.cancel()
     }
 
     companion object {

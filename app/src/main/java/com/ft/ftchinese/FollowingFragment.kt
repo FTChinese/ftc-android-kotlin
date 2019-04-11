@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class FollowingFragment : Fragment(), AnkoLogger {
 
     private var adapter: Adapter? = null

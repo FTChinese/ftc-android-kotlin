@@ -14,6 +14,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.fragment_product.*
 import org.jetbrains.anko.AnkoLogger
 
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class ProductFragment : Fragment(), AnkoLogger {
 
     private var tier: Tier? = null

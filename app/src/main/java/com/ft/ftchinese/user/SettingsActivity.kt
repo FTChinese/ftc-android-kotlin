@@ -13,13 +13,12 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
 import com.ft.ftchinese.util.FileCache
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +44,10 @@ class SettingsActivity : AppCompatActivity() {
     }
 }
 
-class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class SettingsFragment : PreferenceFragmentCompat(),
+        CoroutineScope by MainScope(),
+        AnkoLogger {
 
 
     private var prefClearCache: Preference? = null
@@ -91,7 +93,7 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
         prefClearHistory?.setOnPreferenceClickListener {
 
-            GlobalScope.launch(Dispatchers.Main) {
+            launch {
                 model.truncate()
 
                 val totalItems = model.countRead()
@@ -107,11 +109,17 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
     private fun updateCacheUI() {
         prefClearCache?.summary = cache.space()
 
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val total = model.countRead()
 
             prefClearHistory?.summary = getString(R.string.summary_articles_read, total)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        cancel()
     }
 
     companion object {

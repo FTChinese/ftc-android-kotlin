@@ -2,11 +2,11 @@ package com.ft.ftchinese.user
 
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.models.FtcUser
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.ClientError
@@ -19,9 +19,9 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
-class UpdateNameFragment : Fragment(), AnkoLogger {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class UpdateNameFragment : ScopedFragment(), AnkoLogger {
 
-    private var job: Job? = null
     private var listener: OnUpdateAccountListener? = null
 
     private var sessionManager: SessionManager? = null
@@ -106,7 +106,7 @@ class UpdateNameFragment : Fragment(), AnkoLogger {
         showProgress(true)
         allowInput(false)
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
 
             try {
                 info("Start updating userName")
@@ -139,12 +139,6 @@ class UpdateNameFragment : Fragment(), AnkoLogger {
                 activity?.handleException(e)
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        job?.cancel()
     }
 
     companion object {

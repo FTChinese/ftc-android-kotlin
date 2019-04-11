@@ -3,9 +3,9 @@ package com.ft.ftchinese.user
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.base.handleApiError
@@ -16,10 +16,9 @@ import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.toast
 
-class UpdateAccountActivity : AppCompatActivity(),
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class UpdateAccountActivity : ScopedAppActivity(),
         OnUpdateAccountListener {
-
-    private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +64,9 @@ class UpdateAccountActivity : AppCompatActivity(),
         }
     }
 
+    /**
+     * After user updated account fields, re-fetch user account data.
+     */
     override fun onUpdateAccount() {
         if (!isNetworkConnected()) {
             toast(R.string.prompt_no_network)
@@ -83,7 +85,7 @@ class UpdateAccountActivity : AppCompatActivity(),
             return
         }
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             try {
                 val updatedAccount = withContext(Dispatchers.IO) {
                     account.refresh()

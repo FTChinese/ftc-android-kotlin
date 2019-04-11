@@ -7,13 +7,9 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.getMemberTypeText
-import com.ft.ftchinese.base.handleApiError
-import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.base.*
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.activity_my_subscription.*
@@ -23,11 +19,10 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-class MySubsActivity : AppCompatActivity(),
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class MySubsActivity : ScopedAppActivity(),
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
-
-    private var job: Job? = null
 
     private lateinit var viewAdapter: RowAdapter
     private lateinit var sessionManager: SessionManager
@@ -64,7 +59,7 @@ class MySubsActivity : AppCompatActivity(),
             return
         }
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             try {
                 val refreshedAccount = withContext(Dispatchers.IO) {
                     account.refresh()
@@ -149,6 +144,7 @@ class MySubsActivity : AppCompatActivity(),
 
     private fun updateUIRenewal(membership: Membership) {
 
+        // If user is not a member yet, do not show renew button.
         if (!membership.isRenewable) {
             showRenewal(false)
             return
@@ -214,6 +210,9 @@ class MySubsActivity : AppCompatActivity(),
         return arrayOf(row1, row2)
     }
 
+    /**
+     * After [RenewalActivity] finished, it sends activity result here.
+     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 

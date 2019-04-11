@@ -2,10 +2,10 @@ package com.ft.ftchinese.wxapi
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.AccountsMergeActivity
 import com.ft.ftchinese.user.CredentialsActivity
@@ -27,7 +27,8 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import kotlin.Exception
 
-class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     private lateinit var api: IWXAPI
     private lateinit var sessionManager: SessionManager
 
@@ -178,7 +179,7 @@ class WXEntryActivity : AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
     private fun login(code: String) {
         showProgress(true)
 
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             try {
                 // Get session data from API.
                 val sess = withContext(Dispatchers.IO) {

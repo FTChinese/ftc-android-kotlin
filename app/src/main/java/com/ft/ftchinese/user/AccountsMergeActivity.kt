@@ -3,9 +3,9 @@ package com.ft.ftchinese.user
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
@@ -23,7 +23,8 @@ import org.jetbrains.anko.toast
  * Show details of account to be bound, show a button to let
  * user to confirm the performance, or just deny accounts merging.
  */
-class AccountsMergeActivity : AppCompatActivity(), AnkoLogger {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class AccountsMergeActivity : ScopedAppActivity(), AnkoLogger {
 
     private var job: Job? = null
     private lateinit var sessionManager: SessionManager
@@ -150,7 +151,7 @@ class AccountsMergeActivity : AppCompatActivity(), AnkoLogger {
         showProgress(true)
         allowInput(false)
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             try {
                 val done = withContext(Dispatchers.IO) {
 

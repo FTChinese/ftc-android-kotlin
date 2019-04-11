@@ -3,9 +3,9 @@ package com.ft.ftchinese.user
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
@@ -19,11 +19,15 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-class BindEmailActivity : AppCompatActivity(),
+/**
+ * Started by [WxAccountFragment].
+ * This activity first checks whether the email-to-bind exists.
+ */
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class BindEmailActivity : ScopedAppActivity(),
         OnCredentialsListener,
         AnkoLogger {
 
-    private var job: Job? = null
     private lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,7 +78,7 @@ class BindEmailActivity : AppCompatActivity(),
     }
 
     /**
-     * Fetch email account.
+     * Fetch email account after used logged in.
      */
     override fun onLoggedIn(userId: String) {
         info("Load account for $userId")
@@ -86,11 +90,8 @@ class BindEmailActivity : AppCompatActivity(),
 
         onProgress(true)
 
-        /**
-         * TODO handle errors.
-         */
         try {
-            job = GlobalScope.launch(Dispatchers.Main) {
+            launch {
                 val ftcAccount = withContext(Dispatchers.IO) {
                     /**
                      * Must load account via /user/account since at this point the two account are still independent of each other.
@@ -150,6 +151,7 @@ class BindEmailActivity : AppCompatActivity(),
 
     /**
      * Handle wehcat user creating a new FTC account.
+     * Fetch user account after signed up.
      */
     override fun onSignedUp(userId: String) {
         if (!isNetworkConnected()) {
@@ -161,10 +163,7 @@ class BindEmailActivity : AppCompatActivity(),
 
         onProgress(true)
 
-        /**
-         * TODO handle errors.
-         */
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             try {
                 val ftcAccount = withContext(Dispatchers.IO) {
                     /**
@@ -204,12 +203,6 @@ class BindEmailActivity : AppCompatActivity(),
             }
 
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        job?.cancel()
     }
 
     companion object {

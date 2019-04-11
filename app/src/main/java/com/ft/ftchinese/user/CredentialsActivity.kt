@@ -3,9 +3,9 @@ package com.ft.ftchinese.user
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.models.FtcUser
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.RequestCode
@@ -16,12 +16,12 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-class CredentialsActivity : AppCompatActivity(),
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class CredentialsActivity : ScopedAppActivity(),
         OnCredentialsListener,
         AnkoLogger {
 
     private var sessionManager: SessionManager? = null
-    private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,7 +90,7 @@ class CredentialsActivity : AppCompatActivity(),
         toast(R.string.progress_fetching)
         onProgress(true)
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val account = withContext(Dispatchers.IO) {
                 user.fetchAccount()
             }
@@ -108,12 +108,6 @@ class CredentialsActivity : AppCompatActivity(),
 
             finish()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        job?.cancel()
     }
 
     companion object {

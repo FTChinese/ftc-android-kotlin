@@ -2,7 +2,6 @@ package com.ft.ftchinese.user
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,10 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.getTierCycleText
-import com.ft.ftchinese.base.handleApiError
-import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.base.*
 import com.ft.ftchinese.models.PayMethod
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.Subscription
@@ -27,12 +23,11 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-class MyOrdersActivity : AppCompatActivity(), AnkoLogger {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var viewAdapter: OrderAdapter
     private lateinit var sessionManager: SessionManager
-
-    private var job: Job? = null
 
     private fun showProgress(show: Boolean) {
         if (show) {
@@ -74,7 +69,7 @@ class MyOrdersActivity : AppCompatActivity(), AnkoLogger {
 
         showProgress(true)
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             try {
                 val orders = withContext(Dispatchers.IO) {
                     sessionManager.loadAccount()?.getOrders()
@@ -119,11 +114,6 @@ class MyOrdersActivity : AppCompatActivity(), AnkoLogger {
                     creationTime = getString(R.string.order_creation_time, formatISODateTime(it.createdAt))
             )
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job?.cancel()
     }
 
     companion object {

@@ -3,11 +3,11 @@ package com.ft.ftchinese.user
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
@@ -18,7 +18,8 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
-class EmailFragment : Fragment(),
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class EmailFragment : ScopedFragment(),
         AnkoLogger {
 
     private var listener: OnCredentialsListener? = null
@@ -99,7 +100,7 @@ class EmailFragment : Fragment(),
                 .appendQueryParameter("k", "email")
                 .appendQueryParameter("v", email)
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
 
             try {
                 val exists = withContext(Dispatchers.IO) {
@@ -144,12 +145,6 @@ class EmailFragment : Fragment(),
                 info(e)
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        job?.cancel()
     }
 
     companion object {

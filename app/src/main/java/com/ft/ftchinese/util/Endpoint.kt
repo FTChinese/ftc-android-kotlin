@@ -30,7 +30,7 @@ object SubscribeApi {
     } else {
         "http://www.ftacademy.cn/api/v1"
     }
-//    private const val BASE =
+//    private const val BASE = "http://www.ftacademy.cn/api/sandbox"
 //    private const val BASE = "http://192.168.10.195:8200"
     val WX_UNIFIED_ORDER = "$BASE/wxpay/app"
     val WX_ORDER_QUERY = "$BASE/wxpay/query"

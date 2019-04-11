@@ -15,7 +15,7 @@ import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.OnProgressListener
 import com.ft.ftchinese.util.json
-import com.ft.ftchinese.base.shouldGrantStandard
+import com.ft.ftchinese.user.shouldGrantStandard
 import com.ft.ftchinese.viewmodel.LoadArticleViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream
 private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
 private const val EXTRA_USE_JSON = "extra_use_json"
 
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class ArticleActivity : AppCompatActivity(),
         SocialShareFragment.OnShareListener,
         BottomToolFragment.OnItemClickListener,

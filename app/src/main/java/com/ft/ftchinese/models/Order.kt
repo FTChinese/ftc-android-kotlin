@@ -9,20 +9,22 @@ import com.ft.ftchinese.util.parseLocalDate
 
 data class AlipayOrder(
         val ftcOrderId: String,
-        val price: Double,
+        val listPrice: Double,
+        val netPrice: Double,
         val param: String
 )
 
 data class WxPrepayOrder(
         val ftcOrderId: String,
-        val price: Double,
-        val appid: String,
-        val partnerid: String,
-        val prepayid: String,
-        val noncestr: String,
+        val listPrice: Double,
+        val netPrice: Double,
+        val appId: String,
+        val partnerId: String,
+        val prepayId: String,
         val timestamp: String,
-        val `package`: String,
-        val sign: String
+        val nonce: String,
+        val pkg: String,
+        val signature: String
 )
 
 /**

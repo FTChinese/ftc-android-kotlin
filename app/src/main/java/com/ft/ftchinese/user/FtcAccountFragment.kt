@@ -2,13 +2,13 @@ package com.ft.ftchinese.user
 
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
@@ -23,11 +23,11 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
-class FtcAccountFragment : Fragment(),
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class FtcAccountFragment : ScopedFragment(),
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
-    private var job: Job? = null
     private var listener: OnSwitchAccountListener? = null
 
     private var sessionManager: SessionManager? = null
@@ -44,8 +44,6 @@ class FtcAccountFragment : Fragment(),
     private fun stopRefresh() {
         swipe_refresh.isRefreshing = false
     }
-
-
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -170,7 +168,7 @@ class FtcAccountFragment : Fragment(),
             return
         }
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             try {
                 val updatedAccount = withContext(Dispatchers.IO) {
                     account.refresh()
@@ -255,7 +253,7 @@ class FtcAccountFragment : Fragment(),
         // In the future, we might need to take into account user logged in via social platforms.
         val account = sessionManager?.loadAccount() ?: return
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             try {
                 val done = withContext(Dispatchers.IO) {
                     FtcUser(account.id).requestVerification()
@@ -295,12 +293,6 @@ class FtcAccountFragment : Fragment(),
                 activity?.handleApiError(resp)
             }
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        job?.cancel()
     }
 
     companion object {

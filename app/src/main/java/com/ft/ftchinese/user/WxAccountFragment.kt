@@ -3,12 +3,12 @@ package com.ft.ftchinese.user
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
@@ -25,7 +25,8 @@ import java.io.ByteArrayInputStream
 /**
  * Used by both [WxAccountActivity] and [AccountActivity]
  */
-class WxAccountFragment : Fragment(),
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class WxAccountFragment : ScopedFragment(),
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
@@ -34,7 +35,7 @@ class WxAccountFragment : Fragment(),
 //    private var wxSessManager: WxSessionManager? = null
     // Load drawable from filesDir.
     private var cache: FileCache? = null
-    private var job: Job? = null
+//    private var job: Job? = null
 
 
     override fun onAttach(context: Context) {
@@ -61,6 +62,7 @@ class WxAccountFragment : Fragment(),
 
         updateUI()
 
+        // Handle click bind button
         bind_email_btn.setOnClickListener {
             BindEmailActivity.startForResult(activity, RequestCode.BOUND)
         }
@@ -118,7 +120,7 @@ class WxAccountFragment : Fragment(),
             return
         }
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val bytes = withContext(Dispatchers.IO) {
                 wechat.downloadAvatar(context?.filesDir)
             } ?: return@launch
@@ -153,7 +155,7 @@ class WxAccountFragment : Fragment(),
          * WxSession data should not ever exist. If there is not WxSession data, you are not able to
          * access wechat oauth API.
          */
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             try {
 
                 refreshInfo()
@@ -222,12 +224,6 @@ class WxAccountFragment : Fragment(),
         }
 
         info("Refresh wechat info result: $refreshed")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        job?.cancel()
     }
 
     companion object {

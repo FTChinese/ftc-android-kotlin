@@ -27,14 +27,7 @@ data class Membership(
     // Determine is renewal button is visible.
     // Only check subscribed user.
     val isRenewable: Boolean
-        get() {
-
-            if (expireDate == null || cycle == null) return false
-
-            // Add one day more for leniency.
-            return expireDate
-                    .isBefore(cycle.endDate(LocalDate.now()).plusDays(1))
-        }
+        get() = expireDate != null && cycle != null
 
     // Check weather user is a member.
     // No check for expiration time.

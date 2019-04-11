@@ -3,10 +3,10 @@ package com.ft.ftchinese.user
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.text.Editable
 import android.view.View
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.models.PasswordReset
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.base.handleApiError
@@ -20,10 +20,10 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-class ForgotPasswordActivity : AppCompatActivity(),
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class ForgotPasswordActivity : ScopedAppActivity(),
         AnkoLogger {
 
-    private var job: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,7 +74,7 @@ class ForgotPasswordActivity : AppCompatActivity(),
         showProgress(true)
         allowInput(false)
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val passwordReset = PasswordReset(email)
 
             try {
@@ -129,12 +129,6 @@ class ForgotPasswordActivity : AppCompatActivity(),
     private fun allowInput(value: Boolean) {
         send_email_btn.isEnabled = value
         email_input.isEnabled = value
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        job?.cancel()
     }
 
     companion object {

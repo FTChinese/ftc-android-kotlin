@@ -23,6 +23,7 @@ import org.jetbrains.anko.info
  * If user logged in with wechat account and it is not bound to an FTC account, show WxAccountFragment;
  * If user logged in with wechat account and it is bound to an FTC account, show FtcAccountFragment.
  */
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class AccountActivity : AppCompatActivity(),
         OnSwitchAccountListener,
         AnkoLogger {

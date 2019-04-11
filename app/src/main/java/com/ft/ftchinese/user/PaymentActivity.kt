@@ -11,6 +11,7 @@ import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class PaymentActivity :
         AppCompatActivity(),
         OnProgressListener,
