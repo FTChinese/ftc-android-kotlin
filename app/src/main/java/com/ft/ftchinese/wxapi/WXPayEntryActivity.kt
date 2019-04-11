@@ -3,10 +3,10 @@ package com.ft.ftchinese.wxapi
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
@@ -31,9 +31,10 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
+
     private var api: IWXAPI? = null
-    private var job: Job? = null
     private var sessionManager: SessionManager? = null
     private var orderManager: OrderManager? = null
     private var firebaseAnalytics: FirebaseAnalytics? = null
@@ -170,7 +171,7 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
         showProgress(true)
 
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
 
             info("Start querying order...")
             updateProgress(getString(R.string.wxpay_query_order))
@@ -339,12 +340,6 @@ class WXPayEntryActivity: AppCompatActivity(), IWXAPIEventHandler, AnkoLogger {
 
     override fun onReq(req: BaseReq?) {
 
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        job?.cancel()
     }
 
     // Force back button to startForResult MembershipActivity so that use feels he is returning to previous MembershipActivity while actually the old instance already killed.
