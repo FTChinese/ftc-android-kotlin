@@ -10,6 +10,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.getMemberTypeText
+import com.ft.ftchinese.base.handleApiError
+import com.ft.ftchinese.base.handleException
+import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.activity_my_subscription.*

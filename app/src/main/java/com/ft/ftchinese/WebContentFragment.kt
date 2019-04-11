@@ -13,9 +13,9 @@ import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.flavorQuery
-import com.ft.ftchinese.util.isNetworkConnected
+import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.util.json
-import com.ft.ftchinese.util.shouldGrantStandard
+import com.ft.ftchinese.base.shouldGrantStandard
 import com.ft.ftchinese.viewmodel.LoadArticleViewModel
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
 import com.ft.ftchinese.viewmodel.StarArticleViewModel

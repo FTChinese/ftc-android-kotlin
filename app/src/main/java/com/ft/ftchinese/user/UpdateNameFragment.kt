@@ -10,9 +10,9 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.models.FtcUser
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.ClientError
-import com.ft.ftchinese.util.handleApiError
-import com.ft.ftchinese.util.handleException
-import com.ft.ftchinese.util.isNetworkConnected
+import com.ft.ftchinese.base.handleApiError
+import com.ft.ftchinese.base.handleException
+import com.ft.ftchinese.base.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_update_username.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger

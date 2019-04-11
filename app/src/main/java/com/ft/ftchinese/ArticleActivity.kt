@@ -15,7 +15,7 @@ import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.OnProgressListener
 import com.ft.ftchinese.util.json
-import com.ft.ftchinese.util.shouldGrantStandard
+import com.ft.ftchinese.base.shouldGrantStandard
 import com.ft.ftchinese.viewmodel.LoadArticleViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX

@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.base.shouldGrantStandard
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.OnProgressListener
 import com.ft.ftchinese.util.*

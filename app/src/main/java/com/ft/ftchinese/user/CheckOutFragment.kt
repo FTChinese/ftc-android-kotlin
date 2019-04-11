@@ -15,6 +15,10 @@ import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.getTierCycleText
+import com.ft.ftchinese.base.handleApiError
+import com.ft.ftchinese.base.handleException
+import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.*
 import com.google.android.gms.analytics.HitBuilders
@@ -250,6 +254,8 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                 wxpayStart()
 
             } catch (e: ClientError) {
+                info(e)
+
                 showProgress(false)
                 allowInput(true)
                 handleClientError(e)
@@ -257,7 +263,7 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                 logBuyFailedEvent()
 
             } catch (e: Exception) {
-                e.printStackTrace()
+                info(e)
 
                 showProgress(false)
                 allowInput(true)
@@ -342,6 +348,9 @@ class CheckOutFragment : Fragment(), AnkoLogger {
                 confirmAlipay(account, subs)
 
             } catch (e: ClientError) {
+
+                info(e)
+
                 showProgress(false)
                 allowInput(true)
 

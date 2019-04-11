@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.util.getPriceCycleText
+import com.ft.ftchinese.base.getPriceCycleText
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.fragment_product.*
 import org.jetbrains.anko.AnkoLogger

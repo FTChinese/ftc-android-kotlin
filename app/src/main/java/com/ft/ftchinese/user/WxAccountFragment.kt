@@ -9,6 +9,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.handleApiError
+import com.ft.ftchinese.base.handleException
+import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.models.Wechat
 import com.ft.ftchinese.util.*

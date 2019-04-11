@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Membership
 import com.ft.ftchinese.util.formatLocalDate
-import com.ft.ftchinese.util.getMemberTypeText
+import com.ft.ftchinese.base.getMemberTypeText
 import com.ft.ftchinese.util.json
 import kotlinx.android.synthetic.main.fragment_membership.*
 import org.jetbrains.anko.AnkoLogger
