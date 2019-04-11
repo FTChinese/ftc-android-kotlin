@@ -8,10 +8,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.base.shouldGrantStandard
 import com.ft.ftchinese.models.*
@@ -28,14 +28,17 @@ import org.jetbrains.anko.support.v4.toast
 
 private const val ARG_CHANNEL_ITEM = "arg_channel_item"
 
-class StoryFragment : Fragment(),
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class StoryFragment : ScopedFragment(),
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
     private var storyBrief: ChannelItem? = null
     private var currentLang: Language = Language.CHINESE
-    private var job: Job? = null
+
     private var template: String? = null
+
+    private var loadingJob: Job? = null
 
     private lateinit var cache: FileCache
     private lateinit var followingManager: FollowingManager
@@ -84,7 +87,8 @@ class StoryFragment : Fragment(),
         loadModel.currentLang.observe(this, Observer<Language> {
             currentLang = it
 
-            loadContent()
+//            loadContent()
+            initLoading()
         })
 
         starModel = activity?.run {
@@ -103,6 +107,28 @@ class StoryFragment : Fragment(),
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_article, container, false)
+
+    override fun onRefresh() {
+
+        if (loadingJob?.isActive == true) {
+            loadingJob?.cancel()
+        }
+
+        toast(R.string.prompt_refreshing)
+        launch {
+            loadFromServer()
+            toast(R.string.prompt_updated)
+        }
+    }
+
+    private fun showProgress(value: Boolean) {
+        if (value) {
+            listener?.onProgress(true)
+        } else {
+            listener?.onProgress(false)
+            swipe_refresh.isRefreshing = false
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -136,88 +162,112 @@ class StoryFragment : Fragment(),
             }
         }
 
-        loadContent()
+//        loadContent()
+
+        initLoading()
     }
 
+    private fun initLoading() {
+        loadingJob = launch {
+            val cachedStory = loadFromCache()
+            if (cachedStory != null) {
+                val html = render(cachedStory)
+                if (html != null) {
+                    load(html)
+                    postLoading(cachedStory)
 
-    private fun loadContent() {
-        if (storyBrief == null) {
-            toast(R.string.prompt_load_failure)
-            return
+                    if (activity?.isNetworkConnected() == true) {
+                        fetchAndCacheRemote()
+                    }
+
+                    return@launch
+                }
+
+                loadFromServer()
+            }
+
+            loadFromServer()
+        }
+    }
+
+    private suspend fun loadFromCache(): Story? {
+        val cacheName = storyBrief?.cacheNameJson()
+        info("Cache file name: $cacheName")
+
+        if (cacheName.isNullOrBlank()) {
+            info("No cache file name")
+            return null
         }
 
-        job = GlobalScope.launch(Dispatchers.Main) {
-            val cacheName = storyBrief?.cacheNameJson()
-            info("Cache file name: $cacheName")
+       return withContext(Dispatchers.IO) {
+            val data = cache.loadText(cacheName) ?: return@withContext  null
 
-            if (cacheName.isNullOrBlank()) {
-                info("No cache file name")
-                loadFromServer()
-                return@launch
+            try {
+                json.parse<Story>(data)
+            } catch (e: Exception) {
+                null
             }
-
-            val cachedJson = withContext(Dispatchers.IO) {
-                cache.loadText(cacheName)
-            }
-
-            if (cachedJson.isNullOrBlank()) {
-                info("Cache file is not found or is blank")
-                loadFromServer()
-                return@launch
-            }
-
-            if (template == null) {
-                template = cache.readStoryTemplate()
-            }
-
-            info("Use local cache")
-
-            renderAndLoad(cachedJson)
         }
     }
 
     private suspend fun loadFromServer() {
-        if (activity?.isNetworkConnected() == false) {
-            listener?.onProgress(false)
-            swipe_refresh.isRefreshing = false
-
+        if (activity?.isNetworkConnected() != true) {
+            showProgress(false)
             toast(R.string.prompt_no_network)
             return
         }
 
-        val url = storyBrief?.buildApiUrl() ?: return
+        val url = storyBrief?.buildApiUrl()
 
-        if (!swipe_refresh.isRefreshing) {
-            listener?.onProgress(true)
-        } else {
-            toast(R.string.prompt_refreshing)
+        if (url.isNullOrBlank()) {
+            showProgress(false)
+            toast("API endpoint not found")
+            return
         }
 
         info("Start fetching data from $url")
 
-        try {
-            val data = withContext(Dispatchers.IO) {
-                Fetch().get(url).responseString()
-            }
+        val story = fetchAndCacheRemote()
 
-            // Stop progress indicator
-            listener?.onProgress(false)
-            swipe_refresh.isRefreshing = false
+        if (story == null) {
+            showProgress(false)
+            toast(R.string.api_server_error)
+            return
+        }
 
-            // If data is not fetched, stop.
-            if (data.isNullOrBlank()) {
-                toast(R.string.prompt_load_failure)
-                return
-            }
-
-            // Render UI.
-            renderAndLoad(data)
-
-            // Cache data after retrieved from remote server.
-            cacheData(data)
-        } catch (e: Exception) {
-            info(e)
+        val html = render(story)
+        if (html.isNullOrBlank()) {
+            showProgress(false)
             toast(R.string.prompt_load_failure)
+            return
+        }
+
+        load(html)
+
+        postLoading(story)
+    }
+
+    private suspend fun fetchAndCacheRemote(): Story? = withContext(Dispatchers.IO) {
+        val url = storyBrief?.buildApiUrl() ?: return@withContext null
+
+        val data = try {
+            Fetch().get(url).responseString()
+        } catch (e: Exception) {
+            null
+        }
+
+        if (data.isNullOrBlank()) {
+            return@withContext null
+        }
+
+        launch(Dispatchers.IO) {
+            cacheData(data)
+        }
+
+        try {
+            json.parse<Story>(data)
+        } catch (e: Exception) {
+            null
         }
     }
 
@@ -229,51 +279,33 @@ class StoryFragment : Fragment(),
         }
     }
 
-    private fun renderAndLoad(data: String) {
-
-        if (template == null) {
-            template = cache.readStoryTemplate()
-        }
-
-        val story = try {
-            json.parse<Story>(data)
-        } catch (e: Exception) {
-            info(e)
-            toast(R.string.prompt_load_failure)
-            null
-        }
-
-        if (story == null) {
-            toast(R.string.prompt_load_failure)
-            return
-        }
-
-        // Check access here, again.
+    private suspend fun render(story: Story): String? {
         if (!grantAccess(story)) {
+            cancel()
+
             activity?.finish()
-            return
+            return null
         }
 
         loadModel.showLangSwitcher(story.isBilingual)
 
-        // Publish StarredArticle to ViewModel here.
-        // Tell host activity whether title bar should be shown.
+        return withContext(Dispatchers.Default) {
+            if (template == null) {
+                template = cache.readStoryTemplate()
+            }
 
-        val follows = followingManager.loadForJS()
-        info("Follow tags: $follows")
+            val follows = followingManager.loadForJS()
 
-        val html = storyBrief?.renderStory(
-                template = template,
-                story = story,
-                language = currentLang,
-                follows = follows
-        )
-
-        if (html == null) {
-            toast(R.string.prompt_load_failure)
-            return
+            storyBrief?.renderStory(
+                    template = template,
+                    story = story,
+                    language = currentLang,
+                    follows = follows
+            )
         }
+    }
 
+    private fun load(html: String) {
         web_view.loadDataWithBaseURL(
                 FTC_OFFICIAL_URL,
                 html,
@@ -281,8 +313,12 @@ class StoryFragment : Fragment(),
                 null,
                 null)
 
-        // Save reading history
-        GlobalScope.launch(Dispatchers.IO) {
+        showProgress(false)
+    }
+
+    private suspend fun postLoading(story: Story) {
+        // Save reading history.
+        withContext(Dispatchers.IO) {
             readModel.addOne(story.toReadArticle(storyBrief))
         }
 
@@ -309,21 +345,7 @@ class StoryFragment : Fragment(),
         return true
     }
 
-    override fun onRefresh() {
 
-        if (job?.isActive == true) {
-            job?.cancel()
-        }
-
-        job = GlobalScope.launch(Dispatchers.Main) {
-            loadFromServer()
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        job?.cancel()
-    }
 
     @JavascriptInterface
     fun follow(message: String) {

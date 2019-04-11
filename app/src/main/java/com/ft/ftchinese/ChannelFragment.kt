@@ -349,12 +349,6 @@ class ChannelFragment : ScopedFragment(),
         cancel()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        cancel()
-    }
-
-
     /**
      * WVClient click pagination.
      */

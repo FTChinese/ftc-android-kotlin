@@ -774,12 +774,6 @@ class MainActivity : ScopedAppActivity(),
         showAdJob?.cancel()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-
-        cancel()
-    }
-
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
             drawer_layout.closeDrawer(GravityCompat.START)
