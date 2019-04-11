@@ -1,14 +1,18 @@
 package com.ft.ftchinese
 
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import com.ft.ftchinese.base.ScopedFragment
+import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.base.shouldGrantPremium
+import com.ft.ftchinese.base.shouldGrantStandard
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.*
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -26,7 +30,8 @@ const val JS_INTERFACE_NAME = "Android"
  * As part of TabLayout in MainActivity;
  * As part of ChannelActivity. For example, if you panned to Editor's Choice tab, the mFollows lead to another layer of a list page, not content. You need to use `ChannelFragment` again to render a list page.
  */
-class ChannelFragment : Fragment(),
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class ChannelFragment : ScopedFragment(),
         WVClient.OnWebViewInteractionListener,
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
@@ -36,14 +41,13 @@ class ChannelFragment : Fragment(),
      * Passed in when the fragment is created.
      */
     private var channelSource: ChannelSource? = null
-
-    private var loadJob: Job? = null
-    private var cacheJob: Job? = null
-    private var refreshJob: Job? = null
+    private var listUrl: String = ""
 
     private lateinit var sessionManager: SessionManager
     private lateinit var cache: FileCache
     private lateinit var firebaseAnalytics: FirebaseAnalytics
+
+    private var loadingJob: Job? = null
 
     // Hold string in raw/list.html
     private var template: String? = null
@@ -82,6 +86,30 @@ class ChannelFragment : Fragment(),
 
         info("Channel source: $channelSource")
         info("onCreate finished")
+
+        val targetUrl = channelSource?.contentUrl ?: return
+
+        val queryValue = flavorQuery[BuildConfig.FLAVOR]
+
+        listUrl = if (queryValue == null) {
+            targetUrl
+        } else {
+            try {
+                Uri.parse(targetUrl).buildUpon()
+                        .appendQueryParameter("utm_source", "marketing")
+                        .appendQueryParameter("utm_mediu", "androidmarket")
+                        .appendQueryParameter("utm_campaign", queryValue)
+                        .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
+                        .build()
+                        .toString()
+            } catch (e: Exception) {
+                targetUrl
+            }
+        }
+
+        if (BuildConfig.DEBUG) {
+            info("List url: $listUrl")
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -135,103 +163,95 @@ class ChannelFragment : Fragment(),
 
         info("Initiating current page with data: $channelSource")
 
-        loadContent()
+        initLoading()
     }
 
     override fun onRefresh() {
 
 
         // If auto loading did not stop yet, stop it.
-        if (loadJob?.isActive == true) {
-            loadJob?.cancel()
+        if (loadingJob?.isActive == true) {
+            loadingJob?.cancel()
         }
+
+        toast(R.string.prompt_refreshing)
 
         when (channelSource?.htmlType) {
             HTML_TYPE_FRAGMENT -> {
-                refreshJob = GlobalScope.launch(Dispatchers.Main) {
-                    if (template == null) {
-                        template = cache.readChannelTemplate()
+                launch {
+                    info("start refreshing: html fragment")
+                    loadFromServer()
+                    toast(R.string.prompt_updated)
+                }
+            }
+            HTML_TYPE_COMPLETE -> {
+                info("start refreshing: reload")
+                web_view.reload()
+                showProgress(false)
+                toast(R.string.prompt_updated)
+            }
+        }
+    }
+
+    private fun initLoading() {
+        showProgress(true)
+
+        // For partial HTML, we need to crawl its content and render it with a template file to get the template HTML page.
+        when (channelSource?.htmlType) {
+            HTML_TYPE_FRAGMENT -> {
+                info("initLoading: html fragment")
+
+                loadingJob = launch {
+
+                    val cachedFrag = loadFromCache()
+
+                    // If local cache is found.
+                    if (cachedFrag != null) {
+                        // use cache
+                        val html = render(cachedFrag)
+
+                        // If local cache could be rendered, use it and fetch latest remote data silently.
+                        if (html != null) {
+                            load(html)
+
+                            if (activity?.isNetworkConnected() == true) {
+                                fetchAndCacheRemote()
+                            }
+
+                            return@launch
+                        }
+
+                        // If local cache cannot be rendered, fetch server data.
+                        loadFromServer()
                     }
 
                     loadFromServer()
                 }
             }
+            // For complete HTML, load it directly into Web view.
             HTML_TYPE_COMPLETE -> {
-                info("onRefresh: reload")
-                web_view.reload()
+                info("initLoading: web page")
+                web_view.loadUrl(listUrl)
                 showProgress(false)
             }
         }
     }
 
-    private fun loadContent() {
-        // For partial HTML, we need to crawl its content and render it with a template file to get the template HTML page.
-        when (channelSource?.htmlType) {
-            HTML_TYPE_FRAGMENT -> {
-                info("loadContent: html fragment")
-
-                loadJob = GlobalScope.launch (Dispatchers.Main) {
-
-                    val cacheName = channelSource?.fileName
-
-                    if (cacheName.isNullOrBlank()) {
-                        info("Cached file is not found. Fetch content from server")
-                        loadFromServer()
-                        return@launch
-                    }
-
-                    val cachedFrag = withContext(Dispatchers.IO) {
-                        cache.loadText(cacheName)
-                    }
-
-                    if (cachedFrag.isNullOrBlank()) {
-                        info("Cached HTML fragment is not found or empty. Fetch from server")
-                        loadFromServer()
-                        return@launch
-                    }
-
-                    info("Cached HTML fragment is found. Using cache.")
-                    loadFromCache(cachedFrag)
-                }
-            }
-            // For complete HTML, load it directly into Web view.
-            HTML_TYPE_COMPLETE -> {
-                info("loadContent: web page")
-                web_view.loadUrl(channelSource?.contentUrl)
-            }
-        }
-    }
-
-    // Load data from cache and update cache in background.
-    private suspend fun loadFromCache(htmlFrag: String) {
-
-        if (template == null) {
-            template = withContext(Dispatchers.IO) {
-                cache.readChannelTemplate()
-            }
+    private suspend fun loadFromCache(): String? {
+        val cacheName = channelSource?.fileName
+        if (cacheName.isNullOrBlank()) {
+            return null
         }
 
-        renderAndLoad(htmlFrag)
-
-        if (activity?.isActiveNetworkWifi() != true) {
-            info("Active network is not wifi. Stop update in background.")
-            return
+        val cachedFrag = withContext(Dispatchers.IO) {
+            cache.loadText(cacheName)
         }
 
-        info("Network is wifi and cached exits. Fetch data to update cache only.")
-
-        val url = channelSource?.contentUrl ?: return
-
-        info("Updating cache in background")
-
-        GlobalScope.launch(Dispatchers.IO) {
-            try {
-                val data = Fetch().get(url).responseString() ?: return@launch
-                cacheData(data)
-            } catch (e: Exception) {
-                info("Cannot update cache in background. Reason: ${e.message}")
-            }
+        if (cachedFrag.isNullOrBlank()) {
+            return null
         }
+
+        return cachedFrag
     }
 
     private suspend fun loadFromServer() {
@@ -241,64 +261,74 @@ class ChannelFragment : Fragment(),
             return
         }
 
-        val url = channelSource?.contentUrl ?: return
-
-        if (template == null) {
-            template = withContext(Dispatchers.IO) {
-                cache.readChannelTemplate()
-            }
-        }
-
-        // If this is not refresh action, show progress bar, else show prompt 'Refreshing'
-        if (!swipe_refresh.isRefreshing) {
-            showProgress(true)
-        } else {
-            toast(R.string.prompt_refreshing)
-        }
-
-        info("Load content from server on webUrl: $url")
-
-        try {
-            val data = withContext(Dispatchers.IO) {
-                Fetch().get(url).responseString()
-            }
-
+        if (listUrl.isEmpty()) {
             showProgress(false)
-
-            // If server returned empty data.
-            if (data.isNullOrBlank()) {
-                toast(R.string.api_server_error)
-                return
-            }
-
-            renderAndLoad(data)
-
-            GlobalScope.launch(Dispatchers.IO) {
-                cacheData(data)
-            }
-        } catch (e: Exception) {
-            info(e.message)
+            toast("Target URL is not found")
+            return
         }
+
+        val remoteFrag = fetchAndCacheRemote()
+
+        if (remoteFrag.isNullOrBlank()) {
+            showProgress(false)
+            toast(R.string.api_server_error)
+            return
+        }
+
+        val html = render(remoteFrag) ?: return
+        load(html)
     }
 
+    private suspend fun fetchAndCacheRemote(): String? = withContext(Dispatchers.IO) {
+        if (BuildConfig.DEBUG) {
+            info("Fetching data from $listUrl")
+        }
+
+        if (listUrl.isEmpty()) {
+            return@withContext null
+        }
+        val remoteFrag = try {
+            Fetch().get(listUrl).responseString()
+        } catch (e: Exception) {
+            null
+        }
+
+        if (!remoteFrag.isNullOrBlank()) {
+            launch(Dispatchers.IO) {
+                cacheData(remoteFrag)
+            }
+        }
+        remoteFrag
+    }
 
     private fun cacheData(data: String) {
+
         val fileName = channelSource?.fileName ?: return
+
+        if (BuildConfig.DEBUG) {
+            info("Caching data to $fileName")
+        }
 
         cache.saveText(fileName, data)
     }
 
-    private fun renderAndLoad(htmlFragment: String) {
+    // Since the render process is over-complicated, move it to background.
+    private suspend fun render(htmlFragment: String): String? = withContext(Dispatchers.Default) {
 
-        val dataToLoad = channelSource?.render(template, htmlFragment)
-
-        web_view.loadDataWithBaseURL(FTC_OFFICIAL_URL, dataToLoad, "text/html", null, null)
-
-        val fileName = channelSource?.fileName ?: return
-
-        if (dataToLoad != null) {
-            cache.saveText("full_$fileName", dataToLoad)
+        if (template == null) {
+            template = cache.readChannelTemplate()
         }
+
+        channelSource?.render(template, htmlFragment)
+    }
+
+    private fun load(html: String) {
+        if (BuildConfig.DEBUG) {
+            info("Loading web page to web view")
+        }
+        web_view.loadDataWithBaseURL(FTC_OFFICIAL_URL, html, "text/html", null, null)
+
+        showProgress(false)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -310,31 +340,18 @@ class ChannelFragment : Fragment(),
     override fun onPause() {
         super.onPause()
         info("onPause finished")
-
-        cacheJob?.cancel()
-        loadJob?.cancel()
-        refreshJob?.cancel()
+        cancel()
     }
 
     override fun onStop() {
         super.onStop()
         info("onStop finished")
-
-        cacheJob?.cancel()
-        loadJob?.cancel()
-        refreshJob?.cancel()
+        cancel()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
-        cacheJob?.cancel()
-        loadJob?.cancel()
-        refreshJob?.cancel()
-
-        cacheJob = null
-        loadJob = null
-        refreshJob = null
+        cancel()
     }
 
 
@@ -353,7 +370,7 @@ class ChannelFragment : Fragment(),
 
             channelSource = listPage
 
-            loadContent()
+            initLoading()
         } else {
             info("Start a new activity for $listPage")
             ChannelActivity.start(activity, listPage)

@@ -12,13 +12,14 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AppCompatActivity
 import android.view.*
 import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import com.beust.klaxon.Klaxon
+import com.ft.ftchinese.base.ScopedAppActivity
+import com.ft.ftchinese.base.isActiveNetworkWifi
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.splash.Schedule
 import com.ft.ftchinese.splash.ScreenAd
@@ -46,7 +47,8 @@ import kotlin.Exception
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
  */
-class MainActivity : AppCompatActivity(),
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class MainActivity : ScopedAppActivity(),
         TabLayout.OnTabSelectedListener,
         WxExpireDialogFragment.WxExpireDialogListener,
         AnkoLogger {
@@ -56,11 +58,7 @@ class MainActivity : AppCompatActivity(),
 
     private var avatarName: String? = null
 
-    private var mExitJob: Job? = null
-    private var mShowAdJob: Job? = null
-    private var mDownloadAdJob: Job? = null
-
-    private var mAdScheduleJob: Job? = null
+    private var showAdJob: Job? = null
 
     private var mNewsAdapter: TabPagerAdapter? = null
     private var mEnglishAdapter: TabPagerAdapter? = null
@@ -179,7 +177,7 @@ class MainActivity : AppCompatActivity(),
 
         // Show advertisement
         // Keep a reference the coroutine in case user exit at this moment
-        mShowAdJob = GlobalScope.launch(Dispatchers.Main) {
+        showAdJob = launch {
             showAd()
         }
 
@@ -303,7 +301,7 @@ class MainActivity : AppCompatActivity(),
                     SubscriptionActivity.start(this)
                 }
                 R.id.action_my_subs -> MySubsActivity.start(this)
-                R.id.action_about -> AboutUsActivity.start(this)
+//                R.id.action_about -> AboutUsActivity.start(this)
                 R.id.action_feedback -> feedbackEmail()
                 R.id.action_settings -> SettingsActivity.start(this)
             }
@@ -397,17 +395,16 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun prepareSplash() {
-        val tier = sessionManager
-                .loadAccount()
-                ?.membership
-                ?.tier
 
-        if (BuildConfig.DEBUG) {
-            info("Prepare splash screen for next round")
-        }
+        launch(Dispatchers.IO) {
+            val tier = sessionManager
+                    .loadAccount()
+                    ?.membership
+                    ?.tier
 
-
-        mDownloadAdJob = GlobalScope.launch(Dispatchers.IO) {
+            if (BuildConfig.DEBUG) {
+                info("Prepare splash screen for next round")
+            }
 
             if (!cache.exists(splashScheduleFile)) {
                 if (BuildConfig.DEBUG) {
@@ -488,46 +485,137 @@ class MainActivity : AppCompatActivity(),
     }
 
     private suspend fun showAd() {
+        val screenAd = splashManager.load() ?: return
 
-        // Pick an ad based on its probability distribution factor.
-        val screenAd = splashManager.load()
+        val deferred = async(Dispatchers.IO) {
 
-        if (screenAd == null || !screenAd.isToday()) {
-            showSystemUI()
-            return
-        }
-
-        if (BuildConfig.DEBUG) {
-            info("Splash screen ad: $screenAd")
-        }
-
-
-        val imageFileName = screenAd.imageName
-
-        // Check if the required ad image exists.
-        if (imageFileName.isBlank() || !cache.exists(imageFileName)) {
-            if (BuildConfig.DEBUG) {
-                info("Ad image ${screenAd.imageName} not found")
+            if (!screenAd.isToday()) {
+                return@async null
             }
 
-            showSystemUI()
-            return
-        }
+            if (BuildConfig.DEBUG) {
+                info("Splash screen ad: $screenAd")
+            }
 
-        // Read image and show it.
-        val drawable = withContext(Dispatchers.IO) {
+            val imageFileName = screenAd.imageName
+
+            // Check if the required ad image exists.
+            if (imageFileName.isBlank() || !cache.exists(imageFileName)) {
+                if (BuildConfig.DEBUG) {
+                    info("Ad image ${screenAd.imageName} not found")
+                }
+
+                return@async null
+            }
+
             cache.readDrawable(imageFileName)
         }
 
-        if (drawable == null) {
-            if (BuildConfig.DEBUG) {
-                info("Cannot load ad image")
+        // Pick an ad based on its probability distribution factor.
+
+
+        // Read image and show it.
+        withContext(Dispatchers.Main) {
+            val drawable = deferred.await()
+            if (drawable == null) {
+                if (BuildConfig.DEBUG) {
+                    info("Cannot load ad image")
+                }
+
+                showSystemUI()
+                return@withContext
             }
 
-            showSystemUI()
-            return
-        }
 
+//            val adView = View.inflate(this, R.layout.ad_view, null)
+//
+//            if (BuildConfig.DEBUG) {
+//                info("Starting to show ad. Hide system ui.")
+//            }
+//
+//            supportActionBar?.hide()
+//            adView.systemUiVisibility =
+//                    View.SYSTEM_UI_FLAG_LOW_PROFILE or
+//                            View.SYSTEM_UI_FLAG_FULLSCREEN or
+//                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+//                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+//                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+//                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+//
+//            if (BuildConfig.DEBUG) {
+//                info("Added ad view")
+//            }
+//
+//            root_container.addView(adView)
+
+            val adView = createAdView()
+            val adImage = adView.findViewById<ImageView>(R.id.ad_image)
+            val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
+
+            val bundle = Bundle().apply {
+                putString(FirebaseAnalytics.Param.CREATIVE_NAME, screenAd.title)
+                putString(FirebaseAnalytics.Param.CREATIVE_SLOT, AdSlot.APP_OPEN)
+            }
+
+            adTimer.setOnClickListener {
+                root_container.removeView(adView)
+                showSystemUI()
+                showAdJob?.cancel()
+                if (BuildConfig.DEBUG) {
+                    info("Skipped ads")
+                }
+
+                // Log user skipping advertisement action.
+                firebaseAnalytics.logEvent(FtcEvent.AD_SKIP, bundle)
+            }
+
+
+            adImage.setOnClickListener {
+                val customTabsInt = CustomTabsIntent.Builder().build()
+                customTabsInt.launchUrl(this@MainActivity, Uri.parse(screenAd.linkUrl))
+                root_container.removeView(adView)
+                showSystemUI()
+                showAdJob?.cancel()
+
+                // Log click event
+                firebaseAnalytics.logEvent(FtcEvent.AD_CLICK, bundle)
+
+                tracker.send(HitBuilders.EventBuilder()
+                        .setCategory(GACategory.LAUNCH_AD)
+                        .setAction(GAAction.LAUNCH_AD_CLICK)
+                        .setLabel(screenAd.linkUrl)
+                        .build())
+
+                if (BuildConfig.DEBUG) {
+                    info("Clicked ads")
+                }
+            }
+
+
+            adImage.setImageDrawable(drawable)
+
+            adTimer.visibility = View.VISIBLE
+            info("Show timer")
+
+            // send impressions in background.
+            sendImpression(screenAd)
+
+            firebaseAnalytics.logEvent(FtcEvent.AD_VIEWED, bundle)
+
+            for (i in 5 downTo 1) {
+                adTimer.text = getString(R.string.prompt_ad_timer, i)
+                delay(1000)
+            }
+
+            root_container.removeView(adView)
+
+            showSystemUI()
+        }
+    }
+
+    // Read this article on how inflate works:
+    // https://www.bignerdranch.com/blog/understanding-androids-layoutinflater-inflate/
+    private fun createAdView(): View {
         // Read this article on how inflate works:
         // https://www.bignerdranch.com/blog/understanding-androids-layoutinflater-inflate/
         val adView = View.inflate(this, R.layout.ad_view, null)
@@ -539,11 +627,11 @@ class MainActivity : AppCompatActivity(),
         supportActionBar?.hide()
         adView.systemUiVisibility =
                 View.SYSTEM_UI_FLAG_LOW_PROFILE or
-                View.SYSTEM_UI_FLAG_FULLSCREEN or
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        View.SYSTEM_UI_FLAG_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
 
         if (BuildConfig.DEBUG) {
             info("Added ad view")
@@ -551,67 +639,7 @@ class MainActivity : AppCompatActivity(),
 
         root_container.addView(adView)
 
-        val adImage = adView.findViewById<ImageView>(R.id.ad_image)
-        val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
-
-        val bundle = Bundle().apply {
-            putString(FirebaseAnalytics.Param.CREATIVE_NAME, screenAd.title)
-            putString(FirebaseAnalytics.Param.CREATIVE_SLOT, AdSlot.APP_OPEN)
-        }
-
-        adTimer.setOnClickListener {
-            root_container.removeView(adView)
-            showSystemUI()
-            mShowAdJob?.cancel()
-            if (BuildConfig.DEBUG) {
-                info("Skipped ads")
-            }
-
-
-            // Log user skipping advertisement action.
-            firebaseAnalytics.logEvent(FtcEvent.AD_SKIP, bundle)
-        }
-
-        adImage.setOnClickListener {
-            val customTabsInt = CustomTabsIntent.Builder().build()
-            customTabsInt.launchUrl(this, Uri.parse(screenAd.linkUrl))
-            root_container.removeView(adView)
-            showSystemUI()
-            mShowAdJob?.cancel()
-
-            // Log click event
-            firebaseAnalytics.logEvent(FtcEvent.AD_CLICK, bundle)
-
-            tracker.send(HitBuilders.EventBuilder()
-                    .setCategory(GACategory.LAUNCH_AD)
-                    .setAction(GAAction.LAUNCH_AD_CLICK)
-                    .setLabel(screenAd.linkUrl)
-                    .build())
-
-            if (BuildConfig.DEBUG) {
-                info("Clicked ads")
-            }
-        }
-
-
-        adImage.setImageDrawable(drawable)
-
-        adTimer.visibility = View.VISIBLE
-        info("Show timer")
-
-        // send impressions in background.
-        sendImpression(screenAd)
-
-        firebaseAnalytics.logEvent(FtcEvent.AD_VIEWED, bundle)
-
-        for (i in 5 downTo 1) {
-            adTimer.text = getString(R.string.prompt_ad_timer, i)
-            delay(1000)
-        }
-
-        root_container.removeView(adView)
-
-        showSystemUI()
+        return adView
     }
 
     private fun sendImpression(screenAd: ScreenAd) {
@@ -734,9 +762,7 @@ class MainActivity : AppCompatActivity(),
             info("onPause finished")
         }
 
-        mShowAdJob?.cancel()
-        mDownloadAdJob?.cancel()
-        mAdScheduleJob?.cancel()
+        showAdJob?.cancel()
     }
 
     override fun onStop() {
@@ -745,21 +771,13 @@ class MainActivity : AppCompatActivity(),
             info("onStop finished")
         }
 
-        mShowAdJob?.cancel()
-        mDownloadAdJob?.cancel()
-        mAdScheduleJob?.cancel()
+        showAdJob?.cancel()
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        mShowAdJob?.cancel()
-        mDownloadAdJob?.cancel()
-        mAdScheduleJob?.cancel()
-
-        mShowAdJob = null
-        mDownloadAdJob = null
-        mAdScheduleJob = null
+        cancel()
     }
 
     override fun onBackPressed() {
@@ -773,19 +791,19 @@ class MainActivity : AppCompatActivity(),
     private fun doubleClickToExit() {
         // If this is the first time user clicked back button, the first part the will executed.
         if (!mBackKeyPressed) {
-            toast("再按一次退出程序")
+            toast(R.string.prompt_exit)
             mBackKeyPressed = true
 
             // Delay for 2 seconds.
             // If user did not touch the back button within 2 seconds, mBackKeyPressed will be changed back gto false.
             // If user touch the back button within 2 seconds, `if` condition will be false, this part will not be executed.
-            mExitJob = GlobalScope.launch {
+            launch {
                 delay(2000)
                 mBackKeyPressed = false
             }
         } else {
             // If user clicked back button two times within 2 seconds, this part will be executed.
-            mExitJob?.cancel()
+            cancel()
             finish()
         }
     }
