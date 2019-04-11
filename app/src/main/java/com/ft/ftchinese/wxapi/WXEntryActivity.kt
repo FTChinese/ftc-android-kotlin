@@ -10,7 +10,7 @@ import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.AccountsMergeActivity
 import com.ft.ftchinese.user.CredentialsActivity
 import com.ft.ftchinese.util.ClientError
-import com.ft.ftchinese.util.handleException
+import com.ft.ftchinese.base.handleException
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp

@@ -7,6 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.handleApiError
+import com.ft.ftchinese.base.handleException
+import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.MySubsActivity
 import com.ft.ftchinese.user.SubscriptionActivity
