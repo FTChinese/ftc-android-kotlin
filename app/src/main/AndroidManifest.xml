@@ -77,7 +77,8 @@
             android:parentActivityName=".MainActivity"/>
         <activity
             android:name=".AboutUsActivity"
-            android:label="@string/title_about_us" />
+            android:label="@string/title_about_us"
+            android:parentActivityName=".MainActivity"/>
         <activity
             android:name=".user.CredentialsActivity"
             android:label="@string/title_login_signup"
