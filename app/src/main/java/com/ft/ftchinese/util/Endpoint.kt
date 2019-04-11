@@ -58,10 +58,10 @@ val flavorQuery = mapOf(
         "sanliuling" to "an_360shouji",
         "ftc" to "an_ftc",
         "tencent" to "an_tencent",
-        "samsung" to "an_samsung",
-        "meizu" to "an_meizu",
-        "wandoujia" to "an_wandoujia",
-        "anzhi" to "an_anzhi",
-        "jiuyi" to "an_91",
-        "anzhuoshichang" to "an_anzhuoshichang"
+        "samsung" to "an_samsung"
+//        "meizu" to "an_meizu",
+//        "wandoujia" to "an_wandoujia",
+//        "anzhi" to "an_anzhi",
+//        "jiuyi" to "an_91",
+//        "anzhuoshichang" to "an_anzhuoshichang"
 )

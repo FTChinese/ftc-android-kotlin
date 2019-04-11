@@ -100,26 +100,26 @@ android {
             dimension "appStore"
             versionNameSuffix "-samsung"
         }
-        meizu {
-            dimension "appStore"
-            versionNameSuffix "-meizu"
-        }
-        wandoujia {
-            dimension "appStore"
-            versionNameSuffix "-wandoujia"
-        }
-        anzhi {
-            dimension "appStore"
-            versionNameSuffix "-anzhi"
-        }
-        jiuyi {
-            dimension "appStore"
-            versionNameSuffix "-91"
-        }
-        anzhuoshichang {
-            dimension "appStore"
-            versionNameSuffix "-anzhuoshichang"
-        }
+//        meizu {
+//            dimension "appStore"
+//            versionNameSuffix "-meizu"
+//        }
+//        wandoujia {
+//            dimension "appStore"
+//            versionNameSuffix "-wandoujia"
+//        }
+//        anzhi {
+//            dimension "appStore"
+//            versionNameSuffix "-anzhi"
+//        }
+//        jiuyi {
+//            dimension "appStore"
+//            versionNameSuffix "-91"
+//        }
+//        anzhuoshichang {
+//            dimension "appStore"
+//            versionNameSuffix "-anzhuoshichang"
+//        }
     }
 
     testOptions {
