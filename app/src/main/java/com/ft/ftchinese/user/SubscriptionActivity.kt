@@ -43,6 +43,7 @@ import org.jetbrains.anko.toast
  *
  * When SubscriptionActivity received OK message from PaymentActvitiy, it should startForResult retrieving user data from server.
  */
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class SubscriptionActivity : AppCompatActivity(),
         AnkoLogger {
 
@@ -124,12 +125,12 @@ class SubscriptionActivity : AppCompatActivity(),
                 finish()
             }
 
-            // If user logged in here, update UI.
             RequestCode.SIGN_IN, RequestCode.SIGN_UP -> {
                 if (resultCode != Activity.RESULT_OK) {
                     return
                 }
 
+                login_button.visibility = View.GONE
                 toast(R.string.prompt_logged_in)
             }
         }
