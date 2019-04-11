@@ -154,7 +154,13 @@ data class Account(
         return if (body == null) {
             null
         } else {
-            json.parse<WxPrepayOrder>(body)
+            try {
+                json.parse<WxPrepayOrder>(body)
+            } catch (e: Exception) {
+                info(e)
+
+                null
+            }
         }
     }
 
