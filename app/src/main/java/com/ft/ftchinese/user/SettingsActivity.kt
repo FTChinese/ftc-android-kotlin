@@ -71,7 +71,7 @@ class SettingsFragment : PreferenceFragmentCompat(), AnkoLogger {
 
         prefClearCache = findPreference("pref_clear_cache")
         prefClearHistory = findPreference("pref_clear_history")
-        findPreference<Preference>("pref_version_name").summary = BuildConfig.VERSION_NAME
+        findPreference<Preference>("pref_version_name")?.summary = BuildConfig.VERSION_NAME
 
         updateCacheUI()
 
