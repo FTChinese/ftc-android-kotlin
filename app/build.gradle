@@ -72,18 +72,18 @@ android {
         play {
             dimension "appStore"
         }
-        xiaomi {
-            dimension "appStore"
-            versionNameSuffix "-xiaomi"
-        }
+//        xiaomi {
+//            dimension "appStore"
+//            versionNameSuffix "-xiaomi"
+//        }
         huawei {
             dimension "appStore"
             versionNameSuffix "-huawei"
         }
-        baidu {
-            dimension "appStore"
-            versionNameSuffix "-baidu"
-        }
+//        baidu {
+//            dimension "appStore"
+//            versionNameSuffix "-baidu"
+//        }
         sanliuling {
             dimension "appStore"
             versionNameSuffix "-360"
@@ -92,10 +92,10 @@ android {
             dimension "appStore"
             versionNameSuffix "-ftc"
         }
-        tencent {
-            dimension "appStore"
-            versionNameSuffix "-tencent"
-        }
+//        tencent {
+//            dimension "appStore"
+//            versionNameSuffix "-tencent"
+//        }
         samsung {
             dimension "appStore"
             versionNameSuffix "-samsung"
@@ -108,10 +108,10 @@ android {
 //            dimension "appStore"
 //            versionNameSuffix "-wandoujia"
 //        }
-//        anzhi {
-//            dimension "appStore"
-//            versionNameSuffix "-anzhi"
-//        }
+        anzhi {
+            dimension "appStore"
+            versionNameSuffix "-anzhi"
+        }
 //        jiuyi {
 //            dimension "appStore"
 //            versionNameSuffix "-91"
