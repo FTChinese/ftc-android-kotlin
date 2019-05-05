@@ -507,6 +507,7 @@ data class ChannelItem(
         const val TYPE_CHANNEL = "channel"
         const val TYPE_TAG = "tag"
         const val TYPE_M = "m"
+        const val TYPE_ARCHIVE = "archiver"
 
         const val SUB_TYPE_RADIO = "radio"
         const val SUB_TYPE_USER_COMMENT = ""
