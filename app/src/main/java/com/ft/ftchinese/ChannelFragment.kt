@@ -477,8 +477,9 @@ class ChannelFragment : ScopedFragment(),
 
         val account = sessionManager.loadAccount()
 
-        info("Select item in channel source: $channelSource")
+        info("Is channel require membership: $channelSource")
 
+        // Handle standard subscription and premium subscription channel
         when (channelSource?.requiredTier) {
             Tier.STANDARD -> {
                 val grant = activity?.shouldGrantStandard(account) ?: return
@@ -515,7 +516,20 @@ class ChannelFragment : ScopedFragment(),
             return
         }
 
-        info("Content required standard member")
+        info("Content requires membership")
+        if (channelItem.requirePremium()) {
+            info("Content restricted to premium members")
+            val granted = activity?.shouldGrantPremium(account) ?: return
+            if (granted) {
+                openArticle(channelItem)
+            } else {
+                PaywallTracker.source = channelItem
+            }
+
+            return
+        }
+
+        info("Content restricted to standard members")
         val granted = activity?.shouldGrantStandard(account) ?: return
 
         if (granted) {

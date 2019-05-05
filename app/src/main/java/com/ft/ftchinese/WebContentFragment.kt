@@ -14,6 +14,7 @@ import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.flavorQuery
 import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.user.shouldGrantPremium
 import com.ft.ftchinese.util.json
 import com.ft.ftchinese.user.shouldGrantStandard
 import com.ft.ftchinese.viewmodel.LoadArticleViewModel
@@ -66,6 +67,9 @@ class WebContentFragment : Fragment(),
         starModel.loaded(article)
     }
 
+    /**
+     * Refer to [ChannelFragment.selectItem] method
+     */
     private fun grantAccess(article: StarredArticle): Boolean {
         if (article.isFree()) {
             info("A free article")
@@ -74,12 +78,18 @@ class WebContentFragment : Fragment(),
 
         val account = sessionManager.loadAccount()
 
+        if (article.requirePremium()) {
+            info("Content restricted to premium members")
+            return activity?.shouldGrantPremium(account) ?: false
+        }
+
+
         if (activity?.shouldGrantStandard(account) == false) {
             info("Cannot grant standard access to this article")
             return false
         }
 
-        return true
+        return activity?.shouldGrantStandard(account) ?: false
     }
 
     private fun mergeOpenGraph(og: OpenGraphMeta?): StarredArticle {

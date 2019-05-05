@@ -222,6 +222,14 @@ data class ChannelItem(
         return true
     }
 
+    fun requirePremium(): Boolean {
+        if (tag.contains("高端专享")) {
+            return true
+        }
+
+        return false
+    }
+
     private fun getCommentsId(): String {
         return when(subType) {
             "interactive" -> "r_interactive_$id"

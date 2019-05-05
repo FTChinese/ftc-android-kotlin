@@ -81,6 +81,14 @@ data class StarredArticle(
         return (tier == Tier.STANDARD.string()) || (tier == Tier.PREMIUM.string())
     }
 
+    fun requireStandard(): Boolean {
+        return tier == Tier.STANDARD.string()
+    }
+
+    fun requirePremium(): Boolean {
+        return tier == Tier.PREMIUM.string()
+    }
+
     private fun isSevenDaysOld(): Boolean {
         if (publishedAt.isBlank()) {
             return false
