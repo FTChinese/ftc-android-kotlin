@@ -33,6 +33,11 @@ import java.io.ByteArrayOutputStream
 private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
 private const val EXTRA_USE_JSON = "extra_use_json"
 
+/**
+ * Host activity for [StoryFragment] or [WebContentFragment], depending on the type of contents
+ * to be displayed.
+ * If the content has a standard JSON API, [StoryFragment] will be used; otherwise use [WebContentFragment].
+ */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ArticleActivity : AppCompatActivity(),
         SocialShareFragment.OnShareListener,
@@ -251,7 +256,9 @@ class ArticleActivity : AppCompatActivity(),
 
     companion object {
 
-
+        /**
+         * Load content with standard JSON API.
+         */
         fun start(context: Context?, channelItem: ChannelItem) {
             val intent = Intent(context, ArticleActivity::class.java).apply {
                 putExtra(EXTRA_CHANNEL_ITEM, json.toJsonString(channelItem))
@@ -261,6 +268,9 @@ class ArticleActivity : AppCompatActivity(),
             context?.startActivity(intent)
         }
 
+        /**
+         * Load a web page based on HTML fragment.
+         */
         fun startWeb(context: Context?, channelItem: ChannelItem) {
             channelItem.isWebpage = true
 
