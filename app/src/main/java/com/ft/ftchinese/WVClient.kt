@@ -349,9 +349,8 @@ open class WVClient(
             // Links on home page under FT商学院
             ChannelItem.TYPE_PHOTO_NEWS,
             // Links on home page under FT研究院
-            ChannelItem.TYPE_INTERACTIVE-> {
+            ChannelItem.TYPE_INTERACTIVE -> {
 
-//                WebContentActivity.start(activity, uri)
                 val lastPathSegment = uri.lastPathSegment ?: return true
                 val channelItem = ChannelItem(
                         id = lastPathSegment,
@@ -365,6 +364,7 @@ open class WVClient(
             }
 
             /**
+             * Load content in into [ChannelActivity].
              * If the path looks like `/channel/english.html`
              * On home page '每日英语' section, the title is a link
              * Similar to TYPE_COLUMN
@@ -375,10 +375,17 @@ open class WVClient(
             ChannelItem.TYPE_CHANNEL -> openChannelLink(uri)
 
             /**
-             * If the path looks like `/tag/中美贸易战`,
+             * If the path looks like `/m/marketing/intelligence.html`
+             * or /m/corp/preview.html?pageid=huawei2018
+             */
+            ChannelItem.TYPE_M -> openMLink(uri)
+
+            /**
+             * If the path looks like `/tag/中美贸易战`, `/archiver/2019-03-05`
              * start a new page listing articles
              */
-            ChannelItem.TYPE_TAG -> {
+            ChannelItem.TYPE_TAG,
+            ChannelItem.TYPE_ARCHIVE -> {
                 val page = ChannelSource(
                         title = uri.lastPathSegment ?: "",
                         name = uri.pathSegments.joinToString("_"),
@@ -391,40 +398,21 @@ open class WVClient(
                 true
             }
 
-            /**
-             * If the path looks like `/m/marketing/intelligence.html`
-             * or /m/corp/preview.html?pageid=huawei2018
-             */
-            ChannelItem.TYPE_M -> openMLink(uri)
-
             else -> {
                 info("Open a web page directly. Original webUrl is: $uri")
-//                WebContentActivity.start(activity, uri)
-                ArticleActivity.startWeb(activity, ChannelItem(
-                        id = "",
-                        type = "",
-                        title = "",
-                        webUrl = uri.toString()
-                ))
+                val chSrc = ChannelSource(
+                        title = uri.lastPathSegment ?: "",
+                        name = "",
+                        contentUrl = uri.toString(),
+                        htmlType = HTML_TYPE_COMPLETE
+                )
+
+                ChannelActivity.start(activity, chSrc)
 
                 true
             }
         }
     }
-
-    /**
-     * Loads a story page who has JSON api on server
-     * StoryActivity accepts a ChannelItem parameter.
-     */
-//    private fun startReading(channelItem: ChannelItem): Boolean {
-//
-//        when (channelItem.type) {
-//            ChannelItem.TYPE_STORY, ChannelItem.TYPE_PREMIUM -> {
-//                ArticleActivity.start(activity, channelItem)
-//            }
-//        }
-//        return true
-//    }
 
     /**
      * Handle paths like:
