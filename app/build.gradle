@@ -72,18 +72,10 @@ android {
         play {
             dimension "appStore"
         }
-//        xiaomi {
-//            dimension "appStore"
-//            versionNameSuffix "-xiaomi"
-//        }
         huawei {
             dimension "appStore"
             versionNameSuffix "-huawei"
         }
-//        baidu {
-//            dimension "appStore"
-//            versionNameSuffix "-baidu"
-//        }
         sanliuling {
             dimension "appStore"
             versionNameSuffix "-360"
@@ -92,34 +84,14 @@ android {
             dimension "appStore"
             versionNameSuffix "-ftc"
         }
-//        tencent {
-//            dimension "appStore"
-//            versionNameSuffix "-tencent"
-//        }
         samsung {
             dimension "appStore"
             versionNameSuffix "-samsung"
         }
-//        meizu {
-//            dimension "appStore"
-//            versionNameSuffix "-meizu"
-//        }
-//        wandoujia {
-//            dimension "appStore"
-//            versionNameSuffix "-wandoujia"
-//        }
         anzhi {
             dimension "appStore"
             versionNameSuffix "-anzhi"
         }
-//        jiuyi {
-//            dimension "appStore"
-//            versionNameSuffix "-91"
-//        }
-//        anzhuoshichang {
-//            dimension "appStore"
-//            versionNameSuffix "-anzhuoshichang"
-//        }
     }
 
     testOptions {
@@ -192,8 +164,8 @@ dependencies {
     //    Test
     testImplementation 'junit:junit:4.12'
     testImplementation 'com.github.javafaker:javafaker:0.16'
-    androidTestImplementation 'androidx.test:runner:1.2.0-alpha03'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha03'
+    androidTestImplementation 'androidx.test:runner:1.2.0-alpha04'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha04'
     testImplementation 'org.hamcrest:hamcrest-junit:2.0.0.0'
     testImplementation 'org.mockito:mockito-core:2.23.0'
     testImplementation 'org.robolectric:robolectric:4.0.2'
