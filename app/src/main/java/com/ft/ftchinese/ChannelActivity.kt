@@ -12,8 +12,9 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
 /**
- * This is used to show a channel page, which consists of a list of article summaries.
- * It is similar to `MainActivity` except that it does not wrap a TabLayout.
+ * This is used to show a channel page, which consists of a list of article teaser.
+ * It is similar to [MainActivity] except that it does not wrap a TabLayout.
+ * Use cases: column channel, editor's choice, archive list.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ChannelActivity : AppCompatActivity(), AnkoLogger {
@@ -62,6 +63,9 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
     companion object {
         private const val EXTRA_PAGE_META = "extra_list_page_metadata"
 
+        /**
+         * Start [ChannelActivity] based on values passed from JS.
+         */
         fun start(context: Context?, page: ChannelSource) {
             val intent = Intent(context, ChannelActivity::class.java).apply {
                 putExtra(EXTRA_PAGE_META, json.toJsonString(page))
