@@ -293,60 +293,6 @@ data class ChannelItem(
         }
     }
 
-    private fun pickAdZone(homepageZone: String, fallbackZone: String, keywords: String): String {
-        if (keywords.isBlank()) {
-            return fallbackZone
-        }
-
-        for (sponsor in SponsorManager.sponsors) {
-            if (sponsor.tag.isBlank()) {
-                continue
-            }
-
-            if ((keywords.contains(sponsor.tag) || keywords.contains(sponsor.title)) && sponsor.zone.isNotEmpty() ) {
-                return if (sponsor.zone.contains("/")) {
-                    sponsor.zone
-                } else {
-                    "home/special/${sponsor.zone}"
-                }
-            }
-        }
-
-        if (adZone != homepageZone) {
-            return adZone
-        }
-
-        if (keywords.contains("lifestyle")) {
-            return "lifestyle"
-        }
-
-        if (keywords.contains("management")) {
-            return "management"
-        }
-
-        if (keywords.contains("opinion")) {
-            return "opinion"
-        }
-
-        if (keywords.contains("创新经济")) {
-            return "创新经济"
-        }
-
-        if (keywords.contains("markets")) {
-            return "markets"
-        }
-
-        if (keywords.contains("economy")) {
-            return "economy"
-        }
-
-        if (keywords.contains("china")) {
-            return "china"
-        }
-
-        return fallbackZone
-    }
-
     private fun pickAdchID(homepageId: String, fallbackId: String, keywords: String): String {
 
         if (!keywords.isBlank()) {
@@ -458,8 +404,12 @@ data class ChannelItem(
         }
 
 
-        val adZone = pickAdZone(HOME_AD_ZONE, DEFAULT_STORY_AD_ZONE, story.keywords)
+//        val adZone = pickAdZone(HOME_AD_ZONE, DEFAULT_STORY_AD_ZONE, story.keywords)
+
+        val adZone = story.getAdZone(HOME_AD_ZONE, DEFAULT_STORY_AD_ZONE, adZone)
         val adChId = pickAdchID(HOME_AD_CH_ID, DEFAULT_STORY_AD_CH_ID, story.keywords)
+        val adTopic = story.getAdTopic()
+        val cntopicScript = if (adTopic.isBlank()) "" else "window.cntopic = '$adTopic'"
 
         info("Ad zone: $adZone")
         info("Ad channel id: $adChId")
@@ -493,6 +443,7 @@ data class ChannelItem(
                 .replace("'{follow-augthor}'", follows.author)
                 .replace("'{follow-column}'", follows.column)
                 .replace("{ad-zone}", adZone)
+                .replace("<!--{{cntopic}}-->", cntopicScript)
                 .replace("{ad-mpu}", adMPU)
                 //                        .replace("{font-class}", "")
                 .replace("{{googletagservices-js}}", JSCodes.googletagservices)

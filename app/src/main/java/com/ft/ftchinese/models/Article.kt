@@ -169,11 +169,78 @@ class Story (
     private val tags: List<String>
         get() = tag.split(",")
 
+    // This is a very weired way to product a comma-separated string. Why not use array and join directly?
+    // And why a string? Isn't it keeping `keywords` as an array of string more ideal?
     val keywords: String
         get() = "$tag,$area,$topic,$genre"
                 .replace(Regex(",+"), ",")
                 .replace(Regex("^,"), "")
                 .replace(Regex(",$"), "")
+
+    fun getAdZone(homepageZone: String, fallbackZone: String, overrideAdZone: String): String {
+        if (keywords.isBlank()) {
+            return fallbackZone
+        }
+
+        for (sponsor in SponsorManager.sponsors) {
+            if (sponsor.tag.isBlank()) {
+                continue
+            }
+
+            val matched = isMatchInKeysAndBody(sponsor)
+
+            if ((keywords.contains(sponsor.tag) || keywords.contains(sponsor.title) || matched) && sponsor.zone.isNotEmpty() ) {
+                return if (sponsor.zone.contains("/")) {
+                    sponsor.zone
+                } else {
+                    "home/special/${sponsor.zone}"
+                }
+            }
+        }
+
+        if (overrideAdZone != homepageZone) {
+            return overrideAdZone
+        }
+
+        val regex = Regex("lifestyle|management|opinion|创新经济|markets|economy|china")
+
+        val result = regex.find(keywords)
+
+        if (result != null) {
+            return result.value
+        }
+
+        return fallbackZone
+    }
+
+    fun getAdTopic(): String {
+        if (keywords.isBlank()) {
+            return ""
+        }
+
+        for (sponsor in SponsorManager.sponsors) {
+            val matched = isMatchInKeysAndBody(sponsor)
+
+            if (matched && sponsor.cntopic != "") {
+                return sponsor.cntopic
+            }
+        }
+
+        return ""
+    }
+
+    fun isMatchInKeysAndBody(sponsor: Sponsor): Boolean {
+        if (sponsor.storyKeyWords.isBlank()) {
+            return false
+        }
+
+        val regexStr = sponsor.storyKeyWords.replace(Regex(", *"), "|")
+        val regex = Regex(regexStr)
+
+        val fullContent = "$bodyCN$keywords$titleCN$titleEN$bodyEN"
+
+        return regex.containsMatchIn(fullContent)
+    }
 
     fun formatPublishTime(): String {
         return DateFormat.format("yyyy年M月d日 HH:mm", publishedAt.toLong() * 1000) as String
@@ -287,7 +354,7 @@ class Story (
         val alignedBody = alignBody()
 
         return alignedBody.joinToString("") {
-            "${it.cn}${it.en}"
+            "${it.en}${it.cn}"
         }
     }
 

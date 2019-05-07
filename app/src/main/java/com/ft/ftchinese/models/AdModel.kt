@@ -119,6 +119,9 @@ data class Sponsor(
         val adid: String,
         val zone: String,
         val channel: String,
+        // Example: 经济,贸易,股市,股指
+        val storyKeyWords: String,
+        val cntopic: String,
         val hideAd: String = ""
 )
 
