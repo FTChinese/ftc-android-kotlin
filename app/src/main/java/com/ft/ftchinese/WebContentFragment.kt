@@ -173,6 +173,8 @@ class WebContentFragment : Fragment(),
         web_view.settings.apply {
             javaScriptEnabled = true
             loadsImagesAutomatically = true
+            domStorageEnabled = true
+            databaseEnabled = true
         }
 
         val wvClient = WVClient(activity)
