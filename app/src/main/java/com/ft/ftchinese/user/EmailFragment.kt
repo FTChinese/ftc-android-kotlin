@@ -23,7 +23,6 @@ class EmailFragment : ScopedFragment(),
         AnkoLogger {
 
     private var listener: OnCredentialsListener? = null
-    private var job: Job? = null
 
     private fun showProgress(show: Boolean) {
         listener?.onProgress(show)
