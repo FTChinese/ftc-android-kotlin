@@ -11,8 +11,6 @@ import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.user.shouldGrantPremium
-import com.ft.ftchinese.user.shouldGrantStandard
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.*
 import com.google.firebase.analytics.FirebaseAnalytics
