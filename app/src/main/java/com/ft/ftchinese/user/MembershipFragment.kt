@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.models.Membership
 import com.ft.ftchinese.util.formatLocalDate
-import com.ft.ftchinese.base.getMemberTypeText
+import com.ft.ftchinese.models.Tier
 import com.ft.ftchinese.util.json
 import kotlinx.android.synthetic.main.fragment_membership.*
 import org.jetbrains.anko.AnkoLogger
@@ -66,7 +66,11 @@ class MembershipFragment : Fragment(), AnkoLogger {
 
         val row1 = TableRow(
                 header = getString(R.string.label_member_tier),
-                data = activity?.getMemberTypeText(member) ?: ""
+                data = when (member.tier) {
+                    Tier.STANDARD -> getString(R.string.tier_standard)
+                    Tier.PREMIUM -> getString(R.string.tier_premium)
+                    else -> getString(R.string.tier_free)
+                }
         )
 
         val row2 = TableRow(
