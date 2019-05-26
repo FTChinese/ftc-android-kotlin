@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_orders"
+        android:title="@string/title_my_orders"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/action_service"
+        android:title="@string/heading_customer_service"
+        app:showAsAction="never"/>
+</menu>
