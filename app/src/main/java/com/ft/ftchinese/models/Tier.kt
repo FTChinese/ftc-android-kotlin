@@ -1,12 +1,16 @@
 package com.ft.ftchinese.models
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
 private val tierNames = arrayOf("standard", "premium")
 private val tierValue = mapOf(
         "standard" to Tier.STANDARD,
         "premium" to Tier.PREMIUM
 )
 
-enum class Tier {
+@Parcelize
+enum class Tier : Parcelable {
     STANDARD,
     PREMIUM;
 
