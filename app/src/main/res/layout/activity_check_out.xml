@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.pay.CheckOutActivity">
+
+    <include
+        layout="@layout/simple_toolbar" />
+
+    <TextView
+        android:id="@+id/heading_product_tv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:paddingBottom="8dp"
+        android:text="@string/heading_become_member"
+        android:textSize="18sp"
+        android:background="@drawable/bottom_border_grey"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/product_rv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="@id/heading_product_tv"
+        app:layout_constraintEnd_toEndOf="@id/heading_product_tv"
+        app:layout_constraintTop_toBottomOf="@id/heading_product_tv"/>
+
+    <TextView
+        android:id="@+id/upgrade_smallprint"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="@id/heading_product_tv"
+        app:layout_constraintEnd_toEndOf="@id/heading_product_tv"
+        app:layout_constraintTop_toBottomOf="@id/product_rv"/>
+
+    <FrameLayout
+        android:id="@+id/frag_pay_method"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="@id/heading_product_tv"
+        app:layout_constraintEnd_toEndOf="@id/heading_product_tv"
+        app:layout_constraintTop_toBottomOf="@id/upgrade_smallprint"/>
+
+    <FrameLayout
+        android:id="@+id/frag_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/payment_methods"
+        app:layout_constraintVertical_bias="1.0"/>
+
+    <include layout="@layout/progress_bar"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
