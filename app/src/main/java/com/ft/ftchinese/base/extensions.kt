@@ -58,65 +58,22 @@ fun Activity.isActiveNetworkMobile(): Boolean {
  * 标准会员/年
  * 标准会员/月
  * 高级会员/年
- * 尚未成为会员
  */
-fun Activity.getMemberTypeText(membership: Membership): String {
-    return getTierCycleText(membership.tier, membership.cycle)
-            ?: getString(R.string.tier_free)
-}
-
 fun Activity.getTierCycleText(tier: Tier?, cycle: Cycle?): String? {
-    val key = tierCycleKey(tier, cycle) ?: return null
 
-    return when (key) {
-        KEY_STANDARD_YEAR -> getString(
-                R.string.formatter_tier_cycle,
-                getString(R.string.tier_standard),
-                getString(R.string.cycle_year)
-        )
-        KEY_STANDARD_MONTH -> getString(
-                R.string.formatter_tier_cycle,
-                getString(R.string.tier_standard),
-                getString(R.string.cycle_month)
-        )
-        KEY_PREMIUM_YEAR -> getString(
-                R.string.formatter_tier_cycle,
-                getString(R.string.tier_premium),
-                getString(R.string.cycle_year)
-        )
-        else -> null
+    val tierText = when (tier) {
+        Tier.STANDARD -> getString(R.string.tier_standard)
+        Tier.PREMIUM -> getString(R.string.tier_premium)
+        else -> return null
     }
-}
 
-/**
- * Build strings user on the price button:
- * ¥258.00/年
- * ¥28.00/月
- * ¥1,998.00/年
- */
-fun Activity.getPriceCycleText(tier: Tier, cycle: Cycle): String? {
-    val key = tierCycleKey(tier, cycle)
-
-    val plan = pricingPlans.findPlan(key) ?: return null
-
-    return when (key) {
-        KEY_STANDARD_YEAR -> getString(
-                R.string.formatter_price_cycle,
-                plan.netPrice,
-                getString(R.string.cycle_year)
-        )
-        KEY_STANDARD_MONTH -> getString(
-                R.string.formatter_price_cycle,
-                plan.netPrice,
-                getString(R.string.cycle_month)
-        )
-        KEY_PREMIUM_YEAR -> getString(
-                R.string.formatter_price_cycle,
-                plan.netPrice,
-                getString(R.string.cycle_year)
-        )
-        else -> null
+    val cycleText = when (cycle) {
+        Cycle.YEAR -> getString(R.string.cycle_year)
+        Cycle.MONTH -> getString(R.string.cycle_month)
+        else -> return null
     }
+
+    return getString(R.string.formatter_tier_cycle, tierText, cycleText)
 }
 
 // Using API 28. Unfortunately it also requires that you must increase min supported api.
@@ -171,6 +128,7 @@ fun Activity.handleApiError(resp: ClientError) {
             "password_invalid" -> toast(R.string.error_invalid_password)
             "email_server_missing" -> toast(R.string.api_email_server_down)
             "userName_already_exists" -> toast(R.string.api_name_taken)
+            "membership_already_upgraded" -> toast(R.string.api_already_premium)
             else -> toast(resp.message)
         }
         return
