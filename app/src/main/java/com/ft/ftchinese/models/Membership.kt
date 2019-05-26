@@ -23,12 +23,6 @@ data class Membership(
                     ?.isBefore(LocalDate.now())
                     ?: true
 
-
-    // Determine is renewal button is visible.
-    // Only check subscribed user.
-    val isRenewable: Boolean
-        get() = expireDate != null && cycle != null
-
     // Check weather user is a member.
     // No check for expiration time.
     val isPaidMember: Boolean
@@ -36,15 +30,39 @@ data class Membership(
             return tier == Tier.STANDARD || tier == Tier.PREMIUM
         }
 
+    /**
+     * Status of a membership when its expire date falls into
+     * various period.
+     *         today              3 years later
+     * --------- | -------------- | ---------
+     * expired      renew/upgrade   upgrade only for standard
+     */
+    fun getStatus(): MemberStatus {
+        if (expireDate == null) {
+            return MemberStatus.INVALID
+        }
 
-    // Use the combination of tier and billing cycle to uniquely identify this membership.
-    // It is used as key to retrieve a price;
-    // It is also used as the ITEM_ID for firebase's ADD_TO_CART event.
-    val key: String
-        get() = tierCycleKey(tier, cycle) ?: ""
+        val today = LocalDate.now()
+        val threeYearsLater = today.plusYears(3)
 
-//    val price: Double?
-//        get() = prices[id]
+        return when {
+            expireDate.isBefore(today) -> MemberStatus.EXPIRED
+            expireDate.isBefore(threeYearsLater) -> MemberStatus.RENEWABLE
+            else -> MemberStatus.BEYOND_RENEW
+        }
+    }
+
+    /**
+     * Only when user's current tier is standard should
+     * upgrading be allowed.
+     * Actually you also take into account expire date.
+     * Only not-yet-expired member should allow upgrading.
+     * If membership is expired, simply ask user to subscribe
+     * again.
+     */
+    fun allowUpgrade(): Boolean {
+        return tier == Tier.STANDARD
+    }
 
     // Compare expireDate against another instance.
     // Pick whichever is later.
