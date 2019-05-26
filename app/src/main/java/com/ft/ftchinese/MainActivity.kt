@@ -25,6 +25,8 @@ import com.ft.ftchinese.splash.Schedule
 import com.ft.ftchinese.splash.ScreenAd
 import com.ft.ftchinese.splash.SplashScreenManager
 import com.ft.ftchinese.splash.splashScheduleFile
+import com.ft.ftchinese.ui.pay.MemberActivity
+import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.user.*
 import com.ft.ftchinese.util.*
 import com.google.android.gms.analytics.HitBuilders
@@ -277,6 +279,9 @@ class MainActivity : ScopedAppActivity(),
         }
     }
 
+    /**
+     * Add event listener to drawer menu.
+     */
     private fun setupDrawer() {
         val toggle = ActionBarDrawerToggle(
                 this,
@@ -298,9 +303,9 @@ class MainActivity : ScopedAppActivity(),
                             type = "Drawer",
                             title = ""
                     )
-                    SubscriptionActivity.start(this)
+                    PaywallActivity.start(this)
                 }
-                R.id.action_my_subs -> MySubsActivity.start(this)
+                R.id.action_my_subs -> MemberActivity.start(this)
 //                R.id.action_about -> AboutUsActivity.start(this)
                 R.id.action_feedback -> feedbackEmail()
                 R.id.action_settings -> SettingsActivity.start(this)
