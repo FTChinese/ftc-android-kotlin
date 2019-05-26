@@ -113,6 +113,34 @@ data class Account(
         }
     }
 
+    fun previewUpgrade(): PlanPayable? {
+        val fetch = Fetch().get(SubscribeApi.UPGRADE_PREVIEW)
+
+        if (id.isNotBlank()) {
+            fetch.setUserId(id)
+        }
+
+        if (!unionId.isNullOrBlank()) {
+            fetch.setUnionId(unionId)
+        }
+
+        val (_, body) = fetch
+                .noCache()
+                .setClient()
+                .responseApi()
+
+        return if (body == null) {
+            null
+        } else {
+            try {
+                json.parse<PlanPayable>(body)
+            } catch (e: Exception) {
+                info(e)
+                null
+            }
+        }
+    }
+
     fun getOrders(): List<Subscription> {
         val fetch = Fetch().get(NextApi.ORDERS)
 
