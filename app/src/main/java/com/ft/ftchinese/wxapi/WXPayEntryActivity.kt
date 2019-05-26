@@ -11,8 +11,8 @@ import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.user.MySubsActivity
-import com.ft.ftchinese.user.SubscriptionActivity
+import com.ft.ftchinese.ui.pay.MemberActivity
+import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.util.*
 import com.google.android.gms.analytics.HitBuilders
 import com.google.android.gms.analytics.Tracker
@@ -305,8 +305,8 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
     /**
      * After user paid by wechat, show the done button
-     * which starts [MySubsActivity] if the updated
-     * membership is valid or [SubscriptionActivity]
+     * which starts [MemberActivity] if the updated
+     * membership is valid or [PaywallActivity]
      * if membership is still invalid.
      */
     private fun onClickDone() {
@@ -318,10 +318,10 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         }
 
         if (account.membership.isPaidMember) {
-            MySubsActivity.start(this)
+            MemberActivity.start(this)
         } else {
             PaywallTracker.source = null
-            SubscriptionActivity.start(this)
+            PaywallActivity.start(this)
         }
 
         setResult(Activity.RESULT_OK)
