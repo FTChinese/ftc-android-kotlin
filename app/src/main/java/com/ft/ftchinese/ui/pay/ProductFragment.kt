@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 
 import com.ft.ftchinese.R
@@ -91,9 +92,7 @@ class ProductFragment : ScopedFragment(),
 
         @JvmStatic
         fun newInstance(product: ProductCard) = ProductFragment().apply {
-            arguments = Bundle().apply {
-                putParcelable(ARG_PRODUCT, product)
-            }
+            arguments = bundleOf(ARG_PRODUCT to product)
         }
     }
 }
