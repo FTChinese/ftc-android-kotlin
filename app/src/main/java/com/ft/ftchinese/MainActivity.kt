@@ -304,7 +304,6 @@ class MainActivity : ScopedAppActivity(),
                     PaywallActivity.start(this)
                 }
                 R.id.action_my_subs -> MemberActivity.start(this)
-//                R.id.action_about -> AboutUsActivity.start(this)
                 R.id.action_feedback -> feedbackEmail()
                 R.id.action_settings -> SettingsActivity.start(this)
             }
