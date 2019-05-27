@@ -14,7 +14,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
         android:text="@string/upgrade_to_read"
         app:layout_constraintStart_toStartOf="@id/frag_upgrade_premium"
         app:layout_constraintEnd_toEndOf="@id/frag_upgrade_premium"
