@@ -113,7 +113,6 @@ class CheckOutActivity : ScopedAppActivity(),
          if (p.isUpgrade) {
              supportActionBar?.setTitle(R.string.title_upgrade)
 
-             heading_product_tv.text = "升级为高端会员将首先使用您账号中的余额兑换，不足部分需要另外支付。"
              if (!p.isDirectUpgrade()) {
                  upgrade_smallprint.visibility = View.VISIBLE
                  upgrade_smallprint.text = getString(R.string.upgrade_smallprint, p.cycleCount, p.extraDays)
