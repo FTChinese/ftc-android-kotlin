@@ -101,8 +101,6 @@ class AccountActivity : AppCompatActivity(),
         initUI()
     }
 
-
-
     companion object {
 
         fun start(context: Context) {
