@@ -111,7 +111,7 @@
     <string name="heading_customer_service">聯客服</string>
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
     <string name="heading_pay_method">選擇支付方式</string>
-    <string name="heading_become_member">成為FT會員</string>
+    <string name="heading_become_member">购买FT會員</string>
     <string name="pay_method_ali">支付寶支付</string>
     <string name="pay_method_wechat">微信支付</string>
     <string name="pay_method_stripe">Stripe支付</string>
