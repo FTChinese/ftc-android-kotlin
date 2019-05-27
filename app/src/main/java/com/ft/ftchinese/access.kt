@@ -5,6 +5,7 @@ import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.Tier
 import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
+import com.ft.ftchinese.ui.pay.UpgradeActivity
 import com.ft.ftchinese.user.CredentialsActivity
 import org.jetbrains.anko.toast
 
@@ -61,7 +62,7 @@ fun Activity.shouldGrantPremium(account: Account?): Boolean {
 
     if (account.membership.tier != Tier.PREMIUM) {
         toast(R.string.prompt_premium_only)
-        MemberActivity.start(this)
+        UpgradeActivity.start(this, true)
         return false
     }
 
