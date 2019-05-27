@@ -21,16 +21,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="下拉可更新会员信息"
+                android:textAlignment="center"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/member_rv"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="16dp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@id/textView" />
 
                 <Button
                     android:id="@+id/resubscribe_btn"
@@ -64,7 +75,8 @@
                     app:layout_constraintStart_toStartOf="@+id/member_rv"
                     app:layout_constraintTop_toBottomOf="@+id/renew_btn" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
