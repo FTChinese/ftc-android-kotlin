@@ -12,10 +12,7 @@ import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.models.Plan
-import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.Tier
-import com.ft.ftchinese.models.subsPlans
+import com.ft.ftchinese.models.*
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_upgrade.*
@@ -31,6 +28,7 @@ import org.jetbrains.anko.toast
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
 
+    private lateinit var tracker: StatsTracker
     private lateinit var sessionManager: SessionManager
     private lateinit var productViewModel: ProductViewModel
     private var isFromArticle: Boolean = false
@@ -69,6 +67,8 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
             upgrade_to_read.visibility = View.VISIBLE
         } else {
             upgrade_to_read.visibility = View.GONE
+
+            PaywallTracker.fromUpgrade()
         }
 
         supportFragmentManager.beginTransaction()
@@ -77,8 +77,13 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
                         ProductFragment.newInstance(buildProduct())
                 )
                 .commit()
+
+        tracker = StatsTracker.getInstance(this)
+
+        tracker.displayPaywall()
     }
 
+    // Build data used to create product card.
     private fun buildProduct(): ProductCard {
         return ProductCard(
                 tier = Tier.PREMIUM,
@@ -90,6 +95,7 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
         )
     }
 
+    // Fetch account balance from API.
     private fun previewUpgrade() {
         if (!isNetworkConnected()) {
             toast(R.string.prompt_no_network)

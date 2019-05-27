@@ -55,7 +55,7 @@ class WebContentFragment : Fragment(),
 
         // Check access here.
         if (!grantAccess(article)) {
-            PaywallTracker.source = article.toChannelItem()
+            PaywallTracker.fromArticle(article.toChannelItem())
 
             activity?.finish()
             return

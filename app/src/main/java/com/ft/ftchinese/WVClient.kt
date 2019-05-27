@@ -13,9 +13,7 @@ import android.webkit.WebViewClient
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.user.CredentialsActivity
-import com.ft.ftchinese.util.HOST_FTA
-import com.ft.ftchinese.util.HOST_FTC
-import com.ft.ftchinese.util.HOST_MAILBOX
+import com.ft.ftchinese.util.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -247,12 +245,15 @@ open class WVClient(
         if (uri.lastPathSegment == "subscription.html") {
             val ccode = uri.getQueryParameter("ccode")
             if (ccode == null) {
-                PaywallTracker.source = null
+                PaywallTracker.from = null
             } else {
-                PaywallTracker.source = ChannelItem(
+                PaywallTracker.from = PaywallSource(
                         id = ccode,
                         type = "promotion",
-                        title = "subscription.html"
+                        title = "subscription.html",
+                        category = GACategory.SUBSCRIPTION,
+                        action = GAAction.DISPLAY,
+                        label = "fta/subscription.html"
                 )
             }
 

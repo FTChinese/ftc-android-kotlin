@@ -1,5 +1,73 @@
 package com.ft.ftchinese.models
 
+import com.ft.ftchinese.util.GAAction
+import com.ft.ftchinese.util.GACategory
+
+/**
+ * Paywall might triggered from an article, or it might be
+ * opened by user from drawer
+ */
+data class PaywallSource(
+        val id: String,
+        val type: String,
+        val title: String,
+        val language: Language? = null,
+        val category: String,
+        val action: String,
+        val label: String
+)
+
 object PaywallTracker {
-    var source: ChannelItem? = null
+    var from: PaywallSource? = null
+
+    fun fromArticle(item: ChannelItem?) {
+        if (item == null) {
+            from = null
+            return
+        }
+
+        from = PaywallSource(
+                id = item.id,
+                type = item.type,
+                title = item.title,
+                language = item.langVariant,
+                category = GACategory.SUBSCRIPTION,
+                action = GAAction.DISPLAY,
+                label = item.buildGALabel()
+        )
+    }
+
+    fun fromDrawer() {
+        from = PaywallSource(
+                id = "action_subscription",
+                type = "drawer",
+                title = "User initiated",
+                category = GACategory.SUBSCRIPTION,
+                action = GAAction.DISPLAY,
+                label = "drawer/action_subscription"
+        )
+    }
+
+    // From MemberActivity's upgrade button.
+    fun fromUpgrade() {
+        from = PaywallSource(
+                id = "upgrade_btn",
+                type = "MemberActivity",
+                title = "User initiated",
+                category = GACategory.SUBSCRIPTION,
+                action = GAAction.DISPLAY,
+                label = "MemberActivity/upgrade_btn"
+        )
+    }
+
+    fun fromRenew() {
+        from = PaywallSource(
+                id = "renew_btn",
+                type = "MemberActivity",
+                title = "User initiated",
+                category = GACategory.SUBSCRIPTION,
+                action = GAAction.DISPLAY,
+                label = "MemberActivity/renew_btn"
+        )
+    }
 }

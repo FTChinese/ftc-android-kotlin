@@ -165,7 +165,9 @@ class ArticleActivity : AppCompatActivity(),
 
                 val item = article?.toChannelItem()
                 item?.langVariant = Language.ENGLISH
-                PaywallTracker.source = item
+
+                // Tracking
+                PaywallTracker.fromArticle(item)
 
                 return@setOnClickListener
             }
@@ -183,7 +185,7 @@ class ArticleActivity : AppCompatActivity(),
 
                 val item = article?.toChannelItem()
                 item?.langVariant = Language.BILINGUAL
-                PaywallTracker.source = item
+                PaywallTracker.fromArticle(item)
 
                 return@setOnClickListener
             }

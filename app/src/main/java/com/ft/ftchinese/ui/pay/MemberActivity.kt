@@ -161,11 +161,8 @@ class MemberActivity : ScopedAppActivity(),
         // For renewal
         renew_btn.setOnClickListener {
 
-            PaywallTracker.source = ChannelItem(
-                    id = "RenewButton",
-                    type = "MySubscription",
-                    title = ""
-            )
+            // Tracking
+            PaywallTracker.fromRenew()
 
             val p = PlanPayable.fromPlan(subsPlans.of(tier, cycle))
             p.isRenew = true

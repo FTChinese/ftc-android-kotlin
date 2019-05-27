@@ -298,11 +298,9 @@ class MainActivity : ScopedAppActivity(),
                 R.id.action_login ->  CredentialsActivity.startForResult(this)
                 R.id.action_account -> AccountActivity.start(this)
                 R.id.action_subscription -> {
-                    PaywallTracker.source = ChannelItem(
-                            id = "Subscription Menu",
-                            type = "Drawer",
-                            title = ""
-                    )
+                    // Tracking
+                    PaywallTracker.fromDrawer()
+
                     PaywallActivity.start(this)
                 }
                 R.id.action_my_subs -> MemberActivity.start(this)

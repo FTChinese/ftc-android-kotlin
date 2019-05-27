@@ -14,9 +14,6 @@ import com.ft.ftchinese.models.*
 import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.util.*
-import com.google.android.gms.analytics.HitBuilders
-import com.google.android.gms.analytics.Tracker
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
@@ -37,34 +34,8 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     private var api: IWXAPI? = null
     private var sessionManager: SessionManager? = null
     private var orderManager: OrderManager? = null
-    private var firebaseAnalytics: FirebaseAnalytics? = null
-    private var tracker: Tracker? = null
+    private var tracker: StatsTracker? = null
 
-    private fun logBuySuccessEvent(tier: Tier, cycle: Cycle) {
-       val action = when (tier) {
-           Tier.STANDARD -> GAAction.BUY_STANDARD_SUCCESS
-           Tier.PREMIUM -> GAAction.BUY_PREMIUM_SUCCESS
-       }
-
-        tracker?.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(action)
-                .setLabel(PaywallTracker.source?.buildGALabel())
-                .build())
-    }
-
-    private fun logBuyFailedEvent(tier: Tier, cycle: Cycle) {
-        val action = when (tier) {
-            Tier.STANDARD -> GAAction.BUY_STANDARD_FAIL
-            Tier.PREMIUM -> GAAction.BUY_PREMIUM_FAIL
-        }
-
-        tracker?.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(action)
-                .setLabel(PaywallTracker.source?.buildGALabel())
-                .build())
-    }
 
     private fun showProgress(value: Boolean) {
         if (value) {
@@ -85,8 +56,8 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         sessionManager = SessionManager.getInstance(this)
         orderManager = OrderManager.getInstance(this)
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
-        tracker = Analytics.getDefaultTracker(this)
+
+        tracker = StatsTracker.getInstance(this)
 
         showUI(false)
 
@@ -120,7 +91,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                     showFailureUI(getString(R.string.wxpay_failed))
 
                     if (subs != null) {
-                        logBuyFailedEvent(subs.tier, subs.cycle)
+                        tracker?.buyFail(subs.tier)
                     }
                 }
                 // 用户取消
@@ -146,7 +117,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             return
         }
 
-        logBuySuccessEvent(subs.tier, subs.cycle)
+        tracker?.buySuccess(subs)
 
         if (!isNetworkConnected()) {
             info(R.string.prompt_no_network)
@@ -223,8 +194,6 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     }
 
     private suspend fun confirmSubscription(account: Account, subs: Subscription) {
-
-        logPurchaseEvent(subs)
 
         val updatedMember = subs.confirm(account.membership)
 
@@ -320,22 +289,12 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         if (account.membership.isPaidMember) {
             MemberActivity.start(this)
         } else {
-            PaywallTracker.source = null
+            PaywallTracker.from = null
             PaywallActivity.start(this)
         }
 
         setResult(Activity.RESULT_OK)
         finish()
-    }
-
-    // Log purchase event.
-    private fun logPurchaseEvent(subs: Subscription) {
-
-        firebaseAnalytics?.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
-            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-            putDouble(FirebaseAnalytics.Param.VALUE, subs.netPrice)
-            putString(FirebaseAnalytics.Param.METHOD, subs.payMethod.string())
-        })
     }
 
     override fun onReq(req: BaseReq?) {

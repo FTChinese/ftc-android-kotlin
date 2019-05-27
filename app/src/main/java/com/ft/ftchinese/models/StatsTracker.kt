@@ -17,21 +17,21 @@ class StatsTracker private constructor(context: Context) {
     private val tracker = ga.newTracker(R.xml.global_tracker)
 
     fun displayPaywall() {
-        val channelItem = PaywallTracker.source ?: return
 
+        val source = PaywallTracker.from ?: return
         firebaseAnalytics.logEvent(FtcEvent.PAYWALL_FROM, Bundle().apply {
-            putString(FirebaseAnalytics.Param.ITEM_ID, channelItem.id)
-            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, channelItem.type)
-            putString(FirebaseAnalytics.Param.ITEM_NAME, channelItem.title)
-            if (channelItem.langVariant != null) {
-                putString(FirebaseAnalytics.Param.ITEM_VARIANT, channelItem.langVariant?.name)
+            putString(FirebaseAnalytics.Param.ITEM_ID, source.id)
+            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, source.type)
+            putString(FirebaseAnalytics.Param.ITEM_NAME, source.title)
+            if (source.language != null) {
+                putString(FirebaseAnalytics.Param.ITEM_VARIANT, source.language?.name)
             }
         })
 
         tracker.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(GAAction.DISPLAY)
-                .setLabel(channelItem.buildGALabel())
+                .setCategory(source.category)
+                .setAction(source.action)
+                .setLabel(source.label)
                 .build())
     }
 
@@ -46,7 +46,7 @@ class StatsTracker private constructor(context: Context) {
         tracker.send(HitBuilders.EventBuilder()
                 .setCategory(GACategory.SUBSCRIPTION)
                 .setAction(plan.gaAddCartAction())
-                .setLabel(PaywallTracker.source?.buildGALabel())
+                .setLabel(PaywallTracker.from?.label)
                 .build())
     }
 
@@ -73,7 +73,7 @@ class StatsTracker private constructor(context: Context) {
         tracker.send(HitBuilders.EventBuilder()
                 .setCategory(GACategory.SUBSCRIPTION)
                 .setAction(action)
-                .setLabel(PaywallTracker.source?.buildGALabel())
+                .setLabel(PaywallTracker.from?.label)
                 .build())
     }
 
@@ -82,13 +82,12 @@ class StatsTracker private constructor(context: Context) {
         val action = when (tier) {
             Tier.STANDARD -> GAAction.BUY_STANDARD_FAIL
             Tier.PREMIUM -> GAAction.BUY_PREMIUM_FAIL
-            else -> return
         }
 
         tracker.send(HitBuilders.EventBuilder()
                 .setCategory(GACategory.SUBSCRIPTION)
                 .setAction(action)
-                .setLabel(PaywallTracker.source?.buildGALabel())
+                .setLabel(PaywallTracker.from?.label)
                 .build())
     }
 

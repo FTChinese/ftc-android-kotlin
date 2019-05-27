@@ -485,7 +485,7 @@ class ChannelFragment : ScopedFragment(),
                 val grant = activity?.shouldGrantStandard(account) ?: return
 
                 if (!grant) {
-                    PaywallTracker.source = channelItem
+                    PaywallTracker.fromArticle(channelItem)
 
                     return
                 }
@@ -497,7 +497,7 @@ class ChannelFragment : ScopedFragment(),
                 val granted = activity?.shouldGrantPremium(account) ?: return
 
                 if (!granted) {
-                    PaywallTracker.source = channelItem
+                    PaywallTracker.fromArticle(channelItem)
 
                     return
                 }
@@ -523,7 +523,7 @@ class ChannelFragment : ScopedFragment(),
             if (granted) {
                 openArticle(channelItem)
             } else {
-                PaywallTracker.source = channelItem
+                PaywallTracker.fromArticle(channelItem)
             }
 
             return
@@ -535,7 +535,7 @@ class ChannelFragment : ScopedFragment(),
         if (granted) {
             openArticle(channelItem)
         } else {
-            PaywallTracker.source = channelItem
+            PaywallTracker.fromArticle(channelItem)
         }
     }
 
