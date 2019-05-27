@@ -92,6 +92,7 @@ class CheckOutActivity : ScopedAppActivity(),
             }
 
             // Start upgrading without payment.
+            directUpgrade()
         })
 
         sessionManager = SessionManager.getInstance(this)
@@ -106,11 +107,15 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     private fun initUI(p: PlanPayable) {
+
+        upgrade_smallprint.visibility = View.GONE
+
          if (p.isUpgrade) {
              supportActionBar?.setTitle(R.string.title_upgrade)
 
              heading_product_tv.text = "升级为高端会员将首先使用您账号中的余额兑换，不足部分需要另外支付。"
              if (!p.isDirectUpgrade()) {
+                 upgrade_smallprint.visibility = View.VISIBLE
                  upgrade_smallprint.text = getString(R.string.upgrade_smallprint, p.cycleCount, p.extraDays)
              }
 
@@ -429,6 +434,62 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private fun stripePay() {
         toast("Stripe pay is not supported yet.")
+    }
+
+    // This might never be used.
+    private fun directUpgrade() {
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
+
+            return
+        }
+
+        val account = sessionManager.loadAccount() ?: return
+
+        showProgress(true)
+
+        launch {
+            try {
+                val (ok, plan) = withContext(Dispatchers.IO) {
+                    account.directUpgrade()
+                }
+
+                showProgress(true)
+
+                if (ok) {
+                    toast("Upgrade done")
+                    return@launch
+                }
+
+                checkOutViewModel.enableInput(true)
+
+                if (plan == null) {
+                    toast("An error occurred while upgrading. Please try later")
+                    return@launch
+                }
+
+                if (plan.payable > 0.0) {
+                    toast("You current balance is not enough to cover upgrading price.")
+                    return@launch
+                }
+
+            } catch (e: ClientError) {
+                info(e)
+
+                showProgress(false)
+                checkOutViewModel.enableInput(true)
+
+                when (e.statusCode) {
+                    404 -> toast(R.string.api_member_not_found)
+                    else -> handleApiError(e)
+                }
+            } catch (e: Exception) {
+                showProgress(false)
+                checkOutViewModel.enableInput(true)
+
+                handleException(e)
+            }
+        }
     }
 
     private fun handleClientError(resp: ClientError) {

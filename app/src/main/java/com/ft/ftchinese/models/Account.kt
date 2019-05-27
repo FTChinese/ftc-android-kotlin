@@ -113,6 +113,7 @@ data class Account(
         }
     }
 
+    // Show user's account balance.
     fun previewUpgrade(): PlanPayable? {
         val fetch = Fetch().get(SubscribeApi.UPGRADE_PREVIEW)
 
@@ -138,6 +139,39 @@ data class Account(
                 info(e)
                 null
             }
+        }
+    }
+
+    // If user current balance is enough to cover upgrading cost, we do not ask user to pay and change membership directly.
+    fun directUpgrade(): Pair<Boolean, PlanPayable?> {
+        val fetch = Fetch().put(SubscribeApi.UPGRADE)
+
+        if (id.isNotBlank()) {
+            fetch.setUserId(id)
+        }
+
+        if (!unionId.isNullOrBlank()) {
+            fetch.setUnionId(unionId)
+        }
+
+        val (resp, body) = fetch
+                .noCache()
+                .setClient()
+                .responseApi()
+
+        return when (resp.code()) {
+            204 -> Pair(true, null)
+            200 -> if (body != null) {
+                try {
+                    Pair(true, json.parse<PlanPayable>(body))
+                } catch (e: Exception) {
+                    info(e)
+                    Pair(false, null)
+                }
+            } else {
+                Pair(false, null)
+            }
+            else -> Pair(false, null)
         }
     }
 
