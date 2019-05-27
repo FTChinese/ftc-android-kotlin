@@ -62,6 +62,7 @@ class MemberActivity : ScopedAppActivity(),
             return
         }
 
+        toast(R.string.prompt_refreshing)
         launch {
             try {
                 val refreshedAccount = withContext(Dispatchers.IO) {
