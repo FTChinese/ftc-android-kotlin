@@ -42,8 +42,32 @@ class AccountActivity : AppCompatActivity(),
 
         sessionManager = SessionManager.getInstance(this)
 
-        attachFragment()
+        initUI()
         info("AccountActivity.onCreate")
+    }
+
+    /**
+     * Select the fragment to attach based on whether
+     * FTC account is bound to wechat account,
+     * and the login method.
+     */
+    private fun initUI() {
+        val account = sessionManager.loadAccount() ?: return
+
+        info("Account: $account")
+
+        val fragment: Fragment = if (account.isWxOnly) {
+            info("Using WxAccountFragment")
+            WxAccountFragment.newInstance()
+        } else {
+            info("Using FtcAccountFragment")
+            FtcAccountFragment.newInstance()
+        }
+
+        supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.single_frag_holder, fragment)
+                .commit()
     }
 
     override fun onProgress(show: Boolean) {
@@ -55,7 +79,7 @@ class AccountActivity : AppCompatActivity(),
     }
 
     override fun onSwitchAccount() {
-        attachFragment()
+        initUI()
     }
 
     /**
@@ -74,32 +98,10 @@ class AccountActivity : AppCompatActivity(),
             return
         }
 
-        attachFragment()
+        initUI()
     }
 
-    /**
-     * Select the fragment to attach based on whether
-     * FTC account is bound to wechat account,
-     * and the login method.
-     */
-    private fun attachFragment() {
-        val account = sessionManager.loadAccount() ?: return
 
-        info("Account: $account")
-
-        val fragment: Fragment = if (account.isWxOnly) {
-            info("Using WxAccountFragment")
-            WxAccountFragment.newInstance()
-        } else {
-            info("Using FtcAccountFragment")
-            FtcAccountFragment.newInstance()
-        }
-
-        supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.single_frag_holder, fragment)
-                .commit()
-    }
 
     companion object {
 
