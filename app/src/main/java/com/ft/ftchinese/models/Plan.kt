@@ -78,8 +78,8 @@ data class PlanPayable(
         val netPrice: Double,
 
         val balance: Double,
-        val cycleCount: Int,
-        val extraDays: Int,
+        val cycleCount: Long,
+        val extraDays: Long,
         val payable: Double,
 
         var isUpgrade: Boolean = false,

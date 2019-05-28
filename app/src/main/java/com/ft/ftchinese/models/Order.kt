@@ -44,9 +44,12 @@ private const val PREF_FILE_NAME = "subscription"
 private const val PREF_ORDER_ID = "order_id"
 private const val PREF_TIER_TO_BUY = "tier"
 private const val PREF_BILLING_CYCLE = "cycle"
+private const val PREF_CYCLE_COUNT = "cycle_count"
+private const val PREF_EXTRA_DAYS = "extra_days"
 private const val PREF_PAYMENT_METHOD = "pay_method"
 private const val PREF_PRICE = "net_price"
 private const val PREF_CREATED_AT = "create_at"
+private const val PREF_IS_UPGRADE = "is_upgrade"
 private const val PREF_CONFIRMED_AT = "confirmed_at"
 private const val PREF_START_DATE = "start_date"
 private const val PREF_END_DATE = "end_date"
@@ -70,9 +73,12 @@ class OrderManager private constructor(context: Context) {
         editor.putString(PREF_ORDER_ID, subs.orderId)
         editor.putString(PREF_TIER_TO_BUY, subs.tier.string())
         editor.putString(PREF_BILLING_CYCLE, subs.cycle.string())
+        editor.putLong(PREF_CYCLE_COUNT, subs.cycleCount)
+        editor.putLong(PREF_EXTRA_DAYS, subs.extraDays)
         editor.putString(PREF_PAYMENT_METHOD, subs.payMethod.string())
         editor.putDouble(PREF_PRICE, subs.netPrice)
         editor.putString(PREF_CREATED_AT, formatISODateTime(subs.createdAt))
+        editor.putBoolean(PREF_IS_UPGRADE, subs.isUpgrade)
         editor.putString(PREF_CONFIRMED_AT, formatISODateTime(subs.confirmedAt))
         editor.putString(PREF_START_DATE, formatLocalDate(subs.startDate))
         editor.putString(PREF_END_DATE, formatLocalDate(subs.endDate))
@@ -101,9 +107,12 @@ class OrderManager private constructor(context: Context) {
                 orderId = orderId,
                 tier = tier,
                 cycle = cycle,
+                cycleCount = sharedPreferences.getLong(PREF_CYCLE_COUNT, 1),
+                extraDays = sharedPreferences.getLong(PREF_EXTRA_DAYS, 0),
                 payMethod = payMethod,
                 netPrice = price,
                 createdAt = createdAt,
+                isUpgrade = sharedPreferences.getBoolean(PREF_IS_UPGRADE, false),
                 confirmedAt = if (confirmed == null) null else parseISODateTime(confirmed),
                 startDate = if (start == null) null else parseLocalDate(start),
                 endDate = if (end == null) null else parseLocalDate(end)

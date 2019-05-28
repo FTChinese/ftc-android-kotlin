@@ -20,17 +20,6 @@ enum class Cycle {
         return cycleNames[ordinal]
     }
 
-    /**
-     * Calculate the end date of a cycle.
-     *
-     */
-    fun endDate(d: LocalDate): LocalDate {
-        return when (this) {
-            MONTH -> d.plusMonths(1)
-            YEAR -> d.plusYears(1)
-        }
-    }
-
     companion object {
         fun fromString(s: String?): Cycle? {
             return cycleValue[s]
