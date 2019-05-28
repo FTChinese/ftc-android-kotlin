@@ -110,6 +110,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
         upgrade_smallprint.visibility = View.GONE
 
+        // For upgrading show some additional information.
          if (p.isUpgrade) {
              supportActionBar?.setTitle(R.string.title_upgrade)
 
@@ -252,8 +253,11 @@ class CheckOutActivity : ScopedAppActivity(),
                             orderId = wxOrder.ftcOrderId,
                             tier = tier,
                             cycle = cycle,
+                            cycleCount = plan?.cycleCount ?: 1,
+                            extraDays = plan?.extraDays ?: 0,
+                            netPrice = wxOrder.netPrice,
                             payMethod = PayMethod.WXPAY,
-                            netPrice = wxOrder.netPrice
+                            isUpgrade = plan?.isUpgrade ?: false
                     )
 
                     // Save subscription details to shared preference so that we could use it in WXPayEntryActivity
@@ -329,8 +333,11 @@ class CheckOutActivity : ScopedAppActivity(),
                         orderId = aliOrder.ftcOrderId,
                         tier = tier,
                         cycle = cycle,
+                        cycleCount = plan?.cycleCount ?: 1,
+                        extraDays = plan?.extraDays ?: 0,
                         payMethod = PayMethod.ALIPAY,
-                        netPrice = aliOrder.netPrice
+                        netPrice = aliOrder.netPrice,
+                        isUpgrade = plan?.isUpgrade ?: false
                 )
 
                 info("Save subscription order: $subs")
