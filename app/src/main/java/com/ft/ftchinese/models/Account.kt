@@ -52,9 +52,18 @@ data class Account(
     val isFtcOnly: Boolean
         get() = id.isNotBlank() && unionId.isNullOrBlank()
 
+    /**
+     * isMember checks whether user is/was a member.
+     */
     val isMember: Boolean
-        get() = membership.isPaidMember || isVip
+        get() = when {
+            isVip -> true
+            membership.tier == null -> false
+            else -> true
+        }
 
+    val isExpiredMember: Boolean
+        get() = isMember && membership.isExpired
     /**
      * Get a name used to display on UI.
      * If userName is set, use userName;
@@ -78,6 +87,18 @@ data class Account(
 
             return "用户名未设置"
         }
+
+    /**
+     * Calculate user permissions.
+     * Expired membership is treated as Permission.FREE.
+     */
+    val permission: Int = when {
+        isVip -> Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id
+        membership.isExpired -> Permission.FREE.id
+        membership.tier == Tier.STANDARD -> Permission.FREE.id or Permission.STANDARD.id
+        membership.tier == Tier.PREMIUM -> Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id
+        else -> Permission.FREE.id
+    }
 
     /**
      * @return Account. Always returns a new one rather than modifying the existing one to make it immutable.
