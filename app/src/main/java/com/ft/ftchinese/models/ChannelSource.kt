@@ -1,7 +1,9 @@
 package com.ft.ftchinese.models
 
 import android.net.Uri
+import android.os.Parcelable
 import com.ft.ftchinese.util.KTier
+import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.lang.NumberFormatException
@@ -12,6 +14,7 @@ const val HTML_TYPE_COMPLETE = 2
 /**
  * ChannelSource specifies how to display a channel page and where to fetch its data.
  */
+@Parcelize
 data class ChannelSource (
         val title: String, // A Tab's title
         // name is used to cache files.
@@ -21,9 +24,9 @@ data class ChannelSource (
         val contentUrl: String, // This is used to fetch html fragment containing a list of articles.
         val htmlType: Int, // Flag used to tell whether the webUrl should be loaded directly
         @KTier
-        val requiredTier: Tier? = null
+        val permission: Permission? = null
 
-) : AnkoLogger {
+) : Parcelable, AnkoLogger {
 
     var shouldReload = false
 
