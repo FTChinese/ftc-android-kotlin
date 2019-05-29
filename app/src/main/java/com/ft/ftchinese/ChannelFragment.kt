@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import androidx.core.os.bundleOf
 import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.models.*
@@ -79,11 +80,11 @@ class ChannelFragment : ScopedFragment(),
         super.onCreate(savedInstanceState)
 
         // Get metadata about current tab
-        val channelSourceStr = arguments?.getString(ARG_CHANNEL_SOURCE) ?: return
-        channelSource = json.parse<ChannelSource>(channelSourceStr)
+        channelSource = arguments?.getParcelable(ARG_CHANNEL_SOURCE) ?: return
+
+//                json.parse<ChannelSource>(channelSourceStr)
 
         info("Channel source: $channelSource")
-        info("onCreate finished")
 
         val targetUrl = channelSource?.contentUrl ?: return
 
@@ -479,63 +480,15 @@ class ChannelFragment : ScopedFragment(),
 
         info("Is channel require membership: $channelSource")
 
-        // Handle standard subscription and premium subscription channel
-        when (channelSource?.requiredTier) {
-            Tier.STANDARD -> {
-                val grant = activity?.shouldGrantStandard(account) ?: return
+        PaywallTracker.fromArticle(channelItem)
 
-                if (!grant) {
-                    PaywallTracker.fromArticle(channelItem)
+        // Check whether this article requires permission.
+        val contentPerm = channelSource?.permission ?: channelItem.permission()
 
-                    return
-                }
+        val granted = activity?.grantPermission(account, contentPerm)
 
-                openArticle(channelItem)
-                return
-            }
-            Tier.PREMIUM -> {
-                val granted = activity?.shouldGrantPremium(account) ?: return
-
-                if (!granted) {
-                    PaywallTracker.fromArticle(channelItem)
-
-                    return
-                }
-
-                openArticle(channelItem)
-                return
-            }
-        }
-
-        info("Channel source do not require membership")
-
-        if (channelItem.isFree()) {
-            info("Open a free article")
+        if (granted == true) {
             openArticle(channelItem)
-
-            return
-        }
-
-        info("Content requires membership")
-        if (channelItem.requirePremium()) {
-            info("Content restricted to premium members")
-            val granted = activity?.shouldGrantPremium(account) ?: return
-            if (granted) {
-                openArticle(channelItem)
-            } else {
-                PaywallTracker.fromArticle(channelItem)
-            }
-
-            return
-        }
-
-        info("Content restricted to standard members")
-        val granted = activity?.shouldGrantStandard(account) ?: return
-
-        if (granted) {
-            openArticle(channelItem)
-        } else {
-            PaywallTracker.fromArticle(channelItem)
         }
     }
 
@@ -589,9 +542,10 @@ class ChannelFragment : ScopedFragment(),
          * number.
          */
         fun newInstance(channel: ChannelSource) = ChannelFragment().apply {
-            arguments = Bundle().apply {
-                putString(ARG_CHANNEL_SOURCE, json.toJsonString(channel))
-            }
+//            arguments = Bundle().apply {
+//                putString(ARG_CHANNEL_SOURCE, json.toJsonString(channel))
+//            }
+            arguments = bundleOf(ARG_CHANNEL_SOURCE to channel)
         }
 
     }

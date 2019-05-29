@@ -193,41 +193,38 @@ data class ChannelItem(
         return "${type}_$id.html"
     }
 
-    fun isFree(): Boolean {
-        if (isSevenDaysOld()) {
-            return false
-        }
-
-        if (type == "premium") {
-            return false
-        }
+    fun permission(): Permission {
 
         if (tag.contains("会员专享")) {
-            return false
+            return Permission.STANDARD
         }
 
         if (tag.contains("高端专享")) {
-            return false
+            return Permission.PREMIUM
+        }
+
+        if (type == "premium") {
+            return Permission.STANDARD
         }
 
         if (type == TYPE_INTERACTIVE) {
             info("An interactive")
             return when (subType) {
                 SUB_TYPE_RADIO,
-                SUB_TYPE_SPEED_READING -> false
-                else -> true
+                SUB_TYPE_SPEED_READING -> Permission.STANDARD
+                else -> if (isSevenDaysOld()) {
+                    Permission.STANDARD
+                } else {
+                    Permission.FREE
+                }
             }
         }
 
-        return true
-    }
-
-    fun requirePremium(): Boolean {
-        if (tag.contains("高端专享")) {
-            return true
+        if (isSevenDaysOld()) {
+            return Permission.STANDARD
         }
 
-        return false
+        return Permission.FREE
     }
 
     private fun getCommentsId(): String {

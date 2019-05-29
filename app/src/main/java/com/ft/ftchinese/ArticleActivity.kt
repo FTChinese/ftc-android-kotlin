@@ -158,9 +158,9 @@ class ArticleActivity : AppCompatActivity(),
         lang_en_btn.setOnClickListener {
             val account = sessionManager.loadAccount()
 
-            val grant = shouldGrantStandard(account)
+//            val grant = shouldGrantStandard(account)
 
-            if (!grant) {
+            if (!grantPermission(account, Permission.STANDARD)) {
                 disableLangSwitch()
 
                 val item = article?.toChannelItem()
@@ -178,9 +178,7 @@ class ArticleActivity : AppCompatActivity(),
         lang_bi_btn.setOnClickListener {
             val account = sessionManager.loadAccount()
 
-            val grant = shouldGrantStandard(account)
-
-            if (!grant) {
+            if (!grantPermission(account, Permission.STANDARD)) {
                 disableLangSwitch()
 
                 val item = article?.toChannelItem()

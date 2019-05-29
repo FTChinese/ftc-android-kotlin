@@ -448,7 +448,7 @@ open class WVClient(
                         name = issue,
                         contentUrl = buildUrlForFragment(uri),
                         htmlType = HTML_TYPE_FRAGMENT,
-                        requiredTier = Tier.PREMIUM
+                        permission = Permission.PREMIUM
                 )
 
                 info("Channel source for editor choice: $channelSource")

@@ -123,6 +123,15 @@ class Story (
         }
     }
 
+    fun permission(): Permission {
+        return when {
+            accesibleBy == "1" -> Permission.STANDARD
+            accesibleBy == "2" -> Permission.PREMIUM
+            isSevenDaysOld() -> Permission.STANDARD
+            else -> Permission.FREE
+        }
+    }
+
     private fun isSevenDaysOld(): Boolean {
         if (publishedAt.isBlank()) {
             return false

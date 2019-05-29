@@ -281,7 +281,14 @@ class StoryFragment : ScopedFragment(),
     }
 
     private suspend fun render(story: Story): String? {
-        if (!grantAccess(story)) {
+
+        // After story data is loaded, perform permission
+        // check again.
+        val account = sessionManager.loadAccount()
+        val granted = activity?.grantPermission(account, story.permission())
+
+        if (granted == false) {
+            toast("Incorrect membership to access this article")
             cancel()
 
             activity?.finish()
@@ -329,24 +336,6 @@ class StoryFragment : ScopedFragment(),
         loadModel.loaded(article)
         starModel.loaded(article)
     }
-
-    private fun grantAccess(story: Story): Boolean {
-        if (story.isFree()) {
-            info("A free article")
-            return true
-        }
-
-        val account = sessionManager.loadAccount()
-
-        if (activity?.shouldGrantStandard(account) == false) {
-            info("Cannot grant standard access to this article")
-            return false
-        }
-
-        return true
-    }
-
-
 
     @JavascriptInterface
     fun follow(message: String) {
