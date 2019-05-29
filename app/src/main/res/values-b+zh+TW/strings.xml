@@ -6,11 +6,12 @@
     <string name="action_favorite">收藏</string>
 
     <string name="share_template">[FT中文網]%1$s - %2$s</string>
+
     <!-- Bottom navigation tabs -->
     <string name="nav_news">最新</string>
     <string name="nav_english">每日英語</string>
     <string name="nav_ftacademy">FT商學院</string>
-    <string name="nav_video">影音</string>
+    <string name="nav_video">視•聽</string>
     <string name="nav_myft">我的FT</string>
 
     <string name="news_editor_choice">編輯精選</string>
@@ -75,11 +76,13 @@
 
     <string name="premium_small_print">注：所有活動門票不可折算現金、不能轉讓、不含差旅與食宿</string>
 
+    <string name="paywall_expired">您訂閱的%1$s已經于%2$s日过期，继续閱讀請續訂</string>
     <string name="member_resubs">會員訂閱已过期，請續訂</string>
     <string name="membership_renew">續訂</string>
     <string name="membership_upgrade">升级为高端會員</string>
     <string name="upgrade_guide">如果您计划升级为高端會員，系统将首先使用當前帳號的余额抵扣定价，不足部分需要您另行支付。</string>
-    <string name="upgrade_to_read">您點擊了仅限高端會員閱讀的文章，您目前是标准会员，升级为高端会员可以继续閱讀</string>
+    <string name="upgrade_to_read">您點擊了仅限高端會員閱讀的文章。您目前是標準會員，升级为閱讀會員可以閱读</string>
+    <string name="premium_only">您點擊了仅供高端會員阅读的文章，購買高端會員後可以继续閱讀</string>
     <string name="upgrade_smallprint">余额可以兑换高级會員%1$d年%2$d天，无需额外支付</string>
 
     <!-- Example: ¥1,998.00/年 -->
@@ -111,7 +114,7 @@
     <string name="heading_customer_service">聯客服</string>
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
     <string name="heading_pay_method">選擇支付方式</string>
-    <string name="heading_become_member">购买FT會員</string>
+    <string name="heading_become_member">购买FT会员</string>
     <string name="pay_method_ali">支付寶支付</string>
     <string name="pay_method_wechat">微信支付</string>
     <string name="pay_method_stripe">Stripe支付</string>
@@ -160,7 +163,8 @@
     <string name="btn_bind_email">绑定信箱</string>
     <string name="btn_request_verify">重新寄送驗證郵件</string>
 
-    <string name="wx_session_expired">微信登录已过期，請重新登入</string>
+    <string name="wx_session_expired">微信登入已過期，請重新請。微信登入会定期失效，如果您以後不希望看到本提示，可以在侧边栏的\&quot;账号與安全\&quot;下綁定FT中文網帳號。</string>
+    <string name="wx_relogin">重新授權</string>
     <string name="action_wx_login">微信登入</string>
     <string name="action_cancel">取消</string>
     <string name="action_sign_in_short">Sign in</string>

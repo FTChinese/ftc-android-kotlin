@@ -5,11 +5,12 @@
     <string name="action_favorite">收藏</string>
 
     <string name="share_template">[FT中文网]%1$s - %2$s</string>
+
     <!-- Bottom navigation tabs -->
     <string name="nav_news">最新</string>
     <string name="nav_english">每日英语</string>
     <string name="nav_ftacademy">FT商学院</string>
-    <string name="nav_video">视频</string>
+    <string name="nav_video">视•听</string>
     <string name="nav_myft">我的FT</string>
 
     <string name="news_editor_choice">编辑精选</string>
@@ -74,11 +75,13 @@
 
     <string name="premium_small_print">注：所有活动门票不可折算现金、不能转让、不含差旅与食宿</string>
 
+    <string name="paywall_expired">您订阅的%1$s已经于%2$s日过期，继续阅读请续订</string>
     <string name="member_resubs">会员已过期，重新订阅</string>
     <string name="membership_renew">续订</string>
     <string name="membership_upgrade">升级为高端会员</string>
     <string name="upgrade_guide">如果您计划升级为高端会员，系统将首先使用当前账号的余额抵扣定价，不足部分需要您另行支付。</string>
-    <string name="upgrade_to_read">您点击了仅限高端会员阅读的文章，您目前是标准会员，升级为高端会员可以继续阅读</string>
+    <string name="upgrade_to_read">您点击了仅限高端会员阅读的文章。您目前是标准会员，升级为高端会员可以继续阅读</string>
+    <string name="premium_only">您点击了仅供高端会员阅读的文章，购买高端会员后可以继续阅读</string>
     <string name="upgrade_smallprint">余额可以兑换高级会员%1$d年%2$d天，无需额外支付</string>
 
     <!-- Example: ¥1,998.00/年 -->
@@ -159,7 +162,8 @@
     <string name="btn_bind_email">绑定邮箱</string>
     <string name="btn_request_verify">重新发送验证邮件</string>
 
-    <string name="wx_session_expired">微信登录已过期，请重新登录</string>
+    <string name="wx_session_expired">微信登录已过期，请重新登录。微信登录会定期失效，如果您以后不希望看到本提示，可以在侧边栏的\"账号与安全\"下绑定FT中文网账号。</string>
+    <string name="wx_relogin">重新授权</string>
     <string name="action_wx_login">微信登录</string>
     <string name="action_cancel">取消</string>
     <string name="action_sign_in_short">Sign in</string>
