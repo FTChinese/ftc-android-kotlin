@@ -67,16 +67,11 @@ data class Subscription(
         // it means user is not member currently, use
         // today as startDate;
         // For upgrading the starting date is also today.
-        val start = if (m.expireDate == null || isUpgrade) {
-            today
-        } else {
-            // If user is already a member, but it is expired, use today
-            if (m.expireDate.isBefore(today)) {
-                today
-            } else {
-                // Membership is not expired yet, use previous membership's expiration date as next membership's start date.
-                m.expireDate
-            }
+        val start = when {
+            m.expireDate == null -> today
+            isUpgrade -> today
+            m.expireDate.isBefore(today) -> today
+            else -> m.expireDate
         }
 
         confirmedAt = now
