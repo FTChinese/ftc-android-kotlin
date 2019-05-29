@@ -26,13 +26,31 @@
                 android:text="@string/paywall_login_prompt"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
-                app:layout_constraintStart_toStartOf="@id/product_standard"
-                app:layout_constraintEnd_toEndOf="@id/product_standard"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/product_standard"/>
+                app:layout_constraintStart_toStartOf="@id/product_top"
+                app:layout_constraintEnd_toEndOf="@id/product_top"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/expired_guide"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:layout_constraintStart_toStartOf="@id/product_top"
+                app:layout_constraintEnd_toEndOf="@id/product_top"
+                app:layout_constraintTop_toBottomOf="@id/login_button" />
+
+            <TextView
+                android:id="@+id/premium_guide"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/premium_only"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="@id/product_top"
+                app:layout_constraintStart_toStartOf="@id/product_top"
+                app:layout_constraintTop_toBottomOf="@id/expired_guide" />
 
             <FrameLayout
-                android:id="@+id/product_standard"
+                android:id="@+id/product_top"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
@@ -41,17 +59,17 @@
                 android:layout_marginBottom="16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/login_button"/>
+                app:layout_constraintTop_toBottomOf="@id/premium_guide"/>
 
             <FrameLayout
-                android:id="@+id/product_premium"
+                android:id="@+id/product_bottom"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintStart_toStartOf="@id/product_standard"
-                app:layout_constraintEnd_toEndOf="@id/product_standard"
-                app:layout_constraintTop_toBottomOf="@+id/product_standard"
+                app:layout_constraintStart_toStartOf="@id/product_top"
+                app:layout_constraintEnd_toEndOf="@id/product_top"
+                app:layout_constraintTop_toBottomOf="@+id/product_top"
                 app:layout_constraintBottom_toBottomOf="parent"/>
 
 
