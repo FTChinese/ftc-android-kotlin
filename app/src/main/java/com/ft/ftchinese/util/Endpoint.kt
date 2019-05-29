@@ -27,6 +27,7 @@ object NextApi {
 object SubscribeApi {
     private val BASE = if (BuildConfig.DEBUG) {
         "http://www.ftacademy.cn/api/sandbox"
+//        "http://192.168.10.195:8200"
     } else {
         "http://www.ftacademy.cn/api/v1"
     }
@@ -38,6 +39,9 @@ object SubscribeApi {
 
     val WX_LOGIN = "$BASE/wx/oauth/login"
     val WX_REFRESH = "$BASE/wx/oauth/refresh"
+
+    val UPGRADE = "$BASE/upgrade"
+    val UPGRADE_PREVIEW = "$BASE/upgrade/preview"
 }
 
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
