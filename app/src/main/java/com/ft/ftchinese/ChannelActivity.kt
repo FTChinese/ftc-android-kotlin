@@ -30,12 +30,7 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
             setDisplayShowTitleEnabled(false)
         }
 
-        /**
-         * Get the metadata for this page of article list
-         */
-        val data = intent.getStringExtra(EXTRA_PAGE_META)
-        val channelSource = json.parse<ChannelSource>(data)
-
+        val channelSource = intent.getParcelableExtra<ChannelSource>(EXTRA_PAGE_META)
         if (channelSource == null) {
             toast(R.string.prompt_load_failure)
             return
@@ -68,7 +63,7 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
          */
         fun start(context: Context?, page: ChannelSource) {
             val intent = Intent(context, ChannelActivity::class.java).apply {
-                putExtra(EXTRA_PAGE_META, json.toJsonString(page))
+                putExtra(EXTRA_PAGE_META, page)
             }
 
             context?.startActivity(intent)
