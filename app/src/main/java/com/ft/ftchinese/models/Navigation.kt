@@ -1,6 +1,5 @@
 package com.ft.ftchinese.models
 
-import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.util.FTC_OFFICIAL_URL
 import com.ft.ftchinese.util.MAILBOX_URL
 
@@ -81,35 +80,21 @@ object Navigation {
                     name = "news_china",
                     contentUrl = "$MAILBOX_URL/channel/china.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
+
             ChannelSource(
                     title = "标准订阅",
                     name = "news_standard_only",
                     contentUrl = "$MAILBOX_URL/channel/standardsubscription.html?webview=ftcapp&bodyonly=yes&ad=no&001",
                     htmlType = HTML_TYPE_FRAGMENT,
-                    requiredTier = Tier.STANDARD),
+                    permission = Permission.STANDARD),
+
             ChannelSource(
                     title = "高端订阅",
                     name = "news_premium_only",
                     contentUrl = "$MAILBOX_URL/channel/premiumsubscription.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018",
-                    htmlType = HTML_TYPE_FRAGMENT),
-            /**
-             * "meta": {
-             *   "title": "编辑精选",
-             *   "description": "",
-             *   "theme": "default",
-             *   "adid": "1100",
-             *   "adZone": "home/editorchoice"
-             *   }
-             * This page is not processed by JS. You have to intercept click on webUrl and then open a ChannelActivity.
-             * Links on this page looks like:
-             * http://www.ftchinese.com/channel/editorchoice-issue.html?issue=EditorChoice-20181105
-             * See ChannelWebViewClient.
-             */
-            ChannelSource(
-                    title = "编辑精选",
-                    name = "news_editor_choice",
-                    contentUrl = "$MAILBOX_URL/channel/editorchoice.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018",
-                    htmlType = HTML_TYPE_FRAGMENT),
+                    htmlType = HTML_TYPE_FRAGMENT,
+                    permission = Permission.PREMIUM),
+
             /**
              * "meta": {
                 "title": "全球",
@@ -519,7 +504,7 @@ object Navigation {
             ChannelSource(
                     title = "最新",
                     name = "video_latest",
-                    contentUrl = "$MAILBOX_URL/channel/stream.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+                    contentUrl = "$MAILBOX_URL/channel/audiovideo.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -533,9 +518,9 @@ object Navigation {
              * Handle webUrl click in WebViewClient.
              */
             ChannelSource(
-                    title = "政经",
-                    name = "video_politics",
-                    contentUrl = "$MAILBOX_URL/channel/vpolitics.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+                    title = "高端视点",
+                    name = "video_viewtop",
+                    contentUrl = "$MAILBOX_URL/channel/viewtop.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -549,10 +534,17 @@ object Navigation {
              * Handle webUrl click in WebViewClient
              */
             ChannelSource(
-                    title = "商业",
-                    name = "video_business",
-                    contentUrl = "$MAILBOX_URL/channel/vbusiness.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+                    title = "麦可林学英语",
+                    name = "video_learn_english",
+                    contentUrl = "$MAILBOX_URL/m/corp/preview.html?pageid=learnenglish&webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
+
+            ChannelSource(
+                    title = "BoomEar艺术播客",
+                    name = "video_boomear",
+                    contentUrl = "$MAILBOX_URL/m/corp/preview.html?pageid=boomear&webview=ftcapp&bodyonly=yes",
+                    htmlType = HTML_TYPE_FRAGMENT
+            ),
             /**
              * "meta": {
                 "title": "FT中文网",
@@ -564,45 +556,32 @@ object Navigation {
              * No list in this channel.
              * Handle webUrl click in WebViewClient
              */
-            ChannelSource(title = "秒懂", name = "video_explain", contentUrl = "$MAILBOX_URL/channel/explainer.html?webview=ftcapp&bodyonly=yes&norepeat=yes", htmlType = HTML_TYPE_FRAGMENT),
-            /**
-             * "meta": {
-                "title": "FT中文网",
-                "description": "",
-                "theme": "default",
-                "adid": "1000",
-                "adZone": "home"
-                }
-             * No list in this channel
-             * Handle webUrl click in WebViewClient
-             */
-            ChannelSource(title = "金融", name = "video_finance", contentUrl = "$MAILBOX_URL/channel/vfinance.html?webview=ftcapp&bodyonly=yes&norepeat=yes", htmlType = HTML_TYPE_FRAGMENT),
-            /**
-             * "meta": {
-                "title": "FT中文网",
-                "description": "",
-                "theme": "default",
-                "adid": "1000",
-                "adZone": "home"
-                }
-             * No list in this channel
-             * Handle webUrl click in WebViewClient
-             */
-            ChannelSource(title = "文化", name = "video_culture", contentUrl = "$MAILBOX_URL/channel/vculture.html?webview=ftcapp&bodyonly=yes&norepeat=yes", htmlType = HTML_TYPE_FRAGMENT),
+            ChannelSource(
+                    title = "秒懂",
+                    name = "video_explain",
+                    contentUrl = "$MAILBOX_URL/channel/explainer.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+                    htmlType = HTML_TYPE_FRAGMENT
+            ),
+
             /**
              * No list in this channel
              * Handle webUrl click in WebViewClient
              */
-            ChannelSource(title = "高端视点", name = "video_top", contentUrl = "$MAILBOX_URL/channel/viewtop.html?webview=ftcapp&norepeat=no", htmlType = HTML_TYPE_COMPLETE),
+            ChannelSource(
+                    title = "FT看见",
+                    name = "video_feature",
+                    contentUrl = "$MAILBOX_URL/channel/vfeatures.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+                    htmlType = HTML_TYPE_FRAGMENT
+            ),
             /**
              * No list in this channel
              * Handle webUrl click in WebViewClient
              */
-            ChannelSource(title = "FT看见", name = "video_feature", contentUrl = "$MAILBOX_URL/channel/vfeatures.html?webview=ftcapp&bodyonly=yes&norepeat=yes", htmlType = HTML_TYPE_FRAGMENT),
-            /**
-             * No list in this channel
-             * Handle webUrl click in WebViewClient
-             */
-            ChannelSource(title = "有色眼镜", name = "video_tinted", contentUrl = "$MAILBOX_URL/channel/videotinted.html?webview=ftcapp&bodyonly=yes&norepeat=yes", htmlType = HTML_TYPE_FRAGMENT)
+            ChannelSource(
+                    title = "有色眼镜",
+                    name = "video_tinted",
+                    contentUrl = "$MAILBOX_URL/channel/videotinted.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+                    htmlType = HTML_TYPE_FRAGMENT
+            )
     )
 }
