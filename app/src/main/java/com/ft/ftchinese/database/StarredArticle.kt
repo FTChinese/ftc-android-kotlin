@@ -3,6 +3,7 @@ package com.ft.ftchinese.database
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.ft.ftchinese.models.ChannelItem
+import com.ft.ftchinese.models.Permission
 import com.ft.ftchinese.models.Tier
 import java.util.*
 
@@ -81,12 +82,13 @@ data class StarredArticle(
         return (tier == Tier.STANDARD.string()) || (tier == Tier.PREMIUM.string())
     }
 
-    fun requireStandard(): Boolean {
-        return tier == Tier.STANDARD.string()
-    }
-
-    fun requirePremium(): Boolean {
-        return tier == Tier.PREMIUM.string()
+    fun permission(): Permission {
+        return when {
+            tier == Tier.STANDARD.string() -> Permission.STANDARD
+            tier == Tier.PREMIUM.string() -> Permission.PREMIUM
+            isSevenDaysOld() -> Permission.STANDARD
+            else -> Permission.FREE
+        }
     }
 
     private fun isSevenDaysOld(): Boolean {
