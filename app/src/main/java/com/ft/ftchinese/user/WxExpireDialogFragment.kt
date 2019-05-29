@@ -18,24 +18,17 @@ import org.jetbrains.anko.info
 
 class WxExpireDialogFragment : DialogFragment(), AnkoLogger {
 
-    private lateinit var listener: WxExpireDialogListener
     private lateinit var wxApi: IWXAPI
     private lateinit var sessionManager: SessionManager
-
-    interface WxExpireDialogListener {
-        fun onWxAuthExpired()
-    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
-        if (context is WxExpireDialogListener) {
-            listener = context
-        }
-
         sessionManager = SessionManager.getInstance(context)
         wxApi = WXAPIFactory.createWXAPI(context, BuildConfig.WX_SUBS_APPID)
     }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,7 +47,7 @@ class WxExpireDialogFragment : DialogFragment(), AnkoLogger {
              *
              */
             builder.setMessage(R.string.wx_session_expired)
-                    .setPositiveButton(R.string.action_wx_login){ dialog, id ->
+                    .setPositiveButton(R.string.wx_relogin){ dialog, id ->
                         authorize()
                         // Or should be simply redirects user to
                         // login activity?
@@ -62,7 +55,6 @@ class WxExpireDialogFragment : DialogFragment(), AnkoLogger {
                     }
                     .setNegativeButton(R.string.action_cancel){ dialog, id ->
                         info("Cancel button pressed")
-                        listener.onWxAuthExpired()
                     }
 
             // Create the AlertDialog object and return it
