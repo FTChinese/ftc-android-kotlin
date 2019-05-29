@@ -286,7 +286,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             return
         }
 
-        if (account.membership.isPaidMember) {
+        if (account.isMember) {
             MemberActivity.start(this)
         } else {
             PaywallTracker.from = null
