@@ -39,7 +39,6 @@ class WebContentFragment : Fragment(),
     private var channelItem: ChannelItem? = null
 
     override fun onOpenGraphEvaluated(result: String) {
-        info("Open graph evaluated: $result")
 
         val og = try {
             json.parse<OpenGraphMeta>(result)
@@ -47,14 +46,17 @@ class WebContentFragment : Fragment(),
             null
         }
 
-        info("Open graph evaluation result: $og")
-
         val article = mergeOpenGraph(og)
 
-        info("Loaded article: $article")
+        if (BuildConfig.DEBUG) {
+            info("Open graph evaluation result: $og")
+            info("Loaded article: $article")
+        }
 
-        // Check access here.
-        if (!grantAccess(article)) {
+        val account = sessionManager.loadAccount()
+
+        val granted = activity?.grantPermission(account, article.permission())
+        if (granted == null || granted == false) {
             PaywallTracker.fromArticle(article.toChannelItem())
 
             activity?.finish()
@@ -63,31 +65,6 @@ class WebContentFragment : Fragment(),
 
         loadModel.loaded(article)
         starModel.loaded(article)
-    }
-
-    /**
-     * Refer to [ChannelFragment.selectItem] method
-     */
-    private fun grantAccess(article: StarredArticle): Boolean {
-        if (article.isFree()) {
-            info("A free article")
-            return true
-        }
-
-        val account = sessionManager.loadAccount()
-
-        if (article.requirePremium()) {
-            info("Content restricted to premium members")
-            return activity?.shouldGrantPremium(account) ?: false
-        }
-
-
-        if (activity?.shouldGrantStandard(account) == false) {
-            info("Cannot grant standard access to this article")
-            return false
-        }
-
-        return activity?.shouldGrantStandard(account) ?: false
     }
 
     private fun mergeOpenGraph(og: OpenGraphMeta?): StarredArticle {
