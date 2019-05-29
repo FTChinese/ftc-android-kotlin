@@ -28,6 +28,7 @@ class PaywallActivity : ScopedAppActivity(),
     private lateinit var tracker: StatsTracker
     private lateinit var sessionManager: SessionManager
     private lateinit var productViewModel: ProductViewModel
+    private var premiumFirst: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +39,8 @@ class PaywallActivity : ScopedAppActivity(),
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
         }
+
+        premiumFirst = intent.getBooleanExtra(EXTRA_PREMIUM_FIRST, false)
 
         sessionManager = SessionManager.getInstance(this)
 
@@ -65,7 +68,22 @@ class PaywallActivity : ScopedAppActivity(),
         tracker.displayPaywall()
     }
 
+    private fun expiredText(m: Membership): String {
+        if (m.tier == null) {
+            return ""
+        }
+        val tierText = when (m.tier) {
+            Tier.STANDARD -> getString(R.string.tier_standard)
+            Tier.PREMIUM -> getString(R.string.tier_premium)
+        }
+
+        return getString(R.string.paywall_expired, tierText, m.expireDate)
+    }
+
     private fun initUI() {
+        expired_guide.visibility = View.GONE
+        premium_guide.visibility = View.GONE
+
         val account = sessionManager.loadAccount()
 
         if (account == null) {
@@ -75,16 +93,37 @@ class PaywallActivity : ScopedAppActivity(),
 
         } else {
             login_button.visibility = View.GONE
+
+            // If user is an expired member
+            if (account.isExpiredMember) {
+                expired_guide.visibility = View.VISIBLE
+                expired_guide.text = expiredText(account.membership)
+            }
         }
+
+
+        val topCard = if (premiumFirst) {
+            buildPremiumCard()
+        } else {
+            buildStandardCard()
+        }
+
+        val bottomCard = if (premiumFirst) {
+            buildStandardCard()
+        } else {
+            buildPremiumCard()
+        }
+
+        premium_guide.visibility = if (premiumFirst) View.VISIBLE else View.GONE
 
         supportFragmentManager.beginTransaction()
                 .replace(
-                        R.id.product_standard,
-                        ProductFragment.newInstance(buildStandardCard())
+                        R.id.product_top,
+                        ProductFragment.newInstance(topCard)
                 )
                 .replace(
-                        R.id.product_premium,
-                        ProductFragment.newInstance(buildPremiumCard())
+                        R.id.product_bottom,
+                        ProductFragment.newInstance(bottomCard)
                 )
                 .commit()
     }
@@ -142,10 +181,15 @@ class PaywallActivity : ScopedAppActivity(),
     }
 
     companion object {
-
+        private const val EXTRA_PREMIUM_FIRST = "extra_premium_first"
+        /**
+         * @param premiumFirst determines whether put the premium card on top.
+         */
         @JvmStatic
-        fun start(context: Context?) {
-            context?.startActivity(Intent(context, PaywallActivity::class.java))
+        fun start(context: Context?, premiumFirst: Boolean = false) {
+            context?.startActivity(Intent(context, PaywallActivity::class.java).apply {
+                putExtra(EXTRA_PREMIUM_FIRST, premiumFirst)
+            })
         }
     }
 }
