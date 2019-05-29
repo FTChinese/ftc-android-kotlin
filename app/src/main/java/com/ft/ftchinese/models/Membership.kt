@@ -23,13 +23,6 @@ data class Membership(
                     ?.isBefore(LocalDate.now())
                     ?: true
 
-    // Check weather user is a member.
-    // No check for expiration time.
-    val isPaidMember: Boolean
-        get() {
-            return tier == Tier.STANDARD || tier == Tier.PREMIUM
-        }
-
     /**
      * Status of a membership when its expire date falls into
      * various period.
