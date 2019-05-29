@@ -52,7 +52,6 @@ import kotlin.Exception
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class MainActivity : ScopedAppActivity(),
         TabLayout.OnTabSelectedListener,
-        WxExpireDialogFragment.WxExpireDialogListener,
         AnkoLogger {
 
     private var bottomDialog: BottomSheetDialog? = null
@@ -158,8 +157,6 @@ class MainActivity : ScopedAppActivity(),
             )
         }
     }
-
-    override fun onWxAuthExpired() {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -385,11 +382,22 @@ class MainActivity : ScopedAppActivity(),
      */
     private fun checkWxSession() {
         val account = sessionManager.loadAccount() ?: return
+
+        // If loginMethod is wechat, or the account is bound
+        // to ftc account, do not show the alert.
         if (account.loginMethod != LoginMethod.WECHAT) {
             return
         }
 
+        if (account.isCoupled) {
+            return
+        }
+
         val wxSession = sessionManager.loadWxSession() ?: return
+
+        // For testing only. To test wechat you must use a release version.
+//        WxExpireDialogFragment().show(supportFragmentManager, "WxExpireDialog")
+
         if (wxSession.isExpired) {
             logout()
             WxExpireDialogFragment().show(supportFragmentManager, "WxExpireDialog")
