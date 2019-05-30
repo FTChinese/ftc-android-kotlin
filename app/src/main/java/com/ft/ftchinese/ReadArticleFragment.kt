@@ -10,12 +10,15 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 
-class ReadArticleFragment : Fragment(), AnkoLogger {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class ReadArticleFragment : ScopedFragment(),
+        AnkoLogger {
 
     private lateinit var model: ReadArticleViewModel
     private lateinit var viewAdapter: ReadArticleAdapter
