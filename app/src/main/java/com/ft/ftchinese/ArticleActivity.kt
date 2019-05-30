@@ -7,10 +7,10 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.models.*
 import com.ft.ftchinese.user.OnProgressListener
@@ -38,7 +38,7 @@ private const val EXTRA_USE_JSON = "extra_use_json"
  * If the content has a standard JSON API, [StoryFragment] will be used; otherwise use [WebContentFragment].
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class ArticleActivity : AppCompatActivity(),
+class ArticleActivity : ScopedAppActivity(),
         SocialShareFragment.OnShareListener,
         BottomToolFragment.OnItemClickListener,
         OnProgressListener,
