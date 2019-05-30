@@ -284,16 +284,16 @@ class StoryFragment : ScopedFragment(),
 
         // After story data is loaded, perform permission
         // check again.
-        val account = sessionManager.loadAccount()
-        val granted = activity?.grantPermission(account, story.permission())
-
-        if (granted == false) {
-            toast("Incorrect membership to access this article")
-            cancel()
-
-            activity?.finish()
-            return null
-        }
+//        val account = sessionManager.loadAccount()
+//        val granted = activity?.grantPermission(account, story.permission())
+//
+//        if (granted == false) {
+//            toast("Incorrect membership to access this article")
+//            cancel()
+//
+//            activity?.finish()
+//            return null
+//        }
 
         loadModel.showLangSwitcher(story.isBilingual)
 
