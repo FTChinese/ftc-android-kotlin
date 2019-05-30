@@ -537,27 +537,6 @@ class MainActivity : ScopedAppActivity(),
             }
 
 
-//            val adView = View.inflate(this, R.layout.ad_view, null)
-//
-//            if (BuildConfig.DEBUG) {
-//                info("Starting to show ad. Hide system ui.")
-//            }
-//
-//            supportActionBar?.hide()
-//            adView.systemUiVisibility =
-//                    View.SYSTEM_UI_FLAG_LOW_PROFILE or
-//                            View.SYSTEM_UI_FLAG_FULLSCREEN or
-//                            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-//                            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-//                            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-//                            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-//
-//            if (BuildConfig.DEBUG) {
-//                info("Added ad view")
-//            }
-//
-//            root_container.addView(adView)
-
             val adView = createAdView()
             val adImage = adView.findViewById<ImageView>(R.id.ad_image)
             val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
