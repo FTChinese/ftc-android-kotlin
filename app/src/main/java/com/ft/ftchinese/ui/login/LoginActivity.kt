@@ -8,11 +8,16 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
+import com.ft.ftchinese.models.FtcUser
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class LoginActivity : ScopedAppActivity(), AnkoLogger {
@@ -80,7 +85,28 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun loadAccount(userId: String) {
+        val user = FtcUser(id = userId)
+        toast(R.string.progress_fetching)
+        showProgress(true)
 
+        launch {
+            val account = withContext(Dispatchers.IO) {
+                user.fetchAccount()
+            }
+
+            showProgress(false)
+
+            if (account == null) {
+                toast(R.string.error_not_loaded)
+                return@launch
+            }
+
+            sessionManager.saveAccount(account)
+
+            setResult(Activity.RESULT_OK)
+
+            finish()
+        }
     }
 
     companion object {

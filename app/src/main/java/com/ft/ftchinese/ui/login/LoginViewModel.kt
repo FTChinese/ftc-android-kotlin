@@ -17,7 +17,7 @@ class LoginViewModel : ViewModel() {
         inProgress.value = show
     }
 
-    fun serUserId(id: String) {
+    fun setUserId(id: String) {
         userId.value = id
     }
 }
