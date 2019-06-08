@@ -11,8 +11,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.ft.ftchinese.models.*
+import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
-import com.ft.ftchinese.user.CredentialsActivity
 import com.ft.ftchinese.util.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -205,8 +205,7 @@ open class WVClient(
             // The `微信登录` button is wrapped in a link with webUrl set to `weixinlogin://www.ftchinese.com/`
             "ftcregister",
             "weixinlogin" -> {
-//                SignUpActivity.start(activity)
-                CredentialsActivity.startForResult(activity)
+                LoginActivity.startForResult(activity)
                 return true
             }
 

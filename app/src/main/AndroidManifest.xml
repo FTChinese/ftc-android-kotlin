@@ -75,12 +75,12 @@
             android:name=".ArticleActivity"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name=".user.CredentialsActivity"
+            android:name=".ui.login.LoginActivity"
             android:label="@string/title_login_signup"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".user.ForgotPasswordActivity"
+            android:name=".ui.login.ForgotPasswordActivity"
             android:label="@string/title_reset_password"
             android:parentActivityName=".user.CredentialsActivity"
             android:windowSoftInputMode="adjustResize" />

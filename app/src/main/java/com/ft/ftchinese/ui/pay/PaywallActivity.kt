@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.models.*
-import com.ft.ftchinese.user.CredentialsActivity
+import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_paywall.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -51,7 +51,7 @@ class PaywallActivity : ScopedAppActivity(),
             val account = sessionManager.loadAccount()
 
             if (account == null) {
-                CredentialsActivity.startForResult(this)
+                LoginActivity.startForResult(this)
                 return@Observer
             }
 
@@ -88,7 +88,7 @@ class PaywallActivity : ScopedAppActivity(),
 
         if (account == null) {
             login_button.setOnClickListener {
-                CredentialsActivity.startForResult(this)
+                LoginActivity.startForResult(this)
             }
 
         } else {

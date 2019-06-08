@@ -25,6 +25,7 @@ import com.ft.ftchinese.splash.Schedule
 import com.ft.ftchinese.splash.ScreenAd
 import com.ft.ftchinese.splash.SplashScreenManager
 import com.ft.ftchinese.splash.splashScheduleFile
+import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.user.*
@@ -292,7 +293,7 @@ class MainActivity : ScopedAppActivity(),
         // Set a listener that will be notified when a menu item is selected.
         drawer_nav.setNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.action_login ->  CredentialsActivity.startForResult(this)
+                R.id.action_login ->  LoginActivity.startForResult(this)
                 R.id.action_account -> AccountActivity.start(this)
                 R.id.action_subscription -> {
                     // Tracking
@@ -315,7 +316,7 @@ class MainActivity : ScopedAppActivity(),
                 ?.findViewById<TextView>(R.id.nav_header_title)
                 ?.setOnClickListener {
                     if (!sessionManager.isLoggedIn()) {
-                        CredentialsActivity.startForResult(this)
+                        LoginActivity.startForResult(this)
                         return@setOnClickListener
                     }
 

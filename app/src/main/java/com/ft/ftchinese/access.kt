@@ -3,17 +3,17 @@ package com.ft.ftchinese
 import android.app.Activity
 import com.ft.ftchinese.models.Account
 import com.ft.ftchinese.models.Permission
+import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.pay.UpgradeActivity
-import com.ft.ftchinese.user.CredentialsActivity
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 fun Activity.grantPermission(account: Account?, contentPerm: Permission): Boolean {
     if (account == null) {
         toast(R.string.prompt_login_to_read)
-        CredentialsActivity.startForResult(this)
+        LoginActivity.startForResult(this)
         return false
     }
 
