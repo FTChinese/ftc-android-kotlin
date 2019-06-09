@@ -3,8 +3,8 @@ package com.ft.ftchinese
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
-import com.ft.ftchinese.models.MyftTab
-import com.ft.ftchinese.models.MyftTabId
+import com.ft.ftchinese.model.MyftTab
+import com.ft.ftchinese.model.MyftTabId
 
 class MyftPagerAdapter(
         fm: FragmentManager

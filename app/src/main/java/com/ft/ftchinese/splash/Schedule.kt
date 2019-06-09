@@ -1,7 +1,7 @@
 package com.ft.ftchinese.splash
 
 import com.beust.klaxon.Json
-import com.ft.ftchinese.models.Tier
+import com.ft.ftchinese.model.Tier
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.threeten.bp.LocalDate

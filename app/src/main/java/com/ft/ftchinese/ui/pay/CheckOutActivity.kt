@@ -13,7 +13,7 @@ import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.*
-import com.ft.ftchinese.models.*
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.user.RowAdapter
 import com.ft.ftchinese.user.TableRow
 import com.ft.ftchinese.util.ClientError

@@ -7,7 +7,7 @@ import android.text.Editable
 import android.view.View
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.models.PasswordReset
+import com.ft.ftchinese.model.PasswordReset
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException

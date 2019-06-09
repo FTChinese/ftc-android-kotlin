@@ -13,9 +13,9 @@ import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.models.LoginMethod
-import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.Wechat
+import com.ft.ftchinese.model.LoginMethod
+import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.Wechat
 import com.ft.ftchinese.user.OnSwitchAccountListener
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.FileCache

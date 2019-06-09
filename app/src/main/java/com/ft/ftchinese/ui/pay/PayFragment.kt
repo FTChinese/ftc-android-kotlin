@@ -9,7 +9,7 @@ import androidx.lifecycle.Observer
 
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.models.PayMethod
+import com.ft.ftchinese.model.PayMethod
 import kotlinx.android.synthetic.main.pay_fragment.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info

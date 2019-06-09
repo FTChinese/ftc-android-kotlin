@@ -2,7 +2,7 @@ package com.ft.ftchinese.ui.pay
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.ft.ftchinese.models.PayMethod
+import com.ft.ftchinese.model.PayMethod
 
 /**
  * Used by [PayFragment] to tell [CheckOutActivity] that the

@@ -4,8 +4,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.ft.ftchinese.models.*
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.*
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger

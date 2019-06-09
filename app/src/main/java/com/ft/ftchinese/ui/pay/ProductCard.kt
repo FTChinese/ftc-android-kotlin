@@ -1,7 +1,7 @@
 package com.ft.ftchinese.ui.pay
 
 import android.os.Parcelable
-import com.ft.ftchinese.models.Tier
+import com.ft.ftchinese.model.Tier
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize

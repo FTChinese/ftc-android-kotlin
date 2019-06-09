@@ -2,7 +2,7 @@ package com.ft.ftchinese.ui.account
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.ft.ftchinese.models.LoginMethod
+import com.ft.ftchinese.model.LoginMethod
 
 class AccountViewModel : ViewModel() {
 

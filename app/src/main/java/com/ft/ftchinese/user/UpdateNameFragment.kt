@@ -7,8 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.models.FtcUser
-import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.model.FtcUser
+import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException

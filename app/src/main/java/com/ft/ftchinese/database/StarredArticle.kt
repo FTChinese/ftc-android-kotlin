@@ -2,9 +2,9 @@ package com.ft.ftchinese.database
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.models.Permission
-import com.ft.ftchinese.models.Tier
+import com.ft.ftchinese.model.ChannelItem
+import com.ft.ftchinese.model.Permission
+import com.ft.ftchinese.model.Tier
 import java.util.*
 
 

@@ -6,7 +6,7 @@ import android.view.View
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.models.*
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.ui.account.LinkActivity

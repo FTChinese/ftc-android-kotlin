@@ -10,7 +10,7 @@ import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.models.PasswordReset
+import com.ft.ftchinese.model.PasswordReset
 import com.ft.ftchinese.user.Validator
 import com.ft.ftchinese.util.ClientError
 import kotlinx.android.synthetic.main.activity_forgot_password.*

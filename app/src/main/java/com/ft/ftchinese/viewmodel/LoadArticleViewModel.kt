@@ -3,7 +3,7 @@ package com.ft.ftchinese.viewmodel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.models.Language
+import com.ft.ftchinese.model.Language
 
 /**
  * This is used as communication channel between ArticleActivity

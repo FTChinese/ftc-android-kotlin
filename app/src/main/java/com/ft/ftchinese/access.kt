@@ -1,8 +1,8 @@
 package com.ft.ftchinese
 
 import android.app.Activity
-import com.ft.ftchinese.models.Account
-import com.ft.ftchinese.models.Permission
+import com.ft.ftchinese.model.Account
+import com.ft.ftchinese.model.Permission
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity

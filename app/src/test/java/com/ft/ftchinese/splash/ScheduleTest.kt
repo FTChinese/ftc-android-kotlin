@@ -2,7 +2,7 @@ package com.ft.ftchinese.splash
 
 import android.net.Uri
 import com.beust.klaxon.Klaxon
-import com.ft.ftchinese.models.Tier
+import com.ft.ftchinese.model.Tier
 import org.junit.Test
 
 import org.threeten.bp.LocalDate

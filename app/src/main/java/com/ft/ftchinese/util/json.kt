@@ -3,10 +3,10 @@ package com.ft.ftchinese.util
 import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue
 import com.beust.klaxon.Klaxon
-import com.ft.ftchinese.models.Cycle
-import com.ft.ftchinese.models.LoginMethod
-import com.ft.ftchinese.models.PayMethod
-import com.ft.ftchinese.models.Tier
+import com.ft.ftchinese.model.Cycle
+import com.ft.ftchinese.model.LoginMethod
+import com.ft.ftchinese.model.PayMethod
+import com.ft.ftchinese.model.Tier
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZoneOffset
 import org.threeten.bp.ZonedDateTime

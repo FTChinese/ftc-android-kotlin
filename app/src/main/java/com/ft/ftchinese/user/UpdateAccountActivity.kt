@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.View
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException

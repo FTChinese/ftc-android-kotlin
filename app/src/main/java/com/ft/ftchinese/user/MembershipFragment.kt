@@ -7,9 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.Membership
+import com.ft.ftchinese.model.Membership
 import com.ft.ftchinese.util.formatLocalDate
-import com.ft.ftchinese.models.Tier
+import com.ft.ftchinese.model.Tier
 import com.ft.ftchinese.util.json
 import kotlinx.android.synthetic.main.fragment_membership.*
 import org.jetbrains.anko.AnkoLogger

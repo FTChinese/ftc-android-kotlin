@@ -6,10 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.ft.ftchinese.models.Following
-import com.ft.ftchinese.models.FollowingManager
-import com.ft.ftchinese.models.HTML_TYPE_FRAGMENT
-import com.ft.ftchinese.models.ChannelSource
+import com.ft.ftchinese.model.Following
+import com.ft.ftchinese.model.FollowingManager
+import com.ft.ftchinese.model.HTML_TYPE_FRAGMENT
+import com.ft.ftchinese.model.ChannelSource
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info

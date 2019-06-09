@@ -20,7 +20,7 @@ import androidx.appcompat.widget.SearchView
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.isActiveNetworkWifi
-import com.ft.ftchinese.models.*
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.splash.Schedule
 import com.ft.ftchinese.splash.ScreenAd
 import com.ft.ftchinese.splash.SplashScreenManager

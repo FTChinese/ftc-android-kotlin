@@ -9,10 +9,10 @@ import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.models.Account
-import com.ft.ftchinese.models.FtcUser
-import com.ft.ftchinese.models.LoginMethod
-import com.ft.ftchinese.models.SessionManager
+import com.ft.ftchinese.model.Account
+import com.ft.ftchinese.model.FtcUser
+import com.ft.ftchinese.model.LoginMethod
+import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_accounts_merge.*

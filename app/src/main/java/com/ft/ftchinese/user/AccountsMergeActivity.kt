@@ -9,7 +9,7 @@ import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.models.*
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.activity_accounts_merge.*
 import kotlinx.android.synthetic.main.progress_bar.*

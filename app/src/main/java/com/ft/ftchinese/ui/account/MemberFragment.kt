@@ -7,8 +7,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.Membership
-import com.ft.ftchinese.models.Tier
+import com.ft.ftchinese.model.Membership
+import com.ft.ftchinese.model.Tier
 import com.ft.ftchinese.user.AccountsMergeActivity
 import com.ft.ftchinese.user.RowAdapter
 import com.ft.ftchinese.user.TableRow

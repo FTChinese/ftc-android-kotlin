@@ -1,7 +1,7 @@
 package com.ft.ftchinese
 
-import com.ft.ftchinese.models.AdParser
-import com.ft.ftchinese.models.AdPosition
+import com.ft.ftchinese.model.AdParser
+import com.ft.ftchinese.model.AdPosition
 import org.junit.Test
 
 class EnumTest {

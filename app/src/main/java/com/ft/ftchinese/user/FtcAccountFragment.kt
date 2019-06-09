@@ -12,7 +12,7 @@ import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.models.*
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.util.*
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI

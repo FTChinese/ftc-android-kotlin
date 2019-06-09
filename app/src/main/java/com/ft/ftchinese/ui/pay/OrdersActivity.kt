@@ -7,9 +7,9 @@ import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.*
-import com.ft.ftchinese.models.PayMethod
-import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.Subscription
+import com.ft.ftchinese.model.PayMethod
+import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.Subscription
 import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.activity_my_orders.*
 import kotlinx.android.synthetic.main.progress_bar.*

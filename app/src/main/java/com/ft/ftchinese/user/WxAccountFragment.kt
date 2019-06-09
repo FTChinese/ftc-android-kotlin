@@ -12,8 +12,8 @@ import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.Wechat
+import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.Wechat
 import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.fragment_wx_account.*
 import kotlinx.coroutines.*

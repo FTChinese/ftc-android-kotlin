@@ -2,7 +2,7 @@ package com.ft.ftchinese.ui.pay
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel;
-import com.ft.ftchinese.models.Plan
+import com.ft.ftchinese.model.Plan
 
 /**
  * Used by [ProductFragment] to pass information to host

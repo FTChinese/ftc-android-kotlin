@@ -10,8 +10,8 @@ import androidx.lifecycle.Observer
 
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.models.Cycle
-import com.ft.ftchinese.models.subsPlans
+import com.ft.ftchinese.model.Cycle
+import com.ft.ftchinese.model.subsPlans
 import kotlinx.android.synthetic.main.fragment_product.*
 import org.jetbrains.anko.AnkoLogger
 

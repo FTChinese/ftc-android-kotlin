@@ -5,7 +5,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.*
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.NetworkException
 import org.jetbrains.anko.toast

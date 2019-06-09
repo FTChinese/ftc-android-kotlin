@@ -12,7 +12,7 @@ import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
 import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.models.*
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.util.*
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.fragment_channel.*

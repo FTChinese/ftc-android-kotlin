@@ -3,8 +3,8 @@ package com.ft.ftchinese.database
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.ft.ftchinese.models.ChannelItem
-import com.ft.ftchinese.models.Tier
+import com.ft.ftchinese.model.ChannelItem
+import com.ft.ftchinese.model.Tier
 import java.util.*
 
 @Entity(

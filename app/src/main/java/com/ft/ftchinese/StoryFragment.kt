@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.models.*
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.user.OnProgressListener
 import com.ft.ftchinese.util.*
 import com.ft.ftchinese.viewmodel.LoadArticleViewModel

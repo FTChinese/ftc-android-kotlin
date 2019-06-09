@@ -7,9 +7,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.models.SessionManager
-import com.ft.ftchinese.models.WxOAuth
-import com.ft.ftchinese.models.WxOAuthIntent
+import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.WxOAuth
+import com.ft.ftchinese.model.WxOAuthIntent
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory

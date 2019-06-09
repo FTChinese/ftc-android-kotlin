@@ -11,7 +11,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.models.*
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.util.flavorQuery
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.util.json

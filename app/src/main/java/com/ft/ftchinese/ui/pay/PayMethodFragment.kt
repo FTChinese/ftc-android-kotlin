@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProviders
 
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.models.PayMethod
+import com.ft.ftchinese.model.PayMethod
 import kotlinx.android.synthetic.main.fragment_pay_method.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info

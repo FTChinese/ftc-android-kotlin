@@ -10,7 +10,7 @@ import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.ft.ftchinese.models.*
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.util.*
