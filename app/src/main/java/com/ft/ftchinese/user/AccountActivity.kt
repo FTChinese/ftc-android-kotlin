@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.models.SessionManager
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -24,7 +25,7 @@ import org.jetbrains.anko.info
  * If user logged in with wechat account and it is bound to an FTC account, show FtcAccountFragment.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class AccountActivity : AppCompatActivity(),
+class AccountActivity : ScopedAppActivity(),
         OnSwitchAccountListener,
         AnkoLogger {
 
