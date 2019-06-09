@@ -1,6 +1,8 @@
 package com.ft.ftchinese.models
 
+import android.os.Parcelable
 import com.ft.ftchinese.util.*
+import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -11,6 +13,7 @@ import org.jetbrains.anko.info
  * When user changes data like email, user userName, verified email, purchased subscription, the corresponding fields should be updated and saved to shared preferences.
  * Avoid modifying an instance when user's data changed so that everything is immutable.
  */
+@Parcelize
 data class Account(
         val id: String,
         val unionId: String? = null,
@@ -23,7 +26,7 @@ data class Account(
         val loginMethod: LoginMethod? = null,
         val wechat: Wechat,
         val membership: Membership
-): AnkoLogger {
+): Parcelable, AnkoLogger {
 
     /**
      * Tests whether two accounts are the same one.

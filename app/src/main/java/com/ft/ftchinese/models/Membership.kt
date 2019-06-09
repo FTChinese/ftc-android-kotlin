@@ -1,10 +1,13 @@
 package com.ft.ftchinese.models
 
+import android.os.Parcelable
 import com.ft.ftchinese.util.KCycle
 import com.ft.ftchinese.util.KDate
 import com.ft.ftchinese.util.KTier
+import kotlinx.android.parcel.Parcelize
 import org.threeten.bp.LocalDate
 
+@Parcelize
 data class Membership(
         @KTier
         val tier: Tier? = null,
@@ -13,7 +16,7 @@ data class Membership(
         // ISO8601 format. Example: 2019-08-05
         @KDate
         val expireDate: LocalDate? = null
-) {
+) : Parcelable {
     /**
      * Check if membership is expired.
      * @return true if expireDate is before now, or membership does not exist.

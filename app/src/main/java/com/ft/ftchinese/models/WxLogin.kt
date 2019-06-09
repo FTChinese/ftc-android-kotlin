@@ -1,7 +1,9 @@
 package com.ft.ftchinese.models
 
+import android.os.Parcelable
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.util.*
+import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.threeten.bp.DateTimeException
@@ -114,10 +116,11 @@ data class WxSession(
  * Example Wechat avatar url:
  * http://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTLB34sBwSiaL3GJmejqDUqJw4CZ8Qs0ztibsRu6wzMpg7jg5icxWKwxF73ssZUmXmee1MvSvaZ6iaqs1A/132
  */
+@Parcelize
 data class Wechat(
         val nickname: String? = null,
         val avatarUrl: String? = null
-): AnkoLogger {
+): Parcelable, AnkoLogger {
     val avatarName: String = "wx_avatar.jpg"
 
     val isEmpty: Boolean
