@@ -13,7 +13,6 @@ import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.models.Credentials
 import com.ft.ftchinese.models.TokenManager
-import com.ft.ftchinese.user.ForgotPasswordActivity
 import com.ft.ftchinese.util.ClientError
 import kotlinx.android.synthetic.main.fragment_sign_in.*
 import kotlinx.coroutines.Dispatchers

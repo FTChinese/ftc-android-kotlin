@@ -25,9 +25,11 @@ import com.ft.ftchinese.splash.Schedule
 import com.ft.ftchinese.splash.ScreenAd
 import com.ft.ftchinese.splash.SplashScreenManager
 import com.ft.ftchinese.splash.splashScheduleFile
+import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
+import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.user.*
 import com.ft.ftchinese.util.*
 import com.google.android.gms.analytics.HitBuilders
@@ -910,26 +912,6 @@ class MainActivity : ScopedAppActivity(),
             return mPages[position].title
         }
     }
-
-//    inner class MyftPagerAdapter(private val pages: Array<MyftTab>, fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
-//
-//        override fun getItem(position: Int): androidx.fragment.app.Fragment {
-//            val page = pages[position]
-//            return if (page.id == MyftTab.FOLLOWING) {
-//                FollowingFragment.newInstance()
-//            } else {
-//                MyftFragment.newInstance(page.id)
-//            }
-//        }
-//
-//        override fun getCount(): Int {
-//            return pages.size
-//        }
-//
-//        override fun getPageTitle(position: Int): CharSequence? {
-//            return pages[position].title
-//        }
-//    }
 }
 
 
