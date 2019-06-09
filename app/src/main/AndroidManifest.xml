@@ -85,32 +85,32 @@
             android:parentActivityName=".user.CredentialsActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".user.AccountActivity"
+            android:name=".ui.account.AccountActivity"
             android:label="@string/title_account"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".user.BindEmailActivity"
+            android:name=".ui.account.LinkEmailActivity"
             android:label="@string/title_bind_email"
-            android:parentActivityName=".user.AccountActivity" />
+            android:parentActivityName=".ui.account.AccountActivity" />
         <activity
-            android:name=".user.AccountsMergeActivity"
+            android:name=".ui.account.LinkActivity"
             android:label="@string/title_merge_accounts"
-            android:parentActivityName=".user.AccountActivity" />
+            android:parentActivityName=".ui.account.AccountActivity" />
         <activity
-            android:name=".user.WxAccountActivity"
+            android:name=".ui.account.WxInfoActivity"
             android:label="@string/title_wx_account"
-            android:parentActivityName=".user.AccountActivity" />
+            android:parentActivityName=".ui.account.AccountActivity" />
         <activity
-            android:name=".user.UpdateAccountActivity"
-            android:parentActivityName=".user.AccountActivity"
+            android:name=".ui.account.UpdateActivity"
+            android:parentActivityName=".ui.account.AccountActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.pay.MemberActivity"
             android:label="@string/title_my_subs"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name=".user.SettingsActivity"
+            android:name=".ui.settings.SettingsActivity"
             android:label="@string/action_settings"
             android:parentActivityName=".MainActivity" />
         <activity
