@@ -118,7 +118,7 @@ android {
 
 dependencies {
     def room_version = "2.1.0-alpha04"
-    def lifecycle_version = "2.0.0"
+    def lifecycle_version = "2.2.0-alpha01"
 
     // Firebase
     implementation 'com.google.firebase:firebase-core:16.0.9'
@@ -132,8 +132,10 @@ dependencies {
 
     // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.0.0'
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0-alpha01"
+
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+    implementation "androidx.fragment:fragment-ktx:1.1.0-beta01"
     kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
 
     //  UI
@@ -171,12 +173,12 @@ dependencies {
     //    Test
     testImplementation 'junit:junit:4.12'
     testImplementation 'com.github.javafaker:javafaker:0.16'
-    androidTestImplementation 'androidx.test:runner:1.2.0-alpha04'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0-alpha04'
+    androidTestImplementation 'androidx.test:runner:1.2.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     testImplementation 'org.hamcrest:hamcrest-junit:2.0.0.0'
     testImplementation 'org.mockito:mockito-core:2.23.0'
     testImplementation 'org.robolectric:robolectric:4.0.2'
     testImplementation "androidx.room:room-testing:$room_version"
     // optional - Test helpers for LiveData
-    testImplementation "androidx.arch.core:core-testing:$lifecycle_version"
+    testImplementation "androidx.arch.core:core-testing:2.1.0-beta01"
 }
