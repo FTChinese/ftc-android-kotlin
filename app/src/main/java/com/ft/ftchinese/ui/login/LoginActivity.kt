@@ -4,18 +4,16 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.model.FtcUser
+import com.ft.ftchinese.base.handleError
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
@@ -43,69 +41,75 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
             setDisplayShowTitleEnabled(true)
         }
 
+        sessionManager = SessionManager.getInstance(this)
+
         viewModel = ViewModelProviders.of(this)
                 .get(LoginViewModel::class.java)
 
-        viewModel.email.observe(this, Observer<Pair<String, Boolean>> {
-            val (email, found) = it
+        viewModel.emailResult.observe(this, Observer {
+            val findResult = it ?:return@Observer
 
-            showProgress(false)
+            if (findResult.error != null) {
+                handleError(findResult.error)
 
+                return@Observer
+            }
+
+            if (findResult.success == null) {
+                return@Observer
+            }
+
+            val (email, found) = findResult.success
             if (found) {
                 supportActionBar?.setTitle(R.string.title_login)
-                supportFragmentManager.beginTransaction()
-                        .replace(R.id.double_frag_primary, SignInFragment.newInstance(email))
-                        .addToBackStack(null)
-                        .commit()
+
+                supportFragmentManager.commit {
+                    replace(R.id.double_frag_primary, SignInFragment.newInstance(email))
+                    addToBackStack(null)
+                }
+
             } else {
                 supportActionBar?.setTitle(R.string.title_sign_up)
 
-                supportFragmentManager.beginTransaction()
-                        .replace(R.id.double_frag_primary, SignUpFragment.newInstance(email, HOST_SIGN_UP_ACTIVITY))
-                        .addToBackStack(null)
-                        .commit()
+                supportFragmentManager.commit {
+                    replace(R.id.double_frag_primary, SignUpFragment.newInstance(email, HOST_SIGN_UP_ACTIVITY))
+                    addToBackStack(null)
+                }
             }
         })
 
-        viewModel.userId.observe(this, Observer<String> {
-            loadAccount(it)
+        viewModel.loginResult.observe(this, Observer {
+            val loginResult = it ?: return@Observer
+
+            if (loginResult.error != null) {
+                toast(loginResult.error)
+                return@Observer
+            }
+
+            if (loginResult.exception != null) {
+                handleError(loginResult.exception)
+                return@Observer
+            }
+
+            if (loginResult.success == null) {
+                toast(R.string.error_not_loaded)
+                return@Observer
+            }
+
+            sessionManager.saveAccount(loginResult.success)
+
+            setResult(Activity.RESULT_OK)
+
+            finish()
         })
 
         viewModel.inProgress.observe(this, Observer<Boolean> {
             showProgress(it)
         })
 
-        supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.double_frag_primary, EmailFragment.newInstance())
-                .replace(R.id.double_frag_secondary, WxLoginFragment.newInstance())
-                .commit()
-
-        sessionManager = SessionManager.getInstance(this)
-    }
-
-    private fun loadAccount(userId: String) {
-        val user = FtcUser(id = userId)
-        toast(R.string.progress_fetching)
-        showProgress(true)
-
-        launch {
-            val account = withContext(Dispatchers.IO) {
-                user.fetchAccount()
-            }
-
-            showProgress(false)
-
-            if (account == null) {
-                toast(R.string.error_not_loaded)
-                return@launch
-            }
-
-            sessionManager.saveAccount(account)
-
-            setResult(Activity.RESULT_OK)
-
-            finish()
+        supportFragmentManager.commit {
+            replace(R.id.double_frag_primary, EmailFragment.newInstance())
+            replace(R.id.double_frag_secondary, WxLoginFragment.newInstance())
         }
     }
 

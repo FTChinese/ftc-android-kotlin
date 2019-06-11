@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedFragment
@@ -14,7 +15,6 @@ import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.Credentials
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.TokenManager
-import com.ft.ftchinese.user.Validator
 import com.ft.ftchinese.util.ClientError
 import kotlinx.android.synthetic.main.fragment_sign_up.*
 import kotlinx.coroutines.Dispatchers
@@ -72,38 +72,48 @@ class SignUpFragment : ScopedFragment(),
                     .get(LoginViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
+        viewModel.loginFormState.observe(this, Observer {
+            val signUpState = it ?: return@Observer
+
+            sign_up_btn.isEnabled = signUpState.isDataValid
+
+            if (signUpState.passwordError != null) {
+                password_input.error = getString(signUpState.passwordError)
+                password_input.requestFocus()
+            }
+        })
+
+        viewModel.input.observe(this, Observer {
+            sign_up_btn.isEnabled = it
+        })
+
+        password_input.afterTextChanged {
+            viewModel.passwordDataChanged(password_input.text.toString().trim())
+        }
+
         sign_up_btn.setOnClickListener {
-            val password = password_input.text.toString().trim()
-            val isValid = isPasswordValid(password)
-            if (!isValid) {
+            if (activity?.isNetworkConnected() != true) {
+                toast(R.string.prompt_no_network)
                 return@setOnClickListener
             }
 
             val e = email ?: return@setOnClickListener
 
-            signUp(e, password)
+            it.isEnabled = false
+
+            viewModel.signUp(Credentials(
+                    email = e,
+                    password = password_input.text.toString().trim(),
+                    deviceToken = tokenManager.getToken()
+            ), unionId = when (hostType) {
+                HOST_BINDING_ACTIVITY -> sessionManager.loadWxSession()?.unionId
+                else -> null
+            })
         }
-    }
-
-    private fun isPasswordValid(pw: String): Boolean {
-        password_input.error = null
-
-        val msgId = Validator.ensurePassword(pw)
-        if (msgId != null) {
-            password_input.error = getString(msgId)
-            password_input.requestFocus()
-
-            return false
-        }
-
-        return true
     }
 
     private fun signUp(email: String, password: String) {
-        if (activity?.isNetworkConnected() != true) {
-            toast(R.string.prompt_no_network)
-            return
-        }
+
 
         /**
          * Used to determine which endpoint to access.
@@ -111,7 +121,7 @@ class SignUpFragment : ScopedFragment(),
          * else use /users/signup
          */
         val unionId = when (hostType) {
-            com.ft.ftchinese.user.HOST_BINDING_ACTIVITY -> sessionManager.loadWxSession()?.unionId
+            HOST_BINDING_ACTIVITY -> sessionManager.loadWxSession()?.unionId
             else -> null
         }
 
