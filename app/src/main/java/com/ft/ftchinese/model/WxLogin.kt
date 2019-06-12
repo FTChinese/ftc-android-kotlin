@@ -3,6 +3,7 @@ package com.ft.ftchinese.model
 import android.os.Parcelable
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.util.*
+import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -94,8 +95,8 @@ data class WxSession(
      * Only used for initial login.
      * DO NOT use this to refresh account data since WxSession only exists
      * if user logged in via wechat OAuth.
-     * If user logged in wiht email + password (and the the email is bound to this wechat),
-     * WxSession actually never exist.
+     * If user logged in with email + password (and the the email is bound to this wechat),
+     * WxSession never actually exists.
      */
     fun fetchAccount(): Account? {
         val (_, body) = Fetch()
@@ -121,6 +122,7 @@ data class Wechat(
         val nickname: String? = null,
         val avatarUrl: String? = null
 ): Parcelable, AnkoLogger {
+    @IgnoredOnParcel
     val avatarName: String = "wx_avatar.jpg"
 
     val isEmpty: Boolean
