@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.Credentials
 import com.ft.ftchinese.model.FtcUser
+import com.ft.ftchinese.model.WxSession
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.NextApi
@@ -137,12 +138,12 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    fun signUp(c: Credentials, unionId: String?) {
+    fun signUp(c: Credentials, wxSession: WxSession? = null) {
         inProgress.value = true
         viewModelScope.launch {
             try {
                 val userId = withContext(Dispatchers.IO) {
-                    c.signUp(unionId)
+                    c.signUp(wxSession?.unionId)
                 }
 
                 if (userId == null) {
@@ -154,6 +155,8 @@ class LoginViewModel : ViewModel() {
                     return@launch
                 }
 
+                // TODO: initial singup of wechat linking to new account
+                // based on WxSession
                 loadAccount(userId)
 
             } catch (e: Exception) {
