@@ -5,23 +5,16 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.view.View
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.base.handleApiError
-import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.model.FtcUser
+import com.ft.ftchinese.base.*
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.ui.login.*
-import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -53,85 +46,71 @@ class LinkEmailActivity : ScopedAppActivity(), AnkoLogger {
 
         sessionManager = SessionManager.getInstance(this)
 
-        supportFragmentManager
-                .beginTransaction()
-                .replace(R.id.single_frag_holder, EmailFragment.newInstance())
-                .commit()
-
         viewModel = ViewModelProviders.of(this)
                 .get(LoginViewModel::class.java)
 
-        viewModel.email.observe(this, Observer<Pair<String, Boolean>> {
-            val (email, found) = it
+        viewModel.emailResult.observe(this, Observer {
+            val findResult = it ?: return@Observer
+
             showProgress(false)
 
-            if (found) {
-                supportFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.single_frag_holder, SignInFragment.newInstance(email))
-                        .addToBackStack(null)
-                        .commit()
-            } else {
-                supportFragmentManager.beginTransaction()
-                        .replace(R.id.single_frag_holder, SignUpFragment.newInstance(email, HOST_BINDING_ACTIVITY))
-                        .addToBackStack(null)
-                        .commit()
+            if (findResult.error != null) {
+                handleError(findResult.error)
+                return@Observer
             }
+
+            if (findResult.success == null) {
+                toast("No data received")
+                return@Observer
+            }
+
+            val (email, found) = findResult.success
+            if (found) {
+                supportFragmentManager.commit {
+                    replace(R.id.single_frag_holder, SignInFragment.newInstance(email))
+                    addToBackStack(null)
+                }
+            } else {
+                supportFragmentManager.commit {
+                    replace(R.id.single_frag_holder, SignUpFragment.newInstance(email, HOST_BINDING_ACTIVITY))
+                    addToBackStack(null)
+                }
+            }
+        })
+
+        viewModel.loginResult.observe(this, Observer {
+            val loginResult = it ?: return@Observer
+
+            if (loginResult.error != null) {
+                toast(loginResult.error)
+                return@Observer
+            }
+
+            if (loginResult.exception != null) {
+                handleError(loginResult.exception)
+                return@Observer
+            }
+
+            if (loginResult.success == null) {
+                toast(R.string.error_not_loaded)
+                return@Observer
+            }
+
+            LinkActivity.startForResult(this@LinkEmailActivity, loginResult.success)
+
         })
 
         viewModel.inProgress.observe(this, Observer<Boolean> {
             showProgress(it)
         })
 
-        viewModel.userId.observe(this, Observer<String> {
-            loadAccount(it)
-        })
-    }
-
-    private fun loadAccount(userId: String) {
-        if (!isNetworkConnected()) {
-            toast(R.string.prompt_no_network)
-            return
-        }
-
-        showProgress(true)
-
-        try {
-            launch {
-                val ftcAccount = withContext(Dispatchers.IO) {
-                    /**
-                     * Must load account via /user/account since at this point the two account are still independent of each other.
-                     */
-                    FtcUser(userId).fetchAccount()
-                }
-
-                viewModel.showProgress(false)
-                info("Account: $ftcAccount")
-
-                if (ftcAccount == null) {
-                    toast(R.string.error_not_loaded)
-                    return@launch
-                }
-
-                info("FTC Account: $ftcAccount")
-
-                LinkActivity.startForResult(this@LinkEmailActivity, ftcAccount)
-            }
-
-        } catch (e: ClientError) {
-            viewModel.showProgress(false)
-            when (e.statusCode) {
-                404 -> toast("Account not found")
-                else -> handleApiError(e)
-            }
-        } catch (e: Exception) {
-            viewModel.showProgress(false)
-            handleException(e)
+        supportFragmentManager.commit {
+            replace(R.id.single_frag_holder, EmailFragment.newInstance())
         }
     }
 
     /**
-     * Handle result from AccountsMergeActivity
+     * Handle result from [LinkActivity]
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
