@@ -1,199 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/swipe_refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".user.FtcAccountFragment">
+    tools:context=".ui.account.FtcFragment">
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:orientation="vertical"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:text="下拉更新账号数据"
+            android:layout_marginTop="8dp"
+            android:textAlignment="center" />
+        <!-- Hide this block if email is verified -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/verify_email_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
 
             <TextView
+                android:id="@+id/prompt_verify_email"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="下拉更新账号数据"
-                android:layout_marginTop="8dp"
-                android:textAlignment="center" />
-            <!-- Hide this block if email is verified -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/verify_email_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp">
+                android:text="@string/instruct_verify_email"
+                style="@style/FTCText"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/prompt_verify_email"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/instruct_verify_email"
-                    style="@style/FTCText"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <Button
-                    android:id="@+id/request_verify_button"
-                    style="@style/OrigamiButton.Secondary.Small"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/btn_request_verify"
-                    app:layout_constraintEnd_toEndOf="@+id/prompt_verify_email"
-                    app:layout_constraintTop_toBottomOf="@+id/prompt_verify_email" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/email_container"
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/request_verify_button"
+                style="@style/OrigamiButton.Secondary.Small"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/list_item_background"
-                android:padding="16dp">
+                android:text="@string/btn_request_verify"
+                app:layout_constraintEnd_toEndOf="@+id/prompt_verify_email"
+                app:layout_constraintTop_toBottomOf="@+id/prompt_verify_email" />
 
-                <!-- See https://developer.android.com/reference/android/support/constraint/ConstraintLayout#Chains -->
-                <TextView
-                    style="@style/FTCText"
-                    android:id="@+id/prompt_email"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_email"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/email_text"
-                    app:layout_constraintHorizontal_chainStyle="spread_inside"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    style="@style/FTCText"
-                    android:id="@+id/email_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/prompt_email"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/prompt_email" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/user_name_container"
-                android:layout_width="match_parent"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/email_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/list_item_background"
+            android:padding="16dp">
+
+            <!-- See https://developer.android.com/reference/android/support/constraint/ConstraintLayout#Chains -->
+            <TextView
+                style="@style/FTCText"
+                android:id="@+id/prompt_email"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/list_item_background"
-                android:padding="16dp">
-
-                <TextView
-                    style="@style/FTCText"
-                    android:id="@+id/prompt_user_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_user_name"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/user_name_text"
-                    app:layout_constraintHorizontal_chainStyle="spread_inside"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    style="@style/FTCText"
-                    android:id="@+id/user_name_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/prompt_user_name"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/prompt_user_name" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/password_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/list_item_background"
-                android:padding="16dp">
-
-                <TextView
-                    style="@style/FTCText"
-                    android:id="@+id/label_password"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_password"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/password_text"
-                    app:layout_constraintHorizontal_chainStyle="spread_inside"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    style="@style/FTCText"
-                    android:id="@+id/password_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
-                    android:text="@string/title_change_password"
-                    app:layout_constraintBaseline_toBaselineOf="@+id/label_password"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/label_password" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                android:text="@string/label_email"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/email_text"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                style="@style/SectionHead"
-                android:layout_width="match_parent"
+                style="@style/FTCText"
+                android:id="@+id/email_text"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/heading_bind_account"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"/>
+                android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/prompt_email"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/prompt_email" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/wechat_container"
-                android:layout_width="match_parent"
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/user_name_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/list_item_background"
+            android:padding="16dp">
+
+            <TextView
+                style="@style/FTCText"
+                android:id="@+id/prompt_user_name"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/list_item_background"
-                android:padding="16dp">
+                android:text="@string/label_user_name"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/user_name_text"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    style="@style/FTCText"
-                    android:id="@+id/label_wechat"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_wechat"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/wechat_bound_tv"
-                    app:layout_constraintHorizontal_chainStyle="spread_inside"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+            <TextView
+                style="@style/FTCText"
+                android:id="@+id/user_name_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
+                app:layout_constraintBaseline_toBaselineOf="@+id/prompt_user_name"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/prompt_user_name" />
 
-                <TextView
-                    style="@style/FTCText"
-                    android:id="@+id/wechat_bound_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    app:layout_constraintBaseline_toBaselineOf="@+id/label_wechat"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/label_wechat" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/password_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/list_item_background"
+            android:padding="16dp">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                style="@style/FTCText"
+                android:id="@+id/label_password"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_password"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/password_text"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-        </LinearLayout>
+            <TextView
+                style="@style/FTCText"
+                android:id="@+id/password_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
+                android:text="@string/title_change_password"
+                app:layout_constraintBaseline_toBaselineOf="@+id/label_password"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/label_password" />
 
-    </androidx.core.widget.NestedScrollView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        <TextView
+            style="@style/SectionHead"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/heading_bind_account"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"/>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/wechat_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/list_item_background"
+            android:padding="16dp">
+
+            <TextView
+                style="@style/FTCText"
+                android:id="@+id/label_wechat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_wechat"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/wechat_bound_tv"
+                app:layout_constraintHorizontal_chainStyle="spread_inside"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                style="@style/FTCText"
+                android:id="@+id/wechat_bound_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
+
+                app:layout_constraintBaseline_toBaselineOf="@+id/label_wechat"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/label_wechat" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>
