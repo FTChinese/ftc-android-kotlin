@@ -8,18 +8,11 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.base.handleApiError
-import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.base.*
 import com.ft.ftchinese.model.Credentials
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.TokenManager
-import com.ft.ftchinese.util.ClientError
 import kotlinx.android.synthetic.main.fragment_sign_up.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
