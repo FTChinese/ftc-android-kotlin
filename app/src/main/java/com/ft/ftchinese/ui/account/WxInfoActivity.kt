@@ -8,10 +8,12 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
+import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.SessionManager
 import kotlinx.android.synthetic.main.activity_account.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
@@ -44,7 +46,34 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
         })
 
         swipe_refresh.setOnRefreshListener {
-            
+            val account = sessionManager.loadAccount()
+            if (account == null) {
+                toast("Account not found")
+                swipe_refresh.isRefreshing = false
+                return@setOnRefreshListener
+            }
+
+            if (!isNetworkConnected()) {
+                toast(R.string.prompt_no_network)
+                swipe_refresh.isRefreshing = false
+                return@setOnRefreshListener
+            }
+
+            val wxSession = sessionManager.loadWxSession()
+            if (wxSession == null) {
+                toast("Wechat session not found")
+                swipe_refresh.isRefreshing = false
+                return@setOnRefreshListener
+            }
+
+            // TODO: check whether refresh token is expired.
+
+            toast(R.string.progress_refresh_account)
+
+            viewModel.refresh(
+                    account = account,
+                    wxSession = wxSession
+            )
         }
     }
 
