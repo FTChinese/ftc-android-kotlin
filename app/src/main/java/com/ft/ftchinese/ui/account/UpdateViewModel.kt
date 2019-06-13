@@ -15,6 +15,8 @@ import kotlinx.coroutines.withContext
 
 class UpdateViewModel : ViewModel() {
     val inProgress = MutableLiveData<Boolean>()
+    val inputEnabled = MutableLiveData<Boolean>()
+
     val done = MutableLiveData<Boolean>()
 
     private val _updateForm = MutableLiveData<UpdateFormState>()
@@ -93,6 +95,10 @@ class UpdateViewModel : ViewModel() {
 
     fun showProgress(show: Boolean) {
         inProgress.value = show
+    }
+
+    fun enableInput(enable: Boolean) {
+        inputEnabled.value = enable
     }
 
     fun setDone(ok: Boolean) {
