@@ -72,8 +72,8 @@ class AccountActivity : ScopedAppActivity(),
 
         // Handle swipe refresh
         swipe_refresh.setOnRefreshListener {
-            val a = sessionManager.loadAccount()
-            if (a == null) {
+            val account = sessionManager.loadAccount()
+            if (account == null) {
                 toast("Account not found")
                 swipe_refresh.isRefreshing = false
                 return@setOnRefreshListener
@@ -87,8 +87,8 @@ class AccountActivity : ScopedAppActivity(),
 
             toast(R.string.progress_refresh_account)
             viewModel.refresh(
-                    account = a,
-                    wxSession = sessionManager.loadWxSession()
+                    account = account,
+                    wxSession = if (account.isWxOnly) sessionManager.loadWxSession() else null
             )
         }
     }
