@@ -9,7 +9,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.base.handleError
+import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -58,8 +58,13 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
             if (findResult.error != null) {
                 viewModel.enableInput(true)
 
-                handleError(findResult.error)
+                toast(findResult.error)
 
+                return@Observer
+            }
+
+            if (findResult.exception != null) {
+                handleException(findResult.exception)
                 return@Observer
             }
 
@@ -83,12 +88,13 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
                 supportActionBar?.setTitle(R.string.title_sign_up)
 
                 supportFragmentManager.commit {
-                    replace(R.id.double_frag_primary, SignUpFragment.newInstance(email, HOST_SIGN_UP_ACTIVITY))
+                    replace(R.id.double_frag_primary, SignUpFragment.newInstance(email))
                     addToBackStack(null)
                 }
             }
         })
 
+        // Observing both login and sign up.
         viewModel.loginResult.observe(this, Observer {
             val loginResult = it ?: return@Observer
 
@@ -104,7 +110,7 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
             if (loginResult.exception != null) {
                 viewModel.enableInput(true)
 
-                handleError(loginResult.exception)
+                handleException(loginResult.exception)
                 return@Observer
             }
 
