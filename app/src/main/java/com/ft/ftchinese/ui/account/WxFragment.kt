@@ -6,18 +6,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.LoginMethod
 import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.model.Wechat
-import com.ft.ftchinese.user.OnSwitchAccountListener
-import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.fragment_wx_account.*
@@ -34,16 +30,11 @@ import java.io.ByteArrayInputStream
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class WxFragment : ScopedFragment(),
-        SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
-    lateinit var sessionManager: SessionManager
-    lateinit var cache: FileCache
-    lateinit var viewModel: AccountViewModel
-
-    private fun stopRefresh() {
-        swipe_refresh.isRefreshing = false
-    }
+    private lateinit var sessionManager: SessionManager
+    private lateinit var cache: FileCache
+    private lateinit var viewModel: AccountViewModel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -61,25 +52,80 @@ class WxFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        swipe_refresh.setOnRefreshListener(this)
+        initUI()
 
-        updateUI()
+        link_email_btn.setOnClickListener {
+            LinkEmailActivity.startForResult(activity, RequestCode.LINK)
+        }
 
-        bind_email_btn.setOnClickListener {
-            LinkEmailActivity.startForResult(activity, RequestCode.BOUND)
+        unlink_btn.setOnClickListener {
+
         }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
+        val account = sessionManager.loadAccount() ?: return
+
         viewModel = activity?.run {
             ViewModelProviders.of(this)
                     .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
+
+        viewModel.accountResult.observe(this, Observer {
+            val accountResult = it ?: return@Observer
+
+            viewModel.stopRefreshing()
+
+            if (accountResult.error != null) {
+                toast(accountResult.error)
+                return@Observer
+            }
+
+            if (accountResult.exception != null) {
+                activity?.handleException(accountResult.exception)
+                return@Observer
+            }
+
+            if (accountResult.success == null) {
+                toast("Unknown error")
+                return@Observer
+            }
+
+            toast(R.string.prompt_updated)
+
+            sessionManager.saveAccount(accountResult.success)
+
+            if (!accountResult.success.isWxOnly) {
+                viewModel.switchUI(LoginMethod.EMAIL)
+            }
+        })
+
+        viewModel.avatarResult.observe(this, Observer {
+            if (it.exception != null) {
+                activity?.handleException(it.exception)
+                return@Observer
+            }
+
+            val bytes = it.success ?: return@Observer
+
+            wx_avatar.setImageDrawable(
+                    Drawable.createFromStream(
+                            ByteArrayInputStream(bytes),
+                            account.wechat.avatarName
+                    )
+            )
+
+            launch {
+                withContext(Dispatchers.IO) {
+                    cache.writeBinaryFile(account.wechat.avatarName, bytes)
+                }
+            }
+        })
     }
 
-    private fun updateUI() {
+    private fun initUI() {
         val account = sessionManager.loadAccount()
 
         if (account == null) {
@@ -94,142 +140,38 @@ class WxFragment : ScopedFragment(),
             return
         }
 
-        loadAvatar(account.wechat)
+        // Use locally cached avatar first.
+        // If not found, fetch it from network.
+        launch {
+            val drawable = withContext(Dispatchers.IO) {
+                cache.readDrawable(account.wechat.avatarName)
+            }
+
+            if (drawable != null) {
+                wx_avatar.setImageDrawable(drawable)
+                return@launch
+            }
+
+            if (activity?.isNetworkConnected() != true) {
+                return@launch
+            }
+
+            val imageUrl = account.wechat.avatarUrl ?: return@launch
+
+            viewModel.downloadAvatar(imageUrl)
+        }
 
         wx_nickname.text = account.wechat.nickname
 
         // Test if accounts if coupled to FTC account.
         // If true, do not show the instruction to bind accounts.
-        if (!account.isCoupled) {
+        if (!account.isLinked) {
+            unlink_btn.visibility = View.GONE
             return
         }
 
         instruction_tv.visibility = View.GONE
-        bind_email_btn.visibility = View.GONE
-    }
-
-    private fun loadAvatar(wechat: Wechat) {
-        if (!swipe_refresh.isRefreshing) {
-            val drawable = cache.readDrawable(wechat.avatarName)
-
-            if (drawable != null) {
-                wx_avatar.setImageDrawable(drawable)
-                return
-            }
-        }
-
-        if (wechat.avatarUrl == null) {
-            return
-        }
-
-        if (activity?.isNetworkConnected() != true) {
-            toast(R.string.prompt_no_network)
-
-            return
-        }
-
-        launch {
-            val bytes = withContext(Dispatchers.IO) {
-                wechat.downloadAvatar(context?.filesDir)
-            } ?: return@launch
-
-            wx_avatar.setImageDrawable(
-                    Drawable.createFromStream(
-                            ByteArrayInputStream(bytes),
-                            wechat.avatarName
-                    )
-            )
-        }
-    }
-
-    /**
-     * Refresh takes two steps:
-     * 1. Ask API to refresh wechat userinfo;
-     * 2. Fetch latest user account from API.
-     */
-    override fun onRefresh() {
-        if (activity?.isNetworkConnected() != true) {
-            toast(R.string.prompt_no_network)
-            stopRefresh()
-
-            return
-        }
-
-        /**
-         * If a user logged in with email account, the this account is bound to a wechat account,
-         * WxSession data should not ever exist. If there is not WxSession data, you are not able to
-         * access wechat oauth API.
-         */
-        launch {
-            try {
-
-                refreshInfo()
-
-                toast(R.string.progress_fetching)
-
-                val account = withContext(Dispatchers.IO) {
-                    sessionManager.loadAccount()?.refresh()
-                }
-
-                stopRefresh()
-
-                if (account == null) {
-                    return@launch
-                }
-
-                sessionManager.saveAccount(account)
-
-                info("Refreshed account: $account")
-
-                /**
-                 * Switch account fragment.
-                 * This is only meaningful when hosted inside AccountActivity.
-                 */
-                if (account.isCoupled && context is OnSwitchAccountListener) {
-                    info("A bound account. Ask hosting activity to switch UI.")
-                    viewModel.changeLoginMethod(LoginMethod.EMAIL)
-
-                    return@launch
-                }
-
-                /**
-                 * If after refreshing, we found out this wechat account is bound to an FTC account,
-                 * ask hosting activity to switch fragment;
-                 * otherwise simply update ui.
-                 */
-                toast(R.string.prompt_updated)
-
-                updateUI()
-
-            } catch (e: ClientError) {
-                stopRefresh()
-                info(e)
-
-                activity?.handleApiError(e)
-            } catch (e: Exception) {
-                stopRefresh()
-                info(e)
-
-                activity?.handleException(e)
-            }
-        }
-    }
-
-    /**
-     * This is an optional operation.
-     */
-    private suspend fun refreshInfo() {
-        val wxSession = sessionManager.loadWxSession() ?: return
-
-        info("Wx session: $wxSession")
-
-        toast(R.string.progress_updating)
-
-        val refreshed = withContext(Dispatchers.IO) {
-            wxSession.refreshInfo()
-        }
-
-        info("Refresh wechat info result: $refreshed")
+        link_email_btn.visibility = View.GONE
     }
 
     companion object {

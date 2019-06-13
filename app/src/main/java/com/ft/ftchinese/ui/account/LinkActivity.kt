@@ -112,14 +112,14 @@ class LinkActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         // If FTC account is already bound to another wechat.
-        if (ftcAccount.isCoupled) {
+        if (ftcAccount.isLinked) {
             result_tv.text = getString(R.string.ftc_account_coupled, ftcAccount.email)
 
             allowInput(false)
             return
         }
 
-        if (wxAccount.isCoupled) {
+        if (wxAccount.isLinked) {
             result_tv.text = getString(R.string.wx_account_coupled, wxAccount.wechat.nickname)
 
             allowInput(false)
@@ -135,11 +135,11 @@ class LinkActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         start_binding_btn.setOnClickListener {
-            bind(ftcAccount.id, wxAccount.unionId)
+            link(ftcAccount.id, wxAccount.unionId)
         }
     }
 
-    private fun bind(userId: String, unionId: String?) {
+    private fun link(userId: String, unionId: String?) {
         if (!isNetworkConnected()) {
             toast(R.string.prompt_no_network)
             return
@@ -206,7 +206,7 @@ class LinkActivity : ScopedAppActivity(), AnkoLogger {
                 putExtra(EXTRA_ACCOUNT, account)
             }
 
-            activity?.startActivityForResult(intent, RequestCode.BOUND)
+            activity?.startActivityForResult(intent, RequestCode.LINK)
         }
     }
 }

@@ -5,42 +5,32 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.util.ClientError
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.fragment_ftc_account.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class FtcFragment : ScopedFragment(),
-        SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
-    private var sessionManager: SessionManager? = null
+    private lateinit var sessionManager: SessionManager
     private var wxApi: IWXAPI? = null
-    lateinit var viewModel: AccountViewModel
+    private lateinit var viewModel: AccountViewModel
 
-    private fun allowInput(v: Boolean) {
+    private fun enableInput(v: Boolean) {
         request_verify_button?.isEnabled = v
-    }
-
-    private fun stopRefresh() {
-        swipe_refresh.isRefreshing = false
     }
 
     override fun onAttach(context: Context) {
@@ -61,9 +51,7 @@ class FtcFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val account = sessionManager?.loadAccount() ?: return
-
-        swipe_refresh.setOnRefreshListener(this)
+        val account = sessionManager.loadAccount() ?: return
 
         // Set event handlers.
         email_container.setOnClickListener {
@@ -78,7 +66,7 @@ class FtcFragment : ScopedFragment(),
             UpdateActivity.startForPassword(context)
         }
 
-        updateUI(account)
+        initUI(account)
     }
 
     override fun onResume() {
@@ -86,7 +74,7 @@ class FtcFragment : ScopedFragment(),
 
         val account = sessionManager?.loadAccount() ?: return
 
-        updateUI(account)
+        initUI(account)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -97,15 +85,86 @@ class FtcFragment : ScopedFragment(),
                     .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
+        viewModel.accountResult.observe(this, Observer {
+            val accountResult = it ?: return@Observer
+
+            viewModel.stopRefreshing()
+
+            if (accountResult.error != null) {
+                toast(accountResult.error)
+                return@Observer
+            }
+
+            if (accountResult.exception != null) {
+                activity?.handleException(accountResult.exception)
+                return@Observer
+            }
+
+            if (accountResult.success == null) {
+                toast("Unknown error")
+                return@Observer
+            }
+
+            toast(R.string.prompt_updated)
+
+            sessionManager.saveAccount(accountResult.success)
+
+            if (accountResult.success.isWxOnly) {
+                info("A wechat only account. Switch UI.")
+                viewModel.switchUI(LoginMethod.WECHAT)
+                return@Observer
+            }
+
+            initUI(accountResult.success)
+        })
+
+        viewModel.sendEmailResult.observe(this, Observer {
+            val sendEmailResult = it ?: return@Observer
+
+            viewModel.showProgress(false)
+
+            if (sendEmailResult.error != null) {
+                enableInput(true)
+                toast(sendEmailResult.error)
+                return@Observer
+            }
+
+            if (sendEmailResult.exception != null) {
+                enableInput(true)
+                activity?.handleException(sendEmailResult.exception)
+                return@Observer
+            }
+
+            if (sendEmailResult.success == true) {
+                toast(R.string.prompt_letter_sent)
+            } else {
+                toast("Unknown error")
+            }
+        })
+
+        request_verify_button.setOnClickListener {
+
+            val userId = sessionManager.loadAccount()?.id ?: return@setOnClickListener
+
+            if (activity?.isNetworkConnected() != true) {
+                toast(R.string.prompt_no_network)
+
+                return@setOnClickListener
+            }
+
+            viewModel.showProgress(true)
+            enableInput(false)
+
+            toast(R.string.progress_request_verification)
+
+            viewModel.requestVerification(userId)
+        }
     }
 
-    private fun updateUI(account: Account) {
+    private fun initUI(account: Account) {
+
         if (account.isVerified) {
             verify_email_container.visibility = View.GONE
-        } else {
-            request_verify_button.setOnClickListener {
-                requestVerification()
-            }
         }
 
         email_text.text = if (account.email.isNotBlank()) {
@@ -120,91 +179,19 @@ class FtcFragment : ScopedFragment(),
             account.userName
         }
 
-        wechat_bound_tv.text = if (account.isCoupled) {
+        wechat_bound_tv.text = if (account.isLinked) {
             getString(R.string.action_bound_account)
         } else {
             getString(R.string.action_bind_account)
         }
 
-        if (account.isCoupled) {
+        if (account.isLinked) {
             wechat_container.setOnClickListener {
                 WxInfoActivity.start(context)
             }
         } else if (account.isFtcOnly) {
             wechat_container.setOnClickListener {
-                bindWechat()
-            }
-        }
-    }
-
-    /**
-     * Refresh account data.
-     * It is necessary to inform parent activity of data change?
-     */
-    override fun onRefresh() {
-        if (activity?.isNetworkConnected() != true) {
-            toast(R.string.prompt_no_network)
-            stopRefresh()
-
-            return
-        }
-
-        toast(R.string.progress_refresh_account)
-
-        val account = sessionManager?.loadAccount()
-
-        info("Starting refreshing account: $account")
-
-        if (account == null) {
-            stopRefresh()
-            return
-        }
-
-        launch {
-            try {
-                val updatedAccount = withContext(Dispatchers.IO) {
-                    account.refresh()
-                }
-
-                // hide refreshing indicator
-                stopRefresh()
-
-                if (updatedAccount == null) {
-                    return@launch
-                }
-
-                info("Refreshed account: $updatedAccount")
-                sessionManager?.saveAccount(updatedAccount)
-
-                /**
-                 * If after refreshing, user account changed, e.g.
-                 * previously email and wechat is bound, somehow on
-                 * another platform the two account unbound.
-                 */
-                if (updatedAccount.isWxOnly) {
-                    info("A wechat only account. Switch UI.")
-                    viewModel.changeLoginMethod(LoginMethod.WECHAT)
-                    return@launch
-                }
-
-                updateUI(updatedAccount)
-
-                toast(R.string.prompt_updated)
-            } catch (e: ClientError) {
-                info(e)
-                stopRefresh()
-
-                /**
-                 * TODO logout current session if API responded 404.
-                 * This is possible if user account is deleted on another platform.
-                 */
-                handleClientError(e)
-
-            } catch (e: Exception) {
-                info(e)
-
-                stopRefresh()
-                activity?.handleException(e)
+                linkWechat()
             }
         }
     }
@@ -213,7 +200,7 @@ class FtcFragment : ScopedFragment(),
      * Launch Wechat OAuth workflow to request a code from wechat.
      * It will jump to wxapi.WXEntryActivity.
      */
-    private fun bindWechat() {
+    private fun linkWechat() {
         val stateCode = WxOAuth.stateCode()
 
         sessionManager?.saveWxState(stateCode)
@@ -224,68 +211,6 @@ class FtcFragment : ScopedFragment(),
         req.state = stateCode
 
         wxApi?.sendReq(req)
-    }
-
-    /**
-     * Resend verification email to user.
-     */
-    private fun requestVerification() {
-        if (activity?.isNetworkConnected() != true) {
-            toast(R.string.prompt_no_network)
-
-            return
-        }
-
-        viewModel.showProgress(true)
-        allowInput(false)
-
-        toast(R.string.progress_request_verification)
-
-        // If the account if not found, do nothing.
-        // In the future, we might need to take into account user logged in via social platforms.
-        val account = sessionManager?.loadAccount() ?: return
-
-        launch {
-            try {
-                val done = withContext(Dispatchers.IO) {
-                    FtcUser(account.id).requestVerification()
-                }
-
-                // If request succeeds, disable request verification button.
-
-                viewModel.showProgress(true)
-                allowInput(!done)
-
-                toast(R.string.prompt_letter_sent)
-
-            } catch (e: ClientError) {
-                viewModel.showProgress(true)
-                allowInput(true)
-
-                handleClientError(e)
-
-            } catch (e: Exception) {
-                e.printStackTrace()
-
-                viewModel.showProgress(true)
-                allowInput(true)
-
-                activity?.handleException(e)
-            }
-        }
-    }
-
-    private fun handleClientError(resp: ClientError) {
-        when (resp.statusCode) {
-            // If this account is not found. It's rare but possible. For example, user logged in at one place, then deleted account at another place.
-            404 -> {
-                toast(R.string.api_account_not_found)
-            }
-            // All other errors are treated as server error.
-            else -> {
-                activity?.handleApiError(resp)
-            }
-        }
     }
 
     companion object {
