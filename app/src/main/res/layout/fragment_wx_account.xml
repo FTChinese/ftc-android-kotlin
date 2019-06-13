@@ -1,66 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/swipe_refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".user.WxAccountFragment">
+    tools:context=".ui.account.WxFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/wx_avatar"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_account_circle_black_24dp"
+        android:foreground="@drawable/rounded_fg"
+        app:layout_constraintDimensionRatio="h,1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/wx_avatar"
-            android:layout_width="0dp"
-            android:layout_height="100dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_account_circle_black_24dp"
-            android:foreground="@drawable/rounded_fg"
-            app:layout_constraintDimensionRatio="h,1:1"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+    <TextView
+        android:id="@+id/wx_nickname"
+        android:text="Wechat Nickname"
+        style="@style/FTCTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/wx_avatar" />
 
-        <TextView
-            android:id="@+id/wx_nickname"
-            android:text="Wechat Nickname"
-            style="@style/FTCTitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/wx_avatar" />
+    <TextView
+        android:id="@+id/instruction_tv"
+        style="@style/FTCText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/instruct_bind_email"
+        app:layout_constraintEnd_toEndOf="@+id/wx_nickname"
+        app:layout_constraintStart_toStartOf="@+id/wx_nickname"
+        app:layout_constraintTop_toBottomOf="@+id/wx_nickname" />
 
-        <TextView
-            android:id="@+id/instruction_tv"
-            style="@style/FTCText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/instruct_bind_email"
-            app:layout_constraintEnd_toEndOf="@+id/wx_nickname"
-            app:layout_constraintStart_toStartOf="@+id/wx_nickname"
-            app:layout_constraintTop_toBottomOf="@+id/wx_nickname" />
+    <Button
+        android:id="@+id/link_email_btn"
+        style="@style/OrigamiButton.Secondary.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_link"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="@id/wx_nickname"
+        app:layout_constraintTop_toBottomOf="@+id/instruction_tv" />
 
-        <Button
-            android:id="@+id/bind_email_btn"
-            style="@style/OrigamiButton.Secondary.Small"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_bind_email"
-            android:layout_marginTop="16dp"
-            app:layout_constraintEnd_toEndOf="@+id/instruction_tv"
-            app:layout_constraintTop_toBottomOf="@+id/instruction_tv" />
+    <Button
+        android:id="@+id/unlink_btn"
+        style="@style/OrigamiButton.Secondary.Small"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_unlink"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="@id/wx_nickname"
+        app:layout_constraintTop_toBottomOf="@id/link_email_btn"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
