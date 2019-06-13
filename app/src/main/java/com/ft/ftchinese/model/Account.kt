@@ -2,10 +2,10 @@ package com.ft.ftchinese.model
 
 import android.os.Parcelable
 import com.ft.ftchinese.util.*
+import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-
 
 /**
  * A user's essential data.
@@ -38,7 +38,7 @@ data class Account(
     /**
      * Checks whether an ftc account is bound to a wechat account.
      */
-    val isCoupled: Boolean
+    val isLinked: Boolean
         get() = id.isNotBlank() && !unionId.isNullOrBlank()
 
     /**
@@ -61,8 +61,7 @@ data class Account(
     val isMember: Boolean
         get() = when {
             isVip -> true
-            membership.tier == null -> false
-            else -> true
+            else -> membership.tier != null
         }
 
     val isExpiredMember: Boolean
@@ -95,6 +94,7 @@ data class Account(
      * Calculate user permissions.
      * Expired membership is treated as Permission.FREE.
      */
+    @IgnoredOnParcel
     val permission: Int = when {
         isVip -> Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id
         membership.isExpired -> Permission.FREE.id
