@@ -392,7 +392,7 @@ class MainActivity : ScopedAppActivity(),
             return
         }
 
-        if (account.isCoupled) {
+        if (account.isLinked) {
             return
         }
 
