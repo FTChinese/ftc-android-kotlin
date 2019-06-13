@@ -68,6 +68,10 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
             }
         })
 
+        viewModel.inputEnabled.observe(this, Observer {
+            save_btn.isEnabled = it
+        })
+
         email_input.afterTextChanged {
             viewModel.emailDataChanged(
                     currentEmail = value_email_tv.text.toString(),
