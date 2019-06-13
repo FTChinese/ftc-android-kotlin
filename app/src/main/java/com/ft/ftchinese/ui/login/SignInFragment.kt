@@ -76,8 +76,8 @@ class SignInFragment : ScopedFragment(),
             }
         })
 
-        viewModel.input.observe(this, Observer {
-            sign_in_btn.isEnabled = it
+        viewModel.inputEnabled.observe(this, Observer {
+            enableInput(it)
         })
 
         password_input.afterTextChanged {
@@ -92,7 +92,8 @@ class SignInFragment : ScopedFragment(),
 
             val email = email ?: return@setOnClickListener
 
-            it.isEnabled = false
+            enableInput(false)
+            viewModel.showProgress(true)
 
             viewModel.login(Credentials(
                     email = email,

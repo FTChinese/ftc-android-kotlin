@@ -24,7 +24,7 @@ class LoginViewModel : ViewModel() {
 
 
     val inProgress = MutableLiveData<Boolean>()
-    val input = MutableLiveData<Boolean>()
+    val inputEnabled = MutableLiveData<Boolean>()
 
     private val _loginForm = MutableLiveData<LoginFormState>()
     val loginFormState: LiveData<LoginFormState> =_loginForm
@@ -54,7 +54,6 @@ class LoginViewModel : ViewModel() {
     // See https://developer.android.com/kotlin/ktx
     // https://developer.android.com/topic/libraries/architecture/coroutines
     fun checkEmail(email: String) {
-        inProgress.value = true
 
         viewModelScope.launch {
 
@@ -69,8 +68,6 @@ class LoginViewModel : ViewModel() {
                             .responseApi()
                 }
 
-                inProgress.value = false
-
                 if (resp.code() == 204) {
                     _emailResult.value = FindEmailResult(success = Pair(email, true))
                 } else {
@@ -78,7 +75,6 @@ class LoginViewModel : ViewModel() {
                 }
 
             } catch (e: ClientError) {
-                inProgress.value = false
 
                 if (e.statusCode== 404) {
                     _emailResult.value = FindEmailResult(success = Pair(email, false))
@@ -88,14 +84,10 @@ class LoginViewModel : ViewModel() {
 
                 _emailResult.value = FindEmailResult(error = e)
 
-                input.value = true
 
             } catch (e:Exception) {
-                inProgress.value = false
 
                 _emailResult.value = FindEmailResult(error = e)
-
-                input.value= true
             }
         }
     }
@@ -103,7 +95,6 @@ class LoginViewModel : ViewModel() {
 
 
     fun login(c: Credentials) {
-        inProgress.value = true
 
         viewModelScope.launch {
             try {
@@ -112,8 +103,6 @@ class LoginViewModel : ViewModel() {
                 }
 
                 if (userId == null) {
-                    inProgress.value = false
-                    input.value = true
 
                     _loginResult.value = LoginResult(success = null)
 
@@ -122,16 +111,12 @@ class LoginViewModel : ViewModel() {
 
                 loadAccount(userId)
             } catch (e: ClientError) {
-                inProgress.value = false
-                input.value = true
 
                 _loginResult.value = if (e.statusCode == 404)
                     LoginResult(error = R.string.error_invalid_password)
                 else
                     LoginResult(exception = e)
             } catch (e: Exception) {
-                inProgress.value = false
-                input.value = true
 
                 _loginResult.value = LoginResult(exception = e)
             }
@@ -139,7 +124,7 @@ class LoginViewModel : ViewModel() {
     }
 
     fun signUp(c: Credentials, wxSession: WxSession? = null) {
-        inProgress.value = true
+
         viewModelScope.launch {
             try {
                 val userId = withContext(Dispatchers.IO) {
@@ -147,24 +132,43 @@ class LoginViewModel : ViewModel() {
                 }
 
                 if (userId == null) {
-                    inProgress.value = false
-                    input.value = true
 
                     _loginResult.value = LoginResult(error = R.string.prompt_sign_up_failed)
 
                     return@launch
                 }
 
-                // TODO: initial singup of wechat linking to new account
-                // based on WxSession
-                loadAccount(userId)
+
+                if (wxSession == null) {
+                    loadAccount(userId)
+                    return@launch
+                }
+
+                loadWxAccount(wxSession)
 
             } catch (e: Exception) {
-                inProgress.value = false
-                input.value = true
 
                 _loginResult.value = LoginResult(exception = e)
             }
+        }
+    }
+
+    private suspend fun loadWxAccount(wxSession: WxSession) {
+        try {
+            val account = withContext(Dispatchers.IO) {
+                wxSession.fetchAccount()
+            }
+
+            _loginResult.value = LoginResult(success = account)
+        } catch (e: ClientError) {
+
+            _loginResult.value = if (e.statusCode == 404)
+                LoginResult(error = R.string.error_not_loaded)
+            else
+                LoginResult(exception = e)
+        } catch (e: Exception) {
+
+            _loginResult.value = LoginResult(exception = e)
         }
     }
 
@@ -179,8 +183,7 @@ class LoginViewModel : ViewModel() {
             _loginResult.value = LoginResult(success = account)
 
         } catch (e: ClientError) {
-            inProgress.value = false
-            input.value = true
+            inputEnabled.value = true
 
             _loginResult.value = if (e.statusCode == 404)
                 LoginResult(error = R.string.error_not_loaded)
@@ -188,8 +191,7 @@ class LoginViewModel : ViewModel() {
                 LoginResult(exception = e)
 
         } catch (e: Exception) {
-            inProgress.value = false
-            input.value = true
+            inputEnabled.value = true
 
             _loginResult.value = LoginResult(exception = e)
         }
@@ -209,6 +211,10 @@ class LoginViewModel : ViewModel() {
 
     fun showProgress(show: Boolean) {
         inProgress.value = show
+    }
+
+    fun enableInput(enable: Boolean) {
+        inputEnabled.value = enable
     }
 
     fun setUserId(id: String) {

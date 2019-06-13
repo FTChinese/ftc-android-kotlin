@@ -47,10 +47,11 @@ class EmailFragment : ScopedFragment(),
             }
         })
 
-        viewModel.input.observe(this, Observer {
+        viewModel.inputEnabled.observe(this, Observer {
             next_btn.isEnabled = it
         })
 
+        // Validate email upon changed.
         email_input.afterTextChanged {
             viewModel.emailDataChanged(email_input.text.toString().trim())
         }
@@ -65,6 +66,8 @@ class EmailFragment : ScopedFragment(),
             }
 
             it.isEnabled = false
+            viewModel.showProgress(true)
+
             viewModel.checkEmail(email_input.text.toString().trim())
         }
     }

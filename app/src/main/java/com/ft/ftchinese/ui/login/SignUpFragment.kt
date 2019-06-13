@@ -83,7 +83,7 @@ class SignUpFragment : ScopedFragment(),
             }
         })
 
-        viewModel.input.observe(this, Observer {
+        viewModel.inputEnabled.observe(this, Observer {
             sign_up_btn.isEnabled = it
         })
 
@@ -100,13 +100,14 @@ class SignUpFragment : ScopedFragment(),
             val e = email ?: return@setOnClickListener
 
             it.isEnabled = false
+            viewModel.showProgress(true)
 
             viewModel.signUp(Credentials(
                     email = e,
                     password = password_input.text.toString().trim(),
                     deviceToken = tokenManager.getToken()
-            ), unionId = when (hostType) {
-                HOST_BINDING_ACTIVITY -> sessionManager.loadWxSession()?.unionId
+            ), wxSession = when (hostType) {
+                HOST_BINDING_ACTIVITY -> sessionManager.loadWxSession()
                 else -> null
             })
         }

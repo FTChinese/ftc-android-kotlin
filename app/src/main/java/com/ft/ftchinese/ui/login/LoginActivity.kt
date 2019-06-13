@@ -46,16 +46,27 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
         viewModel = ViewModelProviders.of(this)
                 .get(LoginViewModel::class.java)
 
+        viewModel.inProgress.observe(this, Observer<Boolean> {
+            showProgress(it)
+        })
+
         viewModel.emailResult.observe(this, Observer {
             val findResult = it ?:return@Observer
 
+            showProgress(false)
+
             if (findResult.error != null) {
+                viewModel.enableInput(true)
+
                 handleError(findResult.error)
 
                 return@Observer
             }
 
             if (findResult.success == null) {
+                viewModel.enableInput(true)
+
+                toast(R.string.error_not_loaded)
                 return@Observer
             }
 
@@ -81,17 +92,25 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
         viewModel.loginResult.observe(this, Observer {
             val loginResult = it ?: return@Observer
 
+            showProgress(false)
+
             if (loginResult.error != null) {
+                viewModel.enableInput(true)
+
                 toast(loginResult.error)
                 return@Observer
             }
 
             if (loginResult.exception != null) {
+                viewModel.enableInput(true)
+
                 handleError(loginResult.exception)
                 return@Observer
             }
 
             if (loginResult.success == null) {
+                viewModel.enableInput(true)
+
                 toast(R.string.error_not_loaded)
                 return@Observer
             }
@@ -101,10 +120,6 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
             setResult(Activity.RESULT_OK)
 
             finish()
-        })
-
-        viewModel.inProgress.observe(this, Observer<Boolean> {
-            showProgress(it)
         })
 
         supportFragmentManager.commit {
