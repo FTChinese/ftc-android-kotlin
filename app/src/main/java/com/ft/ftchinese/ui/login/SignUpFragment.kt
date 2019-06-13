@@ -28,7 +28,6 @@ class SignUpFragment : ScopedFragment(),
         AnkoLogger {
 
     private var email: String? = null
-    private var hostType: Int? = null
     private lateinit var sessionManager: SessionManager
     private lateinit var tokenManager: TokenManager
     private lateinit var viewModel: LoginViewModel
@@ -49,7 +48,6 @@ class SignUpFragment : ScopedFragment(),
         super.onCreate(savedInstanceState)
 
         email = arguments?.getString(com.ft.ftchinese.user.ARG_EMAIL)
-        hostType = arguments?.getInt(com.ft.ftchinese.user.ARG_HOST_TYPE)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -102,82 +100,25 @@ class SignUpFragment : ScopedFragment(),
             it.isEnabled = false
             viewModel.showProgress(true)
 
-            viewModel.signUp(Credentials(
+            viewModel.signUp(
+                c = Credentials(
                     email = e,
                     password = password_input.text.toString().trim(),
                     deviceToken = tokenManager.getToken()
-            ), wxSession = when (hostType) {
-                HOST_BINDING_ACTIVITY -> sessionManager.loadWxSession()
-                else -> null
-            })
-        }
-    }
-
-    private fun signUp(email: String, password: String) {
-
-
-        /**
-         * Used to determine which endpoint to access.
-         * If unionId is not null, use /wx/signup,
-         * else use /users/signup
-         */
-        val unionId = when (hostType) {
-            HOST_BINDING_ACTIVITY -> sessionManager.loadWxSession()?.unionId
-            else -> null
-        }
-
-        viewModel.showProgress(true)
-        enableInput(false)
-
-        launch {
-            try {
-                val userId = withContext(Dispatchers.IO) {
-                    Credentials(
-                            email = email,
-                            password = password,
-                            deviceToken = tokenManager.getToken()
-                    ).signUp(unionId)
-                }
-
-                viewModel.showProgress(false)
-
-                if (userId == null) {
-                    toast(R.string.prompt_sign_up_failed)
-                    enableInput(true)
-                    return@launch
-                }
-
-                toast(R.string.prompt_signed_up)
-
-                /**
-                 * Tell hosting activity to fetch account.
-                 */
-
-                viewModel.setUserId(userId)
-
-            } catch (e: ClientError) {
-                viewModel.showProgress(false)
-                enableInput(true)
-
-                activity?.handleApiError(e)
-            } catch (e: Exception) {
-                viewModel.showProgress(false)
-                enableInput(true)
-                activity?.handleException(e)
-            }
+                ),
+                wxSession = sessionManager.loadWxSession()
+            )
         }
     }
 
     companion object {
 
         private const val ARG_EMAIL = "arg_email"
-        private const val ARG_HOST_TYPE = "arg_host_type"
 
         @JvmStatic
-        fun newInstance(email: String, host: Int) = SignUpFragment().apply {
+        fun newInstance(email: String) = SignUpFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_EMAIL, email)
-                putInt(ARG_HOST_TYPE, host)
             }
         }
     }
