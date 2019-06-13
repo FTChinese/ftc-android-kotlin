@@ -19,10 +19,6 @@ import kotlinx.coroutines.withContext
 
 class LoginViewModel : ViewModel() {
 
-    val email = MutableLiveData<Pair<String, Boolean>>()
-    val userId = MutableLiveData<String>()
-
-
     val inProgress = MutableLiveData<Boolean>()
     val inputEnabled = MutableLiveData<Boolean>()
 
@@ -69,30 +65,37 @@ class LoginViewModel : ViewModel() {
                 }
 
                 if (resp.code() == 204) {
-                    _emailResult.value = FindEmailResult(success = Pair(email, true))
+                    _emailResult.value = FindEmailResult(
+                            success = Pair(email, true)
+                    )
                 } else {
-                    _emailResult.value = FindEmailResult(error = Exception("API error ${resp.code()}"))
+                    _emailResult.value = FindEmailResult(
+                            exception = Exception("API error ${resp.code()}")
+                    )
                 }
 
             } catch (e: ClientError) {
 
                 if (e.statusCode== 404) {
-                    _emailResult.value = FindEmailResult(success = Pair(email, false))
+                    _emailResult.value = FindEmailResult(
+                            success = Pair(email, false)
+                    )
 
                     return@launch
                 }
 
-                _emailResult.value = FindEmailResult(error = e)
-
+                _emailResult.value = FindEmailResult(
+                        error = e.statusMessage()
+                )
 
             } catch (e:Exception) {
 
-                _emailResult.value = FindEmailResult(error = e)
+                _emailResult.value = FindEmailResult(
+                        exception = e
+                )
             }
         }
     }
-
-
 
     fun login(c: Credentials) {
 
@@ -111,18 +114,30 @@ class LoginViewModel : ViewModel() {
 
                 loadAccount(userId)
             } catch (e: ClientError) {
+                val msgId = if (e.statusCode == 404) {
+                    R.string.error_invalid_password
+                } else {
+                    e.statusMessage()
+                }
 
-                _loginResult.value = if (e.statusCode == 404)
-                    LoginResult(error = R.string.error_invalid_password)
-                else
-                    LoginResult(exception = e)
+                _loginResult.value = LoginResult(
+                        error = msgId,
+                        exception = e
+                )
+
             } catch (e: Exception) {
 
-                _loginResult.value = LoginResult(exception = e)
+                _loginResult.value = LoginResult(
+                        exception = e
+                )
             }
         }
     }
 
+    /**
+     * Handles both a new user signup, or wechat-logged-in
+     * user trying to link to a new account.
+     */
     fun signUp(c: Credentials, wxSession: WxSession? = null) {
 
         viewModelScope.launch {
@@ -132,9 +147,7 @@ class LoginViewModel : ViewModel() {
                 }
 
                 if (userId == null) {
-
-                    _loginResult.value = LoginResult(error = R.string.prompt_sign_up_failed)
-
+                    _loginResult.value = LoginResult()
                     return@launch
                 }
 
@@ -145,6 +158,26 @@ class LoginViewModel : ViewModel() {
                 }
 
                 loadWxAccount(wxSession)
+
+            } catch (e: ClientError) {
+                val msgId = if (e.statusCode == 422) {
+                    when (e.error?.key) {
+                        "email_already_exists" -> R.string.api_email_taken
+                        "email_invalid" -> R.string.error_invalid_email
+                        "password_invalid" -> R.string.error_invalid_password
+                        // handles wechat user sign up.
+                        "account_link_already_taken" -> R.string.api_wechat_already_linked
+                        "membership_link_already_taken" -> R.string.api_wechat_member_already_linked
+                        else -> null
+                    }
+                } else {
+                    e.statusMessage()
+                }
+
+                _loginResult.value = LoginResult(
+                        error = msgId,
+                        exception = e
+                )
 
             } catch (e: Exception) {
 
@@ -161,11 +194,17 @@ class LoginViewModel : ViewModel() {
 
             _loginResult.value = LoginResult(success = account)
         } catch (e: ClientError) {
+            val msgId = if (e.statusCode == 404) {
+                R.string.error_not_loaded
+            } else {
+                e.statusMessage()
+            }
 
-            _loginResult.value = if (e.statusCode == 404)
-                LoginResult(error = R.string.error_not_loaded)
-            else
-                LoginResult(exception = e)
+            _loginResult.value = LoginResult(
+                    error = msgId,
+                    exception = e
+            )
+
         } catch (e: Exception) {
 
             _loginResult.value = LoginResult(exception = e)
@@ -178,20 +217,21 @@ class LoginViewModel : ViewModel() {
                 FtcUser(id = userId).fetchAccount()
             }
 
-            inProgress.value = false
-
             _loginResult.value = LoginResult(success = account)
 
         } catch (e: ClientError) {
-            inputEnabled.value = true
+            val msgId = if (e.statusCode == 404) {
+                R.string.error_not_loaded
+            } else {
+                e.statusMessage()
+            }
 
-            _loginResult.value = if (e.statusCode == 404)
-                LoginResult(error = R.string.error_not_loaded)
-            else
-                LoginResult(exception = e)
+            _loginResult.value = LoginResult(
+                    error = msgId,
+                    exception = e
+            )
 
         } catch (e: Exception) {
-            inputEnabled.value = true
 
             _loginResult.value = LoginResult(exception = e)
         }
@@ -216,10 +256,4 @@ class LoginViewModel : ViewModel() {
     fun enableInput(enable: Boolean) {
         inputEnabled.value = enable
     }
-
-    fun setUserId(id: String) {
-        userId.value = id
-    }
-
-
 }
