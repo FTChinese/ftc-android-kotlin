@@ -133,7 +133,7 @@ class BindEmailActivity : ScopedAppActivity(),
 
         info("onActivityResult: requestCode $requestCode, $resultCode")
 
-        if (requestCode != RequestCode.BOUND) {
+        if (requestCode != RequestCode.LINK) {
             return
         }
 
