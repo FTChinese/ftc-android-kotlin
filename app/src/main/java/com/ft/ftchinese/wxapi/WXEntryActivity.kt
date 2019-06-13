@@ -9,7 +9,7 @@ import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.ui.account.LinkActivity
+import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
@@ -247,7 +247,7 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
          */
         if (wxIntent == WxOAuthIntent.BINDING) {
             info("Launch binding")
-            LinkActivity.startForResult(this, account)
+            LinkPreviewActivity.startForResult(this, account)
 
             finish()
             return
