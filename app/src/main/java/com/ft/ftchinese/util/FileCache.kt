@@ -4,14 +4,9 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import com.ft.ftchinese.R
 import com.jakewharton.byteunits.BinaryByteUnit
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.io.File
-import java.io.IOException
 
 class FileCache (private val context: Context) : AnkoLogger {
 
