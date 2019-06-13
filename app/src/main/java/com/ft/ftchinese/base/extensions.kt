@@ -4,6 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.EditText
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.util.ClientError
@@ -169,4 +172,19 @@ fun Activity.handleException(e: Exception) {
             toast(e.toString())
         }
     }
+}
+
+/**
+ * Extension function to simplify setting an afterTextChanged action to EditText components.
+ */
+fun EditText.afterTextChanged(afterTextChanged: (String) -> Unit) {
+    this.addTextChangedListener(object : TextWatcher {
+        override fun afterTextChanged(editable: Editable?) {
+            afterTextChanged.invoke(editable.toString())
+        }
+
+        override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+
+        override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+    })
 }
