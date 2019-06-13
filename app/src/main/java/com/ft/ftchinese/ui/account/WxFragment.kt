@@ -55,7 +55,7 @@ class WxFragment : ScopedFragment(),
         initUI()
 
         link_email_btn.setOnClickListener {
-            LinkEmailActivity.startForResult(activity, RequestCode.LINK)
+            LinkActivity.startForResult(activity, RequestCode.LINK)
         }
 
         unlink_btn.setOnClickListener {
