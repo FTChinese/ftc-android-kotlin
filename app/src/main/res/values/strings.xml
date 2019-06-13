@@ -159,7 +159,8 @@
     <string name="btn_save">保存</string>
     <string name="btn_next">下一步</string>
     <string name="btn_verify_password">验证密码</string>
-    <string name="btn_bind_email">绑定邮箱</string>
+    <string name="btn_link">绑定邮箱</string>
+    <string name="btn_unlink">解除绑定</string>
     <string name="btn_request_verify">重新发送验证邮件</string>
 
     <string name="wx_session_expired">微信登录已过期，请重新登录。微信登录会定期失效，如果您以后不希望看到本提示，可以在侧边栏的\"账号与安全\"下绑定FT中文网账号。</string>
