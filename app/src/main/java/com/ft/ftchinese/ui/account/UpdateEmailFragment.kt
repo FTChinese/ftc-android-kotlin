@@ -5,15 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.base.handleApiError
-import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.base.*
 import com.ft.ftchinese.model.FtcUser
 import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.user.Validator
 import com.ft.ftchinese.util.ClientError
 import kotlinx.android.synthetic.main.fragment_update_email.*
 import kotlinx.coroutines.Dispatchers
@@ -26,10 +23,10 @@ import org.jetbrains.anko.support.v4.toast
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
 
-    lateinit var sessionManager: SessionManager
-    lateinit var viewModel: UpdateViewModel
+    private lateinit var sessionManager: SessionManager
+    private lateinit var viewModel: UpdateViewModel
 
-    private fun allowInput(value: Boolean) {
+    private fun enableInput(value: Boolean) {
         email_input.isEnabled = value
         save_btn.isEnabled = value
     }
@@ -60,39 +57,43 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
                     .get(UpdateViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
-        save_btn.setOnClickListener {
-            val email = email_input.text.toString().trim()
-            val isValid = isEmailValid(email)
+        viewModel.updateFormState.observe(this, Observer {
+            val updateState = it ?: return@Observer
 
-            if (!isValid) {
+            save_btn.isEnabled = updateState.isDataValid
+
+            if (updateState.emailError != null) {
+                save_btn.error = getString(updateState.emailError)
+                email_input.requestFocus()
+            }
+        })
+
+        email_input.afterTextChanged {
+            viewModel.emailDataChanged(
+                    currentEmail = value_email_tv.text.toString(),
+                    newEmail = email_input.text.toString().trim()
+            )
+        }
+
+        save_btn.setOnClickListener {
+            if (activity?.isNetworkConnected() != true) {
+                toast(R.string.prompt_no_network)
+
                 return@setOnClickListener
             }
 
-            save(email)
+            val userId = sessionManager.loadAccount()?.id ?: return@setOnClickListener
+
+            it.isEnabled = false
+            viewModel.showProgress(true)
+
+            viewModel.updateEmail(
+                    userId = userId,
+                    email = email_input.text.toString().trim()
+            )
         }
     }
 
-    private fun isEmailValid(email: String): Boolean {
-        email_input.error = null
-
-        val msgId = Validator.ensureEmail(email)
-        if (msgId != null) {
-            email_input.error = getString(msgId)
-            email_input.requestFocus()
-            return false
-        }
-
-        val currentEmail = value_email_tv.text.toString()
-
-        if (currentEmail == email) {
-            email_input.error = getString(R.string.error_email_unchanged)
-            email_input.requestFocus()
-
-            return false
-        }
-
-        return true
-    }
 
     private fun save(emailStr: String) {
         if (activity?.isNetworkConnected() != true) {
@@ -102,10 +103,10 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
         }
 
         // If user id is not found, we could not perform updating.
-        val uuid = sessionManager?.loadAccount()?.id ?: return
+        val uuid = sessionManager.loadAccount()?.id ?: return
 
         viewModel.showProgress(true)
-        allowInput(false)
+        enableInput(false)
 
         launch {
 
@@ -128,13 +129,13 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
                 }
             } catch (e: ClientError) {
                 viewModel.showProgress(false)
-                allowInput(true)
+                enableInput(true)
 
                 activity?.handleApiError(e)
 
             } catch (e: Exception) {
                 viewModel.showProgress(false)
-                allowInput(true)
+                enableInput(true)
 
                 activity?.handleException(e)
             }

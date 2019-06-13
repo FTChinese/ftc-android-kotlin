@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
@@ -53,6 +54,10 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
 
         viewModel.inProgress.observe(this, Observer<Boolean> {
             showProgress(it)
+        })
+
+        viewModel.updateResult.observe(this, Observer {
+
         })
     }
 
