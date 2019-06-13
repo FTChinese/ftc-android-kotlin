@@ -90,11 +90,11 @@
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.account.LinkEmailActivity"
+            android:name=".ui.account.LinkActivity"
             android:label="@string/title_bind_email"
             android:parentActivityName=".ui.account.AccountActivity" />
         <activity
-            android:name=".ui.account.LinkActivity"
+            android:name=".ui.account.LinkPreviewActivity"
             android:label="@string/title_merge_accounts"
             android:parentActivityName=".ui.account.AccountActivity" />
         <activity
