@@ -3,37 +3,28 @@ package com.ft.ftchinese.ui.account
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.view.View
+import androidx.fragment.app.commit
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.base.handleApiError
-import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.model.Account
-import com.ft.ftchinese.model.FtcUser
-import com.ft.ftchinese.model.LoginMethod
+import com.ft.ftchinese.base.*
 import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.ui.login.*
 import com.ft.ftchinese.util.RequestCode
-import kotlinx.android.synthetic.main.activity_accounts_merge.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-/**
- * Show details of account to be bound, show a button to let
- * user to confirm the performance, or just deny accounts merging.
- */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class LinkActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
-    private var otherAccount: Account? = null
+    private lateinit var viewModel: LoginViewModel
+    private var isSignUp = false
 
     private fun showProgress(show: Boolean) {
         if (show) {
@@ -43,13 +34,10 @@ class LinkActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 
-    private fun allowInput(value: Boolean) {
-        start_binding_btn.isEnabled = value
-    }
+    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+        super.onCreate(savedInstanceState, persistentState)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_accounts_merge)
+        setContentView(R.layout.activity_fragment_single)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -59,154 +47,118 @@ class LinkActivity : ScopedAppActivity(), AnkoLogger {
 
         sessionManager = SessionManager.getInstance(this)
 
-        otherAccount = intent.getParcelableExtra(EXTRA_ACCOUNT)
+        viewModel = ViewModelProviders.of(this)
+                .get(LoginViewModel::class.java)
 
-        updateUI()
-    }
+        viewModel.inProgress.observe(this, Observer<Boolean> {
+            showProgress(it)
+        })
 
-    // Checks which account is email account and which one is wechat account.
-    // The first is email-login account, the second is wechat-oauth account.
-    private fun sortAccount(): Pair<Account?, Account?> {
-        val loginAccount = sessionManager.loadAccount() ?: return Pair(null, null)
+        viewModel.emailResult.observe(this, Observer {
+            val findResult = it ?: return@Observer
 
-        return when (loginAccount.loginMethod) {
-            LoginMethod.EMAIL,
-            LoginMethod.MOBILE -> Pair(loginAccount, otherAccount)
-            LoginMethod.WECHAT -> Pair(otherAccount, loginAccount)
-            else -> Pair(null, null)
-        }
-    }
+            showProgress(false)
 
-    private fun updateUI() {
+            if (findResult.error != null) {
+                viewModel.enableInput(true)
+                toast(findResult.error)
 
-        val (ftcAccount, wxAccount) = sortAccount()
-
-        info("FTC account: $ftcAccount")
-        info("Wechat account: $wxAccount")
-
-        if (ftcAccount == null || wxAccount == null) {
-            return
-        }
-
-        val ftcMemberFrag = MemberFragment.newInstance(
-                m = ftcAccount.membership,
-                heading = "FT中文网账号\n${ftcAccount.email}"
-        )
-        val wxMemberFrag = MemberFragment.newInstance(
-                m = wxAccount.membership,
-                heading = "微信账号\n${wxAccount.wechat.nickname}"
-        )
-
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.frag_ftc_account, ftcMemberFrag)
-                .replace(R.id.frag_wx_account, wxMemberFrag)
-                .commit()
-
-
-        // If the two accounts are already bound.
-        if (ftcAccount.isEqual(wxAccount)) {
-            result_tv.text = getString(R.string.accounts_already_bound)
-
-            allowInput(false)
-            return
-        }
-
-        // If FTC account is already bound to another wechat.
-        if (ftcAccount.isLinked) {
-            result_tv.text = getString(R.string.ftc_account_coupled, ftcAccount.email)
-
-            allowInput(false)
-            return
-        }
-
-        if (wxAccount.isLinked) {
-            result_tv.text = getString(R.string.wx_account_coupled, wxAccount.wechat.nickname)
-
-            allowInput(false)
-            return
-        }
-
-        // Both accounts have memberships and not expired yet.
-        if (!ftcAccount.membership.isExpired && !wxAccount.membership.isExpired) {
-            result_tv.text = getString(R.string.accounts_member_valid)
-
-            allowInput(false)
-            return
-        }
-
-        start_binding_btn.setOnClickListener {
-            link(ftcAccount.id, wxAccount.unionId)
-        }
-    }
-
-    private fun link(userId: String, unionId: String?) {
-        if (!isNetworkConnected()) {
-            toast(R.string.prompt_no_network)
-            return
-        }
-
-        if (unionId == null) {
-            toast("Wechat union id not found")
-            return
-        }
-
-        showProgress(true)
-        allowInput(false)
-
-        launch {
-            try {
-                val done = withContext(Dispatchers.IO) {
-
-                    FtcUser(userId)
-                            .bindWechat(unionId)
-                }
-
-                toast(R.string.prompt_bound)
-
-                info("Bind account result: $done")
-
-                refreshAccount()
-            } catch (e: ClientError) {
-                showProgress(false)
-                allowInput(true)
-                info(e)
-                handleApiError(e)
-            } catch (e: Exception) {
-                showProgress(false)
-                allowInput(true)
-                info(e)
-                handleException(e)
+                return@Observer
             }
+
+            if (findResult.exception != null) {
+                handleException(findResult.exception)
+                return@Observer
+            }
+
+            if (findResult.success == null) {
+                toast(R.string.error_not_loaded)
+                return@Observer
+            }
+
+            val (email, found) = findResult.success
+            // If email is found, show login ui;
+            // otherwise show sign up ui.
+            if (found) {
+                supportFragmentManager.commit {
+                    replace(R.id.single_frag_holder, SignInFragment.newInstance(email))
+                    addToBackStack(null)
+                }
+            } else {
+                isSignUp = true
+                supportFragmentManager.commit {
+                    replace(R.id.single_frag_holder, SignUpFragment.newInstance(email))
+                    addToBackStack(null)
+                }
+            }
+        })
+
+        viewModel.loginResult.observe(this, Observer {
+            val loginResult = it ?: return@Observer
+
+            if (loginResult.error != null) {
+                toast(loginResult.error)
+                return@Observer
+            }
+
+            if (loginResult.exception != null) {
+                handleException(loginResult.exception)
+                return@Observer
+            }
+
+            if (loginResult.success == null) {
+                toast(R.string.error_not_loaded)
+                return@Observer
+            }
+
+            if (isSignUp) {
+                setResult(Activity.RESULT_OK)
+                finish()
+                return@Observer
+            }
+
+            LinkPreviewActivity.startForResult(this@LinkActivity, loginResult.success)
+
+        })
+
+
+        supportFragmentManager.commit {
+            replace(R.id.single_frag_holder, EmailFragment.newInstance())
         }
     }
 
-    private suspend fun refreshAccount() {
-        val account = withContext(Dispatchers.IO) {
-            sessionManager.loadAccount()?.refresh()
-        } ?: return
+    /**
+     * Handle result from [LinkPreviewActivity]
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-        info("Account after bound: $account")
+        info("onActivityResult: requestCode $requestCode, $resultCode")
 
-        toast(R.string.prompt_account_updated)
+        if (requestCode != RequestCode.LINK) {
+            return
+        }
 
-        sessionManager.saveAccount(account)
+        if (resultCode != Activity.RESULT_OK) {
+            return
+        }
 
-        showProgress(false)
-
+        info("Bound to an existing ftc account")
+        /**
+         * Pass result to WxAccountFragment.
+         */
         setResult(Activity.RESULT_OK)
-
         finish()
     }
 
     companion object {
-        private const val EXTRA_ACCOUNT = "extra_account"
+        @JvmStatic
+        fun startForResult(activity: Activity?, requestCode: Int) {
+            activity?.startActivityForResult(
+                    Intent(activity, LinkActivity::class.java),
+                    requestCode
+            )
 
-        fun startForResult(activity: Activity?, account: Account) {
-            val intent = Intent(activity, LinkActivity::class.java).apply {
-                putExtra(EXTRA_ACCOUNT, account)
-            }
-
-            activity?.startActivityForResult(intent, RequestCode.LINK)
         }
     }
 }
