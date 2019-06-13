@@ -118,12 +118,6 @@ fun Activity.getTierCycleText(tier: Tier?, cycle: Cycle?): String? {
 //    }
 //}
 
-fun Activity.handleError(e: Exception) {
-    when (e) {
-        is ClientError -> handleApiError(e)
-        else -> handleException(e)
-    }
-}
 
 fun Activity.handleApiError(resp: ClientError) {
     // Here handles 422 response.
