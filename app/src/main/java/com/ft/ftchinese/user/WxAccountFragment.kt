@@ -58,13 +58,13 @@ class WxAccountFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        swipe_refresh.setOnRefreshListener(this)
+//        swipe_refresh.setOnRefreshListener(this)
 
         updateUI()
 
         // Handle click bind button
-        bind_email_btn.setOnClickListener {
-            BindEmailActivity.startForResult(activity, RequestCode.BOUND)
+        link_email_btn.setOnClickListener {
+            BindEmailActivity.startForResult(activity, RequestCode.LINK)
         }
     }
 
@@ -92,23 +92,23 @@ class WxAccountFragment : ScopedFragment(),
 
         // Test if accounts if coupled to FTC account.
         // If true, do not show the instruction to bind accounts.
-        if (!account.isCoupled) {
+        if (!account.isLinked) {
             return
         }
 
         instruction_tv.visibility = View.GONE
-        bind_email_btn.visibility = View.GONE
+        link_email_btn.visibility = View.GONE
     }
 
     private fun loadAvatar(wechat: Wechat) {
-        if (!swipe_refresh.isRefreshing) {
-            val drawable = cache?.readDrawable(wechat.avatarName)
-
-            if (drawable != null) {
-                wx_avatar.setImageDrawable(drawable)
-                return
-            }
-        }
+//        if (!swipe_refresh.isRefreshing) {
+//            val drawable = cache?.readDrawable(wechat.avatarName)
+//
+//            if (drawable != null) {
+//                wx_avatar.setImageDrawable(drawable)
+//                return
+//            }
+//        }
 
         if (wechat.avatarUrl == null) {
             return
@@ -135,7 +135,7 @@ class WxAccountFragment : ScopedFragment(),
     }
 
     private fun stopRefresh() {
-        swipe_refresh.isRefreshing = false
+//        swipe_refresh.isRefreshing = false
     }
     /**
      * Refresh takes two steps:
@@ -180,7 +180,7 @@ class WxAccountFragment : ScopedFragment(),
                  * Switch account fragment.
                  * This is only meaningful when hosted inside AccountActivity.
                  */
-                if (account.isCoupled && context is OnSwitchAccountListener) {
+                if (account.isLinked && context is OnSwitchAccountListener) {
                     info("A bound account. Ask hosting activity to switch UI.")
                     listener?.onSwitchAccount()
                     return@launch

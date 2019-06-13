@@ -41,9 +41,9 @@ class FtcAccountFragment : ScopedFragment(),
         request_verify_button?.isEnabled = v
     }
 
-    private fun stopRefresh() {
-        swipe_refresh.isRefreshing = false
-    }
+//    private fun stopRefresh() {
+//        swipe_refresh.isRefreshing = false
+//    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -77,7 +77,7 @@ class FtcAccountFragment : ScopedFragment(),
         val account = sessionManager?.loadAccount() ?: return
 
         // Set swipe refresh listener
-        swipe_refresh.setOnRefreshListener(this)
+//        swipe_refresh.setOnRefreshListener(this)
 
         // Set event handlers.
         email_container.setOnClickListener {
@@ -128,13 +128,13 @@ class FtcAccountFragment : ScopedFragment(),
             account.userName
         }
 
-        wechat_bound_tv.text = if (account.isCoupled) {
+        wechat_bound_tv.text = if (account.isLinked) {
             getString(R.string.action_bound_account)
         } else {
             getString(R.string.action_bind_account)
         }
 
-        if (account.isCoupled) {
+        if (account.isLinked) {
             wechat_container.setOnClickListener {
                 WxAccountActivity.start(context)
             }
@@ -152,7 +152,7 @@ class FtcAccountFragment : ScopedFragment(),
     override fun onRefresh() {
         if (activity?.isNetworkConnected() != true) {
             toast(R.string.prompt_no_network)
-            stopRefresh()
+//            stopRefresh()
 
             return
         }
@@ -164,7 +164,7 @@ class FtcAccountFragment : ScopedFragment(),
         info("Starting refreshing account: $account")
 
         if (account == null) {
-            stopRefresh()
+//            stopRefresh()
             return
         }
 
@@ -175,7 +175,7 @@ class FtcAccountFragment : ScopedFragment(),
                 }
 
                 // hide refreshing indicator
-                stopRefresh()
+//                stopRefresh()
 
                 if (updatedAccount == null) {
                     return@launch
@@ -200,7 +200,7 @@ class FtcAccountFragment : ScopedFragment(),
                 toast(R.string.prompt_updated)
             } catch (e: ClientError) {
                 info(e)
-                stopRefresh()
+//                stopRefresh()
 
                 /**
                  * TODO logout current session if API responded 404.
@@ -211,7 +211,7 @@ class FtcAccountFragment : ScopedFragment(),
             } catch (e: Exception) {
                 info(e)
 
-                stopRefresh()
+//                stopRefresh()
                 activity?.handleException(e)
             }
         }
