@@ -3,6 +3,7 @@ package com.ft.ftchinese.util
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
+import com.ft.ftchinese.R
 import okhttp3.*
 import okhttp3.Request
 import org.jetbrains.anko.AnkoLogger
@@ -17,7 +18,32 @@ data class ClientError(
         var statusCode: Int = 400, // HTTP status code
         override val message: String,
         val error: Reason? = null
-) : Exception(message)
+) : Exception(message) {
+
+    // Transform statusCode to human readable message.
+    // Status 422 is not handled here since every endpoint
+    // returns different message.
+    // 404 is not handled here too, since its meaning changes
+    // for each endpoint.
+    fun statusMessage(): Int {
+        return when (statusCode) {
+            400 -> {
+                R.string.api_bad_request
+            }
+            // If request header does not contain X-User-Id
+            401 -> {
+                R.string.api_unauthorized
+            }
+            429 -> {
+                R.string.api_too_many_request
+            }
+            // All other errors are treated as server error.
+            else -> {
+                R.string.api_server_error
+            }
+        }
+    }
+}
 
 data class Reason(
         val field: String,
