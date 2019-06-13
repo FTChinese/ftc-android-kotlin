@@ -24,6 +24,7 @@ class LinkEmailActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: LoginViewModel
+    private var isSignUp = false
 
     private fun showProgress(show: Boolean) {
         if (show) {
@@ -49,30 +50,44 @@ class LinkEmailActivity : ScopedAppActivity(), AnkoLogger {
         viewModel = ViewModelProviders.of(this)
                 .get(LoginViewModel::class.java)
 
+        viewModel.inProgress.observe(this, Observer<Boolean> {
+            showProgress(it)
+        })
+
         viewModel.emailResult.observe(this, Observer {
             val findResult = it ?: return@Observer
 
             showProgress(false)
 
             if (findResult.error != null) {
-                handleError(findResult.error)
+                viewModel.enableInput(true)
+                toast(findResult.error)
+
+                return@Observer
+            }
+
+            if (findResult.exception != null) {
+                handleException(findResult.exception)
                 return@Observer
             }
 
             if (findResult.success == null) {
-                toast("No data received")
+                toast(R.string.error_not_loaded)
                 return@Observer
             }
 
             val (email, found) = findResult.success
+            // If email is found, show login ui;
+            // otherwise show sign up ui.
             if (found) {
                 supportFragmentManager.commit {
                     replace(R.id.single_frag_holder, SignInFragment.newInstance(email))
                     addToBackStack(null)
                 }
             } else {
+                isSignUp = true
                 supportFragmentManager.commit {
-                    replace(R.id.single_frag_holder, SignUpFragment.newInstance(email, HOST_BINDING_ACTIVITY))
+                    replace(R.id.single_frag_holder, SignUpFragment.newInstance(email))
                     addToBackStack(null)
                 }
             }
@@ -87,7 +102,7 @@ class LinkEmailActivity : ScopedAppActivity(), AnkoLogger {
             }
 
             if (loginResult.exception != null) {
-                handleError(loginResult.exception)
+                handleException(loginResult.exception)
                 return@Observer
             }
 
@@ -96,13 +111,16 @@ class LinkEmailActivity : ScopedAppActivity(), AnkoLogger {
                 return@Observer
             }
 
+            if (isSignUp) {
+                setResult(Activity.RESULT_OK)
+                finish()
+                return@Observer
+            }
+
             LinkActivity.startForResult(this@LinkEmailActivity, loginResult.success)
 
         })
 
-        viewModel.inProgress.observe(this, Observer<Boolean> {
-            showProgress(it)
-        })
 
         supportFragmentManager.commit {
             replace(R.id.single_frag_holder, EmailFragment.newInstance())
