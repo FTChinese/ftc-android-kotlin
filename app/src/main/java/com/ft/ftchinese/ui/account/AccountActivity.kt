@@ -3,17 +3,20 @@ package com.ft.ftchinese.ui.account
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.view.View
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
+import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.LoginMethod
 import com.ft.ftchinese.model.SessionManager
+import kotlinx.android.synthetic.main.activity_account.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.toast
 
 /**
  * Show user's account details.
@@ -23,7 +26,8 @@ import org.jetbrains.anko.AnkoLogger
  * If user logged in with wechat account and it is bound to an FTC account, show FtcAccountFragment.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class AccountActivity : ScopedAppActivity(), AnkoLogger {
+class AccountActivity : ScopedAppActivity(),
+        AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: AccountViewModel
@@ -36,9 +40,10 @@ class AccountActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
-        setContentView(R.layout.activity_fragment_single)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContentView(R.layout.activity_account)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -57,24 +62,47 @@ class AccountActivity : ScopedAppActivity(), AnkoLogger {
             showProgress(it)
         })
 
-        viewModel.loginMethod.observe(this, Observer<LoginMethod> {
+        viewModel.refreshing.observe(this, Observer {
+            swipe_refresh.isRefreshing = it
+        })
+
+        viewModel.uiType.observe(this, Observer<LoginMethod> {
             initUI()
         })
+
+        // Handle swipe refresh
+        swipe_refresh.setOnRefreshListener {
+            val a = sessionManager.loadAccount()
+            if (a == null) {
+                toast("Account not found")
+                swipe_refresh.isRefreshing = false
+                return@setOnRefreshListener
+            }
+
+            if (!isNetworkConnected()) {
+                toast(R.string.prompt_no_network)
+                swipe_refresh.isRefreshing = false
+                return@setOnRefreshListener
+            }
+
+            toast(R.string.progress_refresh_account)
+            viewModel.refresh(
+                    account = a,
+                    wxSession = sessionManager.loadWxSession()
+            )
+        }
     }
 
     private fun initUI() {
         val account = sessionManager.loadAccount() ?: return
 
-        val fm = supportFragmentManager
-                .beginTransaction()
-
-        if (account.isWxOnly) {
-            fm.replace(R.id.single_frag_holder, WxFragment.newInstance())
-        } else {
-            fm.replace(R.id.single_frag_holder, FtcFragment.newInstance())
+        supportFragmentManager.commit {
+            if (account.isWxOnly) {
+                replace(R.id.frag_account, WxFragment.newInstance())
+            } else {
+                replace(R.id.frag_account, FtcFragment.newInstance())
+            }
         }
-
-        fm.commit()
     }
 
     companion object {
