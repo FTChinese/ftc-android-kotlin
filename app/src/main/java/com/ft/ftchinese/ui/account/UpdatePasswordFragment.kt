@@ -5,23 +5,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.base.handleApiError
-import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.model.FtcUser
 import com.ft.ftchinese.model.Passwords
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.user.Validator
-import com.ft.ftchinese.util.ClientError
 import kotlinx.android.synthetic.main.fragment_update_password.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 import java.lang.Exception
 
@@ -31,7 +24,7 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: UpdateViewModel
 
-    private fun allowInput(value: Boolean) {
+    private fun enableInput(value: Boolean) {
         old_password_input.isEnabled = value
         new_password_input.isEnabled = value
         confirm_password_input.isEnabled = value
@@ -58,12 +51,32 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
                     .get(UpdateViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
-        save_btn.setOnClickListener {
-            info("Saving password...")
+        setUp()
+    }
 
+    private fun setUp() {
+        // Re-enable input in case errors
+        viewModel.inputEnabled.observe(this, Observer {
+            enableInput(it)
+        })
+
+        save_btn.setOnClickListener {
             val passwords = validate() ?: return@setOnClickListener
 
-            save(passwords)
+            if (activity?.isNetworkConnected() != true) {
+                toast(R.string.prompt_no_network)
+                return@setOnClickListener
+            }
+
+            val userId = sessionManager.loadAccount()?.id ?: return@setOnClickListener
+
+            viewModel.showProgress(true)
+            enableInput(false)
+
+            viewModel.updatePassword(
+                    userId = userId,
+                    passwords = passwords
+            )
         }
     }
 
@@ -107,60 +120,6 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
                 oldPassword = oldPassword,
                 newPassword = newPassword
         )
-    }
-
-    private fun save(passwords: Passwords) {
-
-        if (activity?.isNetworkConnected() != true) {
-            toast(R.string.prompt_no_network)
-
-            return
-        }
-
-        val uuid = sessionManager?.loadAccount()?.id ?: return
-
-        viewModel.showProgress(true)
-        allowInput(false)
-
-        launch {
-
-            try {
-                info("Start updating password")
-
-                val done = withContext(Dispatchers.IO) {
-                    FtcUser(uuid).updatePassword(passwords)
-                }
-
-                viewModel.showProgress(false)
-                info("Change password result: $done")
-
-                toast(R.string.prompt_saved)
-
-            } catch (e: ClientError) {
-                viewModel.showProgress(false)
-                allowInput(true)
-
-                when (e.statusCode) {
-                    // 422 could be password_invalid
-                    404 -> {
-                        toast(R.string.api_account_not_found)
-                    }
-                    // Wrong old password
-                    403 -> {
-                        toast(R.string.error_incorrect_old_password)
-                    }
-                    else -> {
-                        activity?.handleApiError(e)
-                    }
-                }
-
-            } catch (e: Exception) {
-                viewModel.showProgress(false)
-                allowInput(true)
-
-                activity?.handleException(e)
-            }
-        }
     }
 
     companion object {

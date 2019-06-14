@@ -5,22 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.base.handleApiError
-import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.model.FtcUser
+import com.ft.ftchinese.base.*
 import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.user.Validator
-import com.ft.ftchinese.util.ClientError
 import kotlinx.android.synthetic.main.fragment_update_username.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,7 +19,7 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: UpdateViewModel
 
-    private fun allowInput(value: Boolean) {
+    private fun enableInput(value: Boolean) {
         user_name_input.isEnabled = value
         save_btn.isEnabled = value
     }
@@ -59,88 +50,51 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
                     .get(UpdateViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
+
+        setUp()
+
         save_btn.setOnClickListener {
+            if (activity?.isNetworkConnected() != true) {
+                toast(R.string.prompt_no_network)
 
-            val userName = user_name_input.text.toString().trim()
-
-            val isValid = isNameValid(userName)
-
-            if (!isValid) {
                 return@setOnClickListener
             }
 
-            save(userName)
+            val userId = sessionManager.loadAccount()?.id ?: return@setOnClickListener
+
+            viewModel.showProgress(true)
+            enableInput(false)
+
+            viewModel.updateUserName(
+                    userId = userId,
+                    name = user_name_input.text.toString().trim()
+            )
         }
     }
 
-    private fun isNameValid(userName: String): Boolean {
-        user_name_input.error = null
+    private fun setUp() {
+        // Validate input data.
+        viewModel.updateFormState.observe(this, Observer {
+            val updateState = it ?: return@Observer
 
-        val msgId = Validator.ensureUserName(userName)
-        if (msgId != null) {
-            user_name_input.error = getString(msgId)
-            user_name_input.requestFocus()
+            save_btn.isEnabled = updateState.isDataValid
 
-            return false
-        }
-
-        val currentName = value_name_tv.text.toString()
-
-        if (currentName == userName) {
-            user_name_input.error = getString(R.string.error_name_unchanged)
-            user_name_input.requestFocus()
-
-            return false
-        }
-
-        return true
-    }
-
-    private fun save(userName: String) {
-
-        if (activity?.isNetworkConnected() != true) {
-            toast(R.string.prompt_no_network)
-
-            return
-        }
-
-        val uuid = sessionManager.loadAccount()?.id ?: return
-
-        viewModel.showProgress(true)
-        allowInput(false)
-
-        launch {
-
-            try {
-                info("Start updating userName")
-
-                val done = withContext(Dispatchers.IO) {
-                    FtcUser(uuid).updateUserName(userName)
-                }
-
-                viewModel.showProgress(false)
-
-                if (done) {
-
-                    toast(R.string.prompt_saved)
-
-                    viewModel.setDone(true)
-                } else {
-
-                }
-            } catch (e: ClientError) {
-                info(e)
-                viewModel.setDone(false)
-                allowInput(true)
-
-                activity?.handleApiError(e)
-
-            } catch (e: Exception) {
-                viewModel.setDone(false)
-                allowInput(true)
-
-                activity?.handleException(e)
+            if (updateState.nameError != null) {
+                save_btn.error = getString(updateState.nameError)
+                user_name_input.requestFocus()
             }
+        })
+
+        // Re-enable save button in case of errors.
+        viewModel.inputEnabled.observe(this, Observer {
+            enableInput(it)
+        })
+
+        user_name_input.afterTextChanged {
+            viewModel.userNameDataChanged(
+                    currentName = value_name_tv.text.toString(),
+                    newName = user_name_input.text.toString().trim()
+            )
         }
     }
 
