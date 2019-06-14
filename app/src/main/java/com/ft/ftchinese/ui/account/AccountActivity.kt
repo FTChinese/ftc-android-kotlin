@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.account
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -12,6 +13,7 @@ import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.LoginMethod
 import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_account.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -102,6 +104,21 @@ class AccountActivity : ScopedAppActivity(),
             } else {
                 replace(R.id.frag_account, FtcFragment.newInstance())
             }
+        }
+    }
+
+    /**
+     * Receive results from [UpdateActivity] or [LinkActivity]
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode != Activity.RESULT_OK) {
+            return
+        }
+
+        if (requestCode == RequestCode.LINK) {
+            initUI()
         }
     }
 
