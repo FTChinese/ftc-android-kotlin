@@ -174,6 +174,7 @@ class WxFragment : ScopedFragment(),
         link_email_btn.visibility = View.GONE
     }
 
+
     companion object {
         @JvmStatic
         fun newInstance() = WxFragment()
