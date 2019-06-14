@@ -9,15 +9,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.*
-import com.ft.ftchinese.model.FtcUser
 import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.util.ClientError
 import kotlinx.android.synthetic.main.fragment_update_email.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -69,7 +63,7 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
         })
 
         viewModel.inputEnabled.observe(this, Observer {
-            save_btn.isEnabled = it
+            enableInput(it)
         })
 
         email_input.afterTextChanged {
@@ -88,61 +82,13 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
 
             val userId = sessionManager.loadAccount()?.id ?: return@setOnClickListener
 
-            it.isEnabled = false
+            enableInput(false)
             viewModel.showProgress(true)
 
             viewModel.updateEmail(
                     userId = userId,
                     email = email_input.text.toString().trim()
             )
-        }
-    }
-
-
-    private fun save(emailStr: String) {
-        if (activity?.isNetworkConnected() != true) {
-            toast(R.string.prompt_no_network)
-
-            return
-        }
-
-        // If user id is not found, we could not perform updating.
-        val uuid = sessionManager.loadAccount()?.id ?: return
-
-        viewModel.showProgress(true)
-        enableInput(false)
-
-        launch {
-
-            try {
-                info("Start updating email")
-
-                val done = withContext(Dispatchers.IO) {
-                    FtcUser(uuid).updateEmail(emailStr)
-                }
-
-                viewModel.showProgress(false)
-
-                if (done) {
-
-                    toast(R.string.prompt_saved)
-
-                    viewModel.setDone(true)
-                } else {
-
-                }
-            } catch (e: ClientError) {
-                viewModel.showProgress(false)
-                enableInput(true)
-
-                activity?.handleApiError(e)
-
-            } catch (e: Exception) {
-                viewModel.showProgress(false)
-                enableInput(true)
-
-                activity?.handleException(e)
-            }
         }
     }
 

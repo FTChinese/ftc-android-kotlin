@@ -9,9 +9,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
+import com.ft.ftchinese.base.handleException
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class UpdateActivity : ScopedAppActivity(), AnkoLogger {
@@ -57,7 +59,29 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
         })
 
         viewModel.updateResult.observe(this, Observer {
+            val updateResult = it ?: return@Observer
 
+            viewModel.showProgress(false)
+
+            if (updateResult.error != null) {
+                toast(updateResult.error)
+                viewModel.enableInput(true)
+                return@Observer
+            }
+
+            if (updateResult.exception != null) {
+                handleException(updateResult.exception)
+                viewModel.enableInput(true)
+                return@Observer
+            }
+
+            if (!updateResult.success) {
+                toast("Failed to save")
+                viewModel.enableInput(true)
+                return@Observer
+            }
+
+            toast(R.string.prompt_saved)
         })
     }
 
