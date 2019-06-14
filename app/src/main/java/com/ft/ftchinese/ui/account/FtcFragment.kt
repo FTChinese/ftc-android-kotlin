@@ -72,7 +72,7 @@ class FtcFragment : ScopedFragment(),
     override fun onResume() {
         super.onResume()
 
-        val account = sessionManager?.loadAccount() ?: return
+        val account = sessionManager.loadAccount() ?: return
 
         initUI(account)
     }
@@ -85,6 +85,7 @@ class FtcFragment : ScopedFragment(),
                     .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
+        // Refreshed account.
         viewModel.accountResult.observe(this, Observer {
             val accountResult = it ?: return@Observer
 
@@ -203,8 +204,8 @@ class FtcFragment : ScopedFragment(),
     private fun linkWechat() {
         val stateCode = WxOAuth.stateCode()
 
-        sessionManager?.saveWxState(stateCode)
-        sessionManager?.saveWxIntent(WxOAuthIntent.BINDING)
+        sessionManager.saveWxState(stateCode)
+        sessionManager.saveWxIntent(WxOAuthIntent.BINDING)
 
         val req = SendAuth.Req()
         req.scope = WxOAuth.SCOPE
