@@ -18,10 +18,11 @@ object NextApi {
     const val UPDATE_USER_NAME = "$BASE/user/name"
     const val UPDATE_PASSWORD = "$BASE/user/password"
     const val ORDERS = "$BASE/user/orders"
+    const val UNLINK = "$BASE/user/unlink/wx"
     const val STARRED = "$BASE/user/starred"
     const val WX_ACCOUNT = "$BASE/wx/account"
     const val WX_SIGNUP = "$BASE/wx/signup"
-    const val WX_BIND = "$BASE/wx/bind"
+    const val WX_LINK = "$BASE/wx/link"
 }
 
 object SubscribeApi {
