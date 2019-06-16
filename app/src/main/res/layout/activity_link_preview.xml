@@ -72,7 +72,7 @@
                 app:layout_constraintTop_toBottomOf="@id/frag_wx_account"/>
 
             <Button
-                android:id="@+id/start_binding_btn"
+                android:id="@+id/start_link_btn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="开始"

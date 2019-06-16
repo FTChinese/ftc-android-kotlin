@@ -11,7 +11,7 @@ import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.util.*
-import kotlinx.android.synthetic.main.activity_accounts_merge.*
+import kotlinx.android.synthetic.main.activity_link_preview.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.*
@@ -39,12 +39,12 @@ class AccountsMergeActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun allowInput(value: Boolean) {
-        start_binding_btn.isEnabled = value
+        start_link_btn.isEnabled = value
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_accounts_merge)
+        setContentView(R.layout.activity_link_preview)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -132,7 +132,7 @@ class AccountsMergeActivity : ScopedAppActivity(), AnkoLogger {
             return
         }
 
-        start_binding_btn.setOnClickListener {
+        start_link_btn.setOnClickListener {
             bind(ftcAccount.id, wxAccount.unionId)
         }
     }
@@ -156,7 +156,7 @@ class AccountsMergeActivity : ScopedAppActivity(), AnkoLogger {
                 val done = withContext(Dispatchers.IO) {
 
                     FtcUser(userId)
-                            .bindWechat(unionId)
+                            .linkWechat(unionId)
                 }
 
                 toast(R.string.prompt_bound)
