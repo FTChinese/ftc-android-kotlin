@@ -46,7 +46,8 @@ object WxOAuth {
  */
 enum class WxOAuthIntent {
     LOGIN,
-    LINK;
+    LINK,
+    REFRESH;
 }
 
 /**
