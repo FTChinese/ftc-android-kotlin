@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -133,16 +134,14 @@ class CheckOutActivity : ScopedAppActivity(),
             adapter = RowAdapter(buildRows(p))
         }
 
-        val fm = supportFragmentManager.beginTransaction()
-
-       if (!p.isPayRequired()) {
-           fm.replace(R.id.frag_confirm, DirectUpgradeFragment.newInstance())
-       } else {
-           fm.replace(R.id.frag_pay_method, PayMethodFragment.newInstance())
-           fm.replace(R.id.frag_confirm, PayFragment.newInstance(p.payable))
-       }
-
-       fm.commit()
+        supportFragmentManager.commit {
+            if (!p.isPayRequired()) {
+                replace(R.id.frag_confirm, DirectUpgradeFragment.newInstance())
+            } else {
+                replace(R.id.frag_pay_method, PayMethodFragment.newInstance())
+                replace(R.id.frag_confirm, PayFragment.newInstance(p.payable))
+            }
+        }
     }
 
     private fun buildRows(p: PlanPayable): Array<TableRow> {
