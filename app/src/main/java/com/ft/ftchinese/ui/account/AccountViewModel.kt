@@ -21,13 +21,28 @@ class AccountViewModel : ViewModel() {
     val refreshing = MutableLiveData<Boolean>()
     val uiType = MutableLiveData<LoginMethod>()
 
-    val sendEmailResult = MutableLiveData<SendEmailResult>()
+    val sendEmailResult = MutableLiveData<BinaryResult>()
 
     private val _accountResult = MutableLiveData<AccountResult>()
     val accountResult: LiveData<AccountResult> = _accountResult
 
     private val _avatarResult = MutableLiveData<ImageResult>()
     val avatarResult: LiveData<ImageResult> = _avatarResult
+
+    private val _wxRefreshResult = MutableLiveData<WxRefreshResult>()
+    val wxRefreshResult: LiveData<WxRefreshResult> = _wxRefreshResult
+
+    fun refreshWxInfo(wxSession: WxSession) {
+        try {
+            withContext(Dispatchers.IO) {
+                wxSession.refreshInfo()
+            }
+        } catch (e: ClientError) {
+
+        } catch (e: Exception) {
+
+        }
+    }
 
     fun refresh(account: Account, wxSession: WxSession? = null) {
         viewModelScope.launch {
@@ -36,9 +51,7 @@ class AccountViewModel : ViewModel() {
                 // Forcing user to re-authorize is the only way
                 // to solve this problem.
                 if (wxSession != null) {
-                    withContext(Dispatchers.IO) {
-                        wxSession.refreshInfo()
-                    }
+
                 }
 
                 val updatedAccount = withContext(Dispatchers.IO) {
@@ -95,7 +108,7 @@ class AccountViewModel : ViewModel() {
                     FtcUser(userId).requestVerification()
                 }
 
-                sendEmailResult.value = SendEmailResult(
+                sendEmailResult.value = BinaryResult(
                         success = done
                 )
 
@@ -109,13 +122,13 @@ class AccountViewModel : ViewModel() {
                     else -> e.statusMessage()
                 }
 
-                sendEmailResult.value = SendEmailResult(
+                sendEmailResult.value = BinaryResult(
                         error = msgId,
                         exception = e
                 )
 
             } catch (e: Exception) {
-                sendEmailResult.value = SendEmailResult(
+                sendEmailResult.value = BinaryResult(
                         exception = e
                 )
             }
