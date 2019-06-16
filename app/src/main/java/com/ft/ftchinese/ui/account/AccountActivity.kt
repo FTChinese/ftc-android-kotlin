@@ -64,35 +64,9 @@ class AccountActivity : ScopedAppActivity(),
             showProgress(it)
         })
 
-        viewModel.refreshing.observe(this, Observer {
-            swipe_refresh.isRefreshing = it
-        })
-
         viewModel.uiType.observe(this, Observer<LoginMethod> {
             initUI()
         })
-
-        // Handle swipe refresh
-        swipe_refresh.setOnRefreshListener {
-            val account = sessionManager.loadAccount()
-            if (account == null) {
-                toast("Account not found")
-                swipe_refresh.isRefreshing = false
-                return@setOnRefreshListener
-            }
-
-            if (!isNetworkConnected()) {
-                toast(R.string.prompt_no_network)
-                swipe_refresh.isRefreshing = false
-                return@setOnRefreshListener
-            }
-
-            toast(R.string.progress_refresh_account)
-            viewModel.refresh(
-                    account = account,
-                    wxSession = if (account.isWxOnly) sessionManager.loadWxSession() else null
-            )
-        }
     }
 
     private fun initUI() {

@@ -18,7 +18,6 @@ import kotlinx.coroutines.withContext
 class AccountViewModel : ViewModel() {
 
     val inProgress = MutableLiveData<Boolean>()
-    val refreshing = MutableLiveData<Boolean>()
     val uiType = MutableLiveData<LoginMethod>()
 
     val sendEmailResult = MutableLiveData<BinaryResult>()
@@ -139,10 +138,6 @@ class AccountViewModel : ViewModel() {
 
     fun showProgress(show: Boolean) {
         inProgress.value = show
-    }
-
-    fun stopRefreshing() {
-        refreshing.value = false
     }
 
     fun switchUI(m: LoginMethod) {
