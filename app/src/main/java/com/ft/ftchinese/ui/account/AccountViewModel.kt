@@ -34,26 +34,40 @@ class AccountViewModel : ViewModel() {
     fun refreshWxInfo(wxSession: WxSession) {
         viewModelScope.launch {
             try {
-                withContext(Dispatchers.IO) {
+                val done = withContext(Dispatchers.IO) {
                     wxSession.refreshInfo()
                 }
+
+                _wxRefreshResult.value = WxRefreshResult(
+                        success = done
+                )
             } catch (e: ClientError) {
+                if (e.statusCode == 422) {
+                    _wxRefreshResult.value = WxRefreshResult(
+                            isExpired = true
+                    )
+                    return@launch
+                }
+
+                _wxRefreshResult.value = WxRefreshResult(
+                        error = when (e.statusCode) {
+                            404 -> R.string.api_account_not_found
+                            else -> null
+                        },
+                        exception = e
+                )
 
             } catch (e: Exception) {
-
+                _wxRefreshResult.value = WxRefreshResult(
+                        exception = e
+                )
             }
         }
     }
 
-    fun refresh(account: Account, wxSession: WxSession? = null) {
+    fun refresh(account: Account) {
         viewModelScope.launch {
             try {
-                // TODO: what if refresh token expired?
-                // Forcing user to re-authorize is the only way
-                // to solve this problem.
-                if (wxSession != null) {
-
-                }
 
                 val updatedAccount = withContext(Dispatchers.IO) {
                     account.refresh()
