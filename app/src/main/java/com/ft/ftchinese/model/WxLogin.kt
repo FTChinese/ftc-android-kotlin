@@ -42,11 +42,11 @@ object WxOAuth {
 /**
  * The reason why you want to perform wechat OAuth:
  * for LOGIN, account data will be saved;
- * for BINDING, account data will be used for display; never save it!
+ * for LINK, account data will be used for display; never save it!
  */
 enum class WxOAuthIntent {
     LOGIN,
-    BINDING;
+    LINK;
 }
 
 /**

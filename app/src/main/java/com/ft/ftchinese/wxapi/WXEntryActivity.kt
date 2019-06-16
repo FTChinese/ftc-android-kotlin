@@ -245,7 +245,7 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
          * If wehcat oauth is used for binding accounts,
          * never save the fetched account!
          */
-        if (wxIntent == WxOAuthIntent.BINDING) {
+        if (wxIntent == WxOAuthIntent.LINK) {
             info("Launch binding")
             LinkPreviewActivity.startForResult(this, account)
 

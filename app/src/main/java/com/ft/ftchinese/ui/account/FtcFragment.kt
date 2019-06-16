@@ -232,7 +232,7 @@ class FtcFragment : ScopedFragment(),
         val stateCode = WxOAuth.stateCode()
 
         sessionManager.saveWxState(stateCode)
-        sessionManager.saveWxIntent(WxOAuthIntent.BINDING)
+        sessionManager.saveWxIntent(WxOAuthIntent.LINK)
 
         val req = SendAuth.Req()
         req.scope = WxOAuth.SCOPE
