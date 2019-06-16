@@ -33,14 +33,16 @@ class AccountViewModel : ViewModel() {
     val wxRefreshResult: LiveData<WxRefreshResult> = _wxRefreshResult
 
     fun refreshWxInfo(wxSession: WxSession) {
-        try {
-            withContext(Dispatchers.IO) {
-                wxSession.refreshInfo()
+        viewModelScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    wxSession.refreshInfo()
+                }
+            } catch (e: ClientError) {
+
+            } catch (e: Exception) {
+
             }
-        } catch (e: ClientError) {
-
-        } catch (e: Exception) {
-
         }
     }
 
