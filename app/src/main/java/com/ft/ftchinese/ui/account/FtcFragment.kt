@@ -17,6 +17,7 @@ import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.fragment_ftc_account.*
+import kotlinx.android.synthetic.main.fragment_wx_account.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -28,6 +29,10 @@ class FtcFragment : ScopedFragment(),
     private lateinit var sessionManager: SessionManager
     private var wxApi: IWXAPI? = null
     private lateinit var viewModel: AccountViewModel
+
+    private fun stopRefreshing() {
+        swipe_refresh.isRefreshing = false
+    }
 
     private fun enableInput(v: Boolean) {
         request_verify_button?.isEnabled = v
@@ -89,7 +94,7 @@ class FtcFragment : ScopedFragment(),
         viewModel.accountResult.observe(this, Observer {
             val accountResult = it ?: return@Observer
 
-            viewModel.stopRefreshing()
+            stopRefreshing()
 
             if (accountResult.error != null) {
                 toast(accountResult.error)
@@ -142,6 +147,28 @@ class FtcFragment : ScopedFragment(),
                 toast("Unknown error")
             }
         })
+
+        swipe_refresh.setOnClickListener {
+
+
+            if (activity?.isNetworkConnected() != true) {
+                toast(R.string.prompt_no_network)
+                stopRefreshing()
+                return@setOnClickListener
+            }
+
+            val acnt = sessionManager.loadAccount()
+
+            if (acnt == null) {
+                toast("Account not found")
+                stopRefreshing()
+                return@setOnClickListener
+            }
+
+            toast(R.string.progress_refresh_account)
+
+            viewModel.refresh(acnt)
+        }
 
         request_verify_button.setOnClickListener {
 
