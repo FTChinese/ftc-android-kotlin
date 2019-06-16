@@ -91,12 +91,16 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.account.LinkActivity"
-            android:label="@string/title_bind_email"
+            android:label="@string/title_link_email"
             android:parentActivityName=".ui.account.AccountActivity" />
         <activity
             android:name=".ui.account.LinkPreviewActivity"
             android:label="@string/title_merge_accounts"
             android:parentActivityName=".ui.account.AccountActivity" />
+        <activity android:name=".ui.account.UnlinkActivity"
+            android:label="@string/title_unlink"
+            android:parentActivityName=".ui.account.WxInfoActivity"/>
+
         <activity
             android:name=".ui.account.WxInfoActivity"
             android:label="@string/title_wx_account"
@@ -128,7 +132,7 @@
         <activity
             android:name=".ui.pay.UpgradeActivity"
             android:label="@string/title_upgrade"
-            android:parentActivityName=".ui.pay.MemberActivity"/>
+            android:parentActivityName=".ui.pay.MemberActivity" />
     </application>
 
 </manifest>
