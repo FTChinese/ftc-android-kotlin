@@ -4,23 +4,20 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.commit
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.Account
-import com.ft.ftchinese.model.FtcUser
 import com.ft.ftchinese.model.LoginMethod
 import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.RequestCode
-import kotlinx.android.synthetic.main.activity_accounts_merge.*
+import kotlinx.android.synthetic.main.activity_link_preview.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -33,6 +30,9 @@ import org.jetbrains.anko.toast
 class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
+    private lateinit var linkViewModel: LinkViewModel
+    private lateinit var accountViewModel: AccountViewModel
+
     private var otherAccount: Account? = null
 
     private fun showProgress(show: Boolean) {
@@ -43,13 +43,13 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 
-    private fun allowInput(value: Boolean) {
-        start_binding_btn.isEnabled = value
+    private fun enableInput(value: Boolean) {
+        start_link_btn.isEnabled = value
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_accounts_merge)
+        setContentView(R.layout.activity_link_preview)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -61,7 +61,75 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
 
         otherAccount = intent.getParcelableExtra(EXTRA_ACCOUNT)
 
-        updateUI()
+        linkViewModel = ViewModelProviders.of(this)
+                .get(LinkViewModel::class.java)
+
+        accountViewModel = ViewModelProviders.of(this)
+                .get(AccountViewModel::class.java)
+
+        initUI()
+
+        linkViewModel.linkResult.observe(this, Observer {
+
+
+            val linkResult = it ?: it ?: return@Observer
+
+            if (linkResult.error != null) {
+                toast(linkResult.error)
+                showProgress(false)
+                enableInput(true)
+                return@Observer
+            }
+
+            if (linkResult.exception != null) {
+                handleException(linkResult.exception)
+                showProgress(false)
+                enableInput(true)
+                return@Observer
+            }
+
+            if (!linkResult.success) {
+                toast("Unknown error")
+                showProgress(false)
+                enableInput(true)
+                return@Observer
+            }
+
+            toast(R.string.prompt_bound)
+
+            if (!isNetworkConnected()) {
+                showProgress(false)
+                enableInput(true)
+                return@Observer
+            }
+
+            // Silently refresh account since this is not
+            // required.
+            val account = sessionManager.loadAccount()
+
+            if (account == null) {
+                showProgress(false)
+                return@Observer
+            }
+
+            toast(R.string.prompt_refreshing)
+
+            accountViewModel.refresh(account)
+        })
+
+        accountViewModel.accountResult.observe(this, Observer {
+            showProgress(false)
+
+            val accountResult = it ?: return@Observer
+
+            if (accountResult.success != null) {
+                sessionManager.saveAccount(accountResult.success)
+            }
+
+            setResult(Activity.RESULT_OK)
+
+            finish()
+        })
     }
 
     // Checks which account is email account and which one is wechat account.
@@ -77,7 +145,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 
-    private fun updateUI() {
+    private fun initUI() {
 
         val (ftcAccount, wxAccount) = sortAccount()
 
@@ -88,26 +156,23 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
             return
         }
 
-        val ftcMemberFrag = MemberFragment.newInstance(
-                m = ftcAccount.membership,
-                heading = "FT中文网账号\n${ftcAccount.email}"
-        )
-        val wxMemberFrag = MemberFragment.newInstance(
-                m = wxAccount.membership,
-                heading = "微信账号\n${wxAccount.wechat.nickname}"
-        )
+        supportFragmentManager.commit {
+            replace(R.id.frag_ftc_account, MemberFragment.newInstance(
+                    m = ftcAccount.membership,
+                    heading = "${getString(R.string.label_ftc_account)}\n${ftcAccount.email}"
+            ))
 
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.frag_ftc_account, ftcMemberFrag)
-                .replace(R.id.frag_wx_account, wxMemberFrag)
-                .commit()
-
+            replace(R.id.frag_wx_account, MemberFragment.newInstance(
+                    m = wxAccount.membership,
+                    heading = "${getString(R.string.label_wx_account)}\n${wxAccount.wechat.nickname}"
+            ))
+        }
 
         // If the two accounts are already bound.
         if (ftcAccount.isEqual(wxAccount)) {
             result_tv.text = getString(R.string.accounts_already_bound)
 
-            allowInput(false)
+            enableInput(false)
             return
         }
 
@@ -115,14 +180,14 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
         if (ftcAccount.isLinked) {
             result_tv.text = getString(R.string.ftc_account_coupled, ftcAccount.email)
 
-            allowInput(false)
+            enableInput(false)
             return
         }
 
         if (wxAccount.isLinked) {
             result_tv.text = getString(R.string.wx_account_coupled, wxAccount.wechat.nickname)
 
-            allowInput(false)
+            enableInput(false)
             return
         }
 
@@ -130,72 +195,23 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
         if (!ftcAccount.membership.isExpired && !wxAccount.membership.isExpired) {
             result_tv.text = getString(R.string.accounts_member_valid)
 
-            allowInput(false)
+            enableInput(false)
             return
         }
 
-        start_binding_btn.setOnClickListener {
-            link(ftcAccount.id, wxAccount.unionId)
-        }
-    }
+        val unionId = wxAccount.unionId ?: return
 
-    private fun link(userId: String, unionId: String?) {
-        if (!isNetworkConnected()) {
-            toast(R.string.prompt_no_network)
-            return
-        }
-
-        if (unionId == null) {
-            toast("Wechat union id not found")
-            return
-        }
-
-        showProgress(true)
-        allowInput(false)
-
-        launch {
-            try {
-                val done = withContext(Dispatchers.IO) {
-
-                    FtcUser(userId)
-                            .bindWechat(unionId)
-                }
-
-                toast(R.string.prompt_bound)
-
-                info("Bind account result: $done")
-
-                refreshAccount()
-            } catch (e: ClientError) {
-                showProgress(false)
-                allowInput(true)
-                info(e)
-                handleApiError(e)
-            } catch (e: Exception) {
-                showProgress(false)
-                allowInput(true)
-                info(e)
-                handleException(e)
+        start_link_btn.setOnClickListener {
+            if (!isNetworkConnected()) {
+                toast(R.string.prompt_no_network)
+                return@setOnClickListener
             }
+
+            showProgress(true)
+            enableInput(false)
+
+            linkViewModel.link(ftcAccount.id, unionId)
         }
-    }
-
-    private suspend fun refreshAccount() {
-        val account = withContext(Dispatchers.IO) {
-            sessionManager.loadAccount()?.refresh()
-        } ?: return
-
-        info("Account after bound: $account")
-
-        toast(R.string.prompt_account_updated)
-
-        sessionManager.saveAccount(account)
-
-        showProgress(false)
-
-        setResult(Activity.RESULT_OK)
-
-        finish()
     }
 
     companion object {
