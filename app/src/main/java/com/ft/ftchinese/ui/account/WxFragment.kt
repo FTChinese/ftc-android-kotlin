@@ -132,26 +132,30 @@ class WxFragment : ScopedFragment(),
             val refreshResult = it ?: return@Observer
 
             if (refreshResult.error != null) {
-                toast(refreshResult.error)
                 stopRefreshing()
+                toast(refreshResult.error)
+
                 return@Observer
             }
 
             if (refreshResult.exception != null) {
-                activity?.handleException(refreshResult.exception)
                 stopRefreshing()
+                activity?.handleException(refreshResult.exception)
+
                 return@Observer
             }
 
             if (refreshResult.isExpired) {
-                // TODO: show re-authorize dialog
                 stopRefreshing()
+                viewModel.setRefreshTokenExpired()
+
                 return@Observer
             }
 
             if (!refreshResult.success) {
-                toast("Unknown error")
                 stopRefreshing()
+                toast("Unknown error")
+
                 return@Observer
             }
 

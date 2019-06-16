@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.commit
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.WxOAuthIntent
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 
@@ -37,6 +39,12 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
         viewModel = ViewModelProviders.of(this)
                 .get(AccountViewModel::class.java)
 
+        viewModel.refreshTokenExpired.observe(this, Observer {
+            if (it) {
+                WxExpireDialogFragment(WxOAuthIntent.REFRESH)
+                        .show(supportFragmentManager, "WxExpireDialog")
+            }
+        })
     }
 
     companion object {

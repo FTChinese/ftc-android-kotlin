@@ -19,6 +19,7 @@ class AccountViewModel : ViewModel() {
 
     val inProgress = MutableLiveData<Boolean>()
     val uiType = MutableLiveData<LoginMethod>()
+    val refreshTokenExpired = MutableLiveData<Boolean>()
 
     val sendEmailResult = MutableLiveData<BinaryResult>()
 
@@ -156,5 +157,9 @@ class AccountViewModel : ViewModel() {
 
     fun switchUI(m: LoginMethod) {
         uiType.value = m
+    }
+
+    fun setRefreshTokenExpired() {
+        refreshTokenExpired.value = true
     }
 }

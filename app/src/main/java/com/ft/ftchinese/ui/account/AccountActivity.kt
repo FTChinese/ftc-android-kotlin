@@ -10,15 +10,13 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.LoginMethod
 import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.WxOAuthIntent
 import com.ft.ftchinese.util.RequestCode
-import kotlinx.android.synthetic.main.activity_account.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.toast
 
 /**
  * Show user's account details.
@@ -66,6 +64,13 @@ class AccountActivity : ScopedAppActivity(),
 
         viewModel.uiType.observe(this, Observer<LoginMethod> {
             initUI()
+        })
+
+        viewModel.refreshTokenExpired.observe(this, Observer {
+            if (it) {
+                WxExpireDialogFragment(WxOAuthIntent.REFRESH)
+                        .show(supportFragmentManager, "WxExpireDialog")
+            }
         })
     }
 
