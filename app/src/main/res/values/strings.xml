@@ -40,8 +40,9 @@
     <string name="title_upgrade">会员升级</string>
     <string name="title_wxpay">微信支付 </string>
     <string name="title_wx_account">微信账号</string>
-    <string name="title_bind_email">绑定邮箱账号</string>
+    <string name="title_link_email">绑定邮箱账号</string>
     <string name="title_merge_accounts">合并账号</string>
+    <string name="title_unlink">解除绑定</string>
     <string name="title_account">账号与安全</string>
     <string name="title_subscription">会员订阅</string>
     <string name="title_my_orders">我的订单</string>
@@ -49,12 +50,6 @@
     <string name="title_wx_login">微信登录</string>
 
     <!-- Member and Subscription -->
-    <string name="label_member_tier">会员类型</string>
-
-    <string name="tier_free">尚未成为会员</string>
-    <string name="tier_standard">标准会员</string>
-    <string name="tier_premium">高端会员</string>
-    <string name="tier_vip">超级会员</string>
 
     <string-array name="standard_benefits">
         <item>✔ 专享订阅内容每日仅需0.7元(或按月订阅每日0.9元)</item>
@@ -98,8 +93,16 @@
     <string name="cycle_month">月</string>
     <string name="cycle_vip">无限期</string>
 
+    <string name="label_member_tier">会员类型</string>
+
+    <string name="tier_free">尚未成为会员</string>
+    <string name="tier_standard">标准会员</string>
+    <string name="tier_premium">高端会员</string>
+    <string name="tier_vip">超级会员</string>
     <string name="label_member_duration">会员期限</string>
     <string name="label_price">支付金额</string>
+    <string name="label_ftc_account">FT中文网账号</string>
+    <string name="label_wx_account">微信账号</string>
     <string name="paywall_title">购买会员服务，阅读FT独家内容</string>
     <string name="paywall_login_prompt">已经购买过？登录</string>
 
@@ -220,7 +223,9 @@
     <string name="instruct_password_letter">请输入您的登录FT中文网所用的电子邮箱，我们会向该邮箱发送邮件，帮您重置密码</string>
     <string name="instruct_verify_email">您的邮箱尚未验证，为保障您的账号安全，请及时验证邮箱。我们已经给您的登录邮箱发送了验证邮件，点击邮件中的链接即可。</string>
     <string name="instruct_letter_sent">请检查您的邮件，点击邮件中的“重置密码”链接，在所打开的网页中修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。如果您已经验证过邮箱地址，请下拉刷新。</string>
-    <string name="instruct_bind_email">您目前使用了微信账号登录FT中文网。为保障账号安全，建议您绑定在FT中文网注册的邮箱账号。</string>
+    <string name="instruct_link_email">您目前使用了微信账号登录FT中文网。为保障账号安全，建议您绑定在FT中文网注册的邮箱账号。</string>
+    <string name="unlink_guide">解除如下账号绑定？</string>
+    <string name="unlink_anchor">检测到您当前账号是FT中文网的会员，解除账号绑定后只能有一个账号拥有当前会员，请选择会员信息保留在哪个账号下</string>
     <string name="instruct_bind_login">邮箱 %1$s 已经注册了FT中文网账号，请输入密码验证身份，即可绑定微信账号和邮箱</string>
     <string name="instruct_sign_up">邮箱 %1$s 尚未注册FT中文网账号，请设置密码创建账号</string>
     <string name="instruct_sign_in">邮箱 %1$s 已经注册了FT中文网账号，请输入登录密码</string>
@@ -276,8 +281,12 @@
     <string name="api_name_taken">用户名已被占用</string>
     <string name="api_already_premium">您已经是高端会员了</string>
     <string name="api_member_not_found">没有查询到您的会员状态</string>
+    <string name="api_account_already_linked">当前账号或目标账号已被绑定</string>
+    <string name="api_membership_already_linked">当前账号或目标账号的会员已被绑定</string>
+    <string name="api_membership_all_valid">不能绑定两个拥有未过期会员的账号</string>
     <string name="api_wechat_already_linked">当前微信账号已经绑定了其他FTC账号</string>
     <string name="api_wechat_member_already_linked">当前微信账号拥有的会员已经绑定了其他FTC账号</string>
+    <string name="api_anchor_missing">会员账号解绑必须选择哪个账号保留会员信息</string>
 
     <string name="api_empty_url">请求地址错误</string>
     <string name="api_network_failure">网络错误</string>
@@ -323,5 +332,8 @@
         <item>sc</item>
         <item>tc</item>
     </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
