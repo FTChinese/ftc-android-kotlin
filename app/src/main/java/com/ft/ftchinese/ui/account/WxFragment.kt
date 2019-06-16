@@ -80,7 +80,7 @@ class WxFragment : ScopedFragment(),
         viewModel.accountResult.observe(this, Observer {
             val accountResult = it ?: return@Observer
 
-            viewModel.stopRefreshing()
+            stopRefreshing()
 
             if (accountResult.error != null) {
                 toast(accountResult.error)
@@ -133,8 +133,33 @@ class WxFragment : ScopedFragment(),
 
             if (refreshResult.error != null) {
                 toast(refreshResult.error)
-
+                stopRefreshing()
+                return@Observer
             }
+
+            if (refreshResult.exception != null) {
+                activity?.handleException(refreshResult.exception)
+                stopRefreshing()
+                return@Observer
+            }
+
+            if (refreshResult.isExpired) {
+                // TODO: show re-authorize dialog
+                stopRefreshing()
+                return@Observer
+            }
+
+            if (!refreshResult.success) {
+                toast("Unknown error")
+                stopRefreshing()
+                return@Observer
+            }
+
+            val acnt = sessionManager.loadAccount() ?: return@Observer
+
+            toast(R.string.progress_refresh_account)
+
+            viewModel.refresh(acnt)
         })
 
         swipe_refresh.setOnRefreshListener {
