@@ -1,33 +1,30 @@
 package com.ft.ftchinese
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
 import com.ft.ftchinese.model.Following
 import com.ft.ftchinese.model.FollowingManager
 import com.ft.ftchinese.model.HTML_TYPE_FRAGMENT
 import com.ft.ftchinese.model.ChannelSource
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class FollowingFragment : Fragment(), AnkoLogger {
 
     private var adapter: Adapter? = null
-    private var followingManager: FollowingManager? = null
+    private lateinit var followingManager: FollowingManager
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
 
-        try {
-            followingManager = FollowingManager.getInstance(requireContext())
-        } catch (e: Exception) {
-            info("Cannot initiate FollowingManager")
-        }
+        followingManager = FollowingManager.getInstance(context)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -38,12 +35,12 @@ class FollowingFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recycler_view.layoutManager = androidx.recyclerview.widget.GridLayoutManager(context, 3)
+        recycler_view.layoutManager = GridLayoutManager(context, 3)
         updateUI()
     }
 
     private fun updateUI() {
-        val follows = followingManager?.load() ?: return
+        val follows = followingManager.load()
 
         if (adapter == null) {
             adapter = Adapter(follows)
