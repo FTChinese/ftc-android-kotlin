@@ -20,8 +20,8 @@ class UpdateViewModel : ViewModel() {
     private val _updateForm = MutableLiveData<UpdateFormState>()
     val updateFormState: LiveData<UpdateFormState> = _updateForm
 
-    private val _updateResult = MutableLiveData<UpdateResult>()
-    val updateResult: LiveData<UpdateResult> = _updateResult
+    private val _updateResult = MutableLiveData<BinaryResult>()
+    val updateResult: LiveData<BinaryResult> = _updateResult
 
     fun emailDataChanged(currentEmail: String, newEmail: String) {
         if (!isEmailValid(newEmail)) {
@@ -58,7 +58,7 @@ class UpdateViewModel : ViewModel() {
                     FtcUser(userId).updateEmail(email)
                 }
 
-                _updateResult.value = UpdateResult(
+                _updateResult.value = BinaryResult(
                         success = done
                 )
             } catch (e: ClientError) {
@@ -72,12 +72,12 @@ class UpdateViewModel : ViewModel() {
                     e.statusMessage()
                 }
 
-                _updateResult.value = UpdateResult(
+                _updateResult.value = BinaryResult(
                         error = msgId,
                         exception = e
                 )
             } catch (e: Exception) {
-                _updateResult.value = UpdateResult(
+                _updateResult.value = BinaryResult(
                         exception = e
                 )
             }
@@ -115,7 +115,7 @@ class UpdateViewModel : ViewModel() {
                     FtcUser(userId).updateUserName(name)
                 }
 
-                _updateResult.value = UpdateResult(
+                _updateResult.value = BinaryResult(
                         success = done
                 )
             } catch (e: ClientError) {
@@ -128,12 +128,12 @@ class UpdateViewModel : ViewModel() {
                     e.statusMessage()
                 }
 
-                _updateResult.value = UpdateResult(
+                _updateResult.value = BinaryResult(
                         error = msgId,
                         exception = e
                 )
             } catch (e: Exception) {
-                _updateResult.value = UpdateResult(
+                _updateResult.value = BinaryResult(
                         exception = e
                 )
             }
@@ -147,7 +147,7 @@ class UpdateViewModel : ViewModel() {
                     FtcUser(userId).updatePassword(passwords)
                 }
 
-                _updateResult.value = UpdateResult(
+                _updateResult.value = BinaryResult(
                         success = done
                 )
             } catch (e: ClientError) {
@@ -161,12 +161,12 @@ class UpdateViewModel : ViewModel() {
                     else -> e.statusMessage()
                 }
 
-                _updateResult.value = UpdateResult(
+                _updateResult.value = BinaryResult(
                         error = msgId,
                         exception = e
                 )
             } catch (e: Exception) {
-                _updateResult.value = UpdateResult(
+                _updateResult.value = BinaryResult(
                         exception = e
                 )
             }
