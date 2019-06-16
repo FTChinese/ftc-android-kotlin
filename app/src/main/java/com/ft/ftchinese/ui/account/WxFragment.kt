@@ -70,8 +70,6 @@ class WxFragment : ScopedFragment(),
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val account = sessionManager.loadAccount() ?: return
-
         viewModel = activity?.run {
             ViewModelProviders.of(this)
                     .get(AccountViewModel::class.java)
@@ -117,13 +115,15 @@ class WxFragment : ScopedFragment(),
             wx_avatar.setImageDrawable(
                     Drawable.createFromStream(
                             ByteArrayInputStream(bytes),
-                            account.wechat.avatarName
+                            "wx_avatar.jpg"
                     )
             )
 
             launch {
                 withContext(Dispatchers.IO) {
-                    cache.writeBinaryFile(account.wechat.avatarName, bytes)
+                    cache.writeBinaryFile(
+                            sessionManager.loadAccount()?.wechat?.avatarName ?: "wx_avatar.jpg",
+                            bytes)
                 }
             }
         })
@@ -167,20 +167,20 @@ class WxFragment : ScopedFragment(),
 
             if (account == null) {
                 toast("Account not found")
-                swipe_refresh.isRefreshing = false
+                stopRefreshing()
                 return@setOnRefreshListener
             }
 
             if (activity?.isNetworkConnected() != true) {
                 toast(R.string.prompt_no_network)
-                swipe_refresh.isRefreshing = false
+                stopRefreshing()
                 return@setOnRefreshListener
             }
 
             val wxSession = sessionManager.loadWxSession()
             if (wxSession == null) {
                 toast("Wechat session not found")
-                swipe_refresh.isRefreshing = false
+                stopRefreshing()
                 return@setOnRefreshListener
             }
 
