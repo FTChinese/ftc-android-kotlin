@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.Credentials
 import com.ft.ftchinese.model.FtcUser
+import com.ft.ftchinese.model.WxOAuth
 import com.ft.ftchinese.model.WxSession
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
@@ -30,6 +31,9 @@ class LoginViewModel : ViewModel() {
 
     private val _loginResult = MutableLiveData<LoginResult>()
     val loginResult: LiveData<LoginResult> = _loginResult
+
+    private val _wxOAuthResult = MutableLiveData<WxOAuthResult>()
+    val wxOAuthResult: LiveData<WxOAuthResult> = _wxOAuthResult
 
     fun emailDataChanged(email: String) {
         if (!isEmailValid(email)) {
@@ -112,7 +116,7 @@ class LoginViewModel : ViewModel() {
                     return@launch
                 }
 
-                loadAccount(userId)
+                loadFtcAccount(userId)
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 404) {
                     R.string.error_invalid_password
@@ -130,6 +134,24 @@ class LoginViewModel : ViewModel() {
                 _loginResult.value = LoginResult(
                         exception = e
                 )
+            }
+        }
+    }
+
+    fun wxLogin(code: String) {
+        viewModelScope.launch {
+            try {
+                val sess = withContext(Dispatchers.IO) {
+                    WxOAuth.login(code)
+                }
+
+                _wxOAuthResult.value = WxOAuthResult(
+                        success = null
+                )
+            } catch (e: ClientError) {
+
+            } catch (e: Exception) {
+
             }
         }
     }
@@ -153,7 +175,7 @@ class LoginViewModel : ViewModel() {
 
 
                 if (wxSession == null) {
-                    loadAccount(userId)
+                    loadFtcAccount(userId)
                     return@launch
                 }
 
@@ -186,6 +208,9 @@ class LoginViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Load account after user performed wechat authorization
+     */
     private suspend fun loadWxAccount(wxSession: WxSession) {
         try {
             val account = withContext(Dispatchers.IO) {
@@ -211,7 +236,11 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    private suspend fun loadAccount(userId: String) {
+    /**
+     * Load account after user's password verified
+     * or signed up.
+     */
+    private suspend fun loadFtcAccount(userId: String) {
         try {
             val account = withContext(Dispatchers.IO) {
                 FtcUser(id = userId).fetchAccount()
@@ -236,6 +265,7 @@ class LoginViewModel : ViewModel() {
             _loginResult.value = LoginResult(exception = e)
         }
     }
+
 
     private fun isEmailValid(email: String): Boolean {
         return if (!email.contains('@')) {
