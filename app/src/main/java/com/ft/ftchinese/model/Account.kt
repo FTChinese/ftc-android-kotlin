@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model
 
 import android.os.Parcelable
+import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
@@ -135,6 +136,27 @@ data class Account(
         } else {
             json.parse<Account>(body)
         }
+    }
+
+    fun unlink(anchor: UnlinkAnchor?): Boolean {
+        if (unionId == null) {
+            throw Exception("Wechat account not found")
+        }
+
+        val fetch = Fetch().put(NextApi.UNLINK)
+                .setUserId(id)
+                .setUnionId(unionId)
+                .noCache()
+
+        if (anchor != null) {
+            fetch.jsonBody(Klaxon().toJsonString(mapOf(
+                    "anchor" to anchor.string()
+            )))
+        }
+
+        val (resp, _) = fetch.responseApi()
+
+        return resp.code() == 204
     }
 
     // Show user's account balance.
