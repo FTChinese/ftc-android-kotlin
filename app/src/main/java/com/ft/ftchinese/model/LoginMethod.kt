@@ -14,6 +14,7 @@ enum class LoginMethod {
     }
 
     companion object {
+        @JvmStatic
         fun fromString(s: String?): LoginMethod? {
             return when (s) {
                 "email" -> EMAIL
