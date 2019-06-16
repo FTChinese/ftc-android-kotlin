@@ -69,8 +69,8 @@ data class FtcUser(
         return resp.code() == 204
     }
 
-    fun bindWechat(unionId: String): Boolean {
-        val (resp, _) = Fetch().put(NextApi.WX_BIND)
+    fun linkWechat(unionId: String): Boolean {
+        val (resp, _) = Fetch().put(NextApi.WX_LINK)
                 .setUnionId(unionId)
                 .noCache()
                 .jsonBody(Klaxon().toJsonString(mapOf(
