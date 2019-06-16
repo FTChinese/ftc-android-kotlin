@@ -36,6 +36,10 @@ class WxFragment : ScopedFragment(),
     private lateinit var cache: FileCache
     private lateinit var viewModel: AccountViewModel
 
+    private fun stopRefreshing() {
+        swipe_refresh.isRefreshing = false
+    }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
@@ -59,7 +63,7 @@ class WxFragment : ScopedFragment(),
         }
 
         unlink_btn.setOnClickListener {
-
+            UnlinkActivity.startForResult(activity, RequestCode.UNLINK)
         }
     }
 
@@ -123,6 +127,42 @@ class WxFragment : ScopedFragment(),
                 }
             }
         })
+
+        viewModel.wxRefreshResult.observe(this, Observer {
+            val refreshResult = it ?: return@Observer
+
+            if (refreshResult.error != null) {
+                toast(refreshResult.error)
+
+            }
+        })
+
+        swipe_refresh.setOnRefreshListener {
+            val account = sessionManager.loadAccount()
+
+            if (account == null) {
+                toast("Account not found")
+                swipe_refresh.isRefreshing = false
+                return@setOnRefreshListener
+            }
+
+            if (activity?.isNetworkConnected() != true) {
+                toast(R.string.prompt_no_network)
+                swipe_refresh.isRefreshing = false
+                return@setOnRefreshListener
+            }
+
+            val wxSession = sessionManager.loadWxSession()
+            if (wxSession == null) {
+                toast("Wechat session not found")
+                swipe_refresh.isRefreshing = false
+                return@setOnRefreshListener
+            }
+
+            toast(R.string.progress_refresh_account)
+
+            viewModel.refreshWxInfo(wxSession)
+        }
     }
 
     private fun initUI() {
