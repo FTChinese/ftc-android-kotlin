@@ -9,6 +9,7 @@ import com.ft.ftchinese.model.Account
 import com.ft.ftchinese.model.FtcUser
 import com.ft.ftchinese.model.LoginMethod
 import com.ft.ftchinese.model.WxSession
+import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
 import kotlinx.coroutines.Dispatchers
