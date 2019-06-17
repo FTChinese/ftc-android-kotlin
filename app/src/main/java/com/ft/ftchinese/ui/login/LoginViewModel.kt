@@ -29,8 +29,8 @@ class LoginViewModel : ViewModel() {
     private val _emailResult = MutableLiveData<FindEmailResult>()
     val emailResult: LiveData<FindEmailResult> =_emailResult
 
-    private val _loginResult = MutableLiveData<LoginResult>()
-    val loginResult: LiveData<LoginResult> = _loginResult
+    private val _loginResult = MutableLiveData<AccountResult>()
+    val loginResult: LiveData<AccountResult> = _loginResult
 
     private val _wxOAuthResult = MutableLiveData<WxOAuthResult>()
     val wxOAuthResult: LiveData<WxOAuthResult> = _wxOAuthResult
@@ -111,7 +111,7 @@ class LoginViewModel : ViewModel() {
 
                 if (userId == null) {
 
-                    _loginResult.value = LoginResult(success = null)
+                    _loginResult.value = AccountResult(success = null)
 
                     return@launch
                 }
@@ -124,21 +124,28 @@ class LoginViewModel : ViewModel() {
                     e.statusMessage()
                 }
 
-                _loginResult.value = LoginResult(
+                _loginResult.value = AccountResult(
                         error = msgId,
                         exception = e
                 )
 
             } catch (e: Exception) {
 
-                _loginResult.value = LoginResult(
+                _loginResult.value = AccountResult(
                         exception = e
                 )
             }
         }
     }
 
-    fun wxLogin(code: String) {
+    /**
+     * Uses wechat authrozation code to get an access token, and then use the
+     * token to get user info.
+     * API responds with WxSession data to uniquely identify this login
+     * session.
+     * You can user the session data later to retrieve user account.
+     */
+    fun wxLogin(code: String, isManualRefresh: Boolean) {
         viewModelScope.launch {
             try {
                 val sess = withContext(Dispatchers.IO) {
@@ -146,12 +153,45 @@ class LoginViewModel : ViewModel() {
                 }
 
                 _wxOAuthResult.value = WxOAuthResult(
-                        success = null
+                        success = sess
                 )
+
+                // If user is manually refreshing
+                // WxFragment and refresh token is
+                // expired, do not retrieve latest
+                // account data because user's
+                // current login method might be
+                // email, not wechat.
+                if (isManualRefresh) {
+                    return@launch
+                }
+
+                if (sess == null) {
+                    return@launch
+                }
+
+                // Fetch account data from wechat side
+                // if the authorization is used for initial login,
+                // or triggered by refresh token
+                // expiration mechanism.
+                // The expiration detection mechanism is only triggered if user logged in
+                // via wechat only.
+                loadWxAccount(sess)
             } catch (e: ClientError) {
-
+                // Possible 422 error key: code_missing_field, code_invalid.
+                // We cannot make sure the exact meaning of each error, just
+                // show user API's error message.
+                _wxOAuthResult.value = WxOAuthResult(
+                        error = when (e.statusCode) {
+                            422 -> null
+                            else -> e.statusMessage()
+                        },
+                        exception = e
+                )
             } catch (e: Exception) {
-
+                _wxOAuthResult.value = WxOAuthResult(
+                        exception = e
+                )
             }
         }
     }
@@ -169,7 +209,7 @@ class LoginViewModel : ViewModel() {
                 }
 
                 if (userId == null) {
-                    _loginResult.value = LoginResult()
+                    _loginResult.value = AccountResult()
                     return@launch
                 }
 
@@ -196,14 +236,14 @@ class LoginViewModel : ViewModel() {
                     e.statusMessage()
                 }
 
-                _loginResult.value = LoginResult(
+                _loginResult.value = AccountResult(
                         error = msgId,
                         exception = e
                 )
 
             } catch (e: Exception) {
 
-                _loginResult.value = LoginResult(exception = e)
+                _loginResult.value = AccountResult(exception = e)
             }
         }
     }
@@ -217,7 +257,7 @@ class LoginViewModel : ViewModel() {
                 wxSession.fetchAccount()
             }
 
-            _loginResult.value = LoginResult(success = account)
+            _loginResult.value = AccountResult(success = account)
         } catch (e: ClientError) {
             val msgId = if (e.statusCode == 404) {
                 R.string.error_not_loaded
@@ -225,14 +265,14 @@ class LoginViewModel : ViewModel() {
                 e.statusMessage()
             }
 
-            _loginResult.value = LoginResult(
+            _loginResult.value = AccountResult(
                     error = msgId,
                     exception = e
             )
 
         } catch (e: Exception) {
 
-            _loginResult.value = LoginResult(exception = e)
+            _loginResult.value = AccountResult(exception = e)
         }
     }
 
@@ -246,7 +286,7 @@ class LoginViewModel : ViewModel() {
                 FtcUser(id = userId).fetchAccount()
             }
 
-            _loginResult.value = LoginResult(success = account)
+            _loginResult.value = AccountResult(success = account)
 
         } catch (e: ClientError) {
             val msgId = if (e.statusCode == 404) {
@@ -255,14 +295,14 @@ class LoginViewModel : ViewModel() {
                 e.statusMessage()
             }
 
-            _loginResult.value = LoginResult(
+            _loginResult.value = AccountResult(
                     error = msgId,
                     exception = e
             )
 
         } catch (e: Exception) {
 
-            _loginResult.value = LoginResult(exception = e)
+            _loginResult.value = AccountResult(exception = e)
         }
     }
 
