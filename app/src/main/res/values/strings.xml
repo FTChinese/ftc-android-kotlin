@@ -288,6 +288,7 @@
     <string name="api_wechat_already_linked">当前微信账号已经绑定了其他FTC账号</string>
     <string name="api_wechat_member_already_linked">当前微信账号拥有的会员已经绑定了其他FTC账号</string>
     <string name="api_anchor_missing">会员账号解绑必须选择哪个账号保留会员信息</string>
+    <string name="api_missing_field">请求参数缺失</string>
 
     <string name="api_empty_url">请求地址错误</string>
     <string name="api_network_failure">网络错误</string>
