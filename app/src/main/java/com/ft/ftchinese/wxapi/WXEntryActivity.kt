@@ -61,18 +61,17 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             val oauthResult = it ?: return@Observer
 
             if (oauthResult.error != null) {
-                showResult(false, getString(oauthResult.error))
-
+                showFailure(getString(oauthResult.error))
                 return@Observer
             }
 
             if (oauthResult.exception != null) {
-                showResult(false, oauthResult.exception.message)
+                showFailure(oauthResult.exception.message)
                 return@Observer
             }
 
             if (oauthResult.success == null) {
-                showResult(false, getString(R.string.prompt_load_failure))
+                showFailure(getString(R.string.prompt_load_failure))
                 return@Observer
             }
 
@@ -80,7 +79,7 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             if (sessionManager.loadWxIntent() == WxOAuthIntent.REFRESH) {
                 val account = sessionManager.loadAccount()
                 if (account == null) {
-                    showResult(true, "请稍后在账号与安全中下拉刷新")
+                    showSuccess("请稍后在账号与安全中下拉刷新")
                     return@Observer
                 }
                 accountViewModel.refresh(account)
@@ -92,23 +91,23 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             val accountResult = it ?: return@Observer
 
             if (accountResult.error != null) {
-                showResult(false, getString(accountResult.error), true)
+                showFailure(getString(accountResult.error), true)
                 return@Observer
             }
 
             if (accountResult.exception != null) {
-                showResult(false, accountResult.exception.message, true)
+                showFailure(accountResult.exception.message, true)
                 return@Observer
             }
 
             if (accountResult.success == null) {
-                showResult(false, getString(R.string.prompt_load_failure), true)
+                showFailure(getString(R.string.prompt_load_failure), true)
                 return@Observer
             }
 
             when (sessionManager.loadWxIntent()) {
                 WxOAuthIntent.LOGIN -> {
-                    showResult(true, getString(R.string.greeting_wx_login, accountResult.success.wechat.nickname))
+                    showSuccess(getString(R.string.greeting_wx_login, accountResult.success.wechat.nickname))
 
                     sessionManager.saveAccount(accountResult.success)
                 }
@@ -133,25 +132,19 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
     }
 
-
-
     override fun onResp(resp: BaseResp?) {
         info("Wx login response type: ${resp?.type}, error code: ${resp?.errCode}")
 
         when (resp?.type) {
             // Wechat Login.
             ConstantsAPI.COMMAND_SENDAUTH -> {
-
                 setTitle(R.string.title_wx_login)
-
-                info("Wx auth")
                 processLogin(resp)
             }
             // This is used to handle your app sending message to wx and then return back to your app.
             // Share will return to here.
             ConstantsAPI.COMMAND_SENDMESSAGE_TO_WX -> {
                 heading_tv.text = getString(R.string.wxshare_done)
-                info("Send message to wx")
                 finish()
             }
             else -> {
@@ -184,12 +177,16 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
                     info("State: $state")
                     if (state == null) {
-                        showResult(false, "授权码缺失")
+                        showFailure(
+                                "授权码缺失",
+                                sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
                         return
                     }
 
                     if (state != resp.state) {
-                        showResult(false, getString(R.string.oauth_state_mismatch))
+                        showFailure(
+                                getString(R.string.oauth_state_mismatch),
+                                sessionManager.loadWxIntent()!= WxOAuthIntent.REFRESH)
                         return
                     }
 
@@ -202,10 +199,30 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             }
 
             BaseResp.ErrCode.ERR_USER_CANCEL -> {
-                showResult(false, getString(R.string.oauth_canceled), true)
+                showFailure(
+                        getString(R.string.oauth_canceled),
+                        sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
+            }
+
+            BaseResp.ErrCode.ERR_SENT_FAILED -> {
+                showFailure(
+                        null,
+                        sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
             }
             BaseResp.ErrCode.ERR_AUTH_DENIED -> {
-                showResult(false, getString(R.string.oauth_denied), true)
+                showFailure(
+                        getString(R.string.oauth_denied),
+                        sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
+            }
+            BaseResp.ErrCode.ERR_UNSUPPORT -> {
+                showFailure(
+                        null,
+                        sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
+            }
+            BaseResp.ErrCode.ERR_BAN -> {
+                showFailure(
+                        null,
+                        sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
             }
         }
     }
@@ -214,13 +231,6 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         heading_tv.visibility = View.GONE
         done_button.visibility = View.GONE
     }
-
-    private fun showLoggingIn() {
-        showResult(UIWxOAuth(
-                heading = R.string.progress_logging
-        ))
-    }
-
 
     private fun showResult(success: Boolean, msg: String? = null, showLogin: Boolean = false) {
         heading_tv.visibility = View.VISIBLE
@@ -249,6 +259,29 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             finish()
         }
 
+    }
+
+    private fun showLoggingIn() {
+        showResult(UIWxOAuth(
+                heading = R.string.progress_logging
+        ))
+    }
+
+    private fun showSuccess(msg: String) {
+        showResult(UIWxOAuth(
+                heading = R.string.prompt_logged_in,
+                body = msg,
+                done = true
+        ))
+    }
+
+    private fun showFailure(msg: String?, reLogin: Boolean = false) {
+        showResult(UIWxOAuth(
+                heading = R.string.prompt_login_failed,
+                body = msg,
+                done = true,
+                restartLogin = reLogin
+        ))
     }
 
     private fun showResult(ui: UIWxOAuth) {
