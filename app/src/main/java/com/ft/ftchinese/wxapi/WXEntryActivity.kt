@@ -133,70 +133,7 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
     }
 
-    private fun hideUI() {
-        heading_tv.visibility = View.GONE
-        done_button.visibility = View.GONE
-    }
 
-//    private fun showLoginFailed() {
-//        heading_tv.visibility = View.VISIBLE
-//        heading_tv.text = getString(R.string.prompt_login_failed)
-//        done_button.visibility = View.VISIBLE
-//
-//        done_button.setOnClickListener {
-//
-//            LoginActivity.startForResult(this)
-//
-//            finish()
-//        }
-//    }
-
-    private fun showLoggingIn() {
-        heading_tv.visibility = View.VISIBLE
-        heading_tv.text = getString(R.string.progress_logging)
-    }
-
-//    private fun showLoginSuccess(msg: String) {
-//        heading_tv.visibility = View.VISIBLE
-//        heading_tv.text = getString(R.string.prompt_logged_in)
-//
-//        message_tv.text = msg
-//
-//        done_button.visibility = View.VISIBLE
-//        done_button.setOnClickListener {
-//            finish()
-//        }
-//    }
-
-
-    private fun showResult(success: Boolean, msg: String? = null, showLogin: Boolean = false) {
-        heading_tv.visibility = View.VISIBLE
-        done_button.visibility = View.VISIBLE
-        showProgress(false)
-
-        if (success) {
-            heading_tv.text = getString(R.string.prompt_logged_in)
-            message_tv.text = msg
-
-            done_button.setOnClickListener {
-                finish()
-            }
-
-            return
-        }
-
-        heading_tv.text = getString(R.string.prompt_login_failed)
-
-        done_button.setOnClickListener {
-
-            if (showLogin) {
-                LoginActivity.startForResult(this)
-            }
-
-            finish()
-        }
-
-    }
 
     override fun onResp(resp: BaseResp?) {
         info("Wx login response type: ${resp?.type}, error code: ${resp?.errCode}")
@@ -227,6 +164,8 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     private fun processLogin(resp: BaseResp) {
 
         showLoggingIn()
+
+        info("Resp code: ${resp.errCode}, resp msg: ${resp.errStr}")
 
         when (resp.errCode) {
             BaseResp.ErrCode.ERR_OK -> {
@@ -263,96 +202,70 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             }
 
             BaseResp.ErrCode.ERR_USER_CANCEL -> {
-
-                info(R.string.oauth_canceled)
+                showResult(false, getString(R.string.oauth_canceled), true)
             }
             BaseResp.ErrCode.ERR_AUTH_DENIED -> {
-                info(R.string.oauth_denied)
+                showResult(false, getString(R.string.oauth_denied), true)
             }
         }
     }
 
-//    private fun login(code: String) {
-//        showProgress(true)
-//
-//        launch {
-//            try {
-//                // Get session data from API.
-//                val sess = withContext(Dispatchers.IO) {
-//
-//                    WxOAuth.login(code)
-//                }
-//
-//                if (sess == null) {
-//                    showProgress(false)
-//
-//                    showLoginFailed()
-//
-//                    return@launch
-//                }
-//
-//                 Save session data.
-//                sessionManager.saveWxSession(sess)
-//
-//                loadAccount(sess)
-//
-//            } catch (e: ClientError) {
-//                info("API error: $e")
-//
-//                showProgress(false)
-//                showLoginFailed()
-//
-//                toast(e.message)
-//            } catch (e: Exception) {
-//
-//                showProgress(false)
-//                showLoginFailed()
-//
-//                handleException(e)
-//            }
-//        }
-//    }
+    private fun hideUI() {
+        heading_tv.visibility = View.GONE
+        done_button.visibility = View.GONE
+    }
 
-    /**
-     * Load account after fetched wechat session.
-     */
-//    private suspend fun loadAccount(sess: WxSession) {
-//        val account = withContext(Dispatchers.IO) {
-//            sess.fetchAccount()
-//        }
-//
-//        if (account == null) {
-//            showProgress(false)
-//
-////            showLoginFailed()
-//
-//            return
-//        }
-//
-//        showProgress(false)
-//
-//        info("Wx login account: $account")
-//
-//        val wxIntent = sessionManager.loadWxIntent() ?: WxOAuthIntent.LOGIN
-//
-//        info("Wechat OAuth intent: $wxIntent")
-//
-//        /**
-//         * If wehcat oauth is used for binding accounts,
-//         * never save the fetched account!
-//         */
-//        if (wxIntent == WxOAuthIntent.LINK) {
-//            info("Launch binding")
-//            LinkPreviewActivity.startForResult(this, account)
-//
-//            finish()
-//            return
-//        }
-//
-//        sessionManager.saveAccount(account)
-//
-////        showLoginSuccess(getString(R.string.greeting_wx_login, account.wechat.nickname))
-//    }
+    private fun showLoggingIn() {
+        showResult(UIWxOAuth(
+                heading = R.string.progress_logging
+        ))
+    }
+
+
+    private fun showResult(success: Boolean, msg: String? = null, showLogin: Boolean = false) {
+        heading_tv.visibility = View.VISIBLE
+        done_button.visibility = View.VISIBLE
+        showProgress(false)
+
+        if (success) {
+            heading_tv.text = getString(R.string.prompt_logged_in)
+            message_tv.text = msg
+
+            done_button.setOnClickListener {
+                finish()
+            }
+
+            return
+        }
+
+        heading_tv.text = getString(R.string.prompt_login_failed)
+
+        done_button.setOnClickListener {
+
+            if (showLogin) {
+                LoginActivity.startForResult(this)
+            }
+
+            finish()
+        }
+
+    }
+
+    private fun showResult(ui: UIWxOAuth) {
+        heading_tv.visibility = View.VISIBLE
+        done_button.visibility = if (ui.done) View.VISIBLE else View.GONE
+        showProgress(false)
+
+        heading_tv.text = getString(ui.heading)
+        message_tv.text = ui.body
+
+        done_button.setOnClickListener {
+            if (ui.restartLogin) {
+                LoginActivity.startForResult(this)
+            }
+            finish()
+        }
+    }
 
     private fun showProgress(show: Boolean) {
         if (show) {
