@@ -2,6 +2,7 @@ package com.ft.ftchinese.wxapi
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -121,6 +122,10 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         info("onCreate called")
     }
 
+    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
+        super.onCreate(savedInstanceState, persistentState)
+    }
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
@@ -230,35 +235,6 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     private fun hideUI() {
         heading_tv.visibility = View.GONE
         done_button.visibility = View.GONE
-    }
-
-    private fun showResult(success: Boolean, msg: String? = null, showLogin: Boolean = false) {
-        heading_tv.visibility = View.VISIBLE
-        done_button.visibility = View.VISIBLE
-        showProgress(false)
-
-        if (success) {
-            heading_tv.text = getString(R.string.prompt_logged_in)
-            message_tv.text = msg
-
-            done_button.setOnClickListener {
-                finish()
-            }
-
-            return
-        }
-
-        heading_tv.text = getString(R.string.prompt_login_failed)
-
-        done_button.setOnClickListener {
-
-            if (showLogin) {
-                LoginActivity.startForResult(this)
-            }
-
-            finish()
-        }
-
     }
 
     private fun showLoggingIn() {
