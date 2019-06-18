@@ -1,4 +1,4 @@
-package com.ft.ftchinese.user
+package com.ft.ftchinese.ui
 
 import com.ft.ftchinese.R
 

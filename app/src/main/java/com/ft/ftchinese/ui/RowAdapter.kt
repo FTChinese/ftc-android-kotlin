@@ -1,4 +1,4 @@
-package com.ft.ftchinese.user
+package com.ft.ftchinese.ui
 
 import android.graphics.Typeface
 import androidx.recyclerview.widget.RecyclerView
