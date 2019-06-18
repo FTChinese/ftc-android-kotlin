@@ -15,8 +15,8 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.*
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.user.RowAdapter
-import com.ft.ftchinese.user.TableRow
+import com.ft.ftchinese.ui.RowAdapter
+import com.ft.ftchinese.ui.TableRow
 import com.ft.ftchinese.util.ClientError
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -158,7 +158,9 @@ class CheckOutActivity : ScopedAppActivity(),
                             data = getString(R.string.formatter_price, p.payable),
                             color = try {
                                 ContextCompat.getColor(this, R.color.colorClaret)
-                            } catch (e: Exception) { null }
+                            } catch (e: Exception) {
+                                null
+                            }
                     )
             )
         }
@@ -183,7 +185,9 @@ class CheckOutActivity : ScopedAppActivity(),
                 data = getString(R.string.formatter_price, p.payable),
                 color = try {
                     ContextCompat.getColor(this, R.color.colorClaret)
-                } catch (e: Exception) { null }
+                } catch (e: Exception) {
+                    null
+                }
         )
 
         return arrayOf(row1, row2, row3, row4)
