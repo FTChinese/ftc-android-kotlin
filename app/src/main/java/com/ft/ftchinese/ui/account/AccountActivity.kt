@@ -12,7 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.model.LoginMethod
 import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.model.WxOAuthIntent
+import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -66,10 +66,13 @@ class AccountActivity : ScopedAppActivity(),
             initUI()
         })
 
-        viewModel.refreshTokenExpired.observe(this, Observer {
+        viewModel.shouldReAuth.observe(this, Observer {
             if (it) {
-                WxExpireDialogFragment(WxOAuthIntent.REFRESH)
+
+                WxExpireDialogFragment()
                         .show(supportFragmentManager, "WxExpireDialog")
+
+                sessionManager.logout()
             }
         })
     }
@@ -96,7 +99,14 @@ class AccountActivity : ScopedAppActivity(),
             return
         }
 
+        // If user linked accounts, reload ui.
         if (requestCode == RequestCode.LINK) {
+            initUI()
+            return
+        }
+
+        // If user unlinked accounts, reload ui.
+        if (requestCode == RequestCode.UNLINK) {
             initUI()
         }
     }
