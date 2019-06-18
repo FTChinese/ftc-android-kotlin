@@ -9,16 +9,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.Membership
 import com.ft.ftchinese.model.Tier
-import com.ft.ftchinese.user.AccountsMergeActivity
-import com.ft.ftchinese.user.RowAdapter
-import com.ft.ftchinese.user.TableRow
+import com.ft.ftchinese.ui.RowAdapter
+import com.ft.ftchinese.ui.TableRow
 import com.ft.ftchinese.util.formatLocalDate
 import com.ft.ftchinese.util.json
 import kotlinx.android.synthetic.main.fragment_membership.*
 import org.jetbrains.anko.AnkoLogger
 
 /**
- * Used by [AccountsMergeActivity] to show details of each
  * account-to-be-merged.
  */
 class MemberFragment : Fragment(), AnkoLogger {
