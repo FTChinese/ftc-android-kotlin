@@ -306,6 +306,13 @@ class MainActivity : ScopedAppActivity(),
                 R.id.action_my_subs -> MemberActivity.start(this)
                 R.id.action_feedback -> feedbackEmail()
                 R.id.action_settings -> SettingsActivity.start(this)
+                R.id.action_app_download -> {
+                    val webpage: Uri = Uri.parse("http://app.ftchinese.com/androidmobile.html")
+                    val intent = Intent(Intent.ACTION_VIEW, webpage)
+                    if (intent.resolveActivity(packageManager) != null) {
+                        startActivity(intent)
+                    }
+                }
             }
 
             drawer_layout.closeDrawer(GravityCompat.START)
