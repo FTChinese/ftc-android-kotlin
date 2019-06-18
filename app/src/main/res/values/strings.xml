@@ -149,7 +149,7 @@
     <string name="action_feedback">反馈</string>
     <string name="action_logout">退出登录</string>
     <string name="action_settings">设置</string>
-    <string name="action_about">关于我们</string>
+    <string name="action_download_app">APP下载</string>
 
     <!-- Myft tabs -->
     <string name="myft_reading_history">阅读历史</string>
