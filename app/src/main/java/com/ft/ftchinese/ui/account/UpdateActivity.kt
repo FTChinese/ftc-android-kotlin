@@ -117,7 +117,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
         })
 
         // Observing refreshed account.
-        accountViewModel.accountResult.observe(this, Observer {
+        accountViewModel.accountRefreshed.observe(this, Observer {
             showProgress(false)
 
             val accountResult = it ?: return@Observer
@@ -141,6 +141,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
 
             sessionManager.saveAccount(accountResult.success)
 
+            // Signal to calling activity
             setResult(Activity.RESULT_OK)
 
             finish()
