@@ -11,7 +11,7 @@ import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.PasswordReset
-import com.ft.ftchinese.user.Validator
+import com.ft.ftchinese.ui.Validator
 import com.ft.ftchinese.util.ClientError
 import kotlinx.android.synthetic.main.activity_forgot_password.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -38,7 +38,7 @@ class ForgotPasswordActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
-        val email = intent.getStringExtra(com.ft.ftchinese.user.ARG_EMAIL) ?: return
+        val email = intent.getStringExtra(ARG_EMAIL) ?: return
 
         email_input.text = Editable.Factory.getInstance().newEditable(email)
 
