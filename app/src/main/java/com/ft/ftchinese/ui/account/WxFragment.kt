@@ -62,6 +62,7 @@ class WxFragment : ScopedFragment(),
             LinkActivity.startForResult(activity, RequestCode.LINK)
         }
 
+        // Start unlinking accounts.
         unlink_btn.setOnClickListener {
             UnlinkActivity.startForResult(activity, RequestCode.UNLINK)
         }
@@ -75,7 +76,54 @@ class WxFragment : ScopedFragment(),
                     .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
-        viewModel.accountResult.observe(this, Observer {
+
+
+        // Check whether we could refresh wechat user info.
+        // If refresh token is not expired, we'll start
+        // refresh user's full account data.
+        viewModel.wxRefreshResult.observe(this, Observer {
+            val refreshResult = it ?: return@Observer
+
+            if (refreshResult.error != null) {
+                stopRefreshing()
+                toast(refreshResult.error)
+
+                return@Observer
+            }
+
+            if (refreshResult.exception != null) {
+                stopRefreshing()
+                activity?.handleException(refreshResult.exception)
+
+                return@Observer
+            }
+
+            if (refreshResult.isExpired) {
+                stopRefreshing()
+                // If the API tells us the refresh token
+                // is expired, notify host activity to
+                // show re-authorize dialog.
+                viewModel.showReAuth()
+
+                return@Observer
+            }
+
+            if (!refreshResult.success) {
+                stopRefreshing()
+                toast("Unknown error")
+
+                return@Observer
+            }
+
+            val acnt = sessionManager.loadAccount() ?: return@Observer
+
+            toast(R.string.progress_refresh_account)
+
+            viewModel.refresh(acnt)
+        })
+
+        // Refreshed account data.
+        viewModel.accountRefreshed.observe(this, Observer {
             val accountResult = it ?: return@Observer
 
             stopRefreshing()
@@ -104,6 +152,7 @@ class WxFragment : ScopedFragment(),
             }
         })
 
+        // Downloaded avatar from internet.
         viewModel.avatarResult.observe(this, Observer {
             if (it.exception != null) {
                 activity?.handleException(it.exception)
@@ -119,6 +168,7 @@ class WxFragment : ScopedFragment(),
                     )
             )
 
+            // Cache avatar file.
             launch {
                 withContext(Dispatchers.IO) {
                     cache.writeBinaryFile(
@@ -128,69 +178,40 @@ class WxFragment : ScopedFragment(),
             }
         })
 
-        viewModel.wxRefreshResult.observe(this, Observer {
-            val refreshResult = it ?: return@Observer
+        val acnt = sessionManager.loadAccount() ?: return
 
-            if (refreshResult.error != null) {
-                stopRefreshing()
-                toast(refreshResult.error)
+        if (acnt.isWxOnly) {
+            swipe_refresh.setOnRefreshListener {
+                val account = sessionManager.loadAccount()
 
-                return@Observer
+                if (account == null) {
+                    toast("Account not found")
+                    stopRefreshing()
+                    return@setOnRefreshListener
+                }
+
+                if (activity?.isNetworkConnected() != true) {
+                    toast(R.string.prompt_no_network)
+                    stopRefreshing()
+                    return@setOnRefreshListener
+                }
+
+                val wxSession = sessionManager.loadWxSession()
+                if (wxSession == null) {
+                    // If a linked user logged in, the WxSession
+                    // data will be definitely not existed.
+                    // In such case, show the re-authorization dialog.
+                    viewModel.showReAuth()
+                    stopRefreshing()
+                    return@setOnRefreshListener
+                }
+
+                toast(R.string.progress_refresh_account)
+
+                viewModel.refreshWxInfo(wxSession)
             }
-
-            if (refreshResult.exception != null) {
-                stopRefreshing()
-                activity?.handleException(refreshResult.exception)
-
-                return@Observer
-            }
-
-            if (refreshResult.isExpired) {
-                stopRefreshing()
-                viewModel.setRefreshTokenExpired()
-
-                return@Observer
-            }
-
-            if (!refreshResult.success) {
-                stopRefreshing()
-                toast("Unknown error")
-
-                return@Observer
-            }
-
-            val acnt = sessionManager.loadAccount() ?: return@Observer
-
-            toast(R.string.progress_refresh_account)
-
-            viewModel.refresh(acnt)
-        })
-
-        swipe_refresh.setOnRefreshListener {
-            val account = sessionManager.loadAccount()
-
-            if (account == null) {
-                toast("Account not found")
-                stopRefreshing()
-                return@setOnRefreshListener
-            }
-
-            if (activity?.isNetworkConnected() != true) {
-                toast(R.string.prompt_no_network)
-                stopRefreshing()
-                return@setOnRefreshListener
-            }
-
-            val wxSession = sessionManager.loadWxSession()
-            if (wxSession == null) {
-                toast("Wechat session not found")
-                stopRefreshing()
-                return@setOnRefreshListener
-            }
-
-            toast(R.string.progress_refresh_account)
-
-            viewModel.refreshWxInfo(wxSession)
+        } else {
+            swipe_refresh.isEnabled = false
         }
     }
 
@@ -242,7 +263,6 @@ class WxFragment : ScopedFragment(),
         instruction_tv.visibility = View.GONE
         link_email_btn.visibility = View.GONE
     }
-
 
     companion object {
         @JvmStatic
