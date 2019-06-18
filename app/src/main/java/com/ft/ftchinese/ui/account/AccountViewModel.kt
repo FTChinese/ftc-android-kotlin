@@ -15,17 +15,19 @@ import com.ft.ftchinese.util.Fetch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
-class AccountViewModel : ViewModel() {
+class AccountViewModel : ViewModel(), AnkoLogger {
 
     val inProgress = MutableLiveData<Boolean>()
     val uiType = MutableLiveData<LoginMethod>()
-    val refreshTokenExpired = MutableLiveData<Boolean>()
+    val shouldReAuth = MutableLiveData<Boolean>()
 
     val sendEmailResult = MutableLiveData<BinaryResult>()
 
-    private val _accountResult = MutableLiveData<AccountResult>()
-    val accountResult: LiveData<AccountResult> = _accountResult
+    private val _accountRefreshed = MutableLiveData<AccountResult>()
+    val accountRefreshed: LiveData<AccountResult> = _accountRefreshed
 
     private val _avatarResult = MutableLiveData<ImageResult>()
     val avatarResult: LiveData<ImageResult> = _avatarResult
@@ -33,6 +35,8 @@ class AccountViewModel : ViewModel() {
     private val _wxRefreshResult = MutableLiveData<WxRefreshResult>()
     val wxRefreshResult: LiveData<WxRefreshResult> = _wxRefreshResult
 
+    // Ask API to fetch user's latest wechat info and save
+    // it to database.
     fun refreshWxInfo(wxSession: WxSession) {
         viewModelScope.launch {
             try {
@@ -69,13 +73,15 @@ class AccountViewModel : ViewModel() {
 
     fun refresh(account: Account) {
         viewModelScope.launch {
+            info("Start refreshing account")
+
             try {
 
                 val updatedAccount = withContext(Dispatchers.IO) {
                     account.refresh()
                 }
 
-                _accountResult.value = AccountResult(
+                _accountRefreshed.value = AccountResult(
                         success = updatedAccount ?: account
                 )
             } catch (e: ClientError) {
@@ -85,13 +91,13 @@ class AccountViewModel : ViewModel() {
                     e.statusMessage()
                 }
 
-                _accountResult.value = AccountResult(
+                _accountRefreshed.value = AccountResult(
                         error = msgId,
                         exception = e
                 )
             } catch (e: Exception) {
 
-                _accountResult.value = AccountResult(
+                _accountRefreshed.value = AccountResult(
                         exception = e
                 )
             }
@@ -160,7 +166,8 @@ class AccountViewModel : ViewModel() {
         uiType.value = m
     }
 
-    fun setRefreshTokenExpired() {
-        refreshTokenExpired.value = true
+    // Show re-authorzation dialog for wechat.
+    fun showReAuth() {
+        shouldReAuth.value = true
     }
 }
