@@ -46,6 +46,11 @@
             android:id="@+id/action_settings"
             android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/action_settings"/>
+
+        <item
+            android:id="@+id/action_app_download"
+            android:icon="@drawable/ic_get_app_black_24dp"
+            android:title="@string/action_download_app"/>
     </group>
 
     <!--<group-->
