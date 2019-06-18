@@ -40,7 +40,7 @@ class SignUpFragment : ScopedFragment(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        email = arguments?.getString(com.ft.ftchinese.user.ARG_EMAIL)
+        email = arguments?.getString(ARG_EMAIL)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

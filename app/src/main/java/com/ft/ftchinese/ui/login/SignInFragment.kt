@@ -39,7 +39,7 @@ class SignInFragment : ScopedFragment(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        email = arguments?.getString(com.ft.ftchinese.user.ARG_EMAIL)
+        email = arguments?.getString(ARG_EMAIL)
 
         if (email.isNullOrBlank()) {
             toast("Email not set!")
