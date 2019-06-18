@@ -147,38 +147,21 @@ class LoginViewModel : ViewModel(), AnkoLogger {
      * session.
      * You can user the session data later to retrieve user account.
      */
-    fun wxLogin(code: String, isManualRefresh: Boolean) {
+    fun wxLogin(code: String) {
         viewModelScope.launch {
             try {
                 val sess = withContext(Dispatchers.IO) {
                     WxOAuth.login(code)
                 }
 
-                info("Get oauth session: $sess. Is manual refresh: $isManualRefresh")
-
                 _wxOAuthResult.value = WxOAuthResult(
                         success = sess
                 )
-
-                // If user is manually refreshing
-                // WxFragment and refresh token is
-                // expired, do not retrieve latest
-                // account data because user's
-                // current login method might be
-                // email, not wechat.
-                if (isManualRefresh) {
-                    return@launch
-                }
 
                 if (sess == null) {
                     return@launch
                 }
 
-                // Fetch account data from wechat side
-                // if the authorization is used for initial login,
-                // or triggered by refresh token
-                // expiration mechanism.
-                // The expiration detection mechanism is only triggered if user logged in
                 // via wechat only.
                 info("Start loading wechat account")
                 loadWxAccount(sess)
