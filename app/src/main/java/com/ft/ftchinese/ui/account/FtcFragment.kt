@@ -13,6 +13,7 @@ import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.util.RequestCode
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -90,7 +91,7 @@ class FtcFragment : ScopedFragment(),
         } ?: throw Exception("Invalid Activity")
 
         // Refreshed account.
-        viewModel.accountResult.observe(this, Observer {
+        viewModel.accountRefreshed.observe(this, Observer {
             val accountResult = it ?: return@Observer
 
             stopRefreshing()
@@ -140,20 +141,21 @@ class FtcFragment : ScopedFragment(),
                 return@Observer
             }
 
-            if (sendEmailResult.success == true) {
+            if (sendEmailResult.success) {
                 toast(R.string.prompt_letter_sent)
             } else {
                 toast("Unknown error")
             }
         })
 
-        swipe_refresh.setOnClickListener {
-
+        // Handle refresh action.
+        swipe_refresh.setOnRefreshListener {
+            info("Start refreshing")
 
             if (activity?.isNetworkConnected() != true) {
                 toast(R.string.prompt_no_network)
                 stopRefreshing()
-                return@setOnClickListener
+                return@setOnRefreshListener
             }
 
             val acnt = sessionManager.loadAccount()
@@ -161,7 +163,7 @@ class FtcFragment : ScopedFragment(),
             if (acnt == null) {
                 toast("Account not found")
                 stopRefreshing()
-                return@setOnClickListener
+                return@setOnRefreshListener
             }
 
             toast(R.string.progress_refresh_account)
@@ -214,7 +216,9 @@ class FtcFragment : ScopedFragment(),
 
         if (account.isLinked) {
             wechat_container.setOnClickListener {
-                WxInfoActivity.start(context)
+                // Start for result in case use clicked
+                // unlink button.
+                WxInfoActivity.startForResult(activity, RequestCode.UNLINK)
             }
         } else if (account.isFtcOnly) {
             wechat_container.setOnClickListener {
