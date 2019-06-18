@@ -43,6 +43,7 @@
     <string name="title_wx_account">微信帳號</string>
     <string name="title_link_email">绑定信箱帳號</string>
     <string name="title_merge_accounts">合並帳號</string>
+    <string name="title_unlink">解除绑定</string>
     <string name="title_account">帳號與安全</string>
     <string name="title_subscription">會員訂閱</string>
     <string name="title_my_orders">我的訂單</string>
@@ -50,12 +51,6 @@
     <string name="title_wx_login">微信登入</string>
 
     <!-- Member and Subscription -->
-    <string name="label_member_tier">會員類型</string>
-
-    <string name="tier_free">尚未成為會員</string>
-    <string name="tier_standard">標準會員</string>
-    <string name="tier_premium">高端會員</string>
-    <string name="tier_vip">超級會員</string>
 
     <string-array name="standard_benefits">
         <item>✔ 专享訂閱内容每日仅需0.7元(或按月訂閱每日0.9元)</item>
@@ -99,8 +94,16 @@
     <string name="cycle_month">月</string>
     <string name="cycle_vip">無限期</string>
 
+    <string name="label_member_tier">會員類型</string>
+
+    <string name="tier_free">尚未成為會員</string>
+    <string name="tier_standard">標準會員</string>
+    <string name="tier_premium">高端會員</string>
+    <string name="tier_vip">超級會員</string>
     <string name="label_member_duration">會員期限</string>
     <string name="label_price">支付金额</string>
+    <string name="label_ftc_account">FT中文网账号</string>
+    <string name="label_wx_account">微信帳號</string>
     <string name="paywall_title">購買會員服務，閱讀FT獨家內容</string>
     <string name="paywall_login_prompt">已經購買過？登入</string>
 
@@ -161,9 +164,11 @@
     <string name="btn_next">下一步</string>
     <string name="btn_verify_password">驗證密碼</string>
     <string name="btn_link">绑定信箱</string>
+    <string name="btn_unlink">解除绑定</string>
     <string name="btn_request_verify">重新寄送驗證郵件</string>
 
     <string name="wx_session_expired">微信登入已過期，請重新請。微信登入会定期失效，如果您以後不希望看到本提示，可以在侧边栏的\&quot;账号與安全\&quot;下綁定FT中文網帳號。</string>
+    <string name="wx_refresh_token_expired">微信授权已过期，請重新授权帳號刷新帳號資料。</string>
     <string name="wx_relogin">重新授權</string>
     <string name="action_wx_login">微信登入</string>
     <string name="action_cancel">取消</string>
@@ -213,7 +218,8 @@
     <string name="prompt_saved">保存成功!</string>
     <string name="prompt_updated">更新成功!</string>
     <string name="prompt_letter_sent">信件已發送</string>
-    <string name="prompt_bound">帳號已绑定</string>
+    <string name="prompt_linked">帳號已绑定</string>
+    <string name="prompt_unlinked">帳號已解除綁定</string>
     <string name="prompt_account_updated">帳號已更新</string>
     <string name="prompt_no_keyword">後输入关键字後搜尋</string>
 
@@ -221,6 +227,8 @@
     <string name="instruct_verify_email">您的信箱尚未驗證，為保障您的帳號安全，請及時驗證信箱。我們已經給您的登入信箱發送了驗證信件，点击信件中的連接即可。</string>
     <string name="instruct_letter_sent">請檢查您的信件，點擊郵件中的「重設密碼」連接，在所打開的網頁中修改您的密碼。如果幾分鐘內沒有看到信件，請檢查是否被放進了垃圾信件列表。如果您已經验驗證信箱地址，請下拉刷新。</string>
     <string name="instruct_link_email">您目前使用了微信帳號登入FT中文。为保障帳號安全，建议您綁定在FT中文网註冊的信箱帳號。</string>
+    <string name="unlink_guide">解除如下帳號綁定？</string>
+    <string name="unlink_anchor">检测到您當前帳號是FT 中文網的會員，解除账号绑定後只能有一个帳號拥有当前會員，請選擇會員信息保留在哪个帳號下</string>
     <string name="instruct_bind_login">信箱 %1$s 已经註冊了FT中文網帳號，请输入密码驗證身份，即可綁定微信帳號和信箱</string>
     <string name="instruct_sign_up">信箱 %1$s 尚未註冊FT中文網帳號，请設置密碼建立帳號</string>
     <string name="instruct_sign_in">信箱 %1$s 已经註冊了FT中文網帳號，请输入登入密碼</string>
@@ -247,8 +255,9 @@
     <!-- Error message -->
     <string name="error_invalid_email">電子信箱錯誤</string>
     <string name="error_email_unchanged">您已經在使用該電子信箱</string>
+    <string name="error_invalid_name"> 使用者名稱不能为空且不超过32 个字符</string>
     <string name="error_name_unchanged">不能與當前使用者名稱相同</string>
-    <string name="error_too_long">过长</string>
+    <string name="error_too_long">過长</string>
     <string name="error_invalid_password">密碼無效</string>
     <string name="error_mismatched_confirm_password">兩次輸入的新密碼不一致</string>
     <string name="error_incorrect_password">密碼錯誤</string>
@@ -272,9 +281,16 @@
     <string name="api_unauthorized">沒有訪問伺服器的權限</string>
     <string name="api_server_error">伺服器出錯，請稍後再試</string>
     <string name="api_email_server_down">信箱伺服器暫時不可用</string>
-    <string name="api_name_taken">用户名已被占用</string>
+    <string name="api_name_taken">使用者名稱已被占用</string>
     <string name="api_already_premium">您已經是會員会员了</string>
     <string name="api_member_not_found">没有查詢到您的會員状态</string>
+    <string name="api_account_already_linked">當前帳號或目标帳號已被绑定</string>
+    <string name="api_membership_already_linked">當前帳號或目标帳號的會員已被绑定</string>
+    <string name="api_membership_all_valid">不能綁定两个擁有未过期會員的帳號</string>
+    <string name="api_wechat_already_linked">當前微信账号已经绑定了其他FTC帳號</string>
+    <string name="api_wechat_member_already_linked">當前微信账号拥有的會員已經綁定了其他FTC帳號</string>
+    <string name="api_anchor_missing">會員帳號解绑必须選擇哪个帳號保留會員信息</string>
+    <string name="api_missing_field">請求参数缺失</string>
 
     <string name="api_empty_url">網址(URL)錯誤</string>
     <string name="api_network_failure">網路錯誤</string>
