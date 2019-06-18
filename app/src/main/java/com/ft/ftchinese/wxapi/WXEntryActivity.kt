@@ -75,8 +75,6 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 .get(AccountViewModel::class.java)
 
         // Save wechat oauth session data.
-        // If the oauth is triggered by manual refreshing,
-        // also refresh the account data.
         loginViewModel.wxOAuthResult.observe(this, Observer {
 
             info("Received WxOAuthResult: $it")
@@ -99,15 +97,6 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             }
 
             sessionManager.saveWxSession(oauthResult.success)
-
-            if (sessionManager.loadWxIntent() == WxOAuthIntent.REFRESH) {
-                val account = sessionManager.loadAccount()
-                if (account == null) {
-                    showSuccess("请稍后在账号与安全中下拉刷新")
-                    return@Observer
-                }
-                accountViewModel.refresh(account)
-            }
         })
 
         // Handle wechat login or re-login after refresh token expired.
@@ -118,23 +107,23 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             val accountResult = it ?: return@Observer
 
             if (accountResult.error != null) {
-                showFailure(getString(accountResult.error), true)
+                showFailure(getString(accountResult.error))
                 return@Observer
             }
 
             if (accountResult.exception != null) {
-                showFailure(accountResult.exception.message, true)
+                showFailure(accountResult.exception.message)
                 return@Observer
             }
 
             if (accountResult.success == null) {
-                showFailure(getString(R.string.prompt_load_failure), true)
+                showFailure(getString(R.string.prompt_load_failure))
                 return@Observer
             }
 
             when (sessionManager.loadWxIntent()) {
                 WxOAuthIntent.LOGIN -> {
-                    showSuccess(getString(R.string.greeting_wx_login, accountResult.success.wechat.nickname))
+                    showLoggedIn(getString(R.string.greeting_wx_login, accountResult.success.wechat.nickname))
 
                     sessionManager.saveAccount(accountResult.success)
                 }
@@ -143,36 +132,6 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                     finish()
                 }
             }
-        })
-
-        // User manually refreshed wechat info page, and
-        // refresh token expired, and user clicked
-        // re-authorization button.
-        // In such case we must refresh account data
-        // base on user's current account. You cannot use
-        // wechat login flow to simply perform
-        // WxSession.fetchAccount().
-        accountViewModel.accountResult.observe(this, Observer {
-
-            info("Account result caused by manual refreshing and refresh token expired.")
-            val accountResult = it ?: return@Observer
-
-            if (accountResult.error != null) {
-                showFailure(getString(accountResult.error), false)
-                return@Observer
-            }
-
-            if (accountResult.exception != null) {
-                showFailure(accountResult.exception.message, false)
-                return@Observer
-            }
-
-            if (accountResult.success == null) {
-                showFailure(getString(R.string.prompt_load_failure), false)
-                return@Observer
-            }
-
-            sessionManager.saveAccount(accountResult.success)
         })
     }
 
@@ -226,17 +185,13 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                     info("State: $state")
                     if (state == null) {
                         info("state not found")
-                        showFailure(
-                                "授权码缺失",
-                                sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
+                        showFailure("授权码缺失")
                         return
                     }
 
                     if (state != resp.state) {
                         info("state mismatched")
-                        showFailure(
-                                getString(R.string.oauth_state_mismatch),
-                                sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
+                        showFailure(getString(R.string.oauth_state_mismatch))
                         return
                     }
 
@@ -246,36 +201,25 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                     info("Start logging in")
 
                     loginViewModel.wxLogin(
-                            code = resp.code,
-                            isManualRefresh = oauthIntent == WxOAuthIntent.REFRESH)
+                            code = resp.code)
                 }
             }
 
             BaseResp.ErrCode.ERR_USER_CANCEL -> {
-                showFailure(
-                        getString(R.string.oauth_canceled),
-                        sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
+                showFailure(getString(R.string.oauth_canceled))
             }
 
             BaseResp.ErrCode.ERR_SENT_FAILED -> {
-                showFailure(
-                        null,
-                        sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
+                showFailure(null)
             }
             BaseResp.ErrCode.ERR_AUTH_DENIED -> {
-                showFailure(
-                        getString(R.string.oauth_denied),
-                        sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
+                showFailure(getString(R.string.oauth_denied))
             }
             BaseResp.ErrCode.ERR_UNSUPPORT -> {
-                showFailure(
-                        null,
-                        sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
+                showFailure(null)
             }
             BaseResp.ErrCode.ERR_BAN -> {
-                showFailure(
-                        null,
-                        sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
+                showFailure(null)
             }
         }
     }
@@ -291,7 +235,7 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         ))
     }
 
-    private fun showSuccess(msg: String) {
+    private fun showLoggedIn(msg: String) {
         showResult(UIWxOAuth(
                 heading = R.string.prompt_logged_in,
                 body = msg,
@@ -299,12 +243,12 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         ))
     }
 
-    private fun showFailure(msg: String?, reLogin: Boolean = false) {
+    private fun showFailure(msg: String?) {
         showResult(UIWxOAuth(
                 heading = R.string.prompt_login_failed,
                 body = msg,
                 done = true,
-                restartLogin = reLogin
+                restartLogin = true
         ))
     }
 
