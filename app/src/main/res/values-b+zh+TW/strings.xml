@@ -150,7 +150,7 @@
     <string name="action_feedback">意見回應</string>
     <string name="action_logout">退出登入</string>
     <string name="action_settings">設置</string>
-    <string name="action_about">關於我們</string>
+    <string name="action_download_app">APP下载</string>
 
     <!-- Myft tabs -->
     <string name="myft_reading_history">閱讀歷史</string>
