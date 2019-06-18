@@ -15,8 +15,8 @@ import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.Account
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.UnlinkAnchor
-import com.ft.ftchinese.user.RowAdapter
-import com.ft.ftchinese.user.TableRow
+import com.ft.ftchinese.ui.RowAdapter
+import com.ft.ftchinese.ui.TableRow
 import kotlinx.android.synthetic.main.activity_unlink.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -24,10 +24,18 @@ import org.jetbrains.anko.toast
 
 class UnlinkActivity : AppCompatActivity() {
 
-    private lateinit var viewModel: AccountViewModel
+    private lateinit var accountViewModel: AccountViewModel
     private lateinit var sessionManager: SessionManager
     private lateinit var linkViewModel: LinkViewModel
     private var anchor: UnlinkAnchor? = null
+
+    private fun showProgress(show: Boolean) {
+        if (show) {
+            progress_bar.visibility = View.VISIBLE
+        } else {
+            progress_bar.visibility = View.GONE
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +49,7 @@ class UnlinkActivity : AppCompatActivity() {
 
         sessionManager = SessionManager.getInstance(this)
 
-        viewModel = ViewModelProviders.of(this)
+        accountViewModel = ViewModelProviders.of(this)
                 .get(AccountViewModel::class.java)
 
         linkViewModel = ViewModelProviders.of(this)
@@ -54,7 +62,8 @@ class UnlinkActivity : AppCompatActivity() {
         })
 
         linkViewModel.unlinkResult.observe(this, Observer {
-            progress_bar.visibility = View.GONE
+
+            showProgress(false)
 
             val unlinkResult = it ?: return@Observer
             if (unlinkResult.error != null) {
@@ -75,9 +84,43 @@ class UnlinkActivity : AppCompatActivity() {
                 return@Observer
             }
 
-            toast("Unlinked")
+            toast(R.string.prompt_unlinked)
 
-            // TODO: refresh account.
+            val acnt = sessionManager.loadAccount() ?: return@Observer
+
+            // Start refreshing account.
+            showProgress(true)
+
+            toast(R.string.prompt_refreshing)
+            accountViewModel.refresh(acnt)
+        })
+
+        accountViewModel.accountRefreshed.observe(this, Observer {
+            showProgress(false)
+
+            val accountResult = it ?: return@Observer
+
+            if (accountResult.error != null) {
+                toast(accountResult.error)
+                return@Observer
+            }
+
+            if (accountResult.exception != null) {
+                handleException(accountResult.exception)
+                return@Observer
+            }
+
+            if (accountResult.success == null) {
+                toast("Unknown error")
+                return@Observer
+            }
+
+            toast(R.string.prompt_updated)
+
+            sessionManager.saveAccount(accountResult.success)
+
+            // Signal to calling activity.
+            setResult(Activity.RESULT_OK)
             finish()
         })
 
