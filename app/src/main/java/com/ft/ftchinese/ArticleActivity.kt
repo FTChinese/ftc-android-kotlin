@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.user.OnProgressListener
+import com.ft.ftchinese.ui.OnProgressListener
 import com.ft.ftchinese.util.json
 import com.ft.ftchinese.viewmodel.LoadArticleViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
