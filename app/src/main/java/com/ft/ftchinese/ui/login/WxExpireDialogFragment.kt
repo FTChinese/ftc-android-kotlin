@@ -1,4 +1,4 @@
-package com.ft.ftchinese.user
+package com.ft.ftchinese.ui.login
 
 import android.app.Dialog
 import android.content.Context
