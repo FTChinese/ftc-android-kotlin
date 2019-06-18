@@ -1,15 +1,13 @@
 package com.ft.ftchinese.ui.account
 
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.model.WxOAuthIntent
+import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 
@@ -17,7 +15,6 @@ import org.jetbrains.anko.AnkoLogger
 class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var viewModel: AccountViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,22 +32,35 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
         supportFragmentManager.commit {
             replace(R.id.frag_account, WxFragment.newInstance())
         }
+    }
 
-        viewModel = ViewModelProviders.of(this)
-                .get(AccountViewModel::class.java)
+    /**
+     * Handle unlink result.
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-        viewModel.refreshTokenExpired.observe(this, Observer {
-            if (it) {
-                WxExpireDialogFragment(WxOAuthIntent.REFRESH)
-                        .show(supportFragmentManager, "WxExpireDialog")
-            }
-        })
+        if (resultCode != Activity.RESULT_OK) {
+            return
+        }
+
+        if (requestCode == RequestCode.UNLINK) {
+            setResult(Activity.RESULT_OK)
+            finish()
+        }
     }
 
     companion object {
-        fun start(context: Context?) {
-            context?.startActivity(
-                    Intent(context, WxInfoActivity::class.java)
+//        fun start(context: Context?) {
+//            context?.startActivity(
+//                    Intent(context, WxInfoActivity::class.java)
+//            )
+//        }
+
+        fun startForResult(activity: Activity?, requestCode: Int) {
+            activity?.startActivityForResult(
+                    Intent(activity, WxInfoActivity::class.java),
+                    requestCode
             )
         }
     }
