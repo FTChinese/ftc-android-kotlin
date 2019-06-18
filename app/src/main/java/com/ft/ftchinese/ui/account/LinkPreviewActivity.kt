@@ -95,7 +95,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
                 return@Observer
             }
 
-            toast(R.string.prompt_bound)
+            toast(R.string.prompt_linked)
 
             if (!isNetworkConnected()) {
                 showProgress(false)
@@ -117,7 +117,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
             accountViewModel.refresh(account)
         })
 
-        accountViewModel.accountResult.observe(this, Observer {
+        accountViewModel.accountRefreshed.observe(this, Observer {
             showProgress(false)
 
             val accountResult = it ?: return@Observer
