@@ -12,7 +12,7 @@ import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.Passwords
 import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.user.Validator
+import com.ft.ftchinese.ui.Validator
 import kotlinx.android.synthetic.main.fragment_update_password.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast

@@ -41,7 +41,10 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
         super.onViewCreated(view, savedInstanceState)
 
         value_email_tv.text = sessionManager.loadAccount()?.email
+        email_input.requestFocus()
+        save_btn.isEnabled = false
     }
+
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -51,13 +54,17 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
                     .get(UpdateViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
+        // Validate form data.
+        // Note this only works if user actually entered something.
+        // If user does not enter anything, and clicked save button,
+        // empty string will be submitted directly.
         viewModel.updateFormState.observe(this, Observer {
             val updateState = it ?: return@Observer
 
             save_btn.isEnabled = updateState.isDataValid
 
             if (updateState.emailError != null) {
-                save_btn.error = getString(updateState.emailError)
+                email_input.error = getString(updateState.emailError)
                 email_input.requestFocus()
             }
         })
@@ -74,6 +81,11 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
         }
 
         save_btn.setOnClickListener {
+            viewModel.emailDataChanged(
+                    currentEmail = value_email_tv.text.toString(),
+                    newEmail = email_input.text.toString().trim()
+            )
+
             if (activity?.isNetworkConnected() != true) {
                 toast(R.string.prompt_no_network)
 

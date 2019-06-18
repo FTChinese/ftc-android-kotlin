@@ -40,6 +40,8 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
         super.onViewCreated(view, savedInstanceState)
 
         value_name_tv.text = sessionManager.loadAccount()?.userName
+        user_name_input.requestFocus()
+        save_btn.isEnabled = false
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -54,6 +56,11 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
         setUp()
 
         save_btn.setOnClickListener {
+            viewModel.userNameDataChanged(
+                    currentName = value_name_tv.text.toString(),
+                    newName = user_name_input.text.toString().trim()
+            )
+
             if (activity?.isNetworkConnected() != true) {
                 toast(R.string.prompt_no_network)
 
@@ -80,7 +87,7 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
             save_btn.isEnabled = updateState.isDataValid
 
             if (updateState.nameError != null) {
-                save_btn.error = getString(updateState.nameError)
+                user_name_input.error = getString(updateState.nameError)
                 user_name_input.requestFocus()
             }
         })
