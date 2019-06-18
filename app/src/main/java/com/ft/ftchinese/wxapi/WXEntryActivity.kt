@@ -2,7 +2,6 @@ package com.ft.ftchinese.wxapi
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -43,8 +42,9 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         hideUI()
 
+        setUp()
+
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
-        sessionManager = SessionManager.getInstance(this)
 
         try {
             api.handleIntent(intent, this)
@@ -52,13 +52,35 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             info(e)
         }
 
+        info("onCreate called")
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        info("onNewIntent")
+        setIntent(intent)
+
+        setUp()
+
+        api.handleIntent(intent, this)
+    }
+
+    private fun setUp() {
+        sessionManager = SessionManager.getInstance(this)
+
         loginViewModel = ViewModelProviders.of(this)
                 .get(LoginViewModel::class.java)
         accountViewModel = ViewModelProviders.of(this)
                 .get(AccountViewModel::class.java)
 
-        // Handle re-authorize when refreshing wechat info page.
+        // Save wechat oauth session data.
+        // If the oauth is triggered by manual refreshing,
+        // also refresh the account data.
         loginViewModel.wxOAuthResult.observe(this, Observer {
+
+            info("Received WxOAuthResult: $it")
+
             val oauthResult = it ?: return@Observer
 
             if (oauthResult.error != null) {
@@ -76,6 +98,7 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 return@Observer
             }
 
+            sessionManager.saveWxSession(oauthResult.success)
 
             if (sessionManager.loadWxIntent() == WxOAuthIntent.REFRESH) {
                 val account = sessionManager.loadAccount()
@@ -88,7 +111,10 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         })
 
         // Handle wechat login or re-login after refresh token expired.
-        accountViewModel.accountResult.observe(this, Observer {
+        loginViewModel.accountResult.observe(this, Observer {
+
+            info("Received account result: $it")
+
             val accountResult = it ?: return@Observer
 
             if (accountResult.error != null) {
@@ -119,18 +145,35 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             }
         })
 
-        info("onCreate called")
-    }
+        // User manually refreshed wechat info page, and
+        // refresh token expired, and user clicked
+        // re-authorization button.
+        // In such case we must refresh account data
+        // base on user's current account. You cannot use
+        // wechat login flow to simply perform
+        // WxSession.fetchAccount().
+        accountViewModel.accountResult.observe(this, Observer {
 
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
-    }
+            info("Account result caused by manual refreshing and refresh token expired.")
+            val accountResult = it ?: return@Observer
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
+            if (accountResult.error != null) {
+                showFailure(getString(accountResult.error), false)
+                return@Observer
+            }
 
-        setIntent(intent)
-        api.handleIntent(intent, this)
+            if (accountResult.exception != null) {
+                showFailure(accountResult.exception.message, false)
+                return@Observer
+            }
+
+            if (accountResult.success == null) {
+                showFailure(getString(R.string.prompt_load_failure), false)
+                return@Observer
+            }
+
+            sessionManager.saveAccount(accountResult.success)
+        })
     }
 
     override fun onReq(req: BaseReq?) {
@@ -176,12 +219,13 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 if (resp is SendAuth.Resp) {
                     info("code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
                     // Cannot initialize in onCreate method due to WXEntryActivity weird design.
-                    sessionManager = SessionManager.getInstance(this)
+//                    sessionManager = SessionManager.getInstance(this)
 
                     val state = sessionManager.loadWxState()
 
                     info("State: $state")
                     if (state == null) {
+                        info("state not found")
                         showFailure(
                                 "授权码缺失",
                                 sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
@@ -189,14 +233,18 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                     }
 
                     if (state != resp.state) {
+                        info("state mismatched")
                         showFailure(
                                 getString(R.string.oauth_state_mismatch),
-                                sessionManager.loadWxIntent()!= WxOAuthIntent.REFRESH)
+                                sessionManager.loadWxIntent() != WxOAuthIntent.REFRESH)
                         return
                     }
 
                     val oauthIntent = sessionManager.loadWxIntent()
                     showProgress(true)
+
+                    info("Start logging in")
+
                     loginViewModel.wxLogin(
                             code = resp.code,
                             isManualRefresh = oauthIntent == WxOAuthIntent.REFRESH)
