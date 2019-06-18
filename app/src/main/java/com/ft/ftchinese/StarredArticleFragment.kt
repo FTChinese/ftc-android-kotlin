@@ -1,13 +1,13 @@
 package com.ft.ftchinese
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -65,6 +65,7 @@ class StarredArticleFragment : ScopedFragment(),
     }
 }
 
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class StarredArticleAdapter(private val context: Context?) :
         RecyclerView.Adapter<StarredArticleAdapter.ViewHolder>() {
 
@@ -103,8 +104,17 @@ class StarredArticleAdapter(private val context: Context?) :
         holder.itemView.setOnClickListener {
             when {
                 article.id == "banner" -> {
-                    val customTabsInt = CustomTabsIntent.Builder().build()
-                    customTabsInt.launchUrl(context, Uri.parse("http://next.ftchinese.com/user/starred"))
+                    val webpage: Uri = Uri.parse("http://next.ftchinese.com/user/starred")
+                    val intent = Intent(Intent.ACTION_VIEW, webpage)
+
+                    if (context != null) {
+                        if (intent.resolveActivity(context.packageManager) != null) {
+                            context.startActivity(intent)
+                        }
+                    }
+
+//                    val customTabsInt = CustomTabsIntent.Builder().build()
+//                    customTabsInt.launchUrl(context, Uri.parse("http://next.ftchinese.com/user/starred"))
                 }
                 article.isWebpage -> {
                     ArticleActivity.startWeb(holder.itemView.context, article.toChannelItem())
