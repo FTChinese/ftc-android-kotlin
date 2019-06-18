@@ -17,8 +17,10 @@ import com.ft.ftchinese.util.NextApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel : ViewModel(), AnkoLogger {
 
     val inProgress = MutableLiveData<Boolean>()
     val inputEnabled = MutableLiveData<Boolean>()
@@ -29,8 +31,8 @@ class LoginViewModel : ViewModel() {
     private val _emailResult = MutableLiveData<FindEmailResult>()
     val emailResult: LiveData<FindEmailResult> =_emailResult
 
-    private val _loginResult = MutableLiveData<AccountResult>()
-    val loginResult: LiveData<AccountResult> = _loginResult
+    private val _accountResult = MutableLiveData<AccountResult>()
+    val accountResult: LiveData<AccountResult> = _accountResult
 
     private val _wxOAuthResult = MutableLiveData<WxOAuthResult>()
     val wxOAuthResult: LiveData<WxOAuthResult> = _wxOAuthResult
@@ -111,7 +113,7 @@ class LoginViewModel : ViewModel() {
 
                 if (userId == null) {
 
-                    _loginResult.value = AccountResult(success = null)
+                    _accountResult.value = AccountResult(success = null)
 
                     return@launch
                 }
@@ -124,14 +126,14 @@ class LoginViewModel : ViewModel() {
                     e.statusMessage()
                 }
 
-                _loginResult.value = AccountResult(
+                _accountResult.value = AccountResult(
                         error = msgId,
                         exception = e
                 )
 
             } catch (e: Exception) {
 
-                _loginResult.value = AccountResult(
+                _accountResult.value = AccountResult(
                         exception = e
                 )
             }
@@ -151,6 +153,8 @@ class LoginViewModel : ViewModel() {
                 val sess = withContext(Dispatchers.IO) {
                     WxOAuth.login(code)
                 }
+
+                info("Get oauth session: $sess. Is manual refresh: $isManualRefresh")
 
                 _wxOAuthResult.value = WxOAuthResult(
                         success = sess
@@ -176,11 +180,14 @@ class LoginViewModel : ViewModel() {
                 // expiration mechanism.
                 // The expiration detection mechanism is only triggered if user logged in
                 // via wechat only.
+                info("Start loading wechat account")
                 loadWxAccount(sess)
             } catch (e: ClientError) {
                 // Possible 422 error key: code_missing_field, code_invalid.
                 // We cannot make sure the exact meaning of each error, just
                 // show user API's error message.
+                info("API error: $e")
+
                 _wxOAuthResult.value = WxOAuthResult(
                         error = when (e.statusCode) {
                             422 -> null
@@ -189,6 +196,7 @@ class LoginViewModel : ViewModel() {
                         exception = e
                 )
             } catch (e: Exception) {
+                info("Exception: $e")
                 _wxOAuthResult.value = WxOAuthResult(
                         exception = e
                 )
@@ -209,7 +217,7 @@ class LoginViewModel : ViewModel() {
                 }
 
                 if (userId == null) {
-                    _loginResult.value = AccountResult()
+                    _accountResult.value = AccountResult()
                     return@launch
                 }
 
@@ -236,14 +244,14 @@ class LoginViewModel : ViewModel() {
                     e.statusMessage()
                 }
 
-                _loginResult.value = AccountResult(
+                _accountResult.value = AccountResult(
                         error = msgId,
                         exception = e
                 )
 
             } catch (e: Exception) {
 
-                _loginResult.value = AccountResult(exception = e)
+                _accountResult.value = AccountResult(exception = e)
             }
         }
     }
@@ -257,7 +265,9 @@ class LoginViewModel : ViewModel() {
                 wxSession.fetchAccount()
             }
 
-            _loginResult.value = AccountResult(success = account)
+            info("Loaded wechat account: $account")
+
+            _accountResult.value = AccountResult(success = account)
         } catch (e: ClientError) {
             val msgId = if (e.statusCode == 404) {
                 R.string.error_not_loaded
@@ -265,14 +275,14 @@ class LoginViewModel : ViewModel() {
                 e.statusMessage()
             }
 
-            _loginResult.value = AccountResult(
+            _accountResult.value = AccountResult(
                     error = msgId,
                     exception = e
             )
 
         } catch (e: Exception) {
 
-            _loginResult.value = AccountResult(exception = e)
+            _accountResult.value = AccountResult(exception = e)
         }
     }
 
@@ -286,7 +296,7 @@ class LoginViewModel : ViewModel() {
                 FtcUser(id = userId).fetchAccount()
             }
 
-            _loginResult.value = AccountResult(success = account)
+            _accountResult.value = AccountResult(success = account)
 
         } catch (e: ClientError) {
             val msgId = if (e.statusCode == 404) {
@@ -295,14 +305,14 @@ class LoginViewModel : ViewModel() {
                 e.statusMessage()
             }
 
-            _loginResult.value = AccountResult(
+            _accountResult.value = AccountResult(
                     error = msgId,
                     exception = e
             )
 
         } catch (e: Exception) {
 
-            _loginResult.value = AccountResult(exception = e)
+            _accountResult.value = AccountResult(exception = e)
         }
     }
 

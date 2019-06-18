@@ -95,7 +95,7 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
         })
 
         // Observing both login and sign up.
-        viewModel.loginResult.observe(this, Observer {
+        viewModel.accountResult.observe(this, Observer {
             val loginResult = it ?: return@Observer
 
             showProgress(false)

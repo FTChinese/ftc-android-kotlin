@@ -93,7 +93,7 @@ class LinkActivity : ScopedAppActivity(), AnkoLogger {
             }
         })
 
-        viewModel.loginResult.observe(this, Observer {
+        viewModel.accountResult.observe(this, Observer {
             val loginResult = it ?: return@Observer
 
             if (loginResult.error != null) {
