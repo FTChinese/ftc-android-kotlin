@@ -1,4 +1,4 @@
-package com.ft.ftchinese.user
+package com.ft.ftchinese.ui
 
 /**
  * Used by fragment to asking host activity to show progress bar.
