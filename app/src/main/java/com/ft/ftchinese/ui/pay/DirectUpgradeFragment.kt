@@ -42,7 +42,7 @@ class DirectUpgradeFragment : ScopedFragment(),
         } ?: throw Exception("Invalid Activity")
 
         // Enable or disable button
-        viewModel.enabled.observe(this, Observer<Boolean> {
+        viewModel.inputEnabled.observe(this, Observer<Boolean> {
             allowInput(it)
         })
 
