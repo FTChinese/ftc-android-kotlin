@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
@@ -116,16 +117,16 @@ class PaywallActivity : ScopedAppActivity(),
 
         premium_guide.visibility = if (premiumFirst) View.VISIBLE else View.GONE
 
-        supportFragmentManager.beginTransaction()
-                .replace(
-                        R.id.product_top,
-                        ProductFragment.newInstance(topCard)
-                )
-                .replace(
-                        R.id.product_bottom,
-                        ProductFragment.newInstance(bottomCard)
-                )
-                .commit()
+        supportFragmentManager.commit {
+            replace(
+                    R.id.product_top,
+                    ProductFragment.newInstance(topCard)
+            )
+            replace(
+                    R.id.product_bottom,
+                    ProductFragment.newInstance(bottomCard)
+            )
+        }
     }
 
     private fun buildStandardCard(): ProductCard {
