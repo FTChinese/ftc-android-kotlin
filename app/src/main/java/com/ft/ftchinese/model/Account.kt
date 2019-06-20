@@ -143,7 +143,7 @@ data class Account(
             throw Exception("Wechat account not found")
         }
 
-        val fetch = Fetch().put(NextApi.UNLINK)
+        val fetch = Fetch().delete(NextApi.WX_LINK)
                 .setUserId(id)
                 .setUnionId(unionId)
                 .noCache()
