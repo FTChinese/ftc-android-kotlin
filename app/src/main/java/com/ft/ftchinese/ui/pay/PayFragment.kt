@@ -24,7 +24,7 @@ class PayFragment : ScopedFragment(),
     private var payMethod: PayMethod? = null
     private var price: Double? = null
 
-    private fun allowInput(value: Boolean) {
+    private fun enableInput(value: Boolean) {
         pay_btn?.isEnabled = value
     }
 
@@ -78,8 +78,8 @@ class PayFragment : ScopedFragment(),
         })
 
         // In case of payment failure, re-enable the button.
-        checkOutViewModel.enabled.observe(this, Observer<Boolean> {
-            allowInput(it)
+        checkOutViewModel.inputEnabled.observe(this, Observer<Boolean> {
+            enableInput(it)
         })
 
 
@@ -98,7 +98,7 @@ class PayFragment : ScopedFragment(),
 
             checkOutViewModel.startPayment(pm)
 
-            allowInput(false)
+            enableInput(false)
         }
     }
 
