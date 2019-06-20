@@ -92,9 +92,9 @@ class FtcFragment : ScopedFragment(),
 
         // Refreshed account.
         viewModel.accountRefreshed.observe(this, Observer {
-            val accountResult = it ?: return@Observer
-
             stopRefreshing()
+
+            val accountResult = it ?: return@Observer
 
             if (accountResult.error != null) {
                 toast(accountResult.error)

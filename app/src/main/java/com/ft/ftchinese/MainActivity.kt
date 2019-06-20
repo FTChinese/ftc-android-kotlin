@@ -28,7 +28,7 @@ import com.ft.ftchinese.splash.splashScheduleFile
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
-import com.ft.ftchinese.ui.pay.MemberActivity
+import com.ft.ftchinese.ui.account.MemberActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.util.*

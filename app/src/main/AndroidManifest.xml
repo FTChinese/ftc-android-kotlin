@@ -110,7 +110,7 @@
             android:parentActivityName=".ui.account.AccountActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.pay.MemberActivity"
+            android:name=".ui.account.MemberActivity"
             android:label="@string/title_my_subs"
             android:parentActivityName=".MainActivity" />
         <activity
@@ -128,11 +128,11 @@
         <activity
             android:name=".ui.pay.MyOrdersActivity"
             android:label="@string/title_my_orders"
-            android:parentActivityName=".ui.pay.MemberActivity" />
+            android:parentActivityName=".ui.account.MemberActivity" />
         <activity
             android:name=".ui.pay.UpgradeActivity"
             android:label="@string/title_upgrade"
-            android:parentActivityName=".ui.pay.MemberActivity" />
+            android:parentActivityName=".ui.account.MemberActivity" />
     </application>
 
 </manifest>

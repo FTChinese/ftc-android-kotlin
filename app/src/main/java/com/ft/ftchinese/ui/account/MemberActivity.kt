@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.account
 
 import android.app.Activity
 import android.content.Context
@@ -9,24 +9,25 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.RowAdapter
 import com.ft.ftchinese.ui.TableRow
-import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.ui.pay.CheckOutActivity
+import com.ft.ftchinese.ui.pay.MyOrdersActivity
+import com.ft.ftchinese.ui.pay.PaywallActivity
+import com.ft.ftchinese.ui.pay.UpgradeActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.formatLocalDate
 import kotlinx.android.synthetic.main.activity_member.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -38,6 +39,7 @@ class MemberActivity : ScopedAppActivity(),
 
     private lateinit var viewAdapter: RowAdapter
     private lateinit var sessionManager: SessionManager
+    private lateinit var accountViewModel: AccountViewModel
 
     private fun stopRefresh() {
         swipe_refresh.isRefreshing = false
@@ -64,47 +66,8 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         toast(R.string.prompt_refreshing)
-        launch {
-            try {
-                val refreshedAccount = withContext(Dispatchers.IO) {
-                    account.refresh()
-                }
 
-                stopRefresh()
-
-                info("Refreshed account: $refreshedAccount")
-
-                if (refreshedAccount == null) {
-                    toast("Account not retrieved")
-                    return@launch
-                }
-
-                toast(R.string.prompt_updated)
-
-                sessionManager.saveAccount(refreshedAccount)
-
-                updateUI(refreshedAccount)
-
-            } catch (e: ClientError) {
-                info("$e")
-
-                stopRefresh()
-
-                when (e.statusCode) {
-                    // Logout this user if account not found during refresh.
-                    404 -> {
-                        toast(R.string.api_account_not_found)
-                        sessionManager.logout()
-                    }
-                    else -> handleApiError(e)
-                }
-
-            } catch (e: Exception) {
-                stopRefresh()
-
-                handleException(e)
-            }
-        }
+        accountViewModel.refresh(account)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,6 +84,35 @@ class MemberActivity : ScopedAppActivity(),
         swipe_refresh.setOnRefreshListener(this)
 
         sessionManager = SessionManager.getInstance(this)
+        accountViewModel = ViewModelProviders.of(this)
+                .get(AccountViewModel::class.java)
+
+        accountViewModel.accountRefreshed.observe(this, Observer {
+            stopRefresh()
+
+            val accountResult = it ?: return@Observer
+
+            if (accountResult.error != null) {
+                toast(accountResult.error)
+                return@Observer
+            }
+
+            if (accountResult.exception != null) {
+                handleException(accountResult.exception)
+                return@Observer
+            }
+
+            if (accountResult.success == null) {
+                toast("Unknown error")
+                return@Observer
+            }
+
+            toast(R.string.prompt_updated)
+
+            sessionManager.saveAccount(accountResult.success)
+
+            updateUI(accountResult.success)
+        })
 
         initUI()
     }
@@ -180,14 +172,14 @@ class MemberActivity : ScopedAppActivity(),
     }
 
     // Hide all buttons on create.
-    private fun hideBtns() {
+    private fun hideButton() {
         resubscribe_btn.visibility = View.GONE
         renew_btn.visibility = View.GONE
         upgrade_btn.visibility = View.GONE
     }
 
     private fun showButton(m: Membership) {
-        hideBtns()
+        hideButton()
 
         when (m.getStatus()) {
             MemberStatus.INVALID -> {

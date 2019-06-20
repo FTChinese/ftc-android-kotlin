@@ -17,6 +17,7 @@ import com.ft.ftchinese.base.*
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.RowAdapter
 import com.ft.ftchinese.ui.TableRow
+import com.ft.ftchinese.ui.account.MemberActivity
 import com.ft.ftchinese.util.ClientError
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
