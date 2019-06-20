@@ -11,13 +11,13 @@ import com.ft.ftchinese.model.Plan
 class ProductViewModel : ViewModel() {
 
     val selected = MutableLiveData<Plan>()
-    val input = MutableLiveData<Boolean>()
+    val inputEnabled = MutableLiveData<Boolean>()
 
     fun select(plan: Plan) {
         selected.value = plan
     }
 
     fun enableInput(enable: Boolean) {
-        input.value = enable
+        inputEnabled.value = enable
     }
 }

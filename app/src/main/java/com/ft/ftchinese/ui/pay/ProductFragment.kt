@@ -72,7 +72,7 @@ class ProductFragment : ScopedFragment(),
         } ?: throw Exception("Invalid Exception")
 
         // Waiting for signal from host activity to enable/disable buttons.
-        viewModel.input.observe(this, Observer<Boolean> {
+        viewModel.inputEnabled.observe(this, Observer<Boolean> {
             yearly_price_btn.isEnabled = it
             monthly_price_btn.isEnabled = it
         })
