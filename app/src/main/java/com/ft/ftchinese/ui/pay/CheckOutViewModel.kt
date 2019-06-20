@@ -16,7 +16,7 @@ class CheckOutViewModel : ViewModel() {
     val methodSelected = MutableLiveData<PayMethod>()
     val payStarted = MutableLiveData<PayMethod>()
     val directUpgrade = MutableLiveData<Boolean>()
-    val enabled = MutableLiveData<Boolean>()
+    val inputEnabled = MutableLiveData<Boolean>()
 
     fun selectPayMethod(method: PayMethod) {
         methodSelected.value = method
@@ -33,6 +33,6 @@ class CheckOutViewModel : ViewModel() {
 
     // Enable/Disable a UI, like button.
     fun enableInput(v: Boolean) {
-        enabled.value = v
+        inputEnabled.value = v
     }
 }
