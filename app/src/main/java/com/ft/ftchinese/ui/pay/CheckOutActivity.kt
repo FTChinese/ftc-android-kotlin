@@ -18,6 +18,7 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.RowAdapter
 import com.ft.ftchinese.ui.TableRow
 import com.ft.ftchinese.util.ClientError
+import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -202,7 +203,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
         // Check wechat version to make sure it suports payment.
         val supportedApi = wxApi.wxAppSupportAPI
-        if (supportedApi < com.tencent.mm.opensdk.constants.Build.PAY_SUPPORTED_SDK_INT) {
+        if (supportedApi < Build.PAY_SUPPORTED_SDK_INT) {
 
             toast(R.string.wxpay_not_supported)
             return
@@ -212,7 +213,7 @@ class CheckOutActivity : ScopedAppActivity(),
         val cycle = plan?.cycle ?: return
         val account = sessionManager.loadAccount() ?: return
 
-        tracker.checkOut(plan?.payable ?: 0.0, PayMethod.ALIPAY)
+        tracker.checkOut(plan?.payable ?: 0.0, PayMethod.WXPAY)
 
         showProgress(true)
 

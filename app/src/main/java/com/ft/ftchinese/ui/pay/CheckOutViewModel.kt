@@ -28,7 +28,7 @@ class CheckOutViewModel : ViewModel() {
     }
 
     fun startUpgrading(v: Boolean) {
-        directUpgrade.value = true
+        directUpgrade.value = v
     }
 
     // Enable/Disable a UI, like button.
