@@ -2,10 +2,13 @@ package com.ft.ftchinese.model
 
 import android.net.Uri
 import android.os.Parcelable
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.util.KTier
+import com.ft.ftchinese.util.flavorQuery
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import java.lang.Exception
 import java.lang.NumberFormatException
 
 const val HTML_TYPE_FRAGMENT = 1
@@ -33,6 +36,25 @@ data class ChannelSource (
     val fileName: String?
         get() = if (name.isBlank()) null else "$name.html"
 
+    fun listUrl(): String? {
+        val flavor = flavorQuery[BuildConfig.FLAVOR]
+
+        return if (flavor == null) {
+            contentUrl
+        } else {
+            try {
+                Uri.parse(contentUrl).buildUpon()
+                        .appendQueryParameter("utm_source", "marketing")
+                        .appendQueryParameter("utm_mediu", "androidmarket")
+                        .appendQueryParameter("utm_campaign", flavor)
+                        .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
+                        .build()
+                        .toString()
+            } catch (e: Exception) {
+                contentUrl
+            }
+        }
+    }
 
     /**
      * Returns a new instance for a pagination link.
