@@ -57,7 +57,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SearchableActivity"
+            android:name=".ui.channel.SearchableActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".MainActivity">
             <intent-filter>
@@ -69,10 +69,10 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity
-            android:name=".ChannelActivity"
+            android:name=".ui.channel.ChannelActivity"
             android:parentActivityName=".MainActivity" />
         <activity
-            android:name=".ArticleActivity"
+            android:name=".ui.article.ArticleActivity"
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".ui.login.LoginActivity"
