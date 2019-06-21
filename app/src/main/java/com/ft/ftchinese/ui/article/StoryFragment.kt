@@ -180,15 +180,6 @@ class StoryFragment : ScopedFragment(),
                     lang = currentLang)
         })
 
-        // Observing remote data and cache it.
-        articleModel.remoteResult.observe(this, Observer {
-            val data = it ?: return@Observer
-
-            val fileName = storyBrief?.cacheNameJson() ?: return@Observer
-
-            articleModel.cacheData(fileName, data)
-        })
-
         // Load html into web view.
         articleModel.renderResult.observe(this, Observer {
             showProgress(false)
