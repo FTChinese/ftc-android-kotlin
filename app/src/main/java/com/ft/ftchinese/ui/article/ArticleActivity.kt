@@ -17,6 +17,7 @@ import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.grantPermission
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.OnProgressListener
+import com.ft.ftchinese.util.FileCache
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
@@ -47,6 +48,7 @@ class ArticleActivity : ScopedAppActivity(),
         OnProgressListener,
         AnkoLogger {
 
+    private lateinit var cache: FileCache
     private lateinit var sessionManager: SessionManager
     private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var followingManager: FollowingManager
@@ -122,13 +124,14 @@ class ArticleActivity : ScopedAppActivity(),
     }
 
     private fun setup() {
+        cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
         followingManager = FollowingManager.getInstance(this)
 
 
-        articleViewModel = ViewModelProviders.of(this)
+        articleViewModel = ViewModelProviders.of(this, ArticleViewModelFactory(cache, followingManager))
                 .get(ArticleViewModel::class.java)
         starViewModel = ViewModelProviders.of(this)
                 .get(StarArticleViewModel::class.java)
