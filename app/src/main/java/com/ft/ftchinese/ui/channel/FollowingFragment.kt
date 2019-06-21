@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui.channel
 
 import android.content.Context
 import android.os.Bundle
@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.Following
 import com.ft.ftchinese.model.FollowingManager
 import com.ft.ftchinese.model.HTML_TYPE_FRAGMENT

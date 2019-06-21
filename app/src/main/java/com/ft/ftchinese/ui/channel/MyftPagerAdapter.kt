@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui.channel
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -6,9 +6,10 @@ import androidx.fragment.app.FragmentStatePagerAdapter
 import com.ft.ftchinese.model.MyftTab
 import com.ft.ftchinese.model.MyftTabId
 
+@kotlinx.coroutines.ExperimentalCoroutinesApi
 class MyftPagerAdapter(
         fm: FragmentManager
-) : FragmentStatePagerAdapter(fm) {
+) : FragmentStatePagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     private val tabs = listOf(
             MyftTab(id = MyftTabId.READ, title = "阅读历史"),

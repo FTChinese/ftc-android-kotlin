@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui.channel
 
 import android.content.Context
 import android.content.Intent
@@ -12,9 +12,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.viewmodel.StarArticleViewModel
+import com.ft.ftchinese.ui.article.StarArticleViewModel
 import kotlinx.android.synthetic.main.card_primary_secondary.view.*
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger

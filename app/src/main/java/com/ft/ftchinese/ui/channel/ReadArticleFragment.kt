@@ -1,18 +1,19 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui.channel
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.database.ReadArticle
-import com.ft.ftchinese.viewmodel.ReadArticleViewModel
+import com.ft.ftchinese.ui.article.ReadArticleViewModel
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 

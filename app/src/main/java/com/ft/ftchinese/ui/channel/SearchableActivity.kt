@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui.channel
 
 import android.app.SearchManager
 import android.content.Intent
@@ -7,6 +7,8 @@ import android.view.KeyEvent
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
+import com.ft.ftchinese.R
+import com.ft.ftchinese.ui.article.WVClient
 import com.ft.ftchinese.util.FTC_OFFICIAL_URL
 import com.ft.ftchinese.util.FileCache
 import kotlinx.android.synthetic.main.activity_searchable.*
