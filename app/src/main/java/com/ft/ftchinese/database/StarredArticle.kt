@@ -5,6 +5,8 @@ import androidx.room.*
 import com.ft.ftchinese.model.ChannelItem
 import com.ft.ftchinese.model.Permission
 import com.ft.ftchinese.model.Tier
+import com.ft.ftchinese.util.formatSQLDateTime
+import org.threeten.bp.LocalDateTime
 import java.util.*
 
 
@@ -75,6 +77,24 @@ data class StarredArticle(
                 tag = keywords,
                 webUrl = webUrl,
                 isWebpage = isWebpage
+        )
+    }
+
+    fun toReadArticle(): ReadArticle {
+        return ReadArticle(
+                id = id,
+                type = type,
+                subType = subType,
+                title = title,
+                standfirst = standfirst,
+                keywords = keywords,
+                imageUrl = imageUrl,
+                audioUrl = audioUrl,
+                radioUrl = radioUrl,
+                publishedAt = publishedAt,
+                readAt = formatSQLDateTime(LocalDateTime.now()),
+                tier = tier,
+                webUrl = webUrl
         )
     }
 
