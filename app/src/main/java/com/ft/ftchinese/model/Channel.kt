@@ -1,12 +1,15 @@
 package com.ft.ftchinese.model
 
 import android.net.Uri
+import android.os.Parcelable
 import com.beust.klaxon.Json
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.util.FTC_OFFICIAL_URL
 import com.ft.ftchinese.util.MAILBOX_URL
 import com.ft.ftchinese.util.flavorQuery
+import kotlinx.android.parcel.IgnoredOnParcel
+import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.util.*
@@ -68,6 +71,7 @@ data class ChannelList(
  *
  * This class is also used to record reading history. `standfirst` is used only for this purpose. `subType` and `shortlead` should not be used for this purpose. ArticleStore could only recored `type==story`.
  */
+@Parcelize
 data class ChannelItem(
         val id: String,
         // For column type, you should start a ChannelActivity instead of  StoryActivity.
@@ -94,16 +98,22 @@ data class ChannelItem(
 
         @Json(ignored = true)
         var isWebpage: Boolean = false
-) : AnkoLogger {
+) : Parcelable, AnkoLogger {
 
     // These two properties are not parsed from JSON.
     // They are copy from ChannelMeta
+    @IgnoredOnParcel
     var channelTitle: String = ""
+    @IgnoredOnParcel
     var theme: String = "default"
+    @IgnoredOnParcel
     var adId: String = ""
+    @IgnoredOnParcel
     var adZone: String = ""
+    @IgnoredOnParcel
     var hideAd: Boolean = false
 
+    @IgnoredOnParcel
     var langVariant: Language? = null
 
     fun buildGALabel(): String {
