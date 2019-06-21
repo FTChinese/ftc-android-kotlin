@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui
 
 import android.webkit.ConsoleMessage
 import android.webkit.WebChromeClient
