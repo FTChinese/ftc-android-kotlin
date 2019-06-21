@@ -9,7 +9,6 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.fragment.app.FragmentPagerAdapter
 import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
 import android.view.*
@@ -29,6 +28,9 @@ import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.account.MemberActivity
+import com.ft.ftchinese.ui.channel.MyftPagerAdapter
+import com.ft.ftchinese.ui.channel.SearchableActivity
+import com.ft.ftchinese.ui.channel.TabPagerAdapter
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.util.*
@@ -894,29 +896,6 @@ class MainActivity : ScopedAppActivity(),
             startActivity(intent)
         } else {
             toast(R.string.prompt_no_email_app)
-        }
-    }
-
-    /**
-     * A [FragmentPagerAdapter] that returns a fragment corresponding to
-     * one of the sections/tabs/mPages.
-     */
-    inner class TabPagerAdapter(private var mPages: Array<ChannelSource>, fm: androidx.fragment.app.FragmentManager) : androidx.fragment.app.FragmentStatePagerAdapter(fm) {
-
-        override fun getItem(position: Int): androidx.fragment.app.Fragment {
-            if (BuildConfig.DEBUG) {
-                info("TabPagerAdapter getItem $position. Data passed to ChannelFragment: ${mPages[position]}")
-            }
-
-            return ChannelFragment.newInstance(mPages[position])
-        }
-
-        override fun getCount(): Int {
-            return mPages.size
-        }
-
-        override fun getPageTitle(position: Int): CharSequence? {
-            return mPages[position].title
         }
     }
 }
