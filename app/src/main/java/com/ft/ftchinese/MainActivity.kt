@@ -73,11 +73,11 @@ class MainActivity : ScopedAppActivity(),
 
     private lateinit var accountViewModel: AccountViewModel
 
-    private var mNewsAdapter: TabPagerAdapter? = null
-    private var mEnglishAdapter: TabPagerAdapter? = null
-    private var mFtaAdapter: TabPagerAdapter? = null
-    private var mVideoAdapter: TabPagerAdapter? = null
-    private var mMyftPagerAdapter: MyftPagerAdapter? = null
+//    private var mNewsAdapter: TabPagerAdapter? = null
+//    private var mEnglishAdapter: TabPagerAdapter? = null
+//    private var mFtaAdapter: TabPagerAdapter? = null
+//    private var mVideoAdapter: TabPagerAdapter? = null
+//    private var mMyftPagerAdapter: MyftPagerAdapter? = null
 
     private var mChannelPages: Array<ChannelSource>? = null
 
@@ -258,40 +258,40 @@ class MainActivity : ScopedAppActivity(),
                 }
 
                 R.id.nav_english -> {
-                    if (mEnglishAdapter == null) {
-                        mEnglishAdapter = TabPagerAdapter(Navigation.englishPages, supportFragmentManager)
-                    }
-                    view_pager.adapter = mEnglishAdapter
+//                    if (mEnglishAdapter == null) {
+//                        mEnglishAdapter = TabPagerAdapter(Navigation.englishPages, supportFragmentManager)
+//                    }
+                    view_pager.adapter = TabPagerAdapter(Navigation.englishPages, supportFragmentManager)
                     mChannelPages = Navigation.englishPages
 
                     displayTitle(R.string.nav_english)
                 }
 
                 R.id.nav_ftacademy -> {
-                    if (mFtaAdapter == null) {
-                        mFtaAdapter = TabPagerAdapter(Navigation.ftaPages, supportFragmentManager)
-                    }
-                    view_pager.adapter = mFtaAdapter
+//                    if (mFtaAdapter == null) {
+//                        mFtaAdapter = TabPagerAdapter(Navigation.ftaPages, supportFragmentManager)
+//                    }
+                    view_pager.adapter = TabPagerAdapter(Navigation.ftaPages, supportFragmentManager)
                     mChannelPages = Navigation.ftaPages
 
                     displayTitle(R.string.nav_ftacademy)
                 }
 
                 R.id.nav_video -> {
-                    if (mVideoAdapter == null) {
-                        mVideoAdapter = TabPagerAdapter(Navigation.videoPages, supportFragmentManager)
-                    }
-                    view_pager.adapter = mVideoAdapter
+//                    if (mVideoAdapter == null) {
+//                        mVideoAdapter = TabPagerAdapter(Navigation.videoPages, supportFragmentManager)
+//                    }
+                    view_pager.adapter = TabPagerAdapter(Navigation.videoPages, supportFragmentManager)
                     mChannelPages = Navigation.videoPages
 
                     displayTitle(R.string.nav_video)
                 }
 
                 R.id.nav_myft -> {
-                    if (mMyftPagerAdapter == null) {
-                        mMyftPagerAdapter = MyftPagerAdapter(supportFragmentManager)
-                    }
-                    view_pager.adapter = mMyftPagerAdapter
+//                    if (mMyftPagerAdapter == null) {
+//                        mMyftPagerAdapter = MyftPagerAdapter(supportFragmentManager)
+//                    }
+                    view_pager.adapter = MyftPagerAdapter(supportFragmentManager)
                     mChannelPages = null
 
                     displayTitle(R.string.nav_myft)
@@ -375,10 +375,10 @@ class MainActivity : ScopedAppActivity(),
     }
 
     private fun setupHome() {
-        if (mNewsAdapter == null) {
-            mNewsAdapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
-        }
-        view_pager.adapter = mNewsAdapter
+//        if (mNewsAdapter == null) {
+//            mNewsAdapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
+//        }
+        view_pager.adapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
         mChannelPages = Navigation.newsPages
     }
 
