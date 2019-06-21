@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui.article
 
 import android.content.Context
 import android.content.Intent
@@ -7,15 +7,16 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.ft.ftchinese.BuildConfig
+import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.database.StarredArticle
+import com.ft.ftchinese.grantPermission
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.OnProgressListener
-import com.ft.ftchinese.util.json
-import com.ft.ftchinese.viewmodel.LoadArticleViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
@@ -36,6 +37,8 @@ private const val EXTRA_USE_JSON = "extra_use_json"
  * Host activity for [StoryFragment] or [WebContentFragment], depending on the type of contents
  * to be displayed.
  * If the content has a standard JSON API, [StoryFragment] will be used; otherwise use [WebContentFragment].
+ * [BottomToolFragment] is positioned at the bottom of
+ * this activity to place menu icons.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ArticleActivity : ScopedAppActivity(),
@@ -49,8 +52,12 @@ class ArticleActivity : ScopedAppActivity(),
     private lateinit var followingManager: FollowingManager
 
     private lateinit var wxApi: IWXAPI
-    private lateinit var loadModel: LoadArticleViewModel
+    private lateinit var articleViewModel: ArticleViewModel
+    private lateinit var starViewModel: StarArticleViewModel
+    private lateinit var readViewModel: ReadArticleViewModel
 
+
+    private var channelItem: ChannelItem? = null
 
     // The data used for share
     private var article: StarredArticle? = null
@@ -61,32 +68,6 @@ class ArticleActivity : ScopedAppActivity(),
         } else {
             progress_bar?.visibility = View.GONE
         }
-    }
-
-    private fun setup() {
-        sessionManager = SessionManager.getInstance(this)
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
-        wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
-        followingManager = FollowingManager.getInstance(this)
-
-
-        // Get article data after loaded.
-        loadModel = ViewModelProviders.of(this)
-                .get(LoadArticleViewModel::class.java)
-
-        // Get the article summary to be used for share
-        loadModel.article.observe(this, Observer {
-            info("Observer found an article loaded: $it")
-            article = it
-
-            logViewItemEvent()
-        })
-
-        // Observe whether the article is bilingual.
-        loadModel.isBilingual.observe(this, Observer<Boolean> {
-            info("Observer found content is bilingual: $it")
-            updateLanguageSwitcher(it)
-        })
     }
 
     private fun logViewItemEvent() {
@@ -121,22 +102,63 @@ class ArticleActivity : ScopedAppActivity(),
         setup()
 
         // Meta data about current article
-        val channelItem = intent.getStringExtra(EXTRA_CHANNEL_ITEM)
+        val item = intent.getParcelableExtra<ChannelItem>(EXTRA_CHANNEL_ITEM)
 
-        info("Article source: $channelItem")
+        info("Article source: $item")
 
         val useJson = intent.getBooleanExtra(EXTRA_USE_JSON, false)
 
-        val fragment: Fragment = if (useJson) {
-            StoryFragment.newInstance(channelItem)
-        } else {
-            WebContentFragment.newInstance(channelItem)
+        supportFragmentManager.commit {
+            if (useJson) {
+                replace(R.id.fragment_article, StoryFragment.newInstance(item))
+            } else {
+                replace(R.id.fragment_article, WebContentFragment.newInstance(item))
+            }
+
+            replace(R.id.fragment_bottom_toolbar, BottomToolFragment.newInstance())
         }
 
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_article, fragment)
-                .replace(R.id.fragment_bottom_toolbar, BottomToolFragment.newInstance())
-                .commit()
+        channelItem = item
+    }
+
+    private fun setup() {
+        sessionManager = SessionManager.getInstance(this)
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
+        followingManager = FollowingManager.getInstance(this)
+
+
+        articleViewModel = ViewModelProviders.of(this)
+                .get(ArticleViewModel::class.java)
+        starViewModel = ViewModelProviders.of(this)
+                .get(StarArticleViewModel::class.java)
+        readViewModel = ViewModelProviders.of(this)
+                .get(ReadArticleViewModel::class.java)
+
+
+        // Observe whether the article is bilingual.
+        articleViewModel.bilingual.observe(this, Observer<Boolean> {
+            info("Observer found content is bilingual: $it")
+            updateLanguageSwitcher(it)
+        })
+
+        articleViewModel.starringTarget.observe(this, Observer {
+            article = it
+
+            starViewModel.isStarring(it)
+
+            readViewModel.addOne(it.toReadArticle())
+
+            logViewItemEvent()
+        })
+
+        starViewModel.shouldStar.observe(this, Observer {
+            if (it) {
+                starViewModel.star(article)
+            } else {
+                starViewModel.unstar(article)
+            }
+        })
     }
 
     override fun onClickShareButton() {
@@ -152,7 +174,7 @@ class ArticleActivity : ScopedAppActivity(),
         language_radio_group.visibility = View.VISIBLE
 
         lang_cn_btn.setOnClickListener {
-            loadModel.switchLang(Language.CHINESE)
+            articleViewModel.switchLang(Language.CHINESE)
         }
 
         lang_en_btn.setOnClickListener {
@@ -172,7 +194,7 @@ class ArticleActivity : ScopedAppActivity(),
                 return@setOnClickListener
             }
 
-            loadModel.switchLang(Language.ENGLISH)
+            articleViewModel.switchLang(Language.ENGLISH)
         }
 
         lang_bi_btn.setOnClickListener {
@@ -188,7 +210,7 @@ class ArticleActivity : ScopedAppActivity(),
                 return@setOnClickListener
             }
 
-            loadModel.switchLang(Language.BILINGUAL)
+            articleViewModel.switchLang(Language.BILINGUAL)
         }
     }
 
@@ -260,7 +282,7 @@ class ArticleActivity : ScopedAppActivity(),
          */
         fun start(context: Context?, channelItem: ChannelItem) {
             val intent = Intent(context, ArticleActivity::class.java).apply {
-                putExtra(EXTRA_CHANNEL_ITEM, json.toJsonString(channelItem))
+                putExtra(EXTRA_CHANNEL_ITEM, channelItem)
                 putExtra(EXTRA_USE_JSON, true)
             }
 
@@ -274,7 +296,7 @@ class ArticleActivity : ScopedAppActivity(),
             channelItem.isWebpage = true
 
             val intent = Intent(context, ArticleActivity::class.java).apply {
-                putExtra(EXTRA_CHANNEL_ITEM, json.toJsonString(channelItem))
+                putExtra(EXTRA_CHANNEL_ITEM, channelItem)
                 putExtra(EXTRA_USE_JSON, false)
             }
 
