@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui.article
 
 import android.content.Context
 import android.net.Uri
@@ -10,14 +10,15 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import com.ft.ftchinese.BuildConfig
+import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.util.flavorQuery
 import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.grantPermission
+import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.util.json
-import com.ft.ftchinese.viewmodel.LoadArticleViewModel
-import com.ft.ftchinese.viewmodel.ReadArticleViewModel
-import com.ft.ftchinese.viewmodel.StarArticleViewModel
 import kotlinx.android.synthetic.main.fragment_web_view.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -30,7 +31,7 @@ class WebContentFragment : Fragment(),
         WVClient.OnWebViewInteractionListener,
         AnkoLogger {
 
-    private lateinit var loadModel: LoadArticleViewModel
+    private lateinit var articleViewModel: ArticleViewModel
     private lateinit var starModel: StarArticleViewModel
     private lateinit var readModel: ReadArticleViewModel
 
@@ -63,8 +64,7 @@ class WebContentFragment : Fragment(),
             return
         }
 
-        loadModel.loaded(article)
-        starModel.loaded(article)
+        articleViewModel.webLoaded(article)
     }
 
     private fun mergeOpenGraph(og: OpenGraphMeta?): StarredArticle {
@@ -110,28 +110,7 @@ class WebContentFragment : Fragment(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        loadModel = activity?.run {
-            ViewModelProviders.of(this).get(LoadArticleViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-
-        starModel = activity?.run {
-            ViewModelProviders.of(this).get(StarArticleViewModel::class.java)
-        } ?: throw java.lang.Exception("Invalid Activity")
-
-        readModel = activity?.run {
-            ViewModelProviders.of(this).get(ReadArticleViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-
-
-        val itemData = arguments?.getString(ARG_WEBPAGE_ARTICLE)
-
-        if (itemData != null) {
-            try {
-                channelItem = json.parse<ChannelItem>(itemData)
-            } catch (e: Exception) {
-                info(e)
-            }
-        }
+        channelItem = arguments?.getParcelable<ChannelItem>(ARG_WEBPAGE_ARTICLE)
 
         info("Web content source: $channelItem")
     }
@@ -170,6 +149,22 @@ class WebContentFragment : Fragment(),
         }
 
         load()
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        articleViewModel = activity?.run {
+            ViewModelProviders.of(this).get(ArticleViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+
+        starModel = activity?.run {
+            ViewModelProviders.of(this).get(StarArticleViewModel::class.java)
+        } ?: throw java.lang.Exception("Invalid Activity")
+
+        readModel = activity?.run {
+            ViewModelProviders.of(this).get(ReadArticleViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
     }
 
     /**
@@ -223,14 +218,14 @@ class WebContentFragment : Fragment(),
 
         web_view.loadUrl(url)
 
+        // Get the minimal information of an article.
         val article = channelItem?.toStarredArticle() ?: return
 
-        loadModel.loaded(article)
-        starModel.loaded(article)
+        articleViewModel.webLoaded(article)
     }
 
     companion object {
-        fun newInstance(channelItem: String) = WebContentFragment().apply {
+        fun newInstance(channelItem: ChannelItem) = WebContentFragment().apply {
             arguments = bundleOf(
                     ARG_WEBPAGE_ARTICLE to channelItem
             )

@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui.article
 
 import android.content.Context
 import android.os.Bundle
@@ -9,6 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.ft.ftchinese.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.fragment_social_share.*
 
@@ -60,6 +61,9 @@ data class SocialApp(
     }
 }
 
+/**
+ * Popup for share menu.
+ */
 class SocialShareFragment :
         BottomSheetDialogFragment() {
 

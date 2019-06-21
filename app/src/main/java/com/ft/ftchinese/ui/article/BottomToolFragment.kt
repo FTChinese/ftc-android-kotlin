@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui.article
 
 import android.content.Context
 import android.os.Bundle
@@ -8,16 +8,10 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.util.formatSQLDateTime
-import com.ft.ftchinese.viewmodel.StarArticleViewModel
+import com.ft.ftchinese.R
 import kotlinx.android.synthetic.main.fragment_bottom_tool.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.threeten.bp.LocalDateTime
 
 class BottomToolFragment : Fragment(),
         AnkoLogger {
@@ -27,7 +21,6 @@ class BottomToolFragment : Fragment(),
     private lateinit var starModel: StarArticleViewModel
 
     private var isStarring = false
-    private var starredArticle: StarredArticle? = null
 
     interface OnItemClickListener {
         fun onClickShareButton()
@@ -50,17 +43,9 @@ class BottomToolFragment : Fragment(),
             ViewModelProviders.of(this).get(StarArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        // Observe article loaded data.
-        starModel.starredArticle.observe(this, Observer<StarredArticle> {
-            info("Observer for starred article: $it")
-
-            starredArticle = it
-
-            GlobalScope.launch(Dispatchers.Main) {
-                val exists = starModel.isStarring(it)
-                info("Found starred: $exists, $it")
-                updateUIStar(exists)
-            }
+        starModel.starred.observe(this, Observer {
+            isStarring = it
+            updateUIStar(it)
         })
 
         info("onCreate called")
@@ -79,17 +64,7 @@ class BottomToolFragment : Fragment(),
             isStarring = !isStarring
             updateUIStar(isStarring)
 
-            GlobalScope.launch(Dispatchers.Main) {
-                starredArticle?.starredAt = formatSQLDateTime(LocalDateTime.now())
-
-                info("Star/Unstar an article")
-
-                if (isStarring) {
-                    starModel.star(starredArticle)
-                } else {
-                    starModel.unstar(starredArticle)
-                }
-            }
+            starModel.setStarState(isStarring)
         }
 
         action_share.setOnClickListener {
