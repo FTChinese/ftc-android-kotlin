@@ -58,6 +58,10 @@ class ChannelFragment : ScopedFragment(),
     private var channelMeta: ChannelMeta? = null
 
     private fun showProgress(value: Boolean) {
+        if (swipe_refresh.isRefreshing) {
+            toast(R.string.prompt_updated)
+        }
+
         if (value) {
             progress_bar?.visibility = View.VISIBLE
         } else {
@@ -184,9 +188,10 @@ class ChannelFragment : ScopedFragment(),
 
                 val chSrc = channelSource ?: return@Observer
 
+                // Load data only. No rendering.
                 channelViewModel.loadFromServer(
                         channelSource = chSrc,
-                        url = listUrl
+                        shouldRender = false
                 )
                 return@Observer
             }
@@ -199,9 +204,9 @@ class ChannelFragment : ScopedFragment(),
             // Fetch data from remote and cache only.
             val chSrc = channelSource ?: return@Observer
 
+            // Load data and render.
             channelViewModel.loadFromServer(
-                    channelSource = chSrc,
-                    url = listUrl
+                    channelSource = chSrc
             )
         })
 
@@ -248,11 +253,11 @@ class ChannelFragment : ScopedFragment(),
             HTML_TYPE_FRAGMENT -> {
                 launch {
                     info("start refreshing: html fragment")
+                    // Load data and render.
                     channelViewModel.loadFromServer(
-                            channelSource = chSrc,
-                            url = listUrl
+                            channelSource = chSrc
                     )
-                    toast(R.string.prompt_updated)
+
                 }
             }
             HTML_TYPE_COMPLETE -> {
