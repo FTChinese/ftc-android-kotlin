@@ -5,13 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.Account
-import com.ft.ftchinese.model.FtcUser
-import com.ft.ftchinese.model.LoginMethod
-import com.ft.ftchinese.model.WxSession
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
+import com.ft.ftchinese.util.FileCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -104,7 +102,8 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun downloadAvatar(url: String) {
+    fun fetchWxAvatar(cache: FileCache, wechat: Wechat) {
+        val url = wechat.avatarUrl ?:  return
         viewModelScope.launch {
             try {
                 val bytes = withContext(Dispatchers.IO) {
@@ -116,6 +115,16 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                 _avatarResult.value = ImageResult(
                         success = bytes
                 )
+
+                if (bytes == null) {
+                    return@launch
+                }
+
+                cache.writeBinaryFile(
+                        WX_AVATAR_NAME,
+                        bytes
+                )
+
             } catch (e: Exception) {
                 _avatarResult.value = ImageResult(
                         exception = e

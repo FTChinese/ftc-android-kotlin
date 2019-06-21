@@ -37,7 +37,7 @@ class FileCache (private val context: Context) : AnkoLogger {
         try {
             File(context.filesDir, name).writeBytes(array)
         } catch (e: Exception) {
-            info("Failed to save bianry file $name due to ${e.message}")
+            info("Failed to save binary file $name due to ${e.message}")
         }
     }
 

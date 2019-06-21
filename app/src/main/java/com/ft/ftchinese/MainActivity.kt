@@ -16,15 +16,19 @@ import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.isActiveNetworkWifi
+import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.splash.Schedule
 import com.ft.ftchinese.splash.ScreenAd
 import com.ft.ftchinese.splash.SplashScreenManager
 import com.ft.ftchinese.splash.splashScheduleFile
 import com.ft.ftchinese.ui.account.AccountActivity
+import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.account.MemberActivity
@@ -42,6 +46,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.drawer_nav_header.view.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -66,6 +71,8 @@ class MainActivity : ScopedAppActivity(),
 
     private var showAdJob: Job? = null
 
+    private lateinit var accountViewModel: AccountViewModel
+
     private var mNewsAdapter: TabPagerAdapter? = null
     private var mEnglishAdapter: TabPagerAdapter? = null
     private var mFtaAdapter: TabPagerAdapter? = null
@@ -84,8 +91,9 @@ class MainActivity : ScopedAppActivity(),
     private lateinit var tracker: Tracker
 
     // Cache UI
-    private var drawerHeaderTitle: TextView? = null
-    private var drawerHeaderImage: ImageView? = null
+//    private var drawerHeaderTitle: TextView? = null
+//    private var drawerHeaderImage: ImageView? = null
+    private var headerView: View? = null
     private var menuItemAccount: MenuItem? = null
     private var menuItemSubs: MenuItem? = null
     private var menuItemMySubs: MenuItem? = null
@@ -97,8 +105,8 @@ class MainActivity : ScopedAppActivity(),
         val account = sessionManager.loadAccount()
 
         if (account == null) {
-            drawerHeaderTitle?.text = getString(R.string.nav_not_logged_in)
-            drawerHeaderImage?.setImageResource(R.drawable.ic_account_circle_black_24dp)
+            headerView?.nav_header_title?.text = getString(R.string.nav_not_logged_in)
+            headerView?.nav_header_image?.setImageResource(R.drawable.ic_account_circle_black_24dp)
 
             // show signin/signup
             drawer_nav.menu
@@ -113,9 +121,8 @@ class MainActivity : ScopedAppActivity(),
             return
         }
 
-        drawerHeaderTitle?.text = account.displayName
-        showAvatar(drawerHeaderImage, account.wechat)
-
+        headerView?.nav_header_title?.text = account.displayName
+        showAvatar(account.wechat)
 
         // Hide signin/signup
         drawer_nav.menu
@@ -133,33 +140,27 @@ class MainActivity : ScopedAppActivity(),
         menuItemMySubs?.isVisible = isMember
     }
 
-    private fun showAvatar(imageView: ImageView?, wechat: Wechat) {
-        if (imageView == null) {
-            return
-        }
+    private fun showAvatar(wechat: Wechat) {
 
-        val drawable = cache.readDrawable(wechat.avatarName)
-        if (drawable != null) {
-            imageView.setImageDrawable(drawable)
-        }
+        launch {
+            val drawable = withContext(Dispatchers.IO) {
+                cache.readDrawable(WX_AVATAR_NAME)
+            }
 
-        if (wechat.avatarUrl == null) {
-            return
-        }
+            if (drawable != null) {
+                headerView?.nav_header_image?.setImageDrawable(drawable)
+                return@launch
+            }
 
-        avatarName = wechat.avatarName
+            if (!isNetworkConnected()) {
+                return@launch
+            }
 
-        GlobalScope.launch(Dispatchers.Main) {
-            val bytes = withContext(Dispatchers.IO) {
-                wechat.downloadAvatar(filesDir)
-            } ?: return@launch
+            if (wechat.avatarUrl == null) {
+                return@launch
+            }
 
-            imageView.setImageDrawable(
-                    Drawable.createFromStream(
-                            ByteArrayInputStream(bytes),
-                            wechat.avatarName
-                    )
-            )
+            accountViewModel.fetchWxAvatar(cache, wechat)
         }
     }
 
@@ -196,13 +197,31 @@ class MainActivity : ScopedAppActivity(),
         tokenManager = TokenManager.getInstance(this)
 
         val menu = drawer_nav.menu
-        val headerView = drawer_nav.getHeaderView(0)
-        drawerHeaderTitle = headerView.findViewById(R.id.nav_header_title)
-        drawerHeaderImage = headerView.findViewById(R.id.nav_header_image)
+        headerView = drawer_nav.getHeaderView(0)
 
         menuItemAccount = menu.findItem(R.id.action_account)
         menuItemSubs = menu.findItem(R.id.action_subscription)
         menuItemMySubs = menu.findItem(R.id.action_my_subs)
+
+        accountViewModel = ViewModelProviders.of(this)
+                .get(AccountViewModel::class.java)
+
+        // If avatar is downloaded from network.
+        accountViewModel.avatarResult.observe(this, Observer {
+            if (it.exception != null) {
+                info("Loading avatar error: ${it.exception}")
+                return@Observer
+            }
+
+            val bytes = it.success ?: return@Observer
+
+            headerView?.nav_header_image?.setImageDrawable(
+                    Drawable.createFromStream(
+                            ByteArrayInputStream(bytes),
+                            WX_AVATAR_NAME
+                    )
+            )
+        })
 
         // Set ViewPager adapter
         setupHome()
@@ -215,6 +234,7 @@ class MainActivity : ScopedAppActivity(),
 
         setupDrawer()
 
+        // Update UI.
         updateSessionUI()
 
         prepareSplash()

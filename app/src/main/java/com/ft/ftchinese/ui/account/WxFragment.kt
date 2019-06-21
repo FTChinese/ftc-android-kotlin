@@ -14,6 +14,7 @@ import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.LoginMethod
 import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.WX_AVATAR_NAME
 import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.fragment_wx_account.*
@@ -164,18 +165,9 @@ class WxFragment : ScopedFragment(),
             wx_avatar.setImageDrawable(
                     Drawable.createFromStream(
                             ByteArrayInputStream(bytes),
-                            "wx_avatar.jpg"
+                            WX_AVATAR_NAME
                     )
             )
-
-            // Cache avatar file.
-            launch {
-                withContext(Dispatchers.IO) {
-                    cache.writeBinaryFile(
-                            sessionManager.loadAccount()?.wechat?.avatarName ?: "wx_avatar.jpg",
-                            bytes)
-                }
-            }
         })
 
         val acnt = sessionManager.loadAccount() ?: return
@@ -234,7 +226,7 @@ class WxFragment : ScopedFragment(),
         // If not found, fetch it from network.
         launch {
             val drawable = withContext(Dispatchers.IO) {
-                cache.readDrawable(account.wechat.avatarName)
+                cache.readDrawable(WX_AVATAR_NAME)
             }
 
             if (drawable != null) {
@@ -246,9 +238,7 @@ class WxFragment : ScopedFragment(),
                 return@launch
             }
 
-            val imageUrl = account.wechat.avatarUrl ?: return@launch
-
-            viewModel.downloadAvatar(imageUrl)
+            viewModel.fetchWxAvatar(cache, account.wechat)
         }
 
         wx_nickname.text = account.wechat.nickname
