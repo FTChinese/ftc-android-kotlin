@@ -1,7 +1,6 @@
 package com.ft.ftchinese.ui.channel
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import android.view.KeyEvent
@@ -46,7 +45,6 @@ class ChannelFragment : ScopedFragment(),
      * Passed in when the fragment is created.
      */
     private var channelSource: ChannelSource? = null
-    private var listUrl: String = ""
 
     private lateinit var sessionManager: SessionManager
     private lateinit var cache: FileCache
@@ -92,30 +90,6 @@ class ChannelFragment : ScopedFragment(),
 //                json.parse<ChannelSource>(channelSourceStr)
 
         info("Channel source: $channelSource")
-
-        val targetUrl = channelSource?.contentUrl ?: return
-
-        val queryValue = flavorQuery[BuildConfig.FLAVOR]
-
-        listUrl = if (queryValue == null) {
-            targetUrl
-        } else {
-            try {
-                Uri.parse(targetUrl).buildUpon()
-                        .appendQueryParameter("utm_source", "marketing")
-                        .appendQueryParameter("utm_mediu", "androidmarket")
-                        .appendQueryParameter("utm_campaign", queryValue)
-                        .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
-                        .build()
-                        .toString()
-            } catch (e: Exception) {
-                targetUrl
-            }
-        }
-
-        if (BuildConfig.DEBUG) {
-            info("List url: $listUrl")
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -284,7 +258,7 @@ class ChannelFragment : ScopedFragment(),
             // For complete HTML, load it directly into Web view.
             HTML_TYPE_COMPLETE -> {
                 info("initLoading: web page")
-                web_view.loadUrl(listUrl)
+                web_view.loadUrl(channelSource?.listUrl())
                 showProgress(false)
             }
         }
