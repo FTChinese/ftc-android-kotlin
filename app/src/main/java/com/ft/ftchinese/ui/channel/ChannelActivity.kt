@@ -1,9 +1,11 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui.channel
 
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.fragment.app.commit
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.*
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -39,9 +41,9 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
          */
         toolbar.title = channelSource.title
 
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.channel_frag_holder, ChannelFragment.newInstance(channelSource))
-                .commit()
+        supportFragmentManager.commit {
+            replace(R.id.channel_frag_holder, ChannelFragment.newInstance(channelSource))
+        }
 
         FirebaseAnalytics.getInstance(this)
             .logEvent(
