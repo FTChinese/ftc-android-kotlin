@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.channel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ChannelSource
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.FileCache
@@ -38,19 +39,35 @@ class ChannelViewModel(val cache: FileCache) : ViewModel() {
         }
     }
 
-    fun loadFromServer(channelSource: ChannelSource, url: String) {
+    fun loadFromServer(channelSource: ChannelSource, shouldRender: Boolean = true) {
+        val url = channelSource.listUrl()
+        if (url == null) {
+            renderResult.value = RenderResult(
+                    error = R.string.api_empty_url
+            )
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val remoteFrag = withContext(Dispatchers.IO) {
                     Fetch().get(url).responseString()
                 }
 
-                remoteResult.value = remoteFrag
 
                 if (remoteFrag == null) {
+                    renderResult.value = RenderResult(
+                            error = R.string.api_server_error
+                    )
                     return@launch
                 }
 
+                // Notify received data after server.
+                remoteResult.value = remoteFrag
+
+                if (!shouldRender) {
+                    return@launch
+                }
 
                 val html = render(channelSource, remoteFrag)
 
