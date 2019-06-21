@@ -147,28 +147,6 @@ class Story (
         return true
     }
 
-    fun isFree(): Boolean {
-        return (requireMemberTier() == null) && !isSevenDaysOld()
-    }
-
-    fun toReadArticle(channelItem: ChannelItem?): ReadArticle {
-        return ReadArticle(
-                id = id,
-                type = channelItem?.type ?: "",
-                subType = channelItem?.subType ?: "",
-                title = titleCN,
-                standfirst = standfirstCN,
-                keywords = keywords,
-                imageUrl = cover.smallbutton,
-                audioUrl = channelItem?.audioUrl ?: "",
-                radioUrl = channelItem?.radioUrl ?: "",
-                publishedAt = publishedAt,
-                readAt = formatSQLDateTime(LocalDateTime.now()),
-                tier = requireMemberTier()?.string() ?: "",
-                webUrl = channelItem?.getCanonicalUrl() ?: ""
-        )
-    }
-
     val isBilingual: Boolean
         get() = bodyEN.isNotBlank()
 
