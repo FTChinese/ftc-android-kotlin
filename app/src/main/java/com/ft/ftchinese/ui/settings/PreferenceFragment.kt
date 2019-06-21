@@ -8,7 +8,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.util.FileCache
-import com.ft.ftchinese.viewmodel.ReadArticleViewModel
+import com.ft.ftchinese.ui.article.ReadArticleViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
