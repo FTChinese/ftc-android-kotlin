@@ -28,8 +28,6 @@ class ArticleViewModel(
 
     // Notify StoryFragment whether cached is found
     val cacheFound = MutableLiveData<Boolean>()
-    // Notify StoryFragment whether we fetched data from server
-    val remoteResult = MutableLiveData<String>()
     // Notify StoryFragment that html is ready to be loaded
     // into WebView.
     val renderResult = MutableLiveData<RenderResult>()
@@ -123,8 +121,12 @@ class ArticleViewModel(
                     return@launch
                 }
 
-                remoteResult.value = data
+                // Cache the downloaded data.
+                launch(Dispatchers.IO) {
+                    cache.saveText(item.cacheNameJson(), data)
+                }
 
+                // If this is only a background download.
                 if (!shouldRender) {
                     return@launch
                 }
@@ -153,6 +155,8 @@ class ArticleViewModel(
                         success = html
                 )
 
+
+
             } catch (e: Exception) {
                 renderResult.value = RenderResult(
                         exception = e
@@ -172,13 +176,5 @@ class ArticleViewModel(
                 language = lang,
                 follows = follows
         )
-    }
-
-    fun cacheData(fileName: String, data: String) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                cache.saveText(fileName, data)
-            }
-        }
     }
 }
