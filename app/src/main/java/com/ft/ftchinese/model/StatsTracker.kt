@@ -166,6 +166,13 @@ class StatsTracker private constructor(context: Context) {
         ))
     }
 
+    fun selectListItem(item: ChannelItem) {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
+            putString(FirebaseAnalytics.Param.CONTENT_TYPE, item.type)
+            putString(FirebaseAnalytics.Param.ITEM_ID, item.id)
+        })
+    }
+
     companion object {
         private var instance: StatsTracker? = null
 
