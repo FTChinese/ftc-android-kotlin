@@ -18,15 +18,11 @@ import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.isActiveNetworkWifi
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.splash.Schedule
-import com.ft.ftchinese.splash.ScreenAd
 import com.ft.ftchinese.splash.SplashScreenManager
-import com.ft.ftchinese.splash.splashScheduleFile
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.LoginActivity
@@ -37,12 +33,10 @@ import com.ft.ftchinese.ui.channel.SearchableActivity
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
+import com.ft.ftchinese.ui.splash.SplashViewModel
 import com.ft.ftchinese.util.*
-import com.google.android.gms.analytics.HitBuilders
-import com.google.android.gms.analytics.Tracker
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -51,10 +45,7 @@ import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-import org.threeten.bp.ZonedDateTime
-import org.threeten.bp.format.DateTimeFormatter
 import java.io.ByteArrayInputStream
-import kotlin.Exception
 
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
@@ -72,6 +63,7 @@ class MainActivity : ScopedAppActivity(),
     private var showAdJob: Job? = null
 
     private lateinit var accountViewModel: AccountViewModel
+    private lateinit var splashViewModel: SplashViewModel
 
 //    private var mNewsAdapter: TabPagerAdapter? = null
 //    private var mEnglishAdapter: TabPagerAdapter? = null
@@ -83,12 +75,12 @@ class MainActivity : ScopedAppActivity(),
 
     private lateinit var cache: FileCache
 
-    private lateinit var firebaseAnalytics: FirebaseAnalytics
     private lateinit var sessionManager: SessionManager
     private lateinit var tokenManager: TokenManager
     private lateinit var splashManager: SplashScreenManager
     private lateinit var wxApi: IWXAPI
-    private lateinit var tracker: Tracker
+
+    private lateinit var statsTracker: StatsTracker
 
     // Cache UI
 //    private var drawerHeaderTitle: TextView? = null
@@ -186,8 +178,7 @@ class MainActivity : ScopedAppActivity(),
             showAd()
         }
 
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
-        tracker = Analytics.getDefaultTracker(this)
+        statsTracker = StatsTracker.getInstance(this)
 
         // Register Wechat id
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
@@ -206,6 +197,9 @@ class MainActivity : ScopedAppActivity(),
         accountViewModel = ViewModelProviders.of(this)
                 .get(AccountViewModel::class.java)
 
+        splashViewModel = ViewModelProviders.of(this)
+                .get(SplashViewModel::class.java)
+
         // If avatar is downloaded from network.
         accountViewModel.avatarResult.observe(this, Observer {
             if (it.exception != null) {
@@ -223,6 +217,14 @@ class MainActivity : ScopedAppActivity(),
             )
         })
 
+        splashViewModel.scheduleResult.observe(this, Observer {
+            splashViewModel.prepare(
+                    sessionManager = sessionManager,
+                    splashManager = splashManager,
+                    schedule = it
+            )
+        })
+
         // Set ViewPager adapter
         setupHome()
 
@@ -237,13 +239,13 @@ class MainActivity : ScopedAppActivity(),
         // Update UI.
         updateSessionUI()
 
-        prepareSplash()
+        splashViewModel.loadSchedule(cache, isActiveNetworkWifi())
 
         if (BuildConfig.DEBUG) {
             info("onCreate finished. Build flavor: ${BuildConfig.FLAVOR}. Is debug: ${BuildConfig.DEBUG}")
         }
 
-        logAppOpen()
+        statsTracker.appOpened()
     }
 
     private fun setupBottomNav() {
@@ -436,147 +438,47 @@ class MainActivity : ScopedAppActivity(),
         }
     }
 
-    private fun prepareSplash() {
-
-        launch(Dispatchers.IO) {
-            val tier = sessionManager
-                    .loadAccount()
-                    ?.membership
-                    ?.tier
-
-            if (BuildConfig.DEBUG) {
-                info("Prepare splash screen for next round")
-            }
-
-            if (!cache.exists(splashScheduleFile)) {
-                if (BuildConfig.DEBUG) {
-                    info("Splash schedule is not found. Fetch from remote.")
-                }
-                // Cache is not found.
-                val schedule = fetchAdSchedule()
-                        ?: return@launch
-
-                splashManager.prepareNextRound(schedule, tier)
-                return@launch
-            }
-
-            val body = cache.loadText(splashScheduleFile)
-
-            if (BuildConfig.DEBUG) {
-                info("Splash schedule cache found")
-            }
-
-            // If cache is not loaded, fetch remote data.
-            if (body == null) {
-                if (BuildConfig.DEBUG) {
-                    info("Splash cache is found but empty")
-                }
-
-                val schedule = fetchAdSchedule() ?: return@launch
-
-                splashManager.prepareNextRound(schedule, tier)
-                return@launch
-            }
-
-            // Read local cache
-            val schedule = try {
-                Klaxon().parse<Schedule>(body)
-            } catch (e: Exception) {
-                null
-            }
-
-            if (BuildConfig.DEBUG) {
-                info("Splash schedule: $schedule")
-            }
-
-
-            splashManager.prepareNextRound(schedule, tier)
-
-            // After cache is used, update cache.
-            if (BuildConfig.DEBUG) {
-                info("Updating splash cache")
-            }
-
-            fetchAdSchedule()
-        }
-    }
-
-    private fun fetchAdSchedule(): Schedule? {
-        if (!isActiveNetworkWifi()) {
-            return null
-        }
-
-        return try {
-            val body = Fetch()
-                    .get(LAUNCH_SCHEDULE_URL)
-                    .responseString()
-
-            if (body.isNullOrBlank()) {
-                return null
-            }
-
-            cache.saveText(splashScheduleFile, body)
-            Klaxon().parse<Schedule>(body)
-        } catch (e: Exception) {
-            if (BuildConfig.DEBUG) {
-                info(e)
-            }
-
-            null
-        }
-    }
 
     private suspend fun showAd() {
         val screenAd = splashManager.load() ?: return
 
-        val deferred = async(Dispatchers.IO) {
-
-            if (!screenAd.isToday()) {
-                return@async null
-            }
-
-            if (BuildConfig.DEBUG) {
-                info("Splash screen ad: $screenAd")
-            }
-
-            val imageFileName = screenAd.imageName
-
-            // Check if the required ad image exists.
-            if (imageFileName.isBlank() || !cache.exists(imageFileName)) {
-                if (BuildConfig.DEBUG) {
-                    info("Ad image ${screenAd.imageName} not found")
+        // Pick an ad based on its probability distribution factor.
+        GlobalScope.launch {
+            val drawable = withContext(Dispatchers.IO) {
+                if (!screenAd.isToday()) {
+                    return@withContext null
                 }
 
-                return@async null
+                if (BuildConfig.DEBUG) {
+                    info("Splash screen ad: $screenAd")
+                }
+
+                val imageFileName = screenAd.imageName
+
+                // Check if the required ad image exists.
+                if (imageFileName.isBlank() || !cache.exists(imageFileName)) {
+                    if (BuildConfig.DEBUG) {
+                        info("Ad image ${screenAd.imageName} not found")
+                    }
+
+                    return@withContext null
+                }
+
+                cache.readDrawable(imageFileName)
             }
 
-            cache.readDrawable(imageFileName)
-        }
-
-        // Pick an ad based on its probability distribution factor.
-
-
-        // Read image and show it.
-        withContext(Dispatchers.Main) {
-            val drawable = deferred.await()
             if (drawable == null) {
                 if (BuildConfig.DEBUG) {
                     info("Cannot load ad image")
                 }
 
                 showSystemUI()
-                return@withContext
+                return@launch
             }
-
 
             val adView = createAdView()
             val adImage = adView.findViewById<ImageView>(R.id.ad_image)
             val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
-
-            val bundle = Bundle().apply {
-                putString(FirebaseAnalytics.Param.CREATIVE_NAME, screenAd.title)
-                putString(FirebaseAnalytics.Param.CREATIVE_SLOT, AdSlot.APP_OPEN)
-            }
 
             adTimer.setOnClickListener {
                 root_container.removeView(adView)
@@ -587,7 +489,7 @@ class MainActivity : ScopedAppActivity(),
                 }
 
                 // Log user skipping advertisement action.
-                firebaseAnalytics.logEvent(FtcEvent.AD_SKIP, bundle)
+                statsTracker.adSkipped(screenAd)
             }
 
 
@@ -599,13 +501,7 @@ class MainActivity : ScopedAppActivity(),
                 showAdJob?.cancel()
 
                 // Log click event
-                firebaseAnalytics.logEvent(FtcEvent.AD_CLICK, bundle)
-
-                tracker.send(HitBuilders.EventBuilder()
-                        .setCategory(GACategory.LAUNCH_AD)
-                        .setAction(GAAction.LAUNCH_AD_CLICK)
-                        .setLabel(screenAd.linkUrl)
-                        .build())
+                statsTracker.adClicked(screenAd)
 
                 if (BuildConfig.DEBUG) {
                     info("Clicked ads")
@@ -619,9 +515,10 @@ class MainActivity : ScopedAppActivity(),
             info("Show timer")
 
             // send impressions in background.
-            sendImpression(screenAd)
+            splashViewModel.sendImpression(screenAd, statsTracker)
 
-            firebaseAnalytics.logEvent(FtcEvent.AD_VIEWED, bundle)
+            // Tracking ad viewd
+            statsTracker.adViewed(screenAd)
 
             for (i in 5 downTo 1) {
                 adTimer.text = getString(R.string.prompt_ad_timer, i)
@@ -661,40 +558,6 @@ class MainActivity : ScopedAppActivity(),
         root_container.addView(adView)
 
         return adView
-    }
-
-    private fun sendImpression(screenAd: ScreenAd) {
-        GlobalScope.launch(Dispatchers.IO) {
-
-
-            screenAd.impressionDest().forEach {
-                try {
-                    tracker.send(HitBuilders.EventBuilder()
-                            .setCategory(GACategory.LAUNCH_AD)
-                            .setAction(GAAction.LAUNCH_AD_SENT)
-                            .setLabel(it)
-                            .build())
-
-                    Fetch().get(it).responseString()
-
-                    tracker.send(HitBuilders.EventBuilder()
-                            .setCategory(GACategory.LAUNCH_AD)
-                            .setAction(GAAction.LAUNCH_AD_SUCCESS)
-                            .setLabel(it)
-                            .build())
-                } catch (e: Exception) {
-                    if (BuildConfig.DEBUG) {
-                        info("Send launch screen impression failed: ${e.message}")
-                    }
-
-                    tracker.send(HitBuilders.EventBuilder()
-                            .setCategory(GACategory.LAUNCH_AD)
-                            .setAction(GAAction.LAUNCH_AD_FAIL)
-                            .setLabel(it)
-                            .build())
-                }
-            }
-        }
     }
 
     override fun onRestart() {
@@ -755,26 +618,6 @@ class MainActivity : ScopedAppActivity(),
             val token = tokenManager.getToken()
             info("Device token $token")
         }
-    }
-
-    private fun logAppOpen() {
-        val bundle = Bundle().apply {
-
-            val now = ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT)
-
-            if (BuildConfig.DEBUG) {
-                info("APP_OPEN event: $now")
-            }
-
-            putString(FirebaseAnalytics.Param.SUCCESS, now)
-        }
-
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundle)
-
-        tracker.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.APP_LAUNCH)
-                .setAction(GAAction.SUCCESS)
-                .build())
     }
 
     override fun onPause() {
@@ -885,24 +728,19 @@ class MainActivity : ScopedAppActivity(),
             info("View item list event: ${pages[position]}")
         }
 
-
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM_LIST, Bundle().apply {
-            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, pages[position].title)
-        })
+        statsTracker.tabSelected(pages[position].title)
     }
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
         if (BuildConfig.DEBUG) {
             info("Tab reselected: ${tab?.position}")
         }
-
     }
 
     override fun onTabUnselected(tab: TabLayout.Tab?) {
         if (BuildConfig.DEBUG) {
             info("Tab unselected: ${tab?.position}")
         }
-
     }
 
     private fun feedbackEmail() {
