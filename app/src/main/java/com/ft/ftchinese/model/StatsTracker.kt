@@ -2,13 +2,18 @@ package com.ft.ftchinese.model
 
 import android.content.Context
 import android.os.Bundle
+import androidx.core.os.bundleOf
 import com.ft.ftchinese.R
+import com.ft.ftchinese.splash.ScreenAd
+import com.ft.ftchinese.util.AdSlot
 import com.ft.ftchinese.util.FtcEvent
 import com.ft.ftchinese.util.GAAction
 import com.ft.ftchinese.util.GACategory
 import com.google.android.gms.analytics.GoogleAnalytics
 import com.google.android.gms.analytics.HitBuilders
 import com.google.firebase.analytics.FirebaseAnalytics
+import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.format.DateTimeFormatter
 
 class StatsTracker private constructor(context: Context) {
 
@@ -24,7 +29,7 @@ class StatsTracker private constructor(context: Context) {
             putString(FirebaseAnalytics.Param.ITEM_CATEGORY, source.type)
             putString(FirebaseAnalytics.Param.ITEM_NAME, source.title)
             if (source.language != null) {
-                putString(FirebaseAnalytics.Param.ITEM_VARIANT, source.language?.name)
+                putString(FirebaseAnalytics.Param.ITEM_VARIANT, source.language.name)
             }
         })
 
@@ -91,6 +96,75 @@ class StatsTracker private constructor(context: Context) {
                 .build())
     }
 
+    fun launchAdSent(label: String) {
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.LAUNCH_AD)
+                .setAction(GAAction.LAUNCH_AD_SENT)
+                .setLabel(label)
+                .build())
+    }
+
+    fun launchAdSuccess(label: String) {
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.LAUNCH_AD)
+                .setAction(GAAction.LAUNCH_AD_SUCCESS)
+                .setLabel(label)
+                .build())
+    }
+
+    fun launchAdFail(label:String) {
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.LAUNCH_AD)
+                .setAction(GAAction.LAUNCH_AD_FAIL)
+                .setLabel(label)
+                .build())
+    }
+
+    fun adClicked(screenAd: ScreenAd) {
+        firebaseAnalytics.logEvent(FtcEvent.AD_CLICK, bundleOf(
+                FirebaseAnalytics.Param.CREATIVE_NAME to screenAd.title,
+                FirebaseAnalytics.Param.CREATIVE_SLOT to AdSlot.APP_OPEN
+        ))
+
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.LAUNCH_AD)
+                .setAction(GAAction.LAUNCH_AD_CLICK)
+                .setLabel(screenAd.linkUrl)
+                .build())
+    }
+
+    fun adSkipped(screenAd: ScreenAd) {
+        firebaseAnalytics.logEvent(FtcEvent.AD_SKIP, bundleOf(
+                FirebaseAnalytics.Param.CREATIVE_NAME to screenAd.title,
+                FirebaseAnalytics.Param.CREATIVE_SLOT to AdSlot.APP_OPEN
+        ))
+    }
+
+    fun adViewed(screenAd: ScreenAd) {
+        firebaseAnalytics.logEvent(FtcEvent.AD_VIEWED, bundleOf(
+                FirebaseAnalytics.Param.CREATIVE_NAME to screenAd.title,
+                FirebaseAnalytics.Param.CREATIVE_SLOT to AdSlot.APP_OPEN
+        ))
+    }
+
+    fun appOpened() {
+        val now = ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT)
+
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundleOf(
+                FirebaseAnalytics.Param.SUCCESS to now
+        ))
+
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.APP_LAUNCH)
+                .setAction(GAAction.SUCCESS)
+                .build())
+    }
+
+    fun tabSelected(title: String) {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM_LIST, bundleOf(
+                FirebaseAnalytics.Param.ITEM_CATEGORY to title
+        ))
+    }
 
     companion object {
         private var instance: StatsTracker? = null
