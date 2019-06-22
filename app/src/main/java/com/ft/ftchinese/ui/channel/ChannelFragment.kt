@@ -20,7 +20,6 @@ import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.WVClient
 import com.ft.ftchinese.util.*
-import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.fragment_channel.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.coroutines.*
@@ -48,7 +47,7 @@ class ChannelFragment : ScopedFragment(),
 
     private lateinit var sessionManager: SessionManager
     private lateinit var cache: FileCache
-    private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private lateinit var statsTracker: StatsTracker
 
     private lateinit var channelViewModel: ChannelViewModel
 
@@ -76,7 +75,7 @@ class ChannelFragment : ScopedFragment(),
 
         sessionManager = SessionManager.getInstance(context)
         cache = FileCache(context)
-        firebaseAnalytics = FirebaseAnalytics.getInstance(context)
+        statsTracker = StatsTracker.getInstance(context)
 
         info("onAttach finished")
     }
@@ -86,8 +85,6 @@ class ChannelFragment : ScopedFragment(),
 
         // Get metadata about current tab
         channelSource = arguments?.getParcelable(ARG_CHANNEL_SOURCE) ?: return
-
-//                json.parse<ChannelSource>(channelSourceStr)
 
         info("Channel source: $channelSource")
     }
@@ -153,9 +150,13 @@ class ChannelFragment : ScopedFragment(),
                 .get(ChannelViewModel::class.java)
 
         channelViewModel.cacheFound.observe(this, Observer {
-            val cacheFound = it ?: return@Observer
 
-            if (cacheFound) {
+            info("Is cache found: $it")
+
+            // If cache is found
+            if (it) {
+                info("Cache found. Update silently.")
+
                 if (activity?.isNetworkConnected() != true) {
                     return@Observer
                 }
@@ -170,7 +171,10 @@ class ChannelFragment : ScopedFragment(),
                 return@Observer
             }
 
+            // Cache not found.
+            info("Cache not found")
             if (activity?.isNetworkConnected() != true) {
+                info("No network")
                 toast(R.string.prompt_no_network)
                 return@Observer
             }
@@ -185,6 +189,7 @@ class ChannelFragment : ScopedFragment(),
         })
 
         channelViewModel.remoteResult.observe(this, Observer {
+            info("Received fetch result")
 
             val remoteFrag = it ?: return@Observer
 
@@ -194,9 +199,16 @@ class ChannelFragment : ScopedFragment(),
         })
 
         channelViewModel.renderResult.observe(this, Observer {
+            info("Received render result: $it")
+
             showProgress(false)
 
             val htmlResult = it ?: return@Observer
+
+            if (htmlResult.error != null) {
+                toast(htmlResult.error)
+                return@Observer
+            }
 
             if (htmlResult.exception != null) {
                 activity?.handleException(htmlResult.exception)
@@ -204,7 +216,6 @@ class ChannelFragment : ScopedFragment(),
             }
 
             if (htmlResult.success.isNullOrBlank()) {
-                toast(R.string.api_server_error)
                 return@Observer
             }
 
@@ -304,23 +315,12 @@ class ChannelFragment : ScopedFragment(),
 
             channelSource = listPage
 
-//            initLoading()
             channelViewModel.loadFromCache(listPage)
 
         } else {
             info("Start a new activity for $listPage")
             ChannelActivity.start(activity, listPage)
         }
-    }
-
-    /**
-     * Log when user clicked an article from a list.
-     */
-    private fun logSelectContent(item: ChannelItem) {
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
-            putString(FirebaseAnalytics.Param.CONTENT_TYPE, item.type)
-            putString(FirebaseAnalytics.Param.ITEM_ID, item.id)
-        })
     }
 
     /**
@@ -468,7 +468,7 @@ class ChannelFragment : ScopedFragment(),
             }
         }
 
-        logSelectContent(item)
+        statsTracker.selectListItem(item)
     }
 
     companion object {
