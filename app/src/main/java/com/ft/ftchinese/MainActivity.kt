@@ -476,58 +476,60 @@ class MainActivity : ScopedAppActivity(),
                 return@launch
             }
 
-            val adView = createAdView()
-            val adImage = adView.findViewById<ImageView>(R.id.ad_image)
-            val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
+            withContext(Dispatchers.Main) {
+                val adView = createAdView()
+                val adImage = adView.findViewById<ImageView>(R.id.ad_image)
+                val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
 
-            adTimer.setOnClickListener {
-                root_container.removeView(adView)
-                showSystemUI()
-                showAdJob?.cancel()
-                if (BuildConfig.DEBUG) {
-                    info("Skipped ads")
+                adTimer.setOnClickListener {
+                    root_container.removeView(adView)
+                    showSystemUI()
+                    showAdJob?.cancel()
+                    if (BuildConfig.DEBUG) {
+                        info("Skipped ads")
+                    }
+
+                    // Log user skipping advertisement action.
+                    statsTracker.adSkipped(screenAd)
                 }
 
-                // Log user skipping advertisement action.
-                statsTracker.adSkipped(screenAd)
-            }
 
+                adImage.setOnClickListener {
+                    val customTabsInt = CustomTabsIntent.Builder().build()
+                    customTabsInt.launchUrl(this@MainActivity, Uri.parse(screenAd.linkUrl))
+                    root_container.removeView(adView)
+                    showSystemUI()
+                    showAdJob?.cancel()
 
-            adImage.setOnClickListener {
-                val customTabsInt = CustomTabsIntent.Builder().build()
-                customTabsInt.launchUrl(this@MainActivity, Uri.parse(screenAd.linkUrl))
-                root_container.removeView(adView)
-                showSystemUI()
-                showAdJob?.cancel()
+                    // Log click event
+                    statsTracker.adClicked(screenAd)
 
-                // Log click event
-                statsTracker.adClicked(screenAd)
-
-                if (BuildConfig.DEBUG) {
-                    info("Clicked ads")
+                    if (BuildConfig.DEBUG) {
+                        info("Clicked ads")
+                    }
                 }
+
+
+                adImage.setImageDrawable(drawable)
+
+                adTimer.visibility = View.VISIBLE
+                info("Show timer")
+
+                // send impressions in background.
+                splashViewModel.sendImpression(screenAd, statsTracker)
+
+                // Tracking ad viewd
+                statsTracker.adViewed(screenAd)
+
+                for (i in 5 downTo 1) {
+                    adTimer.text = getString(R.string.prompt_ad_timer, i)
+                    delay(1000)
+                }
+
+                root_container.removeView(adView)
+
+                showSystemUI()
             }
-
-
-            adImage.setImageDrawable(drawable)
-
-            adTimer.visibility = View.VISIBLE
-            info("Show timer")
-
-            // send impressions in background.
-            splashViewModel.sendImpression(screenAd, statsTracker)
-
-            // Tracking ad viewd
-            statsTracker.adViewed(screenAd)
-
-            for (i in 5 downTo 1) {
-                adTimer.text = getString(R.string.prompt_ad_timer, i)
-                delay(1000)
-            }
-
-            root_container.removeView(adView)
-
-            showSystemUI()
         }
     }
 
