@@ -8,7 +8,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.threeten.bp.LocalDate
 
-const val splashScheduleFile = "splash_schedule.json"
+const val SPLASH_SCHEDULE_FILE = "splash_schedule.json"
 
 private const val SPLASH_AD_PREF_NAME = "splash_ad"
 private const val PREF_TYPE = "type"
