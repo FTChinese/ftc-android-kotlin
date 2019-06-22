@@ -10,8 +10,11 @@ import com.ft.ftchinese.util.FileCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
-class ChannelViewModel(val cache: FileCache) : ViewModel() {
+class ChannelViewModel(val cache: FileCache) :
+        ViewModel(), AnkoLogger {
 
     val cacheFound = MutableLiveData<Boolean>()
     val remoteResult = MutableLiveData<String>()
@@ -25,11 +28,12 @@ class ChannelViewModel(val cache: FileCache) : ViewModel() {
                 cache.loadText(channelSource.fileName)
             }
 
-            cacheFound.value = !cacheFrag.isNullOrBlank()
-
             if (cacheFrag.isNullOrBlank()) {
+                cacheFound.value = false
                 return@launch
             }
+
+            cacheFound.value = true
 
             val html = render(channelSource, cacheFrag)
 
@@ -48,14 +52,18 @@ class ChannelViewModel(val cache: FileCache) : ViewModel() {
             return
         }
 
+        info("Load channel from $url")
+
         viewModelScope.launch {
             try {
                 val remoteFrag = withContext(Dispatchers.IO) {
                     Fetch().get(url).responseString()
                 }
 
+                info("Channel fragment loaded")
 
-                if (remoteFrag == null) {
+                if (remoteFrag.isNullOrBlank()) {
+                    info("Channel fragment is empty")
                     renderResult.value = RenderResult(
                             error = R.string.api_server_error
                     )
@@ -66,6 +74,9 @@ class ChannelViewModel(val cache: FileCache) : ViewModel() {
                 remoteResult.value = remoteFrag
 
                 if (!shouldRender) {
+                    renderResult.value = RenderResult(
+                            success = null
+                    )
                     return@launch
                 }
 
@@ -76,6 +87,7 @@ class ChannelViewModel(val cache: FileCache) : ViewModel() {
                 )
 
             } catch (e: Exception) {
+                info(e)
                 renderResult.value = RenderResult(
                         exception = e
                 )
