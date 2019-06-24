@@ -1,12 +1,12 @@
 package com.ft.ftchinese
 
-import android.app.Activity
-import android.app.SearchManager
+import android.app.*
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.GravityCompat
@@ -16,6 +16,9 @@ import android.webkit.WebView
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.TaskStackBuilder
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.base.ScopedAppActivity
@@ -28,6 +31,9 @@ import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.account.MemberActivity
+import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.article.EXTRA_CHANNEL_ITEM
+import com.ft.ftchinese.ui.article.EXTRA_USE_JSON
 import com.ft.ftchinese.ui.channel.MyftPagerAdapter
 import com.ft.ftchinese.ui.channel.SearchableActivity
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
@@ -47,6 +53,7 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import java.io.ByteArrayInputStream
 
+const val CHANNEL_ID = "com.ft.ftchinese.News"
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
  */
@@ -169,6 +176,8 @@ class MainActivity : ScopedAppActivity(),
             WebView.setWebContentsDebuggingEnabled(true)
         }
 
+        createNotificationChannel()
+
         cache = FileCache(this)
         splashManager = SplashScreenManager(this)
 
@@ -246,6 +255,53 @@ class MainActivity : ScopedAppActivity(),
         }
 
         statsTracker.appOpened()
+
+//        sendNotification()
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = getString(R.string.channel_name)
+            val descriptionText = getString(R.string.channel_description)
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+
+    private fun sendNotification() {
+        // You might have to uninstall the app for the
+        // intent to take effect.
+        val intent = Intent(this, ArticleActivity::class.java).apply {
+            putExtra(EXTRA_CHANNEL_ITEM, ChannelItem(
+                    id = "001083331",
+                    type = "story",
+                    title = "波司登遭做空机构质疑 股价暴跌"
+            ))
+            putExtra(EXTRA_USE_JSON, true)
+        }
+
+        val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(intent)
+            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.logo_round)
+                .setContentTitle("波司登遭做空机构质疑 股价暴跌")
+//                .setContentText("")
+                .setStyle(NotificationCompat.BigTextStyle()
+                        .bigText("周一，波司登的股价下跌了24.8%，随后宣布停牌。此前，做空机构Bonitas Research对波司登的收入和利润提出了质疑。"))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+        with(NotificationManagerCompat.from(this)) {
+            notify(1, builder.build())
+        }
     }
 
     private fun setupBottomNav() {
