@@ -189,7 +189,6 @@ class ChannelFragment : ScopedFragment(),
         })
 
         channelViewModel.renderResult.observe(this, Observer {
-            info("Received render result: $it")
 
             showProgress(false)
 
@@ -381,8 +380,6 @@ class ChannelFragment : ScopedFragment(),
         val channelItem = articleList
                 ?.getOrNull(index)
                 ?: return
-
-        info("Selected item: $channelItem")
         
         channelItem.withMeta(channelMeta)
 
@@ -409,6 +406,8 @@ class ChannelFragment : ScopedFragment(),
 
         // Check whether this article requires permission.
         val contentPerm = channelSource?.permission ?: channelItem.permission()
+
+        info("Content permission: $contentPerm")
 
         val granted = activity?.grantPermission(account, contentPerm)
 
