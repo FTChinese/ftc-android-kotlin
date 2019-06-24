@@ -39,8 +39,6 @@ class StoryFragment : ScopedFragment(),
     private lateinit var followingManager: FollowingManager
     private lateinit var sessionManager: SessionManager
     private lateinit var articleModel: ArticleViewModel
-//    private lateinit var starModel: StarArticleViewModel
-//    private lateinit var readModel: ReadArticleViewModel
 
     private var listener: OnProgressListener? = null
 
@@ -140,33 +138,31 @@ class StoryFragment : ScopedFragment(),
         super.onActivityCreated(savedInstanceState)
 
         articleModel = activity?.run {
-            ViewModelProviders.of(this).get(ArticleViewModel::class.java)
+            ViewModelProviders.of(
+                    this,
+                    ArticleViewModelFactory(cache, followingManager))
+                    .get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
+        // Remember the language user selected so
+        // that we know how to handle refresh.
         articleModel.currentLang.observe(this, Observer<Language> {
             currentLang = it
 
-            initLoading()
+            val item = storyBrief ?: return@Observer
+            articleModel.loadFromCache(
+                    item = item,
+                    lang = it
+            )
         })
 
         // If cache is not found, fetch data from remote.
-        articleModel.cacheFound.observe(this, Observer {
-            if (it) {
-                if (activity?.isNetworkConnected() == true) {
-                    return@Observer
-                }
-
-                val item = storyBrief ?: return@Observer
-
-                // Only load, no rendering.
-                articleModel.loadFromRemote(
-                        item = item,
-                        lang = currentLang,
-                        shouldRender = false
-                )
+        articleModel.cacheResult.observe(this, Observer {
+            if (it.found) {
                 return@Observer
             }
 
+            // If cache is not found, fetch data from server.
             if (activity?.isNetworkConnected() != true) {
                 toast(R.string.prompt_no_network)
                 return@Observer
@@ -211,95 +207,6 @@ class StoryFragment : ScopedFragment(),
         articleModel.loadFromCache(item, currentLang)
     }
 
-//    private suspend fun loadFromServer() {
-//        if (activity?.isNetworkConnected() != true) {
-//            showProgress(false)
-//            toast(R.string.prompt_no_network)
-//            return
-//        }
-//
-//        val url = storyBrief?.buildApiUrl()
-//
-//        if (url.isNullOrBlank()) {
-//            showProgress(false)
-//            toast("API endpoint not found")
-//            return
-//        }
-//
-//        info("Start fetching data from $url")
-//
-//        val story = fetchAndCacheRemote()
-//
-//        if (story == null) {
-//            showProgress(false)
-//            toast(R.string.api_server_error)
-//            return
-//        }
-//
-//        val html = render(story)
-//        if (html.isNullOrBlank()) {
-//            showProgress(false)
-//            toast(R.string.prompt_load_failure)
-//            return
-//        }
-//
-//        load(html)
-//
-//        postLoading(story)
-//    }
-
-//    private suspend fun fetchAndCacheRemote(): Story? = withContext(Dispatchers.IO) {
-//        val url = storyBrief?.buildApiUrl() ?: return@withContext null
-//
-//        val data = try {
-//            Fetch().get(url).responseString()
-//        } catch (e: Exception) {
-//            null
-//        }
-//
-//        if (data.isNullOrBlank()) {
-//            return@withContext null
-//        }
-//
-//        launch(Dispatchers.IO) {
-//            cacheData(data)
-//        }
-//
-//        try {
-//            json.parse<Story>(data)
-//        } catch (e: Exception) {
-//            null
-//        }
-//    }
-
-//    private suspend fun cacheData(data: String) {
-//        val fileName = storyBrief?.cacheNameJson() ?: return
-//
-//        withContext(Dispatchers.IO) {
-//            cache.saveText(fileName, data)
-//        }
-//    }
-//
-//    private suspend fun render(story: Story): String? {
-//
-//        articleModel.showLangSwitcher(story.isBilingual)
-//
-//        return withContext(Dispatchers.Default) {
-//            if (template == null) {
-//                template = cache.readStoryTemplate()
-//            }
-//
-//            val follows = followingManager.loadForJS()
-//
-//            storyBrief?.renderStory(
-//                    template = template,
-//                    story = story,
-//                    language = currentLang,
-//                    follows = follows
-//            )
-//        }
-//    }
-
     private fun load(html: String) {
         web_view.loadDataWithBaseURL(
                 FTC_OFFICIAL_URL,
@@ -310,19 +217,6 @@ class StoryFragment : ScopedFragment(),
 
         showProgress(false)
     }
-
-//    private suspend fun postLoading(story: Story) {
-//        // Save reading history.
-//        withContext(Dispatchers.IO) {
-//            readModel.addOne(story.toReadArticle(storyBrief))
-//        }
-//
-//        // Publish ReadArticle to ViewModel.
-//        val article = story.toStarredArticle(storyBrief)
-//        info("Publish loaded article. Access right: ${story.accesibleBy}")
-//        articleModel.loaded(article)
-//        starModel.loaded(article)
-//    }
 
     @JavascriptInterface
     fun follow(message: String) {
