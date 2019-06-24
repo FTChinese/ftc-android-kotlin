@@ -6,6 +6,9 @@
 
     <string name="share_template">[FT中文网]%1$s - %2$s</string>
 
+    <string name="channel_name">新闻</string>
+    <string name="channel_description">最新新闻动态</string>
+
     <!-- Bottom navigation tabs -->
     <string name="nav_news">最新</string>
     <string name="nav_english">每日英语</string>
