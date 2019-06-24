@@ -30,8 +30,8 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import java.io.ByteArrayOutputStream
 
-private const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
-private const val EXTRA_USE_JSON = "extra_use_json"
+const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
+const val EXTRA_USE_JSON = "extra_use_json"
 
 /**
  * Host activity for [StoryFragment] or [WebContentFragment], depending on the type of contents
