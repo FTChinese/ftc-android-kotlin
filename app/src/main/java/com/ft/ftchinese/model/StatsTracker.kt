@@ -205,7 +205,11 @@ class StatsTracker private constructor(context: Context) {
         }
 
         GlobalScope.launch(Dispatchers.IO) {
-            account.engaging(start, end)
+            try {
+                account.engaging(start, end)
+            } catch (e: Exception) {
+
+            }
         }
     }
 
