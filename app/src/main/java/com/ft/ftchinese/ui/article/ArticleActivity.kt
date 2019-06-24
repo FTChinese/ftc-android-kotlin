@@ -82,7 +82,7 @@ class ArticleActivity : ScopedAppActivity(),
         }
 
         // Hide language switcher.
-        updateLanguageSwitcher(show = false)
+        updateLangSwitcher(show = false)
 
         setup()
 
@@ -109,7 +109,6 @@ class ArticleActivity : ScopedAppActivity(),
     private fun setup() {
         cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
-//        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
         statsTracker = StatsTracker.getInstance(this)
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
         followingManager = FollowingManager.getInstance(this)
@@ -125,7 +124,7 @@ class ArticleActivity : ScopedAppActivity(),
         // Observe whether the article is bilingual.
         articleViewModel.bilingual.observe(this, Observer<Boolean> {
             info("Observer found content is bilingual: $it")
-            updateLanguageSwitcher(it)
+            updateLangSwitcher(it)
         })
 
         articleViewModel.starringTarget.observe(this, Observer {
@@ -151,7 +150,7 @@ class ArticleActivity : ScopedAppActivity(),
         SocialShareFragment().show(supportFragmentManager, "SocialShareFragment")
     }
 
-    private fun updateLanguageSwitcher(show: Boolean) {
+    private fun updateLangSwitcher(show: Boolean) {
         if (!show) {
             language_radio_group.visibility = View.GONE
             return
@@ -166,13 +165,13 @@ class ArticleActivity : ScopedAppActivity(),
         lang_en_btn.setOnClickListener {
             val account = sessionManager.loadAccount()
 
-//            val grant = shouldGrantStandard(account)
+            val item = channelItem ?: return@setOnClickListener
 
             if (!grantPermission(account, Permission.STANDARD)) {
                 disableLangSwitch()
 
-                val item = article?.toChannelItem()
-                item?.langVariant = Language.ENGLISH
+
+                item.langVariant = Language.ENGLISH
 
                 // Tracking
                 PaywallTracker.fromArticle(item)
@@ -186,11 +185,12 @@ class ArticleActivity : ScopedAppActivity(),
         lang_bi_btn.setOnClickListener {
             val account = sessionManager.loadAccount()
 
+            val item = channelItem ?: return@setOnClickListener
+
             if (!grantPermission(account, Permission.STANDARD)) {
                 disableLangSwitch()
 
-                val item = article?.toChannelItem()
-                item?.langVariant = Language.BILINGUAL
+                item.langVariant = Language.BILINGUAL
                 PaywallTracker.fromArticle(item)
 
                 return@setOnClickListener
