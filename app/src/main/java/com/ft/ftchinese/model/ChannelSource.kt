@@ -26,7 +26,6 @@ data class ChannelSource (
         val name: String,  // Cache filename used by this tab
         val contentUrl: String, // This is used to fetch html fragment containing a list of articles.
         val htmlType: Int, // Flag used to tell whether the webUrl should be loaded directly
-        @KTier
         val permission: Permission? = null
 
 ) : Parcelable, AnkoLogger {
