@@ -11,6 +11,10 @@ import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 fun Activity.grantPermission(account: Account?, contentPerm: Permission): Boolean {
+    if (contentPerm == Permission.FREE) {
+        return true
+    }
+
     if (account == null) {
         toast(R.string.prompt_login_to_read)
         LoginActivity.startForResult(this)
