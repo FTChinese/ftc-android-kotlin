@@ -27,7 +27,8 @@ class ArticleViewModel(
     val starringTarget = MutableLiveData<StarredArticle>()
 
     // Notify StoryFragment whether cached is found
-    val cacheFound = MutableLiveData<Boolean>()
+    val cacheResult = MutableLiveData<CachedResult>()
+
     // Notify StoryFragment that html is ready to be loaded
     // into WebView.
     val renderResult = MutableLiveData<RenderResult>()
@@ -48,7 +49,9 @@ class ArticleViewModel(
     fun loadFromCache(item: ChannelItem, lang: Language) {
         val cacheName = item.cacheNameJson()
         if (cacheName.isBlank()) {
-            cacheFound.value = false
+            cacheResult.value = CachedResult(
+                    found = false
+            )
             return
         }
 
@@ -59,24 +62,20 @@ class ArticleViewModel(
                 }
 
                 if (data.isNullOrBlank()) {
-                    cacheFound.value = false
+                    cacheResult.value = CachedResult(
+                            found = false
+                    )
                     return@launch
                 }
-
-                // Notify cache is found
-                cacheFound.value = true
 
                 val story = json.parse<Story>(data)
 
                 if (story == null) {
-                    cacheFound.value = false
+                    cacheResult.value = CachedResult(
+                            found = false
+                    )
                     return@launch
                 }
-
-                starringTarget.value = story.toStarredArticle(item)
-
-                // Notify whether this is bilingual content
-                bilingual.value = story.isBilingual
 
                 val html = render(
                         item = item,
@@ -88,13 +87,21 @@ class ArticleViewModel(
                         success = html
                 )
 
+                // Only set update starringTarget for initial loading.
+                starringTarget.value = story.toStarredArticle(item)
+
+                // Notify whether this is bilingual content
+                bilingual.value = story.isBilingual
+
             } catch (e: Exception) {
-                cacheFound.value = false
+                cacheResult.value = CachedResult(
+                        exception = e
+                )
             }
         }
     }
 
-    fun loadFromRemote(item: ChannelItem, lang: Language, shouldRender: Boolean = true) {
+    fun loadFromRemote(item: ChannelItem, lang: Language) {
         val url = item.buildApiUrl()
         if (url.isBlank()) {
             renderResult.value = RenderResult(
@@ -121,11 +128,6 @@ class ArticleViewModel(
                     cache.saveText(item.cacheNameJson(), data)
                 }
 
-                // If this is only a background download.
-                if (!shouldRender) {
-                    return@launch
-                }
-
                 val story = json.parse<Story>(data)
 
                 if (story == null) {
@@ -135,9 +137,6 @@ class ArticleViewModel(
 
                     return@launch
                 }
-
-                starringTarget.value = story.toStarredArticle(item)
-                bilingual.value = story.isBilingual
 
                 val html = render(
                         item = item,
@@ -150,7 +149,9 @@ class ArticleViewModel(
                         success = html
                 )
 
-
+// Only update it for initial loading.
+                starringTarget.value = story.toStarredArticle(item)
+                bilingual.value = story.isBilingual
 
             } catch (e: Exception) {
                 renderResult.value = RenderResult(
