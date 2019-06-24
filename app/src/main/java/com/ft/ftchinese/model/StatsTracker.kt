@@ -13,6 +13,9 @@ import com.ft.ftchinese.util.GACategory
 import com.google.android.gms.analytics.GoogleAnalytics
 import com.google.android.gms.analytics.HitBuilders
 import com.google.firebase.analytics.FirebaseAnalytics
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
@@ -194,6 +197,16 @@ class StatsTracker private constructor(context: Context) {
                 FirebaseAnalytics.Param.ITEM_ID to article.id,
                 FirebaseAnalytics.Param.METHOD to "wechat"
         ))
+    }
+
+    fun engaged(account: Account?, start: Long, end: Long) {
+        if (account == null) {
+            return
+        }
+
+        GlobalScope.launch(Dispatchers.IO) {
+            account.engaging(start, end)
+        }
     }
 
     companion object {

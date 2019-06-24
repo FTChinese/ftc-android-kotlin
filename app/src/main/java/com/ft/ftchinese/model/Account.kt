@@ -355,6 +355,19 @@ data class Account(
 
         return response.code() == 204
     }
+
+    fun engaging(start: Long, end: Long) {
+        Fetch().post("http://www.ftchinese.com/engagment.php")
+                .jsonBody(Klaxon().toJsonString(ReadingDuration(
+                        url = "http://www.ftchinese.com/",
+                        refer = "http://www.ftchinese.com/",
+                        startUnix = start,
+                        endUnix = end,
+                        userId = id,
+                        functionName = "onLoad"
+                )))
+                .responseString()
+    }
 }
 
 
