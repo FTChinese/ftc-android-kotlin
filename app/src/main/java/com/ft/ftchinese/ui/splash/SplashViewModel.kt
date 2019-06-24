@@ -6,10 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.StatsTracker
-import com.ft.ftchinese.splash.SPLASH_SCHEDULE_FILE
-import com.ft.ftchinese.splash.Schedule
-import com.ft.ftchinese.splash.ScreenAd
-import com.ft.ftchinese.splash.SplashScreenManager
+import com.ft.ftchinese.model.splash.SPLASH_SCHEDULE_FILE
+import com.ft.ftchinese.model.splash.Schedule
+import com.ft.ftchinese.model.splash.ScreenAd
+import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
