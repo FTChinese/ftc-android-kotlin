@@ -40,11 +40,6 @@ class ArticleViewModel(
         starringTarget.value = data
     }
 
-    // Fragment tell host activity to show language switcher
-//    fun showLangSwitcher(show: Boolean) {
-//        isBilingual.value = show
-//    }
-
     // Host activity tells fragment to switch content.
     fun switchLang(lang: Language) {
         currentLang.value = lang

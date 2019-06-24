@@ -18,7 +18,6 @@ import com.ft.ftchinese.grantPermission
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.OnProgressListener
 import com.ft.ftchinese.util.FileCache
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
 import com.tencent.mm.opensdk.modelmsg.WXWebpageObject
@@ -50,7 +49,7 @@ class ArticleActivity : ScopedAppActivity(),
 
     private lateinit var cache: FileCache
     private lateinit var sessionManager: SessionManager
-    private lateinit var firebaseAnalytics: FirebaseAnalytics
+    private lateinit var statsTracker: StatsTracker
     private lateinit var followingManager: FollowingManager
 
     private lateinit var wxApi: IWXAPI
@@ -70,22 +69,6 @@ class ArticleActivity : ScopedAppActivity(),
         } else {
             progress_bar?.visibility = View.GONE
         }
-    }
-
-    private fun logViewItemEvent() {
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM, Bundle().apply {
-            putString(FirebaseAnalytics.Param.ITEM_ID, article?.id)
-            putString(FirebaseAnalytics.Param.ITEM_NAME, article?.title)
-            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, article?.type)
-        })
-    }
-
-    private fun logWxShareEvent() {
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SHARE, Bundle().apply {
-            putString(FirebaseAnalytics.Param.CONTENT_TYPE, article?.type)
-            putString(FirebaseAnalytics.Param.ITEM_ID, article?.id)
-            putString(FirebaseAnalytics.Param.METHOD, "wechat")
-        })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -126,10 +109,10 @@ class ArticleActivity : ScopedAppActivity(),
     private fun setup() {
         cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+//        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        statsTracker = StatsTracker.getInstance(this)
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
         followingManager = FollowingManager.getInstance(this)
-
 
         articleViewModel = ViewModelProviders.of(this, ArticleViewModelFactory(cache, followingManager))
                 .get(ArticleViewModel::class.java)
@@ -152,7 +135,7 @@ class ArticleActivity : ScopedAppActivity(),
 
             readViewModel.addOne(it.toReadArticle())
 
-            logViewItemEvent()
+            statsTracker.storyViewed(it)
         })
 
         starViewModel.shouldStar.observe(this, Observer {
@@ -250,7 +233,7 @@ class ArticleActivity : ScopedAppActivity(),
 
                 wxApi.sendReq(req)
 
-                logWxShareEvent()
+                statsTracker.sharedToWx(article)
             }
 
             ShareItem.OPEN_IN_BROWSER -> {

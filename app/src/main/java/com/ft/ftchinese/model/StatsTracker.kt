@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.ft.ftchinese.R
+import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.splash.ScreenAd
 import com.ft.ftchinese.util.AdSlot
 import com.ft.ftchinese.util.FtcEvent
@@ -171,6 +172,28 @@ class StatsTracker private constructor(context: Context) {
             putString(FirebaseAnalytics.Param.CONTENT_TYPE, item.type)
             putString(FirebaseAnalytics.Param.ITEM_ID, item.id)
         })
+    }
+
+    fun storyViewed(article: StarredArticle?) {
+        if (article == null) {
+            return
+        }
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM, bundleOf(
+                FirebaseAnalytics.Param.ITEM_ID to article.id,
+                FirebaseAnalytics.Param.ITEM_NAME to article.title,
+                FirebaseAnalytics.Param.ITEM_CATEGORY to article.type
+        ))
+    }
+
+    fun sharedToWx(article: StarredArticle?) {
+        if (article == null) {
+            return
+        }
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SHARE, bundleOf(
+                FirebaseAnalytics.Param.CONTENT_TYPE to article.type,
+                FirebaseAnalytics.Param.ITEM_ID to article.id,
+                FirebaseAnalytics.Param.METHOD to "wechat"
+        ))
     }
 
     companion object {
