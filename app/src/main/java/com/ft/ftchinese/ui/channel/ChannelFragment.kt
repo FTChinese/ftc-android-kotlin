@@ -188,16 +188,6 @@ class ChannelFragment : ScopedFragment(),
             )
         })
 
-        channelViewModel.remoteResult.observe(this, Observer {
-            info("Received fetch result")
-
-            val remoteFrag = it ?: return@Observer
-
-            val fileName = channelSource?.fileName ?: return@Observer
-
-            channelViewModel.cacheData(fileName, remoteFrag)
-        })
-
         channelViewModel.renderResult.observe(this, Observer {
             info("Received render result: $it")
 
@@ -226,50 +216,44 @@ class ChannelFragment : ScopedFragment(),
     }
 
     override fun onRefresh() {
+
+        toast(R.string.prompt_refreshing)
+
+        initLoading()
+    }
+
+    private fun initLoading() {
         val chSrc = channelSource
         if (chSrc == null) {
             showProgress(false)
             return
         }
 
-        toast(R.string.prompt_refreshing)
-
-        when (chSrc.htmlType) {
-            HTML_TYPE_FRAGMENT -> {
-                launch {
-                    info("start refreshing: html fragment")
-                    // Load data and render.
-                    channelViewModel.loadFromServer(
-                            channelSource = chSrc
-                    )
-
-                }
-            }
-            HTML_TYPE_COMPLETE -> {
-                info("start refreshing: reload")
-                web_view.reload()
-                showProgress(false)
-                toast(R.string.prompt_updated)
-            }
+        if (!swipe_refresh.isRefreshing) {
+            showProgress(true)
         }
-    }
-
-    private fun initLoading() {
-        showProgress(true)
 
         // For partial HTML, we need to crawl its content and render it with a template file to get the template HTML page.
         when (channelSource?.htmlType) {
             HTML_TYPE_FRAGMENT -> {
                 info("initLoading: html fragment")
 
-                val chSrc = channelSource ?: return
+                if (swipe_refresh.isRefreshing) {
+                    channelViewModel.loadFromServer(
+                            channelSource = chSrc
+                    )
+                } else {
+                    channelViewModel.loadFromCache(chSrc)
+                }
 
-                channelViewModel.loadFromCache(chSrc)
             }
             // For complete HTML, load it directly into Web view.
             HTML_TYPE_COMPLETE -> {
                 info("initLoading: web page")
-                web_view.loadUrl(channelSource?.listUrl())
+                web_view.loadUrl(chSrc.listUrl())
+                if (swipe_refresh.isRefreshing) {
+                    toast(R.string.prompt_updated)
+                }
                 showProgress(false)
             }
         }

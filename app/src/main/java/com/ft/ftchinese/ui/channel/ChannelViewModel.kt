@@ -17,7 +17,6 @@ class ChannelViewModel(val cache: FileCache) :
         ViewModel(), AnkoLogger {
 
     val cacheFound = MutableLiveData<Boolean>()
-    val remoteResult = MutableLiveData<String>()
     val renderResult = MutableLiveData<RenderResult>()
 
     private var template: String? = null
@@ -70,8 +69,12 @@ class ChannelViewModel(val cache: FileCache) :
                     return@launch
                 }
 
-                // Notify received data after server.
-                remoteResult.value = remoteFrag
+                val fileName = channelSource.fileName
+                if (fileName != null) {
+                    launch(Dispatchers.IO) {
+                        cache.saveText(fileName, remoteFrag)
+                    }
+                }
 
                 if (!shouldRender) {
                     renderResult.value = RenderResult(
