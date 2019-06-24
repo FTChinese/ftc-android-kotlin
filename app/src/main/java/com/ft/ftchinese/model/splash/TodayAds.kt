@@ -1,4 +1,4 @@
-package com.ft.ftchinese.splash
+package com.ft.ftchinese.model.splash
 
 import com.ft.ftchinese.util.KDate
 import org.apache.commons.math3.distribution.EnumeratedDistribution

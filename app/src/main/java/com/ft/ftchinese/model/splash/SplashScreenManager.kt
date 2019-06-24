@@ -1,4 +1,4 @@
-package com.ft.ftchinese.splash
+package com.ft.ftchinese.model.splash
 
 import android.content.Context
 import com.ft.ftchinese.model.Tier
@@ -52,19 +52,27 @@ class SplashScreenManager(context: Context) : AnkoLogger {
         val dateStr = sharedPreferences.getString(PREF_DATE, "")
 
         val ad = ScreenAd(
-                type = sharedPreferences.getString(PREF_TYPE, "") ?: "",
-                title =  sharedPreferences.getString(PREF_TITLE, "") ?: "",
+                type = sharedPreferences.getString(PREF_TYPE, "")
+                        ?: "",
+                title = sharedPreferences.getString(PREF_TITLE, "")
+                        ?: "",
                 imageUrl = imageUrl,
-                linkUrl = sharedPreferences.getString(PREF_LINK_URL, "") ?: "",
-                impressionUrl1 = sharedPreferences.getString(PREF_IMPRESSION_URL_1, "") ?: "",
-                impressionUrl2 = sharedPreferences.getString(PREF_IMPRESSION_URL_2, "") ?: "",
-                impressionUrl3 = sharedPreferences.getString(PREF_IMPRESSION_URL_3, "") ?: "",
+                linkUrl = sharedPreferences.getString(PREF_LINK_URL, "")
+                        ?: "",
+                impressionUrl1 = sharedPreferences.getString(PREF_IMPRESSION_URL_1, "")
+                        ?: "",
+                impressionUrl2 = sharedPreferences.getString(PREF_IMPRESSION_URL_2, "")
+                        ?: "",
+                impressionUrl3 = sharedPreferences.getString(PREF_IMPRESSION_URL_3, "")
+                        ?: "",
                 iphone = "",
                 android = "",
                 ipad = "",
                 targetUser = sharedPreferences.getString(PREF_TARGET_USER, null),
-                dates = sharedPreferences.getStringSet(PREF_SCHEDULED_ON, setOf())?.joinToString() ?: "",
-                weight = sharedPreferences.getString(PREF_WEIGHT, "") ?: ""
+                dates = sharedPreferences.getStringSet(PREF_SCHEDULED_ON, setOf())?.joinToString()
+                        ?: "",
+                weight = sharedPreferences.getString(PREF_WEIGHT, "")
+                        ?: ""
         )
 
         ad.date = parseLocalDate(dateStr)

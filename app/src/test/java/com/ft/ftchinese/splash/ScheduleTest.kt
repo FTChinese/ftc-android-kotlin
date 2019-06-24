@@ -3,6 +3,8 @@ package com.ft.ftchinese.splash
 import android.net.Uri
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.Tier
+import com.ft.ftchinese.model.splash.Schedule
+import com.ft.ftchinese.model.splash.ScreenAd
 import org.junit.Test
 
 import org.threeten.bp.LocalDate

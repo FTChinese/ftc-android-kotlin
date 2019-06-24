@@ -1,4 +1,4 @@
-package com.ft.ftchinese.splash
+package com.ft.ftchinese.model.splash
 
 import android.net.Uri
 import com.beust.klaxon.Json

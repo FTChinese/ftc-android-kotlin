@@ -1,4 +1,4 @@
-package com.ft.ftchinese.splash
+package com.ft.ftchinese.model.splash
 
 import com.beust.klaxon.Json
 import com.ft.ftchinese.model.Tier
