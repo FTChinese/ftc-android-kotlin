@@ -24,6 +24,7 @@ import kotlinx.android.synthetic.main.fragment_article.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
+import java.util.*
 
 private const val ARG_CHANNEL_ITEM = "arg_channel_item"
 
@@ -41,6 +42,10 @@ class StoryFragment : ScopedFragment(),
     private lateinit var articleModel: ArticleViewModel
 
     private var listener: OnProgressListener? = null
+
+    private lateinit var statsTracker: StatsTracker
+
+    private val start = Date().time / 1000
 
     private fun showProgress(value: Boolean) {
         if (swipe_refresh.isRefreshing) {
@@ -62,6 +67,7 @@ class StoryFragment : ScopedFragment(),
         cache = FileCache(context)
         followingManager = FollowingManager.getInstance(context)
         sessionManager = SessionManager.getInstance(context)
+        statsTracker = StatsTracker.getInstance(context)
 
         if (context is OnProgressListener) {
             listener = context
@@ -216,6 +222,16 @@ class StoryFragment : ScopedFragment(),
                 null)
 
         showProgress(false)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        statsTracker.engaged(
+                account = sessionManager.loadAccount(),
+                start = start,
+                end = Date().time / 1000
+        )
     }
 
     @JavascriptInterface
