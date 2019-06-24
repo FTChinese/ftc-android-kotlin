@@ -22,7 +22,7 @@ import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.isActiveNetworkWifi
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.splash.SplashScreenManager
+import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.LoginActivity
