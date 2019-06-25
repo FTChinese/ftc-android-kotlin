@@ -55,7 +55,7 @@ data class ScreenAd(
     }
 
     // The name used to cache image locally
-    val imageName: String
+    val imageName: String?
         get() {
             // NOTE: Uri.parse returns null if parsing failed
             // including empty string.
@@ -64,7 +64,7 @@ data class ScreenAd(
                 val segments = uri.pathSegments
                  segments[segments.size - 1]
             } catch (e: Exception) {
-                ""
+                null
             }
         }
 
