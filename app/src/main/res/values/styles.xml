@@ -18,19 +18,7 @@
         <item name="android:windowBackground">@drawable/background_splash</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="Drawer" parent="AppTheme">
-        <item name="colorPrimary">@color/colorTeal</item>
-        <!--<item name="colorAccent">@color/colorClaret</item>-->
-    </style>
-
-    <style name="Dialog" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="colorAccent">@color/colorBlack20</item>
-    </style>
-
+    <!-- Them used by the entire app except -->
     <style name="Origami" parent="AppTheme">
 
         <!-- Window colors -->
@@ -44,6 +32,21 @@
 
         <item name="preferenceTheme">@style/PrefTheme</item>
     </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="Drawer" parent="AppTheme">
+        <item name="colorPrimary">@color/colorTeal</item>
+        <!--<item name="colorAccent">@color/colorClaret</item>-->
+    </style>
+
+    <style name="Dialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/colorBlack20</item>
+    </style>
+
+
 
     <style name="PrefTheme" parent="PreferenceThemeOverlay">
 
