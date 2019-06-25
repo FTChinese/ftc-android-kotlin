@@ -17,37 +17,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Origami">
-
-        <!-- WXPayEntryActivity does not need parent activity since that is useless. -->
         <activity
-            android:name=".wxapi.WXPayEntryActivity"
-            android:exported="true"
-            android:label="@string/title_wxpay"
-            android:launchMode="singleTop">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="wxacddf1c20516eb69" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".wxapi.WXEntryActivity"
-            android:exported="true"
-            android:launchMode="singleTop">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="sdksample" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".MainActivity"
+            android:name=".SplashActivity"
             android:configChanges="orientation"
-            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">
             <intent-filter>
@@ -55,6 +27,19 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="orientation"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait">
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+
+
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
         <activity
             android:name=".ui.channel.SearchableActivity"
@@ -97,10 +82,10 @@
             android:name=".ui.account.LinkPreviewActivity"
             android:label="@string/title_merge_accounts"
             android:parentActivityName=".ui.account.AccountActivity" />
-        <activity android:name=".ui.account.UnlinkActivity"
+        <activity
+            android:name=".ui.account.UnlinkActivity"
             android:label="@string/title_unlink"
-            android:parentActivityName=".ui.account.WxInfoActivity"/>
-
+            android:parentActivityName=".ui.account.WxInfoActivity" />
         <activity
             android:name=".ui.account.WxInfoActivity"
             android:label="@string/title_wx_account"
@@ -132,7 +117,32 @@
         <activity
             android:name=".ui.pay.UpgradeActivity"
             android:label="@string/title_upgrade"
-            android:parentActivityName=".ui.account.MemberActivity" />
+            android:parentActivityName=".ui.account.MemberActivity" /> <!-- WXPayEntryActivity does not need parent activity since that is useless. -->
+        <activity
+            android:name=".wxapi.WXPayEntryActivity"
+            android:exported="true"
+            android:label="@string/title_wxpay"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="wxacddf1c20516eb69" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".wxapi.WXEntryActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <data android:scheme="sdksample" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
