@@ -8,12 +8,10 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.GravityCompat
 import androidx.appcompat.app.ActionBarDrawerToggle
 import android.view.*
 import android.webkit.WebView
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.core.app.NotificationCompat
@@ -66,8 +64,6 @@ class MainActivity : ScopedAppActivity(),
     private var mBackKeyPressed = false
 
     private var avatarName: String? = null
-
-    private var showAdJob: Job? = null
 
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var splashViewModel: SplashViewModel
@@ -181,12 +177,6 @@ class MainActivity : ScopedAppActivity(),
         cache = FileCache(this)
         splashManager = SplashScreenManager(this)
 
-        // Show advertisement
-        // Keep a reference the coroutine in case user exit at this moment
-        showAdJob = launch {
-            showAd()
-        }
-
         statsTracker = StatsTracker.getInstance(this)
 
         // Register Wechat id
@@ -256,7 +246,9 @@ class MainActivity : ScopedAppActivity(),
 
         statsTracker.appOpened()
 
-//        sendNotification()
+        sendNotification()
+
+        checkWxSession()
     }
 
     private fun createNotificationChannel() {
@@ -457,15 +449,6 @@ class MainActivity : ScopedAppActivity(),
         supportActionBar?.setTitle(title)
     }
 
-    private fun showSystemUI() {
-        supportActionBar?.show()
-        root_container.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-
-
-        checkWxSession()
-    }
-
     /**
      * Check whether wechat session has expired.
      * Wechat refresh token expires after 30 days.
@@ -491,137 +474,6 @@ class MainActivity : ScopedAppActivity(),
         if (wxSession.isExpired) {
             logout()
             WxExpireDialogFragment().show(supportFragmentManager, "WxExpireDialog")
-        }
-    }
-
-
-    private suspend fun showAd() {
-        val screenAd = splashManager.load() ?: return
-
-        // Pick an ad based on its probability distribution factor.
-        GlobalScope.launch {
-            val drawable = withContext(Dispatchers.IO) {
-                if (!screenAd.isToday()) {
-                    return@withContext null
-                }
-
-                if (BuildConfig.DEBUG) {
-                    info("Splash screen ad: $screenAd")
-                }
-
-                val imageFileName = screenAd.imageName
-
-                // Check if the required ad image exists.
-                if (imageFileName.isBlank() || !cache.exists(imageFileName)) {
-                    if (BuildConfig.DEBUG) {
-                        info("Ad image ${screenAd.imageName} not found")
-                    }
-
-                    return@withContext null
-                }
-
-                cache.readDrawable(imageFileName)
-            }
-
-            if (drawable == null) {
-                if (BuildConfig.DEBUG) {
-                    info("Cannot load ad image")
-                }
-
-                showSystemUI()
-                return@launch
-            }
-
-            withContext(Dispatchers.Main) {
-                val adView = createAdView()
-                val adImage = adView.findViewById<ImageView>(R.id.ad_image)
-                val adTimer = adView.findViewById<TextView>(R.id.ad_timer)
-
-                adTimer.setOnClickListener {
-                    root_container.removeView(adView)
-                    showSystemUI()
-                    showAdJob?.cancel()
-                    if (BuildConfig.DEBUG) {
-                        info("Skipped ads")
-                    }
-
-                    // Log user skipping advertisement action.
-                    statsTracker.adSkipped(screenAd)
-                }
-
-
-                adImage.setOnClickListener {
-                    val customTabsInt = CustomTabsIntent.Builder().build()
-                    customTabsInt.launchUrl(this@MainActivity, Uri.parse(screenAd.linkUrl))
-                    root_container.removeView(adView)
-                    showSystemUI()
-                    showAdJob?.cancel()
-
-                    // Log click event
-                    statsTracker.adClicked(screenAd)
-
-                    if (BuildConfig.DEBUG) {
-                        info("Clicked ads")
-                    }
-                }
-
-
-                adImage.setImageDrawable(drawable)
-
-                adTimer.visibility = View.VISIBLE
-                info("Show timer")
-
-                // send impressions in background.
-                splashViewModel.sendImpression(screenAd, statsTracker)
-
-                // Tracking ad viewd
-                statsTracker.adViewed(screenAd)
-
-                for (i in 5 downTo 1) {
-                    adTimer.text = getString(R.string.prompt_ad_timer, i)
-                    delay(1000)
-                }
-
-                root_container.removeView(adView)
-
-                showSystemUI()
-            }
-        }
-    }
-
-    // Read this article on how inflate works:
-    // https://www.bignerdranch.com/blog/understanding-androids-layoutinflater-inflate/
-    private fun createAdView(): View {
-        // Read this article on how inflate works:
-        // https://www.bignerdranch.com/blog/understanding-androids-layoutinflater-inflate/
-        val adView = View.inflate(this, R.layout.ad_view, null)
-
-        if (BuildConfig.DEBUG) {
-            info("Starting to show ad. Hide system ui.")
-        }
-
-        supportActionBar?.hide()
-        adView.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LOW_PROFILE or
-                        View.SYSTEM_UI_FLAG_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-
-        if (BuildConfig.DEBUG) {
-            info("Added ad view")
-        }
-
-        root_container.addView(adView)
-
-        return adView
-    }
-
-    override fun onRestart() {
-        super.onRestart()
-        if (BuildConfig.DEBUG) {
-            info("onRestart finished")
         }
     }
 
@@ -659,41 +511,6 @@ class MainActivity : ScopedAppActivity(),
                 updateSessionUI()
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        checkDeviceToken()
-
-        if (BuildConfig.DEBUG) {
-            info("onResume finished")
-        }
-    }
-
-    private fun checkDeviceToken() {
-        if (BuildConfig.DEBUG) {
-            val token = tokenManager.getToken()
-            info("Device token $token")
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (BuildConfig.DEBUG) {
-            info("onPause finished")
-        }
-
-        showAdJob?.cancel()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        if (BuildConfig.DEBUG) {
-            info("onStop finished")
-        }
-
-        showAdJob?.cancel()
     }
 
     override fun onBackPressed() {
@@ -812,6 +629,13 @@ class MainActivity : ScopedAppActivity(),
             startActivity(intent)
         } else {
             toast(R.string.prompt_no_email_app)
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun start(context: Context) {
+            context.startActivity(Intent(context, MainActivity::class.java))
         }
     }
 }
