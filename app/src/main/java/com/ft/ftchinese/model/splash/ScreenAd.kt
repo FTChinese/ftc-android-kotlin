@@ -7,7 +7,6 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.threeten.bp.LocalDate
 import java.io.File
-import java.util.*
 
 data class ScreenAd(
         val type: String,
@@ -80,6 +79,9 @@ data class ScreenAd(
         }
     }
 
+    /**
+     * Collect all impression target.
+     */
     fun impressionDest(): List<String> {
         val urls = mutableListOf<String>()
         if (impressionUrl1.isNotEmpty()) {
@@ -92,16 +94,7 @@ data class ScreenAd(
         if (impressionUrl3 != null && impressionUrl3.isNotEmpty()) {
             urls.add(impressionUrl3)
         }
-        val timestamp = Date().time / 1000
 
-        return urls.map {
-            val urlStr = it.replace("[timestamp]", "$timestamp")
-            Uri.parse(urlStr)
-                    .buildUpon()
-                    .appendQueryParameter("fttime", "$timestamp")
-                    .build()
-                    .toString()
-
-        }
+        return urls
     }
 }

@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.splash
 
+import android.net.Uri
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import com.ft.ftchinese.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
 
 class SplashViewModel : ViewModel() {
 
@@ -82,10 +84,18 @@ class SplashViewModel : ViewModel() {
     fun sendImpression(screenAd: ScreenAd, tracker: StatsTracker) {
         viewModelScope.launch(Dispatchers.IO) {
             screenAd.impressionDest().forEach {
+                val timestamp = Date().time / 1000
+
+                val bustedUrl = Uri.parse(it.replace("[timestamp]", "$timestamp"))
+                        .buildUpon()
+                        .appendQueryParameter("fttime", "$timestamp")
+                        .build()
+                        .toString()
+
                 try {
                     tracker.launchAdSent(it)
 
-                    Fetch().get(it).responseString()
+                    Fetch().get(bustedUrl).responseString()
 
                     tracker.launchAdSuccess(it)
                 } catch (e: Exception) {
