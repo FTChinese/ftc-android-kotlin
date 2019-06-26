@@ -39,8 +39,10 @@ import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.ui.splash.SplashViewModel
 import com.ft.ftchinese.util.*
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.iid.FirebaseInstanceId
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -51,7 +53,6 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import java.io.ByteArrayInputStream
 
-const val CHANNEL_ID = "com.ft.ftchinese.News"
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
  */
@@ -246,24 +247,28 @@ class MainActivity : ScopedAppActivity(),
 
         statsTracker.appOpened()
 
-        sendNotification()
-
         checkWxSession()
+
+        retrieveRegistrationToken()
     }
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = getString(R.string.channel_name)
-            val descriptionText = getString(R.string.channel_description)
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
+            val channelId = getString(R.string.news_notification_channel_id)
+            val channelName = getString(R.string.news_notification_channel_name)
+            val channelDesc = getString(R.string.news_notification_channel_description)
+
+            val channel = NotificationChannel(
+                    channelId,
+                    channelName,
+                    NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = channelDesc
             }
             val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
     }
-
 
     private fun sendNotification() {
         // You might have to uninstall the app for the
@@ -282,7 +287,7 @@ class MainActivity : ScopedAppActivity(),
             getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
-        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, getString(R.string.news_notification_channel_id))
                 .setSmallIcon(R.drawable.logo_round)
                 .setContentTitle("波司登遭做空机构质疑 股价暴跌")
 //                .setContentText("")
@@ -294,6 +299,20 @@ class MainActivity : ScopedAppActivity(),
         with(NotificationManagerCompat.from(this)) {
             notify(1, builder.build())
         }
+    }
+
+    private fun retrieveRegistrationToken() {
+        FirebaseInstanceId.getInstance().instanceId
+                .addOnCompleteListener(OnCompleteListener {task ->
+                    if (!task.isSuccessful) {
+                        info("getInstanceId failed", task.exception)
+                        return@OnCompleteListener
+                    }
+
+                    val token = task.result?.token
+
+                    info("Firebase token: $token")
+                })
     }
 
     private fun setupBottomNav() {
