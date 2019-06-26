@@ -119,6 +119,8 @@ android {
 dependencies {
     def room_version = "2.1.0-alpha04"
     def lifecycle_version = "2.2.0-alpha01"
+    def nav_version = "2.1.0-alpha05"
+    def nav_version_ktx = "2.1.0-alpha05"
 
     // Firebase
     implementation 'com.google.firebase:firebase-core:17.0.0'
@@ -149,6 +151,8 @@ dependencies {
     implementation "androidx.recyclerview:recyclerview:1.1.0-alpha06"
     implementation "androidx.cardview:cardview:$support_version"
     implementation "com.makeramen:roundedimageview:2.3.0"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version_ktx"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version_ktx"
 
     implementation 'androidx.core:core-ktx:1.0.2'
 
