@@ -18,6 +18,7 @@ import com.ft.ftchinese.util.flavorQuery
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.grantPermission
 import com.ft.ftchinese.ui.ChromeClient
+import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.util.json
 import kotlinx.android.synthetic.main.fragment_web_view.*
 import org.jetbrains.anko.AnkoLogger
@@ -32,10 +33,12 @@ class WebContentFragment : Fragment(),
         AnkoLogger {
 
     private lateinit var articleViewModel: ArticleViewModel
-    private lateinit var starModel: StarArticleViewModel
-    private lateinit var readModel: ReadArticleViewModel
+    private lateinit var starViewModel: StarArticleViewModel
+    private lateinit var readViewModel: ReadArticleViewModel
 
     private lateinit var sessionManager: SessionManager
+    private lateinit var cache: FileCache
+    private lateinit var followingManager: FollowingManager
 
     private var channelItem: ChannelItem? = null
 
@@ -105,6 +108,8 @@ class WebContentFragment : Fragment(),
         super.onAttach(context)
 
         sessionManager = SessionManager.getInstance(context)
+        cache = FileCache(context)
+        followingManager = FollowingManager.getInstance(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -147,24 +152,45 @@ class WebContentFragment : Fragment(),
                 false
             }
         }
-
-        load()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
         articleViewModel = activity?.run {
-            ViewModelProviders.of(this).get(ArticleViewModel::class.java)
+            ViewModelProviders.of(
+                    this,
+                    ArticleViewModelFactory(cache, followingManager))
+                    .get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        starModel = activity?.run {
+        starViewModel = activity?.run {
             ViewModelProviders.of(this).get(StarArticleViewModel::class.java)
         } ?: throw java.lang.Exception("Invalid Activity")
 
-        readModel = activity?.run {
+        readViewModel = activity?.run {
             ViewModelProviders.of(this).get(ReadArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
+
+        load()
+    }
+
+    private fun load() {
+        if (activity?.isNetworkConnected() != true) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        val url = buildUrl()
+        info("Load content from: $url")
+
+
+        web_view.loadUrl(url)
+
+        // Get the minimal information of an article.
+        val article = channelItem?.toStarredArticle() ?: return
+
+        articleViewModel.webLoaded(article)
     }
 
     /**
@@ -205,23 +231,6 @@ class WebContentFragment : Fragment(),
         }
 
         return builder.build().toString()
-    }
-
-    private fun load() {
-        if (activity?.isNetworkConnected() != true) {
-            toast(R.string.prompt_no_network)
-            return
-        }
-
-        val url = buildUrl()
-        info("Load content from: $url")
-
-        web_view.loadUrl(url)
-
-        // Get the minimal information of an article.
-        val article = channelItem?.toStarredArticle() ?: return
-
-        articleViewModel.webLoaded(article)
     }
 
     companion object {
