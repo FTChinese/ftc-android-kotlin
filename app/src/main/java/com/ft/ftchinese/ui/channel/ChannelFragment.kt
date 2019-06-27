@@ -174,7 +174,7 @@ class ChannelFragment : ScopedFragment(),
             // Cache not found.
             info("Cache not found")
             if (activity?.isNetworkConnected() != true) {
-                info("No network")
+                showProgress(false)
                 toast(R.string.prompt_no_network)
                 return@Observer
             }
@@ -190,25 +190,23 @@ class ChannelFragment : ScopedFragment(),
 
         channelViewModel.renderResult.observe(this, Observer {
 
-            showProgress(false)
-
             val htmlResult = it ?: return@Observer
 
             if (htmlResult.error != null) {
+                showProgress(false)
                 toast(htmlResult.error)
                 return@Observer
             }
 
             if (htmlResult.exception != null) {
+                showProgress(false)
                 activity?.handleException(htmlResult.exception)
                 return@Observer
             }
 
-            if (htmlResult.success.isNullOrBlank()) {
-                return@Observer
-            }
+            val htmlStr = htmlResult.success ?: return@Observer
 
-            load(htmlResult.success)
+            load(htmlStr)
         })
 
         initLoading()
@@ -228,6 +226,7 @@ class ChannelFragment : ScopedFragment(),
             return
         }
 
+        // Show progress bar upon loading content, regardless of
         if (!swipe_refresh.isRefreshing) {
             showProgress(true)
         }
@@ -263,6 +262,7 @@ class ChannelFragment : ScopedFragment(),
             info("Loading web page to web view")
         }
         web_view.loadDataWithBaseURL(FTC_OFFICIAL_URL, html, "text/html", null, null)
+        showProgress(false)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -273,13 +273,11 @@ class ChannelFragment : ScopedFragment(),
 
     override fun onPause() {
         super.onPause()
-        info("onPause finished")
         cancel()
     }
 
     override fun onStop() {
         super.onStop()
-        info("onStop finished")
         cancel()
     }
 
