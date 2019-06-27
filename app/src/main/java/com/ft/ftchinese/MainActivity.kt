@@ -14,9 +14,6 @@ import android.view.*
 import android.webkit.WebView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.app.TaskStackBuilder
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.base.ScopedAppActivity
@@ -249,7 +246,7 @@ class MainActivity : ScopedAppActivity(),
 
         checkWxSession()
 
-        retrieveRegistrationToken()
+//        retrieveRegistrationToken()
     }
 
     private fun createNotificationChannel() {
@@ -267,37 +264,6 @@ class MainActivity : ScopedAppActivity(),
             }
             val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
-        }
-    }
-
-    private fun sendNotification() {
-        // You might have to uninstall the app for the
-        // intent to take effect.
-        val intent = Intent(this, ArticleActivity::class.java).apply {
-            putExtra(EXTRA_CHANNEL_ITEM, ChannelItem(
-                    id = "001083331",
-                    type = "story",
-                    title = "波司登遭做空机构质疑 股价暴跌"
-            ))
-            putExtra(EXTRA_USE_JSON, true)
-        }
-
-        val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
-            addNextIntentWithParentStack(intent)
-            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
-        }
-
-        val builder = NotificationCompat.Builder(this, getString(R.string.news_notification_channel_id))
-                .setSmallIcon(R.drawable.logo_round)
-                .setContentTitle("波司登遭做空机构质疑 股价暴跌")
-//                .setContentText("")
-                .setStyle(NotificationCompat.BigTextStyle()
-                        .bigText("周一，波司登的股价下跌了24.8%，随后宣布停牌。此前，做空机构Bonitas Research对波司登的收入和利润提出了质疑。"))
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-        with(NotificationManagerCompat.from(this)) {
-            notify(1, builder.build())
         }
     }
 
