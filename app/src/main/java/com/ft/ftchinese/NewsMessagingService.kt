@@ -34,6 +34,8 @@ class NewsMessagingService : FirebaseMessagingService(), AnkoLogger {
     override fun onNewToken(token: String?) {
         super.onNewToken(token)
 
+        info("onNewToken: $token")
+
         sendRegistrationToServer(token)
     }
 
