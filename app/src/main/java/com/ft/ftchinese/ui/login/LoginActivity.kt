@@ -15,6 +15,7 @@ import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,26 +57,18 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
             showProgress(false)
 
             if (findResult.error != null) {
-                viewModel.enableInput(true)
-
                 toast(findResult.error)
-
                 return@Observer
             }
 
             if (findResult.exception != null) {
+                info(findResult.exception)
                 handleException(findResult.exception)
                 return@Observer
             }
 
-            if (findResult.success == null) {
-                viewModel.enableInput(true)
+            val (email, found) = findResult.success ?: return@Observer
 
-                toast(R.string.error_not_loaded)
-                return@Observer
-            }
-
-            val (email, found) = findResult.success
             if (found) {
                 supportActionBar?.setTitle(R.string.title_login)
 
@@ -96,32 +89,23 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
 
         // Observing both login and sign up.
         viewModel.accountResult.observe(this, Observer {
-            val loginResult = it ?: return@Observer
-
             showProgress(false)
 
-            if (loginResult.error != null) {
-                viewModel.enableInput(true)
+            val loginResult = it ?: return@Observer
 
+            if (loginResult.error != null) {
                 toast(loginResult.error)
                 return@Observer
             }
 
             if (loginResult.exception != null) {
-                viewModel.enableInput(true)
-
                 handleException(loginResult.exception)
                 return@Observer
             }
 
-            if (loginResult.success == null) {
-                viewModel.enableInput(true)
+            val account = loginResult.success ?: return@Observer
 
-                toast(R.string.error_not_loaded)
-                return@Observer
-            }
-
-            sessionManager.saveAccount(loginResult.success)
+            sessionManager.saveAccount(account)
 
             setResult(Activity.RESULT_OK)
 
