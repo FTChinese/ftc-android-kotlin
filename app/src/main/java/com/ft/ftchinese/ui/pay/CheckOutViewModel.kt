@@ -16,7 +16,6 @@ class CheckOutViewModel : ViewModel() {
 
     val directUpgradeResult = MutableLiveData<UpgradeResult>()
     val inputEnabled = MutableLiveData<Boolean>()
-    val customerCreated = MutableLiveData<CustomerResult>()
     val wxOrderResult = MutableLiveData<WxOrderResult>()
     val aliOrderResult = MutableLiveData<AliOrderResult>()
     val stripeOrderResult = MutableLiveData<OrderResult>()
@@ -25,36 +24,6 @@ class CheckOutViewModel : ViewModel() {
     // Enable/Disable a UI, like button.
     fun enableInput(v: Boolean) {
         inputEnabled.value = v
-    }
-
-    fun createCustomer(account: Account) {
-        viewModelScope.launch {
-            try {
-                val id = withContext(Dispatchers.IO) {
-                    account.createCustomer()
-                }
-
-                if (id == null) {
-                    customerCreated.value = CustomerResult(
-                            error = R.string.stripe_customer_not_created
-                    )
-                    return@launch
-                }
-
-                customerCreated.value = CustomerResult(
-                        success = id
-                )
-            } catch (e: ClientError) {
-                customerCreated.value = CustomerResult(
-                        exception = e
-                )
-            } catch (e: Exception) {
-                customerCreated.value = CustomerResult(
-                        exception = e
-                )
-            }
-
-        }
     }
 
     fun directUpgrade(account: Account) {
