@@ -13,6 +13,9 @@ import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.order.Plan
+import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.order.subsPlans
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_upgrade.*
@@ -84,8 +87,8 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
     }
 
     // Build data used to create product card.
-    private fun buildProduct(): ProductCard {
-        return ProductCard(
+    private fun buildProduct(): PaywallProduct {
+        return PaywallProduct(
                 tier = Tier.PREMIUM,
                 heading = getString(R.string.membership_upgrade),
                 description = resources
@@ -126,9 +129,8 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
 
                 plan.isUpgrade = true
 
-                CheckOutActivity.startForResult(
-                        activity = this@UpgradeActivity,
-                        requestCode = RequestCode.PAYMENT,
+                UpgradePreviewActivity.start(
+                        context = this@UpgradeActivity,
                         p = plan)
             } catch (e: ClientError) {
 
