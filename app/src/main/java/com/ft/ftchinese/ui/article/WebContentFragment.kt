@@ -17,6 +17,7 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.util.flavorQuery
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.grantPermission
+import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.util.json
