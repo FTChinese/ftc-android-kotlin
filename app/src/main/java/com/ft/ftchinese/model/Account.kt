@@ -1,12 +1,19 @@
 package com.ft.ftchinese.model
 
+import android.net.Uri
 import android.os.Parcelable
 import com.beust.klaxon.Klaxon
+import com.ft.ftchinese.model.order.Cycle
+import com.ft.ftchinese.model.order.Order
+import com.ft.ftchinese.model.order.PlanPayable
+import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.json.JSONException
+import org.json.JSONObject
 
 /**
  * A user's essential data.
@@ -18,6 +25,7 @@ import org.jetbrains.anko.info
 data class Account(
         val id: String,
         val unionId: String? = null,
+        val stripeId: String? = null,
         val userName: String? = null,
         val email: String,
         val isVerified: Boolean = false,
@@ -313,7 +321,6 @@ data class Account(
         val (_, body) = fetch
                 .noCache()
                 .setClient()
-                .setAppId()
                 .body()
                 .responseApi()
 
@@ -321,6 +328,82 @@ data class Account(
             null
         } else {
             json.parse<AlipayOrder>(body)
+        }
+    }
+
+    fun createStripeOrder(tier: Tier, cycle: Cycle): Order? {
+        val (_, body) = Fetch()
+                .post("${SubscribeApi.STRIPE_ORDER}/${tier.string()}/${cycle.string()}")
+                .setUserId(id)
+                .noCache()
+                .setClient()
+                .body()
+                .responseApi()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<Order>(body)
+        }
+    }
+
+    fun createCustomer(): String? {
+        val (_, body) = Fetch()
+                .put(SubscribeApi.STRIPE_CUSTOMER)
+                .setUserId(id)
+                .noCache()
+                .body()
+                .responseApi()
+
+        if (body == null) {
+            return null
+        }
+
+        return try {
+            JSONObject(body).getString("id")
+        } catch (e: JSONException) {
+            null
+        }
+    }
+
+    fun createEphemeralKey(apiVersion: String): String? {
+        if (stripeId == null) {
+            return null
+        }
+
+        val uri = Uri.parse("${SubscribeApi.STRIPE_CUSTOMER}/$stripeId/ephemeral_keys")
+                .buildUpon()
+                .appendQueryParameter("api_version", apiVersion)
+                .build()
+
+        val (_, body) = Fetch()
+                .post(uri.toString())
+                .setUserId(id)
+                .noCache()
+                .body()
+                .responseApi()
+
+        return body
+    }
+
+    fun createPaymentIntent(orderId: String): String? {
+        val (_, body) = Fetch()
+                .post("${SubscribeApi.STRIPE_PAY_INTENT}")
+                .setUserId(id)
+                .noCache()
+                .jsonBody(Klaxon().toJsonString(mapOf(
+                        "orderId" to orderId
+                )))
+                .responseApi()
+
+        if (body == null) {
+            return null
+        }
+
+        return try {
+            JSONObject(body).getString("secret")
+        } catch (e: JSONException) {
+            null
         }
     }
 
@@ -375,3 +458,4 @@ data class Passwords(
         val oldPassword: String,
         val newPassword: String
 )
+
