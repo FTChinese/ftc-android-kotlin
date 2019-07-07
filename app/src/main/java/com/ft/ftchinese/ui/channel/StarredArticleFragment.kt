@@ -106,7 +106,7 @@ class StarredArticleAdapter(private val context: Context?) :
         holder.itemView.setOnClickListener {
             when {
                 article.id == "banner" -> {
-                    val webpage: Uri = Uri.parse("http://next.ftchinese.com/user/starred")
+                    val webpage: Uri = Uri.parse("http://users.ftchinese.com/starred")
                     val intent = Intent(Intent.ACTION_VIEW, webpage)
 
                     if (context != null) {
