@@ -11,6 +11,10 @@ import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.order.Plan
+import com.ft.ftchinese.model.order.PlanPayable
+import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.order.subsPlans
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_paywall.*
@@ -26,6 +30,7 @@ import org.jetbrains.anko.toast
 class PaywallActivity : ScopedAppActivity(),
         AnkoLogger {
 
+    private lateinit var checkoutViewModel: CheckOutViewModel
     private lateinit var tracker: StatsTracker
     private lateinit var sessionManager: SessionManager
     private lateinit var productViewModel: ProductViewModel
@@ -48,6 +53,9 @@ class PaywallActivity : ScopedAppActivity(),
         productViewModel = ViewModelProviders.of(this)
                 .get(ProductViewModel::class.java)
 
+        checkoutViewModel = ViewModelProviders.of(this)
+                .get(CheckOutViewModel::class.java)
+
         productViewModel.selected.observe(this, Observer<Plan> {
             val account = sessionManager.loadAccount()
 
@@ -67,6 +75,7 @@ class PaywallActivity : ScopedAppActivity(),
 
         tracker = StatsTracker.getInstance(this)
         tracker.displayPaywall()
+
     }
 
     private fun expiredText(m: Membership): String {
@@ -129,9 +138,9 @@ class PaywallActivity : ScopedAppActivity(),
         }
     }
 
-    private fun buildStandardCard(): ProductCard {
+    private fun buildStandardCard(): PaywallProduct {
 
-        return ProductCard(
+        return PaywallProduct(
                 tier = Tier.STANDARD,
                 heading = getString(R.string.tier_standard),
                 description = resources
@@ -142,8 +151,8 @@ class PaywallActivity : ScopedAppActivity(),
         )
     }
 
-    private fun buildPremiumCard(): ProductCard {
-        return ProductCard(
+    private fun buildPremiumCard(): PaywallProduct {
+        return PaywallProduct(
                 tier = Tier.PREMIUM,
                 heading = getString(R.string.tier_premium),
                 description = resources
@@ -180,6 +189,8 @@ class PaywallActivity : ScopedAppActivity(),
             }
         }
     }
+
+
 
     companion object {
         private const val EXTRA_PREMIUM_FIRST = "extra_premium_first"
