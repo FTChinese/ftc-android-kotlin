@@ -71,6 +71,10 @@ class FtcFragment : ScopedFragment(),
             UpdateActivity.startForPassword(context)
         }
 
+        wallet_container.setOnClickListener {
+            CustomerActivity.start(context)
+        }
+
         initUI(account)
     }
 

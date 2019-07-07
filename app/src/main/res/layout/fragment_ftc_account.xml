@@ -122,7 +122,6 @@
                 android:id="@+id/password_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
                 android:background="@drawable/list_item_background"
                 android:padding="16dp">
 
@@ -151,11 +150,43 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/wallet_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/list_item_background"
+                android:padding="16dp">
+
+                <TextView
+                    style="@style/FTCText"
+                    android:id="@+id/label_wallet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Stripe钱包"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/wallet_text"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    style="@style/FTCText"
+                    android:id="@+id/wallet_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
+                    app:layout_constraintBaseline_toBaselineOf="@+id/label_wallet"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/label_wallet" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <TextView
                 style="@style/SectionHead"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/heading_bind_account"
+                android:layout_marginTop="16dp"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"/>
 
