@@ -4,6 +4,10 @@ import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.order.Cycle
+import com.ft.ftchinese.model.order.OrderUsage
+import com.ft.ftchinese.model.order.PayMethod
+import com.ft.ftchinese.model.order.Tier
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZoneOffset
 import org.threeten.bp.ZonedDateTime
@@ -30,6 +34,9 @@ annotation class KLoginMethod
 
 @Target(AnnotationTarget.FIELD)
 annotation class KUnlinkAnchor
+
+@Target(AnnotationTarget.FIELD)
+annotation class KOrderUsage
 
 val dateConverter = object : Converter {
     override fun canConvert(cls: Class<*>): Boolean {
@@ -122,6 +129,26 @@ val cycleConverter = object : Converter {
     }
 }
 
+val orderUsageConverter = object : Converter {
+    override fun canConvert(cls: Class<*>): Boolean {
+        return cls == OrderUsage::class.java
+    }
+
+    override fun fromJson(jv: JsonValue): Any? {
+        return jv.string?.let {
+            OrderUsage.fromString(it)
+        }
+    }
+
+    override fun toJson(value: Any): String {
+        return if (value is OrderUsage) {
+            """ "$value" """
+        } else {
+            """null"""
+        }
+    }
+}
+
 val payMethodConverter = object : Converter {
     override fun canConvert(cls: Class<*>): Boolean {
         return cls == PayMethod::class.java
@@ -181,6 +208,7 @@ val json = Klaxon()
         .fieldConverter(KDateTime::class, dateTimeConverter)
         .fieldConverter(KTier::class, tierConverter)
         .fieldConverter(KCycle::class, cycleConverter)
+        .fieldConverter(KOrderUsage::class, orderUsageConverter)
         .fieldConverter(KPayMethod::class, payMethodConverter)
         .fieldConverter(KLoginMethod::class, loginMethodConverter)
         .fieldConverter(KUnlinkAnchor::class, unlinkAnchorConverter)
