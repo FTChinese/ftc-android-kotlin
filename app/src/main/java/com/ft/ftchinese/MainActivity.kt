@@ -26,9 +26,6 @@ import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.account.MemberActivity
-import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.article.EXTRA_CHANNEL_ITEM
-import com.ft.ftchinese.ui.article.EXTRA_USE_JSON
 import com.ft.ftchinese.ui.channel.MyftPagerAdapter
 import com.ft.ftchinese.ui.channel.SearchableActivity
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
@@ -41,6 +38,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.FirebaseApp
 import com.google.firebase.iid.FirebaseInstanceId
+import com.stripe.android.CustomerSession
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -407,6 +405,7 @@ class MainActivity : ScopedAppActivity(),
     private fun logout() {
         sessionManager.logout()
         cache.deleteFile(avatarName)
+        CustomerSession.endCustomerSession()
         updateSessionUI()
     }
 
