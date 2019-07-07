@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.account.CustomerActivity">
+
+    <include
+        layout="@layout/simple_toolbar" />
+
+    <TextView
+        android:id="@+id/default_card_heading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        android:text="默认支付方式"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/default_bank_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:contentPadding="16dp"
+        app:cardBackgroundColor="@color/colorClaret100"
+        app:layout_constraintTop_toBottomOf="@+id/default_card_heading">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:orientation="vertical">
+            <TextView
+                style="@style/FTCHeading"
+                android:id="@+id/card_brand"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="Brand"/>
+
+            <TextView
+                style="@style/FTCText"
+                android:id="@+id/card_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/bank_card_number"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+
+    <Button
+        style="@style/OrigamiButton.Secondary"
+        android:id="@+id/add_bank_card"
+        android:layout_margin="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/default_bank_card"
+        android:text="添加银行卡"/>
+
+    <include layout="@layout/progress_bar"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
