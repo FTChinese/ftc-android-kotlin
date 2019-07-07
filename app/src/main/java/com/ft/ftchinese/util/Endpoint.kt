@@ -3,46 +3,51 @@ package com.ft.ftchinese.util
 import com.ft.ftchinese.BuildConfig
 
 object NextApi {
-    private const val BASE = "http://api.ftchinese.com/v1"
-//    private const val BASE = "http://192.168.10.195:8000"
-    const val EMAIL_EXISTS = "$BASE/users/exists"
-    const val LOGIN = "$BASE/users/login"
-    const val SIGN_UP = "$BASE/users/signup"
-    const val PASSWORD_RESET = "$BASE/users/password-reset/letter"
+    private val BASE = if (BuildConfig.DEBUG) {
+        "http://192.168.10.195:8000"
+    } else {
+        "http://api.ftchinese.com/v1"
+    }
+    val EMAIL_EXISTS = "$BASE/users/exists"
+    val LOGIN = "$BASE/users/login"
+    val SIGN_UP = "$BASE/users/signup"
+    val PASSWORD_RESET = "$BASE/users/password-reset/letter"
     // Refresh account data.
-    const val ACCOUNT = "$BASE/user/account"
-    const val PROFILE = "$BASE/user/profile"
-    const val UPDATE_EMAIL = "$BASE/user/email"
+    val ACCOUNT = "$BASE/user/account"
+    val PROFILE = "$BASE/user/profile"
+    val UPDATE_EMAIL = "$BASE/user/email"
     // Resend email verification letter
-    const val REQUEST_VERIFICATION = "$BASE/user/email/request-verification"
-    const val UPDATE_USER_NAME = "$BASE/user/name"
-    const val UPDATE_PASSWORD = "$BASE/user/password"
-    const val ORDERS = "$BASE/user/orders"
-    const val UNLINK = "$BASE/user/unlink/wx"
-    const val STARRED = "$BASE/user/starred"
-    const val WX_ACCOUNT = "$BASE/user/wx/account"
-    const val WX_SIGNUP = "$BASE/user/wx/signup"
-    const val WX_LINK = "$BASE/user/wx/link"
+    val REQUEST_VERIFICATION = "$BASE/user/email/request-verification"
+    val UPDATE_USER_NAME = "$BASE/user/name"
+    val UPDATE_PASSWORD = "$BASE/user/password"
+    val ORDERS = "$BASE/user/orders"
+    val UNLINK = "$BASE/user/unlink/wx"
+    val STARRED = "$BASE/user/starred"
+    val WX_ACCOUNT = "$BASE/user/wx/account"
+    val WX_SIGNUP = "$BASE/user/wx/signup"
+    val WX_LINK = "$BASE/user/wx/link"
 }
 
 object SubscribeApi {
     private val BASE = if (BuildConfig.DEBUG) {
-        "http://www.ftacademy.cn/api/sandbox"
-//        "http://192.168.10.195:8200"
+//        "http://www.ftacademy.cn/api/sandbox"
+        "http://192.168.10.195:8200"
     } else {
         "http://www.ftacademy.cn/api/v1"
     }
-//    private const val BASE = "http://www.ftacademy.cn/api/sandbox"
-//    private const val BASE = "http://192.168.10.195:8200"
     val WX_UNIFIED_ORDER = "$BASE/wxpay/app"
     val WX_ORDER_QUERY = "$BASE/wxpay/query"
     val ALI_ORDER = "$BASE/alipay/app"
+    val STRIPE_ORDER = "$BASE/stripe/order"
 
     val WX_LOGIN = "$BASE/wx/oauth/login"
     val WX_REFRESH = "$BASE/wx/oauth/refresh"
 
     val UPGRADE = "$BASE/upgrade"
     val UPGRADE_PREVIEW = "$BASE/upgrade/preview"
+
+    val STRIPE_CUSTOMER = "$BASE/stripe/customers"
+    val STRIPE_PAY_INTENT = "$BASE/stripe/payment_intents"
 }
 
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
