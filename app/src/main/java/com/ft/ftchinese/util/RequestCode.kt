@@ -6,4 +6,6 @@ object RequestCode {
     const val PAYMENT = 3
     const val LINK = 4
     const val UNLINK = 5
+    const val SELECT_SOURCE = 55
+    const val PERMISSIONS = 1002
 }
