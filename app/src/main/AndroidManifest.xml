@@ -19,6 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/Origami"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".ui.pay.SubscriptionActivity"></activity>
+        <activity android:name=".ui.account.CustomerActivity" />
 
         <service
             android:name=".NewsMessagingService"
