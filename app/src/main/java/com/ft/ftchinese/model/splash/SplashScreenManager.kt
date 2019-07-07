@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.splash
 
 import android.content.Context
-import com.ft.ftchinese.model.Tier
+import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.util.formatLocalDate
 import com.ft.ftchinese.util.parseLocalDate
 import org.jetbrains.anko.AnkoLogger

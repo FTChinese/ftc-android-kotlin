@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.ft.ftchinese.model.ChannelItem
-import com.ft.ftchinese.model.Tier
+import com.ft.ftchinese.model.order.Tier
 import java.util.*
 
 @Entity(

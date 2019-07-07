@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.ft.ftchinese.model.ChannelItem
 import com.ft.ftchinese.model.Permission
-import com.ft.ftchinese.model.Tier
+import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.util.formatSQLDateTime
 import org.threeten.bp.LocalDateTime
 import java.util.*

@@ -2,6 +2,8 @@ package com.ft.ftchinese.model
 
 import android.content.Context
 import androidx.core.content.edit
+import com.ft.ftchinese.model.order.Cycle
+import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.util.formatISODateTime
 import com.ft.ftchinese.util.formatLocalDate
 import com.ft.ftchinese.util.parseISODateTime
@@ -12,6 +14,7 @@ import org.jetbrains.anko.info
 private const val SESSION_PREF_NAME = "account"
 private const val PREF_USER_ID = "id"
 private const val PREF_UNION_ID = "union_id"
+private const val PREF_STRIPE_ID = "stripe_id"
 private const val PREF_USER_NAME = "user_name"
 private const val PREF_EMAIL = "email"
 private const val PREF_IS_VERIFIED = "is_verified"
@@ -38,6 +41,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         sharedPreferences.edit {
             putString(PREF_USER_ID, account.id)
             putString(PREF_UNION_ID, account.unionId)
+            putString(PREF_STRIPE_ID, account.stripeId)
             putString(PREF_USER_NAME, account.userName)
             putString(PREF_EMAIL, account.email)
             putBoolean(PREF_IS_VERIFIED, account.isVerified)
@@ -64,6 +68,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
     fun loadAccount(): Account? {
         val userId = sharedPreferences.getString(PREF_USER_ID, null) ?: return null
         val unionId = sharedPreferences.getString(PREF_UNION_ID, null)
+        val stripeId = sharedPreferences.getString(PREF_STRIPE_ID, null)
         val userName = sharedPreferences.getString(PREF_USER_NAME, null)
         val email = sharedPreferences.getString(PREF_EMAIL, "") ?: ""
         val isVerified = sharedPreferences.getBoolean(PREF_IS_VERIFIED, false)
@@ -94,6 +99,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         return Account(
                 id = userId,
                 unionId = unionId,
+                stripeId = stripeId,
                 userName = userName,
                 email = email,
                 isVerified = isVerified,
@@ -103,6 +109,12 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
                 membership = membership,
                 loginMethod = LoginMethod.fromString(loginMethod)
         )
+    }
+
+    fun saveStripeId(id: String) {
+        sharedPreferences.edit {
+            putString(PREF_STRIPE_ID, id)
+        }
     }
 
     fun isLoggedIn(): Boolean {

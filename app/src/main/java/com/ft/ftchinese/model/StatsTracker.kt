@@ -5,6 +5,9 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
+import com.ft.ftchinese.model.order.PayMethod
+import com.ft.ftchinese.model.order.PlanPayable
+import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.model.splash.ScreenAd
 import com.ft.ftchinese.util.AdSlot
 import com.ft.ftchinese.util.FtcEvent
@@ -67,6 +70,14 @@ class StatsTracker private constructor(context: Context) {
         })
     }
 
+    fun checkOut(plan: PlanPayable, payMethod: PayMethod) {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
+            putDouble(FirebaseAnalytics.Param.VALUE, plan.payable)
+            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
+            putString(FirebaseAnalytics.Param.METHOD, payMethod.string())
+        })
+    }
+
     fun buySuccess(subs: Subscription) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
@@ -89,6 +100,23 @@ class StatsTracker private constructor(context: Context) {
     fun buyFail(tier: Tier) {
         // Log buy success event
         val action = when (tier) {
+            Tier.STANDARD -> GAAction.BUY_STANDARD_FAIL
+            Tier.PREMIUM -> GAAction.BUY_PREMIUM_FAIL
+        }
+
+        tracker.send(HitBuilders.EventBuilder()
+                .setCategory(GACategory.SUBSCRIPTION)
+                .setAction(action)
+                .setLabel(PaywallTracker.from?.label)
+                .build())
+    }
+
+    fun buyFail(plan: PlanPayable?) {
+        if (plan == null) {
+            return
+        }
+
+        val action = when (plan.tier) {
             Tier.STANDARD -> GAAction.BUY_STANDARD_FAIL
             Tier.PREMIUM -> GAAction.BUY_PREMIUM_FAIL
         }

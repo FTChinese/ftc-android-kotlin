@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.order
 
 import android.os.Parcelable
 import com.beust.klaxon.Json
@@ -10,6 +10,7 @@ import kotlinx.android.parcel.Parcelize
 /**
  * A pricing plan.
  */
+@Parcelize
 data class Plan(
         @KTier
         val tier: Tier,
@@ -18,7 +19,7 @@ data class Plan(
         val listPrice: Double,
         val netPrice: Double,
         val description: String
-)
+) : Parcelable
 
 class SubsPlans(
         @Json(name = "standard_year")
@@ -65,65 +66,4 @@ val subsPlans = SubsPlans(
         )
 )
 
-/**
- * PlanPayable can be used to build UI for checkout.
- */
-@Parcelize
-data class PlanPayable(
-        @KTier
-        val tier: Tier,
-        @KCycle
-        val cycle: Cycle,
-        val listPrice: Double,
-        val netPrice: Double,
 
-        val balance: Double,
-        val cycleCount: Long,
-        val extraDays: Long,
-        val payable: Double,
-
-        var isUpgrade: Boolean = false,
-        var isRenew: Boolean = false
-): Parcelable {
-
-    fun isPayRequired(): Boolean {
-        return payable != 0.0
-    }
-
-    // Whether user's account balance is enough to cover
-    // upgrade cost.
-    fun isDirectUpgrade(): Boolean {
-        return isUpgrade && payable > 0.0
-    }
-
-    fun getId(): String {
-        return "${tier.string()}_${cycle.string()}"
-    }
-
-    fun gaAddCartAction(): String {
-        return when (tier) {
-            Tier.STANDARD -> when (cycle) {
-                   Cycle.YEAR -> GAAction.BUY_STANDARD_YEAR
-                   Cycle.MONTH -> GAAction.BUY_STANDARD_MONTH
-            }
-            Tier.PREMIUM -> GAAction.BUY_PREMIUM
-        }
-    }
-
-    companion object {
-        fun fromPlan(p: Plan): PlanPayable {
-            return PlanPayable(
-                    tier = p.tier,
-                    cycle = p.cycle,
-                    listPrice = p.listPrice,
-                    netPrice = p.netPrice,
-                    balance = 0.0,
-                    cycleCount = 1,
-                    extraDays = 0,
-                    payable = p.netPrice,
-                    isUpgrade = false,
-                    isRenew = false
-            )
-        }
-    }
-}
