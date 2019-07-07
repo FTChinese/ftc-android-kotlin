@@ -142,6 +142,7 @@
     <string name="select_or_add_card">选择或添加银行卡</string>
     <string name="stripe_create_customer">设置Stripe支付</string>
     <string name="retrieve_customer">查询Stripe账号&#8230;</string>
+    <string name="bank_card_number">**** **** **** %1$s</string>
 
     <string name="check_out_default">支付</string>
     <string name="request_order">创建订单&#8230;</string>
