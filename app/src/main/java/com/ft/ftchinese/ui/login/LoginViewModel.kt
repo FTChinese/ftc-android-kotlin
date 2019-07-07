@@ -74,11 +74,14 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                     _emailResult.value = FindEmailResult(
                             success = Pair(email, true)
                     )
-                } else {
-                    _emailResult.value = FindEmailResult(
-                            exception = Exception("API error ${resp.code()}")
-                    )
+                    return@launch
                 }
+
+                _emailResult.value = FindEmailResult(
+                        exception = Exception("API error ${resp.code()}")
+                )
+
+                inputEnabled.value = true
 
             } catch (e: ClientError) {
 
@@ -86,19 +89,22 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                     _emailResult.value = FindEmailResult(
                             success = Pair(email, false)
                     )
-
                     return@launch
                 }
 
                 _emailResult.value = FindEmailResult(
-                        error = e.statusMessage()
+                        exception = e
                 )
+
+                inputEnabled.value = true
 
             } catch (e:Exception) {
 
                 _emailResult.value = FindEmailResult(
                         exception = e
                 )
+
+                inputEnabled.value = true
             }
         }
     }
@@ -113,8 +119,11 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
                 if (userId == null) {
 
-                    _accountResult.value = AccountResult(success = null)
+                    _accountResult.value = AccountResult(
+                            error = R.string.error_not_loaded
+                    )
 
+                    inputEnabled.value = true
                     return@launch
                 }
 
@@ -131,11 +140,14 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                         exception = e
                 )
 
+                inputEnabled.value = true
             } catch (e: Exception) {
 
                 _accountResult.value = AccountResult(
                         exception = e
                 )
+
+                inputEnabled.value = true
             }
         }
     }
@@ -200,7 +212,10 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (userId == null) {
-                    _accountResult.value = AccountResult()
+                    _accountResult.value = AccountResult(
+                            error = R.string.error_not_loaded
+                    )
+                    inputEnabled.value = true
                     return@launch
                 }
 
@@ -232,9 +247,12 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                         exception = e
                 )
 
+                inputEnabled.value = true
             } catch (e: Exception) {
 
                 _accountResult.value = AccountResult(exception = e)
+
+                inputEnabled.value = true
             }
         }
     }
@@ -314,9 +332,5 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
     fun showProgress(show: Boolean) {
         inProgress.value = show
-    }
-
-    fun enableInput(enable: Boolean) {
-        inputEnabled.value = enable
     }
 }
