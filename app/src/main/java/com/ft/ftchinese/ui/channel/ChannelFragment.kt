@@ -342,7 +342,7 @@ class ChannelFragment : ScopedFragment(),
 
             if (name != null) {
                 info("Saving js posted data for sponsors of $channelSource")
-                GlobalScope.launch {
+                launch {
                     cache.saveText("${name}_sponsors.json", message)
                 }
             }
@@ -364,7 +364,7 @@ class ChannelFragment : ScopedFragment(),
 
         val fileName = channelSource?.name ?: return
 
-        GlobalScope.launch(Dispatchers.IO) {
+        launch(Dispatchers.IO) {
             cache.saveText("$fileName.json", data)
         }
     }
