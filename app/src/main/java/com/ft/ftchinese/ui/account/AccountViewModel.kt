@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.ui.StringResult
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
@@ -32,6 +33,8 @@ class AccountViewModel : ViewModel(), AnkoLogger {
 
     private val _wxRefreshResult = MutableLiveData<WxRefreshResult>()
     val wxRefreshResult: LiveData<WxRefreshResult> = _wxRefreshResult
+
+    val customerIdResult = MutableLiveData<StringResult>()
 
     // Ask API to fetch user's latest wechat info and save
     // it to database.
@@ -166,6 +169,36 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                         exception = e
                 )
             }
+        }
+    }
+
+    fun createCustomer(account: Account) {
+        viewModelScope.launch {
+            try {
+                val id = withContext(Dispatchers.IO) {
+                    account.createCustomer()
+                }
+
+                if (id == null) {
+                    customerIdResult.value = StringResult(
+                            error = R.string.stripe_customer_not_created
+                    )
+                    return@launch
+                }
+
+                customerIdResult.value = StringResult(
+                        success = id
+                )
+            } catch (e: ClientError) {
+                customerIdResult.value = StringResult(
+                        exception = e
+                )
+            } catch (e: Exception) {
+                customerIdResult.value = StringResult(
+                        exception = e
+                )
+            }
+
         }
     }
 
