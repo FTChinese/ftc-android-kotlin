@@ -71,9 +71,6 @@ class CheckOutActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
-        // Init stripe cnfiguration.
-        PaymentConfiguration.init("pk_test_6vkfdNgcyZKIMiq9jqLMcwr30012ZCS8Np")
-
         val p = intent.getParcelableExtra<PlanPayable>(EXTRA_PLAN_PAYABLE) ?: return
 
         initUI(p)
@@ -323,42 +320,7 @@ class CheckOutActivity : ScopedAppActivity(),
                 return@Observer
             }
 
-            val account = sessionManager.loadAccount() ?: return@Observer
-
-            if (account.stripeId == null) {
-
-            } else {
-                PaymentSessionActivity.start(this, orderResult.success)
-            }
-        })
-
-        // If user is not a stripe customer yet, create it
-        // and initiate customer session.
-        checkOutViewModel.customerCreated.observe(this, Observer {
-
-            val customerResult = it ?: return@Observer
-
-            if (customerResult.error != null) {
-                toast(customerResult.error)
-                enablePayBtn(true)
-                checkOutViewModel.enableInput(true)
-                return@Observer
-            }
-
-            if (customerResult.exception != null) {
-                handleException(customerResult.exception)
-                enablePayBtn(true)
-                checkOutViewModel.enableInput(true)
-                return@Observer
-            }
-
-            val id = customerResult.success ?: return@Observer
-
-            // NOTE: there are possibilities of infinite
-            // loop is stripe id cannot be set.
-            sessionManager.saveStripeId(id)
-
-//            startStripePaymentSession()
+            SubscriptionActivity.start(this, orderResult.success)
         })
     }
 

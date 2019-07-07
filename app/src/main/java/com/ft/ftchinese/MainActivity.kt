@@ -39,6 +39,7 @@ import com.google.android.material.tabs.TabLayout
 import com.google.firebase.FirebaseApp
 import com.google.firebase.iid.FirebaseInstanceId
 import com.stripe.android.CustomerSession
+import com.stripe.android.PaymentConfiguration
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_main.*
@@ -170,6 +171,9 @@ class MainActivity : ScopedAppActivity(),
         }
 
         createNotificationChannel()
+
+        // Init stripe cnfiguration.
+        PaymentConfiguration.init("pk_test_6vkfdNgcyZKIMiq9jqLMcwr30012ZCS8Np")
 
         cache = FileCache(this)
         splashManager = SplashScreenManager(this)
