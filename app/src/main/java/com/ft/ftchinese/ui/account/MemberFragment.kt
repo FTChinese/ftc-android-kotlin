@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.Membership
-import com.ft.ftchinese.model.Tier
+import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.ui.RowAdapter
 import com.ft.ftchinese.ui.TableRow
 import com.ft.ftchinese.util.formatLocalDate
