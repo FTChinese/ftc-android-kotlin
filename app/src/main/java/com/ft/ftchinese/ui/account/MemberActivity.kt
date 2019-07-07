@@ -18,6 +18,9 @@ import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.order.PlanPayable
+import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.order.subsPlans
 import com.ft.ftchinese.ui.RowAdapter
 import com.ft.ftchinese.ui.TableRow
 import com.ft.ftchinese.ui.pay.CheckOutActivity
