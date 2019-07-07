@@ -19,7 +19,6 @@
         android:supportsRtl="true"
         android:theme="@style/Origami"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.pay.PaymentActivity"></activity>
 
         <service
             android:name=".NewsMessagingService"

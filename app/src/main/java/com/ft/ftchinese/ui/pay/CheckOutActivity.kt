@@ -326,7 +326,7 @@ class CheckOutActivity : ScopedAppActivity(),
             val account = sessionManager.loadAccount() ?: return@Observer
 
             if (account.stripeId == null) {
-                PaymentActivity.start(this, orderResult.success)
+
             } else {
                 PaymentSessionActivity.start(this, orderResult.success)
             }
