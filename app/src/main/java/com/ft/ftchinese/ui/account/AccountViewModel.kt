@@ -69,6 +69,8 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         }
     }
 
+    // Refresh a user's account data, regardless of logged in
+    // via email or wecaht.
     fun refresh(account: Account) {
         viewModelScope.launch {
             info("Start refreshing account")
