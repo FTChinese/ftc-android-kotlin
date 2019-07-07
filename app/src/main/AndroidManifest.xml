@@ -19,6 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/Origami"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".ui.pay.PaymentActivity"></activity>
+
         <service
             android:name=".NewsMessagingService"
             android:exported="false">
@@ -121,12 +123,20 @@
             android:label="@string/title_checkout"
             android:parentActivityName=".ui.pay.PaywallActivity" />
         <activity
+            android:name=".ui.pay.PaymentSessionActivity"
+            android:label="@string/pay_method_stripe"
+            android:parentActivityName=".ui.pay.CheckOutActivity" />
+        <activity
             android:name=".ui.pay.MyOrdersActivity"
             android:label="@string/title_my_orders"
             android:parentActivityName=".ui.account.MemberActivity" />
         <activity
             android:name=".ui.pay.UpgradeActivity"
             android:label="@string/title_upgrade"
+            android:parentActivityName=".ui.account.MemberActivity" />
+        <activity
+            android:name=".ui.pay.UpgradePreviewActivity"
+            android:label="@string/title_upgrade_preview"
             android:parentActivityName=".ui.account.MemberActivity" /> <!-- WXPayEntryActivity does not need parent activity since that is useless. -->
         <activity
             android:name=".wxapi.WXPayEntryActivity"
