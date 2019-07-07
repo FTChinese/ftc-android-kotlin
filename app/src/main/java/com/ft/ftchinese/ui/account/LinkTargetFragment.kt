@@ -19,7 +19,7 @@ import org.jetbrains.anko.AnkoLogger
 /**
  * account-to-be-merged.
  */
-class MemberFragment : Fragment(), AnkoLogger {
+class LinkTargetFragment : Fragment(), AnkoLogger {
 
     private var membership: Membership? = null
     private var heading: String? = null
@@ -85,7 +85,7 @@ class MemberFragment : Fragment(), AnkoLogger {
     companion object {
         private const val ARG_MEMBERSHIP = "arg_membership"
         private const val ARG_HEADING = "arg_heading"
-        fun newInstance(m: Membership, heading: String? = null) = MemberFragment().apply {
+        fun newInstance(m: Membership, heading: String? = null) = LinkTargetFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_MEMBERSHIP, json.toJsonString(m))
                 putString(ARG_HEADING, heading)

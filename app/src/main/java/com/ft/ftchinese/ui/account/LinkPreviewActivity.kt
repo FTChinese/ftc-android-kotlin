@@ -157,12 +157,12 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         supportFragmentManager.commit {
-            replace(R.id.frag_ftc_account, MemberFragment.newInstance(
+            replace(R.id.frag_ftc_account, LinkTargetFragment.newInstance(
                     m = ftcAccount.membership,
                     heading = "${getString(R.string.label_ftc_account)}\n${ftcAccount.email}"
             ))
 
-            replace(R.id.frag_wx_account, MemberFragment.newInstance(
+            replace(R.id.frag_wx_account, LinkTargetFragment.newInstance(
                     m = wxAccount.membership,
                     heading = "${getString(R.string.label_wx_account)}\n${wxAccount.wechat.nickname}"
             ))
