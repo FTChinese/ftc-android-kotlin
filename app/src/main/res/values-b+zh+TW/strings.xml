@@ -39,7 +39,7 @@
     <string name="title_change_email">修改登入信箱</string>
     <string name="title_change_username">修改使用者名稱</string>
     <string name="title_about_us">關於我們</string>
-    <string name="title_checkout">付費中心</string>
+    <string name="title_checkout">付費</string>
     <string name="title_renewal">會員續訂</string>
     <string name="title_upgrade">會員升级</string>
     <string name="title_wxpay">微信支付 </string>
@@ -81,7 +81,7 @@
     <string name="upgrade_guide">如果您计划升级为高端會員，系统将首先使用當前帳號的余额抵扣定价，不足部分需要您另行支付。</string>
     <string name="upgrade_to_read">您點擊了仅限高端會員閱讀的文章。您目前是標準會員，升级为閱讀會員可以閱读</string>
     <string name="premium_only">您點擊了仅供高端會員阅读的文章，購買高端會員後可以继续閱讀</string>
-    <string name="upgrade_smallprint">余额可以兑换高级會員%1$d年%2$d天，无需额外支付</string>
+    <string name="balance_conversion">余额可以兑换高级會員%1$d年%2$d天，无需额外支付</string>
 
     <!-- Example: ¥1,998.00/年 -->
     <string name="formatter_price_year">¥%1$,.2f/年</string>
@@ -121,10 +121,10 @@
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
     <string name="heading_pay_method">選擇支付方式</string>
     <string name="heading_become_member">购买FT会员</string>
-    <string name="pay_method_ali">支付寶支付</string>
+    <string name="pay_method_ali">支付寶</string>
     <string name="pay_method_wechat">微信支付</string>
-    <string name="pay_method_stripe">Stripe支付</string>
-    <string name="pay_method_unknown">請選擇支付方式</string>
+    <string name="pay_method_stripe">Stripe</string>
+    <string name="prompt_pay_method_unknown">請選擇支付方式</string>
 
     <string name="check_out_default">支付</string>
     <string name="request_order">創建訂單…</string>

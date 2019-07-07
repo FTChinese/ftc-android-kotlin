@@ -39,9 +39,10 @@
     <string name="title_change_email">修改登录邮箱</string>
     <string name="title_change_username">修改用户名</string>
     <string name="title_about_us">关于我们</string>
-    <string name="title_checkout">收银台</string>
+    <string name="title_checkout">支付</string>
     <string name="title_renewal">会员续订</string>
     <string name="title_upgrade">会员升级</string>
+    <string name="title_upgrade_preview">升级预览</string>
     <string name="title_wxpay">微信支付 </string>
     <string name="title_wx_account">微信账号</string>
     <string name="title_link_email">绑定邮箱账号</string>
@@ -52,6 +53,7 @@
     <string name="title_my_orders">我的订单</string>
     <string name="title_my_subs">我的订阅</string>
     <string name="title_wx_login">微信登录</string>
+    <string name="title_add_card">添加银行卡</string>
 
     <!-- Member and Subscription -->
 
@@ -81,7 +83,14 @@
     <string name="upgrade_guide">如果您计划升级为高端会员，系统将首先使用当前账号的余额抵扣定价，不足部分需要您另行支付。</string>
     <string name="upgrade_to_read">您点击了仅限高端会员阅读的文章。您目前是标准会员，升级为高端会员可以继续阅读</string>
     <string name="premium_only">您点击了仅供高端会员阅读的文章，购买高端会员后可以继续阅读</string>
-    <string name="upgrade_smallprint">余额可以兑换高级会员%1$d年%2$d天，无需额外支付</string>
+    <string name="balance_conversion">余额可以兑换高级会员%1$d年%2$d天，无需额外支付</string>
+    <string name="confirm_upgrade">去支付</string>
+    <string name="direct_upgrade">无需支付，直接升级</string>
+    <string name="upgrade_payment">升级到高端会员还需支付"</string>
+    <string name="upgrade_forumla">应付额 = 定价 - 账户余额</string>
+    <string name="premium_price">高端会员定价: %1$s</string>
+    <string name="account_balance">当前余额: %1$s</string>
+    <string name="upgrade_success">升级成功</string>
 
     <!-- Example: ¥1,998.00/年 -->
     <string name="formatter_price_year">¥%1$,.2f/年</string>
@@ -121,10 +130,18 @@
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
     <string name="heading_pay_method">选择支付方式</string>
     <string name="heading_become_member">购买FT会员</string>
+    <string name="pay_brand_ali">支付宝</string>
     <string name="pay_method_ali">支付宝支付</string>
+    <string name="pay_brand_wechat">微信支付</string>
     <string name="pay_method_wechat">微信支付</string>
+    <string name="pay_brand_stripe">Stripe</string>
     <string name="pay_method_stripe">Stripe支付</string>
-    <string name="pay_method_unknown">请选择支付方式</string>
+    <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
+    <string name="payment_source">%1$s (尾号%2$s)</string>
+    <string name="stripe_footnote">* Stripe暂不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</string>
+    <string name="select_or_add_card">选择或添加银行卡</string>
+    <string name="stripe_create_customer">设置Stripe支付</string>
+    <string name="retrieve_customer">查询Stripe账号&#8230;</string>
 
     <string name="check_out_default">支付</string>
     <string name="request_order">创建订单&#8230;</string>
@@ -225,6 +242,7 @@
     <string name="prompt_unlinked">账号已解除绑定</string>
     <string name="prompt_account_updated">账号已更新</string>
     <string name="prompt_no_keyword">请输入关键字后搜索</string>
+    <string name="prompt_pay_method_unknown">请选择支付方式</string>
 
     <string name="instruct_password_letter">请输入您的登录FT中文网所用的电子邮箱，我们会向该邮箱发送邮件，帮您重置密码</string>
     <string name="instruct_verify_email">您的邮箱尚未验证，为保障您的账号安全，请及时验证邮箱。我们已经给您的登录邮箱发送了验证邮件，点击邮件中的链接即可。</string>
@@ -339,4 +357,7 @@
         <item>sc</item>
         <item>tc</item>
     </string-array>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
