@@ -1,5 +1,6 @@
 package com.ft.ftchinese.model
 
+import com.ft.ftchinese.model.order.Tier
 import org.junit.Test
 
 class TierTest {
