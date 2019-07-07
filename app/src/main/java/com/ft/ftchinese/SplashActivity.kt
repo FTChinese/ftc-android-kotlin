@@ -99,7 +99,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
             return@setOnClickListener
         }
 
-        counterJob = GlobalScope.launch(Dispatchers.Main) {
+        counterJob = launch(Dispatchers.Main) {
 
             splashViewModel.sendImpression(splashAd, statsTracker)
 
