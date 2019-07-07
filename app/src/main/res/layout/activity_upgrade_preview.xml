@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.pay.UpgradePreviewActivity">
+
+    <include
+        layout="@layout/simple_toolbar" />
+
+    <TextView
+        android:id="@+id/tv_intro"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/upgrade_payment"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:textAlignment="center"/>
+
+    <TextView
+        android:id="@+id/tv_upgrade_price"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/formatter_price"
+        app:layout_constraintTop_toBottomOf="@id/tv_intro"
+        app:layout_constraintStart_toStartOf="@id/tv_intro"
+        app:layout_constraintEnd_toEndOf="@id/tv_intro"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="@color/colorBlack"
+        android:textSize="36sp"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tv_formula"
+        style="@style/FTCTextCenter"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/upgrade_forumla"
+        app:layout_constraintTop_toBottomOf="@id/tv_upgrade_price"
+        app:layout_constraintStart_toStartOf="@id/tv_intro"
+        app:layout_constraintEnd_toEndOf="@id/tv_intro"/>
+
+    <TextView
+        android:id="@+id/tv_premium_price"
+        style="@style/FTCTextCenter"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/premium_price"
+        app:layout_constraintTop_toBottomOf="@id/tv_formula"
+        app:layout_constraintStart_toStartOf="@id/tv_intro"
+        app:layout_constraintEnd_toEndOf="@id/tv_intro"/>
+
+    <TextView
+        android:id="@+id/tv_balance"
+        style="@style/FTCTextCenter"
+        android:layout_width="0dp"
+        android:layout_marginTop="16dp"
+        android:layout_height="wrap_content"
+        android:text="@string/account_balance"
+        app:layout_constraintTop_toBottomOf="@id/tv_premium_price"
+        app:layout_constraintStart_toStartOf="@id/tv_intro"
+        app:layout_constraintEnd_toEndOf="@id/tv_intro"/>
+
+    <TextView
+        android:id="@+id/tv_upgrade_conversion"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/balance_conversion"
+        app:layout_constraintTop_toBottomOf="@id/tv_balance"
+        app:layout_constraintStart_toStartOf="@id/tv_intro"
+        app:layout_constraintEnd_toEndOf="@+id/tv_intro"
+        android:textAlignment="center"/>
+
+    <Button
+        android:id="@+id/btn_confirm_upgrade"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:text="@string/confirm_upgrade"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="1.0"/>
+
+    <include layout="@layout/progress_bar"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
