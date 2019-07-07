@@ -1,11 +1,11 @@
 package com.ft.ftchinese.ui.pay
 
 import android.os.Parcelable
-import com.ft.ftchinese.model.Tier
+import com.ft.ftchinese.model.order.Tier
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class ProductCard(
+data class PaywallProduct(
         val tier: Tier,
         val heading: String,
         val description: String,
