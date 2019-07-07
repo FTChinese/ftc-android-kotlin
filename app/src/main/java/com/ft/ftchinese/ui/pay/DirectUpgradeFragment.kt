@@ -47,9 +47,9 @@ class DirectUpgradeFragment : ScopedFragment(),
         })
 
         // Tell view model upgrading started.
-        upgrade_btn.setOnClickListener {
-            viewModel.startUpgrading(true)
-        }
+//        upgrade_btn.setOnClickListener {
+//            viewModel.startUpgrading(true)
+//        }
     }
 
     companion object {
