@@ -60,7 +60,6 @@ class LinkActivity : ScopedAppActivity(), AnkoLogger {
             showProgress(false)
 
             if (findResult.error != null) {
-                viewModel.enableInput(true)
                 toast(findResult.error)
 
                 return@Observer
