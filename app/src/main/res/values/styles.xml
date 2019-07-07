@@ -134,6 +134,10 @@
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Headline</item>
     </style>
 
+    <style name="FTCHeading">
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Headline</item>
+    </style>
+
     <style name="FTCText">
         <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body1</item>
         <item name="android:textSize">18sp</item>
