@@ -132,7 +132,10 @@ dependencies {
     implementation 'com.google.android.gms:play-services-analytics:17.0.0'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
+    // Payment
     implementation(name: 'alipaySdk-15.5.7-20181023110917', ext: 'aar')
+    implementation 'com.stripe:stripe-android:9.3.5'
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation "org.jetbrains.anko:anko:$anko_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
