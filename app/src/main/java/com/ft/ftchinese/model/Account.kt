@@ -347,6 +347,32 @@ data class Account(
         }
     }
 
+    fun createCard(token: String): String {
+        val (_, body) = Fetch()
+                .post("${SubscribeApi.STRIPE_CUSTOMER}/$stripeId/sources")
+                .setUserId(id)
+                .noCache()
+                .jsonBody(Klaxon().toJsonString(mapOf(
+                        "token" to token
+                )))
+                .responseApi()
+
+        return body ?: "error adding card"
+    }
+
+    fun createSubscription(): String {
+        val (_, body ) = Fetch()
+                .post(SubscribeApi.STRIPE_SUB)
+                .setUserId(id)
+                .noCache()
+                .jsonBody(Klaxon().toJsonString(mapOf(
+                        "customer" to stripeId
+                )))
+                .responseApi()
+
+        return body ?: "Failed to subscribe"
+    }
+
     fun createCustomer(): String? {
         val (_, body) = Fetch()
                 .put(SubscribeApi.STRIPE_CUSTOMER)
