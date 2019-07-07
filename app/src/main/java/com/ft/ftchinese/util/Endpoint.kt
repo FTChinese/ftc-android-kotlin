@@ -47,6 +47,7 @@ object SubscribeApi {
     val UPGRADE_PREVIEW = "$BASE/upgrade/preview"
 
     val STRIPE_CUSTOMER = "$BASE/stripe/customers"
+    val STRIPE_SUB = "$BASE/stripe/subscriptions"
     val STRIPE_PAY_INTENT = "$BASE/stripe/payment_intents"
 }
 
