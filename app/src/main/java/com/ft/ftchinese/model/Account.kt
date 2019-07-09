@@ -3,10 +3,7 @@ package com.ft.ftchinese.model
 import android.net.Uri
 import android.os.Parcelable
 import com.beust.klaxon.Klaxon
-import com.ft.ftchinese.model.order.Cycle
-import com.ft.ftchinese.model.order.Order
-import com.ft.ftchinese.model.order.PlanPayable
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
@@ -331,9 +328,22 @@ data class Account(
         }
     }
 
+    fun getStripePlan(tier: Tier, cycle: Cycle): StripePlan? {
+        val (_, body) = Fetch()
+                .get("${SubscribeApi.STRIPE_PLAN}/$tier/$cycle")
+                .setUserId(id)
+                .responseApi()
+
+        return if (body == null) {
+            return null
+        } else {
+            json.parse<StripePlan>(body)
+        }
+    }
+
     fun createStripeOrder(tier: Tier, cycle: Cycle): Order? {
         val (_, body) = Fetch()
-                .post("${SubscribeApi.STRIPE_ORDER}/${tier.string()}/${cycle.string()}")
+                .post("${SubscribeApi.STRIPE_ORDER}/$tier/$cycle")
                 .setUserId(id)
                 .noCache()
                 .setClient()
@@ -347,30 +357,18 @@ data class Account(
         }
     }
 
-    fun createCard(token: String): String {
-        val (_, body) = Fetch()
-                .post("${SubscribeApi.STRIPE_CUSTOMER}/$stripeId/sources")
-                .setUserId(id)
-                .noCache()
-                .jsonBody(Klaxon().toJsonString(mapOf(
-                        "token" to token
-                )))
-                .responseApi()
-
-        return body ?: "error adding card"
-    }
-
-    fun createSubscription(): String {
+    fun createSubscription(params: StripeSubParams, plan: PlanPayable?): String? {
+        if (plan == null) {
+            return null
+        }
         val (_, body ) = Fetch()
-                .post(SubscribeApi.STRIPE_SUB)
+                .post("${SubscribeApi.STRIPE_SUB}/${plan.tier}/${plan.cycle}")
                 .setUserId(id)
                 .noCache()
-                .jsonBody(Klaxon().toJsonString(mapOf(
-                        "customer" to stripeId
-                )))
+                .jsonBody(json.toJsonString(params))
                 .responseApi()
 
-        return body ?: "Failed to subscribe"
+        return body
     }
 
     fun createCustomer(): String? {
@@ -379,7 +377,7 @@ data class Account(
                 .setUserId(id)
                 .noCache()
                 .body()
-                .responseApi()
+                .responseStripe()
 
         if (body == null) {
             return null
