@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.Account
 import com.ft.ftchinese.model.order.PlanPayable
+import com.ft.ftchinese.model.order.StripePlan
 import com.ft.ftchinese.ui.StringResult
 import com.ft.ftchinese.util.ClientError
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +21,7 @@ class CheckOutViewModel : ViewModel() {
     val aliOrderResult = MutableLiveData<AliOrderResult>()
     val stripeOrderResult = MutableLiveData<OrderResult>()
     val clientSecretResult = MutableLiveData<StringResult>()
+    val stripePlanResult = MutableLiveData<StripePlanResult>()
 
     // Enable/Disable a UI, like button.
     fun enableInput(v: Boolean) {
@@ -124,7 +126,48 @@ class CheckOutViewModel : ViewModel() {
         }
     }
 
-    fun createStripeOrder(account: Account, plan: PlanPayable) {
+    fun getStripePlan(account: Account, plan: PlanPayable) {
+
+        viewModelScope.launch {
+            try {
+                val stripePlan = withContext(Dispatchers.IO) {
+                    account.getStripePlan(plan.tier, plan.cycle)
+                }
+
+                if (stripePlan == null) {
+                    stripePlanResult.value = StripePlanResult(
+                            error = R.string.prompt_unknown_plan
+                    )
+                    return@launch
+                }
+
+                stripePlanResult.value = StripePlanResult(
+                        success = stripePlan
+                )
+
+            } catch (e: Exception) {
+                stripePlanResult.value = StripePlanResult(
+                        exception = e
+                )
+            }
+        }
+    }
+
+    fun createStripeOrder(account: Account?, plan: PlanPayable?) {
+        if (account == null) {
+            stripeOrderResult.value = OrderResult(
+                    error = R.string.api_account_not_found
+            )
+            return
+        }
+
+        if (plan == null) {
+            stripeOrderResult.value = OrderResult(
+                    error = R.string.prompt_unknown_plan
+            )
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val order = withContext(Dispatchers.IO) {
