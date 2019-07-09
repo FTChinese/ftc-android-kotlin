@@ -15,22 +15,26 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"/>
 
-    <com.stripe.android.view.CardInputWidget
-        android:id="@+id/card_input_widget"
-        android:layout_margin="16dp"
-        android:layout_width="match_parent"
+    <TextView
+        style="@style/FTCText"
+        android:id="@+id/tv_payment_method"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/product_in_cart"/>
+        android:layout_marginTop="16dp"
+        android:padding="16dp"
+        app:layout_constraintTop_toBottomOf="@id/product_in_cart"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
+        android:background="@color/colorBlack5"
+        android:text="@string/select_or_add_card" />
 
-    <CheckBox
-        android:id="@+id/auto_renew"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:checked="true"
-        android:text="自动续订"
-        app:layout_constraintTop_toBottomOf="@id/card_input_widget"/>
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_payment_method"
+        android:text="* 使用Stripe订阅FT中文网会员以英镑计价"/>
 
     <Button
         android:id="@+id/btn_subscribe"
