@@ -53,7 +53,7 @@
     <string name="title_my_orders">我的订单</string>
     <string name="title_my_subs">我的订阅</string>
     <string name="title_wx_login">微信登录</string>
-    <string name="title_add_card">添加银行卡</string>
+    <string name="title_stripe_setting">Stripe设置</string>
 
     <!-- Member and Subscription -->
 
@@ -98,7 +98,7 @@
     <!-- Example: 标准会员/年-->
     <string name="formatter_tier_cycle">%1$s/%2$s</string>
     <!-- Example: ¥1,998.00 -->
-    <string name="formatter_price">¥%1$,.2f</string>
+    <string name="formatter_price">%1$s %2$,.2f</string>
     <!-- Example: 支付宝支付 ¥1,998.00-->
     <string name="formatter_check_out">%1$s %2$s</string>
 
@@ -140,9 +140,12 @@
     <string name="payment_source">%1$s (尾号%2$s)</string>
     <string name="stripe_footnote">* Stripe暂不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</string>
     <string name="select_or_add_card">选择或添加银行卡</string>
-    <string name="stripe_create_customer">设置Stripe支付</string>
+    <string name="stripe_init">设置Stripe支付</string>
     <string name="retrieve_customer">查询Stripe账号&#8230;</string>
+    <string name="add_or_select_payment_method">添加银行卡或选择默认支付方式</string>
+    <string name="set_default_payment_method">设为默认支付方式</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
+    <string name="stripe_customer_not_found">Stripe用户不存在，请检查账号或者重新登陆</string>
 
     <string name="check_out_default">支付</string>
     <string name="request_order">创建订单&#8230;</string>
@@ -244,6 +247,7 @@
     <string name="prompt_account_updated">账号已更新</string>
     <string name="prompt_no_keyword">请输入关键字后搜索</string>
     <string name="prompt_pay_method_unknown">请选择支付方式</string>
+    <string name="prompt_unknown_plan">请选择订阅方案</string>
 
     <string name="instruct_password_letter">请输入您的登录FT中文网所用的电子邮箱，我们会向该邮箱发送邮件，帮您重置密码</string>
     <string name="instruct_verify_email">您的邮箱尚未验证，为保障您的账号安全，请及时验证邮箱。我们已经给您的登录邮箱发送了验证邮件，点击邮件中的链接即可。</string>
