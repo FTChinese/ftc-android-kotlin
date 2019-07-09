@@ -233,7 +233,9 @@ class Story (
 
     // HTML for the {related-stories}
     fun htmlForRelatedStories(): String {
-
+        if (relatedStory == null) {
+            return ""
+        }
         val listItems = relatedStory.mapIndexed { index, relatedStory ->
             """
             <li class="mp${index+1}"><a target="_blank" href="/story/${relatedStory.id}\">${relatedStory.titleCN}</a></li>
