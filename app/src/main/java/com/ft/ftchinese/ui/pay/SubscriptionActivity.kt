@@ -1,24 +1,26 @@
 package com.ft.ftchinese.ui.pay
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.handleException
+import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.model.order.Order
 import com.ft.ftchinese.model.order.PlanPayable
-import com.ft.ftchinese.ui.StringResult
-import com.ft.ftchinese.ui.account.AccountViewModel
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.Stripe
-import com.stripe.android.TokenCallback
-import com.stripe.android.model.Token
+import com.ft.ftchinese.model.order.StripeSubParams
+import com.ft.ftchinese.service.StripeEphemeralKeyProvider
+import com.ft.ftchinese.util.RequestCode
+import com.stripe.android.*
+import com.stripe.android.model.Customer
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.view.PaymentMethodsActivity
+import com.stripe.android.view.PaymentMethodsActivityStarter
 import kotlinx.android.synthetic.main.activity_subscription.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -35,9 +37,9 @@ class SubscriptionActivity : ScopedAppActivity(),
         AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var accountViewModel: AccountViewModel
     private lateinit var stripe: Stripe
-    private var order: Order? = null
+    private var plan: PlanPayable? = null
+    private var paymentMethod: PaymentMethod? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,14 +51,9 @@ class SubscriptionActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
-        accountViewModel = ViewModelProviders.of(this)
-                .get(AccountViewModel::class.java)
+        PaymentConfiguration.init(BuildConfig.STRIPE_KEY)
 
-        accountViewModel.customerIdResult.observe(this, Observer {
-            onCustomerIdCreated(it)
-        })
-
-        order = intent.getParcelableExtra(EXTRA_ORDER)
+        plan = intent.getParcelableExtra(EXTRA_PLAN_PAYABLE)
         sessionManager = SessionManager.getInstance(this)
         stripe = Stripe(
                 this,
@@ -65,119 +62,129 @@ class SubscriptionActivity : ScopedAppActivity(),
                         .publishableKey
         )
 
+        setupCustomerSession()
         initUI()
     }
 
-    private fun onCustomerIdCreated(result: StringResult?) {
-        if (result == null) {
+    private fun setupCustomerSession() {
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
             return
         }
 
-        if (result.error != null) {
-            toast(result.error)
+        val account = sessionManager.loadAccount() ?: return
+
+        try {
+            CustomerSession.getInstance()
+            info("CustomerSession already instantiated")
+        } catch (e: Exception) {
+            info(e)
+            // Pass ftc user id to subscription api,
+            // which retrieves stripe's customer id and use
+            // the id to change for a ephemeral key.
+            CustomerSession.initCustomerSession(
+                    this,
+                    StripeEphemeralKeyProvider(account)
+            )
+        }
+
+        toast(R.string.retrieve_customer)
+        showProgress(true)
+
+        CustomerSession.getInstance().retrieveCurrentCustomer(customerRetrievalListener)
+    }
+
+    private val customerRetrievalListener = object : CustomerSession.ActivityCustomerRetrievalListener<SubscriptionActivity>(this) {
+        override fun onCustomerRetrieved(customer: Customer) {
+            showProgress(false)
             enableButton(true)
-            return
         }
 
-        if (result.exception != null) {
-            handleException(result.exception)
-            enableButton(true)
-            return
+        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
+            info("customer retrieval error: $errorMessage")
+
+            runOnUiThread {
+                toast(errorMessage)
+                showProgress(false)
+            }
         }
-
-        val id = result.success ?: return
-
-        sessionManager.saveStripeId(id)
-
-        tokenizeCard()
     }
 
     private fun initUI() {
         supportFragmentManager.commit {
-            replace(R.id.product_in_cart, CartItemFragment.newInstance(
-                    order?.let { PlanPayable.fromOrder(it) }
-            ))
+            replace(
+                    R.id.product_in_cart,
+                    CartItemFragment.newInstance(plan)
+            )
+        }
+
+        tv_payment_method.setOnClickListener {
+            PaymentMethodsActivityStarter(this)
+                    .startForResult(RequestCode.SELECT_SOURCE)
         }
 
         btn_subscribe.setOnClickListener {
-            val account = sessionManager.loadAccount() ?: return@setOnClickListener
-
-            showProgress(true)
-            enableButton(false)
-
-            if (account.stripeId == null) {
-                toast("Setting up stripe...")
-                info("User is not a stripe customer. Create it.")
-                accountViewModel.createCustomer(account)
-
-                return@setOnClickListener
-            }
-
-
-
-            // TODO: tokenize card and attach it to customer.
-            tokenizeCard()
+            onSubscribeButtonClicked()
         }
+
+        enableButton(false)
     }
 
-    private fun tokenizeCard() {
-        info("Tokenizing card...")
-        val cardToSave = card_input_widget.card
+    private fun onSubscribeButtonClicked() {
+        val account = sessionManager.loadAccount() ?: return
 
-        if (cardToSave == null) {
-            toast("Invalid card data")
-            showProgress(false)
-            enableButton(true)
+        if (account.stripeId == null) {
+            toast("You are not a stripe customer yet")
             return
         }
 
-        stripe.createToken(cardToSave, tokenCallback)
-    }
-
-    private val tokenCallback = object : TokenCallback {
-        override fun onSuccess(result: Token) {
-            toast("card saved")
-            info("token result: $result")
-
-            attachCard(result.id)
+        val pm = paymentMethod
+        if (pm == null) {
+            toast(R.string.prompt_pay_method_unknown)
+            return
         }
 
-        override fun onError(e: Exception) {
+        val subParams = StripeSubParams(
+                customer = account.stripeId,
+                defaultPaymentMethod = pm.id
+        )
 
-            showProgress(false)
-            enableButton(true)
-            toast(e.message ?: "Failed to save card")
-        }
-    }
+        showProgress(true)
+        enableButton(false)
 
-    private fun attachCard(token: String) {
-        info("Attaching payment method $token to customer ${sessionManager.loadAccount()?.stripeId}")
-
-        val account = sessionManager.loadAccount() ?: return
-
-        toast("Attaching card...")
         launch {
+            toast("Creating subscription...")
+
             try {
-
-                val resp = withContext(Dispatchers.IO) {
-                    account.createCard(token)
-                }
-
-                info("Add card response: $resp")
-
-                toast("Creating subscription...")
                 val subResp = withContext(Dispatchers.IO) {
-                    account.createSubscription()
+                    account.createSubscription(subParams, plan)
                 }
 
                 info("Subscription result: $subResp")
-
                 toast("Subscription done")
                 showProgress(false)
+
             } catch (e: Exception) {
                 showProgress(false)
+                enableButton(true)
                 handleException(e)
             }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RequestCode.SELECT_SOURCE && resultCode == Activity.RESULT_OK) {
+            val paymentMethod = data?.getParcelableExtra<PaymentMethod>(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT) ?: return
+
+            val card = paymentMethod.card
+
+            tv_payment_method.text = getString(R.string.payment_source, card?.brand, card?.last4)
+
+            this.paymentMethod = paymentMethod
+
+            info("Payment method: $paymentMethod")
         }
     }
 
@@ -187,16 +194,15 @@ class SubscriptionActivity : ScopedAppActivity(),
 
     private fun enableButton(enable: Boolean) {
         btn_subscribe.isEnabled = enable
+        tv_payment_method.isEnabled = enable
     }
 
     companion object {
 
-        private const val EXTRA_ORDER = "extra_order"
-
         @JvmStatic
-        fun start(context: Context, order: Order) {
+        fun start(context: Context, plan: PlanPayable?) {
             context.startActivity(Intent(context, SubscriptionActivity::class.java).apply {
-                putExtra(EXTRA_ORDER, order)
+                putExtra(EXTRA_PLAN_PAYABLE, plan)
             })
         }
     }
