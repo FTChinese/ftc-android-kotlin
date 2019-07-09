@@ -19,6 +19,7 @@ data class PlanPayable(
         val netPrice: Double,
 
         val balance: Double,
+        val currency: String = "cny",
         val cycleCount: Long,
         val extraDays: Long,
         val payable: Double,
@@ -35,6 +36,15 @@ data class PlanPayable(
         return "${tier.string()}_${cycle.string()}"
     }
 
+    fun currencySymbol(): String {
+        return when (currency) {
+            "cny" -> "¥"
+            "usd" -> "$"
+            "gbp" -> "£"
+            else -> "¥"
+        }
+    }
+
     fun gaAddCartAction(): String {
         return when (tier) {
             Tier.STANDARD -> when (cycle) {
@@ -43,6 +53,23 @@ data class PlanPayable(
             }
             Tier.PREMIUM -> GAAction.BUY_PREMIUM
         }
+    }
+
+    fun withStripePlan(p: StripePlan): PlanPayable {
+        val price = (p.amount / 100).toDouble()
+        return PlanPayable(
+                tier = tier,
+                cycle = Cycle.fromString(p.interval) ?: cycle,
+                listPrice = price,
+                netPrice = price,
+                balance = balance,
+                currency = p.currency,
+                cycleCount = cycleCount,
+                extraDays = extraDays,
+                payable = price,
+                isUpgrade = isUpgrade,
+                isRenew = isRenew
+        )
     }
 
     companion object {
