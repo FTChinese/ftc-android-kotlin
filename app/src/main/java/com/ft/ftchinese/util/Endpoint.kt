@@ -38,7 +38,8 @@ object SubscribeApi {
     val WX_UNIFIED_ORDER = "$BASE/wxpay/app"
     val WX_ORDER_QUERY = "$BASE/wxpay/query"
     val ALI_ORDER = "$BASE/alipay/app"
-    val STRIPE_ORDER = "$BASE/stripe/order"
+
+
 
     val WX_LOGIN = "$BASE/wx/oauth/login"
     val WX_REFRESH = "$BASE/wx/oauth/refresh"
@@ -46,6 +47,8 @@ object SubscribeApi {
     val UPGRADE = "$BASE/upgrade"
     val UPGRADE_PREVIEW = "$BASE/upgrade/preview"
 
+    val STRIPE_PLAN = "$BASE/stripe/plans"
+    val STRIPE_ORDER = "$BASE/stripe/order"
     val STRIPE_CUSTOMER = "$BASE/stripe/customers"
     val STRIPE_SUB = "$BASE/stripe/subscriptions"
     val STRIPE_PAY_INTENT = "$BASE/stripe/payment_intents"
