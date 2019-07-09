@@ -25,7 +25,8 @@ class CartItemFragment : Fragment() {
 
         val plan = arguments?.getParcelable<PlanPayable>(EXTRA_PLAN_PAYABLE)
 
-        tv_net_price.text = getString(R.string.formatter_price, plan?.payable)
+        tv_net_price.text = getString(R.string.formatter_price, plan?.currencySymbol(), plan?.payable)
+
         tv_product_overview.text = activity?.getTierCycleText(plan?.tier, plan?.cycle)
     }
 
