@@ -11,6 +11,7 @@ import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.FileCache
+import com.ft.ftchinese.util.StripeError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -189,8 +190,13 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                 customerIdResult.value = StringResult(
                         success = id
                 )
-            } catch (e: ClientError) {
+            } catch (e: StripeError) {
+                val msgId = when (e.status) {
+                    400 -> R.string.stripe_customer_not_found
+                    else -> null
+                }
                 customerIdResult.value = StringResult(
+                        error = msgId,
                         exception = e
                 )
             } catch (e: Exception) {

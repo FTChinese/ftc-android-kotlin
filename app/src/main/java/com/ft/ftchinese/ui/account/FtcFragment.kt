@@ -13,6 +13,8 @@ import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.ui.StringResult
+import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -28,7 +30,7 @@ class FtcFragment : ScopedFragment(),
 
     private lateinit var sessionManager: SessionManager
     private var wxApi: IWXAPI? = null
-    private lateinit var viewModel: AccountViewModel
+    private lateinit var accountViewModel: AccountViewModel
 
     private fun stopRefreshing() {
         swipe_refresh.isRefreshing = false
@@ -56,8 +58,6 @@ class FtcFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val account = sessionManager.loadAccount() ?: return
-
         // Set event handlers.
         email_container.setOnClickListener {
             UpdateActivity.startForEmail(context)
@@ -72,84 +72,47 @@ class FtcFragment : ScopedFragment(),
         }
 
         wallet_container.setOnClickListener {
-            CustomerActivity.start(context)
+            val account = sessionManager.loadAccount() ?: return@setOnClickListener
+
+            if (account.stripeId == null) {
+                if (activity?.isNetworkConnected() != true) {
+                    toast(R.string.prompt_no_network)
+                    return@setOnClickListener
+                }
+                accountViewModel.createCustomer(account)
+            } else {
+                CustomerActivity.start(context)
+            }
         }
 
-        initUI(account)
+        initUI()
     }
 
     override fun onResume() {
         super.onResume()
 
-        val account = sessionManager.loadAccount() ?: return
-
-        initUI(account)
+        initUI()
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel = activity?.run {
+        accountViewModel = activity?.run {
             ViewModelProviders.of(this)
                     .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
         // Refreshed account.
-        viewModel.accountRefreshed.observe(this, Observer {
-            stopRefreshing()
-
-            val accountResult = it ?: return@Observer
-
-            if (accountResult.error != null) {
-                toast(accountResult.error)
-                return@Observer
-            }
-
-            if (accountResult.exception != null) {
-                activity?.handleException(accountResult.exception)
-                return@Observer
-            }
-
-            if (accountResult.success == null) {
-                toast("Unknown error")
-                return@Observer
-            }
-
-            toast(R.string.prompt_updated)
-
-            sessionManager.saveAccount(accountResult.success)
-
-            if (accountResult.success.isWxOnly) {
-                info("A wechat only account. Switch UI.")
-                viewModel.switchUI(LoginMethod.WECHAT)
-                return@Observer
-            }
-
-            initUI(accountResult.success)
+        accountViewModel.accountRefreshed.observe(this, Observer {
+            onAccountRefreshed(it)
         })
 
-        viewModel.sendEmailResult.observe(this, Observer {
-            val sendEmailResult = it ?: return@Observer
+        accountViewModel.sendEmailResult.observe(this, Observer {
+            onEmailSent(it)
+        })
 
-            viewModel.showProgress(false)
-
-            if (sendEmailResult.error != null) {
-                enableInput(true)
-                toast(sendEmailResult.error)
-                return@Observer
-            }
-
-            if (sendEmailResult.exception != null) {
-                enableInput(true)
-                activity?.handleException(sendEmailResult.exception)
-                return@Observer
-            }
-
-            if (sendEmailResult.success) {
-                toast(R.string.prompt_letter_sent)
-            } else {
-                toast("Unknown error")
-            }
+        accountViewModel.customerIdResult.observe(this, Observer {
+            onCustomerCreated(it)
         })
 
         // Handle refresh action.
@@ -172,7 +135,7 @@ class FtcFragment : ScopedFragment(),
 
             toast(R.string.progress_refresh_account)
 
-            viewModel.refresh(acnt)
+            accountViewModel.refresh(acnt)
         }
 
         request_verify_button.setOnClickListener {
@@ -185,16 +148,101 @@ class FtcFragment : ScopedFragment(),
                 return@setOnClickListener
             }
 
-            viewModel.showProgress(true)
+            accountViewModel.showProgress(true)
             enableInput(false)
 
             toast(R.string.progress_request_verification)
 
-            viewModel.requestVerification(userId)
+            accountViewModel.requestVerification(userId)
         }
     }
 
-    private fun initUI(account: Account) {
+    private fun onAccountRefreshed(accountResult: AccountResult?) {
+        stopRefreshing()
+
+        if (accountResult == null) {
+            return
+        }
+
+        if (accountResult.error != null) {
+            toast(accountResult.error)
+            return
+        }
+
+        if (accountResult.exception != null) {
+            activity?.handleException(accountResult.exception)
+            return
+        }
+
+        if (accountResult.success == null) {
+            toast("Unknown error")
+            return
+        }
+
+        toast(R.string.prompt_updated)
+
+        sessionManager.saveAccount(accountResult.success)
+
+        if (accountResult.success.isWxOnly) {
+            info("A wechat only account. Switch UI.")
+            accountViewModel.switchUI(LoginMethod.WECHAT)
+            return
+        }
+
+        initUI()
+    }
+
+    private fun onEmailSent(result: BinaryResult?) {
+        if (result == null) {
+            return
+        }
+
+        accountViewModel.showProgress(false)
+
+        if (result.error != null) {
+            enableInput(true)
+            toast(result.error)
+            return
+        }
+
+        if (result.exception != null) {
+            enableInput(true)
+            activity?.handleException(result.exception)
+            return
+        }
+
+        if (result.success) {
+            toast(R.string.prompt_letter_sent)
+        } else {
+            toast("Unknown error")
+        }
+    }
+
+    private fun onCustomerCreated(result: StringResult?) {
+        accountViewModel.showProgress(false)
+        if (result == null) {
+            return
+        }
+
+        if (result.error != null) {
+            toast(result.error)
+            return
+        }
+
+        if (result.exception != null) {
+            activity?.handleException(result.exception)
+            return
+        }
+
+        val id = result.success ?: return
+        sessionManager.saveStripeId(id)
+
+        CustomerActivity.start(context)
+    }
+
+    private fun initUI() {
+
+        val account = sessionManager.loadAccount() ?: return
 
         if (account.isVerified) {
             verify_email_container.visibility = View.GONE
