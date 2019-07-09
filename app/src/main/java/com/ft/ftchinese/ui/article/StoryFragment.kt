@@ -84,6 +84,7 @@ class StoryFragment : ScopedFragment(),
             return
         }
 
+        info("Loading a story: $storyBrief")
         info("onCreate finished")
     }
 
@@ -189,6 +190,7 @@ class StoryFragment : ScopedFragment(),
             val htmlResult = it ?: return@Observer
 
             if (htmlResult.exception != null) {
+                info("Loading html error")
                 activity?.handleException(htmlResult.exception)
                 return@Observer
             }
