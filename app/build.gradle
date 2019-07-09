@@ -68,6 +68,11 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable false
+            buildConfigField "String", "STRIPE_KEY", props.getProperty("stripe.live")
+        }
+        debug {
+            debuggable true
+            buildConfigField "String", "STRIPE_KEY", props.getProperty("stripe.test")
         }
     }
 
