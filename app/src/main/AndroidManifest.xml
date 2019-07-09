@@ -19,8 +19,6 @@
         android:supportsRtl="true"
         android:theme="@style/Origami"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.pay.SubscriptionActivity"></activity>
-        <activity android:name=".ui.account.CustomerActivity" />
 
         <service
             android:name=".NewsMessagingService"
@@ -87,6 +85,11 @@
             android:label="@string/title_account"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.account.CustomerActivity"
+            android:label="@string/title_stripe_setting"
+            android:parentActivityName=".ui.account.AccountActivity"/>
         <activity
             android:name=".ui.account.LinkActivity"
             android:label="@string/title_link_email"
@@ -127,6 +130,10 @@
             android:name=".ui.pay.PaymentSessionActivity"
             android:label="@string/pay_method_stripe"
             android:parentActivityName=".ui.pay.CheckOutActivity" />
+        <activity
+            android:name=".ui.pay.SubscriptionActivity"
+            android:label="@string/pay_method_stripe"
+            android:parentActivityName=".ui.pay.CheckOutActivity"/>
         <activity
             android:name=".ui.pay.MyOrdersActivity"
             android:label="@string/title_my_orders"
