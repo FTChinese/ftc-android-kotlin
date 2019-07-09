@@ -12,11 +12,13 @@ import com.ft.ftchinese.util.json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 class ArticleViewModel(
         private val cache: FileCache,
         private val followingManager: FollowingManager
-) : ViewModel() {
+) : ViewModel(), AnkoLogger {
     // Notify ArticleActivity whether to display language
     // switch button or not.
     val bilingual = MutableLiveData<Boolean>()
@@ -94,6 +96,7 @@ class ArticleViewModel(
                 bilingual.value = story.isBilingual
 
             } catch (e: Exception) {
+                info(e)
                 cacheResult.value = CachedResult(
                         exception = e
                 )
@@ -103,6 +106,8 @@ class ArticleViewModel(
 
     fun loadFromRemote(item: ChannelItem, lang: Language) {
         val url = item.buildApiUrl()
+        info("Loading json data from $url")
+
         if (url.isBlank()) {
             renderResult.value = RenderResult(
                     error = R.string.api_empty_url
@@ -154,6 +159,7 @@ class ArticleViewModel(
                 bilingual.value = story.isBilingual
 
             } catch (e: Exception) {
+                info(e)
                 renderResult.value = RenderResult(
                         exception = e
                 )
