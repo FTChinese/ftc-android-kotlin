@@ -22,15 +22,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        app:contentPadding="16dp"
-        app:cardBackgroundColor="@color/colorClaret100"
+
         app:layout_constraintTop_toBottomOf="@+id/default_card_heading">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
             <TextView
                 style="@style/FTCHeading"
                 android:id="@+id/card_brand"
@@ -52,12 +51,12 @@
 
     <Button
         style="@style/OrigamiButton.Secondary"
-        android:id="@+id/add_bank_card"
+        android:id="@+id/btn_set_default"
         android:layout_margin="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@id/default_bank_card"
-        android:text="添加银行卡"/>
+        android:text="@string/set_default_payment_method"/>
 
     <include layout="@layout/progress_bar"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
