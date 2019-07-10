@@ -1,10 +1,8 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.order
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.ft.ftchinese.model.order.Cycle
-import com.ft.ftchinese.model.order.PayMethod
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.Subscription
 import com.ft.ftchinese.util.formatISODateTime
 import com.ft.ftchinese.util.formatLocalDate
 import com.ft.ftchinese.util.parseISODateTime

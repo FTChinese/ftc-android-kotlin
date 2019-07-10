@@ -17,6 +17,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.*
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.order.OrderManager
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.order.PlanPayable
 import com.ft.ftchinese.ui.account.AccountViewModel
@@ -191,34 +192,6 @@ class CheckOutActivity : ScopedAppActivity(),
 
             launchAliPay(aliOrder)
         })
-
-//        checkOutViewModel.stripeOrderResult.observe(this, Observer {
-//            showProgress(false)
-//
-//            val orderResult = it ?: return@Observer
-//
-//            if (orderResult.error != null) {
-//                toast(orderResult.error)
-//                enablePayBtn(true)
-//                tracker.buyFail(plan)
-//                return@Observer
-//            }
-//
-//            if (orderResult.exception != null) {
-//                handleException(orderResult.exception)
-//                enablePayBtn(true)
-//                tracker.buyFail(plan)
-//                return@Observer
-//            }
-//
-//            if (orderResult.success == null) {
-//                toast(R.string.order_cannot_be_created)
-//                enablePayBtn(true)
-//                tracker.buyFail(plan)
-//                return@Observer
-//            }
-//
-//        })
 
         accountViewModel.accountRefreshed.observe(this, Observer {
             showProgress(false)

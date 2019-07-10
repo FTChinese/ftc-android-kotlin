@@ -11,6 +11,7 @@ import com.ft.ftchinese.base.handleApiError
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.order.OrderManager
 import com.ft.ftchinese.ui.account.MemberActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.util.*
