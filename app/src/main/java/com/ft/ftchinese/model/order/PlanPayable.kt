@@ -55,7 +55,11 @@ data class PlanPayable(
         }
     }
 
-    fun withStripePlan(p: StripePlan): PlanPayable {
+    fun withStripePlan(p: StripePlan?): PlanPayable? {
+        if (p == null) {
+            return null
+        }
+
         val price = (p.amount / 100).toDouble()
         return PlanPayable(
                 tier = tier,
