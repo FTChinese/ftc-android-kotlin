@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.Account
 import com.ft.ftchinese.model.order.PlanPayable
-import com.ft.ftchinese.model.order.StripePlan
 import com.ft.ftchinese.ui.StringResult
 import com.ft.ftchinese.util.ClientError
 import kotlinx.coroutines.Dispatchers
@@ -19,7 +18,6 @@ class CheckOutViewModel : ViewModel() {
     val inputEnabled = MutableLiveData<Boolean>()
     val wxOrderResult = MutableLiveData<WxOrderResult>()
     val aliOrderResult = MutableLiveData<AliOrderResult>()
-    val stripeOrderResult = MutableLiveData<OrderResult>()
     val clientSecretResult = MutableLiveData<StringResult>()
     val stripePlanResult = MutableLiveData<StripePlanResult>()
 
@@ -131,7 +129,7 @@ class CheckOutViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val stripePlan = withContext(Dispatchers.IO) {
-                    account.getStripePlan(plan.tier, plan.cycle)
+                    account.getStripePlan(plan.getId())
                 }
 
                 if (stripePlan == null) {
@@ -147,49 +145,6 @@ class CheckOutViewModel : ViewModel() {
 
             } catch (e: Exception) {
                 stripePlanResult.value = StripePlanResult(
-                        exception = e
-                )
-            }
-        }
-    }
-
-    fun createStripeOrder(account: Account?, plan: PlanPayable?) {
-        if (account == null) {
-            stripeOrderResult.value = OrderResult(
-                    error = R.string.api_account_not_found
-            )
-            return
-        }
-
-        if (plan == null) {
-            stripeOrderResult.value = OrderResult(
-                    error = R.string.prompt_unknown_plan
-            )
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val order = withContext(Dispatchers.IO) {
-                    account.createStripeOrder(plan.tier, plan.cycle)
-                }
-
-                stripeOrderResult.value = OrderResult(
-                        success = order
-                )
-            } catch (e: ClientError) {
-                val msgId = if (e.statusCode == 403) {
-                    R.string.renewal_not_allowed
-                } else {
-                    e.statusMessage()
-                }
-
-                stripeOrderResult.value = OrderResult(
-                        error = msgId,
-                        exception = e
-                )
-            } catch (e: Exception) {
-                stripeOrderResult.value = OrderResult(
                         exception = e
                 )
             }
