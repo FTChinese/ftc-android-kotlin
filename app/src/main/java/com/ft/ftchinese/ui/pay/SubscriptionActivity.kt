@@ -132,6 +132,7 @@ class SubscriptionActivity : ScopedAppActivity(),
 
     private fun onSubscribeButtonClicked() {
         val account = sessionManager.loadAccount() ?: return
+        val p = plan ?: return
 
         if (account.stripeId == null) {
             toast("You are not a stripe customer yet")
@@ -145,6 +146,8 @@ class SubscriptionActivity : ScopedAppActivity(),
         }
 
         val subParams = StripeSubParams(
+                tier = p.tier,
+                cycle = p.cycle,
                 customer = account.stripeId,
                 defaultPaymentMethod = pm.id
         )
@@ -157,7 +160,7 @@ class SubscriptionActivity : ScopedAppActivity(),
 
             try {
                 val subResp = withContext(Dispatchers.IO) {
-                    account.createSubscription(subParams, plan)
+                    account.createSubscription(subParams)
                 }
 
                 info("Subscription result: $subResp")
