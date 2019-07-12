@@ -328,9 +328,9 @@ data class Account(
         }
     }
 
-    fun getStripePlan(tier: Tier, cycle: Cycle): StripePlan? {
+    fun getStripePlan(id: String): StripePlan? {
         val (_, body) = Fetch()
-                .get("${SubscribeApi.STRIPE_PLAN}/$tier/$cycle")
+                .get("${SubscribeApi.STRIPE_PLAN}/$id")
                 .setUserId(id)
                 .responseApi()
 
@@ -341,28 +341,10 @@ data class Account(
         }
     }
 
-    fun createStripeOrder(tier: Tier, cycle: Cycle): Order? {
-        val (_, body) = Fetch()
-                .post("${SubscribeApi.STRIPE_ORDER}/$tier/$cycle")
-                .setUserId(id)
-                .noCache()
-                .setClient()
-                .body()
-                .responseApi()
+    fun createSubscription(params: StripeSubParams): String? {
 
-        return if (body == null) {
-            null
-        } else {
-            json.parse<Order>(body)
-        }
-    }
-
-    fun createSubscription(params: StripeSubParams, plan: PlanPayable?): String? {
-        if (plan == null) {
-            return null
-        }
         val (_, body ) = Fetch()
-                .post("${SubscribeApi.STRIPE_SUB}/${plan.tier}/${plan.cycle}")
+                .post(SubscribeApi.STRIPE_SUB)
                 .setUserId(id)
                 .noCache()
                 .jsonBody(json.toJsonString(params))
