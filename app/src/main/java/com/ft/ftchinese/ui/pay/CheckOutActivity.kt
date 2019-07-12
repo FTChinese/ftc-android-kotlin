@@ -17,9 +17,8 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.*
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.model.order.OrderManager
-import com.ft.ftchinese.model.order.PayMethod
-import com.ft.ftchinese.model.order.PlanPayable
+import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.ui.StringResult
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.account.MemberActivity
 import com.ft.ftchinese.util.RequestCode
@@ -48,11 +47,14 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private lateinit var orderManager: OrderManager
     private lateinit var sessionManager: SessionManager
+    private lateinit var stripePref: StripePref
     private lateinit var wxApi: IWXAPI
     private lateinit var tracker: StatsTracker
 
     private var plan: PlanPayable? = null
+    private var stripePlan: StripePlan? = null
     private var payMethod: PayMethod? = null
+    private var payWithStripe = false
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
@@ -79,6 +81,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
         sessionManager = SessionManager.getInstance(this)
         orderManager = OrderManager.getInstance(this)
+        stripePref = StripePref.getInstance(this)
 
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
         wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
@@ -88,6 +91,13 @@ class CheckOutActivity : ScopedAppActivity(),
         tracker = StatsTracker.getInstance(this)
         // Log event: add card
         tracker.addCart(p)
+
+        // Get stripe plan from cache.
+        stripePlan = stripePref.getPlan(p.getId())
+
+        val account = sessionManager.loadAccount() ?: return
+        info("Update stripe plan in background")
+        checkOutViewModel.getStripePlan(account, p)
     }
 
     private fun initUI(p: PlanPayable) {
@@ -241,57 +251,13 @@ class CheckOutActivity : ScopedAppActivity(),
         // The pay button will activate get stripe plan
         // directly.
         accountViewModel.customerIdResult.observe(this, Observer {
-            val result = it ?: return@Observer
-
-            if (result.error != null) {
-                showProgress(false)
-                enablePayBtn(true)
-                toast(result.error)
-                return@Observer
-            }
-
-            if (result.exception != null) {
-                showProgress(false)
-                enablePayBtn(true)
-                handleException(result.exception)
-                return@Observer
-            }
-
-            if (result.success == null) {
-                showProgress(false)
-                enablePayBtn(true)
-                return@Observer
-            }
-
-            sessionManager.saveStripeId(result.success)
-
-            val account = sessionManager.loadAccount() ?: return@Observer
-            val p = plan ?: return@Observer
-
-            checkOutViewModel.getStripePlan(account, p)
+            onCustomerIdCreated(it)
         })
 
         // Relardless of whether user has a customer id or not,
         // finally hte stripe plan will be retrieved.
         checkOutViewModel.stripePlanResult.observe(this, Observer {
-            showProgress(false)
-            val planResult = it ?: return@Observer
-
-            if (planResult.error != null) {
-                toast(planResult.error)
-                enablePayBtn(true)
-                return@Observer
-            }
-
-            if (planResult.exception != null) {
-                handleException(planResult.exception)
-                enablePayBtn(true)
-                return@Observer
-            }
-
-            val stripePlan = planResult.success ?: return@Observer
-
-            SubscriptionActivity.start(this, plan?.withStripePlan(stripePlan))
+            onStripePlanRetrieved(it)
         })
     }
 
@@ -311,15 +277,13 @@ class CheckOutActivity : ScopedAppActivity(),
             return
         }
 
-        showProgress(true)
-        enablePayBtn(false)
-
-
         tracker.checkOut(plan, pm)
 
         when (pm) {
             PayMethod.ALIPAY -> {
                 toast(R.string.request_order)
+                showProgress(true)
+                enablePayBtn(false)
                 checkOutViewModel.createAliOrder(account, plan)
             }
 
@@ -334,17 +298,106 @@ class CheckOutActivity : ScopedAppActivity(),
                 }
 
                 toast(R.string.request_order)
+                showProgress(true)
+                enablePayBtn(false)
                 checkOutViewModel.createWxOrder(account, plan)
             }
 
             PayMethod.STRIPE -> {
                 toast(R.string.stripe_init)
+
+                payWithStripe = true
+
                 if (account.stripeId == null) {
+                    info("Stripe customer id not set")
+                    showProgress(true)
+                    enablePayBtn(false)
                     accountViewModel.createCustomer(account)
-                } else {
-                    checkOutViewModel.getStripePlan(account, plan)
+                    return
                 }
+
+                if (stripePlan == null) {
+                    info("Stripe plan not found")
+                    showProgress(true)
+                    enablePayBtn(false)
+                    checkOutViewModel.getStripePlan(account, plan)
+                    return
+                }
+
+                SubscriptionActivity.start(this, plan.withStripePlan(stripePlan))
             }
+        }
+    }
+
+    private fun onCustomerIdCreated(result: StringResult?) {
+        if (result == null) {
+            return
+        }
+
+        if (result.error != null) {
+            showProgress(false)
+            enablePayBtn(true)
+            toast(result.error)
+            return
+        }
+
+        if (result.exception != null) {
+            showProgress(false)
+            enablePayBtn(true)
+            handleException(result.exception)
+            return
+        }
+
+        if (result.success == null) {
+            showProgress(false)
+            enablePayBtn(true)
+            return
+        }
+
+        sessionManager.saveStripeId(result.success)
+
+        val account = sessionManager.loadAccount() ?: return
+        val p = plan ?: return
+
+        if (stripePlan == null) {
+            checkOutViewModel.getStripePlan(account, p)
+        } else {
+            SubscriptionActivity.start(this, plan?.withStripePlan(stripePlan))
+        }
+    }
+
+    private fun onStripePlanRetrieved(planResult: StripePlanResult?) {
+
+        showProgress(false)
+
+        if (planResult == null) {
+            return
+        }
+
+        if (payWithStripe) {
+            if (planResult.error != null) {
+                toast(planResult.error)
+                enablePayBtn(true)
+                return
+            }
+
+            if (planResult.exception != null) {
+                handleException(planResult.exception)
+                enablePayBtn(true)
+                return
+            }
+        }
+
+        val stripePlan = planResult.success ?: return
+
+        this.stripePlan = stripePlan
+
+        launch(Dispatchers.IO) {
+            stripePref.savePlan(plan?.getId(), stripePlan)
+        }
+
+        if (payWithStripe) {
+            SubscriptionActivity.start(this, plan?.withStripePlan(stripePlan))
         }
     }
 
