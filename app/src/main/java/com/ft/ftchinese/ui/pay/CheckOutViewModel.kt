@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.Account
-import com.ft.ftchinese.model.order.PlanPayable
+import com.ft.ftchinese.model.order.Plan
 import com.ft.ftchinese.ui.StringResult
 import com.ft.ftchinese.util.ClientError
 import kotlinx.coroutines.Dispatchers
@@ -14,16 +14,47 @@ import kotlinx.coroutines.withContext
 
 class CheckOutViewModel : ViewModel() {
 
-    val directUpgradeResult = MutableLiveData<UpgradeResult>()
+
     val inputEnabled = MutableLiveData<Boolean>()
     val wxOrderResult = MutableLiveData<WxOrderResult>()
     val aliOrderResult = MutableLiveData<AliOrderResult>()
     val clientSecretResult = MutableLiveData<StringResult>()
     val stripePlanResult = MutableLiveData<StripePlanResult>()
 
+    val upgradePreviewResult = MutableLiveData<UpgradePreviewResult>()
+    val directUpgradeResult = MutableLiveData<UpgradeResult>()
+
     // Enable/Disable a UI, like button.
     fun enableInput(v: Boolean) {
         inputEnabled.value = v
+    }
+
+    fun previewUpgrade(account: Account) {
+        viewModelScope.launch {
+            try {
+                val up = withContext(Dispatchers.IO) {
+                    account.previewUpgrade()
+                }
+
+                upgradePreviewResult.value = UpgradePreviewResult(
+                        success = up
+                )
+            } catch (e: ClientError) {
+                val msgId = when (e.statusCode) {
+                    404 -> R.string.api_member_not_found
+                    else -> e.statusMessage()
+                }
+
+                upgradePreviewResult.value = UpgradePreviewResult(
+                        error = msgId,
+                        exception = e
+                )
+            } catch (e: Exception) {
+                upgradePreviewResult.value = UpgradePreviewResult(
+                        exception = e
+                )
+            }
+        }
     }
 
     fun directUpgrade(account: Account) {
@@ -41,7 +72,7 @@ class CheckOutViewModel : ViewModel() {
                 }
 
                 directUpgradeResult.value = UpgradeResult(
-                        plan = plan
+                        preview = plan
                 )
 
             } catch (e: ClientError) {
@@ -66,7 +97,7 @@ class CheckOutViewModel : ViewModel() {
         }
     }
 
-    fun createWxOrder(account: Account, plan: PlanPayable) {
+    fun createWxOrder(account: Account, plan: Plan) {
         viewModelScope.launch {
             try {
                 val wxOrder = withContext(Dispatchers.IO) {
@@ -95,7 +126,7 @@ class CheckOutViewModel : ViewModel() {
         }
     }
 
-    fun createAliOrder(account: Account, plan: PlanPayable) {
+    fun createAliOrder(account: Account, plan: Plan) {
         viewModelScope.launch {
             try {
                 val aliOrder = withContext(Dispatchers.IO) {
@@ -124,7 +155,13 @@ class CheckOutViewModel : ViewModel() {
         }
     }
 
-    fun getStripePlan(account: Account, plan: PlanPayable) {
+    fun getStripePlan(account: Account, plan: Plan?) {
+        if (plan == null) {
+            stripePlanResult.value = StripePlanResult(
+                    error = R.string.prompt_unknown_plan
+            )
+            return
+        }
 
         viewModelScope.launch {
             try {
