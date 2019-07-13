@@ -36,7 +36,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-const val EXTRA_PLAN_PAYABLE = "extra_plan_payable"
+const val EXTRA_FTC_PLAN = "extra_ftc_plan"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CheckOutActivity : ScopedAppActivity(),
@@ -47,12 +47,12 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private lateinit var orderManager: OrderManager
     private lateinit var sessionManager: SessionManager
-    private lateinit var stripePref: StripePref
+
     private lateinit var wxApi: IWXAPI
     private lateinit var tracker: StatsTracker
 
-    private var plan: PlanPayable? = null
-    private var stripePlan: StripePlan? = null
+    private var plan: Plan? = null
+
     private var payMethod: PayMethod? = null
     private var payWithStripe = false
 
@@ -73,7 +73,7 @@ class CheckOutActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
-        val p = intent.getParcelableExtra<PlanPayable>(EXTRA_PLAN_PAYABLE) ?: return
+        val p = intent.getParcelableExtra<Plan>(EXTRA_FTC_PLAN) ?: return
 
         initUI(p)
 
@@ -81,7 +81,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
         sessionManager = SessionManager.getInstance(this)
         orderManager = OrderManager.getInstance(this)
-        stripePref = StripePref.getInstance(this)
+
 
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
         wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
@@ -92,27 +92,24 @@ class CheckOutActivity : ScopedAppActivity(),
         // Log event: add card
         tracker.addCart(p)
 
-        // Get stripe plan from cache.
-        stripePlan = stripePref.getPlan(p.getId())
-
         val account = sessionManager.loadAccount() ?: return
         info("Update stripe plan in background")
         checkOutViewModel.getStripePlan(account, p)
     }
 
-    private fun initUI(p: PlanPayable) {
+    private fun initUI(p: Plan) {
 
         supportFragmentManager.commit {
             replace(R.id.product_in_cart, CartItemFragment.newInstance(p))
         }
 
         // For upgrading show some additional information.
-         if (p.isUpgrade) {
-             supportActionBar?.setTitle(R.string.title_upgrade)
-
-         } else if (p.isRenew) {
-             supportActionBar?.setTitle(R.string.title_renewal)
-         }
+//         if (p.isUpgrade) {
+//             supportActionBar?.setTitle(R.string.title_upgrade)
+//
+//         } else if (p.isRenew) {
+//             supportActionBar?.setTitle(R.string.title_renewal)
+//         }
 
         requestPermission()
 
@@ -253,12 +250,6 @@ class CheckOutActivity : ScopedAppActivity(),
         accountViewModel.customerIdResult.observe(this, Observer {
             onCustomerIdCreated(it)
         })
-
-        // Relardless of whether user has a customer id or not,
-        // finally hte stripe plan will be retrieved.
-        checkOutViewModel.stripePlanResult.observe(this, Observer {
-            onStripePlanRetrieved(it)
-        })
     }
 
     private fun onPayButtonClicked() {
@@ -316,15 +307,7 @@ class CheckOutActivity : ScopedAppActivity(),
                     return
                 }
 
-                if (stripePlan == null) {
-                    info("Stripe plan not found")
-                    showProgress(true)
-                    enablePayBtn(false)
-                    checkOutViewModel.getStripePlan(account, plan)
-                    return
-                }
-
-                SubscriptionActivity.start(this, plan.withStripePlan(stripePlan))
+                SubscriptionActivity.start(this, plan)
             }
         }
     }
@@ -356,53 +339,11 @@ class CheckOutActivity : ScopedAppActivity(),
 
         sessionManager.saveStripeId(result.success)
 
-        val account = sessionManager.loadAccount() ?: return
-        val p = plan ?: return
-
-        if (stripePlan == null) {
-            checkOutViewModel.getStripePlan(account, p)
-        } else {
-            SubscriptionActivity.start(this, plan?.withStripePlan(stripePlan))
-        }
-    }
-
-    private fun onStripePlanRetrieved(planResult: StripePlanResult?) {
-
-        showProgress(false)
-
-        if (planResult == null) {
-            return
-        }
-
-        if (payWithStripe) {
-            if (planResult.error != null) {
-                toast(planResult.error)
-                enablePayBtn(true)
-                return
-            }
-
-            if (planResult.exception != null) {
-                handleException(planResult.exception)
-                enablePayBtn(true)
-                return
-            }
-        }
-
-        val stripePlan = planResult.success ?: return
-
-        this.stripePlan = stripePlan
-
-        launch(Dispatchers.IO) {
-            stripePref.savePlan(plan?.getId(), stripePlan)
-        }
-
-        if (payWithStripe) {
-            SubscriptionActivity.start(this, plan?.withStripePlan(stripePlan))
-        }
+        SubscriptionActivity.start(this, plan)
     }
 
     private fun onSelectPayMethod() {
-        val priceText = getString(R.string.formatter_price, plan?.currencySymbol(), plan?.payable)
+        val priceText = getString(R.string.formatter_price, plan?.currencySymbol(), plan?.netPrice)
 
         pay_btn.text = when(payMethod) {
             // 支付宝支付 ¥258.00
@@ -434,7 +375,7 @@ class CheckOutActivity : ScopedAppActivity(),
         }
     }
 
-    private fun launchAliPay(aliOrder: AlipayOrder) {
+    private fun launchAliPay(aliOrder: AliOrder) {
 
         val plan = this.plan ?: return
 
@@ -442,19 +383,8 @@ class CheckOutActivity : ScopedAppActivity(),
         // It might be better if API sends back all
         // data of an order, plus payment provider's
         // specific data.
-        val subs = Subscription(
-                orderId = aliOrder.ftcOrderId,
-                tier = plan.tier,
-                cycle = plan.cycle,
-                cycleCount = plan.cycleCount,
-                extraDays = plan.extraDays,
-                payMethod = PayMethod.ALIPAY,
-                netPrice = aliOrder.netPrice,
-                isUpgrade = plan.isUpgrade
-        )
-
-        info("Save subscription order: $subs")
-        orderManager.save(subs)
+        info("Save subscription order: $aliOrder")
+        orderManager.save(aliOrder)
 
         launch {
             /**
@@ -486,10 +416,10 @@ class CheckOutActivity : ScopedAppActivity(),
 
             toast(R.string.wxpay_done)
 
-            tracker.buySuccess(subs)
+            tracker.buySuccess(aliOrder)
 
             val account = sessionManager.loadAccount() ?: return@launch
-            val updatedMembership = subs.confirm(account.membership)
+            val updatedMembership = aliOrder.confirm(account.membership)
 
             info("New membership: $updatedMembership")
 
@@ -502,9 +432,7 @@ class CheckOutActivity : ScopedAppActivity(),
         }
     }
 
-    private fun launchWxPay(wxOrder: WxPrepayOrder) {
-        val plan = this.plan ?: return
-
+    private fun launchWxPay(wxOrder: WxOrder) {
         val req = PayReq()
         req.appId = wxOrder.appId
         req.partnerId = wxOrder.partnerId
@@ -517,19 +445,9 @@ class CheckOutActivity : ScopedAppActivity(),
         val result = wxApi.sendReq(req)
 
         if (result) {
-            val subs = Subscription(
-                    orderId = wxOrder.ftcOrderId,
-                    tier = plan.tier,
-                    cycle = plan.cycle,
-                    cycleCount = plan.cycleCount,
-                    extraDays = plan.extraDays,
-                    netPrice = wxOrder.netPrice,
-                    payMethod = PayMethod.WXPAY,
-                    isUpgrade = plan.isUpgrade
-            )
 
             // Save subscription details to shared preference so that we could use it in WXPayEntryActivity
-            orderManager.save(subs)
+            orderManager.save(wxOrder)
         }
 
         setResult(Activity.RESULT_OK)
@@ -606,9 +524,9 @@ class CheckOutActivity : ScopedAppActivity(),
 
     companion object {
 
-        fun startForResult(activity: Activity?, requestCode: Int, p: PlanPayable) {
+        fun startForResult(activity: Activity?, requestCode: Int, plan: Plan) {
             val intent = Intent(activity, CheckOutActivity::class.java).apply {
-                putExtra(EXTRA_PLAN_PAYABLE, p)
+                putExtra(EXTRA_FTC_PLAN, plan)
             }
 
             activity?.startActivityForResult(intent, requestCode)
