@@ -36,14 +36,6 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
     private lateinit var productViewModel: ProductViewModel
     private var isFromArticle: Boolean = false
 
-    private fun showProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -63,7 +55,7 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
                 .get(ProductViewModel::class.java)
 
         productViewModel.selected.observe(this, Observer<Plan> {
-            previewUpgrade()
+            UpgradePreviewActivity.start(this)
         })
 
         if (isFromArticle) {
@@ -96,62 +88,6 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
                         .joinToString("\n"),
                 yearPrice = getString(R.string.formatter_price_year, subsPlans.premiumYear.netPrice)
         )
-    }
-
-    // Fetch account balance from API.
-    private fun previewUpgrade() {
-        if (!isNetworkConnected()) {
-            toast(R.string.prompt_no_network)
-            return
-        }
-
-        val account = sessionManager.loadAccount() ?: return
-
-        showProgress(true)
-
-        toast("查询余额...")
-
-        launch {
-            try {
-                val plan = withContext(Dispatchers.IO) {
-                    account.previewUpgrade()
-                }
-
-                showProgress(false)
-
-                if (plan == null) {
-                    toast("查询不到账户余额，请稍后再试")
-
-                    productViewModel.enableInput(true)
-
-                    return@launch
-                }
-
-                plan.isUpgrade = true
-
-                UpgradePreviewActivity.start(
-                        context = this@UpgradeActivity,
-                        p = plan)
-            } catch (e: ClientError) {
-
-                info(e)
-
-                showProgress(false)
-
-                when (e.statusCode) {
-                    404 -> toast(R.string.api_member_not_found)
-                    else -> handleApiError(e)
-                }
-
-                productViewModel.enableInput(true)
-
-            } catch (e: Exception) {
-                showProgress(false)
-                productViewModel.enableInput(true)
-
-                handleException(e)
-            }
-        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
