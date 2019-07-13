@@ -81,7 +81,7 @@ class JsonTest {
         val data = """
             [
                 {
-                    "orderId": "FTB6973E6A5C605A45",
+                    "id": "FTB6973E6A5C605A45",
                     "tier": "standard",
                     "cycle": "year",
                     "netPrice": 258,
@@ -91,7 +91,7 @@ class JsonTest {
                     "endDate": "2020-03-05"
                 },
                 {
-                    "orderId": "FTA4ABF0AE64FD88C6",
+                    "id": "FTA4ABF0AE64FD88C6",
                     "tier": "standard",
                     "cycle": "year",
                     "netPrice": 258,
@@ -101,7 +101,7 @@ class JsonTest {
                     "endDate": "2021-03-06"
                 },
                 {
-                    "orderId": "FT6ACC2334C555CA75",
+                    "id": "FT6ACC2334C555CA75",
                     "tier": "standard",
                     "cycle": "year",
                     "netPrice": 258,
