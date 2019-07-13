@@ -44,8 +44,8 @@ object SubscribeApi {
     val WX_LOGIN = "$BASE/wx/oauth/login"
     val WX_REFRESH = "$BASE/wx/oauth/refresh"
 
-    val UPGRADE = "$BASE/upgrade"
-    val UPGRADE_PREVIEW = "$BASE/upgrade/preview"
+    val UPGRADE = "$BASE/upgrade/free"
+    val UPGRADE_PREVIEW = "$BASE/upgrade/balance"
 
     val STRIPE_PLAN = "$BASE/stripe/plans"
     val STRIPE_ORDER = "$BASE/stripe/order"
