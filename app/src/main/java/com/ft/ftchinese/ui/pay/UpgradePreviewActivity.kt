@@ -10,8 +10,8 @@ import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.model.order.PlanPayable
 import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.order.UpgradePreview
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_upgrade_preview.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -24,8 +24,6 @@ class UpgradePreviewActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var checkoutViewModel: CheckOutViewModel
 
-    private var plan: PlanPayable? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_upgrade_preview)
@@ -36,17 +34,14 @@ class UpgradePreviewActivity : AppCompatActivity() {
             setDisplayShowTitleEnabled(true)
         }
 
-        val p = intent
-                .getParcelableExtra<PlanPayable>(EXTRA_PLAN_PAYABLE) ?: return
-
-        initUI(p)
-
-        plan = p
-
         sessionManager = SessionManager.getInstance(this)
 
         checkoutViewModel = ViewModelProviders.of(this)
                 .get(CheckOutViewModel::class.java)
+
+        checkoutViewModel.upgradePreviewResult.observe(this, Observer {
+            onUpgradePreview(it)
+        })
 
         checkoutViewModel.directUpgradeResult.observe(this, Observer {
             showProgress(false)
@@ -70,41 +65,74 @@ class UpgradePreviewActivity : AppCompatActivity() {
                 return@Observer
             }
 
-            if (upgradeResult.plan != null) {
+            if (upgradeResult.preview != null) {
                 toast("无法直接升级")
                 enableInput(true)
-                initUI(upgradeResult.plan)
+                initUI(upgradeResult.preview)
                 return@Observer
             }
         })
 
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+        val account = sessionManager.loadAccount() ?: return
+
+        showProgress(true)
+        enableInput(false)
+
+        toast("查询余额...")
+        checkoutViewModel.previewUpgrade(account)
     }
 
-    private fun initUI(plan: PlanPayable) {
+    private fun onUpgradePreview(previewResult: UpgradePreviewResult?) {
+        showProgress(false)
+        if (previewResult == null) {
+            return
+        }
 
-        tv_upgrade_conversion.visibility = View.GONE
+        if (previewResult.error != null) {
+            toast(previewResult.error)
+            return
+        }
 
-        tv_upgrade_price.text = getString(R.string.formatter_price, plan.payable)
+        if (previewResult.exception != null) {
+            handleException(previewResult.exception)
+            return
+        }
 
-        tv_premium_price.text = getString(R.string.premium_price, getString(R.string.formatter_price, plan.netPrice))
+        if (previewResult.success == null) {
+            toast("查询不到账户余额，请稍后再试")
+            return
+        }
 
-        tv_balance.text = getString(R.string.account_balance, getString(R.string.formatter_price, plan.balance))
+        initUI(previewResult.success)
+    }
 
-        if (plan.isPayRequired()) {
+    private fun initUI(upgrade: UpgradePreview) {
+
+        tv_amount.text = getString(R.string.formatter_price, upgrade.plan.currencySymbol(), upgrade.plan.netPrice)
+
+        tv_premium_price.text = getString(R.string.premium_price, getString(R.string.formatter_price, upgrade.plan.currencySymbol(), upgrade.plan.listPrice))
+
+        tv_balance.text = getString(R.string.account_balance, getString(R.string.formatter_price, upgrade.plan.currencySymbol(), upgrade.balance))
+
+        if (upgrade.isPayRequired()) {
             btn_confirm_upgrade.text = getString(R.string.confirm_upgrade)
 
             btn_confirm_upgrade.setOnClickListener {
-                val p = this.plan ?: return@setOnClickListener
                 CheckOutActivity.startForResult(
                         activity = this,
                         requestCode = RequestCode.PAYMENT,
-                        p = p)
+                        plan = upgrade.plan)
                 finish()
             }
         } else {
-            btn_confirm_upgrade.text = getString(R.string.direct_upgrade)
-            tv_upgrade_conversion.text = getString(R.string.balance_conversion, plan.cycleCount, plan.extraDays)
+            tv_upgrade_conversion.visibility = View.VISIBLE
+            tv_upgrade_conversion.text = getString(R.string.balance_conversion, upgrade.plan.cycleCount, upgrade.plan.extraDays)
 
+            btn_confirm_upgrade.text = getString(R.string.direct_upgrade)
             btn_confirm_upgrade.setOnClickListener {
 
                 if (!isNetworkConnected()) {
@@ -135,13 +163,10 @@ class UpgradePreviewActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val EXTRA_PLAN_PAYABLE = "extra_plan_payable"
 
         @JvmStatic
-        fun start(context: Context, p: PlanPayable) {
-            context.startActivity(Intent(context, UpgradePreviewActivity::class.java).apply {
-                putExtra(EXTRA_PLAN_PAYABLE, p)
-            })
+        fun start(context: Context) {
+            context.startActivity(Intent(context, UpgradePreviewActivity::class.java))
         }
     }
 }
