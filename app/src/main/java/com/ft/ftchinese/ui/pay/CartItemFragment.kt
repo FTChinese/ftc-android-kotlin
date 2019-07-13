@@ -1,18 +1,28 @@
 package com.ft.ftchinese.ui.pay
 
+import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-
 import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.getTierCycleText
-import com.ft.ftchinese.model.order.PlanPayable
+import com.ft.ftchinese.model.order.Plan
+import com.ft.ftchinese.model.order.StripePref
 import kotlinx.android.synthetic.main.fragment_cart_item.*
 
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class CartItemFragment : ScopedFragment() {
 
-class CartItemFragment : Fragment() {
+    private lateinit var stripePref: StripePref
+    private var ftcPlan: Plan? = null
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        stripePref = StripePref.getInstance(context)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -23,28 +33,24 @@ class CartItemFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val plan = arguments?.getParcelable<PlanPayable>(EXTRA_PLAN_PAYABLE)
+        ftcPlan = arguments?.getParcelable(EXTRA_FTC_PLAN)
 
-        tv_net_price.text = getString(R.string.formatter_price, plan?.currencySymbol(), plan?.payable)
-
-        tv_product_overview.text = activity?.getTierCycleText(plan?.tier, plan?.cycle)
+        initUI()
     }
 
+    private fun initUI() {
+        tv_net_price.text = getString(R.string.formatter_price, ftcPlan?.currencySymbol(), ftcPlan?.netPrice)
+
+        tv_product_overview.text = activity?.getTierCycleText(ftcPlan?.tier, ftcPlan?.cycle)
+    }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment CartItemFragment.
-         */
+
         @JvmStatic
-        fun newInstance(plan: PlanPayable?) =
+        fun newInstance(plan: Plan?) =
                 CartItemFragment().apply {
                     arguments = Bundle().apply {
-                        putParcelable(EXTRA_PLAN_PAYABLE, plan)
+                        putParcelable(EXTRA_FTC_PLAN, plan)
                     }
                 }
     }
