@@ -20,7 +20,10 @@ enum class OrderUsage(val code: String) : Parcelable {
         }
 
         @JvmStatic
-        fun fromString(symbol: String): OrderUsage? {
+        fun fromString(symbol: String?): OrderUsage? {
+            if (symbol == null) {
+                return null
+            }
             return stringToEnum[symbol]
         }
     }
