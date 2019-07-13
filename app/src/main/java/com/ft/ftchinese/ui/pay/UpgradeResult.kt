@@ -1,10 +1,10 @@
 package com.ft.ftchinese.ui.pay
 
-import com.ft.ftchinese.model.order.PlanPayable
+import com.ft.ftchinese.model.order.UpgradePreview
 
 data class UpgradeResult(
         val success: Boolean = false,
-        val plan: PlanPayable? = null,
+        val preview: UpgradePreview? = null,
         val error: Int? = null,
         val exception: Exception? = null
 )
