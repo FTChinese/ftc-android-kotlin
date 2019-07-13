@@ -150,7 +150,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
             try {
                 val orderQuery = withContext(Dispatchers.IO) {
-                    account.wxQueryOrder(subs.orderId)
+                    account.wxQueryOrder(subs.id)
                 }
 
                 info("Order queried: $orderQuery")
