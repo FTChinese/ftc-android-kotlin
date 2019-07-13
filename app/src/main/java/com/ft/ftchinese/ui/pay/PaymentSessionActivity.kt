@@ -13,7 +13,6 @@ import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.order.Order
-import com.ft.ftchinese.model.order.PlanPayable
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.ui.StringResult
 import com.stripe.android.*
@@ -80,11 +79,11 @@ class PaymentSessionActivity :
     }
 
     private fun initUI() {
-        supportFragmentManager.commit {
-            replace(R.id.product_in_cart, CartItemFragment.newInstance(
-                    order?.let { PlanPayable.fromOrder(it) }
-            ))
-        }
+//        supportFragmentManager.commit {
+//            replace(R.id.product_in_cart, CartItemFragment.newInstance(
+//                    order?.let { PlanPayable.fromOrder(it) }
+//            ))
+//        }
 
         tv_payment_source.setOnClickListener {
             paymentSession?.presentPaymentMethodSelection()
