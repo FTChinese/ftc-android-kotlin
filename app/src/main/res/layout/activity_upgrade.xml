@@ -44,6 +44,4 @@
         app:layout_constraintEnd_toEndOf="@id/frag_upgrade_premium"
         app:layout_constraintTop_toBottomOf="@id/frag_upgrade_premium" />
 
-    <include layout="@layout/progress_bar"/>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
