@@ -165,7 +165,7 @@ data class Account(
     }
 
     // Show user's account balance.
-    fun previewUpgrade(): PlanPayable? {
+    fun previewUpgrade(): UpgradePreview? {
         val fetch = Fetch().get(SubscribeApi.UPGRADE_PREVIEW)
 
         if (id.isNotBlank()) {
@@ -185,7 +185,7 @@ data class Account(
             null
         } else {
             try {
-                json.parse<PlanPayable>(body)
+                json.parse<UpgradePreview>(body)
             } catch (e: Exception) {
                 info(e)
                 null
@@ -194,7 +194,7 @@ data class Account(
     }
 
     // If user current balance is enough to cover upgrading cost, we do not ask user to pay and change membership directly.
-    fun directUpgrade(): Pair<Boolean, PlanPayable?> {
+    fun directUpgrade(): Pair<Boolean, UpgradePreview?> {
         val fetch = Fetch().put(SubscribeApi.UPGRADE)
 
         if (id.isNotBlank()) {
@@ -214,7 +214,7 @@ data class Account(
             204 -> Pair(true, null)
             200 -> if (body != null) {
                 try {
-                    Pair(true, json.parse<PlanPayable>(body))
+                    Pair(true, json.parse<UpgradePreview>(body))
                 } catch (e: Exception) {
                     info(e)
                     Pair(false, null)
@@ -246,7 +246,7 @@ data class Account(
         } ?: listOf()
     }
 
-    fun wxPlaceOrder(tier: Tier, cycle: Cycle): WxPrepayOrder? {
+    fun wxPlaceOrder(tier: Tier, cycle: Cycle): WxOrder? {
         val fetch = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${tier.string()}/${cycle.string()}")
 
         if (id.isNotBlank()) {
@@ -268,7 +268,7 @@ data class Account(
             null
         } else {
             try {
-                json.parse<WxPrepayOrder>(body)
+                json.parse<WxOrder>(body)
             } catch (e: Exception) {
                 info(e)
 
@@ -301,7 +301,7 @@ data class Account(
         }
     }
 
-    fun aliPlaceOrder(tier: Tier, cycle: Cycle): AlipayOrder? {
+    fun aliPlaceOrder(tier: Tier, cycle: Cycle): AliOrder? {
 
         val fetch = Fetch().post("${SubscribeApi.ALI_ORDER}/${tier.string()}/${cycle.string()}")
 
@@ -324,7 +324,7 @@ data class Account(
         return if (body == null) {
             null
         } else {
-            json.parse<AlipayOrder>(body)
+            json.parse<AliOrder>(body)
         }
     }
 
