@@ -99,10 +99,10 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
                 PayMethod.STRIPE -> getString(R.string.pay_method_stripe)
             }
 
-            val price = getString(R.string.formatter_price, it.netPrice)
+            val price = getString(R.string.formatter_price, "￥", it.netPrice)
 
             OrderRow(
-                    orderId = getString(R.string.order_id, it.orderId),
+                    orderId = getString(R.string.order_id, it.id),
                     memberType = getString(R.string.order_member_type, tierCycle),
                     duration = getString(R.string.order_duration, it.startDate, it.endDate),
                     price = getString(R.string.order_price, price),
