@@ -23,7 +23,7 @@
         android:textAlignment="center"/>
 
     <TextView
-        android:id="@+id/tv_upgrade_price"
+        android:id="@+id/tv_amount"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/upgrade_forumla"
-        app:layout_constraintTop_toBottomOf="@id/tv_upgrade_price"
+        app:layout_constraintTop_toBottomOf="@id/tv_amount"
         app:layout_constraintStart_toStartOf="@id/tv_intro"
         app:layout_constraintEnd_toEndOf="@id/tv_intro"/>
 
