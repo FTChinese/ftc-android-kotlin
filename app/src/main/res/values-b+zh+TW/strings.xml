@@ -89,7 +89,7 @@
     <!-- Example: 标准会员/年-->
     <string name="formatter_tier_cycle">%1$s/%2$s</string>
     <!-- Example: ¥1,998.00 -->
-    <string name="formatter_price">¥%1$,.2f</string>
+    <string name="formatter_price">%1$s %2$,.2f</string>
     <!-- Example: 支付宝支付 ¥1,998.00-->
     <string name="formatter_check_out">%1$s %2$s</string>
 
