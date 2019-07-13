@@ -5,15 +5,16 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.fragment.app.commit
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
+import com.ft.ftchinese.base.getTierCycleText
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.model.order.PlanPayable
-import com.ft.ftchinese.model.order.StripeSubParams
+import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.util.RequestCode
 import com.stripe.android.*
@@ -22,6 +23,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import kotlinx.android.synthetic.main.activity_subscription.*
+import kotlinx.android.synthetic.main.fragment_cart_item.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.Dispatchers
@@ -37,8 +39,11 @@ class SubscriptionActivity : ScopedAppActivity(),
         AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
+    private lateinit var checkOutViewModel: CheckOutViewModel
+    private lateinit var stripePref: StripePref
     private lateinit var stripe: Stripe
-    private var plan: PlanPayable? = null
+
+    private var plan: Plan? = null
     private var paymentMethod: PaymentMethod? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,15 +57,25 @@ class SubscriptionActivity : ScopedAppActivity(),
         }
 
         PaymentConfiguration.init(BuildConfig.STRIPE_KEY)
+        checkOutViewModel = ViewModelProviders.of(this)
+                .get(CheckOutViewModel::class.java)
 
-        plan = intent.getParcelableExtra(EXTRA_PLAN_PAYABLE)
+        checkOutViewModel.stripePlanResult.observe(this, Observer {
+            onStripePlanFetched(it)
+        })
+
+        stripePref = StripePref.getInstance(this)
+
+        plan = intent.getParcelableExtra(EXTRA_FTC_PLAN)
         sessionManager = SessionManager.getInstance(this)
+
         stripe = Stripe(
                 this,
                 PaymentConfiguration
                         .getInstance()
                         .publishableKey
         )
+
 
         setupCustomerSession()
         initUI()
@@ -111,11 +126,14 @@ class SubscriptionActivity : ScopedAppActivity(),
     }
 
     private fun initUI() {
-        supportFragmentManager.commit {
-            replace(
-                    R.id.product_in_cart,
-                    CartItemFragment.newInstance(plan)
-            )
+
+        buildText(
+                stripePref.getPlan(plan?.getId())
+        )
+
+        if (isNetworkConnected()) {
+            val account = sessionManager.loadAccount() ?: return
+            checkOutViewModel.getStripePlan(account, plan)
         }
 
         tv_payment_method.setOnClickListener {
@@ -128,6 +146,42 @@ class SubscriptionActivity : ScopedAppActivity(),
         }
 
         enableButton(false)
+    }
+
+    private fun buildText(stripePlan: StripePlan?) {
+        if (stripePlan != null) {
+
+            tv_net_price.visibility = View.VISIBLE
+            tv_product_overview.visibility = View.VISIBLE
+
+            tv_net_price.text = getString(R.string.formatter_price, stripePlan.currencySymbol(), stripePlan.price())
+            tv_product_overview.text = getTierCycleText(plan?.tier, plan?.cycle)
+        } else {
+            tv_net_price.visibility = View.GONE
+            tv_product_overview.visibility = View.GONE
+        }
+    }
+
+    private fun onStripePlanFetched(result: StripePlanResult?) {
+        if (result == null) {
+            return
+        }
+
+        if (result.error != null) {
+            return
+        }
+
+        if (result.exception != null) {
+            return
+        }
+
+        if (result.success == null) {
+            return
+        }
+
+        buildText(result.success)
+
+        stripePref.savePlan(plan?.getId(), result.success)
     }
 
     private fun onSubscribeButtonClicked() {
@@ -203,9 +257,9 @@ class SubscriptionActivity : ScopedAppActivity(),
     companion object {
 
         @JvmStatic
-        fun start(context: Context, plan: PlanPayable?) {
+        fun start(context: Context, plan: Plan?) {
             context.startActivity(Intent(context, SubscriptionActivity::class.java).apply {
-                putExtra(EXTRA_PLAN_PAYABLE, plan)
+                putExtra(EXTRA_FTC_PLAN, plan)
             })
         }
     }
