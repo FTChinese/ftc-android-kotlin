@@ -6,7 +6,7 @@ import androidx.core.os.bundleOf
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.order.PayMethod
-import com.ft.ftchinese.model.order.PlanPayable
+import com.ft.ftchinese.model.order.Plan
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.model.splash.ScreenAd
 import com.ft.ftchinese.util.AdSlot
@@ -47,7 +47,7 @@ class StatsTracker private constructor(context: Context) {
                 .build())
     }
 
-    fun addCart(plan: PlanPayable) {
+    fun addCart(plan: Plan) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle().apply {
             putString(FirebaseAnalytics.Param.ITEM_ID, plan.getId())
             putString(FirebaseAnalytics.Param.ITEM_NAME, plan.tier.string())
@@ -70,10 +70,10 @@ class StatsTracker private constructor(context: Context) {
         })
     }
 
-    fun checkOut(plan: PlanPayable, payMethod: PayMethod) {
+    fun checkOut(plan: Plan, payMethod: PayMethod) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
-            putDouble(FirebaseAnalytics.Param.VALUE, plan.payable)
-            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
+            putDouble(FirebaseAnalytics.Param.VALUE, plan.netPrice)
+            putString(FirebaseAnalytics.Param.CURRENCY, plan.currency)
             putString(FirebaseAnalytics.Param.METHOD, payMethod.string())
         })
     }
@@ -111,7 +111,7 @@ class StatsTracker private constructor(context: Context) {
                 .build())
     }
 
-    fun buyFail(plan: PlanPayable?) {
+    fun buyFail(plan: Plan?) {
         if (plan == null) {
             return
         }
