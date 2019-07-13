@@ -1,9 +1,9 @@
 package com.ft.ftchinese.ui.pay
 
-import com.ft.ftchinese.model.WxPrepayOrder
+import com.ft.ftchinese.model.WxOrder
 
 data class WxOrderResult(
-        val success: WxPrepayOrder? = null,
+        val success: WxOrder? = null,
         val error: Int? = null,
         val exception: Exception? = null
 )
