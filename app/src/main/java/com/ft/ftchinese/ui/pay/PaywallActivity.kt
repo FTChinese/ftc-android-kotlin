@@ -12,7 +12,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.Plan
-import com.ft.ftchinese.model.order.PlanPayable
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.model.order.subsPlans
 import com.ft.ftchinese.ui.login.LoginActivity
@@ -67,7 +66,7 @@ class PaywallActivity : ScopedAppActivity(),
             CheckOutActivity.startForResult(
                     activity = this,
                     requestCode = RequestCode.PAYMENT,
-                    p = PlanPayable.fromPlan(it)
+                    plan = it
             )
         })
 
