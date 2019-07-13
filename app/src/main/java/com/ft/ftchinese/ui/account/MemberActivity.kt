@@ -18,7 +18,6 @@ import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.model.order.PlanPayable
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.model.order.subsPlans
 import com.ft.ftchinese.ui.RowAdapter
@@ -161,13 +160,12 @@ class MemberActivity : ScopedAppActivity(),
             // Tracking
             PaywallTracker.fromRenew()
 
-            val p = PlanPayable.fromPlan(subsPlans.of(tier, cycle))
-            p.isRenew = true
+            val plan = subsPlans.of(tier, cycle)
 
             CheckOutActivity.startForResult(
                     activity = this,
                     requestCode = RequestCode.PAYMENT,
-                    p = p
+                    plan = plan
             )
 
             it.isEnabled = false
