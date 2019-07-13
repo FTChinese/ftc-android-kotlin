@@ -8,7 +8,7 @@ import com.ft.ftchinese.util.KTier
 import kotlinx.android.parcel.Parcelize
 
 /**
- * A pricing plan.
+ * A plan for a product.
  */
 @Parcelize
 data class Plan(
@@ -16,10 +16,56 @@ data class Plan(
         val tier: Tier,
         @KCycle
         val cycle: Cycle,
+
+        val cycleCount: Int, // new
+        val currency: String, // new
+        val extraDays: Int, // new
         val listPrice: Double,
         val netPrice: Double,
         val description: String
-) : Parcelable
+) : Parcelable {
+
+    fun getId(): String {
+        return "${tier.string()}_${cycle.string()}"
+    }
+
+    fun currencySymbol(): String {
+        return when (currency) {
+            "cny" -> "¥"
+            "usd" -> "$"
+            "gbp" -> "£"
+            else -> "¥"
+        }
+    }
+
+    fun gaAddCartAction(): String {
+        return when (tier) {
+            Tier.STANDARD -> when (cycle) {
+                Cycle.YEAR -> GAAction.BUY_STANDARD_YEAR
+                Cycle.MONTH -> GAAction.BUY_STANDARD_MONTH
+            }
+            Tier.PREMIUM -> GAAction.BUY_PREMIUM
+        }
+    }
+
+    fun withStripePlan(p: StripePlan?): Plan? {
+        if (p == null) {
+            return null
+        }
+
+        return Plan(
+                tier = tier,
+                cycle = cycle,
+                listPrice = listPrice,
+                netPrice = (p.amount / 100).toDouble(),
+                cycleCount = cycleCount,
+                currency = p.currency,
+                extraDays = extraDays,
+                description = description
+        )
+    }
+
+}
 
 class SubsPlans(
         @Json(name = "standard_year")
@@ -46,6 +92,9 @@ val subsPlans = SubsPlans(
         standardYear = Plan(
                 tier = Tier.STANDARD,
                 cycle = Cycle.YEAR,
+                cycleCount = 1,
+                currency = "cny",
+                extraDays = 1,
                 listPrice = 258.00,
                 netPrice = 258.00,
                 description = "FT中文网 - 年度标准会员"
@@ -53,6 +102,9 @@ val subsPlans = SubsPlans(
         standardMonth = Plan(
                 tier = Tier.STANDARD,
                 cycle = Cycle.MONTH,
+                cycleCount = 1,
+                currency = "cny",
+                extraDays = 1,
                 listPrice = 28.00,
                 netPrice = 28.00,
                 description = "FT中文网 - 月度标准会员"
@@ -60,6 +112,9 @@ val subsPlans = SubsPlans(
         premiumYear = Plan(
                 tier = Tier.PREMIUM,
                 cycle = Cycle.YEAR,
+                cycleCount = 1,
+                currency = "cny",
+                extraDays = 1,
                 listPrice = 1998.00,
                 netPrice = 1998.00,
                 description = "FT中文网 - 高端会员"
