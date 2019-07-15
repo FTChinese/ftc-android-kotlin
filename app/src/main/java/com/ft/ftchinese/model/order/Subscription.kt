@@ -1,10 +1,7 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.order
 
 import com.beust.klaxon.Json
-import com.ft.ftchinese.model.order.Cycle
-import com.ft.ftchinese.model.order.OrderUsage
-import com.ft.ftchinese.model.order.PayMethod
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.Membership
 import com.ft.ftchinese.util.*
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime

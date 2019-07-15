@@ -7,6 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.order.Plan
+import com.ft.ftchinese.model.order.Subscription
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.model.splash.ScreenAd
 import com.ft.ftchinese.util.AdSlot
