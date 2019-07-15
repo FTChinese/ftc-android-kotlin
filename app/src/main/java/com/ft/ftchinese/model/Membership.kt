@@ -36,6 +36,44 @@ data class Membership(
         return payMethod == PayMethod.ALIPAY || payMethod == PayMethod.WXPAY
     }
 
+    // Determine how user is using CheckOutActivity.
+    fun subType(plan: Plan): OrderUsage? {
+        if (tier == null) {
+            return OrderUsage.CREATE
+        }
+
+        if (isExpired) {
+            return OrderUsage.CREATE
+        }
+
+        if (tier == plan.tier) {
+            return OrderUsage.RENEW
+        }
+
+        if (tier == Tier.STANDARD && plan.tier == Tier.PREMIUM) {
+            return OrderUsage.UPGRADE
+        }
+
+        return null
+    }
+
+    fun canUseStripe(): Boolean {
+        if (isExpired) {
+            if (fromWxOrAli()) {
+                return true
+            }
+            if (autoRenew) {
+                return false
+            }
+
+            return true
+        }
+
+        // If current member is not expired, user is not
+        // allowed to use tripe regardless of payment method.
+        return false
+    }
+
     fun getPlan(): Plan? {
         if (tier == null) {
             return null
@@ -55,7 +93,7 @@ data class Membership(
      * --------- | -------------- | ---------
      * expired      renew/upgrade   upgrade only for standard
      */
-    fun allowRenew(): Boolean {
+    fun canRenew(): Boolean {
         if (expireDate == null) {
             return false
         }
@@ -66,20 +104,20 @@ data class Membership(
         return expireDate.isBefore(threeYearsLater)
     }
 
-    fun getStatus(): MemberStatus {
-        if (expireDate == null) {
-            return MemberStatus.INVALID
-        }
-
-        val today = LocalDate.now()
-        val threeYearsLater = today.plusYears(3)
-
-        return when {
-            expireDate.isBefore(today) -> MemberStatus.EXPIRED
-            expireDate.isBefore(threeYearsLater) -> MemberStatus.RENEWABLE
-            else -> MemberStatus.BEYOND_RENEW
-        }
-    }
+//    fun getStatus(): MemberStatus {
+//        if (expireDate == null) {
+//            return MemberStatus.INVALID
+//        }
+//
+//        val today = LocalDate.now()
+//        val threeYearsLater = today.plusYears(3)
+//
+//        return when {
+//            expireDate.isBefore(today) -> MemberStatus.EXPIRED
+//            expireDate.isBefore(threeYearsLater) -> MemberStatus.RENEWABLE
+//            else -> MemberStatus.BEYOND_RENEW
+//        }
+//    }
 
     /**
      * Only when user's current tier is standard should
@@ -89,9 +127,9 @@ data class Membership(
      * If membership is expired, simply ask user to subscribe
      * again.
      */
-    fun allowUpgrade(): Boolean {
-        return tier == Tier.STANDARD
-    }
+//    fun allowUpgrade(): Boolean {
+//        return tier == Tier.STANDARD
+//    }
 
     // Compare expireDate against another instance.
     // Pick whichever is later.
