@@ -98,18 +98,29 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     private fun initUI(p: Plan) {
+        val account = sessionManager.loadAccount() ?: return
 
+        // Show different titles
+        when (account.membership.subType(p)) {
+            OrderUsage.RENEW ->  supportActionBar?.setTitle(R.string.title_renewal)
+            OrderUsage.UPGRADE -> supportActionBar?.setTitle(R.string.title_upgrade)
+        }
+
+        // Attach price card
         supportFragmentManager.commit {
             replace(R.id.product_in_cart, CartItemFragment.newInstance(p))
         }
 
-        // For upgrading show some additional information.
-//         if (p.isUpgrade) {
-//             supportActionBar?.setTitle(R.string.title_upgrade)
-//
-//         } else if (p.isRenew) {
-//             supportActionBar?.setTitle(R.string.title_renewal)
-//         }
+        // All payment methods are open to new members or expired members;
+        // Wechat-only user cannot use stripe.
+        // For non-expired user to renew (only applicable to
+        // wechat pay and alipay), stripe should be disabled.
+        if (account.isWxOnly || !account.membership.canUseStripe()) {
+            stripe_btn.isEnabled = false
+        }
+
+        stripe_footnote.text = resources.getStringArray(R.array.stripe_footnotes)
+                .joinToString("* ")
 
         requestPermission()
 
