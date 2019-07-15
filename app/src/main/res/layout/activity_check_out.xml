@@ -82,9 +82,9 @@
             </RadioGroup>
 
             <TextView
+                android:id="@+id/stripe_footnote"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/stripe_footnote"
                 android:layout_margin="16dp" />
 
         </LinearLayout>
