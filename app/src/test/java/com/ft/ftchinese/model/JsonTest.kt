@@ -1,5 +1,7 @@
 package com.ft.ftchinese.model
 
+import com.ft.ftchinese.model.order.Subscription
+import com.ft.ftchinese.model.order.WxOrderQuery
 import com.ft.ftchinese.util.json
 import org.junit.Test
 
