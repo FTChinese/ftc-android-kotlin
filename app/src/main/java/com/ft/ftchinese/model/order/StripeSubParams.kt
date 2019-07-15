@@ -10,5 +10,6 @@ data class StripeSubParams(
         val cycle: Cycle,
         val customer: String,
         val coupon: String? = null,
-        val defaultPaymentMethod: String?
+        val defaultPaymentMethod: String?,
+        val idempotency: String? = null
 )
