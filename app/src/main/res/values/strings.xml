@@ -145,6 +145,7 @@
     <string name="select_or_add_card">选择或添加银行卡</string>
     <string name="stripe_init">设置Stripe支付</string>
     <string name="retrieve_customer">查询Stripe账号&#8230;</string>
+    <string name="default_bank_brand">我的银行卡</string>
     <string name="add_or_select_payment_method">添加银行卡或选择默认支付方式</string>
     <string name="set_default_payment_method">设为默认支付方式</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
