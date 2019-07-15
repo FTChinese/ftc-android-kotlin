@@ -3,16 +3,63 @@ package com.ft.ftchinese.model.order
 import android.content.Context
 import androidx.core.content.edit
 import com.ft.ftchinese.util.json
+import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.format.DateTimeFormatter
+import java.util.*
 
 private const val PREF_FILE_NAME = "stripe_pref"
 private const val PREF_KEY = "idempotency_key"
 private const val PREF_KEY_CREATED = "key_created_at"
 
+data class Idempotency (
+        val key: String,
+        val created: ZonedDateTime
+) {
+
+    /**
+     * checks whether th key is stale.
+     * Idempotency key is only valid for 24 hours since creation.
+     * @see See https://stripe.com/docs/api/idempotent_requests
+     */
+    fun stale(): Boolean {
+        return created.plusHours(24).isBefore(ZonedDateTime.now())
+    }
+}
+
 class StripePref private constructor(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
 
-    fun getKey() {
+    fun getIdempotency(): Idempotency{
+        val key = sharedPreferences.getString(PREF_KEY, null)
+        val created = sharedPreferences.getString(PREF_KEY_CREATED, null)
 
+        if (key == null || created == null) {
+            return generateIdempotency()
+        }
+
+        val i = Idempotency(
+                key = key,
+                created = ZonedDateTime.parse(created, DateTimeFormatter.ISO_DATE_TIME)
+        )
+
+        if (i.stale()) {
+            return generateIdempotency()
+        }
+
+        return i
+    }
+
+    private fun generateIdempotency(): Idempotency {
+        val uuid = UUID.randomUUID().toString()
+        val now = ZonedDateTime.now()
+        sharedPreferences.edit {
+            putString(PREF_KEY, uuid)
+            putString(PREF_KEY_CREATED, now.format(DateTimeFormatter.ISO_DATE_TIME))
+        }
+        return Idempotency(
+                key = uuid,
+                created = now
+        )
     }
 
     fun savePlan(key: String?, plan: StripePlan) {
