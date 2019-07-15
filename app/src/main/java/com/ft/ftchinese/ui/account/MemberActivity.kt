@@ -179,7 +179,7 @@ class MemberActivity : ScopedAppActivity(),
             // User is only allowed to renew as long
             // as membership expire date is within
             // allowed range.
-            if (!member.allowRenew()) {
+            if (!member.canRenew()) {
                 return
             }
 
