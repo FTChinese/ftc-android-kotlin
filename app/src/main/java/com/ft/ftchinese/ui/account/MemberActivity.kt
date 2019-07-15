@@ -8,24 +8,19 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.order.Cycle
+import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.model.order.subsPlans
-import com.ft.ftchinese.ui.RowAdapter
-import com.ft.ftchinese.ui.TableRow
-import com.ft.ftchinese.ui.pay.CheckOutActivity
-import com.ft.ftchinese.ui.pay.MyOrdersActivity
-import com.ft.ftchinese.ui.pay.PaywallActivity
-import com.ft.ftchinese.ui.pay.UpgradeActivity
+import com.ft.ftchinese.ui.pay.*
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.formatLocalDate
 import kotlinx.android.synthetic.main.activity_member.*
@@ -39,7 +34,7 @@ class MemberActivity : ScopedAppActivity(),
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
-    private lateinit var viewAdapter: RowAdapter
+//    private lateinit var viewAdapter: RowAdapter
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
 
@@ -113,7 +108,9 @@ class MemberActivity : ScopedAppActivity(),
 
             sessionManager.saveAccount(accountResult.success)
 
-            updateUI(accountResult.success)
+//            updateUI(accountResult.success)
+
+            initUI()
         })
 
         initUI()
@@ -129,120 +126,173 @@ class MemberActivity : ScopedAppActivity(),
     private fun initUI() {
         val account = sessionManager.loadAccount() ?: return
 
-        viewAdapter = RowAdapter(buildRows(account))
-
-        member_rv.apply {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(this@MemberActivity)
-            adapter = viewAdapter
-        }
-
-        showButton(account.membership)
-
-        // For expired user
-        resubscribe_btn.setOnClickListener {
-            PaywallActivity.start(this)
-            it.isEnabled = false
-        }
-
-
-        upgrade_btn.setOnClickListener {
-            UpgradeActivity.start(this)
-            it.isEnabled = false
-        }
-
-        val tier = account.membership.tier ?: return
-        val cycle = account.membership.cycle ?: return
-
-        // For renewal
-        renew_btn.setOnClickListener {
-
-            // Tracking
-            PaywallTracker.fromRenew()
-
-            val plan = subsPlans.of(tier, cycle)
-
-            CheckOutActivity.startForResult(
-                    activity = this,
-                    requestCode = RequestCode.PAYMENT,
-                    plan = plan
-            )
-
-            it.isEnabled = false
-        }
-    }
-
-    // Hide all buttons on create.
-    private fun hideButton() {
-        resubscribe_btn.visibility = View.GONE
-        renew_btn.visibility = View.GONE
-        upgrade_btn.visibility = View.GONE
-    }
-
-    private fun showButton(m: Membership) {
-        hideButton()
-
-        when (m.getStatus()) {
-            MemberStatus.INVALID -> {
-                resubscribe_btn.visibility = View.VISIBLE
-            }
-            MemberStatus.EXPIRED -> {
-                resubscribe_btn.visibility = View.VISIBLE
-            }
-            MemberStatus.RENEWABLE -> {
-                renew_btn.visibility = View.VISIBLE
-                upgrade_btn.visibility = if (m.allowUpgrade())
-                    View.VISIBLE
-                else View.GONE
-
-            }
-            MemberStatus.BEYOND_RENEW -> {
-                upgrade_btn.visibility = if (m.allowUpgrade())
-                    View.VISIBLE
-                else View.GONE
-            }
-        }
-    }
-
-    private fun buildRows(account: Account): Array<TableRow> {
-
-        val tierText = when (account.membership.tier) {
+        tv_member_tier.text = when (account.membership.tier) {
             Tier.STANDARD -> getString(R.string.tier_standard)
             Tier.PREMIUM -> getString(R.string.tier_premium)
             else -> if (account.isVip) getString(R.string.tier_vip) else getString(R.string.tier_free)
 
         }
 
-        val endDateText = if (account.isVip) {
+        tv_expire_date.text = if (account.isVip) {
             getString(R.string.cycle_vip)
         } else {
             formatLocalDate(account.membership.expireDate)
         }
 
-        val row1 = TableRow(
-                header = getString(R.string.label_member_tier),
-                data = tierText,
-                isBold = true
-        )
+//        viewAdapter = RowAdapter(buildRows(account))
 
-        val row2 = TableRow(
-                header = getString(R.string.label_member_duration),
+//        member_rv.apply {
+//            setHasFixedSize(true)
+//            layoutManager = LinearLayoutManager(this@MemberActivity)
+//            adapter = viewAdapter
+//        }
 
-                data = endDateText ?: "",
-                color = ContextCompat.getColor(this, R.color.colorClaret)
-        )
-
-        return arrayOf(row1, row2)
+//        showButton(account.membership)
+        setupButtons(account.membership)
     }
 
-    private fun updateUI(account: Account) {
-        val rows = buildRows(account)
+    private fun setupButtons(member: Membership) {
+        // re-subscription button always performs the same
+        // action regardless of user's membership status.
+        resubscribe_btn.setOnClickListener {
+            PaywallActivity.start(this)
+            it.isEnabled = false
+        }
 
-        viewAdapter.refreshData(rows)
-        viewAdapter.notifyDataSetChanged()
+        if (member.fromWxOrAli()) {
 
-        showButton(account.membership)
+            if (member.isExpired) {
+                resubscribe_btn.visibility = View.VISIBLE
+                return
+            }
+
+            // If a member in standard tier, always permit
+            // switching to premium.
+            if (member.tier == Tier.STANDARD) {
+                upgrade_btn.visibility = View.VISIBLE
+                upgrade_btn.setOnClickListener {
+                    UpgradeActivity.start(this)
+                    it.isEnabled = false
+                }
+            }
+
+            // User is only allowed to renew as long
+            // as membership expire date is within
+            // allowed range.
+            if (!member.allowRenew()) {
+                return
+            }
+
+            renew_btn.visibility = View.VISIBLE
+            renew_btn.setOnClickListener {
+
+                val plan = member.getPlan() ?: return@setOnClickListener
+                // Tracking
+                PaywallTracker.fromRenew()
+
+                CheckOutActivity.startForResult(
+                        activity = this,
+                        requestCode = RequestCode.PAYMENT,
+                        plan = plan
+                )
+
+                it.isEnabled = false
+            }
+        }
+
+        if (member.payMethod == PayMethod.STRIPE) {
+            if (member.isExpired) {
+                if (member.autoRenew) {
+                    // TODO: data is stale. Refresh.
+                    return
+                }
+                resubscribe_btn.visibility = View.VISIBLE
+            }
+            if (member.tier == Tier.PREMIUM) {
+                return
+            }
+
+            upgrade_btn.visibility = View.VISIBLE
+            // Switch plan.
+            upgrade_btn.setOnClickListener {
+                SubscriptionActivity.start(this, subsPlans.of(Tier.PREMIUM, Cycle.YEAR))
+
+                it.isEnabled = false
+            }
+        }
     }
+
+    // Hide all buttons on create.
+//    private fun hideButton() {
+//        resubscribe_btn.visibility = View.GONE
+//        renew_btn.visibility = View.GONE
+//        upgrade_btn.visibility = View.GONE
+//    }
+
+//    private fun showButton(m: Membership) {
+//        hideButton()
+//
+//        when (m.getStatus()) {
+//            MemberStatus.INVALID -> {
+//                resubscribe_btn.visibility = View.VISIBLE
+//            }
+//            MemberStatus.EXPIRED -> {
+//                resubscribe_btn.visibility = View.VISIBLE
+//            }
+//            MemberStatus.RENEWABLE -> {
+//                renew_btn.visibility = View.VISIBLE
+//                upgrade_btn.visibility = if (m.allowUpgrade())
+//                    View.VISIBLE
+//                else View.GONE
+//
+//            }
+//            MemberStatus.BEYOND_RENEW -> {
+//                upgrade_btn.visibility = if (m.allowUpgrade())
+//                    View.VISIBLE
+//                else View.GONE
+//            }
+//        }
+//    }
+
+//    private fun buildRows(account: Account): Array<TableRow> {
+//
+//        val tierText = when (account.membership.tier) {
+//            Tier.STANDARD -> getString(R.string.tier_standard)
+//            Tier.PREMIUM -> getString(R.string.tier_premium)
+//            else -> if (account.isVip) getString(R.string.tier_vip) else getString(R.string.tier_free)
+//
+//        }
+//
+//        val endDateText = if (account.isVip) {
+//            getString(R.string.cycle_vip)
+//        } else {
+//            formatLocalDate(account.membership.expireDate)
+//        }
+//
+//        val row1 = TableRow(
+//                header = getString(R.string.label_member_tier),
+//                data = tierText,
+//                isBold = true
+//        )
+//
+//        val row2 = TableRow(
+//                header = getString(R.string.label_member_duration),
+//
+//                data = endDateText ?: "",
+//                color = ContextCompat.getColor(this, R.color.colorClaret)
+//        )
+//
+//        return arrayOf(row1, row2)
+//    }
+
+//    private fun updateUI(account: Account) {
+//        val rows = buildRows(account)
+
+//        viewAdapter.refreshData(rows)
+//        viewAdapter.notifyDataSetChanged()
+
+//        showButton(account.membership)
+//    }
 
     /**
      * After [CheckOutActivity] finished, it sends activity result here.
