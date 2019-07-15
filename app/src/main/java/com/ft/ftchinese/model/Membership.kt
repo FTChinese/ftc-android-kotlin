@@ -1,23 +1,27 @@
 package com.ft.ftchinese.model
 
 import android.os.Parcelable
-import com.ft.ftchinese.model.order.Cycle
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.util.KCycle
 import com.ft.ftchinese.util.KDate
+import com.ft.ftchinese.util.KPayMethod
 import com.ft.ftchinese.util.KTier
 import kotlinx.android.parcel.Parcelize
 import org.threeten.bp.LocalDate
 
 @Parcelize
 data class Membership(
+        val id: String? = null,
         @KTier
         val tier: Tier? = null,
         @KCycle
         val cycle: Cycle? = null,
         // ISO8601 format. Example: 2019-08-05
         @KDate
-        val expireDate: LocalDate? = null
+        val expireDate: LocalDate? = null,
+        @KPayMethod
+        val payMethod: PayMethod? = null,
+        val autoRenew: Boolean = false
 ) : Parcelable {
     /**
      * Check if membership is expired.
@@ -28,13 +32,40 @@ data class Membership(
                     ?.isBefore(LocalDate.now())
                     ?: true
 
+    fun fromWxOrAli(): Boolean {
+        return payMethod == PayMethod.ALIPAY || payMethod == PayMethod.WXPAY
+    }
+
+    fun getPlan(): Plan? {
+        if (tier == null) {
+            return null
+        }
+
+        if (cycle == null) {
+            return null
+        }
+
+        return subsPlans.of(tier, cycle)
+    }
     /**
+     * This is only applicable to alipay or wechat pay.
      * Status of a membership when its expire date falls into
      * various period.
      *         today              3 years later
      * --------- | -------------- | ---------
      * expired      renew/upgrade   upgrade only for standard
      */
+    fun allowRenew(): Boolean {
+        if (expireDate == null) {
+            return false
+        }
+
+        val today = LocalDate.now()
+        val threeYearsLater = today.plusYears(3)
+
+        return expireDate.isBefore(threeYearsLater)
+    }
+
     fun getStatus(): MemberStatus {
         if (expireDate == null) {
             return MemberStatus.INVALID
