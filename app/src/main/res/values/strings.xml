@@ -138,7 +138,10 @@
     <string name="pay_method_stripe">Stripe支付</string>
     <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
     <string name="payment_source">%1$s (尾号%2$s)</string>
-    <string name="stripe_footnote">* Stripe暂不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</string>
+    <string-array name="stripe_footnotes">
+        <item>Stripe暂不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</item>
+        <item>微信登录的用户需要绑定FT中文网账号后可以使用Stripe支付</item>
+    </string-array>
     <string name="select_or_add_card">选择或添加银行卡</string>
     <string name="stripe_init">设置Stripe支付</string>
     <string name="retrieve_customer">查询Stripe账号&#8230;</string>
