@@ -9,7 +9,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.base.*
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.model.Subscription
+import com.ft.ftchinese.model.order.Subscription
 import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.activity_my_orders.*
 import kotlinx.android.synthetic.main.progress_bar.*
