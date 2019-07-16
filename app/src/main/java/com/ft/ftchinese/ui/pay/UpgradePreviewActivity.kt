@@ -1,6 +1,6 @@
 package com.ft.ftchinese.ui.pay
 
-import android.content.Context
+import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -40,38 +40,14 @@ class UpgradePreviewActivity : AppCompatActivity() {
                 .get(CheckOutViewModel::class.java)
 
         checkoutViewModel.upgradePreviewResult.observe(this, Observer {
-            onUpgradePreview(it)
+            onPreviewFetched(it)
         })
 
-        checkoutViewModel.directUpgradeResult.observe(this, Observer {
-            showProgress(false)
-            val upgradeResult = it ?: return@Observer
-
-            if (upgradeResult.error != null) {
-                enableInput(true)
-                toast(upgradeResult.error)
-                return@Observer
-            }
-
-            if (upgradeResult.exception != null) {
-                enableInput(true)
-                handleException(upgradeResult.exception)
-                return@Observer
-            }
-
-            if (upgradeResult.success) {
-                toast(R.string.upgrade_success)
-                finish()
-                return@Observer
-            }
-
-            if (upgradeResult.preview != null) {
-                toast("无法直接升级")
-                enableInput(true)
-                initUI(upgradeResult.preview)
-                return@Observer
-            }
+        checkoutViewModel.freeUpgradeResult.observe(this, Observer {
+            onUpgradedForFree(it)
         })
+
+        initUI(null)
 
         if (!isNetworkConnected()) {
             toast(R.string.prompt_no_network)
@@ -82,11 +58,89 @@ class UpgradePreviewActivity : AppCompatActivity() {
         showProgress(true)
         enableInput(false)
 
-        toast("查询余额...")
+        toast(R.string.query_balance)
         checkoutViewModel.previewUpgrade(account)
     }
 
-    private fun onUpgradePreview(previewResult: UpgradePreviewResult?) {
+    private fun initUI(upgrade: UpgradePreview?) {
+
+        if (upgrade == null) {
+            tv_amount.text = ""
+            tv_premium_price.text = ""
+            tv_balance.text = ""
+            btn_confirm_upgrade.text = ""
+            tv_upgrade_conversion.text = ""
+
+            return
+        }
+
+        tv_amount.text = getString(
+                    R.string.formatter_price,
+                    upgrade.plan.currencySymbol(),
+                    upgrade.plan.netPrice)
+
+
+        tv_premium_price.text = getString(
+                    R.string.premium_price,
+                    getString(
+                            R.string.formatter_price,
+                            upgrade.plan.currencySymbol(),
+                            upgrade.plan.listPrice
+                    )
+            )
+
+
+        tv_balance.text = getString(
+                    R.string.account_balance,
+                    getString(
+                            R.string.formatter_price,
+                            upgrade.plan.currencySymbol(),
+                            upgrade.balance
+                    )
+            )
+
+
+        enableInput(true)
+
+        if (upgrade.isPayRequired()) {
+            btn_confirm_upgrade.text = getString(R.string.confirm_upgrade)
+
+            btn_confirm_upgrade.setOnClickListener {
+                CheckOutActivity.startForResult(
+                        activity = this,
+                        requestCode = RequestCode.PAYMENT,
+                        plan = upgrade.plan)
+                finish()
+            }
+
+            return
+        }
+
+        tv_upgrade_conversion.text = getString(
+                R.string.balance_conversion,
+                upgrade.plan.cycleCount,
+                upgrade.plan.extraDays
+        )
+
+        btn_confirm_upgrade.text = getString(R.string.direct_upgrade)
+
+        btn_confirm_upgrade.setOnClickListener {
+
+            if (!isNetworkConnected()) {
+                toast(R.string.prompt_no_network)
+
+                return@setOnClickListener
+            }
+
+            val account = sessionManager.loadAccount() ?: return@setOnClickListener
+
+            showProgress(true)
+            enableInput(false)
+            checkoutViewModel.freeUpgrade(account)
+        }
+    }
+
+    private fun onPreviewFetched(previewResult: UpgradePreviewResult?) {
         showProgress(false)
         if (previewResult == null) {
             return
@@ -110,44 +164,58 @@ class UpgradePreviewActivity : AppCompatActivity() {
         initUI(previewResult.success)
     }
 
-    private fun initUI(upgrade: UpgradePreview) {
+    private fun onUpgradedForFree(upgradeResult: UpgradeResult?) {
+        showProgress(false)
+        if (upgradeResult == null) {
+            return
+        }
 
-        tv_amount.text = getString(R.string.formatter_price, upgrade.plan.currencySymbol(), upgrade.plan.netPrice)
+        if (upgradeResult.error != null) {
+            enableInput(true)
+            toast(upgradeResult.error)
+            return
+        }
 
-        tv_premium_price.text = getString(R.string.premium_price, getString(R.string.formatter_price, upgrade.plan.currencySymbol(), upgrade.plan.listPrice))
+        if (upgradeResult.exception != null) {
+            enableInput(true)
+            handleException(upgradeResult.exception)
+            return
+        }
 
-        tv_balance.text = getString(R.string.account_balance, getString(R.string.formatter_price, upgrade.plan.currencySymbol(), upgrade.balance))
+        // If upgraded successfully, destroy itself
+        // and send data back to calling activity.
+        if (upgradeResult.success) {
+            toast(R.string.upgrade_success)
+            done()
+            return
+        }
 
-        if (upgrade.isPayRequired()) {
-            btn_confirm_upgrade.text = getString(R.string.confirm_upgrade)
+        if (upgradeResult.preview != null) {
+            toast("无法直接升级")
+            enableInput(true)
+            initUI(upgradeResult.preview)
+            return
+        }
+    }
 
-            btn_confirm_upgrade.setOnClickListener {
-                CheckOutActivity.startForResult(
-                        activity = this,
-                        requestCode = RequestCode.PAYMENT,
-                        plan = upgrade.plan)
-                finish()
-            }
-        } else {
-            tv_upgrade_conversion.visibility = View.VISIBLE
-            tv_upgrade_conversion.text = getString(R.string.balance_conversion, upgrade.plan.cycleCount, upgrade.plan.extraDays)
+    /**
+     * Handle payment done event from [CheckOutActivity].
+     * If user paid successfully, destroy this activity.
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-            btn_confirm_upgrade.text = getString(R.string.direct_upgrade)
-            btn_confirm_upgrade.setOnClickListener {
-
-                if (!isNetworkConnected()) {
-                    toast(R.string.prompt_no_network)
-
-                    return@setOnClickListener
-                }
-
-                val account = sessionManager.loadAccount() ?: return@setOnClickListener
-
-                showProgress(true)
-                enableInput(false)
-                checkoutViewModel.directUpgrade(account)
+        if (requestCode == RequestCode.PAYMENT) {
+            if (resultCode == Activity.RESULT_OK) {
+                done()
             }
         }
+    }
+
+    private fun done() {
+        setResult(Activity.RESULT_OK)
+
+        finish()
     }
 
     private fun showProgress(show: Boolean) {
@@ -165,8 +233,8 @@ class UpgradePreviewActivity : AppCompatActivity() {
     companion object {
 
         @JvmStatic
-        fun start(context: Context) {
-            context.startActivity(Intent(context, UpgradePreviewActivity::class.java))
+        fun startForResult(activity: Activity, requestCode: Int) {
+            activity.startActivityForResult(Intent(activity, UpgradePreviewActivity::class.java), requestCode)
         }
     }
 }
