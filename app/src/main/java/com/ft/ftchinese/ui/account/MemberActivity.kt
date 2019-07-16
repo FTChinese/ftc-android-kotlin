@@ -206,7 +206,14 @@ class MemberActivity : ScopedAppActivity(),
             upgrade_btn.visibility = View.VISIBLE
             // Switch plan.
             upgrade_btn.setOnClickListener {
-                SubscriptionActivity.start(this, subsPlans.of(Tier.PREMIUM, Cycle.YEAR))
+                SubscriptionActivity.startForResult(
+                        this,
+                        RequestCode.PAYMENT,
+                        subsPlans.of(
+                                Tier.PREMIUM,
+                                Cycle.YEAR
+                        )
+                )
                 it.isEnabled = false
             }
         }
