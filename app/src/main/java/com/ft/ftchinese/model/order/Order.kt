@@ -1,51 +1,26 @@
 package com.ft.ftchinese.model.order
 
-import android.os.Parcelable
 import com.ft.ftchinese.util.*
-import kotlinx.android.parcel.Parcelize
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
+
 
 /**
  * An order created from server when user pressed pay button.
  */
-@Parcelize
-class Order(
+data class Order(
         val id: String,
-        val listPrice: Double,
-        val netPrice: Double,
-
         @KTier
         val tier: Tier,
-
         @KCycle
         val cycle: Cycle,
-
-        val cycleCount: Long = 1,
-        val extraDays: Long = 0,
-
-        @KOrderUsage
-        val usageType: OrderUsage?,
-
-        val balance: Double? = null,
-
+        val netPrice: Double,
         @KPayMethod
-        val payMethod: PayMethod? = null,
-
+        val payMethod: PayMethod,
         @KDateTime
-        val createdAt: ZonedDateTime = ZonedDateTime.now(),
-
-        @KDateTime
-        val confirmedAt: ZonedDateTime? = null,
-
+        val createdAt: ZonedDateTime,
         @KDate
-        var startDate: LocalDate? = null,
-
+        val startDate: LocalDate,
         @KDate
-        var endDate: LocalDate? = null
-) : Parcelable {
-
-        fun priceInCent(): Long {
-                return (netPrice*100).toLong()
-        }
-}
+        val endDate: LocalDate
+)
