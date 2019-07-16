@@ -83,7 +83,7 @@ class StatsTracker private constructor(context: Context) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
             putDouble(FirebaseAnalytics.Param.VALUE, subs.netPrice)
-            putString(FirebaseAnalytics.Param.METHOD, subs.payMethod.string())
+            putString(FirebaseAnalytics.Param.METHOD, subs.paymentMethod.string())
         })
 
         val action = when(subs.tier) {
