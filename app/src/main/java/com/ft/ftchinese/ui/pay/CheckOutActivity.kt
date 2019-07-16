@@ -259,7 +259,11 @@ class CheckOutActivity : ScopedAppActivity(),
                     return
                 }
 
-                SubscriptionActivity.start(this, plan)
+                SubscriptionActivity.startForResult(
+                        this,
+                        RequestCode.PAYMENT,
+                        plan
+                )
             }
         }
     }
@@ -291,7 +295,10 @@ class CheckOutActivity : ScopedAppActivity(),
 
         sessionManager.saveStripeId(result.success)
 
-        SubscriptionActivity.start(this, plan)
+        SubscriptionActivity.startForResult(
+                this,
+                RequestCode.PAYMENT,
+                plan)
     }
 
     private fun onAliOrderFetch(orderResult: AliOrderResult?) {
@@ -424,9 +431,9 @@ class CheckOutActivity : ScopedAppActivity(),
         finish()
     }
 
-    private fun onWxOrderFetched(orderResult: WxOrderResult) {
+    private fun onWxOrderFetched(orderResult: WxOrderResult?) {
         showProgress(false)
-        if (orderResult != null) {
+        if (orderResult == null) {
             return
         }
 
@@ -543,6 +550,17 @@ class CheckOutActivity : ScopedAppActivity(),
     override fun onResume() {
         super.onResume()
         enablePayBtn(true)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == RequestCode.PAYMENT) {
+            if (resultCode == Activity.RESULT_OK) {
+                setResult(Activity.RESULT_OK)
+                finish()
+            }
+        }
     }
 
     companion object {
