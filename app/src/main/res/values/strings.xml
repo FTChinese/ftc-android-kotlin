@@ -81,6 +81,7 @@
     <string name="membership_renew">续订</string>
     <string name="membership_upgrade">升级为高端会员</string>
     <string name="upgrade_guide">如果您计划升级为高端会员，系统将首先使用当前账号的余额抵扣定价，不足部分需要您另行支付。</string>
+    <string name="query_balance">查询余额&#8230;</string>
     <string name="upgrade_to_read">您点击了仅限高端会员阅读的文章。您目前是标准会员，升级为高端会员可以继续阅读</string>
     <string name="premium_only">您点击了仅供高端会员阅读的文章，购买高端会员后可以继续阅读</string>
     <string name="balance_conversion">余额可以兑换高级会员%1$d年%2$d天，无需额外支付</string>
@@ -139,8 +140,9 @@
     <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
     <string name="payment_source">%1$s (尾号%2$s)</string>
     <string-array name="stripe_footnotes">
-        <item>Stripe暂不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</item>
-        <item>微信登录的用户需要绑定FT中文网账号后可以使用Stripe支付</item>
+        <item>* FT中文网的Stripe支付暂不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</item>
+        <item>* 微信登录的用户需要绑定FT中文网账号后才可以使用Stripe订阅</item>
+        <item>* 通过支付宝或者微信支付购买的会员、且会员尚未到期，无法使用Stripe订阅</item>
     </string-array>
     <string name="select_or_add_card">选择或添加银行卡</string>
     <string name="stripe_init">设置Stripe支付</string>
