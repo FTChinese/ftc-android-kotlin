@@ -1,7 +1,6 @@
 package com.ft.ftchinese.ui.pay
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -20,6 +19,7 @@ import com.ft.ftchinese.util.RequestCode
 import com.stripe.android.*
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import kotlinx.android.synthetic.main.activity_subscription.*
@@ -77,8 +77,31 @@ class SubscriptionActivity : ScopedAppActivity(),
         )
 
 
-        setupCustomerSession()
         initUI()
+        setupCustomerSession()
+    }
+
+    private fun initUI() {
+
+        buildText(
+                stripePref.getPlan(plan?.getId())
+        )
+
+        if (isNetworkConnected()) {
+            val account = sessionManager.loadAccount() ?: return
+            checkOutViewModel.getStripePlan(account, plan)
+        }
+
+        tv_payment_method.setOnClickListener {
+            PaymentMethodsActivityStarter(this)
+                    .startForResult(RequestCode.SELECT_SOURCE)
+        }
+
+        btn_subscribe.setOnClickListener {
+            onSubscribeButtonClicked()
+        }
+
+        enableButton(false)
     }
 
     private fun setupCustomerSession() {
@@ -125,28 +148,6 @@ class SubscriptionActivity : ScopedAppActivity(),
         }
     }
 
-    private fun initUI() {
-
-        buildText(
-                stripePref.getPlan(plan?.getId())
-        )
-
-        if (isNetworkConnected()) {
-            val account = sessionManager.loadAccount() ?: return
-            checkOutViewModel.getStripePlan(account, plan)
-        }
-
-        tv_payment_method.setOnClickListener {
-            PaymentMethodsActivityStarter(this)
-                    .startForResult(RequestCode.SELECT_SOURCE)
-        }
-
-        btn_subscribe.setOnClickListener {
-            onSubscribeButtonClicked()
-        }
-
-        enableButton(false)
-    }
 
     private fun buildText(stripePlan: StripePlan?) {
         if (stripePlan != null) {
@@ -199,32 +200,63 @@ class SubscriptionActivity : ScopedAppActivity(),
             return
         }
 
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        val idempotency = stripePref.getIdempotency()
+
         val subParams = StripeSubParams(
                 tier = p.tier,
                 cycle = p.cycle,
                 customer = account.stripeId,
-                defaultPaymentMethod = pm.id
+                defaultPaymentMethod = pm.id,
+                idempotency = idempotency.key
         )
 
         showProgress(true)
         enableButton(false)
 
+        toast("Creating subscription...")
+
         launch {
-            toast("Creating subscription...")
 
             try {
-                val subResp = withContext(Dispatchers.IO) {
+                val sub = withContext(Dispatchers.IO) {
                     account.createSubscription(subParams)
                 }
 
-                info("Subscription result: $subResp")
+                info("Subscription result: $sub")
                 toast("Subscription done")
                 showProgress(false)
 
+                if (sub == null) {
+                    toast("Subscription failed")
+                    enableButton(true)
+                    return@launch
+                }
+
+
+                onSubscribed(sub.latestInvoice.paymentIntent.status)
             } catch (e: Exception) {
                 showProgress(false)
                 enableButton(true)
                 handleException(e)
+            }
+        }
+    }
+
+    private fun onSubscribed(status: StripeIntent.Status?) {
+        when (status) {
+            StripeIntent.Status.Canceled -> {
+                toast("Canceled")
+            }
+            StripeIntent.Status.Processing -> {
+                toast("Processing")
+            }
+            StripeIntent.Status.RequiresAction -> {
+
             }
         }
     }
@@ -257,10 +289,13 @@ class SubscriptionActivity : ScopedAppActivity(),
     companion object {
 
         @JvmStatic
-        fun start(context: Context, plan: Plan?) {
-            context.startActivity(Intent(context, SubscriptionActivity::class.java).apply {
+        fun  startForResult(activity: Activity, requestCode: Int, plan: Plan?) {
+            activity.startActivityForResult(Intent(
+                    activity,
+                    SubscriptionActivity::class.java
+            ).apply {
                 putExtra(EXTRA_FTC_PLAN, plan)
-            })
+            }, requestCode)
         }
     }
 }
