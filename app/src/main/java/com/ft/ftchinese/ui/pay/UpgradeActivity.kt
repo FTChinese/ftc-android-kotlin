@@ -1,7 +1,6 @@
 package com.ft.ftchinese.ui.pay
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -9,24 +8,15 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.base.handleApiError
-import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.Plan
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.model.order.subsPlans
-import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_upgrade.*
-import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
@@ -54,10 +44,14 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
         productViewModel = ViewModelProviders.of(this)
                 .get(ProductViewModel::class.java)
 
+        // Handle click event on price button.
         productViewModel.selected.observe(this, Observer<Plan> {
-            UpgradePreviewActivity.start(this)
+            UpgradePreviewActivity.startForResult(this, RequestCode.PAYMENT)
         })
 
+
+        // Show an introduction text if user is redirected
+        // from an article.
         if (isFromArticle) {
             upgrade_to_read.visibility = View.VISIBLE
         } else {
@@ -74,7 +68,6 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
                 .commit()
 
         tracker = StatsTracker.getInstance(this)
-
         tracker.displayPaywall()
     }
 
@@ -101,6 +94,7 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
                     return
                 }
 
+                setResult(Activity.RESULT_OK)
                 finish()
             }
         }
@@ -110,10 +104,13 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
         private const val EXTRA_FROM_ARTICLE = "is_from_article"
 
         @JvmStatic
-        fun start(context: Context?, fromArticle: Boolean = false) {
-            context?.startActivity(Intent(context, UpgradeActivity::class.java).apply {
+        fun startForResult(activity: Activity, requestCode: Int, fromArticle: Boolean = false) {
+            activity.startActivityForResult(Intent(
+                    activity,
+                    UpgradeActivity::class.java
+            ).apply {
                 putExtra(EXTRA_FROM_ARTICLE, fromArticle)
-            })
+            }, requestCode)
         }
     }
 }
