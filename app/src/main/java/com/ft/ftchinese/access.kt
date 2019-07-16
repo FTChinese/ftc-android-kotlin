@@ -7,6 +7,7 @@ import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.account.MemberActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.pay.UpgradeActivity
+import com.ft.ftchinese.util.RequestCode
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -71,7 +72,7 @@ fun Activity.grantPermission(account: Account?, contentPerm: Permission): Boolea
     // If code reaches here, user must be a valid member.
     // Access denied could only be caused by premium content.
     toast(R.string.prompt_premium_only)
-    UpgradeActivity.start(this, true)
+    UpgradeActivity.startForResult(this, RequestCode.PAYMENT, true)
 
     return false
 }
