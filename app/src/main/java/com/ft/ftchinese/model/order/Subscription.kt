@@ -33,7 +33,7 @@ open class Subscription(
         open val usageType: OrderUsage,
 
         @KPayMethod
-        open val paymentMethod: PayMethod,
+        open val payMethod: PayMethod,
 
         @KDateTime
         open val createdAt: ZonedDateTime = ZonedDateTime.now(),

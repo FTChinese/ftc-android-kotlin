@@ -43,7 +43,7 @@ class OrderManager private constructor(context: Context) {
             putString(PREF_CYCLE, subs.cycle.toString())
             putLong(PREF_CYCLE_COUNT, subs.cycleCount)
             putLong(PREF_EXTRA_DAYS, subs.extraDays)
-            putString(PREF_PAYMENT_METHOD, subs.paymentMethod.string())
+            putString(PREF_PAYMENT_METHOD, subs.payMethod.string())
             putDouble(PREF_NET_PRICE, subs.netPrice)
             putString(PREF_CREATED_AT, formatISODateTime(subs.createdAt))
             putString(PREF_USAGE, subs.usageType.toString())
@@ -72,7 +72,7 @@ class OrderManager private constructor(context: Context) {
                 cycle = cycle,
                 cycleCount = sharedPreferences.getLong(PREF_CYCLE_COUNT, 1),
                 extraDays = sharedPreferences.getLong(PREF_EXTRA_DAYS, 0),
-                paymentMethod = payMethod,
+                payMethod = payMethod,
                 netPrice = netPrice,
                 createdAt = createdAt,
                 usageType = usageType,

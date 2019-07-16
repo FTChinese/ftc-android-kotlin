@@ -15,7 +15,7 @@ data class WxOrder(
         @KOrderUsage
         override val usageType: OrderUsage,
         @KPayMethod
-        override val paymentMethod: PayMethod,
+        override val payMethod: PayMethod,
         @KDateTime
         override val createdAt: ZonedDateTime,
         val appId: String,
@@ -33,6 +33,6 @@ data class WxOrder(
         extraDays = extraDays,
         netPrice = netPrice,
         usageType = usageType,
-        paymentMethod = paymentMethod,
+        payMethod = payMethod,
         createdAt = createdAt
 )
