@@ -15,7 +15,7 @@ data class AliOrder(
         @KOrderUsage
         override val usageType: OrderUsage,
         @KPayMethod
-        override val payMethod: PayMethod,
+        override val paymentMethod: PayMethod,
         @KDateTime
         override val createdAt: ZonedDateTime,
         val param: String
@@ -28,6 +28,6 @@ data class AliOrder(
         extraDays = extraDays,
         netPrice = netPrice,
         usageType = usageType,
-        payMethod = payMethod,
+        paymentMethod = paymentMethod,
         createdAt = createdAt
 )
