@@ -20,7 +20,7 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.ui.StringResult
 import com.ft.ftchinese.ui.account.AccountViewModel
-import com.ft.ftchinese.ui.account.MemberActivity
+import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
@@ -75,17 +75,12 @@ class CheckOutActivity : ScopedAppActivity(),
 
         val p = intent.getParcelableExtra<Plan>(EXTRA_FTC_PLAN) ?: return
 
-        initUI(p)
-
-        this.plan = p
-
         sessionManager = SessionManager.getInstance(this)
         orderManager = OrderManager.getInstance(this)
-
-
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
         wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
 
+        initUI(p)
         setUp()
 
         tracker = StatsTracker.getInstance(this)
@@ -95,6 +90,8 @@ class CheckOutActivity : ScopedAppActivity(),
         val account = sessionManager.loadAccount() ?: return
         info("Update stripe plan in background")
         checkOutViewModel.getStripePlan(account, p)
+
+        this.plan = p
     }
 
     private fun initUI(p: Plan) {
@@ -120,7 +117,7 @@ class CheckOutActivity : ScopedAppActivity(),
         }
 
         stripe_footnote.text = resources.getStringArray(R.array.stripe_footnotes)
-                .joinToString("* ")
+                .joinToString("\n")
 
         requestPermission()
 
@@ -152,104 +149,15 @@ class CheckOutActivity : ScopedAppActivity(),
                 .get(AccountViewModel::class.java)
 
         checkOutViewModel.wxOrderResult.observe(this, Observer {
-            showProgress(false)
-            val orderResult = it ?: return@Observer
-
-            if (orderResult.error != null) {
-                toast(orderResult.error)
-                enablePayBtn(true)
-                tracker.buyFail(plan)
-                return@Observer
-            }
-
-            if (orderResult.exception != null) {
-                handleException(orderResult.exception)
-                enablePayBtn(true)
-                tracker.buyFail(plan)
-                return@Observer
-            }
-
-            if (orderResult.success == null) {
-                toast(R.string.order_cannot_be_created)
-                enablePayBtn(true)
-                tracker.buyFail(plan)
-                return@Observer
-            }
-
-            val wxOrder = orderResult.success
-            launchWxPay(wxOrder)
+            onWxOrderFetched(it)
         })
 
         checkOutViewModel.aliOrderResult.observe(this, Observer {
-            showProgress(false)
-
-            val orderResult = it ?: return@Observer
-
-            if (orderResult.error != null) {
-                toast(orderResult.error)
-                enablePayBtn(true)
-                tracker.buyFail(plan)
-                return@Observer
-            }
-
-            if (orderResult.exception != null) {
-                handleException(orderResult.exception)
-                enablePayBtn(true)
-                tracker.buyFail(plan)
-                return@Observer
-            }
-
-            if (orderResult.success == null) {
-                toast(R.string.order_cannot_be_created)
-                enablePayBtn(true)
-                tracker.buyFail(plan)
-                return@Observer
-            }
-
-            val aliOrder = orderResult.success
-
-            launchAliPay(aliOrder)
+            onAliOrderFetch(it)
         })
 
         accountViewModel.accountRefreshed.observe(this, Observer {
-            showProgress(false)
-            val accountResult = it ?: return@Observer
-
-            if (accountResult.error != null) {
-                toast(accountResult.error)
-                return@Observer
-            }
-
-            if (accountResult.exception != null) {
-                handleException(accountResult.exception)
-                return@Observer
-            }
-
-
-            if (accountResult.success == null) {
-                toast(R.string.order_not_found)
-                return@Observer
-            }
-
-            val localAccount = sessionManager.loadAccount() ?: return@Observer
-            toast(R.string.prompt_updated)
-
-            val remoteAccount = accountResult.success
-            /**
-             * If remote membership is newer than local
-             * one, save remote data; otherwise do
-             * nothing in case server notification comes
-             * late.
-             */
-            if (remoteAccount.membership.isNewer(localAccount.membership)) {
-                sessionManager.saveAccount(remoteAccount)
-            }
-
-            setResult(Activity.RESULT_OK)
-
-            MemberActivity.start(this)
-
-            finish()
+            onAccountRefreshed(it)
         })
 
         // Used when current user is not a Stripe customer.
@@ -261,6 +169,39 @@ class CheckOutActivity : ScopedAppActivity(),
         accountViewModel.customerIdResult.observe(this, Observer {
             onCustomerIdCreated(it)
         })
+    }
+
+    private fun onSelectPayMethod() {
+        val priceText = getString(R.string.formatter_price, plan?.currencySymbol(), plan?.netPrice)
+
+        pay_btn.text = when(payMethod) {
+            // 支付宝支付 ¥258.00
+            PayMethod.ALIPAY -> getString(
+                    R.string.formatter_check_out,
+                    getString(R.string.pay_method_ali),
+                    priceText)
+            // 微信支付 ¥258.00
+            PayMethod.WXPAY -> getString(
+                    R.string.formatter_check_out,
+                    getString(R.string.pay_method_wechat),
+                    priceText)
+
+            // Stripe支付 ¥258.00
+            // 添加或选择银行卡
+            // 设置Stripe支付
+            PayMethod.STRIPE -> when {
+                sessionManager.loadAccount()?.stripeId == null -> getString(R.string.stripe_init)
+
+                else -> getString(
+                        R.string.formatter_check_out,
+                        getString(R.string.pay_method_stripe),
+                        priceText)
+
+            }
+            else -> {
+                getString(R.string.prompt_pay_method_unknown)
+            }
+        }
     }
 
     private fun onPayButtonClicked() {
@@ -353,37 +294,37 @@ class CheckOutActivity : ScopedAppActivity(),
         SubscriptionActivity.start(this, plan)
     }
 
-    private fun onSelectPayMethod() {
-        val priceText = getString(R.string.formatter_price, plan?.currencySymbol(), plan?.netPrice)
+    private fun onAliOrderFetch(orderResult: AliOrderResult?) {
+        showProgress(false)
 
-        pay_btn.text = when(payMethod) {
-            // 支付宝支付 ¥258.00
-            PayMethod.ALIPAY -> getString(
-                    R.string.formatter_check_out,
-                    getString(R.string.pay_method_ali),
-                    priceText)
-            // 微信支付 ¥258.00
-            PayMethod.WXPAY -> getString(
-                    R.string.formatter_check_out,
-                    getString(R.string.pay_method_wechat),
-                    priceText)
-
-            // Stripe支付 ¥258.00
-            // 添加或选择银行卡
-            // 设置Stripe支付
-            PayMethod.STRIPE -> when {
-                sessionManager.loadAccount()?.stripeId == null -> getString(R.string.stripe_init)
-
-                else -> getString(
-                        R.string.formatter_check_out,
-                        getString(R.string.pay_method_stripe),
-                        priceText)
-
-            }
-            else -> {
-                getString(R.string.prompt_pay_method_unknown)
-            }
+        if (orderResult == null) {
+            return
         }
+
+        if (orderResult.error != null) {
+            toast(orderResult.error)
+            enablePayBtn(true)
+            tracker.buyFail(plan)
+            return
+        }
+
+        if (orderResult.exception != null) {
+            handleException(orderResult.exception)
+            enablePayBtn(true)
+            tracker.buyFail(plan)
+            return
+        }
+
+        if (orderResult.success == null) {
+            toast(R.string.order_cannot_be_created)
+            enablePayBtn(true)
+            tracker.buyFail(plan)
+            return
+        }
+
+        val aliOrder = orderResult.success
+
+        launchAliPay(aliOrder)
     }
 
     private fun launchAliPay(aliOrder: AliOrder) {
@@ -441,6 +382,77 @@ class CheckOutActivity : ScopedAppActivity(),
 
             accountViewModel.refresh(account)
         }
+    }
+
+    private fun onAccountRefreshed(accountResult: AccountResult?) {
+        showProgress(false)
+        if (accountResult == null) {
+            return
+        }
+
+        if (accountResult.error != null) {
+            toast(accountResult.error)
+            return
+        }
+
+        if (accountResult.exception != null) {
+            handleException(accountResult.exception)
+            return
+        }
+
+
+        if (accountResult.success == null) {
+            toast(R.string.order_not_found)
+            return
+        }
+
+        val localAccount = sessionManager.loadAccount() ?: return
+        toast(R.string.prompt_updated)
+
+        val remoteAccount = accountResult.success
+        /**
+         * If remote membership is newer than local
+         * one, save remote data; otherwise do
+         * nothing in case server notification comes
+         * late.
+         */
+        if (remoteAccount.membership.isNewer(localAccount.membership)) {
+            sessionManager.saveAccount(remoteAccount)
+        }
+
+        setResult(Activity.RESULT_OK)
+        finish()
+    }
+
+    private fun onWxOrderFetched(orderResult: WxOrderResult) {
+        showProgress(false)
+        if (orderResult != null) {
+            return
+        }
+
+        if (orderResult.error != null) {
+            toast(orderResult.error)
+            enablePayBtn(true)
+            tracker.buyFail(plan)
+            return
+        }
+
+        if (orderResult.exception != null) {
+            handleException(orderResult.exception)
+            enablePayBtn(true)
+            tracker.buyFail(plan)
+            return
+        }
+
+        if (orderResult.success == null) {
+            toast(R.string.order_cannot_be_created)
+            enablePayBtn(true)
+            tracker.buyFail(plan)
+            return
+        }
+
+        val wxOrder = orderResult.success
+        launchWxPay(wxOrder)
     }
 
     private fun launchWxPay(wxOrder: WxOrder) {
