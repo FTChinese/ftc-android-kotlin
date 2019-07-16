@@ -6,7 +6,7 @@ data class StripeSub(
         val id: String,
         val created: Long,
         @Json(name = "current_period_start")
-        val star: Long,
+        val start: Long,
         @Json(name = "current_period_end")
         val end: Long,
         val customer: String,
