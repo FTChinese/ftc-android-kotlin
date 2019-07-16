@@ -340,7 +340,7 @@ data class Account(
         }
     }
 
-    fun createSubscription(params: StripeSubParams): String? {
+    fun createSubscription(params: StripeSubParams): StripeSub? {
 
         val (_, body ) = Fetch()
                 .post(SubscribeApi.STRIPE_SUB)
@@ -349,7 +349,15 @@ data class Account(
                 .jsonBody(json.toJsonString(params))
                 .responseApi()
 
-        return body
+        if (body == null) {
+            return null
+        }
+
+        return try {
+            json.parse<StripeSub>(body)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     fun createCustomer(): String? {
