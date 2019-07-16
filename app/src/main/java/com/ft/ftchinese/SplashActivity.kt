@@ -12,6 +12,8 @@ import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.ui.splash.SplashViewModel
 import com.ft.ftchinese.util.FileCache
 import kotlinx.android.synthetic.main.activity_splash.*
+import kotlinx.android.synthetic.main.activity_splash.ad_image
+import kotlinx.android.synthetic.main.activity_splash.ad_timer
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 
@@ -122,6 +124,9 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
     // NOTE: it must be called in the main thread.
     // If you call is in a non-Main coroutine, it crashes.
     private fun exit() {
+        ad_timer.visibility = View.GONE
+        ad_image.visibility = View.GONE
+
         showSystemUI()
         MainActivity.start(this)
         finish()
