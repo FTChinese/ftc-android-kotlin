@@ -11,8 +11,10 @@ import com.ft.ftchinese.util.ClientError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
-class CheckOutViewModel : ViewModel() {
+class CheckOutViewModel : ViewModel(), AnkoLogger {
 
 
     val inputEnabled = MutableLiveData<Boolean>()
@@ -22,7 +24,7 @@ class CheckOutViewModel : ViewModel() {
     val stripePlanResult = MutableLiveData<StripePlanResult>()
 
     val upgradePreviewResult = MutableLiveData<UpgradePreviewResult>()
-    val directUpgradeResult = MutableLiveData<UpgradeResult>()
+    val freeUpgradeResult = MutableLiveData<UpgradeResult>()
 
     // Enable/Disable a UI, like button.
     fun enableInput(v: Boolean) {
@@ -35,6 +37,8 @@ class CheckOutViewModel : ViewModel() {
                 val up = withContext(Dispatchers.IO) {
                     account.previewUpgrade()
                 }
+
+                info("Preview upgrade $up")
 
                 upgradePreviewResult.value = UpgradePreviewResult(
                         success = up
@@ -57,7 +61,7 @@ class CheckOutViewModel : ViewModel() {
         }
     }
 
-    fun directUpgrade(account: Account) {
+    fun freeUpgrade(account: Account) {
         viewModelScope.launch {
             try {
                 val (ok, plan) = withContext(Dispatchers.IO) {
@@ -65,13 +69,13 @@ class CheckOutViewModel : ViewModel() {
                 }
 
                 if (ok) {
-                    directUpgradeResult.value = UpgradeResult(
+                    freeUpgradeResult.value = UpgradeResult(
                             success = true
                     )
                     return@launch
                 }
 
-                directUpgradeResult.value = UpgradeResult(
+                freeUpgradeResult.value = UpgradeResult(
                         preview = plan
                 )
 
@@ -85,12 +89,12 @@ class CheckOutViewModel : ViewModel() {
                     else -> e.statusMessage()
                 }
 
-                directUpgradeResult.value = UpgradeResult(
+                freeUpgradeResult.value = UpgradeResult(
                         error = msgId,
                         exception = e
                 )
             } catch (e: Exception) {
-                directUpgradeResult.value = UpgradeResult(
+                freeUpgradeResult.value = UpgradeResult(
                         exception = e
                 )
             }
