@@ -21,7 +21,7 @@ data class Membership(
         val expireDate: LocalDate? = null,
         @KPayMethod
         val payMethod: PayMethod? = null,
-        val autoRenew: Boolean = false
+        val autoRenew: Boolean? = false
 ) : Parcelable {
     /**
      * Check if membership is expired.
@@ -33,7 +33,8 @@ data class Membership(
                     ?: true
 
     fun fromWxOrAli(): Boolean {
-        return payMethod == PayMethod.ALIPAY || payMethod == PayMethod.WXPAY
+        // The first condition is used for backward compatibility.
+        return (tier != null && payMethod == null) || payMethod == PayMethod.ALIPAY || payMethod == PayMethod.WXPAY
     }
 
     // Determine how user is using CheckOutActivity.
@@ -62,7 +63,7 @@ data class Membership(
             if (fromWxOrAli()) {
                 return true
             }
-            if (autoRenew) {
+            if (autoRenew == null || autoRenew) {
                 return false
             }
 
