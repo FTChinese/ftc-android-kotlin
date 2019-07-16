@@ -32,6 +32,15 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
+private val cardBrands = mapOf(
+        "amex" to "American Express",
+        "discover" to "Discover",
+        "jcb" to "JCB",
+        "diners" to "Diners Club",
+        "visa" to "Visa",
+        "mastercard" to "MasterCard",
+        "unionpay" to "UnionPay"
+)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
@@ -52,8 +61,11 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
         sessionMananger = SessionManager.getInstance(this)
 
-        setupCustomerSession()
         initUI()
+
+        // Setup stripe customer session after ui initiated; otherwise the ui might be disabled if stripe customer data
+        // is retrieved too quickly.
+        setupCustomerSession()
     }
 
     private fun initUI() {
@@ -64,51 +76,55 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         btn_set_default.setOnClickListener {
-            val pmId = paymentMethod?.id
-            if (pmId == null) {
-                toast("You are not a stripe customer yet")
-                return@setOnClickListener
-            }
-
-            val account = sessionMananger.loadAccount() ?: return@setOnClickListener
-
-            if (!isNetworkConnected()) {
-                toast(R.string.prompt_no_network)
-                return@setOnClickListener
-            }
-
-            showProgress(true)
-            enableButton(false)
-
-            launch {
-                try {
-                    val (_, body) = withContext(Dispatchers.IO) {
-                        Fetch().post("${SubscribeApi.STRIPE_CUSTOMER}/${account.stripeId}/default_payment_method")
-                                .setUserId(account.id)
-                                .noCache()
-                                .jsonBody(Klaxon().toJsonString(mapOf(
-                                        "defaultPaymentMethod" to pmId
-                                )))
-                                .responseStripe()
-                    }
-
-                    info(body)
-
-                    showProgress(false)
-                    toast("Default payment method set")
-                } catch (e: com.ft.ftchinese.util.StripeError) {
-                    showProgress(false)
-                    enableButton(true)
-                    info(e)
-                } catch (e: Exception) {
-                    showProgress(false)
-                    enableButton(true)
-                    info(e)
-                }
-            }
+            defaultPaymentMethod()
         }
 
         enableButton(false)
+    }
+
+    private fun defaultPaymentMethod() {
+        val pmId = paymentMethod?.id
+        if (pmId == null) {
+            toast("您还不是Stripe用户，重新点击Stripe钱包自动注册")
+            return
+        }
+
+        val account = sessionMananger.loadAccount() ?: return
+
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        showProgress(true)
+        enableButton(false)
+
+        launch {
+            try {
+                val (_, body) = withContext(Dispatchers.IO) {
+                    Fetch().post("${SubscribeApi.STRIPE_CUSTOMER}/${account.stripeId}/default_payment_method")
+                            .setUserId(account.id)
+                            .noCache()
+                            .jsonBody(Klaxon().toJsonString(mapOf(
+                                    "defaultPaymentMethod" to pmId
+                            )))
+                            .responseStripe()
+                }
+
+                info(body)
+
+                showProgress(false)
+                toast("Default payment method set")
+            } catch (e: com.ft.ftchinese.util.StripeError) {
+                showProgress(false)
+                enableButton(true)
+                info(e)
+            } catch (e: Exception) {
+                showProgress(false)
+                enableButton(true)
+                info(e)
+            }
+        }
     }
 
     private fun setupCustomerSession() {
@@ -145,8 +161,6 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
             showProgress(false)
             enableButton(true)
             toast("Customer retrieved")
-
-            info("Customer: ${customer.toMap()}")
         }
 
         override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
@@ -171,12 +185,12 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun setCardText(card: PaymentMethod.Card?) {
         if (card == null) {
-            card_brand.text = ""
+            card_brand.text = getString(R.string.default_bank_brand)
             card_number.text = getString(R.string.add_or_select_payment_method)
             return
         }
 
-        card_brand.text = card.brand
+        card_brand.text = cardBrands[card.brand] ?: card.brand
         card_number.text = getString(R.string.bank_card_number, card.last4)
     }
 
@@ -186,6 +200,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun enableButton(enable: Boolean) {
         btn_set_default.isEnabled = enable
+        default_bank_card.isEnabled = enable
     }
 
     companion object {
