@@ -178,7 +178,6 @@ data class Account(
 
         val (_, body) = fetch
                 .noCache()
-                .setClient()
                 .responseApi()
 
         return if (body == null) {
