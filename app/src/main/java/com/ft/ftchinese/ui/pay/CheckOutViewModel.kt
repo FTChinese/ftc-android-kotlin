@@ -20,7 +20,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
     val inputEnabled = MutableLiveData<Boolean>()
     val wxOrderResult = MutableLiveData<WxOrderResult>()
     val aliOrderResult = MutableLiveData<AliOrderResult>()
-    val clientSecretResult = MutableLiveData<StringResult>()
+//    val clientSecretResult = MutableLiveData<StringResult>()
     val stripePlanResult = MutableLiveData<StripePlanResult>()
 
     val upgradePreviewResult = MutableLiveData<UpgradePreviewResult>()
@@ -192,22 +192,22 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun createPaymentIntent(account: Account, orderId: String) {
-        viewModelScope.launch {
-            try {
-                val secret = withContext(Dispatchers.IO) {
-                    account.createPaymentIntent(orderId)
-                }
-
-                clientSecretResult.value = StringResult(
-                        success = secret
-                )
-
-            } catch (e: Exception) {
-                clientSecretResult.value = StringResult(
-                        exception = e
-                )
-            }
-        }
-    }
+//    fun createPaymentIntent(account: Account, orderId: String) {
+//        viewModelScope.launch {
+//            try {
+//                val secret = withContext(Dispatchers.IO) {
+//                    account.createPaymentIntent(orderId)
+//                }
+//
+//                clientSecretResult.value = StringResult(
+//                        success = secret
+//                )
+//
+//            } catch (e: Exception) {
+//                clientSecretResult.value = StringResult(
+//                        exception = e
+//                )
+//            }
+//        }
+//    }
 }
