@@ -34,7 +34,6 @@ class MemberActivity : ScopedAppActivity(),
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
-//    private lateinit var viewAdapter: RowAdapter
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
 
@@ -108,8 +107,6 @@ class MemberActivity : ScopedAppActivity(),
 
             sessionManager.saveAccount(accountResult.success)
 
-//            updateUI(accountResult.success)
-
             initUI()
         })
 
@@ -121,6 +118,8 @@ class MemberActivity : ScopedAppActivity(),
         resubscribe_btn.isEnabled = true
         renew_btn.isEnabled = true
         upgrade_btn.isEnabled = true
+
+        initUI()
     }
 
     private fun initUI() {
@@ -139,15 +138,7 @@ class MemberActivity : ScopedAppActivity(),
             formatLocalDate(account.membership.expireDate)
         }
 
-//        viewAdapter = RowAdapter(buildRows(account))
-
-//        member_rv.apply {
-//            setHasFixedSize(true)
-//            layoutManager = LinearLayoutManager(this@MemberActivity)
-//            adapter = viewAdapter
-//        }
-
-//        showButton(account.membership)
+        hideButton()
         setupButtons(account.membership)
     }
 
@@ -171,7 +162,7 @@ class MemberActivity : ScopedAppActivity(),
             if (member.tier == Tier.STANDARD) {
                 upgrade_btn.visibility = View.VISIBLE
                 upgrade_btn.setOnClickListener {
-                    UpgradeActivity.start(this)
+                    UpgradeActivity.startForResult(this, RequestCode.PAYMENT)
                     it.isEnabled = false
                 }
             }
@@ -202,7 +193,7 @@ class MemberActivity : ScopedAppActivity(),
 
         if (member.payMethod == PayMethod.STRIPE) {
             if (member.isExpired) {
-                if (member.autoRenew) {
+                if (member.autoRenew == true) {
                     // TODO: data is stale. Refresh.
                     return
                 }
@@ -216,83 +207,18 @@ class MemberActivity : ScopedAppActivity(),
             // Switch plan.
             upgrade_btn.setOnClickListener {
                 SubscriptionActivity.start(this, subsPlans.of(Tier.PREMIUM, Cycle.YEAR))
-
                 it.isEnabled = false
             }
         }
     }
 
     // Hide all buttons on create.
-//    private fun hideButton() {
-//        resubscribe_btn.visibility = View.GONE
-//        renew_btn.visibility = View.GONE
-//        upgrade_btn.visibility = View.GONE
-//    }
+    private fun hideButton() {
+        resubscribe_btn.visibility = View.GONE
+        renew_btn.visibility = View.GONE
+        upgrade_btn.visibility = View.GONE
+    }
 
-//    private fun showButton(m: Membership) {
-//        hideButton()
-//
-//        when (m.getStatus()) {
-//            MemberStatus.INVALID -> {
-//                resubscribe_btn.visibility = View.VISIBLE
-//            }
-//            MemberStatus.EXPIRED -> {
-//                resubscribe_btn.visibility = View.VISIBLE
-//            }
-//            MemberStatus.RENEWABLE -> {
-//                renew_btn.visibility = View.VISIBLE
-//                upgrade_btn.visibility = if (m.allowUpgrade())
-//                    View.VISIBLE
-//                else View.GONE
-//
-//            }
-//            MemberStatus.BEYOND_RENEW -> {
-//                upgrade_btn.visibility = if (m.allowUpgrade())
-//                    View.VISIBLE
-//                else View.GONE
-//            }
-//        }
-//    }
-
-//    private fun buildRows(account: Account): Array<TableRow> {
-//
-//        val tierText = when (account.membership.tier) {
-//            Tier.STANDARD -> getString(R.string.tier_standard)
-//            Tier.PREMIUM -> getString(R.string.tier_premium)
-//            else -> if (account.isVip) getString(R.string.tier_vip) else getString(R.string.tier_free)
-//
-//        }
-//
-//        val endDateText = if (account.isVip) {
-//            getString(R.string.cycle_vip)
-//        } else {
-//            formatLocalDate(account.membership.expireDate)
-//        }
-//
-//        val row1 = TableRow(
-//                header = getString(R.string.label_member_tier),
-//                data = tierText,
-//                isBold = true
-//        )
-//
-//        val row2 = TableRow(
-//                header = getString(R.string.label_member_duration),
-//
-//                data = endDateText ?: "",
-//                color = ContextCompat.getColor(this, R.color.colorClaret)
-//        )
-//
-//        return arrayOf(row1, row2)
-//    }
-
-//    private fun updateUI(account: Account) {
-//        val rows = buildRows(account)
-
-//        viewAdapter.refreshData(rows)
-//        viewAdapter.notifyDataSetChanged()
-
-//        showButton(account.membership)
-//    }
 
     /**
      * After [CheckOutActivity] finished, it sends activity result here.
@@ -311,7 +237,7 @@ class MemberActivity : ScopedAppActivity(),
                     return
                 }
 
-                finish()
+//                finish()
             }
         }
     }
