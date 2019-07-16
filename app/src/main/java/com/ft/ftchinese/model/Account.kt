@@ -225,7 +225,7 @@ data class Account(
         }
     }
 
-    fun getOrders(): List<Subscription> {
+    fun getOrders(): List<Order> {
         val fetch = Fetch().get(NextApi.ORDERS)
 
         if (id.isNotBlank()) {
