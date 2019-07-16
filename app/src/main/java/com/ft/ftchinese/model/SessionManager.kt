@@ -3,6 +3,7 @@ package com.ft.ftchinese.model
 import android.content.Context
 import androidx.core.content.edit
 import com.ft.ftchinese.model.order.Cycle
+import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.util.formatISODateTime
 import com.ft.ftchinese.util.formatLocalDate
@@ -22,9 +23,12 @@ private const val PREF_AVATAR_URL = "avatar_url"
 private const val PREF_IS_VIP = "is_vip"
 private const val PREF_WX_NICKNAME = "nickname"
 private const val PREF_WX_AVATAR = "wx_avatar_url"
+private const val PREF_MEMBER_ID = "member_id"
 private const val PREF_MEMBER_TIER = "member_tier"
 private const val PREF_MEMBER_CYCLE = "member_billing_cycle"
 private const val PREF_MEMBER_EXPIRE = "member_expire"
+private const val PREF_PAY_METHOD = "payment_method"
+private const val PREF_AUTO_RENEW = "auto_renew"
 private const val PREF_IS_LOGGED_IN = "is_logged_in"
 private const val PREF_LOGIN_METHOD = "login_method"
 
@@ -49,9 +53,12 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
             putBoolean(PREF_IS_VIP, account.isVip)
             putString(PREF_WX_NICKNAME, account.wechat.nickname)
             putString(PREF_WX_AVATAR, account.wechat.avatarUrl)
-            putString(PREF_MEMBER_TIER, account.membership.tier?.string())
-            putString(PREF_MEMBER_CYCLE, account.membership.cycle?.string())
+            putString(PREF_MEMBER_ID, account.membership.id)
+            putString(PREF_MEMBER_TIER, account.membership.tier?.toString())
+            putString(PREF_MEMBER_CYCLE, account.membership.cycle?.toString())
             putString(PREF_MEMBER_EXPIRE, formatLocalDate(account.membership.expireDate))
+            putString(PREF_PAY_METHOD, account.membership.payMethod.toString())
+            putBoolean(PREF_AUTO_RENEW, account.membership.autoRenew ?: false)
             putString(PREF_LOGIN_METHOD, account.loginMethod?.string())
             putBoolean(PREF_IS_LOGGED_IN, true)
         }
@@ -59,9 +66,11 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
 
     fun updateMembership(member: Membership) {
         sharedPreferences.edit {
-            putString(PREF_MEMBER_TIER, member.tier?.string())
-            putString(PREF_MEMBER_CYCLE, member.cycle?.string())
+            putString(PREF_MEMBER_TIER, member.tier?.toString())
+            putString(PREF_MEMBER_CYCLE, member.cycle?.toString())
             putString(PREF_MEMBER_EXPIRE, formatLocalDate(member.expireDate))
+            putString(PREF_PAY_METHOD, member.payMethod.toString())
+            putBoolean(PREF_AUTO_RENEW, member.autoRenew ?: false)
         }
     }
 
@@ -74,21 +83,25 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         val isVerified = sharedPreferences.getBoolean(PREF_IS_VERIFIED, false)
         val avatarUrl = sharedPreferences.getString(PREF_AVATAR_URL, null)
         val isVip = sharedPreferences.getBoolean(PREF_IS_VIP, false)
+        val loginMethod = sharedPreferences.getString(PREF_LOGIN_METHOD, null)
 
         val wxNickname = sharedPreferences.getString(PREF_WX_NICKNAME, null)
         val wxAvatar = sharedPreferences.getString(PREF_WX_AVATAR, null)
 
+        val mID = sharedPreferences.getString(PREF_MEMBER_ID, null)
         val tier = sharedPreferences.getString(PREF_MEMBER_TIER, null)
         val cycle = sharedPreferences.getString(PREF_MEMBER_CYCLE, null)
         val expireDate = sharedPreferences.getString(PREF_MEMBER_EXPIRE, null)
-
-        val loginMethod = sharedPreferences.getString(PREF_LOGIN_METHOD, null)
-
+        val payMethod = sharedPreferences.getString(PREF_PAY_METHOD, null)
+        val autoRenew = sharedPreferences.getBoolean(PREF_AUTO_RENEW, false)
 
         val membership = Membership(
+                id = mID,
                 tier = Tier.fromString(tier),
                 cycle = Cycle.fromString(cycle),
-                expireDate = parseLocalDate(expireDate)
+                expireDate = parseLocalDate(expireDate),
+                payMethod = PayMethod.fromString(payMethod),
+                autoRenew = autoRenew
         )
 
         val wechat = Wechat(
@@ -105,9 +118,9 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
                 isVerified = isVerified,
                 avatarUrl = avatarUrl,
                 isVip = isVip,
+                loginMethod = LoginMethod.fromString(loginMethod),
                 wechat = wechat,
-                membership = membership,
-                loginMethod = LoginMethod.fromString(loginMethod)
+                membership = membership
         )
     }
 
