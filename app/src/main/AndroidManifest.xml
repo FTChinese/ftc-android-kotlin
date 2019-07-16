@@ -127,10 +127,6 @@
             android:label="@string/title_checkout"
             android:parentActivityName=".ui.pay.PaywallActivity" />
         <activity
-            android:name=".ui.pay.PaymentSessionActivity"
-            android:label="@string/pay_method_stripe"
-            android:parentActivityName=".ui.pay.CheckOutActivity" />
-        <activity
             android:name=".ui.pay.SubscriptionActivity"
             android:label="@string/pay_method_stripe"
             android:parentActivityName=".ui.pay.CheckOutActivity"/>
