@@ -38,7 +38,11 @@ data class Membership(
     }
 
     // Determine how user is using CheckOutActivity.
-    fun subType(plan: Plan): OrderUsage? {
+    fun subType(plan: Plan?): OrderUsage? {
+        if (plan == null) {
+            return null
+        }
+
         if (tier == null) {
             return OrderUsage.CREATE
         }
@@ -104,21 +108,6 @@ data class Membership(
 
         return expireDate.isBefore(threeYearsLater)
     }
-
-//    fun getStatus(): MemberStatus {
-//        if (expireDate == null) {
-//            return MemberStatus.INVALID
-//        }
-//
-//        val today = LocalDate.now()
-//        val threeYearsLater = today.plusYears(3)
-//
-//        return when {
-//            expireDate.isBefore(today) -> MemberStatus.EXPIRED
-//            expireDate.isBefore(threeYearsLater) -> MemberStatus.RENEWABLE
-//            else -> MemberStatus.BEYOND_RENEW
-//        }
-//    }
 
     /**
      * Only when user's current tier is standard should
