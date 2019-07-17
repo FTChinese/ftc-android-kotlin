@@ -8,8 +8,9 @@ import org.threeten.bp.format.DateTimeFormatter
 import java.util.*
 
 private const val PREF_FILE_NAME = "stripe_pref"
-private const val PREF_KEY = "idempotency_key"
-private const val PREF_KEY_CREATED = "key_created_at"
+private const val PREF_KEY = "key"
+private const val PREF_CREATED = "created"
+private const val PREF_USAGE = "usage"
 
 data class Idempotency (
         val key: String,
@@ -29,12 +30,18 @@ data class Idempotency (
 class StripePref private constructor(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
 
-    fun getIdempotency(): Idempotency{
+    fun getKey(tier: Tier): Idempotency {
         val key = sharedPreferences.getString(PREF_KEY, null)
-        val created = sharedPreferences.getString(PREF_KEY_CREATED, null)
+        val created = sharedPreferences.getString(PREF_CREATED, null)
+        val usage = sharedPreferences.getString(PREF_USAGE, null)
 
-        if (key == null || created == null) {
-            return generateIdempotency()
+        if (key == null || created == null || usage == null) {
+            return generateIdempotency(tier)
+        }
+
+        val usageTier = Tier.fromString(usage)
+        if (usageTier != tier) {
+            return generateIdempotency(tier)
         }
 
         val i = Idempotency(
@@ -43,19 +50,21 @@ class StripePref private constructor(context: Context) {
         )
 
         if (i.stale()) {
-            return generateIdempotency()
+            return generateIdempotency(tier)
         }
 
         return i
     }
 
-    private fun generateIdempotency(): Idempotency {
+    private fun generateIdempotency(tier: Tier): Idempotency {
         val uuid = UUID.randomUUID().toString()
         val now = ZonedDateTime.now()
         sharedPreferences.edit {
             putString(PREF_KEY, uuid)
-            putString(PREF_KEY_CREATED, now.format(DateTimeFormatter.ISO_DATE_TIME))
+            putString(PREF_CREATED, now.format(DateTimeFormatter.ISO_DATE_TIME))
+            putString(PREF_USAGE, tier.toString())
         }
+
         return Idempotency(
                 key = uuid,
                 created = now
