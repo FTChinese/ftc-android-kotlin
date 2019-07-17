@@ -1,16 +1,21 @@
 package com.ft.ftchinese.model.order
 
-import com.beust.klaxon.Json
+import com.ft.ftchinese.util.KDateTime
+import com.ft.ftchinese.util.KStripeSubStatus
+import org.threeten.bp.ZonedDateTime
+
 
 data class StripeSub(
-        val id: String,
-        val created: Long,
-        @Json(name = "current_period_start")
-        val start: Long,
-        @Json(name = "current_period_end")
-        val end: Long,
-        val customer: String,
-        @Json(name = "days_until_due")
-        val daysUntilDue: Int,
-        val latestInvoice: StripeInvoice
+        val cancelAtPeriodEnd: Boolean,
+        @KDateTime
+        val created: ZonedDateTime,
+        @KDateTime
+        val currentPeriodEnd: ZonedDateTime,
+        @KDateTime
+        val currentPeriodStart: ZonedDateTime,
+        @KDateTime
+        val endedAt: ZonedDateTime? = null,
+        val latestInvoice: StripeInvoice,
+        @KStripeSubStatus
+        val status: StripeSubStatus?
 )

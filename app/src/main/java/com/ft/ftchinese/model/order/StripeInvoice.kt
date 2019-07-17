@@ -1,24 +1,20 @@
 package com.ft.ftchinese.model.order
 
-import com.beust.klaxon.Json
-import com.stripe.android.model.PaymentIntent
+import com.ft.ftchinese.util.KDateTime
+import com.ft.ftchinese.util.KPaymentIntentStatus
+import org.threeten.bp.ZonedDateTime
 
 data class StripeInvoice(
-        val id: String,
-        val amountDue: Int,
-        val amountPaid: Int,
-        val amountRemaining: Int,
-        val created: Long,
+        @KDateTime
+        val created: ZonedDateTime,
         val currency: String,
-        val customer: String,
-        val dueDate: Long? = null,
-        @Json(name = "invoice_pdf")
+        val hostedInvoiceUrl: String? = null,
         val invoicePdf: String? = null,
+        val number: String,
         val paid: Boolean,
-        @Json(name = "payment_intent")
-        val paymentIntent: PaymentIntent,
-        @Json(name = "receipt_number")
+        @KPaymentIntentStatus
+        val paymentIntentStatus: PaymentIntentStatus,
         val receiptNumber: String,
-        val status: String,
-        val total: Int
+        val status: String
 )
+
