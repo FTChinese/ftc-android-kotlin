@@ -96,8 +96,10 @@ class SubscriptionActivity : ScopedAppActivity(),
                 stripePref.getPlan(plan?.getId())
         )
 
+        val account = sessionManager.loadAccount() ?: return
+
         if (isNetworkConnected()) {
-            val account = sessionManager.loadAccount() ?: return
+
             checkOutViewModel.getStripePlan(account, plan)
         }
 
@@ -106,8 +108,18 @@ class SubscriptionActivity : ScopedAppActivity(),
                     .startForResult(RequestCode.SELECT_SOURCE)
         }
 
-        btn_subscribe.setOnClickListener {
-            onSubscribeButtonClicked()
+        when (account.membership.subType(plan)) {
+            OrderUsage.CREATE -> {
+                btn_subscribe.setOnClickListener {
+                    onNewSubscription()
+                }
+            }
+            OrderUsage.UPGRADE -> {
+                btn_subscribe.text = getString(R.string.title_upgrade)
+                btn_subscribe.setOnClickListener {
+                    onUpgradeSubscription()
+                }
+            }
         }
 
         enableButton(false)
@@ -194,7 +206,7 @@ class SubscriptionActivity : ScopedAppActivity(),
         stripePref.savePlan(plan?.getId(), result.success)
     }
 
-    private fun onSubscribeButtonClicked() {
+    private fun onNewSubscription() {
         val account = sessionManager.loadAccount() ?: return
         val p = plan ?: return
 
@@ -214,7 +226,7 @@ class SubscriptionActivity : ScopedAppActivity(),
             return
         }
 
-        val idempotency = stripePref.getIdempotency()
+        val idempotency = stripePref.getKey(p.tier)
 
         val subParams = StripeSubParams(
                 tier = p.tier,
@@ -252,7 +264,75 @@ class SubscriptionActivity : ScopedAppActivity(),
 
                 info("Stripe sub: $sub")
 
-                onSubscribed(sub.latestInvoice.paymentIntentStatus)
+                onSubscribed(sub.latestInvoice.paymentIntent.status)
+            } catch (e: Exception) {
+                info(e)
+
+                showProgress(false)
+                enableButton(true)
+                handleException(e)
+            }
+        }
+    }
+
+    private fun onUpgradeSubscription() {
+        val account = sessionManager.loadAccount() ?: return
+        val p = plan ?: return
+
+        if (account.stripeId == null) {
+            toast("You are not a stripe customer yet")
+            return
+        }
+
+        val pm = paymentMethod
+        if (pm == null) {
+            toast(R.string.prompt_pay_method_unknown)
+            return
+        }
+
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        val idempotency = stripePref.getKey(p.tier)
+
+        val subParams = StripeSubParams(
+                tier = p.tier,
+                cycle = p.cycle,
+                customer = account.stripeId,
+                defaultPaymentMethod = pm.id,
+                idempotency = idempotency.key
+        )
+
+        showProgress(true)
+        enableButton(false)
+
+        toast("Creating subscription...")
+
+        launch {
+
+            try {
+                val sub = withContext(Dispatchers.IO) {
+                    account.upgradeStripeSub(subParams)
+                }
+
+                info("Upgrade result: $sub")
+
+
+                if (sub == null) {
+                    toast("Upgrade failed")
+                    showProgress(false)
+                    enableButton(true)
+                    return@launch
+                }
+
+
+                toast("Received response")
+
+                info("Stripe sub: $sub")
+
+                onSubscribed(sub.latestInvoice.paymentIntent.status)
             } catch (e: Exception) {
                 info(e)
 
