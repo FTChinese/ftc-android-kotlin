@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.pay
 
 import android.app.Activity
 import android.content.Context
@@ -20,11 +20,14 @@ import com.ft.ftchinese.model.order.Cycle
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.model.order.subsPlans
-import com.ft.ftchinese.ui.pay.*
+import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.formatLocalDate
 import kotlinx.android.synthetic.main.activity_member.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -60,6 +63,32 @@ class MemberActivity : ScopedAppActivity(),
             toast("Your account data not found!")
             return
         }
+
+
+        if (account.membership.payMethod == PayMethod.STRIPE) {
+            toast("Refresh stripe subscription")
+
+            launch {
+                try {
+                    val stripeSub = withContext(Dispatchers.IO) {
+                        account.refreshStripeSub()
+                    }
+
+                    if (stripeSub == null) {
+                        toast("Failed to refresh stripe subscription")
+                        return@launch
+                    }
+
+                    toast(R.string.prompt_refreshing)
+                    accountViewModel.refresh(account)
+                } catch (e: Exception) {
+                    handleException(e)
+                }
+            }
+
+            return
+        }
+
 
         toast(R.string.prompt_refreshing)
 
