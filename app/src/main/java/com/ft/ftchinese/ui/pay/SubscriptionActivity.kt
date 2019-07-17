@@ -15,11 +15,12 @@ import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
+import com.ft.ftchinese.ui.account.AccountViewModel
+import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
 import com.stripe.android.*
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import kotlinx.android.synthetic.main.activity_subscription.*
@@ -40,6 +41,7 @@ class SubscriptionActivity : ScopedAppActivity(),
 
     private lateinit var sessionManager: SessionManager
     private lateinit var checkOutViewModel: CheckOutViewModel
+    private lateinit var accountViewModel: AccountViewModel
     private lateinit var stripePref: StripePref
     private lateinit var stripe: Stripe
 
@@ -60,8 +62,15 @@ class SubscriptionActivity : ScopedAppActivity(),
         checkOutViewModel = ViewModelProviders.of(this)
                 .get(CheckOutViewModel::class.java)
 
+        accountViewModel = ViewModelProviders.of(this)
+                .get(AccountViewModel::class.java)
+
         checkOutViewModel.stripePlanResult.observe(this, Observer {
             onStripePlanFetched(it)
+        })
+
+        accountViewModel.accountRefreshed.observe(this, Observer {
+            onAccountRefreshed(it)
         })
 
         stripePref = StripePref.getInstance(this)
@@ -228,18 +237,25 @@ class SubscriptionActivity : ScopedAppActivity(),
                 }
 
                 info("Subscription result: $sub")
-                toast("Subscription done")
-                showProgress(false)
+
+
 
                 if (sub == null) {
                     toast("Subscription failed")
+                    showProgress(false)
                     enableButton(true)
                     return@launch
                 }
 
 
-                onSubscribed(sub.latestInvoice.paymentIntent.status)
+                toast("Received response")
+
+                info("Stripe sub: $sub")
+
+                onSubscribed(sub.latestInvoice.paymentIntentStatus)
             } catch (e: Exception) {
+                info(e)
+
                 showProgress(false)
                 enableButton(true)
                 handleException(e)
@@ -247,18 +263,76 @@ class SubscriptionActivity : ScopedAppActivity(),
         }
     }
 
-    private fun onSubscribed(status: StripeIntent.Status?) {
+    private fun onSubscribed(status: PaymentIntentStatus?) {
         when (status) {
-            StripeIntent.Status.Canceled -> {
-                toast("Canceled")
+            PaymentIntentStatus.RequiresPaymentMethod -> {
+                toast("Requires payment method")
             }
-            StripeIntent.Status.Processing -> {
+            PaymentIntentStatus.RequiresConfirmation -> {
+                toast("Requires confirmation")
+            }
+            PaymentIntentStatus.RequiresAction -> {
+                toast("Requires action")
+            }
+            PaymentIntentStatus.Processing -> {
                 toast("Processing")
             }
-            StripeIntent.Status.RequiresAction -> {
+            PaymentIntentStatus.RequiresCapture -> {
+                toast("Requires capture")
+            }
+            PaymentIntentStatus.Canceled -> {
+                toast("Canceled")
+            }
+            PaymentIntentStatus.Succeeded -> {
+                toast("Success")
+                showProgress(false)
+                enableButton(true)
+                val account = sessionManager.loadAccount() ?: return
+                toast(R.string.prompt_refreshing)
 
+//                accountViewModel.refresh(account)
             }
         }
+    }
+
+    private fun onAccountRefreshed(accountResult: AccountResult?) {
+        showProgress(false)
+        if (accountResult == null) {
+            return
+        }
+
+        if (accountResult.error != null) {
+            toast(accountResult.error)
+            return
+        }
+
+        if (accountResult.exception != null) {
+            handleException(accountResult.exception)
+            return
+        }
+
+
+        if (accountResult.success == null) {
+            toast(R.string.order_not_found)
+            return
+        }
+
+        val localAccount = sessionManager.loadAccount() ?: return
+        toast(R.string.prompt_updated)
+
+        val remoteAccount = accountResult.success
+        /**
+         * If remote membership is newer than local
+         * one, save remote data; otherwise do
+         * nothing in case server notification comes
+         * late.
+         */
+        if (remoteAccount.membership.isNewer(localAccount.membership)) {
+            sessionManager.saveAccount(remoteAccount)
+        }
+
+        setResult(Activity.RESULT_OK)
+        finish()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
