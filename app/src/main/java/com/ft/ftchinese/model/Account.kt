@@ -327,38 +327,7 @@ data class Account(
         }
     }
 
-    fun getStripePlan(id: String): StripePlan? {
-        val (_, body) = Fetch()
-                .get("${SubscribeApi.STRIPE_PLAN}/$id")
-                .setUserId(id)
-                .responseApi()
 
-        return if (body == null) {
-            return null
-        } else {
-            json.parse<StripePlan>(body)
-        }
-    }
-
-    fun createSubscription(params: StripeSubParams): StripeSub? {
-
-        val (_, body ) = Fetch()
-                .post(SubscribeApi.STRIPE_SUB)
-                .setUserId(id)
-                .noCache()
-                .jsonBody(json.toJsonString(params))
-                .responseApi()
-
-        if (body == null) {
-            return null
-        }
-
-        return try {
-            json.parse<StripeSub>(body)
-        } catch (e: Exception) {
-            null
-        }
-    }
 
     fun createCustomer(): String? {
         val (_, body) = Fetch()
@@ -399,26 +368,84 @@ data class Account(
         return body
     }
 
-    fun createPaymentIntent(orderId: String): String? {
+    fun getStripePlan(id: String): StripePlan? {
         val (_, body) = Fetch()
-                .post("${SubscribeApi.STRIPE_PAY_INTENT}")
+                .get("${SubscribeApi.STRIPE_PLAN}/$id")
                 .setUserId(id)
-                .noCache()
-                .jsonBody(Klaxon().toJsonString(mapOf(
-                        "orderId" to orderId
-                )))
                 .responseApi()
 
-        if (body == null) {
+        return if (body == null) {
             return null
-        }
-
-        return try {
-            JSONObject(body).getString("secret")
-        } catch (e: JSONException) {
-            null
+        } else {
+            json.parse<StripePlan>(body)
         }
     }
+
+    fun createSubscription(params: StripeSubParams): StripeSub? {
+
+        val (_, body ) = Fetch()
+                .post(SubscribeApi.STRIPE_SUB)
+                .setUserId(id)
+                .noCache()
+                .jsonBody(json.toJsonString(params))
+                .responseApi()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<StripeSub>(body)
+        }
+    }
+
+    fun refreshStripeSub(): StripeSub? {
+        val (_, body) = Fetch()
+                .get(SubscribeApi.STRIPE_SUB)
+                .setUserId(id)
+                .noCache()
+                .responseApi()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse(body)
+        }
+    }
+
+    fun upgradeStripeSub(params: StripeSubParams): StripeSub? {
+        val (_, body) = Fetch()
+                .patch(SubscribeApi.STRIPE_SUB)
+                .setUserId(id)
+                .noCache()
+                .jsonBody(json.toJsonString(params))
+                .responseApi()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse(body)
+        }
+    }
+
+//    fun createPaymentIntent(orderId: String): String? {
+//        val (_, body) = Fetch()
+//                .post("${SubscribeApi.STRIPE_PAY_INTENT}")
+//                .setUserId(id)
+//                .noCache()
+//                .jsonBody(Klaxon().toJsonString(mapOf(
+//                        "orderId" to orderId
+//                )))
+//                .responseApi()
+//
+//        if (body == null) {
+//            return null
+//        }
+//
+//        return try {
+//            JSONObject(body).getString("secret")
+//        } catch (e: JSONException) {
+//            null
+//        }
+//    }
 
     fun starArticle(articleId: String): Boolean {
 
