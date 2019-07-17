@@ -13,7 +13,7 @@ import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.OrderManager
 import com.ft.ftchinese.model.order.Subscription
-import com.ft.ftchinese.ui.account.MemberActivity
+import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.util.*
 import com.tencent.mm.opensdk.constants.ConstantsAPI

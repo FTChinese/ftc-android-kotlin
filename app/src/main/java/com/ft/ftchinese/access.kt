@@ -4,7 +4,7 @@ import android.app.Activity
 import com.ft.ftchinese.model.Account
 import com.ft.ftchinese.model.Permission
 import com.ft.ftchinese.ui.login.LoginActivity
-import com.ft.ftchinese.ui.account.MemberActivity
+import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.pay.UpgradeActivity
 import com.ft.ftchinese.util.RequestCode
