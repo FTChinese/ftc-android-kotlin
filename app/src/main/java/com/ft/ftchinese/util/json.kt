@@ -4,10 +4,7 @@ import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.model.order.Cycle
-import com.ft.ftchinese.model.order.OrderUsage
-import com.ft.ftchinese.model.order.PayMethod
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.order.*
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZoneOffset
 import org.threeten.bp.ZonedDateTime
@@ -37,6 +34,12 @@ annotation class KUnlinkAnchor
 
 @Target(AnnotationTarget.FIELD)
 annotation class KOrderUsage
+
+@Target(AnnotationTarget.FIELD)
+annotation class KStripeSubStatus
+
+@Target(AnnotationTarget.FIELD)
+annotation class KPaymentIntentStatus
 
 val dateConverter = object : Converter {
     override fun canConvert(cls: Class<*>): Boolean {
@@ -203,6 +206,43 @@ val unlinkAnchorConverter = object : Converter {
     }
 }
 
+val stripeSubStatusConverter = object : Converter {
+    override fun canConvert(cls: Class<*>): Boolean {
+        return cls == StripeSubStatus::class.java
+    }
+
+    override fun fromJson(jv: JsonValue): Any? {
+        return StripeSubStatus.fromString(jv.string)
+    }
+
+    override fun toJson(value: Any): String {
+        return if (value is StripeSubStatus) {
+            """ "$value" """
+        } else {
+            """null"""
+        }
+    }
+}
+
+val paymentIntentStatusConverter = object : Converter
+{
+    override fun canConvert(cls: Class<*>): Boolean {
+        return cls == PaymentIntentStatus::class.java
+    }
+
+    override fun fromJson(jv: JsonValue): Any? {
+        return PaymentIntentStatus.fromString(jv.string)
+    }
+
+    override fun toJson(value: Any): String {
+        return if (value is PaymentIntentStatus) {
+            """ "$value" """
+        } else {
+            """null"""
+        }
+    }
+}
+
 val json = Klaxon()
         .fieldConverter(KDate::class, dateConverter)
         .fieldConverter(KDateTime::class, dateTimeConverter)
@@ -212,3 +252,5 @@ val json = Klaxon()
         .fieldConverter(KPayMethod::class, payMethodConverter)
         .fieldConverter(KLoginMethod::class, loginMethodConverter)
         .fieldConverter(KUnlinkAnchor::class, unlinkAnchorConverter)
+        .fieldConverter(KStripeSubStatus::class, stripeSubStatusConverter)
+        .fieldConverter(KPaymentIntentStatus::class, paymentIntentStatusConverter)
