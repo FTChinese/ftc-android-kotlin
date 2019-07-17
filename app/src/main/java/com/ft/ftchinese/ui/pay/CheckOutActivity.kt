@@ -338,7 +338,6 @@ class CheckOutActivity : ScopedAppActivity(),
 
         val plan = this.plan ?: return
 
-        // TODO: unify API output.
         // It might be better if API sends back all
         // data of an order, plus payment provider's
         // specific data.
