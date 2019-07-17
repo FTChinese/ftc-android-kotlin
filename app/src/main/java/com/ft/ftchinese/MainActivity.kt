@@ -25,7 +25,7 @@ import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
-import com.ft.ftchinese.ui.account.MemberActivity
+import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.channel.MyftPagerAdapter
 import com.ft.ftchinese.ui.channel.SearchableActivity
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
