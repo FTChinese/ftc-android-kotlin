@@ -53,12 +53,11 @@
             android:title="@string/action_download_app"/>
     </group>
 
-    <!--<group-->
-        <!--android:id="@+id/drawer_group3"-->
-        <!--android:checkableBehavior="single">-->
-        <!--<item-->
-            <!--android:id="@+id/action_logout"-->
-            <!--android:icon="@drawable/ic_exit_to_app_black_24dp"-->
-            <!--android:title="@string/action_logout" />-->
-    <!--</group>-->
+    <group
+        android:id="@+id/drawer_group3"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/action_test"
+            android:title="Test" />
+    </group>
 </menu>
