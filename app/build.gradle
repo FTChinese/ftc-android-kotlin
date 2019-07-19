@@ -150,7 +150,6 @@ dependencies {
     implementation 'com.stripe:stripe-android:9.3.5'
 
 
-
     // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
 
