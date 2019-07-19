@@ -152,6 +152,11 @@
     <string name="set_default_payment_method">设为默认支付方式</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
     <string name="stripe_customer_not_found">Stripe用户不存在，请检查账号或者重新登陆</string>
+    <string name="outcome_invoice_number">发票 %1$s</string>
+    <string name="outcome_plan">会员类型 %1$s</string>
+    <string name="outcome_period">订阅周期 %1$s</string>
+    <string name="outcome_sub_status">订阅状态 %1$s</string>
+    <string name="outcome_payment_status">支付状态 %1$s</string>
 
     <string name="check_out_default">支付</string>
     <string name="request_order">创建订单&#8230;</string>
@@ -369,6 +374,4 @@
         <item>tc</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
