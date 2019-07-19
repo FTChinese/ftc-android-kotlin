@@ -19,6 +19,8 @@
         android:supportsRtl="true"
         android:theme="@style/Origami"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".ui.TestActivity"></activity>
+        <activity android:name=".ui.pay.PaymentResultActivity" />
 
         <service
             android:name=".NewsMessagingService"
@@ -85,11 +87,10 @@
             android:label="@string/title_account"
             android:parentActivityName=".MainActivity"
             android:windowSoftInputMode="adjustResize" />
-
         <activity
             android:name=".ui.account.CustomerActivity"
             android:label="@string/title_stripe_setting"
-            android:parentActivityName=".ui.account.AccountActivity"/>
+            android:parentActivityName=".ui.account.AccountActivity" />
         <activity
             android:name=".ui.account.LinkActivity"
             android:label="@string/title_link_email"
@@ -129,7 +130,19 @@
         <activity
             android:name=".ui.pay.SubscriptionActivity"
             android:label="@string/pay_method_stripe"
-            android:parentActivityName=".ui.pay.CheckOutActivity"/>
+            android:launchMode="singleTask"
+            android:parentActivityName=".ui.pay.CheckOutActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="stripe-post-authentication-return-url"
+                    android:scheme="ftc" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ui.pay.MyOrdersActivity"
             android:label="@string/title_my_orders"
