@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.core.content.edit
 import com.ft.ftchinese.model.order.Cycle
 import com.ft.ftchinese.model.order.PayMethod
+import com.ft.ftchinese.model.order.StripeSubStatus
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.util.formatISODateTime
 import com.ft.ftchinese.util.formatLocalDate
@@ -29,6 +30,7 @@ private const val PREF_MEMBER_CYCLE = "member_billing_cycle"
 private const val PREF_MEMBER_EXPIRE = "member_expire"
 private const val PREF_PAY_METHOD = "payment_method"
 private const val PREF_AUTO_RENEW = "auto_renew"
+private const val PREF_SUB_STATUS = "subscription_status"
 private const val PREF_IS_LOGGED_IN = "is_logged_in"
 private const val PREF_LOGIN_METHOD = "login_method"
 
@@ -59,6 +61,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
             putString(PREF_MEMBER_EXPIRE, formatLocalDate(account.membership.expireDate))
             putString(PREF_PAY_METHOD, account.membership.payMethod.toString())
             putBoolean(PREF_AUTO_RENEW, account.membership.autoRenew ?: false)
+            putString(PREF_SUB_STATUS, account.membership.status.toString())
             putString(PREF_LOGIN_METHOD, account.loginMethod?.string())
             putBoolean(PREF_IS_LOGGED_IN, true)
         }
@@ -71,6 +74,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
             putString(PREF_MEMBER_EXPIRE, formatLocalDate(member.expireDate))
             putString(PREF_PAY_METHOD, member.payMethod.toString())
             putBoolean(PREF_AUTO_RENEW, member.autoRenew ?: false)
+            putString(PREF_SUB_STATUS, member.status.toString())
         }
     }
 
@@ -94,6 +98,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         val expireDate = sharedPreferences.getString(PREF_MEMBER_EXPIRE, null)
         val payMethod = sharedPreferences.getString(PREF_PAY_METHOD, null)
         val autoRenew = sharedPreferences.getBoolean(PREF_AUTO_RENEW, false)
+        val status = sharedPreferences.getString(PREF_SUB_STATUS, null)
 
         val membership = Membership(
                 id = mID,
@@ -101,7 +106,8 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
                 cycle = Cycle.fromString(cycle),
                 expireDate = parseLocalDate(expireDate),
                 payMethod = PayMethod.fromString(payMethod),
-                autoRenew = autoRenew
+                autoRenew = autoRenew,
+                status = StripeSubStatus.fromString(status)
         )
 
         val wechat = Wechat(
