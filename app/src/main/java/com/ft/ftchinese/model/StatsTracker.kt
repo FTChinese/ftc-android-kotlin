@@ -58,7 +58,7 @@ class StatsTracker private constructor(context: Context) {
 
         tracker.send(HitBuilders.EventBuilder()
                 .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(plan.gaAddCartAction())
+                .setAction(plan.gaGAAction())
                 .setLabel(PaywallTracker.from?.label)
                 .build())
     }
@@ -79,35 +79,17 @@ class StatsTracker private constructor(context: Context) {
         })
     }
 
-    fun buySuccess(subs: Subscription) {
+    fun buySuccess(plan: Plan, payMethod: PayMethod?) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-            putDouble(FirebaseAnalytics.Param.VALUE, subs.netPrice)
-            putString(FirebaseAnalytics.Param.METHOD, subs.payMethod.string())
+            putDouble(FirebaseAnalytics.Param.VALUE, plan.netPrice)
+            putString(FirebaseAnalytics.Param.METHOD, payMethod?.string())
         })
 
-        val action = when(subs.tier) {
-            Tier.STANDARD -> GAAction.BUY_STANDARD_SUCCESS
-            Tier.PREMIUM -> GAAction.BUY_PREMIUM_SUCCESS
-        }
 
         tracker.send(HitBuilders.EventBuilder()
                 .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(action)
-                .setLabel(PaywallTracker.from?.label)
-                .build())
-    }
-
-    fun buyFail(tier: Tier) {
-        // Log buy success event
-        val action = when (tier) {
-            Tier.STANDARD -> GAAction.BUY_STANDARD_FAIL
-            Tier.PREMIUM -> GAAction.BUY_PREMIUM_FAIL
-        }
-
-        tracker.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(action)
+                .setAction(plan.gaGAAction())
                 .setLabel(PaywallTracker.from?.label)
                 .build())
     }
@@ -117,14 +99,9 @@ class StatsTracker private constructor(context: Context) {
             return
         }
 
-        val action = when (plan.tier) {
-            Tier.STANDARD -> GAAction.BUY_STANDARD_FAIL
-            Tier.PREMIUM -> GAAction.BUY_PREMIUM_FAIL
-        }
-
         tracker.send(HitBuilders.EventBuilder()
                 .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(action)
+                .setAction(plan.gaGAAction())
                 .setLabel(PaywallTracker.from?.label)
                 .build())
     }
