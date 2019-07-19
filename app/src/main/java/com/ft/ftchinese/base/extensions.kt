@@ -12,7 +12,7 @@ import com.ft.ftchinese.model.order.Cycle
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.NetworkException
-import org.jetbrains.anko.toast
+import org.jetbrains.anko.alert
 import java.io.IOException
 
 fun Activity.getActiveNetworkInfo(): NetworkInfo? {
@@ -127,52 +127,56 @@ fun Activity.handleApiError(resp: ClientError) {
     // Here handles 422 response.
     // Currently only 422's response has `error` field.
     if (resp.error != null) {
-        when (resp.error.key) {
-            "email_already_exists" -> toast(R.string.api_email_taken)
-            "email_invalid" -> toast(R.string.error_invalid_email)
-            "password_invalid" -> toast(R.string.error_invalid_password)
-            "email_server_missing" -> toast(R.string.api_email_server_down)
-            "userName_already_exists" -> toast(R.string.api_name_taken)
-            "membership_already_upgraded" -> toast(R.string.api_already_premium)
-            else -> toast(resp.message)
+        val msg = when (resp.error.key) {
+            "email_already_exists" -> getString(R.string.api_email_taken)
+            "email_invalid" -> getString(R.string.error_invalid_email)
+            "password_invalid" -> getString(R.string.error_invalid_password)
+            "email_server_missing" -> getString(R.string.api_email_server_down)
+            "userName_already_exists" -> getString(R.string.api_name_taken)
+            "membership_already_upgraded" -> getString(R.string.api_already_premium)
+            else -> resp.message
         }
+        alert(msg, "Error").show()
         return
     }
 
-    when (resp.statusCode) {
+    val msg = when (resp.statusCode) {
         400 -> {
-            toast(R.string.api_bad_request)
+            getString(R.string.api_bad_request)
         }
         // If request header does not contain X-User-Id
         401 -> {
-            toast(R.string.api_unauthorized)
+            getString(R.string.api_unauthorized)
         }
         429 -> {
-            toast(R.string.api_too_many_request)
+            getString(R.string.api_too_many_request)
         }
         // All other errors are treated as server error.
         else -> {
-            toast(R.string.api_server_error)
+            getString(R.string.api_server_error)
         }
     }
+
+    alert(msg, "Error").show()
 }
 
 fun Activity.handleException(e: Exception) {
-    e.printStackTrace()
-    when (e) {
+    val msg = when (e) {
         is IllegalStateException -> {
-            toast(R.string.api_empty_url)
+            getString(R.string.api_empty_url)
         }
         is NetworkException -> {
-            toast(R.string.api_network_failure)
+            getString(R.string.api_network_failure)
         }
         is IOException -> {
-            toast(R.string.api_io_error)
+           getString(R.string.api_io_error)
         }
         else -> {
-            toast(e.toString())
+            e.toString()
         }
     }
+
+    alert(msg, "Error").show()
 }
 
 /**
