@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.Account
 import com.ft.ftchinese.model.order.Plan
-import com.ft.ftchinese.ui.StringResult
+import com.ft.ftchinese.model.order.StripeSubParams
 import com.ft.ftchinese.util.ClientError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,6 +22,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
     val aliOrderResult = MutableLiveData<AliOrderResult>()
 //    val clientSecretResult = MutableLiveData<StringResult>()
     val stripePlanResult = MutableLiveData<StripePlanResult>()
+    val stripeSubResult = MutableLiveData<StripeSubResult>()
 
     val upgradePreviewResult = MutableLiveData<UpgradePreviewResult>()
     val freeUpgradeResult = MutableLiveData<UpgradeResult>()
@@ -186,6 +187,66 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
 
             } catch (e: Exception) {
                 stripePlanResult.value = StripePlanResult(
+                        exception = e
+                )
+            }
+        }
+    }
+
+    fun createStripeSub(account: Account, params: StripeSubParams) {
+        viewModelScope.launch {
+            try {
+                val sub = withContext(Dispatchers.IO) {
+                    account.createSubscription(params)
+                }
+
+                stripeSubResult.value = StripeSubResult(
+                        success = sub
+                )
+            } catch (e: Exception) {
+                stripeSubResult.value = StripeSubResult(
+                        exception = e
+                )
+            }
+        }
+    }
+
+    fun upgradeStripeSub(account: Account, params: StripeSubParams) {
+        viewModelScope.launch {
+            try {
+                val sub = withContext(Dispatchers.IO) {
+                    account.upgradeStripeSub(params)
+                }
+
+                stripeSubResult.value = StripeSubResult(
+                        success = sub
+                )
+            } catch (e: Exception) {
+                stripeSubResult.value = StripeSubResult(
+                        exception = e
+                )
+            }
+        }
+    }
+
+    fun refreshStripeSub(account: Account) {
+        viewModelScope.launch {
+            try {
+
+            } catch (e: ClientError) {
+                if (e.statusCode == 404) {
+                    stripeSubResult.value = StripeSubResult(
+                            success = null
+                    )
+
+                    return@launch
+                }
+
+                stripeSubResult.value = StripeSubResult(
+                        exception = e
+                )
+            } catch (e: Exception) {
+                stripeSubResult.value = StripeSubResult(
                         exception = e
                 )
             }
