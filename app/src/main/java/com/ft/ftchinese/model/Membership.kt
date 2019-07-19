@@ -2,10 +2,7 @@ package com.ft.ftchinese.model
 
 import android.os.Parcelable
 import com.ft.ftchinese.model.order.*
-import com.ft.ftchinese.util.KCycle
-import com.ft.ftchinese.util.KDate
-import com.ft.ftchinese.util.KPayMethod
-import com.ft.ftchinese.util.KTier
+import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.Parcelize
 import org.threeten.bp.LocalDate
 
@@ -21,7 +18,9 @@ data class Membership(
         val expireDate: LocalDate? = null,
         @KPayMethod
         val payMethod: PayMethod? = null,
-        val autoRenew: Boolean? = false
+        val autoRenew: Boolean? = false,
+        @KStripeSubStatus
+        val status: StripeSubStatus? = null
 ) : Parcelable {
     /**
      * Check if membership is expired.
