@@ -30,6 +30,7 @@
         android:text="@string/select_or_add_card" />
 
     <TextView
+        android:id="@+id/price_footnote"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
