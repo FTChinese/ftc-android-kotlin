@@ -21,6 +21,7 @@ import com.ft.ftchinese.base.isActiveNetworkWifi
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.splash.SplashScreenManager
+import com.ft.ftchinese.ui.TestActivity
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.LoginActivity
@@ -244,6 +245,9 @@ class MainActivity : ScopedAppActivity(),
 
         checkWxSession()
 
+        drawer_nav.menu
+                .setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
+
 //        retrieveRegistrationToken()
     }
 
@@ -367,6 +371,10 @@ class MainActivity : ScopedAppActivity(),
                     if (intent.resolveActivity(packageManager) != null) {
                         startActivity(intent)
                     }
+                }
+
+                R.id.action_test -> {
+                    TestActivity.start(this)
                 }
             }
 
