@@ -1,10 +1,16 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
         <item name="colorPrimary">@color/colorWheat</item>
         <item name="colorPrimaryDark">@color/colorBlack30</item>
         <item name="colorAccent">@color/colorClaret</item>
+        <!-- This make sure a dialog's buttons are visible-->
+        <!-- Otherwise you have to set theme when create the dialog: -->
+        <!-- AlertDialog.Builder(it, R.style.DialogTheme) -->
+        <item name="alertDialogTheme">@style/DialogTheme</item>
     </style>
 
     <style name="DialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
@@ -13,7 +19,7 @@
         <item name="colorAccent">@color/colorClaret</item>
     </style>
 
-    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="SplashTheme" parent="AppTheme">
         <item name="colorPrimaryDark">@color/colorPaper</item>
         <item name="android:windowBackground">@drawable/background_splash</item>
     </style>
