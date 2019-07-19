@@ -27,12 +27,12 @@ data class StripeSub(
         val status: StripeSubStatus?
 ) {
         // The payment is complete, and you should promptly provision access to the good or service.
-        fun isSuccess(): Boolean {
+        fun succeeded(): Boolean {
             return status == StripeSubStatus.Active && latestInvoice.paymentIntent.status == PaymentIntentStatus.Succeeded
         }
 
         // Ask user to change payment method.
-        fun isFailure(): Boolean {
+        fun failure(): Boolean {
                 return status == StripeSubStatus.Incomplete && latestInvoice.paymentIntent.status == PaymentIntentStatus.RequiresPaymentMethod
         }
 
