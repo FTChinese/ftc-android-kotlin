@@ -87,10 +87,6 @@ class CheckOutActivity : ScopedAppActivity(),
         // Log event: add card
         tracker.addCart(p)
 
-        val account = sessionManager.loadAccount() ?: return
-        info("Update stripe plan in background")
-        checkOutViewModel.getStripePlan(account, p)
-
         this.plan = p
     }
 
@@ -374,7 +370,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
             toast(R.string.wxpay_done)
 
-            tracker.buySuccess(aliOrder)
+            tracker.buySuccess(plan, payMethod)
 
             val account = sessionManager.loadAccount() ?: return@launch
             val updatedMembership = aliOrder.confirm(account.membership)
