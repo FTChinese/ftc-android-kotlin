@@ -1,6 +1,5 @@
 package com.ft.ftchinese.ui.pay
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,20 +8,12 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedFragment
 import com.ft.ftchinese.base.getTierCycleText
 import com.ft.ftchinese.model.order.Plan
-import com.ft.ftchinese.model.order.StripePref
 import kotlinx.android.synthetic.main.fragment_cart_item.*
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CartItemFragment : ScopedFragment() {
 
-    private lateinit var stripePref: StripePref
     private var ftcPlan: Plan? = null
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-        stripePref = StripePref.getInstance(context)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
