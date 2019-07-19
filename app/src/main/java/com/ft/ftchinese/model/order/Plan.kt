@@ -17,9 +17,9 @@ data class Plan(
         @KCycle
         val cycle: Cycle,
 
-        val cycleCount: Int, // new
+        val cycleCount: Long, // new
         val currency: String, // new
-        val extraDays: Int, // new
+        val extraDays: Long, // new
         val listPrice: Double,
         val netPrice: Double,
         val description: String
@@ -38,7 +38,7 @@ data class Plan(
         }
     }
 
-    fun gaAddCartAction(): String {
+    fun gaGAAction(): String {
         return when (tier) {
             Tier.STANDARD -> when (cycle) {
                 Cycle.YEAR -> GAAction.BUY_STANDARD_YEAR
