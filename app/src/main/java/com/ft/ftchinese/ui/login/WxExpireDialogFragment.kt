@@ -38,7 +38,7 @@ class WxExpireDialogFragment : DialogFragment(), AnkoLogger {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             // Use the Builder class for convenient dialog construction
-            val builder = AlertDialog.Builder(it, R.style.DialogTheme)
+            val builder = AlertDialog.Builder(it)
             /**
              * NOTE: whichever button is clicked, `onDismiss` method
              * will be called. Be cautious performing destructive
