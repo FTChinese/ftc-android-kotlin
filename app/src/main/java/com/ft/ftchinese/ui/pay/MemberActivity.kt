@@ -21,13 +21,11 @@ import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.model.order.subsPlans
 import com.ft.ftchinese.ui.account.AccountViewModel
+import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.formatLocalDate
 import kotlinx.android.synthetic.main.activity_member.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -39,9 +37,41 @@ class MemberActivity : ScopedAppActivity(),
 
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
+    private lateinit var checkOutViewModel: CheckOutViewModel
 
     private fun stopRefresh() {
         swipe_refresh.isRefreshing = false
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContentView(R.layout.activity_member)
+
+        setSupportActionBar(toolbar)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true)
+            setDisplayShowTitleEnabled(true)
+        }
+
+        swipe_refresh.setOnRefreshListener(this)
+
+        sessionManager = SessionManager.getInstance(this)
+        accountViewModel = ViewModelProviders.of(this)
+                .get(AccountViewModel::class.java)
+
+        checkOutViewModel = ViewModelProviders.of(this)
+                .get(CheckOutViewModel::class.java)
+
+        checkOutViewModel.stripeSubResult.observe(this, Observer {
+                onStripeSubRefreshed(it)
+        })
+
+        accountViewModel.accountRefreshed.observe(this, Observer {
+            onAccountRefreshed(it)
+        })
+
+        initUI()
     }
 
     /**
@@ -64,80 +94,80 @@ class MemberActivity : ScopedAppActivity(),
             return
         }
 
-
         if (account.membership.payMethod == PayMethod.STRIPE) {
             toast("Refresh stripe subscription")
 
-            launch {
-                try {
-                    val stripeSub = withContext(Dispatchers.IO) {
-                        account.refreshStripeSub()
-                    }
-
-                    if (stripeSub == null) {
-                        toast("Failed to refresh stripe subscription")
-                        return@launch
-                    }
-
-                    toast(R.string.prompt_refreshing)
-                    accountViewModel.refresh(account)
-                } catch (e: Exception) {
-                    handleException(e)
-                }
-            }
+            checkOutViewModel.refreshStripeSub(account)
 
             return
         }
 
 
         toast(R.string.prompt_refreshing)
-
         accountViewModel.refresh(account)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_member)
-
-        setSupportActionBar(toolbar)
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowTitleEnabled(true)
+    private fun onStripeSubRefreshed(subResult: StripeSubResult?) {
+        if (subResult == null) {
+            stopRefresh()
+            toast("Cannot fetch your subscription data from stripe")
+            return
         }
 
-        swipe_refresh.setOnRefreshListener(this)
-
-        sessionManager = SessionManager.getInstance(this)
-        accountViewModel = ViewModelProviders.of(this)
-                .get(AccountViewModel::class.java)
-
-        accountViewModel.accountRefreshed.observe(this, Observer {
+        if (subResult.error != null) {
+            toast(subResult.error)
             stopRefresh()
+            return
+        }
 
-            val accountResult = it ?: return@Observer
+        if (subResult.exception != null) {
+            handleException(subResult.exception)
+            stopRefresh()
+            return
+        }
 
-            if (accountResult.error != null) {
-                toast(accountResult.error)
-                return@Observer
-            }
+        // Even if user's subscription data is not refresh
+        // (for example, API responded 404, in which case
+        // subResult.success is null), account still
+        // needs to be refreshed.
+        // So here we do not perform checks on subResult == null.
+        // It is just an indicator that network finished,
+        // regardless of result.
+        val account = sessionManager.loadAccount()
+        if (account == null) {
+            stopRefresh()
+            return
+        }
 
-            if (accountResult.exception != null) {
-                handleException(accountResult.exception)
-                return@Observer
-            }
+        toast(R.string.prompt_refreshing)
+        accountViewModel.refresh(account)
+    }
 
-            if (accountResult.success == null) {
-                toast("Unknown error")
-                return@Observer
-            }
+    private fun onAccountRefreshed(accountResult: AccountResult?) {
+        stopRefresh()
 
-            toast(R.string.prompt_updated)
+        if (accountResult == null) {
+            return
+        }
 
-            sessionManager.saveAccount(accountResult.success)
+        if (accountResult.error != null) {
+            toast(accountResult.error)
+            return
+        }
 
-            initUI()
-        })
+        if (accountResult.exception != null) {
+            handleException(accountResult.exception)
+            return
+        }
+
+        if (accountResult.success == null) {
+            toast("Unknown error")
+            return
+        }
+
+        toast(R.string.prompt_updated)
+
+        sessionManager.saveAccount(accountResult.success)
 
         initUI()
     }
