@@ -270,7 +270,7 @@ class Story (
     fun htmlForCoverImage(): String {
         return """
             <div class="story-image image" style="margin-bottom:0;">
-                <figure data-webUrl="${cover.smallbutton}" class="loading"></figure>
+                <figure data-url="${cover.smallbutton}" class="loading"></figure>
             </div>
         """.trimIndent()
     }
