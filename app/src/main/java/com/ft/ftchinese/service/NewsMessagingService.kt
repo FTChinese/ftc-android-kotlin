@@ -1,10 +1,11 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.service
 
 import android.app.PendingIntent
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ChannelItem
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.EXTRA_CHANNEL_ITEM
