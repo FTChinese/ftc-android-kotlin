@@ -13,7 +13,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fragment_single)
+        setContentView(R.layout.activity_settings)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -22,7 +22,7 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         supportFragmentManager.beginTransaction()
-                .replace(R.id.single_frag_holder, PreferenceFragment.newInstance())
+                .replace(R.id.preference_fragment, PreferenceFragment.newInstance())
                 .commit()
     }
 
