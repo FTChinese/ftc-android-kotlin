@@ -53,10 +53,10 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/items_rv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+            <!--<androidx.recyclerview.widget.RecyclerView-->
+                <!--android:id="@+id/items_rv"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="wrap_content"/>-->
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/email_container"

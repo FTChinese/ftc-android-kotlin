@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
@@ -36,7 +35,7 @@ class FtcFragment : ScopedFragment(),
     private lateinit var sessionManager: SessionManager
     private var wxApi: IWXAPI? = null
     private lateinit var accountViewModel: AccountViewModel
-    private var adapter: Adapter? = null
+//    private var adapter: Adapter? = null
 
     private fun stopRefreshing() {
         swipe_refresh.isRefreshing = false
@@ -63,15 +62,17 @@ class FtcFragment : ScopedFragment(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+//
+//        val layout = LinearLayoutManager(context)
+//        adapter = Adapter(buildRows())
+//
+//        account_rv.apply {
+//            setHasFixedSize(true)
+//            layoutManager = layout
+//            adapter = adapter
+//        }
 
-        val layout = LinearLayoutManager(context)
-        adapter = Adapter(buildRows())
 
-        account_rv.apply {
-            setHasFixedSize(true)
-            layoutManager = layout
-            adapter = adapter
-        }
 
         // Set event handlers.
         email_container.setOnClickListener {
@@ -332,6 +333,8 @@ class FtcFragment : ScopedFragment(),
             val item = items[position]
             holder.labelView.text = item.label
             holder.valueView.text = item.value
+
+            holder.itemView.isActivated = true
         }
     }
 
@@ -345,7 +348,7 @@ class FtcFragment : ScopedFragment(),
 
         return arrayOf(
                 Item(
-                        label = "Email",
+                        label = getString(R.string.label_email),
                         value = if (account.email.isNotBlank()) {
                             account.email
                         } else {
@@ -353,7 +356,7 @@ class FtcFragment : ScopedFragment(),
                         }
                 ),
                 Item(
-                        label = "User Name",
+                        label = getString(R.string.label_user_name),
                         value = if (account.userName.isNullOrBlank()) {
                             getString(R.string.prompt_not_set)
                         } else {
@@ -361,11 +364,11 @@ class FtcFragment : ScopedFragment(),
                         }
                 ),
                 Item(
-                        label = "Password",
+                        label = getString(R.string.label_password),
                         value = ""
                 ),
                 Item(
-                        label = "Wechat",
+                        label = getString(R.string.label_wechat),
                         value = if (account.isLinked) {
                             getString(R.string.action_bound_account)
                         } else {
