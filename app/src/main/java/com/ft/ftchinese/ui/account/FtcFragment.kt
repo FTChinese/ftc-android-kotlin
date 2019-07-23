@@ -5,8 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedFragment
@@ -19,6 +23,8 @@ import com.ft.ftchinese.util.RequestCode
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
+import kotlinx.android.synthetic.main.account_row.view.*
+import kotlinx.android.synthetic.main.activity_unlink.*
 import kotlinx.android.synthetic.main.fragment_ftc_account.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -31,6 +37,7 @@ class FtcFragment : ScopedFragment(),
     private lateinit var sessionManager: SessionManager
     private var wxApi: IWXAPI? = null
     private lateinit var accountViewModel: AccountViewModel
+    private var adapter: Adapter? = null
 
     private fun stopRefreshing() {
         swipe_refresh.isRefreshing = false
@@ -57,6 +64,15 @@ class FtcFragment : ScopedFragment(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val layout = LinearLayoutManager(context)
+        adapter = Adapter(buildRows())
+
+        account_rv.apply {
+            setHasFixedSize(true)
+            layoutManager = layout
+            adapter = adapter
+        }
 
         // Set event handlers.
         email_container.setOnClickListener {
@@ -294,6 +310,70 @@ class FtcFragment : ScopedFragment(),
         req.state = stateCode
 
         wxApi?.sendReq(req)
+    }
+
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val labelView: TextView = view.tv_start
+        val valueView: TextView = view.tv_end
+    }
+
+    class Adapter(
+            private var items: Array<Item>
+    ) : RecyclerView.Adapter<ViewHolder>() {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.account_row, parent, false)
+
+            return ViewHolder(view)
+        }
+
+        override fun getItemCount() = items.size
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val item = items[position]
+            holder.labelView.text = item.label
+            holder.valueView.text = item.value
+        }
+    }
+
+    data class Item(
+            val label: String,
+            val value: String
+    )
+
+    private fun buildRows(): Array<Item> {
+        val account = sessionManager.loadAccount() ?: return arrayOf()
+
+        return arrayOf(
+                Item(
+                        label = "Email",
+                        value = if (account.email.isNotBlank()) {
+                            account.email
+                        } else {
+                            getString(R.string.prompt_not_set)
+                        }
+                ),
+                Item(
+                        label = "User Name",
+                        value = if (account.userName.isNullOrBlank()) {
+                            getString(R.string.prompt_not_set)
+                        } else {
+                            account.userName
+                        }
+                ),
+                Item(
+                        label = "Password",
+                        value = ""
+                ),
+                Item(
+                        label = "Wechat",
+                        value = if (account.isLinked) {
+                            getString(R.string.action_bound_account)
+                        } else {
+                            getString(R.string.action_bind_account)
+                        }
+                )
+        )
     }
 
     companion object {
