@@ -78,7 +78,7 @@ class SubscriptionActivity : ScopedAppActivity(),
         })
 
         checkOutViewModel.stripeSubResult.observe(this, Observer {
-            onStripeSubResult(it)
+            onSubcriptionResult(it)
         })
 
         idempotency = Idempotency.getInstance(this)
@@ -255,7 +255,7 @@ class SubscriptionActivity : ScopedAppActivity(),
         }
     }
 
-    private fun onStripeSubResult(subResult: StripeSubResult?) {
+    private fun onSubcriptionResult(subResult: StripeSubResult?) {
         showProgress(false)
 
 
@@ -317,6 +317,7 @@ class SubscriptionActivity : ScopedAppActivity(),
             sub.requiresAction() -> {
 
                 enableButton(true)
+//                idempotency.clear()
 
                 alert(
                         Appcompat,
@@ -396,6 +397,7 @@ class SubscriptionActivity : ScopedAppActivity(),
                 }
 
                 info("Retrieve payment intent: ${paymentIntent?.toMap()}")
+                // TODO: retrieve user account here.
 
                 if (paymentIntent == null) {
                     alert("Failed to retrieve payment intent").show()
