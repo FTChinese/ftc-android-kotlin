@@ -11,7 +11,7 @@ data class WxOrder(
         override val cycle: Cycle,
         override val cycleCount: Long,
         override val extraDays: Long,
-        override var netPrice: Double,
+        override var amount: Double,
         @KOrderUsage
         override val usageType: OrderUsage,
         @KPayMethod
@@ -31,7 +31,7 @@ data class WxOrder(
         cycle = cycle,
         cycleCount = cycleCount,
         extraDays = extraDays,
-        netPrice = netPrice,
+        amount = amount,
         usageType = usageType,
         payMethod = payMethod,
         createdAt = createdAt

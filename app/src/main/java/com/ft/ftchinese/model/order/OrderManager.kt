@@ -15,7 +15,7 @@ private const val PREF_CYCLE = "cycle"
 private const val PREF_CYCLE_COUNT = "cycle_count"
 private const val PREF_EXTRA_DAYS = "extra_days"
 private const val PREF_PAYMENT_METHOD = "pay_method"
-private const val PREF_NET_PRICE = "net_price"
+private const val PREF_AMOUNT = "amount"
 private const val PREF_CREATED_AT = "create_at"
 private const val PREF_USAGE = "usage_type"
 private const val PREF_CONFIRMED_AT = "confirmed_at"
@@ -44,7 +44,7 @@ class OrderManager private constructor(context: Context) {
             putLong(PREF_CYCLE_COUNT, subs.cycleCount)
             putLong(PREF_EXTRA_DAYS, subs.extraDays)
             putString(PREF_PAYMENT_METHOD, subs.payMethod.string())
-            putDouble(PREF_NET_PRICE, subs.netPrice)
+            putDouble(PREF_AMOUNT, subs.amount)
             putString(PREF_CREATED_AT, formatISODateTime(subs.createdAt))
             putString(PREF_USAGE, subs.usageType.toString())
             putString(PREF_CONFIRMED_AT, formatISODateTime(subs.confirmedAt))
@@ -58,7 +58,7 @@ class OrderManager private constructor(context: Context) {
         val tier = Tier.fromString(sharedPreferences.getString(PREF_TIER, null)) ?: return null
         val cycle = Cycle.fromString(sharedPreferences.getString(PREF_CYCLE, null)) ?: return null
         val payMethod = PayMethod.fromString(sharedPreferences.getString(PREF_PAYMENT_METHOD, null)) ?: return null
-        val netPrice = sharedPreferences.getDouble(PREF_NET_PRICE, 0.0)
+        val netPrice = sharedPreferences.getDouble(PREF_AMOUNT, 0.0)
         val usageType = OrderUsage.fromString(sharedPreferences.getString(PREF_USAGE, null)) ?: return null
         val createdAt = parseISODateTime(sharedPreferences.getString(PREF_CREATED_AT, null)) ?: return null
         val confirmed = parseISODateTime(sharedPreferences.getString(PREF_CONFIRMED_AT, null))
@@ -73,7 +73,7 @@ class OrderManager private constructor(context: Context) {
                 cycleCount = sharedPreferences.getLong(PREF_CYCLE_COUNT, 1),
                 extraDays = sharedPreferences.getLong(PREF_EXTRA_DAYS, 0),
                 payMethod = payMethod,
-                netPrice = netPrice,
+                amount = netPrice,
                 createdAt = createdAt,
                 usageType = usageType,
                 confirmedAt = confirmed,

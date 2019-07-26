@@ -27,7 +27,7 @@ open class Subscription(
         // locally saved date against server data.
         open val extraDays: Long = 0,
 
-        open var netPrice: Double,
+        open var amount: Double,
 
         @KOrderUsage
         open val usageType: OrderUsage,
@@ -97,8 +97,8 @@ open class Subscription(
                 cycleCount = cycleCount,
                 currency = "cny",
                 extraDays = extraDays,
-                listPrice = netPrice,
-                netPrice = netPrice,
+                listPrice = amount,
+                netPrice = amount,
                 description = ""
         )
     }
