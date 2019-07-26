@@ -6,13 +6,24 @@
     android:layout_height="match_parent"
     tools:context=".ui.TestActivity">
 
+    <include layout="@layout/simple_toolbar"/>
+
     <Button
         android:id="@+id/btn_test_alert"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:text="Show Alert"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+    <Button
+        android:id="@+id/btn_check_version"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="Check new version"
+        app:layout_constraintTop_toBottomOf="@+id/btn_test_alert"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
