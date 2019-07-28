@@ -19,14 +19,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:orientation="horizontal"
-            android:divider="@drawable/divider"
+            android:divider="@drawable/divider_teal"
             android:showDividers="middle"
-            android:background="@drawable/button_secondary"
+            android:background="@drawable/border_rec_teal"
             android:checkedButton="@id/lang_cn_btn">
 
             <RadioButton
                 android:id="@+id/lang_cn_btn"
-                style="@style/TitleBarButton"
+                style="@style/TabRadioButton.Toolbar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:button="@null"
@@ -34,7 +34,7 @@
 
             <RadioButton
                 android:id="@+id/lang_en_btn"
-                style="@style/TitleBarButton"
+                style="@style/TabRadioButton.Toolbar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:button="@null"
@@ -42,7 +42,7 @@
 
             <RadioButton
                 android:id="@+id/lang_bi_btn"
-                style="@style/TitleBarButton"
+                style="@style/TabRadioButton.Toolbar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:button="@null"
