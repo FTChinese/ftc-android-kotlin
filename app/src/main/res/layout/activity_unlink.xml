@@ -46,7 +46,8 @@
     <Button
         android:id="@+id/unlink_button"
         android:layout_width="0dp"
-        android:layout_height="48dp"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
         android:text="@string/title_unlink"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
