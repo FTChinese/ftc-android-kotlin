@@ -69,9 +69,6 @@
                 android:id="@+id/bottom_nav"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:itemBackground="@color/colorWheat"
-                app:itemTextColor="@color/bottom_nav_state"
-                app:itemIconTint="@color/bottom_nav_state"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -85,8 +82,6 @@
             android:layout_height="match_parent"
             android:layout_gravity="start"
             android:fitsSystemWindows="false"
-            android:theme="@style/Drawer"
-            app:itemTextColor="@color/drawer_item_state"
             app:headerLayout="@layout/drawer_nav_header"
             app:menu="@menu/activity_main_drawer" />
 
