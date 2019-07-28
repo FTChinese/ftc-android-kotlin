@@ -54,7 +54,7 @@
             android:id="@+id/yearly_price_btn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="8dp"
             android:text="Price/Year"
             app:layout_constraintTop_toBottomOf="@+id/product_small_print"
             app:layout_constraintStart_toStartOf="@id/product_heading_tv"
