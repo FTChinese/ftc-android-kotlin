@@ -53,7 +53,7 @@
 
         <Button
             android:id="@+id/link_email_btn"
-            style="@style/OrigamiButton.Secondary.Small"
+            style="@style/AppButton.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_link"
@@ -63,7 +63,7 @@
 
         <Button
             android:id="@+id/unlink_btn"
-            style="@style/OrigamiButton.Secondary.Small"
+            style="@style/AppButton.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_unlink"
