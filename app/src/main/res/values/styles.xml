@@ -1,139 +1,92 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="colorPrimary">@color/colorWheat</item>
+        <item name="android:colorBackground">@color/colorPaper</item>
+        <!-- Primary color is not used as the base color of the whole app. It mostly affects the color of drawer when clicked. -->
+        <item name="colorPrimary">@color/colorBlack60</item>
         <item name="colorPrimaryDark">@color/colorBlack30</item>
-        <item name="colorAccent">@color/colorClaret</item>
-        <!-- This make sure a dialog's buttons are visible-->
-        <!-- Otherwise you have to set theme when create the dialog: -->
-        <!-- AlertDialog.Builder(it, R.style.DialogTheme) -->
+
+        <!-- Determines the color of progress bar -->
+        <item name="colorSecondary">@color/colorClaret</item>
+
+        <item name="toolbarStyle">@style/AppToolbar</item>
+
+        <item name="bottomNavigationStyle">@style/AppBottomNavigation</item>
+
+        <item name="materialButtonStyle">@style/AppButton</item>
+
+        <!-- To make both the dammed MaterialAlertDialog and AlertDialog appears the same. -->
         <item name="alertDialogTheme">@style/DialogTheme</item>
+        <item name="materialAlertDialogTheme">@style/DialogTheme</item>
+
+        <item name="textInputStyle">@style/AppTextField</item>
     </style>
 
-    <style name="DialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="colorPrimary">@color/colorWheat</item>
-        <item name="colorPrimaryDark">@color/colorBlack30</item>
-        <item name="colorAccent">@color/colorClaret</item>
+    <!--Style for edit text -->
+    <style name="AppTextField" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxStrokeColor">@color/colorClaret</item>
     </style>
 
-    <style name="SplashTheme" parent="AppTheme">
-        <item name="colorPrimaryDark">@color/colorPaper</item>
-        <item name="android:windowBackground">@drawable/background_splash</item>
-    </style>
-
-    <!-- Them used by the entire app except -->
-    <style name="Origami" parent="AppTheme">
-
-        <!-- Window colors -->
-        <item name="android:windowBackground">@color/colorPaper</item>
-
-        <!-- Button Style -->
-        <item name="buttonStyle">@style/OrigamiButton.Primary</item>
-
-        <!-- Toolbar styles -->
-        <item name="toolbarStyle">@style/OrigamiToolbar</item>
-
-        <item name="preferenceTheme">@style/PrefTheme</item>
-    </style>
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-    <style name="Drawer" parent="AppTheme">
-        <item name="colorPrimary">@color/colorTeal</item>
-        <!--<item name="colorAccent">@color/colorClaret</item>-->
-    </style>
-
-    <style name="Dialog" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="colorAccent">@color/colorBlack20</item>
-    </style>
-
-
-
-    <style name="PrefTheme" parent="PreferenceThemeOverlay">
-
-    </style>
-
-    <style name="OrigamiButton" parent="Widget.AppCompat.Button" />
-
-    <!-- This is the default Widget.AppCompat.Button style. You override them.-->
-    <!-- See https://chromium.googlesource.com/android_tools/+/HEAD/sdk/extras/android/support/v7/appcompat/res/values/styles_base.xml -->
-    <!--<item name="android:background">@drawable/abc_btn_default_mtrl_shape</item>-->
-    <!--<item name="android:textAppearance">?android:attr/textAppearanceButton</item>-->
-    <!--<item name="android:minHeight">48dip</item>-->
-    <!--<item name="android:minWidth">88dip</item>-->
-    <!--<item name="android:focusable">true</item>-->
-    <!--<item name="android:clickable">true</item>-->
-    <!--<item name="android:gravity">center_vertical|center_horizontal</item>-->
-
-    <style name="OrigamiButton.Primary">
-        <item name="android:background">@drawable/button_primary</item>
-        <item name="android:textColor">@color/colorWhite</item>
-        <item name="android:textSize">18sp</item>
-    </style>
-
-    <style name="OrigamiButton.Primary.Small">
-        <item name="android:minHeight">0dip</item>
-        <item name="android:minWidth">0dip</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
-    </style>
-
-    <style name="OrigamiButton.Secondary">
-        <item name="android:background">@drawable/button_secondary</item>
-        <item name="android:textColor">@color/button_text_state</item>
-    </style>
-
-    <style name="OrigamiButton.Secondary.Small">
-        <item name="android:minHeight">0dip</item>
-        <item name="android:minWidth">0dip</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
-    </style>
-
-    <style name="OrigamiButton.Secondary.Flat">
-        <item name="android:minHeight">0dip</item>
-        <item name="android:minWidth">0dip</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
-        <item name="android:paddingStart">64dp</item>
-        <item name="android:paddingEnd">64dp</item>
-    </style>
-
-    <style name="OrigamiButton.Inline">
-        <item name="android:background">@android:color/transparent</item>
-        <item name="android:textColor">@color/colorTeal</item>
-        <item name="android:minHeight">0dip</item>
-        <item name="android:minWidth">0dip</item>
-        <item name="android:padding">0dp</item>
-    </style>
-
-
-    <style name="OrigamiToolbar" parent="Widget.AppCompat.Toolbar">
+    <!-- Style for toolbar -->
+    <style name="AppToolbar" parent="Widget.AppCompat.Toolbar">
         <item name="android:background">@color/colorWheat</item>
     </style>
 
-    <style name="TitleBarButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
-        <item name="android:background">@drawable/radio_button_background</item>
-        <item name="android:textColor">@color/radio_button_text</item>
-        <!--<item name="android:padding">8dp</item>-->
-        <item name="android:paddingBottom">4dp</item>
-        <item name="android:paddingTop">4dp</item>
-        <item name="android:paddingStart">8dp</item>
-        <item name="android:paddingEnd">8dp</item>
+    <!-- Style for bottom navigation -->
+    <style name="AppBottomNavigation" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
+        <item name="itemBackground">@color/colorWheat</item>
+        <item name="itemTextColor">@color/bottom_nav_text_color_selector</item>
+        <item name="itemIconTint">@color/bottom_nav_text_color_selector</item>
+        <item name="itemHorizontalTranslationEnabled">false</item>
     </style>
 
-    <style name="Origami.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <!-- Style for buttons -->
+    <style name="AppButton" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/btn_bg_color_selector</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/colorWhite</item>
+        <item name="cornerRadius">0dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
 
-    <style name="Origami.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppButton.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <!--Stroke controls the border color -->
+        <item name="strokeColor">@color/btn_stroke_color_selector</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/colorTeal</item>
+        <item name="cornerRadius">0dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+    </style>
+
+    <!-- Style to force color on dialog buttons -->
+    <style name="DialogTheme" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+        <item name="colorPrimary">@color/colorClaret</item>
+    </style>
+
+    <!--Theme used by the splash screen-->
+    <style name="SplashTheme" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/splash_bg</item>
+    </style>
+
+
+    <style name="TabRadioButton" parent="Widget.MaterialComponents.CompoundButton.RadioButton">
+        <item name="android:background">@drawable/radio_bg_color_selector</item>
+        <item name="android:textColor">@color/radio_text_color_selector</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="TabRadioButton.Toolbar" parent="TabRadioButton">
+        <item name="android:minHeight">0dp</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+    </style>
 
     <style name="FTCTitle">
         <item name="android:textAlignment">center</item>
@@ -161,17 +114,6 @@
         <item name="android:textSize">18sp</item>
     </style>
 
-    <style name="FullscreenTheme" parent="AppTheme">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowBackground">@null</item>
-    </style>
-
-    <style name="Origami.NoActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
 
 
 </resources>
