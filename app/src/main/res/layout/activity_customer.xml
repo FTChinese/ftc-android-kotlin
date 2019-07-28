@@ -42,7 +42,7 @@
 
 
     <Button
-        style="@style/OrigamiButton.Secondary"
+        style="@style/AppButton.OutlinedButton"
         android:id="@+id/btn_set_default"
         android:layout_margin="16dp"
         android:layout_width="match_parent"
