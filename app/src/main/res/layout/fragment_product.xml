@@ -52,7 +52,6 @@
 
         <Button
             android:id="@+id/yearly_price_btn"
-            style="@style/OrigamiButton.Primary.Small"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -64,7 +63,7 @@
 
         <Button
             android:id="@+id/monthly_price_btn"
-            style="@style/OrigamiButton.Secondary.Small"
+            style="@style/AppButton.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"

@@ -33,7 +33,7 @@
 
     <Button
         android:id="@+id/done_button"
-        style="@style/OrigamiButton.Secondary.Flat"
+        style="@style/AppButton.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
