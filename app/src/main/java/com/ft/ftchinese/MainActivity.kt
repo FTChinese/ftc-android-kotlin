@@ -159,7 +159,6 @@ class MainActivity : ScopedAppActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        setTheme(R.style.Origami)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
