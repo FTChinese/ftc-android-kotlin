@@ -13,7 +13,7 @@ object NextApi {
     val SIGN_UP = "$BASE/users/signup"
     val PASSWORD_RESET = "$BASE/users/password-reset/letter"
     // Refresh account data.
-    val ACCOUNT = "$BASE/user/account"
+    val ACCOUNT = "$BASE/user/account/v2"
     val PROFILE = "$BASE/user/profile"
     val UPDATE_EMAIL = "$BASE/user/email"
     // Resend email verification letter
@@ -23,7 +23,7 @@ object NextApi {
     val ORDERS = "$BASE/user/orders"
     val UNLINK = "$BASE/user/unlink/wx"
     val STARRED = "$BASE/user/starred"
-    val WX_ACCOUNT = "$BASE/user/wx/account"
+    val WX_ACCOUNT = "$BASE/user/wx/account/v2"
     val WX_SIGNUP = "$BASE/user/wx/signup"
     val WX_LINK = "$BASE/user/wx/link"
 }
