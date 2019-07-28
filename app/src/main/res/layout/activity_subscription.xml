@@ -37,11 +37,11 @@
         app:layout_constraintTop_toBottomOf="@id/tv_payment_method"
         android:text="* 使用Stripe订阅FT中文网会员以英镑计价"/>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_subscribe"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
+        style="@style/AppButton.BottomSticky"
         android:text="订阅"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="1.0"/>
