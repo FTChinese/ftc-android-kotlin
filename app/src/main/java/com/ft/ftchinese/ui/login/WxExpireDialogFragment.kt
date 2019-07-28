@@ -3,13 +3,13 @@ package com.ft.ftchinese.ui.login
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.WxOAuth
 import com.ft.ftchinese.model.WxOAuthIntent
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -37,15 +37,14 @@ class WxExpireDialogFragment : DialogFragment(), AnkoLogger {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
-            // Use the Builder class for convenient dialog construction
-            val builder = AlertDialog.Builder(it)
+
             /**
              * NOTE: whichever button is clicked, `onDismiss` method
              * will be called. Be cautious performing destructive
              * actions when overriding it.
              *
              */
-            builder.setMessage(R.string.wx_session_expired)
+            MaterialAlertDialogBuilder(it).setMessage(R.string.wx_session_expired)
                     .setPositiveButton(R.string.wx_relogin){ dialog, id ->
                         authorize()
                         // Or should be simply redirects user to
@@ -55,9 +54,8 @@ class WxExpireDialogFragment : DialogFragment(), AnkoLogger {
                     .setNegativeButton(R.string.action_cancel){ dialog, id ->
                         info("Cancel button pressed")
                     }
+                    .create()
 
-            // Create the AlertDialog object and return it
-            builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 
