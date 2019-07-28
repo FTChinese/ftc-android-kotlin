@@ -58,6 +58,7 @@
         android:checkableBehavior="single">
         <item
             android:id="@+id/action_test"
+            android:icon="@drawable/ic_menu_gallery"
             android:title="Test" />
     </group>
 </menu>

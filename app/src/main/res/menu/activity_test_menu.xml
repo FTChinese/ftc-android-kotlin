@@ -4,5 +4,21 @@
 
     <item android:id="@+id/menu_item_toggle_polling"
         android:title="Start Polling"
-        app:showAsAction="ifRoom"/>
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/menu_test_wechat_expired"
+        android:title="Show Wechat Expired"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/menu_test_anko_alert"
+        android:title="Show Anko Alert"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/menu_show_unlink_activity"
+        android:title="Show Unlink Activity"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/menu_show_unlink_anchor"
+        android:title="Show Unlink Anchor"
+        app:showAsAction="never"/>
 </menu>

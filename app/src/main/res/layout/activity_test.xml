@@ -9,21 +9,36 @@
     <include layout="@layout/simple_toolbar"/>
 
     <Button
-        android:id="@+id/btn_test_alert"
+        android:id="@+id/btn_start_download"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Show Alert"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:text="Start Download"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"/>
 
     <Button
-        android:id="@+id/btn_check_version"
+        android:id="@+id/btn_find_download"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:text="Check new version"
-        app:layout_constraintTop_toBottomOf="@+id/btn_test_alert"/>
+        android:text="Find Download"
+        app:layout_constraintTop_toBottomOf="@id/btn_start_download"/>
+
+    <Button
+        android:id="@+id/btn_download_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="Download Status"
+        app:layout_constraintTop_toBottomOf="@id/btn_find_download"/>
+
+    <FrameLayout
+        android:id="@+id/test_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/btn_download_status"/>
+
+    <include layout="@layout/progress_bar"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
