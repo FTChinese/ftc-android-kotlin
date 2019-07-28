@@ -32,8 +32,7 @@
                 android:showDividers="middle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:background="@drawable/bottom_border_grey">
+                android:layout_margin="16dp">
 
                 <RadioButton
                     android:id="@+id/alipay_btn"
@@ -46,8 +45,7 @@
                     android:drawableEnd="@drawable/btn_radio"
                     android:drawablePadding="20dp"
                     android:text="@string/pay_brand_ali"
-                    android:textSize="18sp"
-                    android:background="@drawable/bottom_border_grey"/>
+                    android:textSize="18sp"/>
 
                 <RadioButton
                     android:id="@+id/wxpay_btn"
@@ -60,8 +58,7 @@
                     android:drawableEnd="@drawable/btn_radio"
                     android:drawablePadding="20dp"
                     android:text="@string/pay_brand_wechat"
-                    android:textSize="18sp"
-                    android:background="@drawable/bottom_border_grey"/>
+                    android:textSize="18sp"/>
 
                 <!-- NOTE: the transparent background added here
                  is just a hack. It seems when setting button to null, there is a round button flasing in the background when you clicked a radio button. -->
@@ -76,8 +73,7 @@
                     android:drawableEnd="@drawable/btn_radio"
                     android:drawablePadding="20dp"
                     android:text="@string/pay_brand_stripe"
-                    android:textSize="18sp"
-                    android:background="@android:color/transparent"/>
+                    android:textSize="18sp"/>
 
             </RadioGroup>
 
@@ -91,10 +87,11 @@
     </androidx.core.widget.NestedScrollView>
 
 
-    <Button android:id="@+id/pay_btn"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/pay_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
+        style="@style/AppButton.BottomSticky"
         android:text="@string/check_out_default"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="1.0"/>
