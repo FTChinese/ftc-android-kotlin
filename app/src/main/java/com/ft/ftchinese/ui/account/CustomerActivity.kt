@@ -5,13 +5,17 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
+import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
+import com.ft.ftchinese.ui.StringResult
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.SubscribeApi
@@ -44,8 +48,9 @@ private val cardBrands = mapOf(
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
-    private lateinit var sessionMananger: SessionManager
+    private lateinit var sessionManager: SessionManager
     private var paymentMethod: PaymentMethod? = null
+    private lateinit var accountViewModel: AccountViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,13 +64,33 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
         PaymentConfiguration.init(BuildConfig.STRIPE_KEY)
 
-        sessionMananger = SessionManager.getInstance(this)
+        sessionManager = SessionManager.getInstance(this)
+        accountViewModel = ViewModelProviders.of(this)
+                .get(AccountViewModel::class.java)
+
+        accountViewModel.customerIdResult.observe(this, Observer {
+            onCustomerCreated(it)
+        })
 
         initUI()
 
         // Setup stripe customer session after ui initiated; otherwise the ui might be disabled if stripe customer data
         // is retrieved too quickly.
-        setupCustomerSession()
+
+        val account = sessionManager.loadAccount() ?: return
+        if (account.stripeId == null) {
+            if (!isNetworkConnected()) {
+                toast(R.string.prompt_no_network)
+                return
+            }
+
+            showProgress(true)
+            toast(R.string.stripe_init)
+
+            accountViewModel.createCustomer(account)
+        } else {
+            setupCustomerSession()
+        }
     }
 
     private fun initUI() {
@@ -82,6 +107,27 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         enableButton(false)
     }
 
+    private fun onCustomerCreated(result: StringResult?) {
+        if (result == null) {
+            return
+        }
+
+        if (result.error != null) {
+            toast(result.error)
+            return
+        }
+
+        if (result.exception != null) {
+            handleException(result.exception)
+            return
+        }
+
+        val id = result.success ?: return
+        sessionManager.saveStripeId(id)
+
+        setupCustomerSession()
+    }
+
     private fun defaultPaymentMethod() {
         val pmId = paymentMethod?.id
         if (pmId == null) {
@@ -89,7 +135,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
             return
         }
 
-        val account = sessionMananger.loadAccount() ?: return
+        val account = sessionManager.loadAccount() ?: return
 
         if (!isNetworkConnected()) {
             toast(R.string.prompt_no_network)
@@ -133,7 +179,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
             return
         }
 
-        val account = sessionMananger.loadAccount() ?: return
+        val account = sessionManager.loadAccount() ?: return
 
         try {
             CustomerSession.getInstance()
