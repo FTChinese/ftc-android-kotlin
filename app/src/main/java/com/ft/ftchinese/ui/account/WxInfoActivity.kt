@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.account
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.commit
@@ -29,8 +30,17 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
             setDisplayShowTitleEnabled(true)
         }
 
+        val account = sessionManager.loadAccount()
         supportFragmentManager.commit {
-            replace(R.id.frag_account, WxFragment.newInstance())
+            when {
+                account?.isLinked == true -> {
+                    replace(R.id.frag_account, WxInfoFragment.newInstance())
+                }
+                account?.isFtcOnly == true -> {
+                    replace(R.id.frag_account, LinkWxFragment.newInstance())
+                }
+            }
+
         }
     }
 
@@ -51,17 +61,16 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     companion object {
-//        fun start(context: Context?) {
-//            context?.startActivity(
-//                    Intent(context, WxInfoActivity::class.java)
-//            )
-//        }
 
         fun startForResult(activity: Activity?, requestCode: Int) {
             activity?.startActivityForResult(
                     Intent(activity, WxInfoActivity::class.java),
                     requestCode
             )
+        }
+
+        fun start(context: Context) {
+            context.startActivity(Intent(context, WxInfoActivity::class.java))
         }
     }
 }
