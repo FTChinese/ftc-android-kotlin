@@ -12,7 +12,7 @@ import com.ft.ftchinese.model.order.Cycle
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.NetworkException
-import org.jetbrains.anko.alert
+import org.jetbrains.anko.toast
 import java.io.IOException
 
 fun Activity.getActiveNetworkInfo(): NetworkInfo? {
@@ -136,7 +136,7 @@ fun Activity.handleApiError(resp: ClientError) {
             "membership_already_upgraded" -> getString(R.string.api_already_premium)
             else -> resp.message
         }
-        alert(msg, "Error").show()
+        toast(msg)
         return
     }
 
@@ -157,7 +157,7 @@ fun Activity.handleApiError(resp: ClientError) {
         }
     }
 
-    alert(msg, "Error").show()
+    toast(msg)
 }
 
 fun Activity.handleException(e: Exception) {
@@ -176,7 +176,7 @@ fun Activity.handleException(e: Exception) {
         }
     }
 
-    alert(msg, "Error").show()
+    toast(msg)
 }
 
 /**
