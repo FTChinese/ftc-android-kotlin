@@ -30,11 +30,7 @@ class UnlinkActivity : AppCompatActivity() {
     private var anchor: UnlinkAnchor? = null
 
     private fun showProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
+        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
