@@ -33,7 +33,7 @@
         app:layout_constraintBottom_toTopOf="@id/how_to"/>
 
     <TextView
-        style="@style/FTCText"
+        style="@style/AppTextBody"
         android:id="@+id/how_to"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

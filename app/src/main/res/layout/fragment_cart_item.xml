@@ -27,7 +27,7 @@
             android:textStyle="bold" />
 
         <TextView
-            style="@style/FTCTextCenter"
+            style="@style/AppTextBody.Center"
             android:id="@+id/tv_product_overview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

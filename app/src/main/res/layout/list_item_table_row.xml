@@ -7,7 +7,7 @@
 
     <!-- See https://developer.android.com/reference/android/support/constraint/ConstraintLayout#Chains -->
     <TextView
-        style="@style/FTCText"
+        style="@style/AppTextBody"
         android:id="@+id/label_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -20,7 +20,7 @@
         app:layout_constraintHorizontal_chainStyle="spread_inside" />
 
     <TextView
-        style="@style/FTCText"
+        style="@style/AppTextBody"
         android:id="@+id/value_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

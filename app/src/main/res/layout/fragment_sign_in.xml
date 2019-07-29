@@ -15,7 +15,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        style="@style/FTCText"/>
+        style="@style/AppTextBody"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/password_container"
@@ -43,19 +43,18 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/sign_in_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:text="@string/btn_login"
-        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="@+id/password_container"
         app:layout_constraintStart_toStartOf="@+id/password_container"
         app:layout_constraintTop_toBottomOf="@+id/password_container" />
 
-    <TextView
-        style="@style/FTCLink"
+    <com.google.android.material.button.MaterialButton
+        style="@style/AppButton.TextButton"
         android:id="@+id/forgot_password_link"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

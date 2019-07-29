@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <TextView
-        style="@style/FTCTextCenter"
+        style="@style/AppTextBody.Center"
         android:id="@+id/heading_tv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

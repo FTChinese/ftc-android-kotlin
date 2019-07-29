@@ -6,7 +6,7 @@
     android:id="@+id/swipe_refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.account.WxFragment">
+    tools:context=".ui.account.WxInfoFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -30,7 +30,7 @@
         <TextView
             android:id="@+id/wx_nickname"
             android:text="Wechat Nickname"
-            style="@style/FTCTitle"
+            style="@style/OrigamiText.ProductHeading3.Center"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
@@ -42,7 +42,7 @@
 
         <TextView
             android:id="@+id/instruction_tv"
-            style="@style/FTCText"
+            style="@style/AppTextBody"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"

@@ -15,7 +15,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        style="@style/FTCText"/>
+        style="@style/AppTextBody"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/password_container"
@@ -31,23 +31,19 @@
             android:id="@+id/password_input"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/label_password"
-            android:imeActionId="6"
-            android:imeActionLabel="@string/action_sign_in_short"
-            android:imeOptions="actionUnspecified"
+            android:hint="@string/hint_set_password"
             android:inputType="textPassword"
             android:maxLines="1"
             android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/sign_up_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:text="@string/btn_sign_up"
-        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="@+id/password_container"
         app:layout_constraintStart_toStartOf="@+id/password_container"
         app:layout_constraintTop_toBottomOf="@+id/password_container" />

@@ -40,7 +40,7 @@
 
     <TextView
         android:id="@+id/tv_formula"
-        style="@style/FTCTextCenter"
+        style="@style/AppTextBody.Center"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -51,7 +51,7 @@
 
     <TextView
         android:id="@+id/tv_premium_price"
-        style="@style/FTCTextCenter"
+        style="@style/AppTextBody.Center"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -62,7 +62,7 @@
 
     <TextView
         android:id="@+id/tv_balance"
-        style="@style/FTCTextCenter"
+        style="@style/AppTextBody.Center"
         android:layout_width="0dp"
         android:layout_marginTop="16dp"
         android:layout_height="wrap_content"
