@@ -47,6 +47,19 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
         viewModel = ViewModelProviders.of(this)
                 .get(LoginViewModel::class.java)
 
+
+        setup()
+        initUI()
+    }
+
+    private fun initUI() {
+        supportFragmentManager.commit {
+            replace(R.id.double_frag_primary, EmailFragment.newInstance())
+            replace(R.id.double_frag_secondary, WxLoginFragment.newInstance())
+        }
+    }
+
+    private fun setup() {
         viewModel.inProgress.observe(this, Observer<Boolean> {
             showProgress(it)
         })
@@ -111,11 +124,6 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
 
             finish()
         })
-
-        supportFragmentManager.commit {
-            replace(R.id.double_frag_primary, EmailFragment.newInstance())
-            replace(R.id.double_frag_secondary, WxLoginFragment.newInstance())
-        }
     }
 
     companion object {

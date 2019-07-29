@@ -15,6 +15,7 @@ import com.ft.ftchinese.model.Credentials
 import com.ft.ftchinese.model.TokenManager
 import kotlinx.android.synthetic.main.fragment_sign_in.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,6 +57,14 @@ class SignInFragment : ScopedFragment(),
         super.onViewCreated(view, savedInstanceState)
 
         instruct_sign_in_tv.text = getString(R.string.instruct_sign_in, email)
+
+        password_input.requestFocus()
+        sign_in_btn.isEnabled = false
+
+        forgot_password_link.setOnClickListener {
+            val e = email ?: return@setOnClickListener
+            ForgotPasswordActivity.start(context, e)
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -66,24 +75,23 @@ class SignInFragment : ScopedFragment(),
                     .get(LoginViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        viewModel.loginFormState.observe(this, Observer {
-            val loginState = it ?: return@Observer
-
-            sign_in_btn.isEnabled =loginState.isDataValid
-
-            if (loginState.passwordError != null) {
-                password_input.error = getString(loginState.passwordError)
-                password_input.requestFocus()
-            }
-        })
-
-        viewModel.inputEnabled.observe(this, Observer {
-            enableInput(it)
-        })
 
         password_input.afterTextChanged {
             viewModel.passwordDataChanged(password_input.text.toString().trim())
         }
+
+        viewModel.loginFormState.observe(this, Observer {
+            info("login form state: $it")
+            val loginState = it ?: return@Observer
+
+            sign_in_btn.isEnabled = loginState.isPasswordValid
+
+            if (loginState.error != null) {
+                password_input.error = getString(loginState.error)
+                password_input.requestFocus()
+            }
+        })
+
 
         sign_in_btn.setOnClickListener {
             if (activity?.isNetworkConnected() != true) {
@@ -92,6 +100,12 @@ class SignInFragment : ScopedFragment(),
             }
 
             val email = email ?: return@setOnClickListener
+
+            // TODO: move somewhere else.
+            if (password_input.text.toString().trim().isEmpty()) {
+                password_input.error = getString(R.string.error_invalid_password)
+                return@setOnClickListener
+            }
 
             enableInput(false)
             viewModel.showProgress(true)
@@ -103,10 +117,11 @@ class SignInFragment : ScopedFragment(),
             ))
         }
 
-        forgot_password_link.setOnClickListener {
-            val e = email ?: return@setOnClickListener
-            ForgotPasswordActivity.start(context, e)
-        }
+        viewModel.accountResult.observe(this, Observer {
+            if (it.error != null || it.exception != null) {
+                enableInput(true)
+            }
+        })
     }
 
     companion object {

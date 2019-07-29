@@ -66,18 +66,16 @@ class SignUpFragment : ScopedFragment(),
         viewModel.loginFormState.observe(this, Observer {
             val signUpState = it ?: return@Observer
 
-            sign_up_btn.isEnabled = signUpState.isDataValid
+            sign_up_btn.isEnabled = signUpState.isPasswordValid
 
-            if (signUpState.passwordError != null) {
-                password_input.error = getString(signUpState.passwordError)
+            if (signUpState.error != null) {
+                password_input.error = getString(signUpState.error)
                 password_input.requestFocus()
             }
         })
 
-        viewModel.inputEnabled.observe(this, Observer {
-            sign_up_btn.isEnabled = it
-        })
 
+        password_input.requestFocus()
         password_input.afterTextChanged {
             viewModel.passwordDataChanged(password_input.text.toString().trim())
         }
@@ -90,7 +88,12 @@ class SignUpFragment : ScopedFragment(),
 
             val e = email ?: return@setOnClickListener
 
-            it.isEnabled = false
+            if (password_input.text.toString().trim().isEmpty()) {
+                password_input.error = getString(R.string.error_invalid_password)
+                return@setOnClickListener
+            }
+
+            enableInput(false)
             viewModel.showProgress(true)
 
             viewModel.signUp(
@@ -102,6 +105,12 @@ class SignUpFragment : ScopedFragment(),
                 wxSession = sessionManager.loadWxSession()
             )
         }
+
+        viewModel.accountResult.observe(this, Observer {
+            if (it.error != null || it.exception != null) {
+                enableInput(true)
+            }
+        })
     }
 
     companion object {

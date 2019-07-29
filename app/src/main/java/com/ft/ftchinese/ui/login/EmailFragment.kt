@@ -26,6 +26,13 @@ class EmailFragment : ScopedFragment(),
         return inflater.inflate(R.layout.fragment_email, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        email_input.requestFocus()
+        next_btn.isEnabled = false
+    }
+
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
@@ -34,40 +41,47 @@ class EmailFragment : ScopedFragment(),
                     .get(LoginViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        viewModel.loginFormState.observe(this, Observer {
-            val loginState = it ?: return@Observer
-
-            next_btn.isEnabled = loginState.isDataValid
-
-            if (loginState.emailError != null) {
-                email_input.error = getString(loginState.emailError)
-                email_input.requestFocus()
-            }
-        })
-
-        viewModel.inputEnabled.observe(this, Observer {
-            next_btn.isEnabled = it
-        })
 
         // Validate email upon changed.
         email_input.afterTextChanged {
             viewModel.emailDataChanged(email_input.text.toString().trim())
         }
 
-        /**
-         * Check whether email exists.
-         */
+        viewModel.loginFormState.observe(this, Observer {
+            val loginState = it ?: return@Observer
+
+            next_btn.isEnabled = loginState.isEmailValid
+
+            if (loginState.error != null) {
+                email_input.error = getString(loginState.error)
+                email_input.requestFocus()
+            }
+        })
+
         next_btn.setOnClickListener {
             if (activity?.isNetworkConnected() != true) {
                 toast(R.string.prompt_no_network)
                 return@setOnClickListener
             }
 
-            it.isEnabled = false
+            enableInput(false)
             viewModel.showProgress(true)
 
             viewModel.checkEmail(email_input.text.toString().trim())
         }
+
+        // Enable or disable input depending on network result.
+        // Only re-enable button if there's any error.
+        viewModel.emailResult.observe(this, Observer {
+            if (it.error != null || it.exception != null) {
+                enableInput(true)
+            }
+        })
+    }
+
+    private fun enableInput(enable: Boolean) {
+        email_input.isEnabled = enable
+        next_btn.isEnabled = enable
     }
 
     companion object {
