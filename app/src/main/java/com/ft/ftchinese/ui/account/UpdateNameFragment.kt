@@ -17,12 +17,9 @@ import org.jetbrains.anko.support.v4.toast
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class UpdateNameFragment : ScopedFragment(), AnkoLogger {
     private lateinit var sessionManager: SessionManager
-    private lateinit var viewModel: UpdateViewModel
+    private lateinit var updateViewModel: UpdateViewModel
 
-    private fun enableInput(value: Boolean) {
-        user_name_input.isEnabled = value
-        save_btn.isEnabled = value
-    }
+
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -47,16 +44,37 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel = activity?.run {
+        updateViewModel = activity?.run {
             ViewModelProviders.of(this)
                     .get(UpdateViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
 
         setUp()
+    }
+
+    private fun setUp() {
+        // Validate input data.
+        updateViewModel.updateFormState.observe(this, Observer {
+            val updateState = it ?: return@Observer
+
+            save_btn.isEnabled = updateState.isDataValid
+
+            if (updateState.nameError != null) {
+                user_name_input.error = getString(updateState.nameError)
+                user_name_input.requestFocus()
+            }
+        })
+
+        user_name_input.afterTextChanged {
+            updateViewModel.userNameDataChanged(
+                    currentName = value_name_tv.text.toString(),
+                    newName = user_name_input.text.toString().trim()
+            )
+        }
 
         save_btn.setOnClickListener {
-            viewModel.userNameDataChanged(
+            updateViewModel.userNameDataChanged(
                     currentName = value_name_tv.text.toString(),
                     newName = user_name_input.text.toString().trim()
             )
@@ -69,40 +87,26 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
 
             val userId = sessionManager.loadAccount()?.id ?: return@setOnClickListener
 
-            viewModel.showProgress(true)
+            updateViewModel.showProgress(true)
             enableInput(false)
 
-            viewModel.updateUserName(
+            updateViewModel.updateUserName(
                     userId = userId,
                     name = user_name_input.text.toString().trim()
             )
         }
-    }
 
-    private fun setUp() {
-        // Validate input data.
-        viewModel.updateFormState.observe(this, Observer {
-            val updateState = it ?: return@Observer
-
-            save_btn.isEnabled = updateState.isDataValid
-
-            if (updateState.nameError != null) {
-                user_name_input.error = getString(updateState.nameError)
-                user_name_input.requestFocus()
+        // Re-enable button on error.
+        updateViewModel.updateResult.observe(this, Observer {
+            if (it.error != null || it.exception != null) {
+                enableInput(false)
             }
         })
+    }
 
-        // Re-enable save button in case of errors.
-        viewModel.inputEnabled.observe(this, Observer {
-            enableInput(it)
-        })
-
-        user_name_input.afterTextChanged {
-            viewModel.userNameDataChanged(
-                    currentName = value_name_tv.text.toString(),
-                    newName = user_name_input.text.toString().trim()
-            )
-        }
+    private fun enableInput(value: Boolean) {
+        user_name_input.isEnabled = value
+        save_btn.isEnabled = value
     }
 
     companion object {

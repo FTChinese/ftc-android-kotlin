@@ -15,13 +15,14 @@ import kotlinx.coroutines.withContext
 
 class UpdateViewModel : ViewModel() {
     val inProgress = MutableLiveData<Boolean>()
-    val inputEnabled = MutableLiveData<Boolean>()
 
     private val _updateForm = MutableLiveData<UpdateFormState>()
     val updateFormState: LiveData<UpdateFormState> = _updateForm
 
     private val _updateResult = MutableLiveData<BinaryResult>()
     val updateResult: LiveData<BinaryResult> = _updateResult
+
+    val sendEmailResult = MutableLiveData<BinaryResult>()
 
     fun emailDataChanged(currentEmail: String, newEmail: String) {
         if (!isEmailValid(newEmail)) {
@@ -174,11 +175,41 @@ class UpdateViewModel : ViewModel() {
         }
     }
 
-    fun showProgress(show: Boolean) {
-        inProgress.value = show
+    fun requestVerification(userId: String) {
+        viewModelScope.launch {
+            try {
+                val done = withContext(Dispatchers.IO) {
+                    FtcUser(userId).requestVerification()
+                }
+
+                sendEmailResult.value = BinaryResult(
+                        success = done
+                )
+
+            } catch (e: ClientError) {
+                val msgId = when (e.statusCode) {
+                    404 -> R.string.api_account_not_found
+                    422 -> when (e.error?.key) {
+                        "email_server_missing" -> R.string.api_email_server_down
+                        else -> null
+                    }
+                    else -> e.statusMessage()
+                }
+
+                sendEmailResult.value = BinaryResult(
+                        error = msgId,
+                        exception = e
+                )
+
+            } catch (e: Exception) {
+                sendEmailResult.value = BinaryResult(
+                        exception = e
+                )
+            }
+        }
     }
 
-    fun enableInput(enable: Boolean) {
-        inputEnabled.value = enable
+    fun showProgress(show: Boolean) {
+        inProgress.value = show
     }
 }

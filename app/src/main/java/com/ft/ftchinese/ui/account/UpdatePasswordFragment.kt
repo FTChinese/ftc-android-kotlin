@@ -22,7 +22,7 @@ import java.lang.Exception
 class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var viewModel: UpdateViewModel
+    private lateinit var updateViewModel: UpdateViewModel
 
     private fun enableInput(value: Boolean) {
         old_password_input.isEnabled = value
@@ -46,7 +46,7 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel = activity?.run {
+        updateViewModel = activity?.run {
             ViewModelProviders.of(this)
                     .get(UpdateViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
@@ -55,10 +55,6 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
     }
 
     private fun setUp() {
-        // Re-enable input in case errors
-        viewModel.inputEnabled.observe(this, Observer {
-            enableInput(it)
-        })
 
         save_btn.setOnClickListener {
             val passwords = validate() ?: return@setOnClickListener
@@ -70,14 +66,21 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
 
             val userId = sessionManager.loadAccount()?.id ?: return@setOnClickListener
 
-            viewModel.showProgress(true)
+            updateViewModel.showProgress(true)
             enableInput(false)
 
-            viewModel.updatePassword(
+            updateViewModel.updatePassword(
                     userId = userId,
                     passwords = passwords
             )
         }
+
+        // Re-enable input in case errors
+        updateViewModel.updateResult.observe(this, Observer {
+            if (it.error != null || it.exception != null) {
+                enableInput(true)
+            }
+        })
     }
 
     private fun validate(): Passwords? {

@@ -18,12 +18,8 @@ import org.jetbrains.anko.support.v4.toast
 class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var viewModel: UpdateViewModel
-
-    private fun enableInput(value: Boolean) {
-        email_input.isEnabled = value
-        save_btn.isEnabled = value
-    }
+    private lateinit var updateViewModel: UpdateViewModel
+    private var currentEmail: String? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -40,16 +36,18 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        value_email_tv.text = sessionManager.loadAccount()?.email
-        email_input.requestFocus()
+        currentEmail = sessionManager.loadAccount()?.email
+
         save_btn.isEnabled = false
+
+        label_email_tv.text = getString(R.string.label_current_email, currentEmail ?: getString(R.string.prompt_not_set))
     }
 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel = activity?.run {
+        updateViewModel = activity?.run {
             ViewModelProviders.of(this)
                     .get(UpdateViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
@@ -58,7 +56,7 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
         // Note this only works if user actually entered something.
         // If user does not enter anything, and clicked save button,
         // empty string will be submitted directly.
-        viewModel.updateFormState.observe(this, Observer {
+        updateViewModel.updateFormState.observe(this, Observer {
             val updateState = it ?: return@Observer
 
             save_btn.isEnabled = updateState.isDataValid
@@ -69,20 +67,16 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
             }
         })
 
-        viewModel.inputEnabled.observe(this, Observer {
-            enableInput(it)
-        })
-
         email_input.afterTextChanged {
-            viewModel.emailDataChanged(
-                    currentEmail = value_email_tv.text.toString(),
+            updateViewModel.emailDataChanged(
+                    currentEmail = currentEmail ?: "",
                     newEmail = email_input.text.toString().trim()
             )
         }
 
         save_btn.setOnClickListener {
-            viewModel.emailDataChanged(
-                    currentEmail = value_email_tv.text.toString(),
+            updateViewModel.emailDataChanged(
+                    currentEmail = currentEmail ?: "",
                     newEmail = email_input.text.toString().trim()
             )
 
@@ -95,13 +89,24 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
             val userId = sessionManager.loadAccount()?.id ?: return@setOnClickListener
 
             enableInput(false)
-            viewModel.showProgress(true)
+            updateViewModel.showProgress(true)
 
-            viewModel.updateEmail(
+            updateViewModel.updateEmail(
                     userId = userId,
                     email = email_input.text.toString().trim()
             )
         }
+
+        updateViewModel.updateResult.observe(this, Observer {
+            if (it.error != null || it.exception != null) {
+                enableInput(true)
+            }
+        })
+    }
+
+    private fun enableInput(value: Boolean) {
+        email_input.isEnabled = value
+        save_btn.isEnabled = value
     }
 
     companion object {
