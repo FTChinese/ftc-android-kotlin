@@ -3,6 +3,8 @@ package com.ft.ftchinese.ui.login
 /**
  * Data validation state of the login form.
  */
-data class LoginFormState (val emailError: Int? = null,
-                           val passwordError: Int? = null,
-                           val isDataValid: Boolean = false)
+data class LoginFormState (
+        val error: Int? = null,
+        val isEmailValid: Boolean = false,
+        val isPasswordValid: Boolean = false
+)
