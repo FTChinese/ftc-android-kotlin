@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.pay.SubscriptionActivity">
+    tools:context=".ui.pay.StripeSubActivity">
 
     <include
         layout="@layout/simple_toolbar" />
@@ -16,7 +16,7 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar"/>
 
     <TextView
-        style="@style/FTCText"
+        style="@style/AppTextBody"
         android:id="@+id/tv_payment_method"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -37,6 +37,16 @@
         app:layout_constraintTop_toBottomOf="@id/tv_payment_method"
         android:text="* 使用Stripe订阅FT中文网会员以英镑计价"/>
 
+    <FrameLayout
+        android:id="@+id/frag_outcome"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/price_footnote"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_subscribe"
         android:layout_width="match_parent"
@@ -45,6 +55,7 @@
         android:text="订阅"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="1.0"/>
+
 
     <include layout="@layout/progress_bar"/>
 
