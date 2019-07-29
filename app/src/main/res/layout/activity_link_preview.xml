@@ -20,7 +20,7 @@
             android:layout_height="wrap_content">
 
             <TextView
-                style="@style/FTCText"
+                style="@style/AppTextBody"
                 android:id="@+id/heading_tv"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -62,7 +62,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/link_icon"/>
 
             <TextView
-                style="@style/FTCText"
+                style="@style/AppTextBody"
                 android:id="@+id/result_tv"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

@@ -25,7 +25,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="下拉可更新会员信息"
+                android:text="下拉更新会员信息"
                 android:textAlignment="center"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
@@ -48,37 +48,42 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="@string/label_member_tier"
-                    android:textAlignment="center"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                    android:textColor="@color/colorBlack"
-                    android:textSize="36sp"
+                    style="@style/OrigamiText.ProductHeading1.Center"
                     android:textStyle="bold" />
 
                 <TextView
-                    style="@style/FTCTextCenter"
+                    style="@style/OrigamiText.Body1.Light.Center"
                     android:id="@+id/tv_expire_date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
-                    android:text="@string/label_member_duration"
-                    android:textSize="18sp" />
+                    android:text="@string/label_member_duration" />
+
+                <TextView
+                    style="@style/OrigamiText.Body1.Light.Center"
+                    android:id="@+id/tv_sub_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/label_stripe_status"/>
+
+                <TextView
+                    style="@style/OrigamiText.Body1.Light.Center"
+                    android:id="@+id/tv_auto_renewal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/auto_renewal"/>
 
             </LinearLayout>
 
-            <!--<androidx.recyclerview.widget.RecyclerView-->
-                <!--android:id="@+id/member_rv"-->
-                <!--android:layout_width="0dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginStart="16dp"-->
-                <!--android:layout_marginEnd="16dp"-->
-                <!--android:layout_marginTop="16dp"-->
-                <!--app:layout_constraintStart_toStartOf="parent"-->
-                <!--app:layout_constraintEnd_toEndOf="parent"-->
-                <!--app:layout_constraintTop_toBottomOf="@id/swipe_tip" />-->
-
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/resubscribe_btn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -89,7 +94,7 @@
                 app:layout_constraintTop_toBottomOf="@id/member_status_wrapper"/>
 
             <!-- Only show this button who is a member and will expire -->
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/renew_btn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -99,9 +104,8 @@
                 app:layout_constraintEnd_toEndOf="@id/member_status_wrapper"
                 app:layout_constraintTop_toBottomOf="@+id/resubscribe_btn"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/upgrade_btn"
-                style="@style/FTCText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"

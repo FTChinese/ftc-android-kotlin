@@ -23,7 +23,7 @@
             android:orientation="vertical"
             android:padding="16dp">
             <TextView
-                style="@style/FTCHeading"
+                style="@style/OrigamiText.ProductHeading2"
                 android:id="@+id/card_brand"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -31,7 +31,7 @@
                 android:text="@string/default_bank_brand"/>
 
             <TextView
-                style="@style/FTCText"
+                style="@style/AppTextBody"
                 android:id="@+id/card_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
