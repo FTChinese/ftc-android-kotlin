@@ -30,7 +30,7 @@ import java.io.ByteArrayInputStream
  * Contained both by [AccountActivity] and [WxInfoActivity]
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class WxFragment : ScopedFragment(),
+class WxInfoFragment : ScopedFragment(),
         AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
@@ -60,7 +60,7 @@ class WxFragment : ScopedFragment(),
         initUI()
 
         link_email_btn.setOnClickListener {
-            LinkActivity.startForResult(activity, RequestCode.LINK)
+            LinkFtcActivity.startForResult(activity, RequestCode.LINK)
         }
 
         // Start unlinking accounts.
@@ -118,7 +118,7 @@ class WxFragment : ScopedFragment(),
 
             val acnt = sessionManager.loadAccount() ?: return@Observer
 
-            toast(R.string.progress_refresh_account)
+            toast(R.string.refreshing_account)
 
             viewModel.refresh(acnt)
         })
@@ -198,7 +198,7 @@ class WxFragment : ScopedFragment(),
                     return@setOnRefreshListener
                 }
 
-                toast(R.string.progress_refresh_account)
+                toast(R.string.refreshing_account)
 
                 viewModel.refreshWxInfo(wxSession)
             }
@@ -256,6 +256,6 @@ class WxFragment : ScopedFragment(),
 
     companion object {
         @JvmStatic
-        fun newInstance() = WxFragment()
+        fun newInstance() = WxInfoFragment()
     }
 }
