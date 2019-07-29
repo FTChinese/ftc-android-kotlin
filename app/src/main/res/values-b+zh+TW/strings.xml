@@ -246,7 +246,7 @@
     <string name="formatter_wx_name">微信使用者 %1$s</string>
 
     <string name="progress_updating">更新資料…</string>
-    <string name="progress_refresh_account">更新帳號資料…</string>
+    <string name="refreshing_account">更新帳號資料…</string>
     <string name="progress_fetching">获取資料…</string>
     <string name="progress_request_verification">正在寄送驗證信件…</string>
     <string name="progress_logging">正在登入…</string>
