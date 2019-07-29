@@ -18,7 +18,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.base.*
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
-import com.ft.ftchinese.ui.StringResult
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
@@ -54,7 +53,6 @@ class CheckOutActivity : ScopedAppActivity(),
     private var plan: Plan? = null
 
     private var payMethod: PayMethod? = null
-    private var payWithStripe = false
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
@@ -155,16 +153,6 @@ class CheckOutActivity : ScopedAppActivity(),
         accountViewModel.accountRefreshed.observe(this, Observer {
             onAccountRefreshed(it)
         })
-
-        // Used when current user is not a Stripe customer.
-        // Whe the pay button is clicked, first creates
-        // the customer id, then get stripe plan.
-        // If customer id already exists, this will not be used.
-        // The pay button will activate get stripe plan
-        // directly.
-        accountViewModel.customerIdResult.observe(this, Observer {
-            onCustomerIdCreated(it)
-        })
     }
 
     private fun onSelectPayMethod() {
@@ -218,11 +206,12 @@ class CheckOutActivity : ScopedAppActivity(),
 
         tracker.checkOut(plan, pm)
 
+        showProgress(true)
+        enablePayBtn(false)
+
         when (pm) {
             PayMethod.ALIPAY -> {
                 toast(R.string.request_order)
-                showProgress(true)
-                enablePayBtn(false)
                 checkOutViewModel.createAliOrder(account, plan)
             }
 
@@ -237,65 +226,21 @@ class CheckOutActivity : ScopedAppActivity(),
                 }
 
                 toast(R.string.request_order)
-                showProgress(true)
-                enablePayBtn(false)
                 checkOutViewModel.createWxOrder(account, plan)
             }
 
             PayMethod.STRIPE -> {
-                toast(R.string.stripe_init)
 
-                payWithStripe = true
-
-                if (account.stripeId == null) {
-                    info("Stripe customer id not set")
-                    showProgress(true)
-                    enablePayBtn(false)
-                    accountViewModel.createCustomer(account)
-                    return
-                }
-
-                SubscriptionActivity.startForResult(
+                StripeSubActivity.startForResult(
                         this,
                         RequestCode.PAYMENT,
                         plan
                 )
+                showProgress(false)
             }
         }
     }
 
-    private fun onCustomerIdCreated(result: StringResult?) {
-        if (result == null) {
-            return
-        }
-
-        if (result.error != null) {
-            showProgress(false)
-            enablePayBtn(true)
-            toast(result.error)
-            return
-        }
-
-        if (result.exception != null) {
-            showProgress(false)
-            enablePayBtn(true)
-            handleException(result.exception)
-            return
-        }
-
-        if (result.success == null) {
-            showProgress(false)
-            enablePayBtn(true)
-            return
-        }
-
-        sessionManager.saveStripeId(result.success)
-
-        SubscriptionActivity.startForResult(
-                this,
-                RequestCode.PAYMENT,
-                plan)
-    }
 
     private fun onAliOrderFetch(orderResult: AliOrderResult?) {
         showProgress(false)
@@ -379,7 +324,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
             sessionManager.updateMembership(updatedMembership)
 
-            toast(R.string.progress_refresh_account)
+            toast(R.string.refreshing_account)
             showProgress(true)
 
             accountViewModel.refresh(account)
@@ -422,6 +367,7 @@ class CheckOutActivity : ScopedAppActivity(),
             sessionManager.saveAccount(remoteAccount)
         }
 
+        MemberActivity.start(this)
         setResult(Activity.RESULT_OK)
         finish()
     }
