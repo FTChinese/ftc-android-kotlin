@@ -383,12 +383,17 @@ data class Account(
 
     fun createSubscription(params: StripeSubParams): StripeSub? {
 
-        val (_, body ) = Fetch()
+        val fetch = Fetch()
                 .post(SubscribeApi.STRIPE_SUB)
                 .setUserId(id)
                 .noCache()
                 .jsonBody(json.toJsonString(params))
-                .responseApi()
+
+        if (unionId != null) {
+            fetch.setUnionId(unionId)
+        }
+
+        val (_, body ) = fetch.responseApi()
 
         return if (body == null) {
             null
@@ -398,11 +403,16 @@ data class Account(
     }
 
     fun refreshStripeSub(): StripeSub? {
-        val (_, body) = Fetch()
+         val fetch = Fetch()
                 .get(SubscribeApi.STRIPE_SUB)
                 .setUserId(id)
                 .noCache()
-                .responseApi()
+
+        if (unionId != null) {
+            fetch.setUnionId(unionId)
+        }
+
+        val (_, body) = fetch.responseApi()
 
         return if (body == null) {
             null
@@ -412,13 +422,17 @@ data class Account(
     }
 
     fun upgradeStripeSub(params: StripeSubParams): StripeSub? {
-        val (_, body) = Fetch()
+        val fetch = Fetch()
                 .patch(SubscribeApi.STRIPE_SUB)
                 .setUserId(id)
                 .noCache()
                 .jsonBody(json.toJsonString(params))
-                .responseApi()
 
+        if (unionId != null) {
+            fetch.setUnionId(unionId)
+        }
+
+        val (_, body) = fetch.responseApi()
         return if (body == null) {
             null
         } else {
