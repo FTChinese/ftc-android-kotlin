@@ -25,7 +25,6 @@
         <!-- To make both the dammed MaterialAlertDialog and AlertDialog appears the same. -->
         <item name="alertDialogTheme">@style/DialogTheme</item>
         <item name="materialAlertDialogTheme">@style/DialogTheme</item>
-
         <item name="textInputStyle">@style/AppTextField</item>
     </style>
 
@@ -34,33 +33,16 @@
         <item name="boxStrokeColor">@color/colorClaret</item>
     </style>
 
-    <!-- Style for toolbar -->
-    <style name="AppToolbar" parent="Widget.AppCompat.Toolbar">
-        <item name="android:background">@color/colorWheat</item>
-    </style>
-
-    <!-- Style for bottom navigation -->
-    <style name="AppBottomNavigation" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
-        <item name="itemBackground">@color/colorWheat</item>
-        <item name="itemTextColor">@color/bottom_nav_text_color_selector</item>
-        <item name="itemIconTint">@color/bottom_nav_text_color_selector</item>
-        <item name="itemHorizontalTranslationEnabled">false</item>
-    </style>
-
     <!-- Style for buttons -->
     <style name="AppButton" parent="Widget.MaterialComponents.Button">
         <item name="backgroundTint">@color/btn_bg_color_selector</item>
-        <item name="android:textSize">18sp</item>
         <item name="android:textColor">@color/colorWhite</item>
         <item name="cornerRadius">0dp</item>
-
-    </style>
-
-    <!-- A larger button -->
-    <style name="AppButton.Big">
+        <item name="android:textSize">18sp</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingBottom">8dp</item>
     </style>
+
 
     <!-- A button sticking to the bottom the screen and fills the horizontal space of the screen -->
     <style name="AppButton.BottomSticky">
@@ -73,16 +55,16 @@
     <style name="AppButton.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <!--Stroke controls the border color -->
         <item name="strokeColor">@color/btn_stroke_color_selector</item>
-        <item name="android:textSize">18sp</item>
         <item name="android:textColor">@color/colorTeal</item>
         <item name="cornerRadius">0dp</item>
-
-    </style>
-
-    <!-- A larger outlined button -->
-    <style name="AppButton.OutlinedButton.Big">
+        <item name="android:textSize">18sp</item>
         <item name="android:paddingTop">8dp</item>
         <item name="android:paddingBottom">8dp</item>
+    </style>
+
+    <style name="AppButton.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/btn_text_color_selector</item>
     </style>
 
     <!-- Style to force color on dialog buttons -->
@@ -110,32 +92,71 @@
         <item name="android:paddingBottom">4dp</item>
     </style>
 
-    <style name="FTCTitle">
+    <!-- Style for toolbar -->
+    <style name="AppToolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:background">@color/colorWheat</item>
+    </style>
+
+    <!-- Style for bottom navigation -->
+    <style name="AppBottomNavigation" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
+        <item name="itemBackground">@color/colorWheat</item>
+        <item name="itemTextColor">@color/bottom_nav_text_color_selector</item>
+        <item name="itemIconTint">@color/bottom_nav_text_color_selector</item>
+        <item name="itemHorizontalTranslationEnabled">false</item>
+    </style>
+
+
+    <!-- 34sp text as product heading -->
+    <style name="OrigamiText.ProductHeading1" parent="TextAppearance.MaterialComponents.Headline4"/>
+    <style name="OrigamiText.ProductHeading1.Center">
         <item name="android:textAlignment">center</item>
-        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Headline</item>
     </style>
 
-    <style name="FTCHeading">
-        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Headline</item>
+    <!-- 24 sp text as product heading -->
+    <style name="OrigamiText.ProductHeading2" parent="TextAppearance.MaterialComponents.Headline5"/>
+    <style name="OrigamiText.ProductHeading2.Center">
+        <item name="android:textAlignment">center</item>
     </style>
 
-    <style name="FTCText">
-        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body1</item>
+    <!-- 20 sp text as product heading -->
+    <style name="OrigamiText.ProductHeading3" parent="TextAppearance.MaterialComponents.Headline6"/>
+    <style name="OrigamiText.ProductHeading3.Center">
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <!-- 18sp text body with variants -->
+    <style name="OrigamiText.Body1" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textSize">18sp</item>
+    </style>
+    <style name="OrigamiText.Body1.Center">
+        <item name="android:textAlignment">center</item>
+    </style>
+    <style name="OrigamiText.Body1.Light">
+        <item name="android:textColor">@color/colorBlack60</item>
+    </style>
+    <style name="OrigamiText.Body1.Light.Center">
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <!-- 16sp text with variants -->
+    <style name="OrigamiText.Body2" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:textSize">16sp</item>
+    </style>
+    <style name="OrigamiText.Body2.Center">
+        <item name="android:textAlignment">center</item>
+    </style>
+    <style name="OrigamiText.Body2.Light">
+        <item name="android:textColor">@color/colorBlack60</item>
+    </style>
+
+    <!-- Deprecated -->
+    <style name="AppTextBody" parent="TextAppearance.MaterialComponents.Body1">
         <item name="android:textSize">18sp</item>
     </style>
 
-    <style name="FTCTextCenter" parent="FTCText">
+    <style name="AppTextBody.Center">
         <item name="android:textAlignment">center</item>
     </style>
-
-    <style name="FTCLink" parent="FTCText">
-        <item name="android:textColor">@color/colorTeal</item>
-    </style>
-
-    <style name="SectionHead">
-        <item name="android:textSize">18sp</item>
-    </style>
-
 
 
 </resources>
