@@ -232,6 +232,13 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
     fun refreshStripeSub(account: Account) {
         viewModelScope.launch {
             try {
+                val stripeSub = withContext(Dispatchers.IO) {
+                    account.refreshStripeSub()
+                }
+
+                stripeSubResult.value = StripeSubResult(
+                        success = stripeSub
+                )
 
             } catch (e: ClientError) {
                 if (e.statusCode == 404) {
