@@ -82,15 +82,15 @@ class AccountActivity : ScopedAppActivity(),
 
         supportFragmentManager.commit {
             if (account.isWxOnly) {
-                replace(R.id.frag_account, WxFragment.newInstance())
+                replace(R.id.frag_account, WxInfoFragment.newInstance())
             } else {
-                replace(R.id.frag_account, FtcFragment.newInstance())
+                replace(R.id.frag_account, FtcAccountV2Fragment.newInstance())
             }
         }
     }
 
     /**
-     * Receive results from [UpdateActivity] or [LinkActivity]
+     * Receive results from [UpdateActivity] or [LinkFtcActivity]
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
