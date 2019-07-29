@@ -6,9 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <TextView
         android:id="@+id/label_email_tv"
-        style="@style/FTCText"
+        style="@style/AppTextBody"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/label_current_email"
@@ -19,17 +20,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <TextView
-        style="@style/FTCText"
-        android:id="@+id/value_email_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/prompt_not_set"
-        app:layout_constraintStart_toStartOf="@id/label_email_tv"
-        app:layout_constraintEnd_toEndOf="@id/label_email_tv"
-        app:layout_constraintTop_toBottomOf="@id/label_email_tv"/>
-
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/email_container"
@@ -38,7 +28,7 @@
         android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="@id/label_email_tv"
         app:layout_constraintStart_toStartOf="@id/label_email_tv"
-        app:layout_constraintTop_toBottomOf="@id/value_email_tv">
+        app:layout_constraintTop_toBottomOf="@id/label_email_tv">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/email_input"
@@ -51,7 +41,7 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/save_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
