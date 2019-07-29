@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class PaymentOutcome(
+data class StripeOutcome(
         val invoice: String,
         val plan: String,
         val period: String,

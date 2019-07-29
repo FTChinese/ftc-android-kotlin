@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.BuildConfig
@@ -15,6 +16,7 @@ import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
+import com.ft.ftchinese.ui.StringResult
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
@@ -23,7 +25,7 @@ import com.stripe.android.exception.InvalidRequestException
 import com.stripe.android.model.*
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import kotlinx.android.synthetic.main.activity_subscription.*
+import kotlinx.android.synthetic.main.activity_stripe_sub.*
 import kotlinx.android.synthetic.main.fragment_cart_item.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -36,7 +38,7 @@ import org.threeten.bp.format.DateTimeFormatter
 import kotlin.Exception
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class SubscriptionActivity : ScopedAppActivity(),
+class StripeSubActivity : ScopedAppActivity(),
         AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
@@ -53,7 +55,7 @@ class SubscriptionActivity : ScopedAppActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_subscription)
+        setContentView(R.layout.activity_stripe_sub)
 
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -78,7 +80,11 @@ class SubscriptionActivity : ScopedAppActivity(),
         })
 
         checkOutViewModel.stripeSubResult.observe(this, Observer {
-            onSubcriptionResult(it)
+            onSubscriptionResult(it)
+        })
+
+        accountViewModel.customerIdResult.observe(this, Observer {
+            onCustomerIdCreated(it)
         })
 
         idempotency = Idempotency.getInstance(this)
@@ -94,21 +100,13 @@ class SubscriptionActivity : ScopedAppActivity(),
                         .publishableKey
         )
 
-        val account = sessionManager.loadAccount()
-
-        subType = account?.membership?.subType(plan)
-
         initUI()
-        setupCustomerSession()
-
-        if (isNetworkConnected() && account != null) {
-            checkOutViewModel.getStripePlan(account, plan)
-        }
+        setup()
     }
 
     private fun initUI() {
 
-        buildText(planCache.load(plan?.getId()))
+        buildProductText(planCache.load(plan?.getId()))
 
         tv_payment_method.setOnClickListener {
             PaymentMethodsActivityStarter(this)
@@ -124,6 +122,56 @@ class SubscriptionActivity : ScopedAppActivity(),
         if (subType == OrderUsage.UPGRADE) {
             btn_subscribe.text = getString(R.string.title_upgrade)
         }
+    }
+
+    private fun setup() {
+        val account = sessionManager.loadAccount() ?: return
+
+        subType = account.membership.subType(plan)
+
+        if (!isNetworkConnected()) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        checkOutViewModel.getStripePlan(account, plan)
+
+        if (account.stripeId == null) {
+            showProgress(true)
+            enableButton(false)
+            toast(R.string.stripe_init)
+            accountViewModel.createCustomer(account)
+            return
+        }
+
+        setupCustomerSession()
+    }
+
+    private fun onCustomerIdCreated(result: StringResult?) {
+        if (result == null) {
+            return
+        }
+
+        if (result.error != null) {
+            showProgress(false)
+            toast(result.error)
+            return
+        }
+
+        if (result.exception != null) {
+            showProgress(false)
+            handleException(result.exception)
+            return
+        }
+
+        if (result.success == null) {
+            showProgress(false)
+            return
+        }
+
+        sessionManager.saveStripeId(result.success)
+
+        setupCustomerSession()
     }
 
     private fun setupCustomerSession() {
@@ -154,7 +202,7 @@ class SubscriptionActivity : ScopedAppActivity(),
         CustomerSession.getInstance().retrieveCurrentCustomer(customerRetrievalListener)
     }
 
-    private val customerRetrievalListener = object : CustomerSession.ActivityCustomerRetrievalListener<SubscriptionActivity>(this) {
+    private val customerRetrievalListener = object : CustomerSession.ActivityCustomerRetrievalListener<StripeSubActivity>(this) {
         override fun onCustomerRetrieved(customer: Customer) {
             showProgress(false)
             enableButton(true)
@@ -170,7 +218,7 @@ class SubscriptionActivity : ScopedAppActivity(),
         }
     }
 
-    private fun buildText(stripePlan: StripePlan?) {
+    private fun buildProductText(stripePlan: StripePlan?) {
         if (stripePlan != null) {
 
             tv_net_price.visibility = View.VISIBLE
@@ -201,7 +249,7 @@ class SubscriptionActivity : ScopedAppActivity(),
             return
         }
 
-        buildText(result.success)
+        buildProductText(result.success)
 
         planCache.save(result.success, plan?.getId())
     }
@@ -255,7 +303,7 @@ class SubscriptionActivity : ScopedAppActivity(),
         }
     }
 
-    private fun onSubcriptionResult(subResult: StripeSubResult?) {
+    private fun onSubscriptionResult(subResult: StripeSubResult?) {
         showProgress(false)
 
 
@@ -294,14 +342,17 @@ class SubscriptionActivity : ScopedAppActivity(),
             sub.succeeded() -> {
                 toast("Success")
 
+                supportFragmentManager.commit {
+                    replace(R.id.frag_outcome, StripeOutcomeFragment.newInstance(buildOutcome(sub)))
+                }
+                
                 val account = sessionManager.loadAccount() ?: return
                 toast(R.string.prompt_refreshing)
 
-//                accountViewModel.refresh(account)
+                accountViewModel.refresh(account)
 
-                PaymentResultActivity.start(this, buildOutcome(sub))
-//                setResult(Activity.RESULT_OK)
-//                finish()
+//                PaymentResultActivity.start(this, buildOutcome(sub))
+//
             }
             sub.failure() -> {
                 alert(
@@ -410,11 +461,11 @@ class SubscriptionActivity : ScopedAppActivity(),
         }
     }
 
-    private fun buildOutcome(sub: StripeSub): PaymentOutcome {
+    private fun buildOutcome(sub: StripeSub): StripeOutcome {
         val start = sub.currentPeriodStart.format(DateTimeFormatter.ISO_LOCAL_DATE)
         val end = sub.currentPeriodEnd.format(DateTimeFormatter.ISO_LOCAL_DATE)
 
-        return PaymentOutcome(
+        return StripeOutcome(
                 invoice = sub.latestInvoice.number,
                 plan = getTierCycleText(plan?.tier, plan?.cycle) ?: "",
                 period = "$start - $end",
@@ -445,22 +496,21 @@ class SubscriptionActivity : ScopedAppActivity(),
             return
         }
 
-        val localAccount = sessionManager.loadAccount() ?: return
         toast(R.string.prompt_updated)
+        sessionManager.saveAccount(accountResult.success)
 
-        val remoteAccount = accountResult.success
-        /**
-         * If remote membership is newer than local
-         * one, save remote data; otherwise do
-         * nothing in case server notification comes
-         * late.
-         */
-        if (remoteAccount.membership.isNewer(localAccount.membership)) {
-            sessionManager.saveAccount(remoteAccount)
+        showDone()
+    }
+
+    private fun showDone() {
+        btn_subscribe.isEnabled = true
+
+        btn_subscribe.text = getString(R.string.done)
+        btn_subscribe.setOnClickListener {
+            setResult(Activity.RESULT_OK)
+            MemberActivity.start(this)
+            finish()
         }
-
-        setResult(Activity.RESULT_OK)
-        finish()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -494,7 +544,7 @@ class SubscriptionActivity : ScopedAppActivity(),
         fun  startForResult(activity: Activity, requestCode: Int, plan: Plan?) {
             activity.startActivityForResult(Intent(
                     activity,
-                    SubscriptionActivity::class.java
+                    StripeSubActivity::class.java
             ).apply {
                 putExtra(EXTRA_FTC_PLAN, plan)
             }, requestCode)
