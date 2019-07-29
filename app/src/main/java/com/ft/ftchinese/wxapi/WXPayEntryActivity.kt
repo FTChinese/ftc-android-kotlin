@@ -204,7 +204,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         sessionManager?.updateMembership(updatedMember)
 
-        updateProgress(getString(R.string.progress_refresh_account))
+        updateProgress(getString(R.string.refreshing_account))
 
         val refreshAccount = withContext(Dispatchers.IO) {
             account.refresh()
