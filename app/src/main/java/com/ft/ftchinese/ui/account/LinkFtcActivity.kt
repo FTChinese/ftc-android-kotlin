@@ -20,7 +20,7 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class LinkActivity : ScopedAppActivity(), AnkoLogger {
+class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: LoginViewModel
@@ -116,7 +116,7 @@ class LinkActivity : ScopedAppActivity(), AnkoLogger {
                 return@Observer
             }
 
-            LinkPreviewActivity.startForResult(this@LinkActivity, loginResult.success)
+            LinkPreviewActivity.startForResult(this@LinkFtcActivity, loginResult.success)
 
         })
 
@@ -154,7 +154,7 @@ class LinkActivity : ScopedAppActivity(), AnkoLogger {
         @JvmStatic
         fun startForResult(activity: Activity?, requestCode: Int) {
             activity?.startActivityForResult(
-                    Intent(activity, LinkActivity::class.java),
+                    Intent(activity, LinkFtcActivity::class.java),
                     requestCode
             )
 
