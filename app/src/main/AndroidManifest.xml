@@ -105,7 +105,7 @@
             android:label="@string/title_stripe_setting"
             android:parentActivityName=".ui.account.AccountActivity" />
         <activity
-            android:name=".ui.account.LinkActivity"
+            android:name=".ui.account.LinkFtcActivity"
             android:label="@string/title_link_email"
             android:parentActivityName=".ui.account.AccountActivity" />
         <activity
@@ -141,7 +141,7 @@
             android:label="@string/title_checkout"
             android:parentActivityName=".ui.pay.PaywallActivity" />
         <activity
-            android:name=".ui.pay.SubscriptionActivity"
+            android:name=".ui.pay.StripeSubActivity"
             android:label="@string/pay_method_stripe"
             android:launchMode="singleTask"
             android:parentActivityName=".ui.pay.CheckOutActivity">
@@ -156,9 +156,7 @@
                     android:scheme="ftc" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.pay.PaymentResultActivity"
-            android:label="Stripe订阅"/>
+
         <activity
             android:name=".ui.pay.MyOrdersActivity"
             android:label="@string/title_my_orders"
