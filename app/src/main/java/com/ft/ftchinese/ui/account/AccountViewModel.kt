@@ -24,8 +24,6 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     val uiType = MutableLiveData<LoginMethod>()
     val shouldReAuth = MutableLiveData<Boolean>()
 
-    val sendEmailResult = MutableLiveData<BinaryResult>()
-
     private val _accountRefreshed = MutableLiveData<AccountResult>()
     val accountRefreshed: LiveData<AccountResult> = _accountRefreshed
 
@@ -133,40 +131,6 @@ class AccountViewModel : ViewModel(), AnkoLogger {
 
             } catch (e: Exception) {
                 _avatarResult.value = ImageResult(
-                        exception = e
-                )
-            }
-        }
-    }
-
-    fun requestVerification(userId: String) {
-        viewModelScope.launch {
-            try {
-                val done = withContext(Dispatchers.IO) {
-                    FtcUser(userId).requestVerification()
-                }
-
-                sendEmailResult.value = BinaryResult(
-                        success = done
-                )
-
-            } catch (e: ClientError) {
-                val msgId = when (e.statusCode) {
-                    404 -> R.string.api_account_not_found
-                    422 -> when (e.error?.key) {
-                        "email_server_missing" -> R.string.api_email_server_down
-                        else -> null
-                    }
-                    else -> e.statusMessage()
-                }
-
-                sendEmailResult.value = BinaryResult(
-                        error = msgId,
-                        exception = e
-                )
-
-            } catch (e: Exception) {
-                sendEmailResult.value = BinaryResult(
                         exception = e
                 )
             }
