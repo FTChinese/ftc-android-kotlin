@@ -19,7 +19,7 @@ import org.jetbrains.anko.toast
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class UpdateActivity : ScopedAppActivity(), AnkoLogger {
 
-    private lateinit var viewModel: UpdateViewModel
+    private lateinit var updateViewModel: UpdateViewModel
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var sessionManager: SessionManager
 
@@ -34,7 +34,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_fragment_single)
+        setContentView(R.layout.activity_fragment_double)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -42,7 +42,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             setDisplayShowTitleEnabled(true)
         }
 
-        viewModel = ViewModelProviders.of(this)
+        updateViewModel = ViewModelProviders.of(this)
                 .get(UpdateViewModel::class.java)
 
         accountViewModel = ViewModelProviders.of(this)
@@ -53,53 +53,55 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
         val fm = supportFragmentManager
                 .beginTransaction()
 
-        when (intent.getIntExtra(TARGET_FRAG, 0)) {
-            FRAG_EMAIL -> {
+        when (intent.getSerializableExtra(TARGET_FRAG)) {
+            AccountRowType.EMAIL -> {
                 supportActionBar?.setTitle(R.string.title_change_email)
-                fm.replace(R.id.single_frag_holder, UpdateEmailFragment.newInstance())
+                if (sessionManager.loadAccount()?.isVerified == false) {
+                    fm.replace(R.id.double_frag_primary, RequestVerificationFragment.newInstance())
+                }
+
+                fm.replace(R.id.double_frag_secondary, UpdateEmailFragment.newInstance())
             }
-            FRAG_USER_NAME -> {
+            AccountRowType.USER_NAME -> {
                 supportActionBar?.setTitle(R.string.title_change_username)
-                fm.replace(R.id.single_frag_holder, UpdateNameFragment.newInstance())
+                fm.replace(R.id.double_frag_primary, UpdateNameFragment.newInstance())
             }
-            FRAG_PASSWORD -> {
+            AccountRowType.PASSWORD -> {
                 supportActionBar?.setTitle(R.string.title_change_password)
-                fm.replace(R.id.single_frag_holder, UpdatePasswordFragment.newInstance())
+                fm.replace(R.id.double_frag_primary, UpdatePasswordFragment.newInstance())
             }
         }
 
         fm.commit()
 
-
-
         setUp()
     }
 
     private fun setUp() {
-        viewModel.inProgress.observe(this, Observer<Boolean> {
+        updateViewModel.inProgress.observe(this, Observer<Boolean> {
             showProgress(it)
         })
 
-        viewModel.updateResult.observe(this, Observer {
+        updateViewModel.updateResult.observe(this, Observer {
             val updateResult = it ?: return@Observer
 
             showProgress(false)
 
             if (updateResult.error != null) {
                 toast(updateResult.error)
-                viewModel.enableInput(true)
+//                updateViewModel.enableInput(true)
                 return@Observer
             }
 
             if (updateResult.exception != null) {
                 handleException(updateResult.exception)
-                viewModel.enableInput(true)
+//                updateViewModel.enableInput(true)
                 return@Observer
             }
 
             if (!updateResult.success) {
                 toast("Failed to save")
-                viewModel.enableInput(true)
+//                updateViewModel.enableInput(true)
                 return@Observer
             }
 
@@ -151,33 +153,12 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     companion object {
 
         private const val TARGET_FRAG = "extra_target_fragment"
-        private const val FRAG_EMAIL = 1
-        private const val FRAG_USER_NAME = 2
-        private const val FRAG_PASSWORD = 3
 
         @JvmStatic
-        fun startForEmail(context: Context?) {
-            context?.startActivity(
+        fun start(context: Context, rowType: AccountRowType?) {
+            context.startActivity(
                     Intent(context, UpdateActivity::class.java).apply {
-                        putExtra(TARGET_FRAG, FRAG_EMAIL)
-                    }
-            )
-        }
-
-        @JvmStatic
-        fun startForUserName(context: Context?) {
-            context?.startActivity(
-                    Intent(context, UpdateActivity::class.java).apply {
-                        putExtra(TARGET_FRAG, FRAG_USER_NAME)
-                    }
-            )
-        }
-
-        @JvmStatic
-        fun startForPassword(context: Context?) {
-            context?.startActivity(
-                    Intent(context, UpdateActivity::class.java).apply {
-                        putExtra(TARGET_FRAG, FRAG_PASSWORD)
+                        putExtra(TARGET_FRAG, rowType)
                     }
             )
         }
