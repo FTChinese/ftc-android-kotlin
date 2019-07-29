@@ -16,10 +16,7 @@ import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.model.order.Cycle
-import com.ft.ftchinese.model.order.PayMethod
-import com.ft.ftchinese.model.order.Tier
-import com.ft.ftchinese.model.order.subsPlans
+import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
@@ -29,6 +26,16 @@ import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
+
+private val subStatusText = mapOf(
+    StripeSubStatus.Active to R.string.sub_status_active,
+        StripeSubStatus.Incomplete to R.string.sub_status_incomplete,
+        StripeSubStatus.IncompleteExpired to R.string.sub_status_incomplete_expired,
+        StripeSubStatus.Trialing to R.string.sub_status_trialing,
+        StripeSubStatus.PastDue to R.string.sub_status_past_due,
+        StripeSubStatus.Canceled to R.string.sub_status_cancled,
+        StripeSubStatus.Unpaid to R.string.sub_status_unpaid
+)
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class MemberActivity : ScopedAppActivity(),
@@ -94,35 +101,53 @@ class MemberActivity : ScopedAppActivity(),
             return
         }
 
+        // TODO: what if user ended stripe pay, and change
+        // to other payment methods like ali, or wechat?
+        // In such cases, this app has no way to know the
+        // the changes. And if we start refresh,  API
+        // will continue to fetch user's stripe subscription,
+        // and the invalid stipe data will override
+        // user's later changed valid data!
+        // What's more, even this step errored, we still
+        // need to proceed with account refreshing!
         if (account.membership.payMethod == PayMethod.STRIPE) {
-            toast("Refresh stripe subscription")
+            toast(R.string.refreshing_stripe_sub)
 
             checkOutViewModel.refreshStripeSub(account)
 
             return
         }
 
+        startRefreshingAccount(account)
+    }
 
-        toast(R.string.prompt_refreshing)
+    private fun startRefreshingAccount(account: Account) {
+        toast(R.string.refreshing_account)
         accountViewModel.refresh(account)
     }
 
     private fun onStripeSubRefreshed(subResult: StripeSubResult?) {
-        if (subResult == null) {
+        val account = sessionManager.loadAccount()
+        if (account == null) {
             stopRefresh()
-            toast("Cannot fetch your subscription data from stripe")
+            return
+        }
+
+        if (subResult == null) {
+            toast(R.string.stripe_refreshing_failed)
+            startRefreshingAccount(account)
             return
         }
 
         if (subResult.error != null) {
             toast(subResult.error)
-            stopRefresh()
+            startRefreshingAccount(account)
             return
         }
 
         if (subResult.exception != null) {
             handleException(subResult.exception)
-            stopRefresh()
+            startRefreshingAccount(account)
             return
         }
 
@@ -133,14 +158,7 @@ class MemberActivity : ScopedAppActivity(),
         // So here we do not perform checks on subResult == null.
         // It is just an indicator that network finished,
         // regardless of result.
-        val account = sessionManager.loadAccount()
-        if (account == null) {
-            stopRefresh()
-            return
-        }
-
-        toast(R.string.prompt_refreshing)
-        accountViewModel.refresh(account)
+        startRefreshingAccount(account)
     }
 
     private fun onAccountRefreshed(accountResult: AccountResult?) {
@@ -196,6 +214,24 @@ class MemberActivity : ScopedAppActivity(),
         } else {
             formatLocalDate(account.membership.expireDate)
         }
+
+        if (account.membership.payMethod == PayMethod.STRIPE) {
+            val statusId = subStatusText[account.membership.status]
+            val statusStr = if (statusId == null) account.membership.status.toString() else getString(statusId)
+
+            tv_sub_status.text = getString(
+                    R.string.label_stripe_status,
+                    statusStr)
+        } else {
+            tv_sub_status.visibility = View.GONE
+        }
+
+        // Show auto renewal status to all members.
+        val autoRenewalId = if (account.membership.autoRenew == true) R.string.yes else R.string.no
+        tv_auto_renewal.text = getString(
+                R.string.auto_renewal,
+                getString(autoRenewalId)
+        )
 
         hideButton()
         setupButtons(account.membership)
@@ -265,7 +301,7 @@ class MemberActivity : ScopedAppActivity(),
             upgrade_btn.visibility = View.VISIBLE
             // Switch plan.
             upgrade_btn.setOnClickListener {
-                SubscriptionActivity.startForResult(
+                StripeSubActivity.startForResult(
                         this,
                         RequestCode.PAYMENT,
                         subsPlans.of(
