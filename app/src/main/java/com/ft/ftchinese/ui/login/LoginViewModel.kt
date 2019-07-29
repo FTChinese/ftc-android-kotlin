@@ -23,7 +23,6 @@ import org.jetbrains.anko.info
 class LoginViewModel : ViewModel(), AnkoLogger {
 
     val inProgress = MutableLiveData<Boolean>()
-    val inputEnabled = MutableLiveData<Boolean>()
 
     private val _loginForm = MutableLiveData<LoginFormState>()
     val loginFormState: LiveData<LoginFormState> =_loginForm
@@ -39,17 +38,17 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
     fun emailDataChanged(email: String) {
         if (!isEmailValid(email)) {
-            _loginForm.value = LoginFormState(emailError = R.string.error_invalid_email)
+            _loginForm.value = LoginFormState(error = R.string.error_invalid_email)
         } else {
-            _loginForm.value = LoginFormState(isDataValid = true)
+            _loginForm.value = LoginFormState(isEmailValid = true)
         }
     }
 
     fun passwordDataChanged(password: String) {
         if (!isPasswordValid(password)) {
-            _loginForm.value = LoginFormState(passwordError = R.string.error_invalid_password)
+            _loginForm.value = LoginFormState(error = R.string.error_invalid_password)
         } else{
-            _loginForm.value = LoginFormState(isDataValid = true)
+            _loginForm.value = LoginFormState(isPasswordValid = true)
         }
     }
 
@@ -81,8 +80,6 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                         exception = Exception("API error ${resp.code()}")
                 )
 
-                inputEnabled.value = true
-
             } catch (e: ClientError) {
 
                 if (e.statusCode== 404) {
@@ -96,15 +93,11 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                         exception = e
                 )
 
-                inputEnabled.value = true
-
             } catch (e:Exception) {
 
                 _emailResult.value = FindEmailResult(
                         exception = e
                 )
-
-                inputEnabled.value = true
             }
         }
     }
@@ -123,7 +116,6 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                             error = R.string.error_not_loaded
                     )
 
-                    inputEnabled.value = true
                     return@launch
                 }
 
@@ -140,14 +132,11 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                         exception = e
                 )
 
-                inputEnabled.value = true
             } catch (e: Exception) {
 
                 _accountResult.value = AccountResult(
                         exception = e
                 )
-
-                inputEnabled.value = true
             }
         }
     }
@@ -215,7 +204,6 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                     _accountResult.value = AccountResult(
                             error = R.string.error_not_loaded
                     )
-                    inputEnabled.value = true
                     return@launch
                 }
 
@@ -246,13 +234,8 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                         error = msgId,
                         exception = e
                 )
-
-                inputEnabled.value = true
             } catch (e: Exception) {
-
                 _accountResult.value = AccountResult(exception = e)
-
-                inputEnabled.value = true
             }
         }
     }
