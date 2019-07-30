@@ -111,8 +111,8 @@
     <string name="paywall_login_prompt">已經購買過？登入</string>
 
     <string name="order_id">訂單号：%1$s</string>
-    <string name="order_member_type">會員類型: %1$s</string>
-    <string name="order_duration">會員期限：%1$s ~ %2$s</string>
+    <string name="order_subscribed_plan">會員類型: %1$s</string>
+    <string name="order_period">會員期限：%1$s ~ %2$s</string>
     <string name="order_price">支付金额：%1$s</string>
     <string name="order_pay_method">支付方式：%1$s</string>
     <string name="order_creation_time">創建时间：%1$s</string>
@@ -124,11 +124,11 @@
     <string name="pay_method_ali">支付寶</string>
     <string name="pay_method_wechat">微信支付</string>
     <string name="pay_method_stripe">Stripe</string>
-    <string name="prompt_pay_method_unknown">請選擇支付方式</string>
+    <string name="pay_method_not_selected">請選擇支付方式</string>
 
-    <string name="check_out_default">支付</string>
+    <string name="check_out">支付</string>
     <string name="request_order">創建訂單…</string>
-    <string name="done">完成</string>
+    <string name="action_done">完成</string>
     <string name="renewal_not_allowed">您已經是會員了，請勿重複購買</string>
     <string name="order_cannot_be_created">無法創建訂單，請稍後再試</string>
     <string name="order_not_found">沒有查詢到訂單，請稍後刷新</string>
@@ -136,7 +136,7 @@
 
     <string name="subs_success">訂閱成功！</string>
     <string name="wxpay_not_supported">您的設備不支持微信支付</string>
-    <string name="wxpay_done">支付成功</string>
+    <string name="payment_done">支付成功</string>
     <string name="wxpay_refund">轉入退款</string>
     <string name="wxpay_not_paid">未支付</string>
     <string name="wxpay_closed">交易已關閉</string>
@@ -197,9 +197,9 @@
     <string name="prompt_exit">再按一次退出程序</string>
     <string name="prompt_ad_timer">跳過 %1$d</string>
 
-    <string name="prompt_refreshing">更新頁面</string>
+    <string name="refreshing_data">更新頁面</string>
     <string name="prompt_no_network">網路無連結，請檢查網路設置</string>
-    <string name="prompt_load_failure">無法下載頁面，請稍後再試</string>
+    <string name="loading_failed">無法下載頁面，請稍後再試</string>
     <string name="prompt_login_to_read">訂閱會員登入後可以閱讀</string>
     <string name="prompt_subscribe_to_read">僅限會員閱讀</string>
     <string name="prompt_premium_only">仅限高端會員閱讀</string>
@@ -236,9 +236,9 @@
     <string name="instruct_sign_up">信箱 %1$s 尚未註冊FT中文網帳號，请設置密碼建立帳號</string>
     <string name="instruct_sign_in">信箱 %1$s 已经註冊了FT中文網帳號，请输入登入密碼</string>
 
-    <string name="accounts_already_bound">两个帳號已經綁定，无需操作。如果您未看到綁定後的帳號信息，請返回&quot;帳號与安全&quot;後下拉刷新</string>
-    <string name="ftc_account_coupled">帳號 %1$s 已經綁定了其他微信帳號。一个FT 中文網帳號只能綁定一个微信帳號。</string>
-    <string name="wx_account_coupled">微信帳號 %1$s 已經綁定了其他FT中文網帳號。一个FT 中文網帳號只能綁定一个微信帳號。</string>
+    <string name="accounts_already_linked">两个帳號已經綁定，无需操作。如果您未看到綁定後的帳號信息，請返回&quot;帳號与安全&quot;後下拉刷新</string>
+    <string name="ftc_account_linked">帳號 %1$s 已經綁定了其他微信帳號。一个FT 中文網帳號只能綁定一个微信帳號。</string>
+    <string name="wx_account_linked">微信帳號 %1$s 已經綁定了其他FT中文網帳號。一个FT 中文網帳號只能綁定一个微信帳號。</string>
     <string name="accounts_member_valid">您的微信帳號和FT中文網的帳號均購買了會員服务，两个會員均未到期。合並帳號会删除其中一个帳號的會員信息。为保障您的權益，暂不支持綁定两个會員未过期的帳號。您可以寻求客服幫助。</string>
 
     <string name="greeting_wx_login">你好，%1$s！欢迎登入FT中文網。</string>
