@@ -113,7 +113,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                 if (userId == null) {
 
                     _accountResult.value = AccountResult(
-                            error = R.string.error_not_loaded
+                            error = R.string.loading_failed
                     )
 
                     return@launch
@@ -202,7 +202,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
                 if (userId == null) {
                     _accountResult.value = AccountResult(
-                            error = R.string.error_not_loaded
+                            error = R.string.loading_failed
                     )
                     return@launch
                 }
@@ -254,7 +254,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
             _accountResult.value = AccountResult(success = account)
         } catch (e: ClientError) {
             val msgId = if (e.statusCode == 404) {
-                R.string.error_not_loaded
+                R.string.loading_failed
             } else {
                 e.statusMessage()
             }
@@ -284,7 +284,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
         } catch (e: ClientError) {
             val msgId = if (e.statusCode == 404) {
-                R.string.error_not_loaded
+                R.string.loading_failed
             } else {
                 e.statusMessage()
             }
