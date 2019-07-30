@@ -5,15 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.Membership
 import com.ft.ftchinese.model.order.Tier
-import com.ft.ftchinese.ui.RowAdapter
-import com.ft.ftchinese.ui.TableRow
 import com.ft.ftchinese.util.formatLocalDate
 import com.ft.ftchinese.util.json
-import kotlinx.android.synthetic.main.fragment_membership.*
+import kotlinx.android.synthetic.main.fragment_link_target.*
 import org.jetbrains.anko.AnkoLogger
 
 /**
@@ -40,46 +37,20 @@ class LinkTargetFragment : Fragment(), AnkoLogger {
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
 
-        return inflater.inflate(R.layout.fragment_membership, container, false)
+        return inflater.inflate(R.layout.fragment_link_target, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        heading_tv.text = heading
-
-        val rows = buildRows(membership)
-
-        val viewManager = LinearLayoutManager(context)
-        val viewAdapter = RowAdapter(rows)
-
-        member_rv.apply {
-            setHasFixedSize(true)
-            layoutManager = viewManager
-            adapter = viewAdapter
+        tv_link_heading.text = heading
+        tv_link_member_tier.text = when (membership?.tier) {
+            Tier.STANDARD -> getString(R.string.tier_standard)
+            Tier.PREMIUM -> getString(R.string.tier_premium)
+            else -> getString(R.string.tier_free)
         }
-    }
+        tv_member_expire_date.text = formatLocalDate(membership?.expireDate) ?: ""
 
-    private fun buildRows(member: Membership?): Array<TableRow> {
-        if (member == null) {
-            return arrayOf()
-        }
-
-        val row1 = TableRow(
-                header = getString(R.string.label_member_tier),
-                data = when (member.tier) {
-                    Tier.STANDARD -> getString(R.string.tier_standard)
-                    Tier.PREMIUM -> getString(R.string.tier_premium)
-                    else -> getString(R.string.tier_free)
-                }
-        )
-
-        val row2 = TableRow(
-                header = getString(R.string.label_member_duration),
-                data = formatLocalDate(member.expireDate) ?: ""
-        )
-
-        return arrayOf(row1, row2)
     }
 
     companion object {
