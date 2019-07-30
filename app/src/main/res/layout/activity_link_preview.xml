@@ -20,11 +20,11 @@
             android:layout_height="wrap_content">
 
             <TextView
-                style="@style/AppTextBody"
+                style="@style/OrigamiText.ProductHeading3.Center"
                 android:id="@+id/heading_tv"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="您选择合并如下账号"
+                android:text="@string/link_heading"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
@@ -46,7 +46,7 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:scaleType="fitCenter"
-                android:src="@drawable/ic_import_export_teal_24dp"
+                android:src="@drawable/ic_link_teal_24dp"
                 app:layout_constraintDimensionRatio="h,1:1"
                 app:layout_constraintTop_toBottomOf="@id/frag_ftc_account"
                 app:layout_constraintStart_toStartOf="@id/heading_tv"
@@ -56,7 +56,6 @@
                 android:id="@+id/frag_wx_account"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
                 app:layout_constraintStart_toStartOf="@+id/frag_ftc_account"
                 app:layout_constraintEnd_toEndOf="@+id/frag_ftc_account"
                 app:layout_constraintTop_toBottomOf="@+id/link_icon"/>
@@ -71,13 +70,12 @@
                 app:layout_constraintEnd_toEndOf="@id/heading_tv"
                 app:layout_constraintTop_toBottomOf="@id/frag_wx_account"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/start_link_btn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="开始"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="32dp"
+                android:text="@string/action_start"
+                android:layout_marginTop="16dp"
                 app:layout_constraintStart_toStartOf="@+id/heading_tv"
                 app:layout_constraintEnd_toEndOf="@+id/heading_tv"
                 app:layout_constraintTop_toBottomOf="@id/result_tv"
