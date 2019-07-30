@@ -8,15 +8,12 @@ import android.view.View
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.model.Account
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.UnlinkAnchor
-import com.ft.ftchinese.ui.RowAdapter
-import com.ft.ftchinese.ui.TableRow
+import com.ft.ftchinese.model.order.PayMethod
 import kotlinx.android.synthetic.main.activity_unlink.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -87,7 +84,7 @@ class UnlinkActivity : AppCompatActivity() {
             // Start refreshing account.
             showProgress(true)
 
-            toast(R.string.prompt_refreshing)
+            toast(R.string.refreshing_data)
             accountViewModel.refresh(acnt)
         })
 
@@ -142,30 +139,20 @@ class UnlinkActivity : AppCompatActivity() {
 
     private fun initUI() {
         val account = sessionManager.loadAccount() ?: return
-        account_rv.apply {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(this@UnlinkActivity)
-            adapter = RowAdapter(buildRows(account))
-        }
+
+        unlink_ftc_account.text = arrayOf(getString(R.string.label_ftc_account), account.email).joinToString("\n")
+        unlink_wx_account.text = arrayOf(getString(R.string.label_wx_account), account.wechat.nickname).joinToString("\n")
 
         if (account.isMember) {
             supportFragmentManager.commit {
-                replace(R.id.frag_unlink_anchor, UnlinkAnchorFragment.newInstance())
+                replace(
+                        R.id.frag_unlink_anchor,
+                        UnlinkAnchorFragment.newInstance(
+                                account.membership.payMethod == PayMethod.STRIPE
+                        )
+                )
             }
         }
-    }
-
-    private fun buildRows(account: Account): Array<TableRow> {
-        return arrayOf(
-                TableRow(
-                        header = getString(R.string.label_ftc_account),
-                        data = account.email
-                ),
-                TableRow(
-                        header = getString(R.string.label_wx_account),
-                        data = account.wechat.nickname ?: ""
-                )
-        )
     }
 
     companion object {
