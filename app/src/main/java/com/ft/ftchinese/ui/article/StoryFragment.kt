@@ -80,7 +80,7 @@ class StoryFragment : ScopedFragment(),
         storyBrief = arguments?.getParcelable(ARG_CHANNEL_ITEM)
 
         if (storyBrief == null) {
-            toast(R.string.prompt_load_failure)
+            toast(R.string.loading_failed)
             return
         }
 
@@ -102,7 +102,7 @@ class StoryFragment : ScopedFragment(),
             return
         }
 
-        toast(R.string.prompt_refreshing)
+        toast(R.string.refreshing_data)
 
         // Load and render
         articleModel.loadFromRemote(item, currentLang)
