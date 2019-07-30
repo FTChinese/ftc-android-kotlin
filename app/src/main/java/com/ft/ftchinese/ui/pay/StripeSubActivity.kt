@@ -265,7 +265,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
         val pm = paymentMethod
         if (pm == null) {
-            toast(R.string.prompt_pay_method_unknown)
+            toast(R.string.pay_method_not_selected)
             return
         }
 
@@ -347,7 +347,7 @@ class StripeSubActivity : ScopedAppActivity(),
                 }
                 
                 val account = sessionManager.loadAccount() ?: return
-                toast(R.string.prompt_refreshing)
+                toast(R.string.refreshing_data)
 
                 accountViewModel.refresh(account)
 
@@ -505,7 +505,7 @@ class StripeSubActivity : ScopedAppActivity(),
     private fun showDone() {
         btn_subscribe.isEnabled = true
 
-        btn_subscribe.text = getString(R.string.done)
+        btn_subscribe.text = getString(R.string.action_done)
         btn_subscribe.setOnClickListener {
             setResult(Activity.RESULT_OK)
             MemberActivity.start(this)
