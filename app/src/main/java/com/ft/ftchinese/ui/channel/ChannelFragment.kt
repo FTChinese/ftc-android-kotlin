@@ -214,7 +214,7 @@ class ChannelFragment : ScopedFragment(),
 
     override fun onRefresh() {
 
-        toast(R.string.prompt_refreshing)
+        toast(R.string.refreshing_data)
 
         initLoading()
     }
