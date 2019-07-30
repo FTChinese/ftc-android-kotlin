@@ -18,7 +18,19 @@
         android:title="Show Unlink Activity"
         app:showAsAction="never"/>
 
-    <item android:id="@+id/menu_show_unlink_anchor"
-        android:title="Show Unlink Anchor"
+    <item android:id="@+id/menu_wxpay_activity"
+        android:title="Show Wechat Pay Result"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/menu_latest_order"
+        android:title="Show Latest Order"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/menu_wx_oauth"
+        android:title="Show Wechat OAuth Progress"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/menu_link_preview"
+        android:title="Preview Accounts Link"
         app:showAsAction="never"/>
 </menu>
