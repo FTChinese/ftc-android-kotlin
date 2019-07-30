@@ -92,7 +92,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/AppButton.BottomSticky"
-        android:text="@string/check_out_default"
+        android:text="@string/check_out"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="1.0"/>
 
