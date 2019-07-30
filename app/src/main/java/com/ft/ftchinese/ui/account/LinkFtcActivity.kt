@@ -19,6 +19,9 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
+/**
+ * Lead a wechat user to sign up an FTC account.
+ */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
 
@@ -71,7 +74,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
             }
 
             if (findResult.success == null) {
-                toast(R.string.error_not_loaded)
+                toast(R.string.loading_failed)
                 return@Observer
             }
 
@@ -106,7 +109,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
             }
 
             if (loginResult.success == null) {
-                toast(R.string.error_not_loaded)
+                toast(R.string.loading_failed)
                 return@Observer
             }
 
