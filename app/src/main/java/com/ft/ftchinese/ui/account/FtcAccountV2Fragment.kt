@@ -62,8 +62,6 @@ class FtcAccountV2Fragment : ScopedFragment(), AnkoLogger {
             setHasFixedSize(true)
             layoutManager = layout
             adapter = viewAdapter
-
-
         }
 
         updateUI()
