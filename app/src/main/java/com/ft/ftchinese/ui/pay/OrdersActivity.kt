@@ -103,8 +103,8 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
 
             OrderRow(
                     orderId = getString(R.string.order_id, it.id),
-                    memberType = getString(R.string.order_member_type, tierCycle),
-                    duration = getString(R.string.order_duration, it.startDate, it.endDate),
+                    plan = getString(R.string.order_subscribed_plan, tierCycle),
+                    period = getString(R.string.order_period, it.startDate, it.endDate),
                     price = getString(R.string.order_price, price),
                     payMethod = getString(R.string.order_pay_method, payMethod),
                     creationTime = getString(R.string.order_creation_time, formatISODateTime(it.createdAt))
