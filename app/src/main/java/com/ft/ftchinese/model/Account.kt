@@ -277,7 +277,7 @@ data class Account(
     }
 
 
-    fun wxQueryOrder(orderId: String): WxOrderQuery? {
+    fun wxQueryOrder(orderId: String): WxPaymentStatus? {
         val fetch = Fetch().get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
 
         if (id.isNotBlank()) {
@@ -296,7 +296,7 @@ data class Account(
         return if (body == null) {
             null
         } else {
-            json.parse<WxOrderQuery>(body)
+            json.parse<WxPaymentStatus>(body)
         }
     }
 
@@ -335,7 +335,7 @@ data class Account(
                 .setUserId(id)
                 .noCache()
                 .body()
-                .responseStripe()
+                .responseApi()
 
         if (body == null) {
             return null
