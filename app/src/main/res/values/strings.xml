@@ -137,7 +137,7 @@
     <string name="add_or_select_payment_method">添加银行卡或选择默认支付方式</string>
     <string name="set_default_payment_method">设为默认支付方式</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
-    <string name="stripe_customer_not_found">Stripe用户不存在，请检查账号或者重新登陆</string>
+    <string name="stripe_customer_not_found">Stripe用户不存在，请检查账号或者重新登录</string>
 
     <string name="sub_status_incomplete">支付未完成</string>
     <string name="sub_status_incomplete_expired">支付已过期</string>
