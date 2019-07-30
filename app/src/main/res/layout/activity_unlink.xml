@@ -10,6 +10,7 @@
         layout="@layout/simple_toolbar" />
 
     <TextView
+        style="@style/OrigamiText.ProductHeading3.Center"
         android:id="@+id/unlink_guide"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -20,27 +21,53 @@
         android:text="@string/unlink_guide"
         android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintBottom_toTopOf="@id/unlink_ftc_account"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/account_rv"
+    <TextView
+        style="@style/OrigamiText.Body1.Center"
+        android:id="@+id/unlink_ftc_account"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:text="@string/label_ftc_account"
+        android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="@id/unlink_guide"
         app:layout_constraintEnd_toEndOf="@id/unlink_guide"
-        app:layout_constraintTop_toBottomOf="@id/unlink_guide"/>
+        app:layout_constraintTop_toBottomOf="@id/unlink_guide"
+        app:layout_constraintBottom_toTopOf="@id/unlink_icon"/>
+
+    <ImageView
+        android:id="@+id/unlink_icon"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:src="@drawable/link_off_24px"
+        app:layout_constraintDimensionRatio="h,1:1"
+        app:layout_constraintTop_toBottomOf="@id/unlink_ftc_account"
+        app:layout_constraintBottom_toTopOf="@id/unlink_wx_account"
+        app:layout_constraintStart_toStartOf="@id/unlink_guide"
+        app:layout_constraintEnd_toEndOf="@id/unlink_guide"/>
+
+    <TextView
+        style="@style/OrigamiText.Body1.Center"
+        android:id="@+id/unlink_wx_account"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/label_wx_account"
+        app:layout_constraintStart_toStartOf="@id/unlink_guide"
+        app:layout_constraintEnd_toEndOf="@id/unlink_guide"
+        app:layout_constraintTop_toBottomOf="@id/unlink_icon"
+        app:layout_constraintBottom_toTopOf="@id/frag_unlink_anchor"/>
+
 
     <FrameLayout
         android:id="@+id/frag_unlink_anchor"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         app:layout_constraintStart_toStartOf="@id/unlink_guide"
         app:layout_constraintEnd_toEndOf="@id/unlink_guide"
-        app:layout_constraintTop_toBottomOf="@id/account_rv"/>
+        app:layout_constraintTop_toBottomOf="@id/unlink_wx_account"/>
 
 
     <com.google.android.material.button.MaterialButton
