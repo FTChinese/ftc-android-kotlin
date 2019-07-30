@@ -10,7 +10,7 @@ import android.os.SystemClock
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.TestActivity
+import com.ft.ftchinese.TestActivity
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.util.concurrent.TimeUnit

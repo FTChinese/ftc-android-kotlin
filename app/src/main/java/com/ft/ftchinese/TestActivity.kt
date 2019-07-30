@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui
+package com.ft.ftchinese
 
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.view.Menu
@@ -14,12 +13,21 @@ import android.view.MenuItem
 import android.view.View
 import androidx.core.content.edit
 import androidx.fragment.app.commit
-import com.ft.ftchinese.R
+import com.ft.ftchinese.base.ScopedAppActivity
+import com.ft.ftchinese.model.Account
+import com.ft.ftchinese.model.LoginMethod
+import com.ft.ftchinese.model.Membership
+import com.ft.ftchinese.model.Wechat
+import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.service.PollService
+import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
 import com.ft.ftchinese.ui.account.UnlinkAnchorFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
+import com.ft.ftchinese.ui.pay.LatestOrderActivity
 import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.wxapi.WXEntryActivity
+import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import kotlinx.android.synthetic.main.activity_test.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -28,9 +36,14 @@ import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
+import org.threeten.bp.LocalDate
+import org.threeten.bp.ZonedDateTime
 import java.io.File
 
-class TestActivity : AppCompatActivity(), AnkoLogger {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class TestActivity : ScopedAppActivity(), AnkoLogger {
+
+    private lateinit var orderManger: OrderManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +55,8 @@ class TestActivity : AppCompatActivity(), AnkoLogger {
             setDisplayShowTitleEnabled(true)
         }
 
+
+        orderManger = OrderManager.getInstance(this)
 
         info("Internal directory of this app: $filesDir")
         info("Internal directory for this app's temporary cache files: $cacheDir")
@@ -295,11 +310,58 @@ class TestActivity : AppCompatActivity(), AnkoLogger {
                 UnlinkActivity.startForResult(this, RequestCode.UNLINK)
                 true
             }
-            R.id.menu_show_unlink_anchor -> {
-                supportFragmentManager.commit {
-                    replace(R.id.test_container, UnlinkAnchorFragment.newInstance())
-                }
-                
+            R.id.menu_wxpay_activity -> {
+                // Create a mock order.
+                // This order actually exists, since you
+                // Wechat does not provide a fake test
+                // mechanism.
+                orderManger.save(Subscription(
+                        id = "FTEFD5E11FDFA709E0",
+                        tier = Tier.PREMIUM,
+                        cycle = Cycle.YEAR,
+                        cycleCount = 1,
+                        extraDays = 1,
+                        amount = 1998.00,
+                        usageType = OrderUsage.CREATE,
+                        payMethod = PayMethod.WXPAY,
+                        createdAt = ZonedDateTime.now()
+                ))
+                WXPayEntryActivity.start(this)
+                true
+            }
+            R.id.menu_latest_order -> {
+                LatestOrderActivity.start(this)
+                true
+            }
+            R.id.menu_wx_oauth -> {
+                WXEntryActivity.start(this)
+                true
+            }
+            R.id.menu_link_preview -> {
+                LinkPreviewActivity.startForResult(this, Account(
+                        id = "",
+                        unionId = "AgqiTngwsasF6r8m83jOdhZRolJ9",
+                        stripeId = null,
+                        userName = null,
+                        email = "",
+                        isVerified =  false,
+                        avatarUrl = null,
+                        isVip = false,
+                        loginMethod = LoginMethod.WECHAT,
+                        wechat = Wechat(
+                                nickname = "aliquam_quas_minima",
+                                avatarUrl = "https://randomuser.me/api/portraits/thumb/men/17.jpg"
+                        ),
+                        membership = Membership(
+                                id = "mmb_bOWD32Qf3Xzd",
+                                tier = Tier.STANDARD,
+                                cycle = Cycle.YEAR,
+                                expireDate = LocalDate.now().plusDays(30),
+                                payMethod = PayMethod.WXPAY,
+                                autoRenew = false,
+                                status = null
+                        )
+                ))
                 true
             }
             else -> super.onOptionsItemSelected(item)
