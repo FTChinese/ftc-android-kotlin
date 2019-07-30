@@ -11,13 +11,22 @@ import kotlinx.android.synthetic.main.card_order.view.*
 class OrderAdapter(private var orders: List<OrderRow>) :
         RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
 
-    inner class ViewHolder (view: View): RecyclerView.ViewHolder(view) {
-        val orderIdView: TextView = view.order_id_tv
-        val tierCycleView: TextView = view.tier_cycle_tv
-        val durationView: TextView = view.duration_tv
-        val netPriceView: TextView = view.net_price_tv
-        val payMethodView: TextView = view.pay_method_tv
-        val createdAtView: TextView = view.created_at_tv
+    class ViewHolder (view: View): RecyclerView.ViewHolder(view) {
+        private val orderIdView: TextView = view.order_id_tv
+        private val planView: TextView = view.order_subscribed_plan
+        private val amountView: TextView = view.tv_order_amount
+        private val payMethodView: TextView = view.tv_payment_method
+        private val createdAtView: TextView = view.tv_creation_time
+        private val periodView: TextView = view.tv_order_period
+
+        fun bind(row: OrderRow) {
+            orderIdView.text = row.orderId
+            planView.text = row.plan
+            amountView.text = row.price
+            payMethodView.text = row.payMethod
+            createdAtView.text = row.creationTime
+            periodView.text = row.period
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -32,12 +41,7 @@ class OrderAdapter(private var orders: List<OrderRow>) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val row = orders[position]
 
-        holder.orderIdView.text = row.orderId
-        holder.tierCycleView.text = row.memberType
-        holder.durationView.text = row.duration
-        holder.netPriceView.text = row.price
-        holder.payMethodView.text = row.payMethod
-        holder.createdAtView.text = row.creationTime
+        holder.bind(row)
     }
 
     fun setData(orders: List<OrderRow>) {
@@ -47,9 +51,9 @@ class OrderAdapter(private var orders: List<OrderRow>) :
 
 data class OrderRow(
         val orderId: String,
-        val memberType: String,
-        val duration: String,
+        val plan: String,
         val price: String,
         val payMethod: String,
-        val creationTime: String
+        val creationTime: String,
+        val period: String
 )
