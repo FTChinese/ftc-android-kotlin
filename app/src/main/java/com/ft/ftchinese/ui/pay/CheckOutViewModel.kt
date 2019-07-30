@@ -16,9 +16,9 @@ import org.jetbrains.anko.info
 
 class CheckOutViewModel : ViewModel(), AnkoLogger {
 
-
-    val inputEnabled = MutableLiveData<Boolean>()
     val wxOrderResult = MutableLiveData<WxOrderResult>()
+    val wxPayResult = MutableLiveData<WxPayResult>()
+
     val aliOrderResult = MutableLiveData<AliOrderResult>()
 //    val clientSecretResult = MutableLiveData<StringResult>()
     val stripePlanResult = MutableLiveData<StripePlanResult>()
@@ -26,11 +26,6 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
 
     val upgradePreviewResult = MutableLiveData<UpgradePreviewResult>()
     val freeUpgradeResult = MutableLiveData<UpgradeResult>()
-
-    // Enable/Disable a UI, like button.
-    fun enableInput(v: Boolean) {
-        inputEnabled.value = v
-    }
 
     fun previewUpgrade(account: Account) {
         viewModelScope.launch {
@@ -125,6 +120,24 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 )
             } catch (e: Exception) {
                 wxOrderResult.value = WxOrderResult(
+                        exception = e
+                )
+            }
+        }
+    }
+
+    fun queryWxPayStatus(account: Account, orderId: String) {
+        viewModelScope.launch {
+            try {
+                val paymentStatus = withContext(Dispatchers.IO) {
+                    account.wxQueryOrder(orderId)
+                }
+
+                wxPayResult.value = WxPayResult(
+                        success = paymentStatus
+                )
+            } catch (e: Exception) {
+                wxPayResult.value = WxPayResult(
                         exception = e
                 )
             }
@@ -259,23 +272,4 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
             }
         }
     }
-
-//    fun createPaymentIntent(account: Account, orderId: String) {
-//        viewModelScope.launch {
-//            try {
-//                val secret = withContext(Dispatchers.IO) {
-//                    account.createPaymentIntent(orderId)
-//                }
-//
-//                clientSecretResult.value = StringResult(
-//                        success = secret
-//                )
-//
-//            } catch (e: Exception) {
-//                clientSecretResult.value = StringResult(
-//                        exception = e
-//                )
-//            }
-//        }
-//    }
 }
