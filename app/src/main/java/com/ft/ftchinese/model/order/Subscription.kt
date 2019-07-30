@@ -52,39 +52,26 @@ open class Subscription(
         var endDate: LocalDate? = null
 ) {
 
-    private fun setDuration(start: LocalDate) {
-        startDate = start
-
-        endDate = when (cycle) {
-            Cycle.YEAR -> start.plusYears(cycleCount).plusDays(extraDays)
-            Cycle.MONTH -> start.plusMonths(cycleCount).plusDays(extraDays)
-        }
-    }
-
-    /**
-     * Confirm a subscription and return the new Membership.
-     */
-    fun confirm(m: Membership): Membership {
+    fun withConfirmation(member: Membership): Subscription {
         val now = ZonedDateTime.now()
                 .truncatedTo(ChronoUnit.SECONDS)
         val today = now.toLocalDate()
 
-        // If current membership does not have expire date,
-        // it means user is not member currently, use
-        // today as startDate;
-        // For upgrading the starting date is also today.
         val start = when {
-            m.expireDate == null -> today
+            member.expireDate == null -> today
             usageType == OrderUsage.UPGRADE -> today
-            m.expireDate.isBefore(today) -> today
-            else -> m.expireDate
+            member.isExpired -> today
+            else -> member.expireDate
         }
 
         confirmedAt = now
+        startDate = start
+        endDate = when (cycle) {
+            Cycle.YEAR -> start.plusYears(cycleCount).plusDays(extraDays)
+            Cycle.MONTH -> start.plusMonths(cycleCount).plusDays(extraDays)
+        }
 
-        setDuration(start)
-
-        return Membership(tier = tier, cycle = cycle, expireDate = endDate)
+        return this
     }
 
     /**
