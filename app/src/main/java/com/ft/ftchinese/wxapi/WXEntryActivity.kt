@@ -1,5 +1,6 @@
 package com.ft.ftchinese.wxapi
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -11,8 +12,10 @@ import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
+import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.login.LoginViewModel
+import com.ft.ftchinese.ui.login.WxOAuthResult
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
@@ -27,6 +30,8 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import kotlin.Exception
 
+private const val EXTRA_UI_TEST = "extra_ui_test"
+
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     private lateinit var api: IWXAPI
@@ -37,36 +42,10 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_wechat)
-
         setSupportActionBar(toolbar)
-
-        hideUI()
-
-        setUp()
 
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
 
-        try {
-            api.handleIntent(intent, this)
-        } catch (e: Exception) {
-            info(e)
-        }
-
-        info("onCreate called")
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-
-        info("onNewIntent")
-        setIntent(intent)
-
-        setUp()
-
-        api.handleIntent(intent, this)
-    }
-
-    private fun setUp() {
         sessionManager = SessionManager.getInstance(this)
 
         loginViewModel = ViewModelProviders.of(this)
@@ -76,68 +55,135 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         // Save wechat oauth session data.
         loginViewModel.wxOAuthResult.observe(this, Observer {
-
-            info("Received WxOAuthResult: $it")
-
-            val oauthResult = it ?: return@Observer
-
-            if (oauthResult.error != null) {
-                showFailure(getString(oauthResult.error))
-                return@Observer
-            }
-
-            if (oauthResult.exception != null) {
-                showFailure(oauthResult.exception.message)
-                return@Observer
-            }
-
-            if (oauthResult.success == null) {
-                showFailure(getString(R.string.prompt_load_failure))
-                return@Observer
-            }
-
-            sessionManager.saveWxSession(oauthResult.success)
+            onOAuthSession(it)
         })
 
         // Handle wechat login or re-login after refresh token expired.
         loginViewModel.accountResult.observe(this, Observer {
-
-            info("Received account result: $it")
-
-            val accountResult = it ?: return@Observer
-
-            if (accountResult.error != null) {
-                showFailure(getString(accountResult.error))
-                return@Observer
-            }
-
-            if (accountResult.exception != null) {
-                showFailure(accountResult.exception.message)
-                return@Observer
-            }
-
-            if (accountResult.success == null) {
-                showFailure(getString(R.string.prompt_load_failure))
-                return@Observer
-            }
-
-            when (sessionManager.loadWxIntent()) {
-                WxOAuthIntent.LOGIN -> {
-                    showLoggedIn(getString(R.string.greeting_wx_login, accountResult.success.wechat.nickname))
-
-                    sessionManager.saveAccount(accountResult.success)
-                }
-                WxOAuthIntent.LINK -> {
-                    LinkPreviewActivity.startForResult(this, accountResult.success)
-                    finish()
-                }
-            }
+            onAccountRetrieved(it)
         })
+
+        done_button.setOnClickListener {
+            onClickDone()
+        }
+
+        showMessage("")
+        enableButton(false)
+
+        if (intent.getBooleanExtra(EXTRA_UI_TEST, false)) {
+
+            showProgress(true)
+
+            showMessage(
+                    R.string.prompt_logged_in,
+                    getString(R.string.greeting_wx_login, "xxx"))
+
+            showProgress(false)
+            enableButton(true)
+
+            return
+        }
+
+        try {
+            api.handleIntent(intent, this)
+        } catch (e: Exception) {
+            info(e)
+        }
     }
 
-    override fun onReq(req: BaseReq?) {
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
 
+        setIntent(intent)
+
+        api.handleIntent(intent, this)
     }
+
+    private fun onOAuthSession(oauthResult: WxOAuthResult?) {
+
+        if (oauthResult == null) {
+            return
+        }
+
+        if (oauthResult.error != null) {
+            showMessage(R.string.prompt_login_failed, oauthResult.error)
+            showProgress(false)
+            enableButton(true)
+            return
+        }
+
+        if (oauthResult.exception != null) {
+            showMessage(
+                    R.string.prompt_login_failed,
+                    oauthResult.exception.message
+            )
+            showProgress(false)
+            enableButton(true)
+            return
+        }
+
+        if (oauthResult.success == null) {
+            showMessage(R.string.prompt_login_failed, R.string.loading_failed)
+            showProgress(false)
+            enableButton(true)
+            return
+        }
+
+        sessionManager.saveWxSession(oauthResult.success)
+    }
+
+    private fun onAccountRetrieved(accountResult: AccountResult?) {
+        showProgress(false)
+        enableButton(true)
+
+        if (accountResult == null) {
+            return
+        }
+
+        if (accountResult.error != null) {
+            showMessage(
+                    R.string.prompt_login_failed,
+                    accountResult.error
+            )
+            return
+        }
+
+        if (accountResult.exception != null) {
+            showMessage(
+                    R.string.prompt_login_failed,
+                    accountResult.exception.message
+            )
+            return
+        }
+
+        if (accountResult.success == null) {
+            showMessage(
+                    R.string.prompt_login_failed,
+                    R.string.loading_failed
+            )
+            return
+        }
+
+        when (sessionManager.loadWxIntent()) {
+            WxOAuthIntent.LOGIN -> {
+                showMessage(
+                        R.string.prompt_logged_in,
+                        getString(
+                                R.string.greeting_wx_login,
+                                accountResult.success.wechat.nickname
+                        )
+                )
+                sessionManager.saveAccount(accountResult.success)
+            }
+            WxOAuthIntent.LINK -> {
+                LinkPreviewActivity.startForResult(this, accountResult.success)
+                finish()
+            }
+        }
+    }
+
+
+    override fun onReq(req: BaseReq?) {}
 
     override fun onResp(resp: BaseResp?) {
         info("Wx login response type: ${resp?.type}, error code: ${resp?.errCode}")
@@ -158,12 +204,11 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 finish()
             }
         }
-
     }
 
     private fun processLogin(resp: BaseResp) {
 
-        showLoggingIn()
+        showMessage(R.string.progress_logging)
 
         info("Resp code: ${resp.errCode}, resp msg: ${resp.errStr}")
 
@@ -177,28 +222,20 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 // SDK通过SendAuth的Resp返回数据给调用方
                 if (resp is SendAuth.Resp) {
                     info("code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
-                    // Cannot initialize in onCreate method due to WXEntryActivity weird design.
-//                    sessionManager = SessionManager.getInstance(this)
 
                     val state = sessionManager.loadWxState()
 
-                    info("State: $state")
                     if (state == null) {
-                        info("state not found")
-                        showFailure("授权码缺失")
+                        showMessage(R.string.oauth_state_missing)
                         return
                     }
 
                     if (state != resp.state) {
-                        info("state mismatched")
-                        showFailure(getString(R.string.oauth_state_mismatch))
+                        showMessage(R.string.oauth_state_mismatch)
                         return
                     }
 
-                    val oauthIntent = sessionManager.loadWxIntent()
                     showProgress(true)
-
-                    info("Start logging in")
 
                     loginViewModel.wxLogin(
                             code = resp.code)
@@ -206,73 +243,84 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             }
 
             BaseResp.ErrCode.ERR_USER_CANCEL -> {
-                showFailure(getString(R.string.oauth_canceled))
+                showMessage(R.string.oauth_canceled)
+                showProgress(false)
+                enableButton(true)
             }
-
             BaseResp.ErrCode.ERR_SENT_FAILED -> {
-                showFailure(null)
+                showMessage(R.string.prompt_login_failed)
+                showProgress(false)
+                enableButton(true)
             }
             BaseResp.ErrCode.ERR_AUTH_DENIED -> {
-                showFailure(getString(R.string.oauth_denied))
+                showMessage(R.string.oauth_denied)
+                showProgress(false)
+                enableButton(true)
             }
             BaseResp.ErrCode.ERR_UNSUPPORT -> {
-                showFailure(null)
+                showMessage(R.string.prompt_login_failed)
+                showProgress(false)
+                enableButton(true)
             }
             BaseResp.ErrCode.ERR_BAN -> {
-                showFailure(null)
+                showMessage(R.string.prompt_login_failed)
+                showProgress(false)
+                enableButton(true)
             }
         }
     }
 
-    private fun hideUI() {
-        heading_tv.visibility = View.GONE
-        done_button.visibility = View.GONE
+    private fun showMessage(title: String, body: String? = null) {
+        heading_tv.text = title
+        message_tv.text = body ?: ""
     }
 
-    private fun showLoggingIn() {
-        showResult(UIWxOAuth(
-                heading = R.string.progress_logging
-        ))
+    private fun showMessage(title: Int, body: String? = null) {
+        heading_tv.text = getString(title)
+        message_tv.text = body ?: ""
     }
 
-    private fun showLoggedIn(msg: String) {
-        showResult(UIWxOAuth(
-                heading = R.string.prompt_logged_in,
-                body = msg,
-                done = true
-        ))
+    private fun showMessage(title: Int?, body: Int? = null) {
+        heading_tv.text = if (title != null) getString(title) else ""
+        message_tv.text = if (body != null) getString(body) else ""
     }
 
-    private fun showFailure(msg: String?) {
-        showResult(UIWxOAuth(
-                heading = R.string.prompt_login_failed,
-                body = msg,
-                done = true,
-                restartLogin = true
-        ))
-    }
+    private fun onClickDone() {
+        val account = sessionManager.loadAccount()
 
-    private fun showResult(ui: UIWxOAuth) {
-        heading_tv.visibility = View.VISIBLE
-        done_button.visibility = if (ui.done) View.VISIBLE else View.GONE
-        showProgress(false)
-
-        heading_tv.text = getString(ui.heading)
-        message_tv.text = ui.body
-
-        done_button.setOnClickListener {
-            if (ui.restartLogin) {
-                LoginActivity.startForResult(this)
-            }
+        if (account != null) {
             finish()
+            return
         }
+
+        LoginActivity.startForResult(this)
+        finish()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        onClickDone()
+    }
+
+    private fun enableButton(enable: Boolean) {
+        done_button.isEnabled = enable
     }
 
     private fun showProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
+        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
+    companion object {
+        @JvmStatic
+        fun start(context: Context) {
+            val intent = Intent(
+                    context,
+                    WXEntryActivity::class.java
+            ).apply {
+                putExtra(EXTRA_UI_TEST, true)
+            }
+
+            context.startActivity(intent)
         }
     }
 }
