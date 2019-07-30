@@ -17,7 +17,10 @@ data class ClientError(
         @Json(ignored = true)
         var statusCode: Int = 400, // HTTP status code
         override val message: String,
-        val error: Reason? = null
+        val error: Reason? = null,
+        val code: String? = null,
+        val param: String? = null,
+        val type: String? = null
 ) : Exception(message) {
 
     // Transform statusCode to human readable message.
@@ -51,15 +54,6 @@ data class Reason(
 ) {
     val key: String = "${field}_$code"
 }
-
-data class StripeError(
-        val code: String,
-        val status: Int,
-        override val message: String,
-        val param: String,
-        val requestId: String,
-        val type: String
-) : Exception(message)
 
 class NetworkException(msg: String?, cause: Throwable?) : IOException(msg, cause)
 
@@ -269,37 +263,6 @@ class Fetch : AnkoLogger {
                 statusCode = resp.code(),
                 message = resp.message()
         )
-    }
-
-    fun responseStripe(): Pair<Response, String?> {
-        setAccessKey()
-
-        /**
-         * @throws NetworkException when sending request.
-         */
-        val resp = end()
-
-        /**
-         * Success response.
-         * @throws IOException when reading body.
-         */
-        if (resp.code() in 200 until 400) {
-            return Pair(resp, resp.body()?.string())
-        }
-
-        /**
-         * @throws IOException when turning to string.
-         * @throws ClientError
-         */
-        val body = resp.body()
-                ?.string()
-                ?: throw Exception("Cannot get request body")
-        info("API error response: $body")
-
-        // Avoid throwing JSON parse error.
-        val stripeErr = Klaxon().parse<StripeError>(body)
-
-        throw stripeErr ?: throw Exception("Failed to parse error response")
     }
 
     /**
