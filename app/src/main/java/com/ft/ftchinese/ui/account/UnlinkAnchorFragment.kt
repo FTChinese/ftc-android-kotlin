@@ -5,11 +5,14 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProviders
 
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.UnlinkAnchor
 import kotlinx.android.synthetic.main.fragment_unlink_anchor.*
+
+private const val ARG_IS_STRIPE = "arg_is_stripe"
 
 class UnlinkAnchorFragment : Fragment() {
 
@@ -36,10 +39,19 @@ class UnlinkAnchorFragment : Fragment() {
         anchor_wx_btn.setOnClickListener {
             viewModel.selectAnchor(UnlinkAnchor.WECHAT)
         }
+
+        if (arguments?.getBoolean(ARG_IS_STRIPE) == true) {
+            anchor_ftc_btn.isChecked  = true
+            anchor_wx_btn.isEnabled = false
+        }
     }
 
     companion object {
         @JvmStatic
-        fun newInstance() = UnlinkAnchorFragment()
+        fun newInstance(isStripe: Boolean) = UnlinkAnchorFragment().apply {
+            arguments = bundleOf(
+                   ARG_IS_STRIPE to isStripe
+            )
+        }
     }
 }
