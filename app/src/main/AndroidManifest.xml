@@ -9,7 +9,6 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- To auto-complete the email text field in the login form with the user's emails -->
     <!-- Required by zhifubao -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!--<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>RECEIVE_BOOT_COMPLETED-->
 
     <application
         android:allowBackup="false"
@@ -21,10 +20,10 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
-        <activity android:name=".ui.TestActivity"
+        <activity
+            android:name=".TestActivity"
             android:label="Test"
-            android:parentActivityName=".MainActivity"/>
-
+            android:parentActivityName=".MainActivity" />
 
         <service
             android:name=".service.NewsMessagingService"
@@ -33,16 +32,13 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".service.PollService"
-            android:label="Poll Service">
-
-        </service>
-
-        <!--<receiver android:name=".service.StartupReceiver">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.BOOT_COMPLETED"/>-->
-            <!--</intent-filter>-->
-        <!--</receiver>-->
+        <service
+            android:name=".service.PollService"
+            android:label="Poll Service"/> <!-- <receiver android:name=".service.StartupReceiver"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="android.intent.action.BOOT_COMPLETED"/> -->
+        <!-- </intent-filter> -->
+        <!-- </receiver> -->
         <activity
             android:name=".SplashActivity"
             android:configChanges="orientation"
@@ -156,7 +152,6 @@
                     android:scheme="ftc" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.pay.MyOrdersActivity"
             android:label="@string/title_my_orders"
@@ -168,11 +163,15 @@
         <activity
             android:name=".ui.pay.UpgradePreviewActivity"
             android:label="@string/title_upgrade_preview"
-            android:parentActivityName=".ui.pay.MemberActivity" /> <!-- WXPayEntryActivity does not need parent activity since that is useless. -->
+            android:parentActivityName=".ui.pay.MemberActivity" />
         <activity
             android:name=".wxapi.WXPayEntryActivity"
             android:exported="true"
             android:label="@string/title_wxpay"
+            android:launchMode="singleTop" />
+        <activity
+            android:name=".wxapi.WXEntryActivity"
+            android:exported="true"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -183,17 +182,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".wxapi.WXEntryActivity"
-            android:exported="true"
-            android:launchMode="singleTop">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-
-                <data android:scheme="sdksample" />
-            </intent-filter>
-        </activity>
+            android:name=".ui.pay.LatestOrderActivity"
+            android:label="@string/title_latest_order"/>
     </application>
 
 </manifest>
