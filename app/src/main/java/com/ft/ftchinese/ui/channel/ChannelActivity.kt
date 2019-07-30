@@ -33,7 +33,7 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
 
         val channelSource = intent.getParcelableExtra<ChannelSource>(EXTRA_PAGE_META)
         if (channelSource == null) {
-            toast(R.string.prompt_load_failure)
+            toast(R.string.loading_failed)
             return
         }
         /**
