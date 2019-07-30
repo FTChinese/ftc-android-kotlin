@@ -183,7 +183,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
             }
             else -> {
-                getString(R.string.prompt_pay_method_unknown)
+                getString(R.string.pay_method_not_selected)
             }
         }
     }
@@ -200,7 +200,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
         val pm = payMethod
         if (pm == null) {
-            toast(R.string.prompt_pay_method_unknown)
+            toast(R.string.pay_method_not_selected)
             return
         }
 
@@ -246,6 +246,7 @@ class CheckOutActivity : ScopedAppActivity(),
         showProgress(false)
 
         if (orderResult == null) {
+            enablePayBtn(true)
             return
         }
 
@@ -279,10 +280,6 @@ class CheckOutActivity : ScopedAppActivity(),
 
         val plan = this.plan ?: return
 
-        // It might be better if API sends back all
-        // data of an order, plus payment provider's
-        // specific data.
-        info("Save subscription order: $aliOrder")
         orderManager.save(aliOrder)
 
         launch {
@@ -313,22 +310,30 @@ class CheckOutActivity : ScopedAppActivity(),
                 return@launch
             }
 
-            toast(R.string.wxpay_done)
+            toast(R.string.payment_done)
 
             tracker.buySuccess(plan, payMethod)
 
-            val account = sessionManager.loadAccount() ?: return@launch
-            val updatedMembership = aliOrder.confirm(account.membership)
-
-            info("New membership: $updatedMembership")
-
-            sessionManager.updateMembership(updatedMembership)
-
-            toast(R.string.refreshing_account)
-            showProgress(true)
-
-            accountViewModel.refresh(account)
+            confirmAliSubscription()
         }
+    }
+
+    private fun confirmAliSubscription() {
+        val account = sessionManager.loadAccount() ?: return
+        val member = account.membership
+
+        val subs = orderManager.load() ?: return
+        val confirmedSub = subs.withConfirmation(member)
+        orderManager.save(confirmedSub)
+
+        val updatedMembership = member.withSubscription(confirmedSub)
+        sessionManager.updateMembership(updatedMembership)
+        info("New membership: $updatedMembership")
+
+
+        toast(R.string.refreshing_account)
+        showProgress(true)
+        accountViewModel.refresh(account)
     }
 
     private fun onAccountRefreshed(accountResult: AccountResult?) {
@@ -353,21 +358,17 @@ class CheckOutActivity : ScopedAppActivity(),
             return
         }
 
-        val localAccount = sessionManager.loadAccount() ?: return
-        toast(R.string.prompt_updated)
-
         val remoteAccount = accountResult.success
-        /**
-         * If remote membership is newer than local
-         * one, save remote data; otherwise do
-         * nothing in case server notification comes
-         * late.
-         */
+
+        val localAccount = sessionManager.loadAccount() ?: return
+
         if (remoteAccount.membership.isNewer(localAccount.membership)) {
             sessionManager.saveAccount(remoteAccount)
         }
 
-        MemberActivity.start(this)
+        toast(R.string.subs_success)
+
+        LatestOrderActivity.start(this)
         setResult(Activity.RESULT_OK)
         finish()
     }
@@ -471,11 +472,7 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     private fun showProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
+        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     private fun enablePayBtn(enable: Boolean) {
@@ -486,11 +483,6 @@ class CheckOutActivity : ScopedAppActivity(),
     // whether user granted permissions.
     private fun enableAlipay(enable: Boolean) {
         alipay_btn.isEnabled = enable
-    }
-
-    override fun onResume() {
-        super.onResume()
-        enablePayBtn(true)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
