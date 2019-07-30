@@ -16,6 +16,7 @@ import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.ui.StringResult
+import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.SubscribeApi
@@ -154,14 +155,14 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
                             .jsonBody(Klaxon().toJsonString(mapOf(
                                     "defaultPaymentMethod" to pmId
                             )))
-                            .responseStripe()
+                            .responseApi()
                 }
 
                 info(body)
 
                 showProgress(false)
                 toast("Default payment method set")
-            } catch (e: com.ft.ftchinese.util.StripeError) {
+            } catch (e: ClientError) {
                 showProgress(false)
                 enableButton(true)
                 info(e)
