@@ -22,6 +22,18 @@ data class Membership(
         @KStripeSubStatus
         val status: StripeSubStatus? = null
 ) : Parcelable {
+
+    fun withSubscription(s: Subscription): Membership {
+        return Membership(
+                id = id,
+                tier = s.tier,
+                cycle = s.cycle,
+                expireDate = s.endDate,
+                payMethod = s.payMethod,
+                autoRenew = autoRenew,
+                status = status
+        )
+    }
     /**
      * Check if membership is expired.
      * @return true if expireDate is before now, or membership does not exist.
@@ -137,5 +149,6 @@ data class Membership(
 
         return expireDate.isAfter(m.expireDate)
     }
+
 }
 
