@@ -7,8 +7,9 @@
 
     <string name="share_template">[FT中文網]%1$s - %2$s</string>
 
-    <string name="news_notification_channel_name">新闻</string>
-    <string name="news_notification_channel_description">最新新闻动态</string>
+    <string name="news_notification_channel_id">fcm_news_channel</string>
+    <string name="news_notification_channel_name">新聞</string>
+    <string name="news_notification_channel_description">最新新聞动态</string>
 
     <!-- Bottom navigation tabs -->
     <string name="nav_news">最新</string>
@@ -23,12 +24,7 @@
     <string name="titlebar_en">英文</string>
     <string name="titlebar_bilingual">對照</string>
 
-    <!-- Drawer -->
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_not_logged_in">您尚未登入</string>
-    <string name="nav_header_desc">導覽列</string>
-
+    <!-- Titles on toolbar -->
     <string name="title_search">搜索 %1$s</string>
     <string name="title_login">登入FT中文網</string>
     <string name="title_sign_up">建立FT中文網帳號</string>
@@ -39,9 +35,10 @@
     <string name="title_change_email">修改登入信箱</string>
     <string name="title_change_username">修改使用者名稱</string>
     <string name="title_about_us">關於我們</string>
-    <string name="title_checkout">付費</string>
+    <string name="title_checkout">支付</string>
     <string name="title_renewal">會員續訂</string>
     <string name="title_upgrade">會員升级</string>
+    <string name="title_upgrade_preview">升级预览</string>
     <string name="title_wxpay">微信支付 </string>
     <string name="title_wx_account">微信帳號</string>
     <string name="title_link_email">绑定信箱帳號</string>
@@ -52,9 +49,10 @@
     <string name="title_my_orders">我的訂單</string>
     <string name="title_my_subs">我的訂閱</string>
     <string name="title_wx_login">微信登入</string>
+    <string name="title_stripe_setting">Stripe設置</string>
+    <string name="title_latest_order">訂單详情</string>
 
-    <!-- Member and Subscription -->
-
+    <!-- Paywall -->
     <string-array name="standard_benefits">
         <item>✔ 专享訂閱内容每日仅需0.7元(或按月訂閱每日0.9元)</item>
         <item>✔ 精選深度分析</item>
@@ -75,13 +73,8 @@
     <string name="premium_small_print">注：所有活動門票不可折算現金、不能轉讓、不含差旅與食宿</string>
 
     <string name="paywall_expired">您訂閱的%1$s已經于%2$s日过期，继续閱讀請續訂</string>
-    <string name="member_resubs">會員訂閱已过期，請續訂</string>
-    <string name="membership_renew">續訂</string>
-    <string name="membership_upgrade">升级为高端會員</string>
-    <string name="upgrade_guide">如果您计划升级为高端會員，系统将首先使用當前帳號的余额抵扣定价，不足部分需要您另行支付。</string>
-    <string name="upgrade_to_read">您點擊了仅限高端會員閱讀的文章。您目前是標準會員，升级为閱讀會員可以閱读</string>
-    <string name="premium_only">您點擊了仅供高端會員阅读的文章，購買高端會員後可以继续閱讀</string>
-    <string name="balance_conversion">余额可以兑换高级會員%1$d年%2$d天，无需额外支付</string>
+
+
 
     <!-- Example: ¥1,998.00/年 -->
     <string name="formatter_price_year">¥%1$,.2f/年</string>
@@ -89,7 +82,7 @@
     <!-- Example: 标准会员/年-->
     <string name="formatter_tier_cycle">%1$s/%2$s</string>
     <!-- Example: ¥1,998.00 -->
-    <string name="formatter_price">%1$s %2$,.2f</string>
+    <string name="formatter_price">%1$s%2$,.2f</string>
     <!-- Example: 支付宝支付 ¥1,998.00-->
     <string name="formatter_check_out">%1$s %2$s</string>
 
@@ -99,44 +92,86 @@
 
     <string name="label_member_tier">會員類型</string>
 
+    <string name="member_resubs">會員訂閱已过期，請續訂</string>
+    <string name="membership_renew">續訂</string>
+    <string name="membership_upgrade">升级为高端會員</string>
     <string name="tier_free">尚未成為會員</string>
     <string name="tier_standard">標準會員</string>
     <string name="tier_premium">高端會員</string>
     <string name="tier_vip">超級會員</string>
     <string name="label_member_duration">會員期限</string>
     <string name="label_price">支付金额</string>
-    <string name="label_ftc_account">FT中文网账号</string>
+    <string name="label_ftc_account">FT中文網帳號</string>
     <string name="label_wx_account">微信帳號</string>
     <string name="paywall_title">購買會員服務，閱讀FT獨家內容</string>
     <string name="paywall_login_prompt">已經購買過？登入</string>
+    <string name="prompt_login_to_read">訂閱會員登入後可以閱讀</string>
+    <string name="prompt_subscribe_to_read">僅限會員閱讀</string>
+    <string name="prompt_premium_only">仅限高端會員閱讀</string>
+    <string name="prompt_membership_expired">會員訂閱已过期，請續訂</string>
+    <string name="prompt_restricted_login">會員登入后可以閱讀</string>
 
-    <string name="order_id">訂單号：%1$s</string>
-    <string name="order_subscribed_plan">會員類型: %1$s</string>
-    <string name="order_period">會員期限：%1$s ~ %2$s</string>
-    <string name="order_price">支付金额：%1$s</string>
-    <string name="order_pay_method">支付方式：%1$s</string>
-    <string name="order_creation_time">創建时间：%1$s</string>
 
     <string name="heading_customer_service">聯客服</string>
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
     <string name="heading_pay_method">選擇支付方式</string>
-    <string name="heading_become_member">购买FT会员</string>
-    <string name="pay_method_ali">支付寶</string>
+    <string name="heading_become_member">購買FT會員</string>
+    <string name="pay_brand_ali">支付寶</string>
+    <string name="pay_method_ali">支付寶支付</string>
+    <string name="pay_brand_wechat">微信支付</string>
     <string name="pay_method_wechat">微信支付</string>
-    <string name="pay_method_stripe">Stripe</string>
-    <string name="pay_method_not_selected">請選擇支付方式</string>
+    <string name="pay_brand_stripe">Stripe</string>
+    <string name="pay_method_stripe">Stripe支付</string>
 
+    <!-- Stripe payment -->
+    <string name="stripe_customer_not_created">創建Stripe使用者失敗，請重试！</string>
+    <string name="payment_source">%1$s (尾号%2$s)</string>
+    <string-array name="stripe_footnotes">
+        <item>* FT中文網的Stripe支付暂不接受人民币计价的银行卡，建议中國大陆以外地区使用者使用</item>
+        <item>* 微信登入的用户需要綁定FT中文網帳號後才可以使用Stripe訂閱</item>
+        <item>* 通过支付寶或者微信支付購買的會員、且會員尚未到期，無法使用Stripe訂閱</item>
+    </string-array>
+    <string name="select_or_add_card">選擇或添加银行卡</string>
+    <string name="stripe_init">設置Stripe支付</string>
+    <string name="retrieve_customer">查詢Stripe帳號…</string>
+    <string name="default_bank_brand">我的银行卡</string>
+    <string name="add_or_select_payment_method">添加银行卡或選擇默認支付方式</string>
+    <string name="set_default_payment_method">设为默認支付方式</string>
+    <string name="bank_card_number">**** **** **** %1$s</string>
+    <string name="stripe_customer_not_found">Stripe使用者不存在，请檢查帳號或者重新登入</string>
+
+    <string name="sub_status_incomplete">支付未完成</string>
+    <string name="sub_status_incomplete_expired">支付已过期</string>
+    <string name="sub_status_trialing">试用</string>
+    <string name="sub_status_past_due">自动续费失敗</string>
+    <string name="sub_status_cancled">已取消</string>
+    <string name="sub_status_unpaid">未支付</string>
+    <string name="sub_status_active">活跃</string>
+    <string name="auto_renewal">自动續訂: %1$s</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+    <string name="refreshing_stripe_sub">更新Stripe訂閱信息…</string>
+    <string name="stripe_refreshing_failed">無法更新Stripe訂閱信息</string>
+
+    <string name="permission_alipay_denied">無法獲取支付寶所需的權限，請到系統設置開啟</string>
+    <string name="permission_alipay_granted">已獲取支付寶所需的權限</string>
+    <string name="pay_method_not_selected">請選擇支付方式</string>
+    <string name="prompt_unknown_plan">請選擇訂閱方案</string>
     <string name="check_out">支付</string>
     <string name="request_order">創建訂單…</string>
-    <string name="action_done">完成</string>
-    <string name="renewal_not_allowed">您已經是會員了，請勿重複購買</string>
     <string name="order_cannot_be_created">無法創建訂單，請稍後再試</string>
+    <string name="payment_done">支付成功</string>
+
+    <string name="api_already_premium">您已經是會員会员了</string>
+    <string name="api_member_not_found">没有查詢到您的會員状态</string>
+    <string name="renewal_not_allowed">您已經是會員了，請勿重複購買</string>
+    <string name="subs_success">訂閱成功！</string>
+
+    <!-- Wechat payment status -->
+    <string name="wxpay_not_supported">您的設備不支持微信支付</string>
+    <string name="wxpay_query_order">查詢支付状态…</string>
     <string name="order_not_found">沒有查詢到訂單，請稍後刷新</string>
     <string name="order_cannot_be_queried">暫時無法查詢訂單状态，請稍後在&quot;帳號與安全&quot;中下拉刷新</string>
-
-    <string name="subs_success">訂閱成功！</string>
-    <string name="wxpay_not_supported">您的設備不支持微信支付</string>
-    <string name="payment_done">支付成功</string>
     <string name="wxpay_refund">轉入退款</string>
     <string name="wxpay_not_paid">未支付</string>
     <string name="wxpay_closed">交易已關閉</string>
@@ -144,11 +179,54 @@
     <string name="wxpay_pending">正在支付</string>
     <string name="wxpay_failed">支付失敗</string>
     <string name="wxpay_cancelled">支付已取消</string>
-    <string name="wxpay_query_order">查詢支付状态…</string>
-    <string name="wxpay_tier_cycle">您已經訂閱了FT中文網 %1$s/%2$s</string>
-    <string name="wxpay_expire_date">會員有效期：%1$s</string>
+
+    <!-- Upgrade to premium -->
+    <string name="upgrade_guide">如果您计划升级为高端會員，系统将首先使用當前帳號的余额抵扣定价，不足部分需要您另行支付。</string>
+    <string name="query_balance">查詢余额…</string>
+    <string name="upgrade_to_read">您點擊了仅限高端會員閱讀的文章。您目前是標準會員，升级为閱讀會員可以閱读</string>
+    <string name="premium_only">您點擊了仅供高端會員阅读的文章，購買高端會員後可以继续閱讀</string>
+    <string name="balance_conversion">余额可以兑换高级會員%1$d年%2$d天，无需额外支付</string>
+    <string name="confirm_upgrade">去支付</string>
+    <string name="direct_upgrade">无需支付，直接升级</string>
+    <string name="upgrade_payment">升级到高端會員还需支付&quot;</string>
+    <string name="upgrade_forumla">应付额 = 定价 - 账户余额</string>
+    <string name="premium_price">高端會員定价: %1$s</string>
+    <string name="account_balance">目前余额: %1$s</string>
+    <string name="upgrade_success">升级成功</string>
+
+    <string name="outcome_invoice_number">发票 %1$s</string>
+    <string name="outcome_period">訂閱周期 %1$s</string>
+    <string name="outcome_sub_status">訂閱状态 %1$s</string>
+    <string name="outcome_payment_status">支付状态 %1$s</string>
+    <string name="label_stripe_status">Stripe訂閱状态 %1$s</string>
+
+    <!-- List of orders -->
+    <string name="order_id">訂單编号: %1$s</string>
+    <string name="order_subscribed_plan">訂閱方案: %1$s</string>
+    <string name="order_price">支付金额: %1$s</string>
+    <string name="order_pay_method">支付方式: %1$s</string>
+    <string name="order_creation_time">創建时间: %1$s</string>
+    <string name="order_period">訂閱周期: %1$s ~ %2$s</string>
+
+    <!-- Generic buttons -->
+    <string name="action_done">完成</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_start">开始</string>
+
+    <!-- Data loading and refreshing -->
+    <string name="refreshing_data">更新資料…</string>
+    <string name="refreshing_account">更新帳號資料…</string>
+    <string name="loading_failed">無法下載頁面，請稍後再試</string>
+
+
+    <!-- Social share -->
     <string name="wxshare_done">分享成功</string>
 
+    <!-- Drawer -->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_not_logged_in">您尚未登入</string>
+    <string name="nav_header_desc">導覽列</string>
     <string name="action_help">幫助</string>
     <string name="action_feedback">意見回應</string>
     <string name="action_logout">退出登入</string>
@@ -160,6 +238,27 @@
     <string name="myft_starred_articles">收藏文章</string>
     <string name="myft_following">關注</string>
 
+
+    <!-- Wechat Account -->
+    <string name="formatter_wx_name">微信使用者 %1$s</string>
+    <string name="oauth_canceled">授权取消！</string>
+    <string name="oauth_denied">授权被拒绝！</string>
+    <string name="oauth_state_missing">授权码缺失！</string>
+    <string name="oauth_state_mismatch">授权状态码錯誤！</string>
+    <string name="wx_session_expired">微信登入已過期，請重新請。微信登入会定期失效，如果您以後不希望看到本提示，可以在侧边栏的\&quot;账号與安全\&quot;下綁定FT中文網帳號。</string>
+    <string name="wx_refresh_token_expired">微信授权已过期，請重新授权帳號刷新帳號資料。</string>
+    <string name="wx_relogin">重新授權</string>
+    <string name="action_wx_login">微信登入</string>
+
+    <string name="wechat_not_found">没有找到您的微信帳號信息</string>
+    <string name="action_bound_account">已綁定</string>
+    <string name="action_bind_account">尚未綁定</string>
+    <string name="greeting_wx_login">你好，%1$s！欢迎登入FT中文網。</string>
+
+    <!-- Network status -->
+    <string name="prompt_no_network">網路無連結，請檢查網路設置</string>
+
+    <!-- FTC account -->
     <string name="btn_login">登入</string>
     <string name="btn_sign_up">註冊</string>
     <string name="btn_password_letter">寄送電子郵件</string>
@@ -170,26 +269,18 @@
     <string name="btn_unlink">解除绑定</string>
     <string name="btn_request_verify">重新寄送驗證郵件</string>
 
-    <string name="wx_session_expired">微信登入已過期，請重新請。微信登入会定期失效，如果您以後不希望看到本提示，可以在侧边栏的\&quot;账号與安全\&quot;下綁定FT中文網帳號。</string>
-    <string name="wx_refresh_token_expired">微信授权已过期，請重新授权帳號刷新帳號資料。</string>
-    <string name="wx_relogin">重新授權</string>
-    <string name="action_wx_login">微信登入</string>
-    <string name="action_cancel">取消</string>
-    <string name="action_sign_in_short">Sign in</string>
-
-    <string name="action_bound_account">已綁定</string>
-    <string name="action_bind_account">尚未綁定</string>
-
-    <string name="heading_bind_account">帳號綁定</string>
-
+    <!-- Account related -->
     <string name="label_email">信箱</string>
+    <string name="email_not_verified">邮箱(未验证)</string>
     <string name="label_wechat">微信</string>
-    <string name="label_current_email">目前信箱</string>
+    <string name="label_current_email">当前邮箱 %1$s</string>
     <string name="label_new_email">新信箱</string>
     <string name="label_current_name">目前使用者名稱</string>
     <string name="label_user_name">使用者名稱</string>
     <string name="label_new_name">新使用者名稱</string>
     <string name="label_password">密碼</string>
+    <string name="hint_enter_password">输入登录密码</string>
+    <string name="hint_set_password">设置登录密码</string>
     <string name="label_old_password">目前密碼</string>
     <string name="label_new_password">新密碼</string>
     <string name="label_confirm_password">確認新密碼</string>
@@ -197,14 +288,6 @@
     <string name="prompt_exit">再按一次退出程序</string>
     <string name="prompt_ad_timer">跳過 %1$d</string>
 
-    <string name="refreshing_data">更新頁面</string>
-    <string name="prompt_no_network">網路無連結，請檢查網路設置</string>
-    <string name="loading_failed">無法下載頁面，請稍後再試</string>
-    <string name="prompt_login_to_read">訂閱會員登入後可以閱讀</string>
-    <string name="prompt_subscribe_to_read">僅限會員閱讀</string>
-    <string name="prompt_premium_only">仅限高端會員閱讀</string>
-    <string name="prompt_membership_expired">會員訂閱已过期，請續訂</string>
-    <string name="prompt_restricted_login">會員登入后可以閱讀</string>
 
     <string name="prompt_logged_in">登入成功</string>
     <string name="prompt_signed_up">註冊成功</string>
@@ -213,41 +296,35 @@
     <string name="prompt_not_logged_in">您尚未登入，登入後可以查看</string>
     <string name="prompt_not_set">未設置</string>
     <string name="prompt_no_email_app">您的設備上沒有安裝信件程式，無法發送反饋信件</string>
-    <string name="prompt_cache_cleared">緩存已清空</string>
-    <string name="prompt_cache_not_cleared">無法清空緩存</string>
-    <string name="prompt_reading_history">閱讀歷史已刪除</string>
-    <string name="permission_alipay_denied">無法獲取支付寶所需的權限，請到系統設置開啟</string>
-    <string name="permission_alipay_granted">已獲取支付寶所需的權限</string>
+
+
     <string name="prompt_saved">保存成功!</string>
     <string name="prompt_updated">更新成功!</string>
-    <string name="prompt_letter_sent">信件已發送</string>
+    <string name="prompt_letter_sent">信件已發送。您可以稍後在邮箱中檢查FT中文網發送给您的驗證信件，點擊信件中的連接即可</string>
     <string name="prompt_linked">帳號已绑定</string>
     <string name="prompt_unlinked">帳號已解除綁定</string>
     <string name="prompt_account_updated">帳號已更新</string>
     <string name="prompt_no_keyword">後输入关键字後搜尋</string>
 
+
     <string name="instruct_password_letter">請輸入您的登入FT中文網所用的電子信箱，我們會向該信箱發送郵件，幫您重設密碼码</string>
     <string name="instruct_verify_email">您的信箱尚未驗證，為保障您的帳號安全，請及時驗證信箱。我們已經給您的登入信箱發送了驗證信件，点击信件中的連接即可。</string>
     <string name="instruct_letter_sent">請檢查您的信件，點擊郵件中的「重設密碼」連接，在所打開的網頁中修改您的密碼。如果幾分鐘內沒有看到信件，請檢查是否被放進了垃圾信件列表。如果您已經验驗證信箱地址，請下拉刷新。</string>
     <string name="instruct_link_email">您目前使用了微信帳號登入FT中文。为保障帳號安全，建议您綁定在FT中文网註冊的信箱帳號。</string>
-    <string name="unlink_guide">解除如下帳號綁定？</string>
-    <string name="unlink_anchor">检测到您當前帳號是FT 中文網的會員，解除账号绑定後只能有一个帳號拥有当前會員，請選擇會員信息保留在哪个帳號下</string>
     <string name="instruct_bind_login">信箱 %1$s 已经註冊了FT中文網帳號，请输入密码驗證身份，即可綁定微信帳號和信箱</string>
     <string name="instruct_sign_up">信箱 %1$s 尚未註冊FT中文網帳號，请設置密碼建立帳號</string>
     <string name="instruct_sign_in">信箱 %1$s 已经註冊了FT中文網帳號，请输入登入密碼</string>
 
+    <!-- Link accounts -->
+    <string name="link_heading">您選擇合並如下帳號</string>
     <string name="accounts_already_linked">两个帳號已經綁定，无需操作。如果您未看到綁定後的帳號信息，請返回&quot;帳號与安全&quot;後下拉刷新</string>
     <string name="ftc_account_linked">帳號 %1$s 已經綁定了其他微信帳號。一个FT 中文網帳號只能綁定一个微信帳號。</string>
     <string name="wx_account_linked">微信帳號 %1$s 已經綁定了其他FT中文網帳號。一个FT 中文網帳號只能綁定一个微信帳號。</string>
     <string name="accounts_member_valid">您的微信帳號和FT中文網的帳號均購買了會員服务，两个會員均未到期。合並帳號会删除其中一个帳號的會員信息。为保障您的權益，暂不支持綁定两个會員未过期的帳號。您可以寻求客服幫助。</string>
+    <string name="unlink_footnote">* Stripe訂閱信息只能保留在FT中文網帳號下</string>
+    <string name="unlink_guide">解除如下帳號关联？</string>
+    <string name="unlink_anchor">請選擇解除关联後，會員信息保留在哪一方？</string>
 
-    <string name="greeting_wx_login">你好，%1$s！欢迎登入FT中文網。</string>
-    <string name="wechat_not_found">没有找到您的微信帳號信息</string>
-    <string name="formatter_wx_name">微信使用者 %1$s</string>
-
-    <string name="progress_updating">更新資料…</string>
-    <string name="refreshing_account">更新帳號資料…</string>
-    <string name="progress_fetching">获取資料…</string>
     <string name="progress_request_verification">正在寄送驗證信件…</string>
     <string name="progress_logging">正在登入…</string>
 
@@ -266,13 +343,7 @@
     <string name="error_incorrect_password">密碼錯誤</string>
     <string name="error_incorrect_old_password">當前密碼錯誤，不能設置新密碼</string>
     <string name="error_field_required">請填寫此項</string>
-    <string name="permission_rationale">&quot;Contacts permissions are needed for providing email
-        completions.&quot;
-    </string>
-    <string name="error_not_loaded">資料加载失敗，請重试</string>
-    <string name="oauth_canceled">授权取消！</string>
-    <string name="oauth_denied">授权被拒绝！</string>
-    <string name="oauth_state_mismatch">授权状态码錯誤！</string>
+
 
     <!-- API error message -->
     <string name="api_wrong_credentials">密碼錯誤</string>
@@ -285,8 +356,6 @@
     <string name="api_server_error">伺服器出錯，請稍後再試</string>
     <string name="api_email_server_down">信箱伺服器暫時不可用</string>
     <string name="api_name_taken">使用者名稱已被占用</string>
-    <string name="api_already_premium">您已經是會員会员了</string>
-    <string name="api_member_not_found">没有查詢到您的會員状态</string>
     <string name="api_account_already_linked">當前帳號或目标帳號已被绑定</string>
     <string name="api_membership_already_linked">當前帳號或目标帳號的會員已被绑定</string>
     <string name="api_membership_all_valid">不能綁定两个擁有未过期會員的帳號</string>
@@ -301,6 +370,10 @@
     <string name="api_json_syntax">無法解析數據</string>
     <string name="api_empty_response">伺服器沒有回應</string>
 
+    <!-- Settings -->
+    <string name="prompt_cache_cleared">緩存已清空</string>
+    <string name="prompt_cache_not_cleared">無法清空緩存</string>
+    <string name="prompt_reading_history">閱讀歷史已刪除</string>
     <string name="pref_title_storage">存儲空間</string>
     <string name="pref_language">語言偏好</string>
     <string name="pref_clear_cache">清除页面快取</string>
@@ -339,5 +412,6 @@
         <item>sc</item>
         <item>tc</item>
     </string-array>
+
 
 </resources>
