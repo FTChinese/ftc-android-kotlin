@@ -14,7 +14,6 @@
         android:text="@string/unlink_anchor"
         android:textSize="18sp"
         android:paddingBottom="8dp"
-        android:background="@drawable/bottom_border_grey"
         app:layout_constraintTop_toTopOf="parent" />
 
     <RadioGroup
@@ -46,5 +45,12 @@
             android:button="@null"
             android:text="@string/label_wx_account" />
     </RadioGroup>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/unlink_footnote"
+        app:layout_constraintTop_toBottomOf="@id/unlink_anchors"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
