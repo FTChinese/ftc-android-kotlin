@@ -1,22 +1,20 @@
 package com.ft.ftchinese.wxapi
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.base.handleApiError
-import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.model.order.OrderManager
-import com.ft.ftchinese.model.order.PayMethod
-import com.ft.ftchinese.model.order.Subscription
-import com.ft.ftchinese.ui.pay.MemberActivity
-import com.ft.ftchinese.ui.pay.PaywallActivity
-import com.ft.ftchinese.util.*
+import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.ui.account.AccountViewModel
+import com.ft.ftchinese.ui.login.AccountResult
+import com.ft.ftchinese.ui.pay.*
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
@@ -26,10 +24,19 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_wechat.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.jetbrains.anko.toast
+
+private val paymentStatusId = mapOf(
+        "REFUND" to R.string.wxpay_refund,
+        "NOTPAY" to R.string.wxpay_not_paid,
+        "CLOSED" to R.string.wxpay_closed,
+        "REVOKED" to R.string.wxpay_revoked,
+        "USERPAYING" to R.string.wxpay_pending,
+        "PAYERROR" to R.string.wxpay_failed
+)
+
+private const val EXTRA_UI_TEST = "extra_ui_test"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
@@ -39,34 +46,60 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     private var orderManager: OrderManager? = null
     private var tracker: StatsTracker? = null
 
-
-    private fun showProgress(value: Boolean) {
-        if (value) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
-    }
+    private lateinit var accountViewModel: AccountViewModel
+    private lateinit var checkoutViewModel: CheckOutViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_wechat)
-
         setSupportActionBar(toolbar)
 
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
 
         sessionManager = SessionManager.getInstance(this)
         orderManager = OrderManager.getInstance(this)
+        accountViewModel = ViewModelProviders.of(this)
+                .get(AccountViewModel::class.java)
+        checkoutViewModel = ViewModelProviders.of(this)
+                .get(CheckOutViewModel::class.java)
+
+        checkoutViewModel.wxPayResult.observe(this, Observer {
+            onWxPayStatusQueried(it)
+        })
+
+        accountViewModel.accountRefreshed.observe(this, Observer {
+            onAccountRefreshed(it)
+        })
 
         tracker = StatsTracker.getInstance(this)
 
-        showUI(false)
+
+        done_button.setOnClickListener {
+            onClickDone()
+        }
+
+        showMessage("")
+        enableButton(false)
+
+        if (intent.getBooleanExtra(EXTRA_UI_TEST, false)) {
+            val order = orderManager?.load() ?: return
+            queryOrder(order)
+
+            return
+        }
 
         api?.handleIntent(intent, this)
     }
 
+    /**
+     * What does wechat send inside the intent:
+     *
+     * _mmessage_content: string
+     * _mmessage_sdkVersion: int
+     * _mmessage_appPackage: string
+     * _mmessage_checksum: byte array
+     * _wxapi_command_type: int
+     */
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         setIntent(intent)
@@ -74,6 +107,9 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     }
 
     // Reference https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=8_5
+    /**
+     * The BaseResp wraps a Bundle.
+     */
     override fun onResp(resp: BaseResp?) {
         info("onPayFinish, errCode = ${resp?.errCode}")
 
@@ -91,7 +127,8 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
                 -1 -> {
                     showProgress(false)
-                    showFailureUI(getString(R.string.wxpay_failed))
+                    enableButton(true)
+                    showMessage(R.string.wxpay_failed)
 
                     if (subs != null) {
                         tracker?.buyFail(subs.plan())
@@ -101,22 +138,21 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
                 -2 -> {
                     showProgress(false)
-                    showFailureUI(getString(R.string.wxpay_cancelled))
+                    enableButton(true)
+                    showMessage(R.string.wxpay_cancelled)
                 }
             }
         }
     }
 
+    // This is the entry point after user paid successfully
     private fun queryOrder(subs: Subscription?) {
-//        val subs = orderManager?.load()
-        info("Subscription prior to confirmation: $subs")
+
+        info("Start querying order")
 
         if (subs == null) {
-            showDoneUI(
-                    heading = getString(R.string.wxpay_done),
-                    msg = getString(R.string.order_cannot_be_queried)
-            )
-
+            showMessage(R.string.payment_done, R.string.order_cannot_be_queried)
+            enableButton(true)
             return
         }
 
@@ -124,155 +160,110 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         if (!isNetworkConnected()) {
             info(R.string.prompt_no_network)
-            showDoneUI(
-                    heading = getString(R.string.wxpay_done),
-                    msg = getString(R.string.order_cannot_be_queried)
-            )
+            showMessage(R.string.payment_done, R.string.order_cannot_be_queried)
+            showProgress(false)
             return
         }
 
-        val account = sessionManager?.loadAccount()
-        info("Account prior to confirmation: $account")
-
-        if (account == null) {
-            showDoneUI(
-                    heading = getString(R.string.wxpay_done),
-                    msg = getString(R.string.order_cannot_be_queried)
-            )
-
-            return
-        }
+        val account = sessionManager?.loadAccount() ?: return
 
         showProgress(true)
+        showMessage(R.string.wxpay_query_order)
 
-        launch {
+        checkoutViewModel.queryWxPayStatus(account, subs.id)
+    }
 
-            info("Start querying order...")
-            updateProgress(getString(R.string.wxpay_query_order))
+    private fun onWxPayStatusQueried(result: WxPayResult?) {
+        if (result == null || result.exception != null || result.success == null) {
+            val title = getString(R.string.payment_done)
+            val msg = if (result?.exception != null) result.exception.message else getString(R.string.order_cannot_be_queried)
+            showMessage(title, msg)
+            enableButton(true)
+            showProgress(false)
+            return
+        }
 
-            try {
-                val orderQuery = withContext(Dispatchers.IO) {
-                    account.wxQueryOrder(subs.id)
-                }
-
-                info("Order queried: $orderQuery")
-
-                // If order query is empty
-                if (orderQuery == null) {
-                    showDoneUI(
-                            heading = getString(R.string.wxpay_done),
-                            msg = getString(R.string.order_cannot_be_queried)
-                    )
-                    return@launch
-                }
-
-                // Check the value of `trade_state`
-                when (orderQuery.paymentState) {
-                    // If payment success, update user sessions's member tier, expire date, billing cycle.
-                    "SUCCESS" -> confirmSubscription(account, subs)
-                    "REFUND" -> showFailureUI(getString(R.string.wxpay_refund))
-                    "NOTPAY" -> showFailureUI(getString(R.string.wxpay_not_paid))
-                    "CLOSED" -> showFailureUI(getString(R.string.wxpay_closed))
-                    "REVOKED" -> showFailureUI(getString(R.string.wxpay_revoked))
-                    "USERPAYING" -> showFailureUI(getString(R.string.wxpay_pending))
-                    "PAYERROR" -> showFailureUI(getString(R.string.wxpay_failed))
-                }
-
-            } catch (resp: ClientError) {
-
-                showFailureUI(getString(R.string.order_not_found))
-
-                handleApiError(resp)
-
-                info(resp)
-            } catch (e: Exception) {
-
-                showFailureUI(getString(R.string.order_not_found))
-
-                handleException(e)
-
-                info(e)
+        when (result.success.paymentState) {
+            "REFUND",
+            "NOTPAY",
+            "CLOSED",
+            "REVOKED",
+            "USERPAYING",
+            "PAYERROR"  -> {
+                showMessage(paymentStatusId[result.success.paymentState])
+                showProgress(false)
+                enableButton(true)
+            }
+            "SUCCESS" -> {
+                showMessage(R.string.payment_done)
+                confirmSubscription()
             }
         }
     }
 
-    private suspend fun confirmSubscription(account: Account, subs: Subscription) {
+    private fun confirmSubscription() {
+        // Load current membership
+        val account = sessionManager?.loadAccount() ?: return
+        val member = account.membership
 
-        val updatedMember = subs.confirm(account.membership)
+        // Confirm the order locally sand save it.
+        val subs = orderManager?.load() ?: return
+        val confirmedSub = subs.withConfirmation(member)
+        orderManager?.save(confirmedSub)
 
-        info("New membership: $updatedMember")
-
+        // Update member and save it.
+        val updatedMember = member.withSubscription(confirmedSub)
         sessionManager?.updateMembership(updatedMember)
 
-        updateProgress(getString(R.string.refreshing_account))
+        // Start retrieving account data from server.
+        showMessage(R.string.payment_done, R.string.refreshing_account)
+        accountViewModel.refresh(account)
+    }
 
-        val refreshAccount = withContext(Dispatchers.IO) {
-            account.refresh()
-        }
-
+    private fun onAccountRefreshed(result: AccountResult?) {
         showProgress(false)
+        enableButton(true)
 
-        if (refreshAccount == null) {
-            showDoneUI(
-                    heading = getString(R.string.wxpay_done),
-                    msg = getString(R.string.order_cannot_be_queried)
-            )
+        if (result == null) {
+            showMessage(R.string.payment_done, R.string.loading_failed)
             return
         }
 
-        toast(R.string.prompt_updated)
-
-        if (refreshAccount.membership.isNewer(updatedMember)) {
-            sessionManager?.saveAccount(refreshAccount)
+        if (result.error != null) {
+            showMessage(R.string.payment_done, result.error)
+            return
         }
 
-        showDoneUI(getString(R.string.subs_success))
+        if (result.exception != null) {
+            showMessage(getString(R.string.payment_done), result.exception.message)
+            return
+        }
+
+        val remoteAccount = result.success
+
+        if (remoteAccount == null) {
+            showMessage(R.string.payment_done, R.string.loading_failed)
+
+            return
+        }
+
+        val localAccount = sessionManager?.loadAccount() ?: return
+
+        if (remoteAccount.membership.isNewer(localAccount.membership)) {
+            sessionManager?.saveAccount(remoteAccount)
+        }
+
+        showMessage(R.string.payment_done, R.string.subs_success)
     }
 
-    private fun showUI(show: Boolean) {
-        if (show) {
-            heading_tv.visibility = View.VISIBLE
-            done_button.visibility = View.VISIBLE
-        } else {
-            heading_tv.visibility = View.GONE
-            done_button.visibility = View.GONE
-        }
+    private fun showMessage(title: String, body: String? = null) {
+        heading_tv.text = title
+        message_tv.text = body ?: ""
     }
 
-    private fun updateProgress(heading: String) {
-        heading_tv.visibility = View.VISIBLE
-        done_button.visibility = View.GONE
-
-        heading_tv.text = heading
-    }
-
-    private fun showDoneUI(heading: String, msg: String? = null) {
-        showProgress(false)
-
-        heading_tv.visibility = View.VISIBLE
-        heading_tv.text = heading
-
-        if (msg != null) {
-            message_tv.visibility = View.VISIBLE
-            message_tv.text = msg
-        }
-
-        done_button.visibility = View.VISIBLE
-        done_button.setOnClickListener {
-            onClickDone()
-        }
-    }
-
-    private fun showFailureUI(heading: String) {
-        showProgress(false)
-
-        heading_tv.visibility = View.VISIBLE
-        heading_tv.text = heading
-
-        done_button.visibility = View.VISIBLE
-        done_button.setOnClickListener {
-            onClickDone()
-        }
+    private fun showMessage(title: Int?, body: Int? = null) {
+        heading_tv.text = if (title != null) getString(title) else ""
+        message_tv.text = if (body != null) getString(body) else ""
     }
 
     /**
@@ -290,13 +281,12 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         }
 
         if (account.isMember) {
-            MemberActivity.start(this)
+            LatestOrderActivity.start(this)
         } else {
             PaywallTracker.from = null
             PaywallActivity.start(this)
         }
 
-        setResult(Activity.RESULT_OK)
         finish()
     }
 
@@ -310,5 +300,27 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     override fun onBackPressed() {
         super.onBackPressed()
         onClickDone()
+    }
+
+    private fun enableButton(enable: Boolean) {
+        done_button.isEnabled = enable
+    }
+
+    private fun showProgress(show: Boolean) {
+        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
+    companion object {
+        @JvmStatic
+        fun start(context: Context) {
+            val intent = Intent(
+                    context,
+                    WXPayEntryActivity::class.java
+            ).apply {
+                putExtra(EXTRA_UI_TEST, true)
+            }
+
+            context.startActivity(intent)
+        }
     }
 }
