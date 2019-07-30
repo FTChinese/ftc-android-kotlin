@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model
 
 import com.ft.ftchinese.model.order.Subscription
-import com.ft.ftchinese.model.order.WxOrderQuery
+import com.ft.ftchinese.model.order.WxPaymentStatus
 import com.ft.ftchinese.util.json
 import org.junit.Test
 
@@ -132,7 +132,7 @@ class JsonTest {
         }
         """.trimIndent()
 
-        val result = json.parse<WxOrderQuery>(data)
+        val result = json.parse<WxPaymentStatus>(data)
 
         println(result)
     }
