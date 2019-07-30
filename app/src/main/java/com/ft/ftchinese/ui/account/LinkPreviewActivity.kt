@@ -36,11 +36,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
     private var otherAccount: Account? = null
 
     private fun showProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
+        progress_bar.visibility =  if (show) View.VISIBLE else View.GONE
     }
 
     private fun enableInput(value: Boolean) {
@@ -112,7 +108,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
                 return@Observer
             }
 
-            toast(R.string.prompt_refreshing)
+            toast(R.string.refreshing_data)
 
             accountViewModel.refresh(account)
         })
@@ -170,7 +166,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
 
         // If the two accounts are already bound.
         if (ftcAccount.isEqual(wxAccount)) {
-            result_tv.text = getString(R.string.accounts_already_bound)
+            result_tv.text = getString(R.string.accounts_already_linked)
 
             enableInput(false)
             return
@@ -178,14 +174,14 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
 
         // If FTC account is already bound to another wechat.
         if (ftcAccount.isLinked) {
-            result_tv.text = getString(R.string.ftc_account_coupled, ftcAccount.email)
+            result_tv.text = getString(R.string.ftc_account_linked, ftcAccount.email)
 
             enableInput(false)
             return
         }
 
         if (wxAccount.isLinked) {
-            result_tv.text = getString(R.string.wx_account_coupled, wxAccount.wechat.nickname)
+            result_tv.text = getString(R.string.wx_account_linked, wxAccount.wechat.nickname)
 
             enableInput(false)
             return
