@@ -37,7 +37,7 @@ class LinkViewModel : ViewModel() {
                         "membership_all_valid" -> R.string.api_membership_all_valid
                         else -> null
                     }
-                    else -> e.statusMessage()
+                    else -> e.parseStatusCode()
                 }
 
                 linkResult.value = BinaryResult(
@@ -73,7 +73,7 @@ class LinkViewModel : ViewModel() {
                         else -> null
                     }
                     404 -> R.string.api_account_not_found
-                    else -> e.statusMessage()
+                    else -> e.parseStatusCode()
                 }
 
                 unlinkResult.value = BinaryResult(

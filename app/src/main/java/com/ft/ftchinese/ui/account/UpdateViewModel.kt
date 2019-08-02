@@ -70,7 +70,7 @@ class UpdateViewModel : ViewModel() {
                         else -> null
                     }
                 } else {
-                    e.statusMessage()
+                    e.parseStatusCode()
                 }
 
                 _updateResult.value = BinaryResult(
@@ -126,7 +126,7 @@ class UpdateViewModel : ViewModel() {
                         else -> null
                     }
                 } else {
-                    e.statusMessage()
+                    e.parseStatusCode()
                 }
 
                 _updateResult.value = BinaryResult(
@@ -159,7 +159,7 @@ class UpdateViewModel : ViewModel() {
                         "password_invalid" -> R.string.error_invalid_password
                         else -> null
                     }
-                    else -> e.statusMessage()
+                    else -> e.parseStatusCode()
                 }
 
                 _updateResult.value = BinaryResult(
@@ -193,7 +193,7 @@ class UpdateViewModel : ViewModel() {
                         "email_server_missing" -> R.string.api_email_server_down
                         else -> null
                     }
-                    else -> e.statusMessage()
+                    else -> e.parseStatusCode()
                 }
 
                 sendEmailResult.value = BinaryResult(
