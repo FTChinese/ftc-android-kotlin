@@ -82,10 +82,11 @@
         app:layout_constraintEnd_toEndOf="@+id/tv_intro"
         android:textAlignment="center"/>
 
-    <Button
+    <com.google.android.material.button.MaterialButton
+        style="@style/AppButton.BottomSticky"
         android:id="@+id/btn_confirm_upgrade"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
         android:text="@string/confirm_upgrade"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintVertical_bias="1.0"/>
