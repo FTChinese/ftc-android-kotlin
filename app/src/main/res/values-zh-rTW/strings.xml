@@ -43,7 +43,7 @@
     <string name="title_wx_account">微信帳號</string>
     <string name="title_link_email">绑定信箱帳號</string>
     <string name="title_merge_accounts">合並帳號</string>
-    <string name="title_unlink">解除绑定</string>
+    <string name="title_unlink">解除綁定</string>
     <string name="title_account">帳號與安全</string>
     <string name="title_subscription">會員訂閱</string>
     <string name="title_my_orders">我的訂單</string>
@@ -51,6 +51,14 @@
     <string name="title_wx_login">微信登入</string>
     <string name="title_stripe_setting">Stripe設置</string>
     <string name="title_latest_order">訂單详情</string>
+    <string name="title_error">错误</string>
+
+    <!-- Generic buttons -->
+    <string name="action_done">完成</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_start">开始</string>
+    <string name="action_ok">确认</string>
+    <string name="action_retry">重试</string>
 
     <!-- Paywall -->
     <string-array name="standard_benefits">
@@ -72,7 +80,6 @@
 
     <string name="premium_small_print">注：所有活動門票不可折算現金、不能轉讓、不含差旅與食宿</string>
 
-    <string name="paywall_expired">您訂閱的%1$s已經于%2$s日过期，继续閱讀請續訂</string>
 
 
 
@@ -88,11 +95,12 @@
 
     <string name="cycle_year">年</string>
     <string name="cycle_month">月</string>
-    <string name="cycle_vip">無限期</string>
+    <string name="vip_no_expiration">無限期</string>
 
     <string name="label_member_tier">會員類型</string>
 
-    <string name="member_resubs">會員訂閱已过期，請續訂</string>
+    <!-- Membership status -->
+
     <string name="membership_renew">續訂</string>
     <string name="membership_upgrade">升级为高端會員</string>
     <string name="tier_free">尚未成為會員</string>
@@ -110,6 +118,11 @@
     <string name="prompt_premium_only">仅限高端會員閱讀</string>
     <string name="prompt_membership_expired">會員訂閱已过期，請續訂</string>
     <string name="prompt_restricted_login">會員登入后可以閱讀</string>
+    <string name="stripe_not_active">Stripe订阅状态异常</string>
+    <string name="member_status_invalid">订阅状态异常，请刷新或联系客服</string>
+    <string name="member_status_expired">会员已过期</string>
+    <string name="member_will_expire">会员还有 %1$d 天过期，请及时续订</string>
+    <string name="member_expired_on">您訂閱的%1$s已經于%2$s日过期，继续閱讀請續訂</string>
 
 
     <string name="heading_customer_service">聯客服</string>
@@ -131,14 +144,19 @@
         <item>* 微信登入的用户需要綁定FT中文網帳號後才可以使用Stripe訂閱</item>
         <item>* 通过支付寶或者微信支付購買的會員、且會員尚未到期，無法使用Stripe訂閱</item>
     </string-array>
+    <string name="stripe_in_pounds">* 使用Stripe訂閱FT中文網會員以英镑计价</string>
     <string name="select_or_add_card">選擇或添加银行卡</string>
     <string name="stripe_init">設置Stripe支付</string>
     <string name="retrieve_customer">查詢Stripe帳號…</string>
     <string name="default_bank_brand">我的银行卡</string>
-    <string name="add_or_select_payment_method">添加银行卡或選擇默認支付方式</string>
+    <string name="add_or_select_payment_method">点击添加银行卡或选择默认支付方式</string>
     <string name="set_default_payment_method">设为默認支付方式</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
-    <string name="stripe_customer_not_found">Stripe使用者不存在，请檢查帳號或者重新登入</string>
+    <string name="stripe_customer_not_found">Stripe用户不存在，请检查账号或者重新登录</string>
+    <string name="btn_start_subscription">订阅</string>
+    <string name="stripe_authentication_failed">Stripe支付验证似乎失败了</string>
+    <string name="stripe_unable_to_authenticate">无法验证，请联系客服</string>
+
 
     <string name="sub_status_incomplete">支付未完成</string>
     <string name="sub_status_incomplete_expired">支付已过期</string>
@@ -151,7 +169,12 @@
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="refreshing_stripe_sub">更新Stripe訂閱信息…</string>
+    <string name="query_stripe_subscription">查詢Stripe訂閱状态…</string>
     <string name="stripe_refreshing_failed">無法更新Stripe訂閱信息</string>
+    <string name="title_requires_action">需要驗證</string>
+    <string name="stripe_requires_action">Stripe支付尚未完成，您的发卡行需要进行安全验证，點擊确认开始驗證</string>
+    <string name="creating_subscription">創建訂閱…</string>
+    <string name="upgrading_subscription">升级訂閱…</string>
 
     <string name="permission_alipay_denied">無法獲取支付寶所需的權限，請到系統設置開啟</string>
     <string name="permission_alipay_granted">已獲取支付寶所需的權限</string>
@@ -164,8 +187,9 @@
 
     <string name="api_already_premium">您已經是會員会员了</string>
     <string name="api_member_not_found">没有查詢到您的會員状态</string>
-    <string name="renewal_not_allowed">您已經是會員了，請勿重複購買</string>
+    <string name="duplicate_purchase">您已經是會員了，請勿重複購買</string>
     <string name="subs_success">訂閱成功！</string>
+    <string name="balance_query_failed">查詢不到账户余额，請稍後再試</string>
 
     <!-- Wechat payment status -->
     <string name="wxpay_not_supported">您的設備不支持微信支付</string>
@@ -207,11 +231,6 @@
     <string name="order_pay_method">支付方式: %1$s</string>
     <string name="order_creation_time">創建时间: %1$s</string>
     <string name="order_period">訂閱周期: %1$s ~ %2$s</string>
-
-    <!-- Generic buttons -->
-    <string name="action_done">完成</string>
-    <string name="action_cancel">取消</string>
-    <string name="action_start">开始</string>
 
     <!-- Data loading and refreshing -->
     <string name="refreshing_data">更新資料…</string>
@@ -266,7 +285,7 @@
     <string name="btn_next">下一步</string>
     <string name="btn_verify_password">驗證密碼</string>
     <string name="btn_link">绑定信箱</string>
-    <string name="btn_unlink">解除绑定</string>
+    <string name="btn_unlink">解除綁定</string>
     <string name="btn_request_verify">重新寄送驗證郵件</string>
 
     <!-- Account related -->
@@ -279,8 +298,8 @@
     <string name="label_user_name">使用者名稱</string>
     <string name="label_new_name">新使用者名稱</string>
     <string name="label_password">密碼</string>
-    <string name="hint_enter_password">输入登录密码</string>
-    <string name="hint_set_password">设置登录密码</string>
+    <string name="hint_enter_password">输入登入密碼</string>
+    <string name="hint_set_password">設置登入密碼</string>
     <string name="label_old_password">目前密碼</string>
     <string name="label_new_password">新密碼</string>
     <string name="label_confirm_password">確認新密碼</string>
@@ -369,6 +388,7 @@
     <string name="api_io_error">無法讀取數據</string>
     <string name="api_json_syntax">無法解析數據</string>
     <string name="api_empty_response">伺服器沒有回應</string>
+    <string name="error_unknown">发生未知錯誤</string>
 
     <!-- Settings -->
     <string name="prompt_cache_cleared">緩存已清空</string>
