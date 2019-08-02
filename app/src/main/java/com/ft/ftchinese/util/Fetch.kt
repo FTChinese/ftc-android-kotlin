@@ -12,6 +12,11 @@ import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
+val statusCodeMeaning = mapOf(
+        401 to R.string.api_unauthorized,
+        429 to R.string.api_too_many_request,
+        500 to R.string.api_server_error
+)
 
 data class ClientError(
         @Json(ignored = true)
@@ -28,17 +33,17 @@ data class ClientError(
     // returns different message.
     // 404 is not handled here too, since its meaning changes
     // for each endpoint.
-    fun statusMessage(): Int {
+    fun parseStatusCode(): Int {
         return when (statusCode) {
-            400 -> {
-                R.string.api_bad_request
-            }
             // If request header does not contain X-User-Id
             401 -> {
                 R.string.api_unauthorized
             }
             429 -> {
                 R.string.api_too_many_request
+            }
+            500 -> {
+                R.string.api_server_error
             }
             // All other errors are treated as server error.
             else -> {
@@ -47,6 +52,7 @@ data class ClientError(
         }
     }
 }
+
 
 data class Reason(
         val field: String,
