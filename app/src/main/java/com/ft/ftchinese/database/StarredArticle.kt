@@ -99,13 +99,13 @@ data class StarredArticle(
     }
 
     private fun requireMembership(): Boolean {
-        return (tier == Tier.STANDARD.string()) || (tier == Tier.PREMIUM.string())
+        return (tier == Tier.STANDARD.toString()) || (tier == Tier.PREMIUM.toString())
     }
 
     fun permission(): Permission {
         return when {
-            tier == Tier.STANDARD.string() -> Permission.STANDARD
-            tier == Tier.PREMIUM.string() -> Permission.PREMIUM
+            tier == Tier.STANDARD.toString() -> Permission.STANDARD
+            tier == Tier.PREMIUM.toString() -> Permission.PREMIUM
             isSevenDaysOld() -> Permission.STANDARD
             else -> Permission.FREE
         }

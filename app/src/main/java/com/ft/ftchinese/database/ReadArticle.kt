@@ -74,7 +74,7 @@ data class ReadArticle(
     }
 
     private fun requireMembership(): Boolean {
-        return (tier == Tier.STANDARD.string()) || (tier == Tier.PREMIUM.string())
+        return (tier == Tier.STANDARD.toString()) || (tier == Tier.PREMIUM.toString())
     }
 
     private fun isSevenDaysOld(): Boolean {
