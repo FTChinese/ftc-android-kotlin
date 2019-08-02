@@ -8,6 +8,7 @@ import com.ft.ftchinese.model.Account
 import com.ft.ftchinese.model.order.Plan
 import com.ft.ftchinese.model.order.StripeSubParams
 import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.util.statusCodeMeaning
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -21,8 +22,9 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
 
     val aliOrderResult = MutableLiveData<AliOrderResult>()
 //    val clientSecretResult = MutableLiveData<StringResult>()
+
     val stripePlanResult = MutableLiveData<StripePlanResult>()
-    val stripeSubResult = MutableLiveData<StripeSubResult>()
+    val stripeSubscribedResult = MutableLiveData<StripeSubscribedResult>()
 
     val upgradePreviewResult = MutableLiveData<UpgradePreviewResult>()
     val freeUpgradeResult = MutableLiveData<UpgradeResult>()
@@ -40,15 +42,15 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                         success = up
                 )
             } catch (e: ClientError) {
-                val msgId = when (e.statusCode) {
-                    404 -> R.string.api_member_not_found
-                    else -> e.statusMessage()
-                }
 
                 upgradePreviewResult.value = UpgradePreviewResult(
-                        error = msgId,
+                        errorId = when (e.statusCode) {
+                            404 -> R.string.api_member_not_found
+                            else -> statusCodeMeaning[e.statusCode]
+                        },
                         exception = e
                 )
+
             } catch (e: Exception) {
                 upgradePreviewResult.value = UpgradePreviewResult(
                         exception = e
@@ -82,7 +84,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                         "membership_already_upgraded" -> R.string.api_already_premium
                         else -> null
                     }
-                    else -> e.statusMessage()
+                    else -> e.parseStatusCode()
                 }
 
                 freeUpgradeResult.value = UpgradeResult(
@@ -109,9 +111,9 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 )
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 403) {
-                    R.string.renewal_not_allowed
+                    R.string.duplicate_purchase
                 } else {
-                    e.statusMessage()
+                    e.parseStatusCode()
                 }
 
                 wxOrderResult.value = WxOrderResult(
@@ -156,9 +158,9 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 )
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 403) {
-                    R.string.renewal_not_allowed
+                    R.string.duplicate_purchase
                 } else {
-                    e.statusMessage()
+                    e.parseStatusCode()
                 }
 
                 aliOrderResult.value = AliOrderResult(
@@ -213,11 +215,17 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                     account.createSubscription(params)
                 }
 
-                stripeSubResult.value = StripeSubResult(
+                stripeSubscribedResult.value = StripeSubscribedResult(
                         success = sub
                 )
+            } catch (e: ClientError) {
+                stripeSubscribedResult.value = StripeSubscribedResult(
+                        isIdempotencyError = e.type == "idempotency_error",
+                        exception = e
+                )
+
             } catch (e: Exception) {
-                stripeSubResult.value = StripeSubResult(
+                stripeSubscribedResult.value = StripeSubscribedResult(
                         exception = e
                 )
             }
@@ -231,45 +239,15 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                     account.upgradeStripeSub(params)
                 }
 
-                stripeSubResult.value = StripeSubResult(
+                stripeSubscribedResult.value = StripeSubscribedResult(
                         success = sub
                 )
             } catch (e: Exception) {
-                stripeSubResult.value = StripeSubResult(
+                stripeSubscribedResult.value = StripeSubscribedResult(
                         exception = e
                 )
             }
         }
     }
 
-    fun refreshStripeSub(account: Account) {
-        viewModelScope.launch {
-            try {
-                val stripeSub = withContext(Dispatchers.IO) {
-                    account.refreshStripeSub()
-                }
-
-                stripeSubResult.value = StripeSubResult(
-                        success = stripeSub
-                )
-
-            } catch (e: ClientError) {
-                if (e.statusCode == 404) {
-                    stripeSubResult.value = StripeSubResult(
-                            success = null
-                    )
-
-                    return@launch
-                }
-
-                stripeSubResult.value = StripeSubResult(
-                        exception = e
-                )
-            } catch (e: Exception) {
-                stripeSubResult.value = StripeSubResult(
-                        exception = e
-                )
-            }
-        }
-    }
 }
