@@ -86,7 +86,7 @@ class PaywallActivity : ScopedAppActivity(),
             Tier.PREMIUM -> getString(R.string.tier_premium)
         }
 
-        return getString(R.string.paywall_expired, tierText, m.expireDate)
+        return getString(R.string.member_expired_on, tierText, m.expireDate)
     }
 
     private fun initUI() {
@@ -104,7 +104,7 @@ class PaywallActivity : ScopedAppActivity(),
             login_button.visibility = View.GONE
 
             // If user is an expired member
-            if (account.isExpiredMember) {
+            if (account.memberExpired()) {
                 expired_guide.visibility = View.VISIBLE
                 expired_guide.text = expiredText(account.membership)
             }
