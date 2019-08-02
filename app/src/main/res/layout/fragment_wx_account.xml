@@ -41,7 +41,7 @@
             app:layout_constraintTop_toBottomOf="@+id/wx_avatar" />
 
         <TextView
-            android:id="@+id/instruction_tv"
+            android:id="@+id/tv_urge_linking"
             style="@style/AppTextBody"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -51,25 +51,16 @@
             app:layout_constraintStart_toStartOf="@+id/wx_nickname"
             app:layout_constraintTop_toBottomOf="@+id/wx_nickname" />
 
-        <Button
-            android:id="@+id/link_email_btn"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_link_or_unlink"
             style="@style/AppButton.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/btn_link"
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="@id/wx_nickname"
-            app:layout_constraintTop_toBottomOf="@+id/instruction_tv" />
+            app:layout_constraintTop_toBottomOf="@+id/tv_urge_linking" />
 
-        <Button
-            android:id="@+id/unlink_btn"
-            style="@style/AppButton.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_unlink"
-            android:layout_marginTop="16dp"
-            app:layout_constraintEnd_toEndOf="@id/wx_nickname"
-            app:layout_constraintTop_toBottomOf="@id/link_email_btn"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
