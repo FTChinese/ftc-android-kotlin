@@ -124,6 +124,11 @@ class SignInFragment : ScopedFragment(),
         })
     }
 
+    override fun onResume() {
+        super.onResume()
+        enableInput(true)
+    }
+
     companion object {
         private const val ARG_EMAIL = "arg_email"
 
