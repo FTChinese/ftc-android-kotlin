@@ -55,7 +55,7 @@
     <style name="AppButton.OutlinedButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <!--Stroke controls the border color -->
         <item name="strokeColor">@color/btn_stroke_color_selector</item>
-        <item name="android:textColor">@color/colorTeal</item>
+        <item name="android:textColor">@color/btn_text_color_selector</item>
         <item name="cornerRadius">0dp</item>
         <item name="android:textSize">18sp</item>
         <item name="android:paddingTop">8dp</item>
@@ -142,11 +142,18 @@
     <style name="OrigamiText.Body2" parent="TextAppearance.MaterialComponents.Body2">
         <item name="android:textSize">16sp</item>
     </style>
+
     <style name="OrigamiText.Body2.Center">
         <item name="android:textAlignment">center</item>
     </style>
+
     <style name="OrigamiText.Body2.Light">
         <item name="android:textColor">@color/colorBlack60</item>
+    </style>
+
+    <style name="OrigamiText.Body2.Warning">
+        <item name="android:textColor">@color/colorClaret80</item>
+        <item name="android:textAlignment">center</item>
     </style>
 
     <!-- Deprecated -->
@@ -159,4 +166,7 @@
     </style>
 
 
+    <style name="AppCard" parent="Widget.MaterialComponents.CardView">
+        <item name="android:textColor">@color/card_text_color_selector</item>
+    </style>
 </resources>
