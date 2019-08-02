@@ -25,6 +25,7 @@ import com.ft.ftchinese.ui.account.UnlinkActivity
 import com.ft.ftchinese.ui.account.UnlinkAnchorFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.LatestOrderActivity
+import com.ft.ftchinese.ui.pay.StripeSubActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.wxapi.WXEntryActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
@@ -307,7 +308,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                 true
             }
             R.id.menu_show_unlink_activity -> {
-                UnlinkActivity.startForResult(this, RequestCode.UNLINK)
+                UnlinkActivity.startForResult(this)
                 true
             }
             R.id.menu_wxpay_activity -> {
@@ -362,6 +363,16 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                                 status = null
                         )
                 ))
+                true
+            }
+            R.id.menu_clear_idempotency -> {
+                Idempotency.getInstance(this).clear()
+                toast("Cleared")
+                true
+            }
+            R.id.menu_stripe_subscripiton -> {
+
+                StripeSubActivity.startTest(this, subsPlans.of(Tier.STANDARD, Cycle.YEAR))
                 true
             }
             else -> super.onOptionsItemSelected(item)
