@@ -95,6 +95,7 @@ class CheckOutActivity : ScopedAppActivity(),
         when (account.membership.subType(p)) {
             OrderUsage.RENEW ->  supportActionBar?.setTitle(R.string.title_renewal)
             OrderUsage.UPGRADE -> supportActionBar?.setTitle(R.string.title_upgrade)
+            else -> {}
         }
 
         // Attach price card
@@ -106,9 +107,7 @@ class CheckOutActivity : ScopedAppActivity(),
         // Wechat-only user cannot use stripe.
         // For non-expired user to renew (only applicable to
         // wechat pay and alipay), stripe should be disabled.
-        if (account.isWxOnly || !account.membership.canUseStripe()) {
-            stripe_btn.isEnabled = false
-        }
+        stripe_btn.isEnabled = account.permitStripe()
 
         stripe_footnote.text = resources.getStringArray(R.array.stripe_footnotes)
                 .joinToString("\n")
@@ -231,6 +230,11 @@ class CheckOutActivity : ScopedAppActivity(),
 
             PayMethod.STRIPE -> {
 
+                if (account.membership.isActiveStripe() && !account.membership.expired()) {
+                    toast(R.string.duplicate_purchase)
+                    showProgress(false)
+                    return
+                }
                 StripeSubActivity.startForResult(
                         this,
                         RequestCode.PAYMENT,
@@ -362,7 +366,8 @@ class CheckOutActivity : ScopedAppActivity(),
 
         val localAccount = sessionManager.loadAccount() ?: return
 
-        if (remoteAccount.membership.isNewer(localAccount.membership)) {
+
+        if (localAccount.membership.useRemote(remoteAccount.membership)) {
             sessionManager.saveAccount(remoteAccount)
         }
 
@@ -488,11 +493,13 @@ class CheckOutActivity : ScopedAppActivity(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
+        if (resultCode != Activity.RESULT_OK) {
+            enablePayBtn(true)
+            return
+        }
         if (requestCode == RequestCode.PAYMENT) {
-            if (resultCode == Activity.RESULT_OK) {
-                setResult(Activity.RESULT_OK)
-                finish()
-            }
+            setResult(Activity.RESULT_OK)
+            finish()
         }
     }
 
