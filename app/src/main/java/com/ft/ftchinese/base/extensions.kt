@@ -179,6 +179,23 @@ fun Activity.handleException(e: Exception) {
     toast(msg)
 }
 
+fun Activity.parseException(e: Exception): String {
+    return when (e) {
+        is IllegalStateException -> {
+            getString(R.string.api_empty_url)
+        }
+        is NetworkException -> {
+            getString(R.string.api_network_failure)
+        }
+        is IOException -> {
+            getString(R.string.api_io_error)
+        }
+        else -> {
+            e.message ?: getString(R.string.error_unknown)
+        }
+    }
+}
+
 /**
  * Extension function to simplify setting an afterTextChanged action to EditText components.
  */
@@ -193,3 +210,4 @@ fun EditText.afterTextChanged(afterTextChanged: (String) -> Unit) {
         override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
     })
 }
+
