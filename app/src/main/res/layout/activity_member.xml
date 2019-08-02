@@ -63,7 +63,7 @@
 
                 <TextView
                     style="@style/OrigamiText.Body1.Light.Center"
-                    android:id="@+id/tv_sub_status"
+                    android:id="@+id/tv_stripe_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -81,6 +81,17 @@
                     android:layout_marginEnd="16dp"
                     android:text="@string/auto_renewal"/>
 
+                <TextView
+                    style="@style/OrigamiText.Body2.Warning"
+                    android:id="@+id/tv_status_warning"
+                    android:textColor="@color/colorClaret80"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/member_status_invalid"/>
+
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton
@@ -88,7 +99,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:text="@string/member_resubs"
+                android:text="@string/btn_start_subscription"
                 app:layout_constraintStart_toStartOf="@id/member_status_wrapper"
                 app:layout_constraintEnd_toEndOf="@+id/member_status_wrapper"
                 app:layout_constraintTop_toBottomOf="@id/member_status_wrapper"/>
