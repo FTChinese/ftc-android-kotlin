@@ -18,26 +18,8 @@ data class StripeSub(
         val currentPeriodEnd: ZonedDateTime,
         @KDateTime
         val currentPeriodStart: ZonedDateTime,
-        @KDateTime
-        val endedAt: ZonedDateTime? = null,
-        val latestInvoice: StripeInvoice,
-
+        val latestInvoiceId: String,
         // lets us know whether we can provision the good or service associated with the subscription.
         @KStripeSubStatus
         val status: StripeSubStatus?
-) {
-        // The payment is complete, and you should promptly provision access to the good or service.
-        fun succeeded(): Boolean {
-            return status == StripeSubStatus.Active && latestInvoice.paymentIntent.status == PaymentIntentStatus.Succeeded
-        }
-
-        // Ask user to change payment method.
-        fun failure(): Boolean {
-                return status == StripeSubStatus.Incomplete && latestInvoice.paymentIntent.status == PaymentIntentStatus.RequiresPaymentMethod
-        }
-
-        // Some payment methods require additional steps, such as authentication, in order to complete the payment process.
-        fun requiresAction(): Boolean {
-                return status == StripeSubStatus.Incomplete && latestInvoice.paymentIntent.status == PaymentIntentStatus.RequiresAction
-        }
-}
+)
