@@ -33,4 +33,12 @@
     <item android:id="@+id/menu_link_preview"
         android:title="Preview Accounts Link"
         app:showAsAction="never"/>
+
+    <item android:id="@+id/menu_clear_idempotency"
+        android:title="Clear Idempotency"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/menu_stripe_subscripiton"
+        android:title="Stripe Subscribed"
+        app:showAsAction="never"/>
 </menu>
