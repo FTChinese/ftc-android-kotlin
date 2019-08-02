@@ -9,7 +9,8 @@
     <include
         layout="@layout/simple_toolbar" />
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
+        style="@style/AppCard"
         android:id="@+id/default_bank_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,7 +24,7 @@
             android:orientation="vertical"
             android:padding="16dp">
             <TextView
-                style="@style/OrigamiText.ProductHeading2"
+                style="@style/OrigamiText.ProductHeading3"
                 android:id="@+id/card_brand"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -38,7 +39,7 @@
                 android:layout_marginTop="16dp"
                 android:text="@string/bank_card_number"/>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
 
     <Button
