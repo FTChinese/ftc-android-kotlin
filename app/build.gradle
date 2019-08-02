@@ -147,7 +147,7 @@ dependencies {
 
     // Payment
     implementation(name: 'alipaySdk-15.5.7-20181023110917', ext: 'aar')
-    implementation 'com.stripe:stripe-android:9.3.5'
+    implementation 'com.stripe:stripe-android:10.1.0'
 
 
     // ViewModel and LiveData
