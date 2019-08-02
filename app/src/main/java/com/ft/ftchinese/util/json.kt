@@ -107,7 +107,7 @@ val tierConverter = object : Converter {
 
     override fun toJson(value: Any): String {
         return if (value is Tier) {
-            """ "${value.string()}" """
+            """ "$value" """
         } else {
             """null"""
         }
