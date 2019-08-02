@@ -20,15 +20,19 @@ import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.base.isActiveNetworkWifi
 import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.order.PayMethod
+import com.ft.ftchinese.model.order.StripeSubStatus
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.account.AccountViewModel
+import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.channel.MyftPagerAdapter
 import com.ft.ftchinese.ui.channel.SearchableActivity
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
+import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.ui.splash.SplashViewModel
@@ -58,8 +62,6 @@ class MainActivity : ScopedAppActivity(),
 
     private var bottomDialog: BottomSheetDialog? = null
     private var mBackKeyPressed = false
-
-    private var avatarName: String? = null
 
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var splashViewModel: SplashViewModel
@@ -247,6 +249,17 @@ class MainActivity : ScopedAppActivity(),
                 .setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
 
 //        retrieveRegistrationToken()
+
+
+        accountViewModel.accountRefreshed.observe(this, Observer {
+            onAccountRefreshed(it)
+        })
+
+        accountViewModel.stripeRetrievalResult.observe(this, Observer {
+            onStripeSubRetrieved(it)
+        })
+
+        checkStripeStatus()
     }
 
     private fun createNotificationChannel() {
@@ -409,7 +422,7 @@ class MainActivity : ScopedAppActivity(),
 
     private fun logout() {
         sessionManager.logout()
-        cache.deleteFile(avatarName)
+        cache.deleteFile(WX_AVATAR_NAME)
         CustomerSession.endCustomerSession()
         updateSessionUI()
     }
@@ -465,6 +478,44 @@ class MainActivity : ScopedAppActivity(),
             logout()
             WxExpireDialogFragment().show(supportFragmentManager, "WxExpireDialog")
         }
+    }
+
+    private fun checkStripeStatus() {
+        val account = sessionManager.loadAccount() ?: return
+
+        if (account.membership.payMethod != PayMethod.STRIPE) {
+            return
+        }
+
+        if (account.membership.status != StripeSubStatus.Incomplete) {
+            return
+        }
+
+        if (!isNetworkConnected()) {
+            return
+        }
+
+        accountViewModel.retrieveStripeSub(account)
+    }
+
+    private fun onStripeSubRetrieved(result: StripeRetrievalResult?) {
+        if (result?.success == null) {
+            return
+        }
+
+        val account = sessionManager.loadAccount() ?: return
+        accountViewModel.refresh(account)
+    }
+
+    private fun onAccountRefreshed(result: AccountResult?) {
+        if (result?.success == null) {
+            return
+        }
+
+        if (!isNetworkConnected()) {
+            return
+        }
+        sessionManager.saveAccount(result.success)
     }
 
     override fun onStart() {
