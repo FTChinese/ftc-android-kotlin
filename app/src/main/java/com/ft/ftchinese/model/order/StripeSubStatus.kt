@@ -1,5 +1,7 @@
 package com.ft.ftchinese.model.order
 
+import com.ft.ftchinese.R
+
 enum class StripeSubStatus(val symbol: String) {
     // if the initial payment attempt fails.
     Incomplete("incomplete"),
@@ -19,8 +21,23 @@ enum class StripeSubStatus(val symbol: String) {
     Canceled("canceled"),
     Unpaid("unpaid");
 
+    val stringRes: Int
+        get() = when (this) {
+            Active -> R.string.sub_status_active
+            Incomplete -> R.string.sub_status_incomplete
+            IncompleteExpired -> R.string.sub_status_incomplete_expired
+            Trialing -> R.string.sub_status_trialing
+            PastDue -> R.string.sub_status_past_due
+            Canceled -> R.string.sub_status_cancled
+            Unpaid -> R.string.sub_status_unpaid
+        }
+
     override fun toString(): String {
         return symbol
+    }
+
+    fun shouldResubscribe(): Boolean {
+        return this == IncompleteExpired || this == PastDue || this == Canceled || this == Unpaid
     }
 
     companion object {
