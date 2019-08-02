@@ -18,6 +18,7 @@ import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.ui.account.AccountViewModel
+import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.formatLocalDate
@@ -27,16 +28,6 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-private val subStatusText = mapOf(
-    StripeSubStatus.Active to R.string.sub_status_active,
-        StripeSubStatus.Incomplete to R.string.sub_status_incomplete,
-        StripeSubStatus.IncompleteExpired to R.string.sub_status_incomplete_expired,
-        StripeSubStatus.Trialing to R.string.sub_status_trialing,
-        StripeSubStatus.PastDue to R.string.sub_status_past_due,
-        StripeSubStatus.Canceled to R.string.sub_status_cancled,
-        StripeSubStatus.Unpaid to R.string.sub_status_unpaid
-)
-
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class MemberActivity : ScopedAppActivity(),
         SwipeRefreshLayout.OnRefreshListener,
@@ -44,7 +35,6 @@ class MemberActivity : ScopedAppActivity(),
 
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
-    private lateinit var checkOutViewModel: CheckOutViewModel
 
     private fun stopRefresh() {
         swipe_refresh.isRefreshing = false
@@ -67,11 +57,9 @@ class MemberActivity : ScopedAppActivity(),
         accountViewModel = ViewModelProviders.of(this)
                 .get(AccountViewModel::class.java)
 
-        checkOutViewModel = ViewModelProviders.of(this)
-                .get(CheckOutViewModel::class.java)
 
-        checkOutViewModel.stripeSubResult.observe(this, Observer {
-                onStripeSubRefreshed(it)
+        accountViewModel.stripeRetrievalResult.observe(this, Observer {
+                onStripeSubRetrieved(it)
         })
 
         accountViewModel.accountRefreshed.observe(this, Observer {
@@ -79,6 +67,122 @@ class MemberActivity : ScopedAppActivity(),
         })
 
         initUI()
+    }
+
+    private fun initUI() {
+        hideButton()
+
+        val account = sessionManager.loadAccount() ?: return
+
+//        tv_member_tier.text = when (account.membership.tier) {
+//            Tier.STANDARD -> getString(R.string.tier_standard)
+//            Tier.PREMIUM -> getString(R.string.tier_premium)
+//            else -> if (account.isVip) getString(R.string.tier_vip) else getString(R.string.tier_free)
+//
+//        }
+
+        tv_member_tier.text = getString(account.tierStringRes)
+
+        tv_expire_date.text = if (account.isVip) {
+            getString(R.string.vip_no_expiration)
+        } else {
+            formatLocalDate(account.membership.expireDate)
+        }
+
+        tv_auto_renewal.text = getString(
+                R.string.auto_renewal,
+                if (account.membership.autoRenew == true)
+                    getString(R.string.yes)
+                else getString(R.string.no)
+        )
+
+        if (account.membership.payMethod == PayMethod.STRIPE) {
+
+            val statusStr = if (account.membership.status != null) getString(account.membership.status.stringRes) else ""
+
+            tv_stripe_status.text = getString(
+                    R.string.label_stripe_status,
+                    statusStr)
+
+            tv_status_warning.visibility = if (account.membership.isActiveStripe()) View.GONE else View.VISIBLE
+
+        } else {
+            // Do not show stripe subscription status
+            // for non-stripe member.
+            tv_stripe_status.visibility = View.GONE
+
+            // Calculate remaning days.
+            val remains = account.membership.remainingDays()
+
+            when {
+                remains == null -> {
+                    tv_status_warning.visibility = View.GONE
+                }
+                remains > 7 -> {
+                    tv_status_warning.visibility = View.GONE
+                }
+                remains < 0 -> {
+                    tv_status_warning.text = getString(R.string.member_status_expired)
+                }
+                else -> {
+                    tv_status_warning.text = getString(R.string.member_will_expire, remains)
+                }
+            }
+        }
+
+        setupButtons(account.membership)
+    }
+
+    private fun setupButtons(member: Membership) {
+
+        // Setup re-subscribe buton
+        resubscribe_btn.visibility = if (member.shouldResubscribe()) View.VISIBLE else View.GONE
+
+        resubscribe_btn.setOnClickListener {
+            PaywallActivity.start(this)
+            it.isEnabled = false
+        }
+
+        // Setup renewal button
+        renew_btn.visibility = if (member.shouldRenew()) View.VISIBLE else View.GONE
+        renew_btn.setOnClickListener {
+
+            val plan = member.getPlan() ?: return@setOnClickListener
+            // Tracking
+            PaywallTracker.fromRenew()
+
+            CheckOutActivity.startForResult(
+                    activity = this,
+                    requestCode = RequestCode.PAYMENT,
+                    plan = plan
+            )
+
+            it.isEnabled = false
+        }
+
+        // Setup upgrade button
+        upgrade_btn.visibility = if (member.shouldUpgrade()) View.VISIBLE else View.GONE
+
+        if (member.fromWxOrAli()) {
+            upgrade_btn.setOnClickListener {
+                UpgradeActivity.startForResult(this, RequestCode.PAYMENT)
+                it.isEnabled = false
+            }
+        }
+
+        if (member.payMethod == PayMethod.STRIPE) {
+            upgrade_btn.setOnClickListener {
+                StripeSubActivity.startForResult(
+                        this,
+                        RequestCode.PAYMENT,
+                        subsPlans.of(
+                                Tier.PREMIUM,
+                                Cycle.YEAR
+                        )
+                )
+                it.isEnabled = false
+            }
+        }
     }
 
     /**
@@ -101,64 +205,56 @@ class MemberActivity : ScopedAppActivity(),
             return
         }
 
-        // TODO: what if user ended stripe pay, and change
-        // to other payment methods like ali, or wechat?
-        // In such cases, this app has no way to know the
-        // the changes. And if we start refresh,  API
-        // will continue to fetch user's stripe subscription,
-        // and the invalid stipe data will override
-        // user's later changed valid data!
-        // What's more, even this step errored, we still
-        // need to proceed with account refreshing!
+
         if (account.membership.payMethod == PayMethod.STRIPE) {
             toast(R.string.refreshing_stripe_sub)
 
-            checkOutViewModel.refreshStripeSub(account)
+            accountViewModel.retrieveStripeSub(account)
 
             return
         }
 
-        startRefreshingAccount(account)
+        refreshAccount(account)
     }
 
-    private fun startRefreshingAccount(account: Account) {
+    private fun refreshAccount(account: Account) {
         toast(R.string.refreshing_account)
         accountViewModel.refresh(account)
     }
 
-    private fun onStripeSubRefreshed(subResult: StripeSubResult?) {
+    private fun onStripeSubRetrieved(result: StripeRetrievalResult?) {
         val account = sessionManager.loadAccount()
         if (account == null) {
             stopRefresh()
             return
         }
 
-        if (subResult == null) {
+        if (result == null) {
             toast(R.string.stripe_refreshing_failed)
-            startRefreshingAccount(account)
+            refreshAccount(account)
             return
         }
 
-        if (subResult.error != null) {
-            toast(subResult.error)
-            startRefreshingAccount(account)
+        if (result.error != null) {
+            toast(result.error)
+            refreshAccount(account)
             return
         }
 
-        if (subResult.exception != null) {
-            handleException(subResult.exception)
-            startRefreshingAccount(account)
+        if (result.exception != null) {
+            handleException(result.exception)
+            refreshAccount(account)
             return
         }
 
         // Even if user's subscription data is not refresh
         // (for example, API responded 404, in which case
-        // subResult.success is null), account still
+        // subscribedResult.success is null), account still
         // needs to be refreshed.
-        // So here we do not perform checks on subResult == null.
+        // So here we do not perform checks on subscribedResult == null.
         // It is just an indicator that network finished,
         // regardless of result.
-        startRefreshingAccount(account)
+        refreshAccount(account)
     }
 
     private fun onAccountRefreshed(accountResult: AccountResult?) {
@@ -199,120 +295,9 @@ class MemberActivity : ScopedAppActivity(),
         initUI()
     }
 
-    private fun initUI() {
-        val account = sessionManager.loadAccount() ?: return
 
-        tv_member_tier.text = when (account.membership.tier) {
-            Tier.STANDARD -> getString(R.string.tier_standard)
-            Tier.PREMIUM -> getString(R.string.tier_premium)
-            else -> if (account.isVip) getString(R.string.tier_vip) else getString(R.string.tier_free)
 
-        }
 
-        tv_expire_date.text = if (account.isVip) {
-            getString(R.string.cycle_vip)
-        } else {
-            formatLocalDate(account.membership.expireDate)
-        }
-
-        if (account.membership.payMethod == PayMethod.STRIPE) {
-            val statusId = subStatusText[account.membership.status]
-            val statusStr = if (statusId == null) account.membership.status.toString() else getString(statusId)
-
-            tv_sub_status.text = getString(
-                    R.string.label_stripe_status,
-                    statusStr)
-        } else {
-            tv_sub_status.visibility = View.GONE
-        }
-
-        // Show auto renewal status to all members.
-        val autoRenewalId = if (account.membership.autoRenew == true) R.string.yes else R.string.no
-        tv_auto_renewal.text = getString(
-                R.string.auto_renewal,
-                getString(autoRenewalId)
-        )
-
-        hideButton()
-        setupButtons(account.membership)
-    }
-
-    private fun setupButtons(member: Membership) {
-        // re-subscription button always performs the same
-        // action regardless of user's membership status.
-        resubscribe_btn.setOnClickListener {
-            PaywallActivity.start(this)
-            it.isEnabled = false
-        }
-
-        if (member.fromWxOrAli()) {
-
-            if (member.isExpired) {
-                resubscribe_btn.visibility = View.VISIBLE
-                return
-            }
-
-            // If a member in standard tier, always permit
-            // switching to premium.
-            if (member.tier == Tier.STANDARD) {
-                upgrade_btn.visibility = View.VISIBLE
-                upgrade_btn.setOnClickListener {
-                    UpgradeActivity.startForResult(this, RequestCode.PAYMENT)
-                    it.isEnabled = false
-                }
-            }
-
-            // User is only allowed to renew as long
-            // as membership expire date is within
-            // allowed range.
-            if (!member.canRenew()) {
-                return
-            }
-
-            renew_btn.visibility = View.VISIBLE
-            renew_btn.setOnClickListener {
-
-                val plan = member.getPlan() ?: return@setOnClickListener
-                // Tracking
-                PaywallTracker.fromRenew()
-
-                CheckOutActivity.startForResult(
-                        activity = this,
-                        requestCode = RequestCode.PAYMENT,
-                        plan = plan
-                )
-
-                it.isEnabled = false
-            }
-        }
-
-        if (member.payMethod == PayMethod.STRIPE) {
-            if (member.isExpired) {
-                if (member.autoRenew == true) {
-                    // TODO: data is stale. Refresh.
-                    return
-                }
-                resubscribe_btn.visibility = View.VISIBLE
-            }
-            if (member.tier == Tier.PREMIUM) {
-                return
-            }
-
-            upgrade_btn.visibility = View.VISIBLE
-            // Switch plan.
-            upgrade_btn.setOnClickListener {
-                StripeSubActivity.startForResult(
-                        this,
-                        RequestCode.PAYMENT,
-                        subsPlans.of(
-                                Tier.PREMIUM,
-                                Cycle.YEAR
-                        )
-                )
-                it.isEnabled = false
-            }
-        }
-    }
 
     // Hide all buttons on create.
     private fun hideButton() {
@@ -339,7 +324,7 @@ class MemberActivity : ScopedAppActivity(),
                     return
                 }
 
-//                finish()
+                finish()
             }
         }
     }
