@@ -26,7 +26,7 @@ data class Plan(
 ) : Parcelable {
 
     fun getId(): String {
-        return "${tier.string()}_${cycle.string()}"
+        return "${tier}_$cycle"
     }
 
     fun currencySymbol(): String {
@@ -47,24 +47,6 @@ data class Plan(
             Tier.PREMIUM -> GAAction.BUY_PREMIUM
         }
     }
-
-    fun withStripePlan(p: StripePlan?): Plan? {
-        if (p == null) {
-            return null
-        }
-
-        return Plan(
-                tier = tier,
-                cycle = cycle,
-                listPrice = listPrice,
-                netPrice = (p.amount / 100).toDouble(),
-                cycleCount = cycleCount,
-                currency = p.currency,
-                extraDays = extraDays,
-                description = description
-        )
-    }
-
 }
 
 class SubsPlans(
