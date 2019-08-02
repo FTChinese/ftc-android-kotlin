@@ -33,6 +33,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     val wxRefreshResult: LiveData<WxRefreshResult> = _wxRefreshResult
 
     val customerIdResult = MutableLiveData<StringResult>()
+    val stripeRetrievalResult = MutableLiveData<StripeRetrievalResult>()
 
     // Ask API to fetch user's latest wechat info and save
     // it to database.
@@ -89,7 +90,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                 val msgId = if (e.statusCode == 404) {
                     R.string.api_account_not_found
                 } else {
-                    e.statusMessage()
+                    e.parseStatusCode()
                 }
 
                 _accountRefreshed.value = AccountResult(
@@ -168,6 +169,37 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                 )
             }
 
+        }
+    }
+
+    fun retrieveStripeSub(account: Account) {
+        viewModelScope.launch {
+            try {
+                val stripeSub = withContext(Dispatchers.IO) {
+                    account.refreshStripeSub()
+                }
+
+                stripeRetrievalResult.value = StripeRetrievalResult(
+                        success = stripeSub
+                )
+
+            } catch (e: ClientError) {
+                if (e.statusCode == 404) {
+                    stripeRetrievalResult.value = StripeRetrievalResult(
+                            success = null
+                    )
+
+                    return@launch
+                }
+
+                stripeRetrievalResult.value = StripeRetrievalResult(
+                        exception = e
+                )
+            } catch (e: Exception) {
+                stripeRetrievalResult.value = StripeRetrievalResult(
+                        exception = e
+                )
+            }
         }
     }
 
