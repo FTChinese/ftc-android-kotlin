@@ -124,7 +124,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                 val msgId = if (e.statusCode == 404) {
                     R.string.error_invalid_password
                 } else {
-                    e.statusMessage()
+                    e.parseStatusCode()
                 }
 
                 _accountResult.value = AccountResult(
@@ -155,6 +155,9 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                     WxOAuth.login(code)
                 }
 
+                // Fetched wx session data and send it to
+                // UI thread for saving, and then continues
+                // to fetch account data.
                 _wxOAuthResult.value = WxOAuthResult(
                         success = sess
                 )
@@ -165,8 +168,13 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
                 // via wechat only.
                 info("Start loading wechat account")
+
+                // Here won't throw an errors.
                 loadWxAccount(sess)
             } catch (e: ClientError) {
+                // Here the error comes from WxOAuth.login,
+                // not loadWxAccount(), which won't throw
+                // any error here.
                 // Possible 422 error key: code_missing_field, code_invalid.
                 // We cannot make sure the exact meaning of each error, just
                 // show user API's error message.
@@ -175,7 +183,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                 _wxOAuthResult.value = WxOAuthResult(
                         error = when (e.statusCode) {
                             422 -> null
-                            else -> e.statusMessage()
+                            else -> e.parseStatusCode()
                         },
                         exception = e
                 )
@@ -227,7 +235,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                         else -> null
                     }
                 } else {
-                    e.statusMessage()
+                    e.parseStatusCode()
                 }
 
                 _accountResult.value = AccountResult(
@@ -256,7 +264,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
             val msgId = if (e.statusCode == 404) {
                 R.string.loading_failed
             } else {
-                e.statusMessage()
+                e.parseStatusCode()
             }
 
             _accountResult.value = AccountResult(
@@ -286,7 +294,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
             val msgId = if (e.statusCode == 404) {
                 R.string.loading_failed
             } else {
-                e.statusMessage()
+                e.parseStatusCode()
             }
 
             _accountResult.value = AccountResult(
