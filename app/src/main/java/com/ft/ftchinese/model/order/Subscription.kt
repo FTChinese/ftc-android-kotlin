@@ -29,6 +29,8 @@ open class Subscription(
 
         open var amount: Double,
 
+        val currency: String = "cny",
+
         @KOrderUsage
         open val usageType: OrderUsage,
 
@@ -60,7 +62,7 @@ open class Subscription(
         val start = when {
             member.expireDate == null -> today
             usageType == OrderUsage.UPGRADE -> today
-            member.isExpired -> today
+            member.expired() -> today
             else -> member.expireDate
         }
 
