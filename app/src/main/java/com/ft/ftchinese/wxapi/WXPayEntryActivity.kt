@@ -249,7 +249,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         val localAccount = sessionManager?.loadAccount() ?: return
 
-        if (remoteAccount.membership.isNewer(localAccount.membership)) {
+        if (localAccount.membership.useRemote(remoteAccount.membership)) {
             sessionManager?.saveAccount(remoteAccount)
         }
 

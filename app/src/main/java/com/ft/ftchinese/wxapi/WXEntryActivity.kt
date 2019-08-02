@@ -99,7 +99,92 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         api.handleIntent(intent, this)
     }
 
+    override fun onReq(req: BaseReq?) {}
+
+    override fun onResp(resp: BaseResp?) {
+        info("Wx login response type: ${resp?.type}, error code: ${resp?.errCode}")
+
+        when (resp?.type) {
+            // Wechat Login.
+            ConstantsAPI.COMMAND_SENDAUTH -> {
+                setTitle(R.string.title_wx_login)
+                info("Start processing login...")
+                processLogin(resp)
+            }
+            // This is used to handle your app sending message to wx and then return back to your app.
+            // Share will return to here.
+            ConstantsAPI.COMMAND_SENDMESSAGE_TO_WX -> {
+                heading_tv.text = getString(R.string.wxshare_done)
+                finish()
+            }
+            else -> {
+                finish()
+            }
+        }
+    }
+
+    private fun processLogin(resp: BaseResp) {
+
+        showMessage(R.string.progress_logging)
+
+        info("Resp code: ${resp.errCode}, resp msg: ${resp.errStr}")
+
+        when (resp.errCode) {
+            BaseResp.ErrCode.ERR_OK -> {
+                info("User authorized")
+
+                // 第一步：请求CODE
+                // 用户点击授权后，微信客户端会被拉起，
+                // 跳转至授权界面，用户在该界面点击允许或取消，
+                // SDK通过SendAuth的Resp返回数据给调用方
+                if (resp is SendAuth.Resp) {
+                    info("code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
+
+                    val state = sessionManager.loadWxState()
+
+                    if (state == null) {
+                        showMessage(R.string.oauth_state_missing)
+                        return
+                    }
+
+                    if (state != resp.state) {
+                        showMessage(R.string.oauth_state_mismatch)
+                        return
+                    }
+
+                    showProgress(true)
+
+                    info("Use oauth code to exchange for ftc login session...")
+                    loginViewModel.wxLogin(
+                            code = resp.code)
+                }
+            }
+
+            BaseResp.ErrCode.ERR_USER_CANCEL -> {
+                showMessage(R.string.oauth_canceled, resp.errStr)
+                showProgress(false)
+                enableButton(true)
+            }
+            BaseResp.ErrCode.ERR_AUTH_DENIED -> {
+                showMessage(R.string.oauth_denied, resp.errStr)
+                showProgress(false)
+                enableButton(true)
+            }
+            BaseResp.ErrCode.ERR_SENT_FAILED,
+            BaseResp.ErrCode.ERR_UNSUPPORT,
+            BaseResp.ErrCode.ERR_BAN -> {
+                showMessage(R.string.prompt_login_failed, resp.errStr)
+                showProgress(false)
+                enableButton(true)
+            }
+        }
+    }
+
+    // This is just used for saving data.
+    // If errors occurred here, onAccountRetrieved won't be
+    // called.
     private fun onOAuthSession(oauthResult: WxOAuthResult?) {
+        info("Received wx login session: $oauthResult")
 
         if (oauthResult == null) {
             return
@@ -178,94 +263,6 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             WxOAuthIntent.LINK -> {
                 LinkPreviewActivity.startForResult(this, accountResult.success)
                 finish()
-            }
-        }
-    }
-
-
-    override fun onReq(req: BaseReq?) {}
-
-    override fun onResp(resp: BaseResp?) {
-        info("Wx login response type: ${resp?.type}, error code: ${resp?.errCode}")
-
-        when (resp?.type) {
-            // Wechat Login.
-            ConstantsAPI.COMMAND_SENDAUTH -> {
-                setTitle(R.string.title_wx_login)
-                processLogin(resp)
-            }
-            // This is used to handle your app sending message to wx and then return back to your app.
-            // Share will return to here.
-            ConstantsAPI.COMMAND_SENDMESSAGE_TO_WX -> {
-                heading_tv.text = getString(R.string.wxshare_done)
-                finish()
-            }
-            else -> {
-                finish()
-            }
-        }
-    }
-
-    private fun processLogin(resp: BaseResp) {
-
-        showMessage(R.string.progress_logging)
-
-        info("Resp code: ${resp.errCode}, resp msg: ${resp.errStr}")
-
-        when (resp.errCode) {
-            BaseResp.ErrCode.ERR_OK -> {
-                info("User authorized")
-
-                // 第一步：请求CODE
-                // 用户点击授权后，微信客户端会被拉起，
-                // 跳转至授权界面，用户在该界面点击允许或取消，
-                // SDK通过SendAuth的Resp返回数据给调用方
-                if (resp is SendAuth.Resp) {
-                    info("code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
-
-                    val state = sessionManager.loadWxState()
-
-                    if (state == null) {
-                        showMessage(R.string.oauth_state_missing)
-                        return
-                    }
-
-                    if (state != resp.state) {
-                        showMessage(R.string.oauth_state_mismatch)
-                        return
-                    }
-
-                    showProgress(true)
-
-                    loginViewModel.wxLogin(
-                            code = resp.code)
-                }
-            }
-
-            BaseResp.ErrCode.ERR_USER_CANCEL -> {
-                showMessage(R.string.oauth_canceled)
-                showProgress(false)
-                enableButton(true)
-            }
-            BaseResp.ErrCode.ERR_SENT_FAILED -> {
-                showMessage(R.string.prompt_login_failed)
-                showProgress(false)
-                enableButton(true)
-            }
-            BaseResp.ErrCode.ERR_AUTH_DENIED -> {
-                showMessage(R.string.oauth_denied)
-                showProgress(false)
-                enableButton(true)
-            }
-            BaseResp.ErrCode.ERR_UNSUPPORT -> {
-                showMessage(R.string.prompt_login_failed)
-                showProgress(false)
-                enableButton(true)
-            }
-            BaseResp.ErrCode.ERR_BAN -> {
-                showMessage(R.string.prompt_login_failed)
-                showProgress(false)
-                enableButton(true)
             }
         }
     }
