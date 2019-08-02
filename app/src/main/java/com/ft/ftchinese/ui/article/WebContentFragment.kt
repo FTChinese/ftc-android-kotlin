@@ -16,7 +16,7 @@ import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.util.flavorQuery
 import com.ft.ftchinese.base.isNetworkConnected
-import com.ft.ftchinese.grantPermission
+import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.util.FileCache
@@ -97,8 +97,8 @@ class WebContentFragment : Fragment(),
                 radioUrl = channelItem?.radioUrl ?: "",
                 webUrl = channelItem?.getCanonicalUrl() ?: og?.url ?: "",
                 tier =  when {
-                    og?.keywords?.contains("会员专享") == true -> Tier.STANDARD.string()
-                    og?.keywords?.contains("高端专享") == true -> Tier.PREMIUM.string()
+                    og?.keywords?.contains("会员专享") == true -> Tier.STANDARD.toString()
+                    og?.keywords?.contains("高端专享") == true -> Tier.PREMIUM.toString()
                     else -> ""
                 },
                 isWebpage = true

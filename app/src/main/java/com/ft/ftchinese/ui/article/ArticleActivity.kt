@@ -14,7 +14,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.grantPermission
+import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.OnProgressListener
 import com.ft.ftchinese.util.FileCache
