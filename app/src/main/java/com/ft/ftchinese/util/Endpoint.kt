@@ -6,7 +6,7 @@ object NextApi {
     private val BASE = if (BuildConfig.DEBUG) {
         "http://192.168.10.195:8000"
     } else {
-        "http://api.ftchinese.com/v1"
+        "http://user.ftmailbox.com/v1"
     }
     val EMAIL_EXISTS = "$BASE/users/exists"
     val LOGIN = "$BASE/users/login"
