@@ -10,13 +10,16 @@ import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
 import com.ft.ftchinese.base.handleException
 import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.base.parseException
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.order.UpgradePreview
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_upgrade_preview.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.toast
+import org.jetbrains.anko.yesButton
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class UpgradePreviewActivity : AppCompatActivity() {
@@ -146,18 +149,26 @@ class UpgradePreviewActivity : AppCompatActivity() {
             return
         }
 
-        if (previewResult.error != null) {
-            toast(previewResult.error)
+        if (previewResult.errorId != null) {
+            alert(previewResult.errorId, R.string.title_error) {
+                yesButton {
+                    it.dismiss()
+                }
+            }.show()
             return
         }
 
         if (previewResult.exception != null) {
-            handleException(previewResult.exception)
+            alert(parseException(previewResult.exception), getString(R.string.title_error)) {
+                yesButton {
+                    it.dismiss()
+                }
+            }.show()
             return
         }
 
         if (previewResult.success == null) {
-            toast("查询不到账户余额，请稍后再试")
+            toast(R.string.balance_query_failed)
             return
         }
 
@@ -214,7 +225,6 @@ class UpgradePreviewActivity : AppCompatActivity() {
 
     private fun done() {
         setResult(Activity.RESULT_OK)
-
         finish()
     }
 
