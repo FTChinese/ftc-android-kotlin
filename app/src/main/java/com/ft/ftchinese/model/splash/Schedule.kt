@@ -32,7 +32,7 @@ class Schedule(
     fun findToday(tier: Tier?): TodayAds {
 
         val today = LocalDate.now()
-        val tierStr = tier?.string() ?: "free"
+        val tierStr = tier?.toString() ?: "free"
 
         val todayAds = sections
                 .filter {
