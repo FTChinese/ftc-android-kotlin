@@ -33,9 +33,7 @@ import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
-import org.jetbrains.anko.toast
+import org.jetbrains.anko.*
 
 private val cardBrands = mapOf(
         "amex" to "American Express",
@@ -213,7 +211,12 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
 
             runOnUiThread {
-                toast(errorMessage)
+                alert(errorMessage) {
+                    yesButton {
+                        it.dismiss()
+                    }
+                }.show()
+
                 showProgress(false)
             }
         }
