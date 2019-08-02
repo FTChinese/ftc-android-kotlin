@@ -3,6 +3,7 @@ package com.ft.ftchinese.model
 import android.net.Uri
 import android.os.Parcelable
 import com.beust.klaxon.Klaxon
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.IgnoredOnParcel
@@ -33,6 +34,14 @@ data class Account(
         val wechat: Wechat,
         val membership: Membership
 ): Parcelable, AnkoLogger {
+
+    val tierStringRes: Int
+        get() = when {
+            isVip -> R.string.tier_vip
+            membership.tier != null -> membership.tier
+                    .stringRes
+            else -> R.string.tier_free
+        }
 
     /**
      * Tests whether two accounts are the same one.
@@ -70,8 +79,6 @@ data class Account(
             else -> membership.tier != null
         }
 
-    val isExpiredMember: Boolean
-        get() = isMember && membership.isExpired
     /**
      * Get a name used to display on UI.
      * If userName is set, use userName;
@@ -103,10 +110,30 @@ data class Account(
     @IgnoredOnParcel
     val permission: Int = when {
         isVip -> Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id
-        membership.isExpired -> Permission.FREE.id
+        membership.expired() -> Permission.FREE.id
         membership.tier == Tier.STANDARD -> Permission.FREE.id or Permission.STANDARD.id
         membership.tier == Tier.PREMIUM -> Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id
         else -> Permission.FREE.id
+    }
+
+    fun memberExpired(): Boolean {
+        if (isVip) {
+            return false
+        }
+
+        if (membership.tier == null) {
+            return false
+        }
+
+        return membership.expired()
+    }
+
+    fun permitStripe(): Boolean {
+        if (isWxOnly) {
+            return false
+        }
+
+        return membership.permitStripe()
     }
 
     /**
@@ -166,7 +193,9 @@ data class Account(
 
     // Show user's account balance.
     fun previewUpgrade(): UpgradePreview? {
-        val fetch = Fetch().get(SubscribeApi.UPGRADE_PREVIEW)
+        val fetch = Fetch()
+                .get(SubscribeApi.UPGRADE_PREVIEW)
+                .setTimeout(30)
 
         if (id.isNotBlank()) {
             fetch.setUserId(id)
@@ -183,12 +212,7 @@ data class Account(
         return if (body == null) {
             null
         } else {
-            try {
-                json.parse<UpgradePreview>(body)
-            } catch (e: Exception) {
-                info(e)
-                null
-            }
+            json.parse<UpgradePreview>(body)
         }
     }
 
@@ -246,7 +270,9 @@ data class Account(
     }
 
     fun wxPlaceOrder(tier: Tier, cycle: Cycle): WxOrder? {
-        val fetch = Fetch().post("${SubscribeApi.WX_UNIFIED_ORDER}/${tier.string()}/${cycle.string()}")
+        val fetch = Fetch()
+                .post("${SubscribeApi.WX_UNIFIED_ORDER}/$tier/$cycle")
+                .setTimeout(30)
 
         if (id.isNotBlank()) {
             fetch.setUserId(id)
@@ -302,7 +328,9 @@ data class Account(
 
     fun aliPlaceOrder(tier: Tier, cycle: Cycle): AliOrder? {
 
-        val fetch = Fetch().post("${SubscribeApi.ALI_ORDER}/${tier.string()}/${cycle.string()}")
+        val fetch = Fetch()
+                .post("${SubscribeApi.ALI_ORDER}/$tier/$cycle")
+                .setTimeout(30)
 
         info("Place alipay order. User id: $id, union id: $unionId")
 
@@ -326,8 +354,6 @@ data class Account(
             json.parse<AliOrder>(body)
         }
     }
-
-
 
     fun createCustomer(): String? {
         val (_, body) = Fetch()
@@ -381,7 +407,7 @@ data class Account(
         }
     }
 
-    fun createSubscription(params: StripeSubParams): StripeSub? {
+    fun createSubscription(params: StripeSubParams): StripeSubResponse? {
 
         val fetch = Fetch()
                 .post(SubscribeApi.STRIPE_SUB)
@@ -398,7 +424,7 @@ data class Account(
         return if (body == null) {
             null
         } else {
-            json.parse<StripeSub>(body)
+            json.parse<StripeSubResponse>(body)
         }
     }
 
@@ -421,7 +447,7 @@ data class Account(
         }
     }
 
-    fun upgradeStripeSub(params: StripeSubParams): StripeSub? {
+    fun upgradeStripeSub(params: StripeSubParams): StripeSubResponse? {
         val fetch = Fetch()
                 .patch(SubscribeApi.STRIPE_SUB)
                 .setUserId(id)
