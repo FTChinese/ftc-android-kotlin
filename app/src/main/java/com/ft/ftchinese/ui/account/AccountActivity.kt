@@ -90,7 +90,17 @@ class AccountActivity : ScopedAppActivity(),
     }
 
     /**
-     * Receive results from [UpdateActivity] or [LinkFtcActivity]
+     * Receive results from
+     * [UpdateActivity]
+     * [LinkFtcActivity] with RequestCode.Link, which is
+     * received from [LinkPreviewActivity]
+     * [WxInfoActivity] with RequestCode.Unlink, which is
+     * received from [UnlinkActivity].
+     * In cases this activity starts [WxInfoActivity] with
+     * wechat account not linked, and user starts wechat OAuth,
+     * the request code mechanism does not work since WxEntryActivity interferes with this flow.
+     * In such case the [onResume] is the last resort to
+     * ensure UI changes.
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -100,15 +110,20 @@ class AccountActivity : ScopedAppActivity(),
         }
 
         // If user linked accounts, reload ui.
-        if (requestCode == RequestCode.LINK) {
+        if (requestCode == RequestCode.LINK || requestCode == RequestCode.UNLINK) {
             initUI()
-            return
         }
+    }
 
-        // If user unlinked accounts, reload ui.
-        if (requestCode == RequestCode.UNLINK) {
-            initUI()
-        }
+    /**
+     * This ensures UI changes as user link/unlink accounts.
+     * The onActivityResult mechanism is not reliable since
+     * Wechat's WXEntryActivity might interrupt the data
+     * passing back.
+     */
+    override fun onResume() {
+        super.onResume()
+        initUI()
     }
 
     companion object {

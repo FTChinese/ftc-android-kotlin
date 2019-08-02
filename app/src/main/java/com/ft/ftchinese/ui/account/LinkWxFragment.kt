@@ -46,8 +46,13 @@ class LinkWxFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        /**
+         * Start WXEntryActivity and finish the parent
+         * [WxInfoActivity]
+         */
         btn_wx_authorization.setOnClickListener {
             linkWechat()
+            activity?.finish()
         }
     }
 

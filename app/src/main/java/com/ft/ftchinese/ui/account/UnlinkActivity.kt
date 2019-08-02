@@ -14,6 +14,7 @@ import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.UnlinkAnchor
 import com.ft.ftchinese.model.order.PayMethod
+import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_unlink.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -156,10 +157,10 @@ class UnlinkActivity : AppCompatActivity() {
     }
 
     companion object {
-        fun startForResult(activity: Activity?, requestCode: Int) {
+        fun startForResult(activity: Activity?) {
             activity?.startActivityForResult(
                     Intent(activity, UnlinkActivity::class.java),
-                    requestCode
+                    RequestCode.UNLINK
             )
         }
     }

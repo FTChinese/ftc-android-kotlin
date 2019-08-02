@@ -16,7 +16,6 @@ import com.ft.ftchinese.model.LoginMethod
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.WX_AVATAR_NAME
 import com.ft.ftchinese.util.FileCache
-import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.fragment_wx_account.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,7 +34,7 @@ class WxInfoFragment : ScopedFragment(),
 
     private lateinit var sessionManager: SessionManager
     private lateinit var cache: FileCache
-    private lateinit var viewModel: AccountViewModel
+    private lateinit var accountViewModel: AccountViewModel
 
     private fun stopRefreshing() {
         swipe_refresh.isRefreshing = false
@@ -58,21 +57,12 @@ class WxInfoFragment : ScopedFragment(),
         super.onViewCreated(view, savedInstanceState)
 
         initUI()
-
-        link_email_btn.setOnClickListener {
-            LinkFtcActivity.startForResult(activity, RequestCode.LINK)
-        }
-
-        // Start unlinking accounts.
-        unlink_btn.setOnClickListener {
-            UnlinkActivity.startForResult(activity, RequestCode.UNLINK)
-        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        viewModel = activity?.run {
+        accountViewModel = activity?.run {
             ViewModelProviders.of(this)
                     .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
@@ -82,7 +72,7 @@ class WxInfoFragment : ScopedFragment(),
         // Check whether we could refresh wechat user info.
         // If refresh token is not expired, we'll start
         // refresh user's full account data.
-        viewModel.wxRefreshResult.observe(this, Observer {
+        accountViewModel.wxRefreshResult.observe(this, Observer {
             val refreshResult = it ?: return@Observer
 
             if (refreshResult.error != null) {
@@ -104,7 +94,7 @@ class WxInfoFragment : ScopedFragment(),
                 // If the API tells us the refresh token
                 // is expired, notify host activity to
                 // show re-authorize dialog.
-                viewModel.showReAuth()
+                accountViewModel.showReAuth()
 
                 return@Observer
             }
@@ -120,11 +110,11 @@ class WxInfoFragment : ScopedFragment(),
 
             toast(R.string.refreshing_account)
 
-            viewModel.refresh(acnt)
+            accountViewModel.refresh(acnt)
         })
 
         // Refreshed account data.
-        viewModel.accountRefreshed.observe(this, Observer {
+        accountViewModel.accountRefreshed.observe(this, Observer {
             val accountResult = it ?: return@Observer
 
             stopRefreshing()
@@ -149,12 +139,12 @@ class WxInfoFragment : ScopedFragment(),
             sessionManager.saveAccount(accountResult.success)
 
             if (!accountResult.success.isWxOnly) {
-                viewModel.switchUI(LoginMethod.EMAIL)
+                accountViewModel.switchUI(LoginMethod.EMAIL)
             }
         })
 
         // Downloaded avatar from internet.
-        viewModel.avatarResult.observe(this, Observer {
+        accountViewModel.avatarResult.observe(this, Observer {
             if (it.exception != null) {
                 activity?.handleException(it.exception)
                 return@Observer
@@ -193,14 +183,14 @@ class WxInfoFragment : ScopedFragment(),
                     // If a linked user logged in, the WxSession
                     // data will be definitely not existed.
                     // In such case, show the re-authorization dialog.
-                    viewModel.showReAuth()
+                    accountViewModel.showReAuth()
                     stopRefreshing()
                     return@setOnRefreshListener
                 }
 
                 toast(R.string.refreshing_account)
 
-                viewModel.refreshWxInfo(wxSession)
+                accountViewModel.refreshWxInfo(wxSession)
             }
         } else {
             swipe_refresh.isEnabled = false
@@ -215,11 +205,29 @@ class WxInfoFragment : ScopedFragment(),
             return
         }
 
+
         info("Show wechat acount: $account")
 
         if (account.wechat.isEmpty) {
             toast(R.string.wechat_not_found)
             return
+        }
+
+        wx_nickname.text = account.wechat.nickname
+        // Test if accounts if coupled to FTC account.
+        // If true, do not show the instruction to bind accounts.
+        if (account.isLinked) {
+            tv_urge_linking.visibility = View.GONE
+
+            btn_link_or_unlink.text = getString(R.string.btn_unlink)
+            btn_link_or_unlink.setOnClickListener {
+                UnlinkActivity.startForResult(activity)
+            }
+        } else {
+            btn_link_or_unlink.text = getString(R.string.btn_link)
+            btn_link_or_unlink.setOnClickListener {
+                LinkFtcActivity.startForResult(activity)
+            }
         }
 
         // Use locally cached avatar first.
@@ -238,20 +246,8 @@ class WxInfoFragment : ScopedFragment(),
                 return@launch
             }
 
-            viewModel.fetchWxAvatar(cache, account.wechat)
+            accountViewModel.fetchWxAvatar(cache, account.wechat)
         }
-
-        wx_nickname.text = account.wechat.nickname
-
-        // Test if accounts if coupled to FTC account.
-        // If true, do not show the instruction to bind accounts.
-        if (!account.isLinked) {
-            unlink_btn.visibility = View.GONE
-            return
-        }
-
-        instruction_tv.visibility = View.GONE
-        link_email_btn.visibility = View.GONE
     }
 
     companion object {

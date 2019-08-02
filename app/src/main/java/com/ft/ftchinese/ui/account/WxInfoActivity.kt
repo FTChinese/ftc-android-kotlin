@@ -45,7 +45,12 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     /**
-     * Handle unlink result.
+     * Received results from [UnlinkActivity] with
+     * RequestCode.Unlink.
+     * If [LinkWxFragment] is used inside this activity,
+     * user starts linking wechat to FTC account, ideally
+     * this activity should receive a RequestCode.Link
+     * message. But I'm not sure whether this works or not.
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -54,6 +59,11 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
             return
         }
 
+        /**
+         * Upon receiving RequestCode.UNLINK, which is sent
+         * from [UnlinkActivity], just destroy itself
+         * and lead user back to [AccountActivity]
+         */
         if (requestCode == RequestCode.UNLINK) {
             setResult(Activity.RESULT_OK)
             finish()
@@ -62,12 +72,12 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
 
     companion object {
 
-        fun startForResult(activity: Activity?, requestCode: Int) {
-            activity?.startActivityForResult(
-                    Intent(activity, WxInfoActivity::class.java),
-                    requestCode
-            )
-        }
+//        fun startForResult(activity: Activity?, requestCode: Int) {
+//            activity?.startActivityForResult(
+//                    Intent(activity, WxInfoActivity::class.java),
+//                    requestCode
+//            )
+//        }
 
         fun start(context: Context) {
             context.startActivity(Intent(context, WxInfoActivity::class.java))

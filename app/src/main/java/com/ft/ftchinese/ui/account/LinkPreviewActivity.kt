@@ -14,6 +14,7 @@ import com.ft.ftchinese.base.isNetworkConnected
 import com.ft.ftchinese.model.Account
 import com.ft.ftchinese.model.LoginMethod
 import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_link_preview.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -34,14 +35,6 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var accountViewModel: AccountViewModel
 
     private var otherAccount: Account? = null
-
-    private fun showProgress(show: Boolean) {
-        progress_bar.visibility =  if (show) View.VISIBLE else View.GONE
-    }
-
-    private fun enableInput(value: Boolean) {
-        start_link_btn.isEnabled = value
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,79 +59,12 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
         initUI()
 
         linkViewModel.linkResult.observe(this, Observer {
-
-
-            val linkResult = it ?: it ?: return@Observer
-
-            if (linkResult.error != null) {
-                toast(linkResult.error)
-                showProgress(false)
-                enableInput(true)
-                return@Observer
-            }
-
-            if (linkResult.exception != null) {
-                handleException(linkResult.exception)
-                showProgress(false)
-                enableInput(true)
-                return@Observer
-            }
-
-            if (!linkResult.success) {
-                toast("Unknown error")
-                showProgress(false)
-                enableInput(true)
-                return@Observer
-            }
-
-            toast(R.string.prompt_linked)
-
-            if (!isNetworkConnected()) {
-                showProgress(false)
-                enableInput(true)
-                return@Observer
-            }
-
-            // Silently refresh account since this is not
-            // required.
-            val account = sessionManager.loadAccount()
-
-            if (account == null) {
-                showProgress(false)
-                return@Observer
-            }
-
-            toast(R.string.refreshing_data)
-
-            accountViewModel.refresh(account)
+            onLinkResult(it)
         })
 
         accountViewModel.accountRefreshed.observe(this, Observer {
-            showProgress(false)
-
-            val accountResult = it ?: return@Observer
-
-            if (accountResult.success != null) {
-                sessionManager.saveAccount(accountResult.success)
-            }
-
-            setResult(Activity.RESULT_OK)
-
-            finish()
+            onAccountRefreshed(it)
         })
-    }
-
-    // Checks which account is email account and which one is wechat account.
-    // The first is email-login account, the second is wechat-oauth account.
-    private fun sortAccount(): Pair<Account?, Account?> {
-        val loginAccount = sessionManager.loadAccount() ?: return Pair(null, null)
-
-        return when (loginAccount.loginMethod) {
-            LoginMethod.EMAIL,
-            LoginMethod.MOBILE -> Pair(loginAccount, otherAccount)
-            LoginMethod.WECHAT -> Pair(otherAccount, loginAccount)
-            else -> Pair(null, null)
-        }
     }
 
     private fun initUI() {
@@ -188,7 +114,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         // Both accounts have memberships and not expired yet.
-        if (!ftcAccount.membership.isExpired && !wxAccount.membership.isExpired) {
+        if (!ftcAccount.membership.expired() && !wxAccount.membership.expired()) {
             result_tv.text = getString(R.string.accounts_member_valid)
 
             enableInput(false)
@@ -208,6 +134,95 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
 
             linkViewModel.link(ftcAccount.id, unionId)
         }
+    }
+
+    // Checks which account is email account and which one is wechat account.
+    // The first is email-login account, the second is wechat-oauth account.
+    private fun sortAccount(): Pair<Account?, Account?> {
+        val loginAccount = sessionManager.loadAccount() ?: return Pair(null, null)
+
+        return when (loginAccount.loginMethod) {
+            LoginMethod.EMAIL,
+            LoginMethod.MOBILE -> Pair(loginAccount, otherAccount)
+            LoginMethod.WECHAT -> Pair(otherAccount, loginAccount)
+            else -> Pair(null, null)
+        }
+    }
+
+    private fun onLinkResult(linkResult: BinaryResult?) {
+
+        if (linkResult == null) {
+            return
+        }
+
+        if (linkResult.error != null) {
+            toast(linkResult.error)
+            showProgress(false)
+            enableInput(true)
+            return
+        }
+
+        if (linkResult.exception != null) {
+            handleException(linkResult.exception)
+            showProgress(false)
+            enableInput(true)
+            return
+        }
+
+        if (!linkResult.success) {
+            toast("Unknown error")
+            showProgress(false)
+            enableInput(true)
+            return
+        }
+
+        toast(R.string.prompt_linked)
+
+        if (!isNetworkConnected()) {
+            showProgress(false)
+            enableInput(true)
+            return
+        }
+
+        // Silently refresh account since this is not
+        // required.
+        val account = sessionManager.loadAccount()
+
+        if (account == null) {
+            showProgress(false)
+            return
+        }
+
+        toast(R.string.refreshing_account)
+        accountViewModel.refresh(account)
+    }
+
+    private fun onAccountRefreshed(accountResult: AccountResult?) {
+        showProgress(false)
+
+        if (accountResult == null) {
+            return
+        }
+
+        if (accountResult.success != null) {
+            sessionManager.saveAccount(accountResult.success)
+        }
+
+        /**
+         * Pass data back to [LinkFtcActivity].
+         * If this activity is started from WxEntryActivity,
+         * it is meaningless to pass data back.
+         */
+        setResult(Activity.RESULT_OK)
+        finish()
+    }
+
+    private fun showProgress(show: Boolean) {
+        progress_bar.visibility =  if (show) View.VISIBLE else View.GONE
+    }
+
+    private fun enableInput(value: Boolean) {
+        start_link_btn.isEnabled = value
     }
 
     companion object {
