@@ -5,6 +5,7 @@ import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.Parcelize
 import org.threeten.bp.LocalDate
+import org.threeten.bp.temporal.ChronoUnit
 
 @Parcelize
 data class Membership(
@@ -34,14 +35,30 @@ data class Membership(
                 status = status
         )
     }
+
+    fun remainingDays(): Long? {
+        if (expireDate == null) {
+            return null
+        }
+
+        if (expired()) {
+            return null
+        }
+
+        return LocalDate.now().until(expireDate, ChronoUnit.DAYS)
+    }
+
     /**
-     * Check if membership is expired.
-     * @return true if expireDate is before now, or membership does not exist.
+     * Checks whether membership expired.
+     * For stripe customer, if expire date is past and
+     * authRenew is true, take it as not expired.
      */
-    val isExpired: Boolean
-        get() = expireDate
-                    ?.isBefore(LocalDate.now())
-                    ?: true
+    fun expired(): Boolean {
+        if (expireDate == null) {
+            return true
+        }
+        return expireDate.isBefore(LocalDate.now()) && (autoRenew == false)
+    }
 
     fun fromWxOrAli(): Boolean {
         // The first condition is used for backward compatibility.
@@ -54,11 +71,7 @@ data class Membership(
             return null
         }
 
-        if (tier == null) {
-            return OrderUsage.CREATE
-        }
-
-        if (isExpired) {
+        if (tier == null || shouldResubscribe()) {
             return OrderUsage.CREATE
         }
 
@@ -73,23 +86,6 @@ data class Membership(
         return null
     }
 
-    fun canUseStripe(): Boolean {
-        if (isExpired) {
-            if (fromWxOrAli()) {
-                return true
-            }
-            if (autoRenew == null || autoRenew) {
-                return false
-            }
-
-            return true
-        }
-
-        // If current member is not expired, user is not
-        // allowed to use tripe regardless of payment method.
-        return false
-    }
-
     fun getPlan(): Plan? {
         if (tier == null) {
             return null
@@ -101,7 +97,25 @@ data class Membership(
 
         return subsPlans.of(tier, cycle)
     }
+
     /**
+     * Determines whether the Re-Subscribe button should
+     * be visible.
+     */
+    fun shouldResubscribe(): Boolean {
+        if (expired()) {
+            return true
+        }
+
+        if (status?.shouldResubscribe() == true) {
+            return true
+        }
+
+        return false
+    }
+
+    /**
+     * Determines whether the Renew button should be visible.
      * This is only applicable to alipay or wechat pay.
      * Status of a membership when its expire date falls into
      * various period.
@@ -109,8 +123,12 @@ data class Membership(
      * --------- | -------------- | ---------
      * expired      renew/upgrade   upgrade only for standard
      */
-    fun canRenew(): Boolean {
+    fun shouldRenew(): Boolean {
         if (expireDate == null) {
+            return false
+        }
+
+        if (payMethod == PayMethod.STRIPE) {
             return false
         }
 
@@ -121,34 +139,65 @@ data class Membership(
     }
 
     /**
-     * Only when user's current tier is standard should
-     * upgrading be allowed.
-     * Actually you also take into account expire date.
-     * Only not-yet-expired member should allow upgrading.
-     * If membership is expired, simply ask user to subscribe
-     * again.
+     * Determines whether the Upgrade button should be
+     * visible.
      */
-//    fun allowUpgrade(): Boolean {
-//        return tier == Tier.STANDARD
-//    }
-
-    // Compare expireDate against another instance.
-    // Pick whichever is later.
-    fun isNewer(m: Membership): Boolean {
-        if (expireDate == null && m.expireDate == null) {
+    fun shouldUpgrade(): Boolean {
+        if (tier == null) {
             return false
         }
 
-        if (m.expireDate == null) {
+        return tier == Tier.STANDARD
+    }
+
+    /**
+     * Determine whether to display a warning message
+     * on membership info.
+     */
+    fun isActiveStripe(): Boolean {
+        return payMethod == PayMethod.STRIPE && status == StripeSubStatus.Active
+    }
+
+    /**
+     * Determines whether the stripe payment method should
+     * be visible.
+     */
+    fun permitStripe(): Boolean {
+        if (tier == null) {
             return true
         }
 
-        if (expireDate == null) {
+        return shouldResubscribe()
+    }
+
+    /**
+     * Compare local membership against remote.
+     */
+    fun useRemote(remote: Membership): Boolean {
+        if (expireDate == null && remote.expireDate == null) {
             return false
         }
 
-        return expireDate.isAfter(m.expireDate)
-    }
+        if (remote.expireDate == null) {
+            return false
+        }
 
+        if (expireDate == null) {
+            return true
+        }
+
+        // Renewal
+        if (tier == remote.tier) {
+            return remote.expireDate.isAfter(expireDate)
+        }
+
+        // For upgrading we canno compare the expire date.
+        if (tier == Tier.STANDARD && remote.tier
+         == Tier.PREMIUM) {
+            return true
+        }
+
+        return false
+    }
 }
 
