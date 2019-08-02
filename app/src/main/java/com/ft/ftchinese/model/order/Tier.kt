@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model.order
 
 import android.os.Parcelable
+import com.ft.ftchinese.R
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
@@ -8,9 +9,11 @@ enum class Tier(val symbol: String) : Parcelable {
     STANDARD("standard"),
     PREMIUM("premium");
 
-    fun string(): String {
-        return symbol
-    }
+    val stringRes: Int
+        get() =  when (this) {
+            STANDARD -> R.string.tier_standard
+            PREMIUM -> R.string.tier_premium
+        }
 
     override fun toString(): String {
         return symbol

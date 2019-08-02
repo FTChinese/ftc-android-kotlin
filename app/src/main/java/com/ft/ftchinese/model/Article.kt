@@ -107,7 +107,7 @@ class Story (
                 audioUrl = channelItem?.audioUrl ?: "",
                 radioUrl = channelItem?.radioUrl ?: "",
                 publishedAt = publishedAt,
-                tier = requireMemberTier()?.string() ?: "",
+                tier = requireMemberTier()?.toString() ?: "",
                 webUrl = channelItem?.getCanonicalUrl() ?: ""
         )
     }
