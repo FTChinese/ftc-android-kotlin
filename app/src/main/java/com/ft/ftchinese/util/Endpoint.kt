@@ -4,7 +4,8 @@ import com.ft.ftchinese.BuildConfig
 
 object NextApi {
     private val BASE = if (BuildConfig.DEBUG) {
-        "http://192.168.10.195:8000"
+//        "http://192.168.10.195:8000"
+        "http://user.ftmailbox.com/v1"
     } else {
         "http://user.ftmailbox.com/v1"
     }
@@ -21,7 +22,6 @@ object NextApi {
     val UPDATE_USER_NAME = "$BASE/user/name"
     val UPDATE_PASSWORD = "$BASE/user/password"
     val ORDERS = "$BASE/user/orders"
-    val UNLINK = "$BASE/user/unlink/wx"
     val STARRED = "$BASE/user/starred"
     val WX_ACCOUNT = "$BASE/user/wx/account/v2"
     val WX_SIGNUP = "$BASE/user/wx/signup"
@@ -30,8 +30,8 @@ object NextApi {
 
 object SubscribeApi {
     private val BASE = if (BuildConfig.DEBUG) {
-//        "http://www.ftacademy.cn/api/sandbox"
-        "http://192.168.10.195:8200"
+        "http://www.ftacademy.cn/api/sandbox"
+//        "http://192.168.10.195:8200"
     } else {
         "http://www.ftacademy.cn/api/v1"
     }
