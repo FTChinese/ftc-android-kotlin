@@ -39,8 +39,6 @@ object SubscribeApi {
     val WX_ORDER_QUERY = "$BASE/wxpay/query"
     val ALI_ORDER = "$BASE/alipay/app"
 
-
-
     val WX_LOGIN = "$BASE/wx/oauth/login"
     val WX_REFRESH = "$BASE/wx/oauth/refresh"
 
@@ -48,10 +46,8 @@ object SubscribeApi {
     val UPGRADE_PREVIEW = "$BASE/upgrade/balance"
 
     val STRIPE_PLAN = "$BASE/stripe/plans"
-    val STRIPE_ORDER = "$BASE/stripe/order"
     val STRIPE_CUSTOMER = "$BASE/stripe/customers"
     val STRIPE_SUB = "$BASE/stripe/subscriptions"
-    val STRIPE_PAY_INTENT = "$BASE/stripe/payment_intents"
 }
 
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
