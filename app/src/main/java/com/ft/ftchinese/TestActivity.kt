@@ -12,7 +12,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.core.content.edit
-import androidx.fragment.app.commit
 import com.ft.ftchinese.base.ScopedAppActivity
 import com.ft.ftchinese.model.Account
 import com.ft.ftchinese.model.LoginMethod
@@ -22,11 +21,9 @@ import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.service.PollService
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
-import com.ft.ftchinese.ui.account.UnlinkAnchorFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.LatestOrderActivity
 import com.ft.ftchinese.ui.pay.StripeSubActivity
-import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.wxapi.WXEntryActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import kotlinx.android.synthetic.main.activity_test.*
@@ -91,11 +88,27 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             getDownloadStatus()
         }
 
+        btn_install_apk.setOnClickListener {
+            install()
+        }
     }
 
     private val onNotificationClicked = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             info("intent: $intent")
+
+            val downloadId = loadDownloadId()
+            if (downloadId < 0) {
+                return
+            }
+
+            val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+
+            info("Notification clicked $id")
+
+            if (downloadId == id) {
+                install()
+            }
         }
     }
 
@@ -124,20 +137,42 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             positiveButton("Install") {
                 it.dismiss()
 
-                val fileUri = findDownload()
-                if (fileUri == null) {
-                    toast("Downloded file not found")
-                }
-
-                val promptInstall = Intent(Intent.ACTION_VIEW).
-                        setDataAndType(Uri.parse(fileUri), "application/vnd.android.package-archive")
-
-                startActivity(promptInstall)
+                install()
             }
+
             negativeButton("Later") {
                 it.dismiss()
             }
         }.show()
+    }
+
+    private fun install() {
+        try {
+            val fileUri = findDownload()
+            if (fileUri == null) {
+                toast("Downloaded file not found")
+            }
+
+            info("Try to install $fileUri")
+
+            val intent = Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+
+                setDataAndType(Uri.parse(fileUri), "application/vnd.android.package-archive")
+
+                putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+                putExtra(Intent.EXTRA_RETURN_RESULT, true)
+                putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME, applicationInfo.packageName)
+            }
+
+            startActivity(intent)
+        } catch (e: Exception) {
+            alert(Appcompat, "${e.message}", "Installation Failed") {
+                positiveButton("OK") {
+                    it.dismiss()
+                }
+            }.show()
+        }
     }
 
     private fun download() {
@@ -156,6 +191,9 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         saveDownloadId(id)
     }
 
+    /**
+     * Find the downloaded file.
+     */
     private fun findDownload(): String? {
         val id = loadDownloadId()
         if (id < 0) {
@@ -173,7 +211,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
                 c.close()
 
-                toast("Download file $fileUri")
+                info("Downloaded file $fileUri")
 
                 return fileUri
             }
@@ -198,9 +236,8 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         val c = dm.query(query)
 
         if (c != null && c.moveToFirst()) {
-            val status = c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
 
-            when (status) {
+            when (c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))) {
                 DownloadManager.STATUS_PENDING -> {
                     toast("Pending")
                 }
