@@ -16,9 +16,9 @@ import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.base.isActiveNetworkWifi
-import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.isActiveNetworkWifi
+import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.order.StripeSubStatus

@@ -1,4 +1,4 @@
-package com.ft.ftchinese.base
+package com.ft.ftchinese.ui.base
 
 import android.app.Activity
 import android.content.Context

@@ -10,12 +10,12 @@ import androidx.lifecycle.ViewModelProviders
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.handleException
+import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
-import com.ft.ftchinese.ui.StringResult
+import com.ft.ftchinese.viewmodel.StringResult
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.RequestCode

@@ -8,8 +8,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.Passwords
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.ui.Validator

@@ -9,7 +9,7 @@ import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedFragment
+import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.model.order.Cycle
 import com.ft.ftchinese.model.order.subsPlans
 import kotlinx.android.synthetic.main.fragment_product.*

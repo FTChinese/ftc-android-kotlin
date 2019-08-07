@@ -6,7 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.commit
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.simple_toolbar.*

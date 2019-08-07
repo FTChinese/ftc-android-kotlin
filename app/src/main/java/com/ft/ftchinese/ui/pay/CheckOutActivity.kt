@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.*
+import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.ui.account.AccountViewModel

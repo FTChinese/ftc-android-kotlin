@@ -11,8 +11,9 @@ import android.os.Environment
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.core.content.FileProvider
 import androidx.core.content.edit
-import com.ft.ftchinese.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.Account
 import com.ft.ftchinese.model.LoginMethod
 import com.ft.ftchinese.model.Membership
@@ -81,7 +82,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         btn_find_download.setOnClickListener {
-            findDownload()
+            getDownloadedUri()
         }
 
         btn_download_status.setOnClickListener {
@@ -146,40 +147,80 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         }.show()
     }
 
+    /**
+     * @see https://stackoverflow.com/questions/39996491/open-downloaded-file-on-android-n-using-fileprovider
+     * The path you passed to File must ba a connonical file
+     * path with the `file://` part.
+     */
     private fun install() {
+        val localUri = getDownloadedUri()
+        if (localUri == null) {
+            toast("Downloaded file not found")
+            return
+        }
+
+        info("Raw file path $localUri")
+
+
+        val filePath = localUri.path
+        info("File path: $filePath")
+
+        if (filePath == null) {
+            toast("Download file uri cannot be parsed")
+            return
+        }
+
+        val downloadedFile = File(filePath)
+
+        info("Downloaded file: $downloadedFile")
+
         try {
-            val fileUri = findDownload()
-            if (fileUri == null) {
-                toast("Downloaded file not found")
-            }
 
-            info("Try to install $fileUri")
+            startInstall(downloadedFile)
 
-            val intent = Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
-                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
-
-                setDataAndType(Uri.parse(fileUri), "application/vnd.android.package-archive")
-
-                putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
-                putExtra(Intent.EXTRA_RETURN_RESULT, true)
-                putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME, applicationInfo.packageName)
-            }
-
-            startActivity(intent)
         } catch (e: Exception) {
             alert(Appcompat, "${e.message}", "Installation Failed") {
-                positiveButton("OK") {
+                positiveButton("Re-try") {
+                    it.dismiss()
+                    startInstall(downloadedFile)
+                }
+                positiveButton("Cancel") {
+
                     it.dismiss()
                 }
             }.show()
         }
     }
 
+    private fun startInstall(file: File) {
+        val contentUri = FileProvider.getUriForFile(this, "com.ftchinese.fileprovider", file)
+
+        info("file $contentUri")
+
+        // Do not use ACTION_VIEW you found on most
+        // stack overflow answers. It's too old.
+        // Nor should you use ACTION_INSTALL_PACKAGE.
+        val intent = Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
+            setDataAndType(contentUri, "application/vnd.android.package-archive")
+            // The permission must be added, otherwise you
+            // will get error parsing package.
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+            putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME, applicationInfo.packageName)
+        }
+
+        startActivity(intent)
+    }
+
     private fun download() {
-        val req = DownloadManager.Request(Uri.parse("https://creatives.ftacademy.cn/minio/android/ftchinese-v2.1.3-ftc-release.apk"))
+        val parsedUri = Uri.parse("https://creatives.ftacademy.cn/minio/android/ftchinese-v3.0.0-ftc-release.apk")
+
+        val fileName = parsedUri.lastPathSegment
+
+        val req = DownloadManager.Request(parsedUri)
                 .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "ftchinese-v2.1.3-ftc-release.apk")
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
                 .setTitle("FT中文网App更新")
                 .setMimeType("application/vnd.android.package-archive")
 
@@ -194,7 +235,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
     /**
      * Find the downloaded file.
      */
-    private fun findDownload(): String? {
+    private fun getDownloadedUri(): Uri? {
         val id = loadDownloadId()
         if (id < 0) {
             toast("Download id $id not found")
@@ -207,13 +248,13 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         val c = dm.query(query)
         if (c != null) {
             if (c.moveToFirst()) {
-                val fileUri = c.getString(c.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI))
+                val localUri = c.getString(c.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI))
 
                 c.close()
 
-                info("Downloaded file $fileUri")
+                info("Downloaded file $localUri")
 
-                return fileUri
+                return Uri.parse(localUri)
             }
         }
 
@@ -275,15 +316,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun isExternalStorageWritable(): Boolean {
         return Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
-    }
-
-    private fun getPublicAlbumStorageDir(albumName: String): File? {
-        val file = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), albumName)
-        if (!file.mkdir()) {
-            info("Directory not created")
-        }
-
-        return file
     }
 
     override fun onStart() {

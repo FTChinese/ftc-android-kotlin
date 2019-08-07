@@ -7,9 +7,9 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.base.afterTextChanged
-import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.base.afterTextChanged
+import com.ft.ftchinese.ui.base.isNetworkConnected
 import kotlinx.android.synthetic.main.fragment_email.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast

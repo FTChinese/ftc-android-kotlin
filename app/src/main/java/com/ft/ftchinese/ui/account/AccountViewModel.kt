@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.ui.StringResult
+import com.ft.ftchinese.viewmodel.StringResult
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch

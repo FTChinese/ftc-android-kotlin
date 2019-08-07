@@ -1,4 +1,4 @@
-package com.ft.ftchinese.base
+package com.ft.ftchinese.ui.base
 
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.CoroutineScope

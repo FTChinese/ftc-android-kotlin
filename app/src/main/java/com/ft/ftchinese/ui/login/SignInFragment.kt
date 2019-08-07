@@ -8,9 +8,9 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.base.afterTextChanged
-import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.base.afterTextChanged
+import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.Credentials
 import com.ft.ftchinese.model.TokenManager
 import kotlinx.android.synthetic.main.fragment_sign_in.*

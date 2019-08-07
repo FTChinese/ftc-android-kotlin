@@ -41,7 +41,7 @@ class PreferenceFragment : PreferenceFragmentCompat(),
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        addPreferencesFromResource(R.xml.preferences)
+        setPreferencesFromResource(R.xml.preferences, rootKey)
 
         prefClearCache = findPreference("pref_clear_cache")
         prefClearHistory = findPreference("pref_clear_history")

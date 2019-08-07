@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModelProviders
-import com.ft.ftchinese.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.StatsTracker
 import com.ft.ftchinese.model.splash.SplashScreenManager

@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedFragment
+import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.ui.article.StarArticleViewModel
 import kotlinx.android.synthetic.main.card_primary_secondary.view.*

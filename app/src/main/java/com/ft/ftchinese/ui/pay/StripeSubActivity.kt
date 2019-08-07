@@ -10,11 +10,11 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.*
+import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
-import com.ft.ftchinese.ui.StringResult
+import com.ft.ftchinese.viewmodel.StringResult
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.ui.login.AccountResult

@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.*
+import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.order.Order

@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.*
+import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.SessionManager
 import kotlinx.android.synthetic.main.fragment_update_email.*
 import org.jetbrains.anko.AnkoLogger

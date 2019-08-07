@@ -8,9 +8,9 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.handleException
+import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.Account
 import com.ft.ftchinese.model.LoginMethod
 import com.ft.ftchinese.model.SessionManager

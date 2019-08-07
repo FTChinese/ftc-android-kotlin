@@ -9,7 +9,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.Plan
 import com.ft.ftchinese.model.order.Tier

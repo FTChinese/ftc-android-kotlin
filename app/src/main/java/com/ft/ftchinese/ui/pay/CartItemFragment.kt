@@ -5,8 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.base.getTierCycleText
+import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.base.getTierCycleText
 import com.ft.ftchinese.model.order.Plan
 import kotlinx.android.synthetic.main.fragment_cart_item.*
 

@@ -3,7 +3,6 @@ package com.ft.ftchinese.ui.account
 
 import android.content.Context
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,9 +10,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedFragment
-import com.ft.ftchinese.base.handleException
-import com.ft.ftchinese.base.isNetworkConnected
+import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.base.handleException
+import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.SessionManager
 import kotlinx.android.synthetic.main.fragment_request_verification.*
 import org.jetbrains.anko.AnkoLogger

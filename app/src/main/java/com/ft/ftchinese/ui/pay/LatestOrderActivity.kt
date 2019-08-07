@@ -5,8 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
-import com.ft.ftchinese.base.ScopedAppActivity
-import com.ft.ftchinese.base.getTierCycleText
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.getTierCycleText
 import com.ft.ftchinese.model.order.OrderManager
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.order.Subscription
