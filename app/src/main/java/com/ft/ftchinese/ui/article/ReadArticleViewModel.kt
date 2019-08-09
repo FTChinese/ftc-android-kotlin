@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
-import androidx.sqlite.db.SimpleSQLiteQuery
 import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.database.ReadArticle
 import kotlinx.coroutines.Dispatchers
@@ -32,19 +31,6 @@ class ReadArticleViewModel(application: Application) :
                 info("Adding a read article")
                 readDao.insertOne(article)
             }
-        }
-    }
-
-    suspend fun countRead(): Int {
-        return withContext(Dispatchers.IO) {
-            readDao.count()
-        }
-    }
-
-    suspend fun truncate() {
-        withContext(Dispatchers.IO) {
-            readDao.deleteAll()
-            readDao.vacuumDb(SimpleSQLiteQuery("VACUUM"))
         }
     }
 }
