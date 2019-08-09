@@ -67,10 +67,10 @@ class FileCache (private val context: Context) : AnkoLogger {
         return try {
             val fileSize = context.filesDir
                     .listFiles()
-                    .map {
+                    ?.map {
                         if (!it.isFile) 0 else it.length()
                     }
-                    .fold(0L) { total, next -> total + next }
+                    ?.fold(0L) { total, next -> total + next } ?: 0
             BinaryByteUnit.format(fileSize)
         } catch (e: Exception) {
             BinaryByteUnit.format(0L)
