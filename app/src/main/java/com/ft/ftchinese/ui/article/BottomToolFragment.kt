@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.database.StarredArticle
 import kotlinx.android.synthetic.main.fragment_bottom_tool.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -18,9 +19,11 @@ class BottomToolFragment : Fragment(),
 
     private var listener: OnItemClickListener? = null
 
-    private lateinit var starModel: StarArticleViewModel
-
+    private var article: StarredArticle? = null
     private var isStarring = false
+
+    private lateinit var starViewModel: StarArticleViewModel
+    private lateinit var articleViewModel: ArticleViewModel
 
     interface OnItemClickListener {
         fun onClickShareButton()
@@ -32,23 +35,6 @@ class BottomToolFragment : Fragment(),
         if (context is OnItemClickListener) {
             listener = context
         }
-
-        info("onAttach called")
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        starModel = activity?.run {
-            ViewModelProvider(this).get(StarArticleViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-
-        starModel.starred.observe(this, Observer {
-            isStarring = it
-            updateUIStar(it)
-        })
-
-        info("onCreate called")
     }
 
     override fun onCreateView(
@@ -64,7 +50,11 @@ class BottomToolFragment : Fragment(),
             isStarring = !isStarring
             updateUIStar(isStarring)
 
-            starModel.setStarState(isStarring)
+            if (isStarring) {
+                starViewModel.star(article)
+            } else {
+                starViewModel.unstar(article)
+            }
         }
 
         action_share.setOnClickListener {
@@ -72,6 +62,30 @@ class BottomToolFragment : Fragment(),
         }
 
         info("onViewCreated called")
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        starViewModel = activity?.run {
+            ViewModelProvider(this).get(StarArticleViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+
+        articleViewModel = activity?.run {
+            ViewModelProvider(this)
+                    .get(ArticleViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+
+
+        articleViewModel.articleLoaded.observe(this, Observer {
+            article = it
+            starViewModel.isStarring(it)
+        })
+
+        starViewModel.starred.observe(this, Observer {
+            isStarring = it
+            updateUIStar(it)
+        })
     }
 
     private fun updateUIStar(star: Boolean) {

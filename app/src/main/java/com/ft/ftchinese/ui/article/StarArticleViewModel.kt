@@ -20,15 +20,9 @@ class StarArticleViewModel(application: Application) :
     private var starredDao = ArticleDb.getInstance(application).starredDao()
 
     val starred = MutableLiveData<Boolean>()
-    val shouldStar = MutableLiveData<Boolean>()
-
 
     fun getAllStarred(): LiveData<List<StarredArticle>> {
         return starredDao.getAll()
-    }
-
-    fun setStarState(star: Boolean) {
-        shouldStar.value = star
     }
 
     fun star(article: StarredArticle?) {

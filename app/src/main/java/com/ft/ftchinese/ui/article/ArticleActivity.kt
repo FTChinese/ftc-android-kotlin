@@ -54,7 +54,6 @@ class ArticleActivity : ScopedAppActivity(),
 
     private lateinit var wxApi: IWXAPI
     private lateinit var articleViewModel: ArticleViewModel
-    private lateinit var starViewModel: StarArticleViewModel
     private lateinit var readViewModel: ReadArticleViewModel
 
 
@@ -111,11 +110,9 @@ class ArticleActivity : ScopedAppActivity(),
 
         articleViewModel = ViewModelProvider(this, ArticleViewModelFactory(cache, followingManager))
                 .get(ArticleViewModel::class.java)
-        starViewModel = ViewModelProvider(this)
-                .get(StarArticleViewModel::class.java)
+
         readViewModel = ViewModelProvider(this)
                 .get(ReadArticleViewModel::class.java)
-
 
         // Observe whether the article is bilingual.
         articleViewModel.bilingual.observe(this, Observer<Boolean> {
@@ -128,20 +125,11 @@ class ArticleActivity : ScopedAppActivity(),
         articleViewModel.articleLoaded.observe(this, Observer {
             article = it
 
-            starViewModel.isStarring(it)
+//            starViewModel.isStarring(it)
 
             readViewModel.addOne(it.toReadArticle())
 
             statsTracker.storyViewed(it)
-        })
-
-        // Monitor star/unstar action
-        starViewModel.shouldStar.observe(this, Observer {
-            if (it) {
-                starViewModel.star(article)
-            } else {
-                starViewModel.unstar(article)
-            }
         })
     }
 
