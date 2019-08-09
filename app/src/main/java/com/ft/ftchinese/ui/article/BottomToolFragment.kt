@@ -48,7 +48,7 @@ class BottomToolFragment : Fragment(),
 
         action_favourite.setOnClickListener {
             isStarring = !isStarring
-            updateUIStar(isStarring)
+            updateUI(isStarring)
 
             if (isStarring) {
                 starViewModel.star(article)
@@ -84,12 +84,11 @@ class BottomToolFragment : Fragment(),
 
         starViewModel.starred.observe(this, Observer {
             isStarring = it
-            updateUIStar(it)
+            updateUI(it)
         })
     }
 
-    private fun updateUIStar(star: Boolean) {
-        info("updateUIStar called")
+    private fun updateUI(star: Boolean) {
         if (star) {
             action_favourite.setImageResource(R.drawable.ic_favorite_teal_24dp)
         } else {

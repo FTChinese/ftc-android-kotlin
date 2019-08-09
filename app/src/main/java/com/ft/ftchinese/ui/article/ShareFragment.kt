@@ -1,48 +1,45 @@
 package com.ft.ftchinese.ui.article
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.fragment_social_share.*
+import kotlinx.android.synthetic.main.list_item_share.view.*
 
 private val apps = arrayOf(
         SocialApp(
                 appName = "好友",
                 icon = R.drawable.wechat,
-                id = SocialApp.WECHAT_FRIEND,
                 itemId = ShareItem.WECHAT_FRIEND
         ),
         SocialApp(
                 appName = "朋友圈",
                 icon = R.drawable.moments,
-                id = SocialApp.WECHAT_MOMOMENTS,
-                itemId = ShareItem.WECHAT_MOMOMENTS
+                itemId = ShareItem.WECHAT_MOMENTS
         ),
         SocialApp(
                 appName = "打开链接",
                 icon = R.drawable.chrome,
-                id = SocialApp.OPEN_IN_BROWSER,
                 itemId = ShareItem.OPEN_IN_BROWSER
         ),
         SocialApp(
                 appName = "更多",
                 icon = R.drawable.ic_more_horiz_black_24dp,
-                id = SocialApp.MORE_OPTIONS,
                 itemId = ShareItem.MORE_OPTIONS
         )
 )
 
 enum class ShareItem {
     WECHAT_FRIEND,
-    WECHAT_MOMOMENTS,
+    WECHAT_MOMENTS,
     OPEN_IN_BROWSER,
     MORE_OPTIONS
 }
@@ -50,16 +47,8 @@ enum class ShareItem {
 data class SocialApp(
         val appName: CharSequence,
         val icon: Int,
-        val id: Int,
         val itemId: ShareItem
-) {
-    companion object {
-        const val WECHAT_FRIEND = 1
-        const val WECHAT_MOMOMENTS = 2
-        const val OPEN_IN_BROWSER = 3
-        const val MORE_OPTIONS = 4
-    }
-}
+)
 
 /**
  * Popup for share menu.
@@ -67,19 +56,9 @@ data class SocialApp(
 class SocialShareFragment :
         BottomSheetDialogFragment() {
 
-    private var listener: OnShareListener? = null
+//    private var listener: OnShareListener? = null
 
-    interface OnShareListener {
-        fun onClickShareIcon(item: ShareItem)
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-
-        if (context is OnShareListener) {
-            listener = context
-        }
-    }
+    private lateinit var articleViewModel: ArticleViewModel
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -88,8 +67,13 @@ class SocialShareFragment :
     ): View? = inflater.inflate(R.layout.fragment_social_share, container, false)
 
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
+        articleViewModel = activity?.run {
+            ViewModelProvider(this)
+                    .get(ArticleViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
 
         share_rv.apply {
             setHasFixedSize(true)
@@ -97,39 +81,43 @@ class SocialShareFragment :
                 orientation = LinearLayoutManager.HORIZONTAL
             }
 
-            adapter = ShareAdapter()
+            adapter = ShareAdapter(articleViewModel)
         }
+    }
+}
 
+class ShareAdapter(
+        private val articleViewModel: ArticleViewModel
+) : RecyclerView.Adapter<ShareAdapter.ViewHolder>() {
+
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        private val iconView: ImageView = itemView.share_icon_view
+        private val textView: TextView = itemView.share_text_view
+
+        fun bind(app: SocialApp) {
+            iconView.setImageResource(app.icon)
+            textView.text = app.appName
+        }
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val iconView: ImageView = itemView.findViewById(R.id.share_icon_view)
-        val textView: TextView = itemView.findViewById(R.id.share_text_view)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context)
+                .inflate(R.layout.list_item_share, parent, false)
+
+        return ViewHolder(view)
     }
 
-    inner class ShareAdapter : RecyclerView.Adapter<ViewHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.list_item_share, parent, false)
+    override fun getItemCount() = apps.size
 
-            return ViewHolder(view)
-        }
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val app = apps[position]
 
-        override fun getItemCount(): Int {
-            return apps.size
-        }
+        holder.bind(app)
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val app = apps[position]
+        holder.itemView.setOnClickListener {
+            articleViewModel.share(app.itemId)
 
-            holder.iconView.setImageResource(app.icon)
-            holder.textView.text = app.appName
-
-            holder.itemView.setOnClickListener {
-                listener?.onClickShareIcon(app.itemId)
-
-                dismiss()
-            }
+//            dismiss()
         }
     }
 }

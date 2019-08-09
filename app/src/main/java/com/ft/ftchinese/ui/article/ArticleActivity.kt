@@ -42,7 +42,6 @@ const val EXTRA_USE_JSON = "extra_use_json"
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ArticleActivity : ScopedAppActivity(),
-        SocialShareFragment.OnShareListener,
         BottomToolFragment.OnItemClickListener,
         OnProgressListener,
         AnkoLogger {
@@ -131,9 +130,14 @@ class ArticleActivity : ScopedAppActivity(),
 
             statsTracker.storyViewed(it)
         })
+
+        articleViewModel.shareItem.observe(this, Observer {
+            onClickShareIcon(it)
+        })
     }
 
     override fun onClickShareButton() {
+
         SocialShareFragment().show(supportFragmentManager, "SocialShareFragment")
     }
 
@@ -193,10 +197,10 @@ class ArticleActivity : ScopedAppActivity(),
         lang_bi_btn.isChecked = false
     }
 
-    override fun onClickShareIcon(item: ShareItem) {
+    private fun onClickShareIcon(item: ShareItem) {
         when (item) {
             ShareItem.WECHAT_FRIEND,
-            ShareItem.WECHAT_MOMOMENTS -> {
+            ShareItem.WECHAT_MOMENTS -> {
 
                 val webpage = WXWebpageObject()
                 webpage.webpageUrl = article?.webUrl

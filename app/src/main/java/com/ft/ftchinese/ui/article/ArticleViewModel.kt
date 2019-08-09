@@ -35,6 +35,8 @@ class ArticleViewModel(
     // into WebView.
     val renderResult = MutableLiveData<RenderResult>()
 
+    val shareItem = MutableLiveData<ShareItem>()
+
     private var template: String? = null
 
     // Tell host activity that content is loaded.
@@ -178,5 +180,9 @@ class ArticleViewModel(
                 language = lang,
                 follows = follows
         )
+    }
+
+    fun share(item: ShareItem) {
+        shareItem.value = item
     }
 }
