@@ -125,6 +125,8 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
             }
         }
 
+        counterJob?.cancel()
+        showSystemUI()
         finish()
     }
 
