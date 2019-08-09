@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import kotlinx.android.synthetic.main.fragment_bottom_tool.*
 import org.jetbrains.anko.AnkoLogger
@@ -40,7 +40,7 @@ class BottomToolFragment : Fragment(),
         super.onCreate(savedInstanceState)
 
         starModel = activity?.run {
-            ViewModelProviders.of(this).get(StarArticleViewModel::class.java)
+            ViewModelProvider(this).get(StarArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
         starModel.starred.observe(this, Observer {
