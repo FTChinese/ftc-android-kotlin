@@ -11,7 +11,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
@@ -54,8 +54,8 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private var payMethod: PayMethod? = null
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
             android.R.id.home -> onBackPressed()
         }
         return super.onOptionsItemSelected(item)
@@ -135,10 +135,10 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     private fun setUp() {
-        checkOutViewModel = ViewModelProviders.of(this)
+        checkOutViewModel = ViewModelProvider(this)
                 .get(CheckOutViewModel::class.java)
 
-        accountViewModel = ViewModelProviders.of(this)
+        accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
         checkOutViewModel.wxOrderResult.observe(this, Observer {
