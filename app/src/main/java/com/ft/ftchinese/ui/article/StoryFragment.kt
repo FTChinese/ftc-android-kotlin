@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
@@ -145,7 +145,7 @@ class StoryFragment : ScopedFragment(),
         super.onActivityCreated(savedInstanceState)
 
         articleModel = activity?.run {
-            ViewModelProviders.of(
+            ViewModelProvider(
                     this,
                     ArticleViewModelFactory(cache, followingManager))
                     .get(ArticleViewModel::class.java)
