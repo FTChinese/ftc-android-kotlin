@@ -26,7 +26,7 @@ class ArticleViewModel(
     val currentLang = MutableLiveData<Language>()
 
     // Notify ArticleActivity the meta data for starring.
-    val starringTarget = MutableLiveData<StarredArticle>()
+    val articleLoaded = MutableLiveData<StarredArticle>()
 
     // Notify StoryFragment whether cached is found
     val cacheResult = MutableLiveData<CachedResult>()
@@ -40,7 +40,7 @@ class ArticleViewModel(
     // Tell host activity that content is loaded.
     // Host could then log view event.
     fun webLoaded(data: StarredArticle) {
-        starringTarget.value = data
+        articleLoaded.value = data
     }
 
     // Host activity tells fragment to switch content.
@@ -89,8 +89,8 @@ class ArticleViewModel(
                         success = html
                 )
 
-                // Only set update starringTarget for initial loading.
-                starringTarget.value = story.toStarredArticle(item)
+                // Only set update articleLoaded for initial loading.
+                articleLoaded.value = story.toStarredArticle(item)
 
                 // Notify whether this is bilingual content
                 bilingual.value = story.isBilingual
@@ -155,7 +155,7 @@ class ArticleViewModel(
                 )
 
 // Only update it for initial loading.
-                starringTarget.value = story.toStarredArticle(item)
+                articleLoaded.value = story.toStarredArticle(item)
                 bilingual.value = story.isBilingual
 
             } catch (e: Exception) {

@@ -124,8 +124,8 @@ class ArticleActivity : ScopedAppActivity(),
         })
 
         // Get article data that can be saved to db
-        // after article is loaed.
-        articleViewModel.starringTarget.observe(this, Observer {
+        // after article is loaded.
+        articleViewModel.articleLoaded.observe(this, Observer {
             article = it
 
             starViewModel.isStarring(it)
