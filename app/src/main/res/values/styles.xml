@@ -151,6 +151,10 @@
         <item name="android:textColor">@color/colorBlack60</item>
     </style>
 
+    <style name="OrigamiText.Body2.Light.Center">
+        <item name="android:textAlignment">center</item>
+    </style>
+
     <style name="OrigamiText.Body2.Warning">
         <item name="android:textColor">@color/colorClaret80</item>
         <item name="android:textAlignment">center</item>
