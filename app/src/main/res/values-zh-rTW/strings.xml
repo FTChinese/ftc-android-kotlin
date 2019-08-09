@@ -81,8 +81,6 @@
     <string name="premium_small_print">注：所有活動門票不可折算現金、不能轉讓、不含差旅與食宿</string>
 
 
-
-
     <!-- Example: ¥1,998.00/年 -->
     <string name="formatter_price_year">¥%1$,.2f/年</string>
     <string name="formatter_price_month">¥%1$,.2f/月</string>
@@ -120,8 +118,8 @@
     <string name="prompt_restricted_login">會員登入后可以閱讀</string>
     <string name="stripe_not_active">Stripe订阅状态异常</string>
     <string name="member_status_invalid">订阅状态异常，请刷新或联系客服</string>
-    <string name="member_status_expired">会员已过期</string>
-    <string name="member_will_expire">会员还有 %1$d 天过期，请及时续订</string>
+    <string name="member_status_expired">會員已过期</string>
+    <string name="member_will_expire">會員还有 %1$d 天过期，請及时續訂</string>
     <string name="member_expired_on">您訂閱的%1$s已經于%2$s日过期，继续閱讀請續訂</string>
 
 
@@ -149,13 +147,13 @@
     <string name="stripe_init">設置Stripe支付</string>
     <string name="retrieve_customer">查詢Stripe帳號…</string>
     <string name="default_bank_brand">我的银行卡</string>
-    <string name="add_or_select_payment_method">点击添加银行卡或选择默认支付方式</string>
+    <string name="add_or_select_payment_method">點擊添加银行卡或選擇默認支付方式</string>
     <string name="set_default_payment_method">设为默認支付方式</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
-    <string name="stripe_customer_not_found">Stripe用户不存在，请检查账号或者重新登录</string>
-    <string name="btn_start_subscription">订阅</string>
-    <string name="stripe_authentication_failed">Stripe支付验证似乎失败了</string>
-    <string name="stripe_unable_to_authenticate">无法验证，请联系客服</string>
+    <string name="stripe_customer_not_found">Stripe 使用者不存在，請檢查帳號或者重新登入</string>
+    <string name="btn_start_subscription">訂閱</string>
+    <string name="stripe_authentication_failed">Stripe支付驗證似乎失敗了</string>
+    <string name="stripe_unable_to_authenticate">無法驗證，請联系客服</string>
 
 
     <string name="sub_status_incomplete">支付未完成</string>
@@ -365,6 +363,8 @@
 
 
     <!-- API error message -->
+    <string name="not_found_latest_app">未找到最新App</string>
+
     <string name="api_wrong_credentials">密碼錯誤</string>
     <string name="api_email_taken">電子信箱已經註冊</string>
     <string name="api_email_not_found">電子信箱尚未註冊</string>
@@ -399,7 +399,28 @@
     <string name="pref_clear_cache">清除页面快取</string>
     <string name="pref_clear_history">清空閱讀歷史</string>
     <string name="pref_version_name">當前版本</string>
+    <string name="pref_check_new_version">检查新版本</string>
+    <string name="current_version">当前版本 %1$s</string>
+    <string name="latest_version">发现新版本 %1$s</string>
     <string name="summary_articles_read">已閱讀 %1$d 篇文章</string>
+    <string name="btn_start_download">开始下载</string>
+    <string name="checking_latest_release">正在查找最新版…</string>
+    <string name="released_at">更新时间 %1$s</string>
+    <string name="release_log">更新日志</string>
+    <string name="no_new_release">没有找到新版本</string>
+    <string name="already_latest_release">已經是最新版了</string>
+    <string name="btn_install">安装</string>
+    <string name="title_install">安装App</string>
+    <string name="app_download_complte">下载完成，开始安装？</string>
+    <string name="download_not_found">没有找到下载文件</string>
+    <string name="download_title">FT中文網%1$s</string>
+    <string name="download_pending">等待下载</string>
+    <string name="download_paused">下载已暂停</string>
+    <string name="download_running">下载中</string>
+    <string name="download_successful">下载成功</string>
+    <string name="download_failed">下载失败，请重试</string>
+    <string name="wait_download_finish">开始后台下载，等稍候。下载完成後会提示您安装， 或者點擊通知栏的下载完成通知开始安装。您也可以下载完成後手动安装，文件位于手机存儲的下载文件夹下。</string>
+    <string name="action_open_download">打开下载文件夹</string>
 
     <string-array name="profile_gender_entries">
         <item>男</item>

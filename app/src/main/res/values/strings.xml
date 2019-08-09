@@ -80,8 +80,6 @@
     <string name="premium_small_print">注：所有活动门票不可折算现金、不能转让、不含差旅与食宿</string>
 
 
-
-
     <!-- Example: ¥1,998.00/年 -->
     <string name="formatter_price_year">¥%1$,.2f/年</string>
     <string name="formatter_price_month">¥%1$,.2f/月</string>
@@ -247,7 +245,7 @@
     <string name="nav_header_desc">导航栏头部</string>
     <string name="action_help">帮助</string>
     <string name="action_feedback">反馈</string>
-    <string name="action_logout">退出登入</string>
+    <string name="action_logout">退出登录</string>
     <string name="action_settings">设置</string>
     <string name="action_download_app">APP下载</string>
 
@@ -297,8 +295,8 @@
     <string name="label_user_name">用户名</string>
     <string name="label_new_name">新用户名</string>
     <string name="label_password">密码</string>
-    <string name="hint_enter_password">输入登入密码</string>
-    <string name="hint_set_password">设置登入密码</string>
+    <string name="hint_enter_password">输入登录密码</string>
+    <string name="hint_set_password">设置登录密码</string>
     <string name="label_old_password">当前密码</string>
     <string name="label_new_password">新密码</string>
     <string name="label_confirm_password">确认新密码</string>
@@ -364,6 +362,8 @@
 
 
     <!-- API error message -->
+    <string name="not_found_latest_app">未找到最新App</string>
+
     <string name="api_wrong_credentials">密码错误</string>
     <string name="api_email_taken">该邮箱已经注册</string>
     <string name="api_email_not_found">邮箱尚未注册</string>
@@ -398,7 +398,28 @@
     <string name="pref_clear_cache">清除缓存</string>
     <string name="pref_clear_history">清空阅读历史</string>
     <string name="pref_version_name">当前版本</string>
+    <string name="pref_check_new_version">检查新版本</string>
+    <string name="current_version">当前版本 %1$s</string>
+    <string name="latest_version">发现新版本 %1$s</string>
     <string name="summary_articles_read">已阅读 %1$d 篇文章</string>
+    <string name="btn_start_download">开始下载</string>
+    <string name="checking_latest_release">正在查找最新版&#8230;</string>
+    <string name="released_at">更新时间 %1$s</string>
+    <string name="release_log">更新日志</string>
+    <string name="no_new_release">没有找到新版本</string>
+    <string name="already_latest_release">已经是最新版了</string>
+    <string name="btn_install">安装</string>
+    <string name="title_install">安装App</string>
+    <string name="app_download_complte">下载完成，开始安装？</string>
+    <string name="download_not_found">没有找到下载文件</string>
+    <string name="download_title">FT中文网%1$s</string>
+    <string name="download_pending">等待下载</string>
+    <string name="download_paused">下载已暂停</string>
+    <string name="download_running">下载中</string>
+    <string name="download_successful">下载成功</string>
+    <string name="download_failed">下载失败，请重试</string>
+    <string name="wait_download_finish">开始后台下载，等稍候。下载完成后会提示您安装，或者点击通知栏的下载完成通知开始安装。您也可以下载完成后手动安装，文件位于手机存储的下载文件夹下。</string>
+    <string name="action_open_download">打开下载文件夹</string>
 
     <string-array name="profile_gender_entries">
         <item>男</item>
