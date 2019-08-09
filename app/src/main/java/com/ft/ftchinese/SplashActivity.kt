@@ -4,11 +4,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.model.StatsTracker
 import com.ft.ftchinese.model.splash.SplashScreenManager
+import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.splash.SplashViewModel
 import com.ft.ftchinese.util.FileCache
 import kotlinx.android.synthetic.main.activity_splash.*
@@ -16,6 +17,10 @@ import kotlinx.android.synthetic.main.activity_splash.ad_image
 import kotlinx.android.synthetic.main.activity_splash.ad_timer
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
+
+private const val EXTRA_MESSAGE_TYPE = "action"
+private const val EXTRA_CONTENT_ID = "pageId"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class SplashActivity : ScopedAppActivity(), AnkoLogger {
@@ -35,12 +40,92 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
         cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
         splashManager = SplashScreenManager(this)
-        splashViewModel = ViewModelProviders.of(this)
+        splashViewModel = ViewModelProvider(this)
                 .get(SplashViewModel::class.java)
 
         statsTracker = StatsTracker.getInstance(this)
 
         initUI()
+
+        // google.delivered_priority: high
+        // google.sent_time: 1565331193712
+        // google.ttl Value: 2419200
+        // from:
+        // google.message_id:
+        // collapse_key:
+        intent.extras?.let {
+            for (key in it.keySet()) {
+                val value = intent.extras?.get(key)
+                info("Key: $key Value: $value")
+            }
+        }
+
+        val msgTypeStr = intent.getStringExtra(EXTRA_MESSAGE_TYPE) ?: return
+        val msgType = RemoteMessageType.fromString(msgTypeStr) ?: return
+
+        val pageId = intent.getStringExtra(EXTRA_CONTENT_ID) ?: return
+
+        info("Message type: $msgType, content id: $pageId")
+
+        when (msgType) {
+            RemoteMessageType.Story -> {
+
+                ArticleActivity.start(this, ChannelItem(
+                        id = pageId,
+                        type = "story",
+                        title = ""
+                ))
+            }
+            RemoteMessageType.Video -> {
+                ArticleActivity.startWeb(this, ChannelItem(
+                        id = pageId,
+                        type = "video",
+                        title = ""
+                ))
+            }
+            RemoteMessageType.Photo -> {
+                ArticleActivity.startWeb(this, ChannelItem(
+                        id = pageId,
+                        type = "photonews",
+                        title = ""
+                ))
+            }
+            RemoteMessageType.Academy -> {
+                ArticleActivity.startWeb(this, ChannelItem(
+                        id = pageId,
+                        type = "interactive",
+                        title = ""
+                ))
+            }
+            RemoteMessageType.SpecialReport -> {
+
+            }
+            RemoteMessageType.Tag -> {
+                ChannelActivity.start(this, ChannelSource(
+                        title = pageId,
+                        name = "${msgType}_$pageId",
+                        contentUrl = "",
+                        htmlType = HTML_TYPE_FRAGMENT
+                ))
+            }
+            RemoteMessageType.Channel -> {
+                ChannelActivity.start(this, ChannelSource(
+                        title = pageId,
+                        name = "${msgType}_$pageId",
+                        contentUrl = "",
+                        htmlType = HTML_TYPE_FRAGMENT
+
+                ))
+            }
+            RemoteMessageType.Other -> {
+
+            }
+            RemoteMessageType.Download -> {
+
+            }
+        }
+
+        finish()
     }
 
     private fun initUI() {
