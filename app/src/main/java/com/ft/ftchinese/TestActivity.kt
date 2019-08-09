@@ -1,6 +1,9 @@
 package com.ft.ftchinese
 
+import android.app.Dialog
 import android.app.DownloadManager
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -11,22 +14,30 @@ import android.os.Environment
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.TaskStackBuilder
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.model.Account
-import com.ft.ftchinese.model.LoginMethod
-import com.ft.ftchinese.model.Membership
-import com.ft.ftchinese.model.Wechat
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.service.PollService
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
+import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.article.EXTRA_CHANNEL_ITEM
+import com.ft.ftchinese.ui.article.EXTRA_USE_JSON
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.LatestOrderActivity
 import com.ft.ftchinese.ui.pay.StripeSubActivity
 import com.ft.ftchinese.wxapi.WXEntryActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.iid.FirebaseInstanceId
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_test.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -43,6 +54,7 @@ import java.io.File
 class TestActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var orderManger: OrderManager
+    private var errorDialog: Dialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +104,123 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         btn_install_apk.setOnClickListener {
             install()
         }
+
+        create_notification.setOnClickListener {
+            createNotification()
+        }
+
+        intent.extras?.let {
+            for (key in it.keySet()) {
+                val value = intent.extras?.get(key)
+                info("Key: $key Value: $value")
+            }
+        }
+
+        subscribeButton.setOnClickListener {
+            info("Subscribing to news topic")
+
+            FirebaseMessaging
+                    .getInstance()
+                    .subscribeToTopic("news")
+                    .addOnCompleteListener {
+                        if (!it.isSuccessful) {
+                            alert(Appcompat, "Subscription failed").show()
+                        } else {
+                            alert(Appcompat, "Subscribed").show()
+                        }
+                    }
+        }
+
+        logTokenButton.setOnClickListener {
+            FirebaseInstanceId
+                    .getInstance()
+                    .instanceId
+                    .addOnCompleteListener(OnCompleteListener {
+                        if (!it.isSuccessful) {
+                            info("getInstanceId failed", it.exception)
+                            alert(Appcompat, "Failed to get token due to: ${it.exception?.message}", "Failed").show()
+                            return@OnCompleteListener
+                        }
+
+                        val token = it.result?.token
+
+                        info("Token $token")
+                        alert(Appcompat, "Token retrieved: $token", "Success").show()
+                    })
+        }
+
+        check_google_api.setOnClickListener {
+            if (checkPlayServices()) {
+                alert(Appcompat, "Play service available").show()
+            } else {
+                alert(Appcompat, "Play service not available").show()
+            }
+        }
+
+
+    }
+
+    private fun getChannelSettings() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val channel = notificationManager.getNotificationChannel(getString(R.string.news_notification_channel_id))
+
+        info("Vibration pattern: ${channel.vibrationPattern}")
+        info("Sound: ${channel.sound}")
+        info("Importance: ${channel.importance}")
+        info("Channel id: ${channel.id}")
+    }
+
+    private fun createNotification() {
+        val intent = Intent(this, ArticleActivity::class.java).apply {
+            putExtra(EXTRA_CHANNEL_ITEM, ChannelItem(
+                    id = "001083331",
+                    type = "story",
+                    title = "波司登遭做空机构质疑 股价暴跌"
+            ))
+            putExtra(EXTRA_USE_JSON, true)
+        }
+
+        val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(intent)
+            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        val builder = NotificationCompat.Builder(
+                this,
+                getString(R.string.news_notification_channel_id))
+                .setSmallIcon(R.drawable.logo_round)
+                .setContentTitle("波司登遭做空机构质疑 股价暴跌")
+//                .setContentText("")
+                .setStyle(NotificationCompat.BigTextStyle()
+                        .bigText("周一，波司登的股价下跌了24.8%，随后宣布停牌。此前，做空机构Bonitas Research对波司登的收入和利润提出了质疑。"))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+
+        with(NotificationManagerCompat.from(this)) {
+            notify(1, builder.build())
+        }
+    }
+
+    private fun checkPlayServices(): Boolean {
+        val googleApiAvailability = GoogleApiAvailability.getInstance()
+        val resultCode = googleApiAvailability.isGooglePlayServicesAvailable(this)
+
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (googleApiAvailability.isUserResolvableError(resultCode)) {
+                if (errorDialog == null) {
+                    errorDialog = googleApiAvailability.getErrorDialog(this, resultCode, 2404)
+                    errorDialog?.setCancelable(false)
+                }
+
+                if (errorDialog?.isShowing == false) {
+                    errorDialog?.show()
+                }
+            }
+        }
+
+        return resultCode == ConnectionResult.SUCCESS
     }
 
     private val onNotificationClicked = object : BroadcastReceiver() {
@@ -126,25 +255,20 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                 btn_start_download.isEnabled = true
                 showProgress(false)
 
-                alertInstall()
+                alert(Appcompat,"Download complete. Install now?", "Install") {
+                    positiveButton("Install") {
+                        it.dismiss()
 
-                toast("Download complete")
+                        install()
+                    }
+
+                    negativeButton("Later") {
+                        it.dismiss()
+                    }
+                }.show()
+
             }
         }
-    }
-
-    private fun alertInstall() {
-        alert(Appcompat,"Download complete. Install now?", "Install") {
-            positiveButton("Install") {
-                it.dismiss()
-
-                install()
-            }
-
-            negativeButton("Later") {
-                it.dismiss()
-            }
-        }.show()
     }
 
     /**
@@ -160,7 +284,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         info("Raw file path $localUri")
-
 
         val filePath = localUri.path
         info("File path: $filePath")
@@ -221,7 +344,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                 .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
                 .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                 .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-                .setTitle("FT中文网App更新")
+                .setTitle("FT中文网${parsedUri.lastPathSegment}")
                 .setMimeType("application/vnd.android.package-archive")
 
         val dm: DownloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
@@ -245,22 +368,25 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
         val query = DownloadManager.Query().setFilterById(id)
-        val c = dm.query(query)
-        if (c != null) {
-            if (c.moveToFirst()) {
-                val localUri = c.getString(c.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI))
+        val c = dm.query(query) ?: return null
 
-                c.close()
-
-                info("Downloaded file $localUri")
-
-                return Uri.parse(localUri)
-            }
+        if (!c.moveToFirst()) {
+            c.close()
+            return null
         }
 
-        c.close()
 
-        return null
+        return try {
+            val localUri = c.getString(c.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI))
+            info("Downloaded file $localUri")
+            c.close()
+
+            return Uri.parse(localUri)
+        } catch (e: Exception) {
+            null
+        } finally {
+            c.close()
+        }
     }
 
     private fun getDownloadStatus() {
@@ -274,30 +400,39 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
         val query = DownloadManager.Query().setFilterById(id)
 
-        val c = dm.query(query)
+        val c = dm.query(query) ?: return
 
-        if (c != null && c.moveToFirst()) {
-
-            when (c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))) {
-                DownloadManager.STATUS_PENDING -> {
-                    toast("Pending")
-                }
-                DownloadManager.STATUS_PAUSED -> {
-                    toast("Paused")
-                }
-                DownloadManager.STATUS_RUNNING -> {
-                    toast("Running")
-                }
-                DownloadManager.STATUS_SUCCESSFUL -> {
-                    toast("Successful")
-                }
-                DownloadManager.STATUS_FAILED -> {
-                    toast("Failed")
-                }
-            }
+        if (!c.moveToFirst()) {
+            return
         }
 
-        c.close()
+
+
+        val status = try {
+            c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
+        } catch (e: Exception) {
+            null
+        } finally {
+            c.close()
+        } ?: return
+
+        when (status) {
+            DownloadManager.STATUS_PENDING -> {
+                toast("Pending")
+            }
+            DownloadManager.STATUS_PAUSED -> {
+                toast("Paused")
+            }
+            DownloadManager.STATUS_RUNNING -> {
+                toast("Running")
+            }
+            DownloadManager.STATUS_SUCCESSFUL -> {
+                toast("Successful")
+            }
+            DownloadManager.STATUS_FAILED -> {
+                toast("Failed")
+            }
+        }
     }
 
     private fun saveDownloadId(id: Long) {
