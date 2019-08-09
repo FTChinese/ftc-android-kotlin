@@ -9,7 +9,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
@@ -64,11 +64,7 @@ class ArticleActivity : ScopedAppActivity(),
     private var article: StarredArticle? = null
 
     override fun onProgress(show: Boolean) {
-        if (show) {
-            progress_bar?.visibility = View.VISIBLE
-        } else {
-            progress_bar?.visibility = View.GONE
-        }
+        progress_bar?.visibility = if (show) View.VISIBLE else View.GONE
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,11 +109,11 @@ class ArticleActivity : ScopedAppActivity(),
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
         followingManager = FollowingManager.getInstance(this)
 
-        articleViewModel = ViewModelProviders.of(this, ArticleViewModelFactory(cache, followingManager))
+        articleViewModel = ViewModelProvider(this, ArticleViewModelFactory(cache, followingManager))
                 .get(ArticleViewModel::class.java)
-        starViewModel = ViewModelProviders.of(this)
+        starViewModel = ViewModelProvider(this)
                 .get(StarArticleViewModel::class.java)
-        readViewModel = ViewModelProviders.of(this)
+        readViewModel = ViewModelProvider(this)
                 .get(ReadArticleViewModel::class.java)
 
 
@@ -127,6 +123,8 @@ class ArticleActivity : ScopedAppActivity(),
             updateLangSwitcher(it)
         })
 
+        // Get article data that can be saved to db
+        // after article is loaed.
         articleViewModel.starringTarget.observe(this, Observer {
             article = it
 
@@ -137,6 +135,7 @@ class ArticleActivity : ScopedAppActivity(),
             statsTracker.storyViewed(it)
         })
 
+        // Monitor star/unstar action
         starViewModel.shouldStar.observe(this, Observer {
             if (it) {
                 starViewModel.star(article)
@@ -266,6 +265,7 @@ class ArticleActivity : ScopedAppActivity(),
         /**
          * Load content with standard JSON API.
          */
+        @JvmStatic
         fun start(context: Context?, channelItem: ChannelItem) {
             val intent = Intent(context, ArticleActivity::class.java).apply {
                 putExtra(EXTRA_CHANNEL_ITEM, channelItem)
@@ -278,6 +278,7 @@ class ArticleActivity : ScopedAppActivity(),
         /**
          * Load a web page based on HTML fragment.
          */
+        @JvmStatic
         fun startWeb(context: Context?, channelItem: ChannelItem) {
             channelItem.isWebpage = true
 
