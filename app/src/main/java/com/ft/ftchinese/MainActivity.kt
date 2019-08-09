@@ -15,7 +15,7 @@ import android.webkit.WebView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isActiveNetworkWifi
 import com.ft.ftchinese.ui.base.isNetworkConnected
@@ -37,10 +37,8 @@ import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.ui.splash.SplashViewModel
 import com.ft.ftchinese.util.*
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
-import com.google.firebase.iid.FirebaseInstanceId
 import com.stripe.android.CustomerSession
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -190,10 +188,10 @@ class MainActivity : ScopedAppActivity(),
         menuItemSubs = menu.findItem(R.id.action_subscription)
         menuItemMySubs = menu.findItem(R.id.action_my_subs)
 
-        accountViewModel = ViewModelProviders.of(this)
+        accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
-        splashViewModel = ViewModelProviders.of(this)
+        splashViewModel = ViewModelProvider(this)
                 .get(SplashViewModel::class.java)
 
         // If avatar is downloaded from network.
@@ -278,20 +276,6 @@ class MainActivity : ScopedAppActivity(),
             val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
-    }
-
-    private fun retrieveRegistrationToken() {
-        FirebaseInstanceId.getInstance().instanceId
-                .addOnCompleteListener(OnCompleteListener {task ->
-                    if (!task.isSuccessful) {
-                        info("getInstanceId failed", task.exception)
-                        return@OnCompleteListener
-                    }
-
-                    val token = task.result?.token
-
-                    info("Firebase token: $token")
-                })
     }
 
     private fun setupBottomNav() {
