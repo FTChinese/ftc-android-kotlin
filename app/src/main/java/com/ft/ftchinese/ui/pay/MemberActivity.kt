@@ -9,7 +9,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
@@ -54,7 +54,7 @@ class MemberActivity : ScopedAppActivity(),
         swipe_refresh.setOnRefreshListener(this)
 
         sessionManager = SessionManager.getInstance(this)
-        accountViewModel = ViewModelProviders.of(this)
+        accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
 
@@ -295,10 +295,6 @@ class MemberActivity : ScopedAppActivity(),
         initUI()
     }
 
-
-
-
-
     // Hide all buttons on create.
     private fun hideButton() {
         resubscribe_btn.visibility = View.GONE
@@ -337,7 +333,7 @@ class MemberActivity : ScopedAppActivity(),
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?) = when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_orders -> {
             MyOrdersActivity.start(this)
             true
