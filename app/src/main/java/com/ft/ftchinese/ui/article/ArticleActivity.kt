@@ -55,6 +55,8 @@ class ArticleActivity : ScopedAppActivity(),
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var readViewModel: ReadArticleViewModel
 
+    private var shareFragment: SocialShareFragment? = null
+
 
     private var channelItem: ChannelItem? = null
 
@@ -137,8 +139,8 @@ class ArticleActivity : ScopedAppActivity(),
     }
 
     override fun onClickShareButton() {
-
-        SocialShareFragment().show(supportFragmentManager, "SocialShareFragment")
+        shareFragment = SocialShareFragment()
+        shareFragment?.show(supportFragmentManager, "SocialShareFragment")
     }
 
     private fun updateLangSwitcher(show: Boolean) {
@@ -198,6 +200,9 @@ class ArticleActivity : ScopedAppActivity(),
     }
 
     private fun onClickShareIcon(item: ShareItem) {
+        shareFragment?.dismiss()
+        shareFragment = null
+
         when (item) {
             ShareItem.WECHAT_FRIEND,
             ShareItem.WECHAT_MOMENTS -> {
