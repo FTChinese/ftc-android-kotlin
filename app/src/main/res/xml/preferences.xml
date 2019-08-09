@@ -1,26 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen
+<androidx.preference.PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory
-        app:title="@string/pref_title_storage">
-        <Preference
-            app:key="pref_clear_cache"
-            app:title="@string/pref_clear_cache">
-        </Preference>
 
-        <Preference
-            app:key="pref_clear_history"
-            app:title="@string/pref_clear_history">
-        </Preference>
-    </PreferenceCategory>
+    <Preference
+        app:key="pref_clear_cache"
+        app:title="@string/pref_clear_cache"
+        app:icon="@drawable/ic_clear_24dp">
+    </Preference>
 
-    <PreferenceCategory>
-        <Preference
-            app:key="pref_version_name"
-            app:title="@string/pref_version_name">
-        </Preference>
-    </PreferenceCategory>
+    <Preference
+        app:key="pref_clear_history"
+        app:title="@string/pref_clear_history"
+        app:icon="@drawable/ic_delete_forever_black_24dp"
+        app:summary="@string/summary_articles_read">
+    </Preference>
 
-</PreferenceScreen>
+    <Preference
+        app:key="pref_notification"
+        app:title="通知"
+        app:icon="@drawable/ic_notifications_black_24dp"
+        app:summary="接收或关闭通知推送">
+
+    </Preference>
+    <Preference
+        app:key="pref_check_version"
+        app:title="@string/pref_check_new_version"
+        app:icon="@drawable/ic_update_black_24dp"
+        app:summary="@string/current_version">
+    </Preference>
+
+</androidx.preference.PreferenceScreen>
