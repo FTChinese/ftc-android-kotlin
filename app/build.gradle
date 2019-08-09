@@ -26,15 +26,18 @@ androidExtensions {
 }
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     compileOptions {
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
     defaultConfig {
         applicationId "com.ft.ftchinese"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode 18
         versionName "3.0.0"
 
@@ -54,9 +57,9 @@ android {
             }
         }
     }
-//    dataBinding {
-//        enabled true
-//    }
+    dataBinding {
+        enabled true
+    }
     signingConfigs {
         release {
             keyAlias keystoreProperties['keyAlias']
@@ -128,9 +131,9 @@ android {
 
 dependencies {
     def room_version = "2.1.0-alpha04"
-    def lifecycle_version = "2.2.0-alpha02"
+    def lifecycle_version = "2.2.0-alpha03"
     def nav_version = "2.1.0-alpha05"
-    def nav_version_ktx = "2.1.0-beta02"
+    def nav_version_ktx = "2.2.0-alpha01"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.anko:anko:$anko_version"
@@ -155,7 +158,7 @@ dependencies {
 
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
-    implementation "androidx.fragment:fragment-ktx:1.2.0-alpha01"
+    implementation "androidx.fragment:fragment-ktx:1.2.0-alpha02"
     kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
 
     //  UI
@@ -165,7 +168,7 @@ dependencies {
     implementation "androidx.browser:browser:1.0.0"
     implementation "androidx.preference:preference:1.1.0-rc01"
     implementation "androidx.legacy:legacy-support-v4:$support_version"
-    implementation "androidx.recyclerview:recyclerview:1.1.0-beta01"
+    implementation "androidx.recyclerview:recyclerview:1.1.0-beta02"
     implementation "androidx.cardview:cardview:$support_version"
     implementation "com.makeramen:roundedimageview:2.3.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version_ktx"
