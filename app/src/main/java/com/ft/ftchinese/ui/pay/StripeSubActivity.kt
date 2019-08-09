@@ -14,7 +14,7 @@ import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
-import com.ft.ftchinese.viewmodel.StringResult
+import com.ft.ftchinese.ui.base.StringResult
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.ui.login.AccountResult

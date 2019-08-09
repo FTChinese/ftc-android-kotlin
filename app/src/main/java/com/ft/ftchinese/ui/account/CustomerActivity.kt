@@ -15,7 +15,7 @@ import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.SessionManager
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
-import com.ft.ftchinese.viewmodel.StringResult
+import com.ft.ftchinese.ui.base.StringResult
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.RequestCode

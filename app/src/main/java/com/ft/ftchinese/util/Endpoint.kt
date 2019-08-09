@@ -4,8 +4,8 @@ import com.ft.ftchinese.BuildConfig
 
 object NextApi {
     private val BASE = if (BuildConfig.DEBUG) {
-//        "http://192.168.10.195:8000"
-        "http://user.ftmailbox.com/v1"
+        "http://192.168.10.195:8000"
+//        "http://user.ftmailbox.com/v1"
     } else {
         "http://user.ftmailbox.com/v1"
     }
@@ -26,12 +26,14 @@ object NextApi {
     val WX_ACCOUNT = "$BASE/user/wx/account/v2"
     val WX_SIGNUP = "$BASE/user/wx/signup"
     val WX_LINK = "$BASE/user/wx/link"
+
+    val latestRelease = "$BASE/apps/android/latest"
 }
 
 object SubscribeApi {
     private val BASE = if (BuildConfig.DEBUG) {
-        "http://www.ftacademy.cn/api/sandbox"
-//        "http://192.168.10.195:8200"
+//        "http://www.ftacademy.cn/api/sandbox"
+        "http://192.168.10.195:8200"
     } else {
         "http://www.ftacademy.cn/api/v1"
     }

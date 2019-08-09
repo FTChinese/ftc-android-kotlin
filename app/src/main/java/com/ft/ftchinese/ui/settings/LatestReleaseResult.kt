@@ -1,4 +1,4 @@
-package com.ft.ftchinese.viewmodel
+package com.ft.ftchinese.ui.settings
 
 import com.ft.ftchinese.model.AppRelease
 

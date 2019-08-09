@@ -1,4 +1,4 @@
-package com.ft.ftchinese.viewmodel
+package com.ft.ftchinese.ui.base
 
 data class StringResult(
         val success: String? = null,

@@ -7,13 +7,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -29,8 +26,6 @@ import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.viewmodel.LatestReleaseResult
-import com.ft.ftchinese.viewmodel.SettingsViewModel
 import kotlinx.android.synthetic.main.activity_update_app.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
