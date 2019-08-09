@@ -67,7 +67,7 @@ class StatsTracker private constructor(context: Context) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
             putDouble(FirebaseAnalytics.Param.VALUE, price)
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-            putString(FirebaseAnalytics.Param.METHOD, payMethod.string())
+            putString(FirebaseAnalytics.Param.METHOD, payMethod.toString())
         })
     }
 
@@ -75,7 +75,7 @@ class StatsTracker private constructor(context: Context) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
             putDouble(FirebaseAnalytics.Param.VALUE, plan.netPrice)
             putString(FirebaseAnalytics.Param.CURRENCY, plan.currency)
-            putString(FirebaseAnalytics.Param.METHOD, payMethod.string())
+            putString(FirebaseAnalytics.Param.METHOD, payMethod.toString())
         })
     }
 
@@ -83,7 +83,7 @@ class StatsTracker private constructor(context: Context) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
             putDouble(FirebaseAnalytics.Param.VALUE, plan.netPrice)
-            putString(FirebaseAnalytics.Param.METHOD, payMethod?.string())
+            putString(FirebaseAnalytics.Param.METHOD, payMethod?.toString())
         })
 
 

@@ -5,10 +5,6 @@ enum class PayMethod(val symbol: String) {
     WXPAY("wechat"),
     STRIPE("stripe");
 
-    fun string(): String {
-        return symbol
-    }
-
     override fun toString(): String {
         return symbol
     }
