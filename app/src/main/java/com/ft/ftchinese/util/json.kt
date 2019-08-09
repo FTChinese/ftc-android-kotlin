@@ -163,7 +163,7 @@ val payMethodConverter = object : Converter {
 
     override fun toJson(value: Any): String {
         return if (value is PayMethod) {
-            """ "${value.string()}" """
+            """ "$value" """
         } else {
             """null"""
         }
