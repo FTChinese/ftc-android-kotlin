@@ -1,18 +1,22 @@
 package com.ft.ftchinese.ui.settings
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import androidx.lifecycle.ViewModelProviders
+import android.provider.Settings
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.database.ArticleDb
+import com.ft.ftchinese.database.ReadingHistoryDao
 import com.ft.ftchinese.util.FileCache
-import com.ft.ftchinese.ui.article.ReadArticleViewModel
+import com.ft.ftchinese.viewmodel.SettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
@@ -21,76 +25,116 @@ class PreferenceFragment : PreferenceFragmentCompat(),
         CoroutineScope by MainScope(),
         AnkoLogger {
 
-
     private var prefClearCache: Preference? = null
     private var prefClearHistory: Preference? = null
-    //    private var mArticleStore: ArticleStore? = null
+    private var prefCheckVersion: Preference? = null
+    private var prefNotification: Preference? = null
+
     private lateinit var cache: FileCache
-    private lateinit var model: ReadArticleViewModel
+    private lateinit var readingHistoryDao: ReadingHistoryDao
+
+    private lateinit var settingsViewModel: SettingsViewModel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
         cache = FileCache(context)
+        readingHistoryDao = ArticleDb.getInstance(context).readDao()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+        settingsViewModel = ViewModelProvider(this)
+                .get(SettingsViewModel::class.java)
 
-        model = ViewModelProviders.of(this).get(ReadArticleViewModel::class.java)
+        settingsViewModel.calculateCacheSize(cache)
+        settingsViewModel.countReadArticles(readingHistoryDao)
+
+        super.onCreate(savedInstanceState)
     }
 
+    // onCreatePreferences is called by onCreate.
+    // Initialize any variable before super.onCreate
+    // is called.
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
 
         prefClearCache = findPreference("pref_clear_cache")
         prefClearHistory = findPreference("pref_clear_history")
-        findPreference<Preference>("pref_version_name")?.summary = BuildConfig.VERSION_NAME
+        prefNotification = findPreference("pref_notification")
+        prefCheckVersion = findPreference("pref_check_version")
 
-        updateCacheUI()
+        prefCheckVersion?.summary = getString(R.string.current_version, BuildConfig.VERSION_NAME)
 
-        prefClearCache?.setOnPreferenceClickListener {
+        // Show cache size.
+        settingsViewModel.cacheSizeResult.observe(this, Observer {
+            prefClearCache?.summary = it
+        })
 
-            val result = cache.clear()
+        // Wait for cache clearing result.
+        settingsViewModel.cacheClearedResult.observe(this, Observer {
+            
+            // After cache is cleared, re-calculate cache size.
+            settingsViewModel.calculateCacheSize(cache)
 
-            if (result) {
+            if (it) {
                 toast(R.string.prompt_cache_cleared)
             } else {
                 toast(R.string.prompt_cache_not_cleared)
             }
+        })
 
-            updateCacheUI()
+
+        // Show how many articles user read.
+        settingsViewModel.articlesReadResult.observe(this, Observer {
+            prefClearHistory?.summary = getString(R.string.summary_articles_read, it)
+        })
+
+        // Show result of clearing reading history.
+        settingsViewModel.articlesClearedResult.observe(this, Observer {
+            if (it) {
+                toast(R.string.prompt_reading_history)
+            } else {
+                toast("Cannot truncate your reading history")
+            }
+        })
+
+
+        // Delete cached files
+        prefClearCache?.setOnPreferenceClickListener {
+
+            settingsViewModel.clearCache(cache)
             true
         }
 
+        // Clear reading history
         prefClearHistory?.setOnPreferenceClickListener {
 
-            launch {
-                model.truncate()
+            settingsViewModel.truncateReadArticles(readingHistoryDao)
+            true
+        }
 
-                val totalItems = model.countRead()
-
-                prefClearHistory?.summary = getString(R.string.summary_articles_read, totalItems)
-                toast(R.string.prompt_reading_history)
+        prefNotification?.setOnPreferenceClickListener {
+            val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, BuildConfig.APPLICATION_ID)
+                putExtra(Settings.EXTRA_CHANNEL_ID, getString(R.string.news_notification_channel_id))
             }
+
+            startActivity(intent)
+
+            true
+        }
+
+        // Show checking new version
+        prefCheckVersion?.setOnPreferenceClickListener {
+            UpdateAppActivity.start(context)
 
             true
         }
     }
 
-    private fun updateCacheUI() {
-        prefClearCache?.summary = cache.space()
-
-        launch {
-            val total = model.countRead()
-
-            prefClearHistory?.summary = getString(R.string.summary_articles_read, total)
-        }
-    }
 
     override fun onDestroy() {
         super.onDestroy()
-
         cancel()
     }
 
