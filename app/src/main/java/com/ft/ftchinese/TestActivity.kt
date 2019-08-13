@@ -2,7 +2,6 @@ package com.ft.ftchinese
 
 import android.app.Dialog
 import android.app.DownloadManager
-import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -39,8 +38,6 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_test.*
-import kotlinx.android.synthetic.main.progress_bar.*
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
@@ -158,18 +155,20 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         }
 
 
+        bottom_bar.setOnMenuItemClickListener {
+            when (it.itemId) {
+//                R.id.app_bar_fav -> {
+//                    toast("Fav clicked")
+//                }
+                R.id.app_bar_share -> {
+                    toast("Share clicked")
+                }
+            }
+
+            true
+        }
     }
 
-    private fun getChannelSettings() {
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val channel = notificationManager.getNotificationChannel(getString(R.string.news_notification_channel_id))
-
-        info("Vibration pattern: ${channel.vibrationPattern}")
-        info("Sound: ${channel.sound}")
-        info("Importance: ${channel.importance}")
-        info("Channel id: ${channel.id}")
-    }
 
     private fun createNotification() {
         val intent = Intent(this, ArticleActivity::class.java).apply {
@@ -479,8 +478,10 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)
         menuInflater.inflate(R.menu.activity_test_menu, menu)
-        menu
-                ?.findItem(R.id.menu_item_toggle_polling)
+
+        bottom_bar.replaceMenu(R.menu.article_menu)
+
+        menu?.findItem(R.id.menu_item_toggle_polling)
                 ?.title = if (PollService.isServiceAlarmOn(this)) "Stop polling" else "Start polling"
 
         return true
