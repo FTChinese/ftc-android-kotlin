@@ -114,7 +114,7 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             // This is used to handle your app sending message to wx and then return back to your app.
             // Share will return to here.
             ConstantsAPI.COMMAND_SENDMESSAGE_TO_WX -> {
-                heading_tv.text = getString(R.string.wxshare_done)
+                heading_tv.text = getString(R.string.share_done)
                 finish()
             }
             else -> {
