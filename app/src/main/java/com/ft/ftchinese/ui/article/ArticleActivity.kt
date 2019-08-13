@@ -6,6 +6,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
@@ -18,13 +20,13 @@ import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.OnProgressListener
 import com.ft.ftchinese.util.FileCache
+import com.google.android.material.snackbar.Snackbar
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
 import com.tencent.mm.opensdk.modelmsg.WXWebpageObject
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.activity_article.*
-import kotlinx.android.synthetic.main.progress_bar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -37,12 +39,9 @@ const val EXTRA_USE_JSON = "extra_use_json"
  * Host activity for [StoryFragment] or [WebContentFragment], depending on the type of contents
  * to be displayed.
  * If the content has a standard JSON API, [StoryFragment] will be used; otherwise use [WebContentFragment].
- * [BottomToolFragment] is positioned at the bottom of
- * this activity to place menu icons.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ArticleActivity : ScopedAppActivity(),
-        BottomToolFragment.OnItemClickListener,
         OnProgressListener,
         AnkoLogger {
 
@@ -54,6 +53,7 @@ class ArticleActivity : ScopedAppActivity(),
     private lateinit var wxApi: IWXAPI
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var readViewModel: ReadArticleViewModel
+    private lateinit var starViewModel: StarArticleViewModel
 
     private var shareFragment: SocialShareFragment? = null
 
@@ -62,6 +62,8 @@ class ArticleActivity : ScopedAppActivity(),
 
     // The data used for share
     private var article: StarredArticle? = null
+
+    private var isStarring = false
 
     override fun onProgress(show: Boolean) {
         progress_bar?.visibility = if (show) View.VISIBLE else View.GONE
@@ -96,7 +98,6 @@ class ArticleActivity : ScopedAppActivity(),
                 replace(R.id.fragment_article, WebContentFragment.newInstance(item))
             }
 
-            replace(R.id.fragment_bottom_toolbar, BottomToolFragment.newInstance())
         }
 
         channelItem = item
@@ -115,6 +116,9 @@ class ArticleActivity : ScopedAppActivity(),
         readViewModel = ViewModelProvider(this)
                 .get(ReadArticleViewModel::class.java)
 
+        starViewModel = ViewModelProvider(this)
+                .get(StarArticleViewModel::class.java)
+
         // Observe whether the article is bilingual.
         articleViewModel.bilingual.observe(this, Observer<Boolean> {
             info("Observer found content is bilingual: $it")
@@ -126,21 +130,38 @@ class ArticleActivity : ScopedAppActivity(),
         articleViewModel.articleLoaded.observe(this, Observer {
             article = it
 
-//            starViewModel.isStarring(it)
+            // Check whether this article is bookmarked.
+            starViewModel.isStarring(it)
 
+            // Add this article to reading history.
             readViewModel.addOne(it.toReadArticle())
 
             statsTracker.storyViewed(it)
         })
 
+        // Switch bookmark icon upon starViewModel.isStarring() finished.
+        starViewModel.starred.observe(this, Observer {
+            isStarring = it
+            updateBookmark(it)
+        })
+
         articleViewModel.shareItem.observe(this, Observer {
             onClickShareIcon(it)
         })
-    }
 
-    override fun onClickShareButton() {
-        shareFragment = SocialShareFragment()
-        shareFragment?.show(supportFragmentManager, "SocialShareFragment")
+        // Handle bookmakr action
+        fab_bookmark.setOnClickListener {
+            isStarring = !isStarring
+            updateBookmark(isStarring)
+
+            if (isStarring) {
+                starViewModel.star(article)
+                Snackbar.make(it, R.string.article_starred, Snackbar.LENGTH_SHORT).show()
+            } else {
+                starViewModel.unstar(article)
+                Snackbar.make(it, R.string.article_unstarred, Snackbar.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun updateLangSwitcher(show: Boolean) {
@@ -193,10 +214,37 @@ class ArticleActivity : ScopedAppActivity(),
         }
     }
 
+    private fun updateBookmark(ok: Boolean) {
+        if (ok) {
+            fab_bookmark.setImageResource(R.drawable.ic_bookmark_black_24dp)
+        } else {
+            fab_bookmark.setImageResource(R.drawable.ic_bookmark_border_black_24dp)
+        }
+    }
+
     private fun disableLangSwitch() {
         lang_cn_btn.isChecked = true
         lang_en_btn.isChecked = false
         lang_bi_btn.isChecked = false
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+
+        menuInflater.inflate(R.menu.article_menu, menu)
+
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.app_bar_share -> {
+                shareFragment = SocialShareFragment()
+                shareFragment?.show(supportFragmentManager, "SocialShareFragment")
+
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun onClickShareIcon(item: ShareItem) {
@@ -252,7 +300,10 @@ class ArticleActivity : ScopedAppActivity(),
                     putExtra(Intent.EXTRA_TEXT, shareString)
                     type = "text/plain"
                 }
-                startActivity(Intent.createChooser(sendIntent, "分享到"))
+                startActivity(
+                        Intent.createChooser(sendIntent,
+                                getString(R.string.share_to))
+                )
             }
         }
     }
