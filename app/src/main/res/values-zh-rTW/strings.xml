@@ -237,7 +237,7 @@
 
 
     <!-- Social share -->
-    <string name="wxshare_done">分享成功</string>
+    <string name="share_done">分享成功</string>
 
     <!-- Drawer -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -453,6 +453,10 @@
         <item>sc</item>
         <item>tc</item>
     </string-array>
+    <string name="article_starred">已收藏</string>
+    <string name="article_unstarred">取消收藏</string>
+    <string name="share_to">分享到</string>
+    <string name="title_share">分享</string>
 
 
 </resources>
