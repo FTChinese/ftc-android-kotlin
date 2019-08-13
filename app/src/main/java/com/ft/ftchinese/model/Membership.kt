@@ -21,7 +21,8 @@ data class Membership(
         val payMethod: PayMethod? = null,
         val autoRenew: Boolean? = false,
         @KStripeSubStatus
-        val status: StripeSubStatus? = null
+        val status: StripeSubStatus? = null,
+        val vip: Boolean = false
 ) : Parcelable {
 
     fun withSubscription(s: Subscription): Membership {
