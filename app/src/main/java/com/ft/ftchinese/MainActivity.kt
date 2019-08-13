@@ -645,8 +645,7 @@ class MainActivity : ScopedAppActivity(),
 
     private fun feedbackEmail() {
         val intent = Intent(Intent.ACTION_SENDTO).apply {
-            data = Uri.parse("mailto:")
-            putExtra(Intent.EXTRA_EMAIL, "ftchinese.feedback@gmail.com")
+            data = Uri.parse("mailto:ftchinese.feedback@gmail.com")
             putExtra(Intent.EXTRA_SUBJECT, "Feedback on FTC Android App")
         }
 
