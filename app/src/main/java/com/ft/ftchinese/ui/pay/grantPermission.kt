@@ -31,6 +31,10 @@ fun Activity.grantPermission(account: Account?, contentPerm: Permission): Boolea
         return false
     }
 
+    if (account.isVip) {
+        return true
+    }
+
     // If user is not or was not a member.
     // Take into account the content's permission type.
     // If content is premium-only, tell user to buy premium.
@@ -61,7 +65,7 @@ fun Activity.grantPermission(account: Account?, contentPerm: Permission): Boolea
     // If expired, show user paywall.
     // If the content requires premium membership, paywall should
     // display premium card on top.
-    if (account.membership.expired()) {
+    if (account.membership.expired() && account.membership.autoRenew == false) {
         // If membership is expired, show paywall again,
         // and put premium product on top.
         if (contentPerm == Permission.PREMIUM) {
