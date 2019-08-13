@@ -17,6 +17,9 @@ import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.ui.login.AccountResult

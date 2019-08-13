@@ -7,12 +7,12 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.model.UnlinkAnchor
+import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_unlink.*
@@ -43,10 +43,10 @@ class UnlinkActivity : AppCompatActivity() {
 
         sessionManager = SessionManager.getInstance(this)
 
-        accountViewModel = ViewModelProviders.of(this)
+        accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
-        linkViewModel = ViewModelProviders.of(this)
+        linkViewModel = ViewModelProvider(this)
                 .get(LinkViewModel::class.java)
 
         initUI()

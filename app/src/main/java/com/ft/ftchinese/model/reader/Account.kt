@@ -1,9 +1,10 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.reader
 
 import android.net.Uri
 import android.os.Parcelable
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.IgnoredOnParcel

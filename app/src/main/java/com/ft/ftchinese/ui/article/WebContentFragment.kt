@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
@@ -18,6 +18,7 @@ import com.ft.ftchinese.util.flavorQuery
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.util.json
@@ -159,18 +160,18 @@ class WebContentFragment : Fragment(),
         super.onActivityCreated(savedInstanceState)
 
         articleViewModel = activity?.run {
-            ViewModelProviders.of(
+            ViewModelProvider(
                     this,
                     ArticleViewModelFactory(cache, followingManager))
                     .get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
         starViewModel = activity?.run {
-            ViewModelProviders.of(this).get(StarArticleViewModel::class.java)
+            ViewModelProvider(this).get(StarArticleViewModel::class.java)
         } ?: throw java.lang.Exception("Invalid Activity")
 
         readViewModel = activity?.run {
-            ViewModelProviders.of(this).get(ReadArticleViewModel::class.java)
+            ViewModelProvider(this).get(ReadArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
         load()

@@ -6,14 +6,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.ui.base.StringResult
 import com.ft.ftchinese.util.ClientError
@@ -64,7 +64,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         PaymentConfiguration.init(BuildConfig.STRIPE_KEY)
 
         sessionManager = SessionManager.getInstance(this)
-        accountViewModel = ViewModelProviders.of(this)
+        accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
         accountViewModel.customerIdResult.observe(this, Observer {

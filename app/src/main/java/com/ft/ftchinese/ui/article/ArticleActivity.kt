@@ -18,6 +18,8 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.Permission
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.OnProgressListener
 import com.ft.ftchinese.util.FileCache
 import com.google.android.material.snackbar.Snackbar

@@ -1,6 +1,6 @@
 package com.ft.ftchinese.service
 
-import com.ft.ftchinese.model.Account
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.util.ClientError
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.EphemeralKeyUpdateListener

@@ -5,13 +5,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.ui.pay.*
@@ -58,9 +59,9 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         sessionManager = SessionManager.getInstance(this)
         orderManager = OrderManager.getInstance(this)
-        accountViewModel = ViewModelProviders.of(this)
+        accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
-        checkoutViewModel = ViewModelProviders.of(this)
+        checkoutViewModel = ViewModelProvider(this)
                 .get(CheckOutViewModel::class.java)
 
         checkoutViewModel.wxPayResult.observe(this, Observer {

@@ -6,11 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.model.Credentials
-import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.reader.Credentials
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.TokenManager
 import kotlinx.android.synthetic.main.fragment_sign_up.*
 import org.jetbrains.anko.AnkoLogger
@@ -59,7 +59,7 @@ class SignUpFragment : ScopedFragment(),
         super.onActivityCreated(savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProviders.of(this)
+            ViewModelProvider(this)
                     .get(LoginViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
@@ -98,9 +98,9 @@ class SignUpFragment : ScopedFragment(),
 
             viewModel.signUp(
                 c = Credentials(
-                    email = e,
-                    password = password_input.text.toString().trim(),
-                    deviceToken = tokenManager.getToken()
+                        email = e,
+                        password = password_input.text.toString().trim(),
+                        deviceToken = tokenManager.getToken()
                 ),
                 wxSession = sessionManager.loadWxSession()
             )

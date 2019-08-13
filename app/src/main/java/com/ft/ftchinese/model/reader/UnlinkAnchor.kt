@@ -1,25 +1,22 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.reader
 
-enum class LoginMethod {
-    EMAIL,
-    WECHAT,
-    MOBILE;
+enum class UnlinkAnchor {
+    FTC,
+    WECHAT;
 
     fun string(): String {
         return when (this) {
-            EMAIL -> "email"
+            FTC -> "ftc"
             WECHAT -> "wechat"
-            MOBILE -> "mobile"
         }
     }
 
     companion object {
         @JvmStatic
-        fun fromString(s: String?): LoginMethod? {
+        fun fromString(s: String?): UnlinkAnchor? {
             return when (s) {
-                "email" -> EMAIL
+                "ftc" -> FTC
                 "wechat" -> WECHAT
-                "mobile" -> MOBILE
                 else -> null
             }
         }

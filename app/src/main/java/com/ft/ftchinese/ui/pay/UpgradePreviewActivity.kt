@@ -6,12 +6,12 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.ui.base.parseException
-import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.order.UpgradePreview
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_upgrade_preview.*
@@ -39,7 +39,7 @@ class UpgradePreviewActivity : AppCompatActivity() {
 
         sessionManager = SessionManager.getInstance(this)
 
-        checkoutViewModel = ViewModelProviders.of(this)
+        checkoutViewModel = ViewModelProvider(this)
                 .get(CheckOutViewModel::class.java)
 
         checkoutViewModel.upgradePreviewResult.observe(this, Observer {

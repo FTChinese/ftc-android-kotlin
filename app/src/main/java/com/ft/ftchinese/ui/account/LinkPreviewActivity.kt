@@ -6,14 +6,14 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.Account
-import com.ft.ftchinese.model.LoginMethod
-import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_link_preview.*
@@ -50,10 +50,10 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
 
         otherAccount = intent.getParcelableExtra(EXTRA_ACCOUNT)
 
-        linkViewModel = ViewModelProviders.of(this)
+        linkViewModel = ViewModelProvider(this)
                 .get(LinkViewModel::class.java)
 
-        accountViewModel = ViewModelProviders.of(this)
+        accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
         initUI()

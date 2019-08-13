@@ -21,6 +21,10 @@ import androidx.core.content.edit
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.service.PollService
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
@@ -550,7 +554,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                         stripeId = null,
                         userName = null,
                         email = "",
-                        isVerified =  false,
+                        isVerified = false,
                         avatarUrl = null,
                         isVip = false,
                         loginMethod = LoginMethod.WECHAT,

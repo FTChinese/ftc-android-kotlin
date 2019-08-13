@@ -16,6 +16,7 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.OnProgressListener
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME

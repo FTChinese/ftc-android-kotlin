@@ -7,11 +7,11 @@ import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.model.LoginMethod
-import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -55,7 +55,7 @@ class AccountActivity : ScopedAppActivity(),
 
         initUI()
 
-        viewModel = ViewModelProviders.of(this)
+        viewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
         viewModel.inProgress.observe(this, Observer<Boolean> {

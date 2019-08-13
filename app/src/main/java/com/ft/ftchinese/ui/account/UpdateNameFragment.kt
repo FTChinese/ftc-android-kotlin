@@ -6,10 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.reader.SessionManager
 import kotlinx.android.synthetic.main.fragment_update_username.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
@@ -45,7 +45,7 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
         super.onActivityCreated(savedInstanceState)
 
         updateViewModel = activity?.run {
-            ViewModelProviders.of(this)
+            ViewModelProvider(this)
                     .get(UpdateViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 

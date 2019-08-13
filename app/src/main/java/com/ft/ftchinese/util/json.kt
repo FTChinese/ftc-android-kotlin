@@ -3,8 +3,9 @@ package com.ft.ftchinese.util
 import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue
 import com.beust.klaxon.Klaxon
-import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.reader.UnlinkAnchor
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZoneOffset
 import org.threeten.bp.ZonedDateTime

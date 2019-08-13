@@ -6,10 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.UnlinkAnchor
+import com.ft.ftchinese.model.reader.UnlinkAnchor
 import kotlinx.android.synthetic.main.fragment_unlink_anchor.*
 
 private const val ARG_IS_STRIPE = "arg_is_stripe"
@@ -28,7 +28,7 @@ class UnlinkAnchorFragment : Fragment() {
         super.onActivityCreated(savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProviders.of(this)
+            ViewModelProvider(this)
                     .get(LinkViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 

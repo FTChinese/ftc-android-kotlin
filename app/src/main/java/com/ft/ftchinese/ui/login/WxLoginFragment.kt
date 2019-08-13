@@ -6,12 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.model.WxOAuth
-import com.ft.ftchinese.model.WxOAuthIntent
+import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.model.reader.WxOAuth
+import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -43,7 +43,7 @@ class WxLoginFragment : Fragment(), AnkoLogger {
         super.onActivityCreated(savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProviders.of(this)
+            ViewModelProvider(this)
                     .get(LoginViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 

@@ -6,12 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.afterTextChanged
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.Credentials
+import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.model.TokenManager
 import kotlinx.android.synthetic.main.fragment_sign_in.*
 import org.jetbrains.anko.AnkoLogger
@@ -71,7 +71,7 @@ class SignInFragment : ScopedFragment(),
         super.onActivityCreated(savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProviders.of(this)
+            ViewModelProvider(this)
                     .get(LoginViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 

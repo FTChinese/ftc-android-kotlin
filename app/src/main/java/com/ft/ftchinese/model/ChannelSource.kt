@@ -3,8 +3,8 @@ package com.ft.ftchinese.model
 import android.net.Uri
 import android.os.Parcelable
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.util.KTier
 import com.ft.ftchinese.util.flavorQuery
+import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -30,6 +30,7 @@ data class ChannelSource (
 
 ) : Parcelable, AnkoLogger {
 
+    @IgnoredOnParcel
     var shouldReload = false
 
     val fileName: String?

@@ -6,11 +6,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.handleException
-import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.reader.SessionManager
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
@@ -42,10 +42,10 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             setDisplayShowTitleEnabled(true)
         }
 
-        updateViewModel = ViewModelProviders.of(this)
+        updateViewModel = ViewModelProvider(this)
                 .get(UpdateViewModel::class.java)
 
-        accountViewModel = ViewModelProviders.of(this)
+        accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
         sessionManager = SessionManager.getInstance(this)

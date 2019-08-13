@@ -7,10 +7,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.Credentials
-import com.ft.ftchinese.model.FtcUser
-import com.ft.ftchinese.model.WxOAuth
-import com.ft.ftchinese.model.WxSession
+import com.ft.ftchinese.model.reader.Credentials
+import com.ft.ftchinese.model.reader.FtcUser
+import com.ft.ftchinese.model.reader.WxOAuth
+import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.NextApi

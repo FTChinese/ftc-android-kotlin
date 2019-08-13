@@ -5,13 +5,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.Plan
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.model.order.subsPlans
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_upgrade.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -41,7 +42,7 @@ class UpgradeActivity :  ScopedAppActivity(), AnkoLogger {
 
         sessionManager = SessionManager.getInstance(this)
 
-        productViewModel = ViewModelProviders.of(this)
+        productViewModel = ViewModelProvider(this)
                 .get(ProductViewModel::class.java)
 
         // Handle click event on price button.

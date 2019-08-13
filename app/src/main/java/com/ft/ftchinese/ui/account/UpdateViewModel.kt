@@ -6,8 +6,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.FtcUser
-import com.ft.ftchinese.model.Passwords
+import com.ft.ftchinese.model.reader.FtcUser
+import com.ft.ftchinese.model.reader.Passwords
 import com.ft.ftchinese.util.ClientError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

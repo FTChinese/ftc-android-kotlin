@@ -10,13 +10,14 @@ import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.*
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.WVClient
@@ -147,7 +148,7 @@ class ChannelFragment : ScopedFragment(),
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        channelViewModel = ViewModelProviders.of(this, ChannelViewModelFactory(cache))
+        channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache))
                 .get(ChannelViewModel::class.java)
 
         channelViewModel.cacheFound.observe(this, Observer {

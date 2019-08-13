@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.Membership
+import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.util.formatLocalDate
 import com.ft.ftchinese.util.json

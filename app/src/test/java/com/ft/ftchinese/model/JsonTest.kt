@@ -2,6 +2,10 @@ package com.ft.ftchinese.model
 
 import com.ft.ftchinese.model.order.Subscription
 import com.ft.ftchinese.model.order.WxPaymentStatus
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.util.json
 import org.junit.Test
 

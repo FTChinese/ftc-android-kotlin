@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.reader
 
 import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.Fetch
@@ -10,7 +10,6 @@ data class PasswordReset(
 ) {
     /**
      * @return HTTP status code
-     * @throws ClientError If HTTP response status is above 400.
      * @throws IllegalStateException If request url is empty.
      * @throws IOException If network request failed, or response body can not be read, regardless of if response is successful or not.
      */

@@ -2,7 +2,7 @@ package com.ft.ftchinese.ui.pay
 
 import android.app.Activity
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.Account
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.Permission
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.order.StripeSubStatus

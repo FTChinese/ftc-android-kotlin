@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.reader
 
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.NextApi

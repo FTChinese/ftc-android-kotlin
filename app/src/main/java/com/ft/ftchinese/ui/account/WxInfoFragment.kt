@@ -7,14 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.LoginMethod
-import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.model.WX_AVATAR_NAME
+import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.util.FileCache
 import kotlinx.android.synthetic.main.fragment_wx_account.*
 import kotlinx.coroutines.Dispatchers
@@ -63,7 +63,7 @@ class WxInfoFragment : ScopedFragment(),
         super.onActivityCreated(savedInstanceState)
 
         accountViewModel = activity?.run {
-            ViewModelProviders.of(this)
+            ViewModelProvider(this)
                     .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 

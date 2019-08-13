@@ -13,6 +13,8 @@ import android.webkit.WebViewClient
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.Permission
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity

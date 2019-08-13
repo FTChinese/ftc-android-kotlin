@@ -9,9 +9,9 @@ import android.view.ViewGroup
 import com.ft.ftchinese.BuildConfig
 
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.SessionManager
-import com.ft.ftchinese.model.WxOAuth
-import com.ft.ftchinese.model.WxOAuthIntent
+import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.model.reader.WxOAuth
+import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory

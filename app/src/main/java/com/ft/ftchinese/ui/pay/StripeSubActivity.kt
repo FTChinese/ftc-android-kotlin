@@ -6,12 +6,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.ui.base.StringResult
@@ -68,10 +68,10 @@ class StripeSubActivity : ScopedAppActivity(),
 
         PaymentConfiguration.init(BuildConfig.STRIPE_KEY)
 
-        checkOutViewModel = ViewModelProviders.of(this)
+        checkOutViewModel = ViewModelProvider(this)
                 .get(CheckOutViewModel::class.java)
 
-        accountViewModel = ViewModelProviders.of(this)
+        accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
         checkOutViewModel.stripePlanResult.observe(this, Observer {

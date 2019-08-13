@@ -18,6 +18,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode

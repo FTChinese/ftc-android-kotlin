@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -15,8 +15,8 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.LoginMethod
-import com.ft.ftchinese.model.SessionManager
+import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.login.AccountResult
 import com.google.android.material.button.MaterialButton
 import kotlinx.android.synthetic.main.banner.view.*
@@ -138,7 +138,7 @@ class FtcAccountV2Fragment : ScopedFragment(), AnkoLogger {
         super.onActivityCreated(savedInstanceState)
 
         accountViewModel = activity?.run {
-            ViewModelProviders.of(this)
+            ViewModelProvider(this)
                     .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 

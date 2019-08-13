@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.reader
 
 import android.content.Context
 import androidx.core.content.edit

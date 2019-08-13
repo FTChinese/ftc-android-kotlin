@@ -5,11 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.login.AccountResult
@@ -48,9 +49,9 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         sessionManager = SessionManager.getInstance(this)
 
-        loginViewModel = ViewModelProviders.of(this)
+        loginViewModel = ViewModelProvider(this)
                 .get(LoginViewModel::class.java)
-        accountViewModel = ViewModelProviders.of(this)
+        accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
         // Save wechat oauth session data.
