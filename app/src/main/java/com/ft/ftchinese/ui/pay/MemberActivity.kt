@@ -84,7 +84,7 @@ class MemberActivity : ScopedAppActivity(),
 //
 //        }
 
-        tv_member_tier.text = getString(account.tierStringRes)
+        tv_member_tier.text = getString(account.membership.tierStringRes)
 
         tv_expire_date.text = if (account.isVip) {
             getString(R.string.vip_no_expiration)

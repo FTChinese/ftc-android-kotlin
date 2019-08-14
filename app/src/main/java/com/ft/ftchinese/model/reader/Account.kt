@@ -3,7 +3,6 @@ package com.ft.ftchinese.model.reader
 import android.net.Uri
 import android.os.Parcelable
 import com.beust.klaxon.Klaxon
-import com.ft.ftchinese.R
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.util.*
@@ -35,14 +34,6 @@ data class Account(
         val wechat: Wechat,
         val membership: Membership
 ): Parcelable, AnkoLogger {
-
-    val tierStringRes: Int
-        get() = when {
-            isVip -> R.string.tier_vip
-            membership.tier != null -> membership.tier
-                    .stringRes
-            else -> R.string.tier_free
-        }
 
     /**
      * Tests whether two accounts are the same one.
