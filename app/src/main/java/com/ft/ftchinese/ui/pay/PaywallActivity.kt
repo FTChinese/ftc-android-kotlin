@@ -106,7 +106,7 @@ class PaywallActivity : ScopedAppActivity(),
             login_button.visibility = View.GONE
 
             // If user is an expired member
-            if (account.memberExpired()) {
+            if (account.membership.expired()) {
                 expired_guide.visibility = View.VISIBLE
                 expired_guide.text = expiredText(account.membership)
             }
