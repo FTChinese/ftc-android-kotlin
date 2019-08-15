@@ -112,7 +112,7 @@
     <string name="paywall_title">購買會員服務，閱讀FT獨家內容</string>
     <string name="paywall_login_prompt">已經購買過？登入</string>
     <string name="prompt_login_to_read">訂閱會員登入後可以閱讀</string>
-    <string name="prompt_subscribe_to_read">僅限會員閱讀</string>
+    <string name="prompt_member_only">僅限會員閱讀</string>
     <string name="prompt_premium_only">仅限高端會員閱讀</string>
     <string name="prompt_membership_expired">會員訂閱已过期，請續訂</string>
     <string name="prompt_restricted_login">會員登入后可以閱讀</string>
@@ -163,7 +163,7 @@
     <string name="sub_status_cancled">已取消</string>
     <string name="sub_status_unpaid">未支付</string>
     <string name="sub_status_active">活跃</string>
-    <string name="auto_renewal">自动續訂: %1$s</string>
+    <string name="label_auto_renewal">自动續訂: %1$s</string>
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="refreshing_stripe_sub">更新Stripe訂閱信息…</string>
@@ -457,6 +457,8 @@
     <string name="article_unstarred">取消收藏</string>
     <string name="share_to">分享到</string>
     <string name="title_share">分享</string>
+    <string name="prompt_upgrade_premium">仅限高端会员阅读，请升级</string>
+    <string name="swipe_member_info">下拉更新会员信息</string>
 
 
 </resources>

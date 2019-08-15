@@ -110,17 +110,34 @@
     <string name="label_wx_account">微信账号</string>
     <string name="paywall_title">购买会员服务，阅读FT独家内容</string>
     <string name="paywall_login_prompt">已经购买过？登录</string>
+
+    <!--  Prompt message for membership  -->
+    <string name="swipe_member_info">下拉更新会员信息</string>
     <string name="prompt_login_to_read">订阅会员登录后可以阅读</string>
-    <string name="prompt_subscribe_to_read">仅限付费会员阅读</string>
+    <string name="prompt_member_only">仅限付费会员阅读</string>
     <string name="prompt_premium_only">仅限高端会员阅读</string>
+    <string name="prompt_upgrade_premium">仅限高端会员阅读，请升级</string>
     <string name="prompt_membership_expired">会员订阅已过期，请续订</string>
     <string name="prompt_restricted_login">会员登入后可以阅读</string>
     <string name="stripe_not_active">Stripe订阅状态异常</string>
+
     <string name="member_status_invalid">订阅状态异常，请刷新或联系客服</string>
     <string name="member_status_expired">会员已过期</string>
     <string name="member_will_expire">会员还有 %1$d 天过期，请及时续订</string>
     <string name="member_expired_on">您订阅的%1$s已经于%2$s日过期，继续阅读请续订</string>
 
+    <!--    Membership info-->
+    <string name="sub_status_incomplete">支付未完成</string>
+    <string name="sub_status_incomplete_expired">支付已过期</string>
+    <string name="sub_status_trialing">试用</string>
+    <string name="sub_status_past_due">自动续费失败</string>
+    <string name="sub_status_cancled">已取消</string>
+    <string name="sub_status_unpaid">未支付</string>
+    <string name="sub_status_active">活跃</string>
+    <string name="label_auto_renewal">自动续订:</string>
+    <string name="label_stripe_status">Stripe订阅状态:</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
 
     <string name="heading_customer_service">联系客服</string>
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
@@ -155,16 +172,8 @@
     <string name="stripe_unable_to_authenticate">无法验证，请联系客服</string>
 
 
-    <string name="sub_status_incomplete">支付未完成</string>
-    <string name="sub_status_incomplete_expired">支付已过期</string>
-    <string name="sub_status_trialing">试用</string>
-    <string name="sub_status_past_due">自动续费失败</string>
-    <string name="sub_status_cancled">已取消</string>
-    <string name="sub_status_unpaid">未支付</string>
-    <string name="sub_status_active">活跃</string>
-    <string name="auto_renewal">自动续订: %1$s</string>
-    <string name="yes">是</string>
-    <string name="no">否</string>
+
+
     <string name="refreshing_stripe_sub">更新Stripe订阅信息&#8230;</string>
     <string name="query_stripe_subscription">查询Stripe订阅状态&#8230;</string>
     <string name="stripe_refreshing_failed">无法更新Stripe订阅信息</string>
@@ -219,7 +228,6 @@
     <string name="outcome_period">订阅周期 %1$s</string>
     <string name="outcome_sub_status">订阅状态 %1$s</string>
     <string name="outcome_payment_status">支付状态 %1$s</string>
-    <string name="label_stripe_status">Stripe订阅状态 %1$s</string>
 
     <!-- List of orders -->
     <string name="order_id">订单编号: %1$s</string>
