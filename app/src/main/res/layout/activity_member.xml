@@ -1,138 +1,186 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <include
-        layout="@layout/simple_toolbar" />
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="member"
+            type="com.ft.ftchinese.ui.pay.MemberInfo" />
+    </data>
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipe_refresh"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:layout_height="match_parent">
+
+        <include
+            layout="@layout/simple_toolbar" />
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            app:layout_constraintBottom_toBottomOf="parent">
 
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:paddingTop="8dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="16dp">
 
-            <TextView
-                android:id="@+id/swipe_tip"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="下拉更新会员信息"
-                android:textAlignment="center"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
-
-            <LinearLayout
-                android:id="@+id/member_status_wrapper"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                app:layout_constraintStart_toStartOf="@id/swipe_tip"
-                app:layout_constraintEnd_toEndOf="@id/swipe_tip"
-                app:layout_constraintTop_toBottomOf="@id/swipe_tip"
-                android:orientation="vertical">
+                <TextView
+                    android:id="@+id/swipe_tip"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:text="@string/swipe_member_info"/>
 
                 <TextView
                     android:id="@+id/tv_member_tier"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_member_tier"
                     style="@style/OrigamiText.ProductHeading1.Center"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toBottomOf="@id/swipe_tip"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:text="@{member.tier}"/>
 
                 <TextView
-                    style="@style/OrigamiText.Body1.Light.Center"
                     android:id="@+id/tv_expire_date"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:text="@string/label_member_duration" />
-
-                <TextView
                     style="@style/OrigamiText.Body1.Light.Center"
-                    android:id="@+id/tv_stripe_status"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:text="@string/label_stripe_status"/>
+                    app:layout_constraintTop_toBottomOf="@id/tv_member_tier"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:text="@{member.expireDate}" />
 
                 <TextView
+                    android:id="@+id/label_auto_renewal"
                     style="@style/OrigamiText.Body1.Light.Center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_expire_date"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/tv_auto_renewal"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    android:text="@string/label_auto_renewal"/>
+
+                <TextView
                     android:id="@+id/tv_auto_renewal"
-                    android:layout_width="match_parent"
+                    style="@style/OrigamiText.Body1.Light.Center"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:text="@string/auto_renewal"/>
+                    android:layout_marginStart="8dp"
+                    app:layout_constraintStart_toEndOf="@id/label_auto_renewal"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBaseline_toBaselineOf="@id/label_auto_renewal"
+                    android:text="@{member.autoRenewal ? @string/yes : @string/no}"/>
 
                 <TextView
-                    style="@style/OrigamiText.Body2.Warning"
-                    android:id="@+id/tv_status_warning"
-                    android:textColor="@color/colorClaret80"
-                    android:layout_width="match_parent"
+                    android:id="@+id/label_stripe_status"
+                    style="@style/OrigamiText.Body1.Light.Center"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/label_auto_renewal"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/tv_stripe_status"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    android:text="@string/label_stripe_status"/>
+                <TextView
+                    android:id="@+id/tv_stripe_status"
+                    style="@style/OrigamiText.Body1.Light.Center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginStart="8dp"
+                    app:layout_constraintStart_toEndOf="@id/label_stripe_status"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBaseline_toBaselineOf="@id/label_stripe_status"
+                    android:visibility="@{member.stripeStatus == null ? View.GONE : View.VISIBLE}"
+                    android:text="@{member.stripeStatus}"/>
+
+                <TextView
+                    android:id="@+id/tv_status_warning"
+                    style="@style/OrigamiText.Body2.Warning"
+                    android:textColor="@color/colorClaret80"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_stripe_status"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:visibility="@{member.stripeInactive ? View.VISIBLE : View.GONE}"
                     android:text="@string/member_status_invalid"/>
 
-            </LinearLayout>
+                <TextView
+                    android:id="@+id/tv_remaining_days"
+                    style="@style/OrigamiText.Body2.Warning"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:layout_constraintTop_toBottomOf="@id/tv_status_warning"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:visibility="@{member.remains == null ? View.GONE : View.VISIBLE}"
+                    android:text="@{member.remains}"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/resubscribe_btn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/btn_start_subscription"
-                app:layout_constraintStart_toStartOf="@id/member_status_wrapper"
-                app:layout_constraintEnd_toEndOf="@+id/member_status_wrapper"
-                app:layout_constraintTop_toBottomOf="@id/member_status_wrapper"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/subscribe_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/btn_start_subscription"
+                    android:visibility="@{member.showSubscribe ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_remaining_days"/>
 
-            <!-- Only show this button who is a member and will expire -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/renew_btn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/membership_renew"
-                app:layout_constraintStart_toStartOf="@id/member_status_wrapper"
-                app:layout_constraintEnd_toEndOf="@id/member_status_wrapper"
-                app:layout_constraintTop_toBottomOf="@+id/resubscribe_btn"/>
+                <!-- Only show this button who is a member and will expire -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/renew_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/membership_renew"
+                    android:visibility="@{member.showRenew ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/subscribe_btn"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/upgrade_btn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="@string/membership_upgrade"
-                app:layout_constraintEnd_toEndOf="@+id/member_status_wrapper"
-                app:layout_constraintStart_toStartOf="@+id/member_status_wrapper"
-                app:layout_constraintTop_toBottomOf="@+id/renew_btn" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/upgrade_btn"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/membership_upgrade"
+                    android:visibility="@{member.showUpgrade ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintEnd_toEndOf="@+id/subscribe_btn"
+                    app:layout_constraintStart_toStartOf="@+id/subscribe_btn"
+                    app:layout_constraintTop_toBottomOf="@+id/renew_btn" />
 
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-    <include layout="@layout/progress_bar"/>
+        <include layout="@layout/progress_bar"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
+
+
 
 

@@ -8,23 +8,23 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityMemberBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.util.formatLocalDate
 import kotlinx.android.synthetic.main.activity_member.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
@@ -38,6 +38,8 @@ class MemberActivity : ScopedAppActivity(),
 
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
+    private lateinit var binding: ActivityMemberBinding
+
 
     private fun stopRefresh() {
         swipe_refresh.isRefreshing = false
@@ -47,6 +49,7 @@ class MemberActivity : ScopedAppActivity(),
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_member)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_member)
 
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -77,77 +80,40 @@ class MemberActivity : ScopedAppActivity(),
 
         val account = sessionManager.loadAccount() ?: return
 
-//        tv_member_tier.text = when (account.membership.tier) {
-//            Tier.STANDARD -> getString(R.string.tier_standard)
-//            Tier.PREMIUM -> getString(R.string.tier_premium)
-//            else -> if (account.isVip) getString(R.string.tier_vip) else getString(R.string.tier_free)
-//
-//        }
+        val member = account.membership
 
-        tv_member_tier.text = getString(account.membership.tierStringRes)
+        val visibleButtons = member.nextAction()
 
-        tv_expire_date.text = if (account.isVip) {
-            getString(R.string.vip_no_expiration)
-        } else {
-            formatLocalDate(account.membership.expireDate)
-        }
-
-        tv_auto_renewal.text = getString(
-                R.string.auto_renewal,
-                if (account.membership.autoRenew == true)
-                    getString(R.string.yes)
-                else getString(R.string.no)
+        val memberInfo = MemberInfo(
+                tier = getString(member.tierStringRes),
+                expireDate = member.localizedExpireDate(),
+                autoRenewal = member.autoRenew ?: false,
+                stripeStatus = if (member.payMethod == PayMethod.STRIPE && member.status != null) {
+                    getString(member.status.stringRes)
+                } else {
+                    null
+                },
+                stripeInactive = member.stripeInactive(),
+                remains = member.remainingDays().let {
+                    when {
+                        it == null -> null
+                        it < 0 -> getString(R.string.member_status_expired)
+                        it <= 7 -> getString(R.string.member_will_expire, it)
+                        else -> null
+                    }
+                },
+                showSubscribe = (visibleButtons and NextStep.Resubscribe.id) > 0,
+                showRenew = (visibleButtons and NextStep.Renew.id) > 0,
+                showUpgrade = (visibleButtons and NextStep.Upgrade.id) > 0
         )
 
-        if (account.membership.payMethod == PayMethod.STRIPE) {
+        binding.member = memberInfo
 
-            val statusStr = if (account.membership.status != null) getString(account.membership.status.stringRes) else ""
-
-            tv_stripe_status.text = getString(
-                    R.string.label_stripe_status,
-                    statusStr)
-
-            tv_status_warning.visibility = if (account.membership.isActiveStripe()) View.GONE else View.VISIBLE
-
-        } else {
-            // Do not show stripe subscription status
-            // for non-stripe member.
-            tv_stripe_status.visibility = View.GONE
-
-            // Calculate remaning days.
-            val remains = account.membership.remainingDays()
-
-            when {
-                remains == null -> {
-                    tv_status_warning.visibility = View.GONE
-                }
-                remains > 7 -> {
-                    tv_status_warning.visibility = View.GONE
-                }
-                remains < 0 -> {
-                    tv_status_warning.text = getString(R.string.member_status_expired)
-                }
-                else -> {
-                    tv_status_warning.text = getString(R.string.member_will_expire, remains)
-                }
-            }
-        }
-
-        setupButtons(account.membership)
-    }
-
-    private fun setupButtons(member: Membership) {
-
-        // Setup re-subscribe buton
-        resubscribe_btn.visibility = if (member.shouldResubscribe()) View.VISIBLE else View.GONE
-
-        resubscribe_btn.setOnClickListener {
+        subscribe_btn.setOnClickListener {
             PaywallActivity.start(this)
             it.isEnabled = false
         }
 
-        // Setup renewal button
-        renew_btn.visibility = if (member.shouldRenew()) View.VISIBLE else View.GONE
         renew_btn.setOnClickListener {
 
             val plan = member.getPlan() ?: return@setOnClickListener
@@ -163,18 +129,12 @@ class MemberActivity : ScopedAppActivity(),
             it.isEnabled = false
         }
 
-        // Setup upgrade button
-        upgrade_btn.visibility = if (member.shouldUpgrade()) View.VISIBLE else View.GONE
+        upgrade_btn.setOnClickListener {
+            if (member.fromWxOrAli()) {
 
-        if (member.fromWxOrAli()) {
-            upgrade_btn.setOnClickListener {
                 UpgradeActivity.startForResult(this, RequestCode.PAYMENT)
-                it.isEnabled = false
-            }
-        }
 
-        if (member.payMethod == PayMethod.STRIPE) {
-            upgrade_btn.setOnClickListener {
+            } else if (member.payMethod == PayMethod.STRIPE) {
                 StripeSubActivity.startForResult(
                         this,
                         RequestCode.PAYMENT,
@@ -183,8 +143,9 @@ class MemberActivity : ScopedAppActivity(),
                                 Cycle.YEAR
                         )
                 )
-                it.isEnabled = false
             }
+
+            it.isEnabled = false
         }
     }
 
@@ -291,7 +252,7 @@ class MemberActivity : ScopedAppActivity(),
 
     override fun onResume() {
         super.onResume()
-        resubscribe_btn.isEnabled = true
+        subscribe_btn.isEnabled = true
         renew_btn.isEnabled = true
         upgrade_btn.isEnabled = true
 
@@ -300,7 +261,7 @@ class MemberActivity : ScopedAppActivity(),
 
     // Hide all buttons on create.
     private fun hideButton() {
-        resubscribe_btn.visibility = View.GONE
+        subscribe_btn.visibility = View.GONE
         renew_btn.visibility = View.GONE
         upgrade_btn.visibility = View.GONE
     }
@@ -343,8 +304,7 @@ class MemberActivity : ScopedAppActivity(),
         }
         R.id.action_service -> {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:")
-                putExtra(Intent.EXTRA_EMAIL, "subscriber.service@ftchinese.com")
+                data = Uri.parse("mailto:subscriber.service@ftchinese.com")
                 putExtra(Intent.EXTRA_SUBJECT, "FT中文网会员订阅")
             }
 
