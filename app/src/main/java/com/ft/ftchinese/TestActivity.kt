@@ -29,6 +29,7 @@ import com.ft.ftchinese.service.PollService
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
 import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.article.BarrierFragment
 import com.ft.ftchinese.ui.article.EXTRA_CHANNEL_ITEM
 import com.ft.ftchinese.ui.article.EXTRA_USE_JSON
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
@@ -42,11 +43,8 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_test.*
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.alert
+import org.jetbrains.anko.*
 import org.jetbrains.anko.appcompat.v7.Appcompat
-import org.jetbrains.anko.info
-import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
 import java.io.File
@@ -159,18 +157,23 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         }
 
 
+        bottom_bar.replaceMenu(R.menu.activity_test_menu)
         bottom_bar.setOnMenuItemClickListener {
-            when (it.itemId) {
-//                R.id.app_bar_fav -> {
-//                    toast("Fav clicked")
-//                }
-                R.id.app_bar_share -> {
-                    toast("Share clicked")
-                }
-            }
+            onBottomMenuItemClicked(it)
 
             true
         }
+
+        show_bottom_sheet.setOnClickListener {
+
+            BarrierFragment().show(supportFragmentManager, "BarrierFragment")
+        }
+
+        fab.setOnClickListener {
+            fab.setImageResource(R.drawable.ic_bookmark_black_24dp)
+        }
+
+
     }
 
 
@@ -479,30 +482,16 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        super.onCreateOptionsMenu(menu)
-        menuInflater.inflate(R.menu.activity_test_menu, menu)
-
-        bottom_bar.replaceMenu(R.menu.article_menu)
-
-        menu?.findItem(R.id.menu_item_toggle_polling)
-                ?.title = if (PollService.isServiceAlarmOn(this)) "Stop polling" else "Start polling"
-
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when (item?.itemId) {
+    private fun onBottomMenuItemClicked(item: MenuItem) {
+        when (item.itemId) {
             R.id.menu_item_toggle_polling -> {
                 val shouldStartAlarm = !PollService.isServiceAlarmOn(this)
                 PollService.setServiceAlarm(this, shouldStartAlarm)
                 invalidateOptionsMenu()
 
-                true
             }
             R.id.menu_test_wechat_expired -> {
                 WxExpireDialogFragment().show(supportFragmentManager, "WxExpiredDialog")
-                true
             }
             R.id.menu_test_anko_alert -> {
                 alert(Appcompat,"Anko alert", "Test") {
@@ -514,11 +503,9 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                     }
                 }.show()
 
-                true
             }
             R.id.menu_show_unlink_activity -> {
                 UnlinkActivity.startForResult(this)
-                true
             }
             R.id.menu_wxpay_activity -> {
                 // Create a mock order.
@@ -537,15 +524,12 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                         createdAt = ZonedDateTime.now()
                 ))
                 WXPayEntryActivity.start(this)
-                true
             }
             R.id.menu_latest_order -> {
                 LatestOrderActivity.start(this)
-                true
             }
             R.id.menu_wx_oauth -> {
                 WXEntryActivity.start(this)
-                true
             }
             R.id.menu_link_preview -> {
                 LinkPreviewActivity.startForResult(this, Account(
@@ -572,20 +556,41 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                                 status = null
                         )
                 ))
-                true
             }
             R.id.menu_clear_idempotency -> {
                 Idempotency.getInstance(this).clear()
                 toast("Cleared")
-                true
             }
             R.id.menu_stripe_subscripiton -> {
 
                 StripeSubActivity.startTest(this, subsPlans.of(Tier.STANDARD, Cycle.YEAR))
-                true
             }
-            else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.article_menu, menu)
+
+//        menu?.findItem(R.id.menu_item_toggle_polling)
+//                ?.title = if (PollService.isServiceAlarmOn(this)) "Stop polling" else "Start polling"
+
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.app_bar_share -> {
+                startActivity(Intent.createChooser(Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, "FT中文网 - test")
+                    type = "text/plain"
+                }, "分享"))
+            }
+        }
+
+
+        return super.onOptionsItemSelected(item)
     }
 
     companion object {
