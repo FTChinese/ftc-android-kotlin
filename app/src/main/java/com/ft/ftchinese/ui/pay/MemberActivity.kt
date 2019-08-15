@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -76,7 +75,6 @@ class MemberActivity : ScopedAppActivity(),
     }
 
     private fun initUI() {
-        hideButton()
 
         val account = sessionManager.loadAccount() ?: return
 
@@ -106,6 +104,8 @@ class MemberActivity : ScopedAppActivity(),
                 showRenew = (visibleButtons and NextStep.Renew.id) > 0,
                 showUpgrade = (visibleButtons and NextStep.Upgrade.id) > 0
         )
+
+        info("Member info for ui: $memberInfo")
 
         binding.member = memberInfo
 
@@ -257,13 +257,6 @@ class MemberActivity : ScopedAppActivity(),
         upgrade_btn.isEnabled = true
 
         initUI()
-    }
-
-    // Hide all buttons on create.
-    private fun hideButton() {
-        subscribe_btn.visibility = View.GONE
-        renew_btn.visibility = View.GONE
-        upgrade_btn.visibility = View.GONE
     }
 
 

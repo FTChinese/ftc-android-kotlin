@@ -97,6 +97,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/tv_stripe_status"
                     app:layout_constraintHorizontal_chainStyle="packed"
+                    android:visibility="@{member.stripeStatus == null ? View.GONE : View.VISIBLE}"
                     android:text="@string/label_stripe_status"/>
                 <TextView
                     android:id="@+id/tv_stripe_status"
@@ -118,7 +119,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    app:layout_constraintTop_toBottomOf="@id/tv_stripe_status"
+                    app:layout_constraintTop_toBottomOf="@id/label_stripe_status"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     android:visibility="@{member.stripeInactive ? View.VISIBLE : View.GONE}"
@@ -165,9 +166,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/membership_upgrade"
-                    android:visibility="@{member.showUpgrade ? View.VISIBLE : View.GONE}"
-                    app:layout_constraintEnd_toEndOf="@+id/subscribe_btn"
-                    app:layout_constraintStart_toStartOf="@+id/subscribe_btn"
+
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/renew_btn" />
 
 
