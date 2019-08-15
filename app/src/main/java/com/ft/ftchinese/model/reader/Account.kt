@@ -95,31 +95,6 @@ data class Account(
             return "用户名未设置"
         }
 
-    /**
-     * Calculate user permissions.
-     * Expired membership is treated as Permission.FREE.
-     */
-    @IgnoredOnParcel
-    val permission: Int = when {
-        isVip -> Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id
-        membership.expired() -> Permission.FREE.id
-        membership.tier == Tier.STANDARD -> Permission.FREE.id or Permission.STANDARD.id
-        membership.tier == Tier.PREMIUM -> Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id
-        else -> Permission.FREE.id
-    }
-
-    fun memberExpired(): Boolean {
-        if (isVip) {
-            return false
-        }
-
-        if (membership.tier == null) {
-            return false
-        }
-
-        return membership.expired()
-    }
-
     fun permitStripe(): Boolean {
         if (isWxOnly) {
             return false
