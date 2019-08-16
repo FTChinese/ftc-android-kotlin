@@ -17,13 +17,9 @@ import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.util.FileCache
 import kotlinx.android.synthetic.main.fragment_wx_account.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
-import java.io.ByteArrayInputStream
 
 /**
  * Contained both by [AccountActivity] and [WxInfoActivity]
@@ -66,7 +62,6 @@ class WxInfoFragment : ScopedFragment(),
             ViewModelProvider(this)
                     .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
-
 
 
         // Check whether we could refresh wechat user info.
@@ -143,18 +138,24 @@ class WxInfoFragment : ScopedFragment(),
             }
         })
 
-        // Downloaded avatar from internet.
-        accountViewModel.avatarResult.observe(this, Observer {
+        // Avatar
+        accountViewModel.avatarRetrieved.observe(this, Observer {
+            if (it == null) {
+                return@Observer
+            }
+
             if (it.exception != null) {
                 activity?.handleException(it.exception)
                 return@Observer
             }
 
-            val bytes = it.success ?: return@Observer
+            if (it.success == null) {
+                return@Observer
+            }
 
             wx_avatar.setImageDrawable(
                     Drawable.createFromStream(
-                            ByteArrayInputStream(bytes),
+                            it.success,
                             WX_AVATAR_NAME
                     )
             )
@@ -191,6 +192,10 @@ class WxInfoFragment : ScopedFragment(),
                 toast(R.string.refreshing_account)
 
                 accountViewModel.refreshWxInfo(wxSession)
+                accountViewModel.fetchWxAvatar(
+                        cache,
+                        acnt.wechat
+                )
             }
         } else {
             swipe_refresh.isEnabled = false
@@ -204,7 +209,6 @@ class WxInfoFragment : ScopedFragment(),
             toast("Account not found")
             return
         }
-
 
         info("Show wechat acount: $account")
 
@@ -230,24 +234,11 @@ class WxInfoFragment : ScopedFragment(),
             }
         }
 
-        // Use locally cached avatar first.
-        // If not found, fetch it from network.
-        launch {
-            val drawable = withContext(Dispatchers.IO) {
-                cache.readDrawable(WX_AVATAR_NAME)
-            }
-
-            if (drawable != null) {
-                wx_avatar.setImageDrawable(drawable)
-                return@launch
-            }
-
-            if (activity?.isNetworkConnected() != true) {
-                return@launch
-            }
-
-            accountViewModel.fetchWxAvatar(cache, account.wechat)
-        }
+        accountViewModel.loadWxAvatar(
+                cache,
+                account.wechat,
+                activity?.isNetworkConnected() == true
+        )
     }
 
     companion object {

@@ -28,18 +28,15 @@ import com.ft.ftchinese.model.order.StripeSubStatus
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
-import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.account.AccountViewModel
-import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.channel.MyftPagerAdapter
 import com.ft.ftchinese.ui.channel.SearchableActivity
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
-import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.util.*
@@ -54,7 +51,7 @@ import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-import java.io.ByteArrayInputStream
+import org.threeten.bp.LocalDate
 
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
@@ -70,96 +67,21 @@ class MainActivity : ScopedAppActivity(),
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var splashViewModel: SplashViewModel
 
-//    private var mNewsAdapter: TabPagerAdapter? = null
-//    private var mEnglishAdapter: TabPagerAdapter? = null
-//    private var mFtaAdapter: TabPagerAdapter? = null
-//    private var mVideoAdapter: TabPagerAdapter? = null
-//    private var mMyftPagerAdapter: MyftPagerAdapter? = null
-
     private var mChannelPages: Array<ChannelSource>? = null
 
     private lateinit var cache: FileCache
 
     private lateinit var sessionManager: SessionManager
     private lateinit var tokenManager: TokenManager
-    private lateinit var splashManager: SplashScreenManager
     private lateinit var wxApi: IWXAPI
 
     private lateinit var statsTracker: StatsTracker
 
-    // Cache UI
-//    private var drawerHeaderTitle: TextView? = null
-//    private var drawerHeaderImage: ImageView? = null
     private var headerView: View? = null
     private var menuItemAccount: MenuItem? = null
     private var menuItemSubs: MenuItem? = null
     private var menuItemMySubs: MenuItem? = null
 
-    /**
-     * Update UI depending on user's login/logout state
-     */
-    private fun updateSessionUI() {
-        val account = sessionManager.loadAccount()
-
-        if (account == null) {
-            headerView?.nav_header_title?.text = getString(R.string.nav_not_logged_in)
-            headerView?.nav_header_image?.setImageResource(R.drawable.ic_account_circle_black_24dp)
-
-            // show signin/signup
-            drawer_nav.menu
-                    .setGroupVisible(R.id.drawer_group_sign_in_up, true)
-
-            // Do not show account
-            menuItemAccount?.isVisible = false
-            // Show subscription
-            menuItemSubs?.isVisible = true
-            // Do not show my subscription
-            menuItemMySubs?.isVisible = false
-            return
-        }
-
-        headerView?.nav_header_title?.text = account.displayName
-        showAvatar(account.wechat)
-
-        // Hide signin/signup
-        drawer_nav.menu
-                .setGroupVisible(R.id.drawer_group_sign_in_up, false)
-        // Show account
-        menuItemAccount?.isVisible = true
-
-        // If user is not logged in, isMember always false.
-        val isMember = account.isMember
-
-        // Show subscription if user is a member; otherwise
-        // hide it
-        menuItemSubs?.isVisible = !isMember
-        // Show my subscription if user is a member; otherwise hide it.
-        menuItemMySubs?.isVisible = isMember
-    }
-
-    private fun showAvatar(wechat: Wechat) {
-
-        launch {
-            val drawable = withContext(Dispatchers.IO) {
-                cache.readDrawable(WX_AVATAR_NAME)
-            }
-
-            if (drawable != null) {
-                headerView?.nav_header_image?.setImageDrawable(drawable)
-                return@launch
-            }
-
-            if (!isNetworkConnected()) {
-                return@launch
-            }
-
-            if (wechat.avatarUrl == null) {
-                return@launch
-            }
-
-            accountViewModel.fetchWxAvatar(cache, wechat)
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -176,7 +98,7 @@ class MainActivity : ScopedAppActivity(),
         createNotificationChannel()
 
         cache = FileCache(this)
-        splashManager = SplashScreenManager(this)
+
 
         statsTracker = StatsTracker.getInstance(this)
 
@@ -197,33 +119,29 @@ class MainActivity : ScopedAppActivity(),
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
-        splashViewModel = ViewModelProvider(this)
-                .get(SplashViewModel::class.java)
-
         // If avatar is downloaded from network.
-        accountViewModel.avatarResult.observe(this, Observer {
+        accountViewModel.avatarRetrieved.observe(this, Observer {
+            if (it == null) {
+                return@Observer
+            }
+
             if (it.exception != null) {
                 info("Loading avatar error: ${it.exception}")
                 return@Observer
             }
 
-            val bytes = it.success ?: return@Observer
+            if (it.success == null) {
+                return@Observer
+            }
 
             headerView?.nav_header_image?.setImageDrawable(
                     Drawable.createFromStream(
-                            ByteArrayInputStream(bytes),
+                            it.success,
                             WX_AVATAR_NAME
                     )
             )
         })
 
-        splashViewModel.scheduleResult.observe(this, Observer {
-            splashViewModel.prepare(
-                    sessionManager = sessionManager,
-                    splashManager = splashManager,
-                    schedule = it
-            )
-        })
 
         // Set ViewPager adapter
         setupHome()
@@ -239,8 +157,6 @@ class MainActivity : ScopedAppActivity(),
         // Update UI.
         updateSessionUI()
 
-        splashViewModel.loadSchedule(cache, isActiveNetworkWifi())
-
         if (BuildConfig.DEBUG) {
             info("onCreate finished. Build flavor: ${BuildConfig.FLAVOR}. Is debug: ${BuildConfig.DEBUG}")
         }
@@ -254,16 +170,9 @@ class MainActivity : ScopedAppActivity(),
 
 //        retrieveRegistrationToken()
 
-
-        accountViewModel.accountRefreshed.observe(this, Observer {
-            onAccountRefreshed(it)
-        })
-
-        accountViewModel.stripeRetrievalResult.observe(this, Observer {
-            onStripeSubRetrieved(it)
-        })
-
         checkStripeStatus()
+
+        setupSplashScreen()
     }
 
     private fun createNotificationChannel() {
@@ -410,19 +319,64 @@ class MainActivity : ScopedAppActivity(),
                 }
     }
 
+    private fun setupHome() {
+        view_pager.adapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
+        mChannelPages = Navigation.newsPages
+    }
+
+    /**
+     * Update UI depending on user's login/logout state
+     */
+    private fun updateSessionUI() {
+        val account = sessionManager.loadAccount()
+
+        if (account == null) {
+            headerView?.nav_header_title?.text = getString(R.string.nav_not_logged_in)
+            headerView?.nav_header_image?.setImageResource(R.drawable.ic_account_circle_black_24dp)
+
+            // show signin/signup
+            drawer_nav.menu
+                    .setGroupVisible(R.id.drawer_group_sign_in_up, true)
+
+            // Do not show account
+            menuItemAccount?.isVisible = false
+            // Show subscription
+            menuItemSubs?.isVisible = true
+            // Do not show my subscription
+            menuItemMySubs?.isVisible = false
+            return
+        }
+
+        headerView?.nav_header_title?.text = account.displayName
+
+        // Load wechat avatar.
+        accountViewModel.loadWxAvatar(
+                cache,
+                account.wechat,
+                isNetworkConnected()
+        )
+
+        // Hide signin/signup
+        drawer_nav.menu
+                .setGroupVisible(R.id.drawer_group_sign_in_up, false)
+        // Show account
+        menuItemAccount?.isVisible = true
+
+        // If user is not logged in, isMember always false.
+        val isMember = account.isMember
+
+        // Show subscription if user is a member; otherwise
+        // hide it
+        menuItemSubs?.isVisible = !isMember
+        // Show my subscription if user is a member; otherwise hide it.
+        menuItemMySubs?.isVisible = isMember
+    }
+
     private fun logout() {
         sessionManager.logout()
         cache.deleteFile(WX_AVATAR_NAME)
         CustomerSession.endCustomerSession()
         updateSessionUI()
-    }
-
-    private fun setupHome() {
-//        if (mNewsAdapter == null) {
-//            mNewsAdapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
-//        }
-        view_pager.adapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
-        mChannelPages = Navigation.newsPages
     }
 
     private fun displayLogo(show: Boolean) {
@@ -440,6 +394,23 @@ class MainActivity : ScopedAppActivity(),
         supportActionBar?.setDisplayUseLogoEnabled(false)
         supportActionBar?.setDisplayShowTitleEnabled(true)
         supportActionBar?.setTitle(title)
+    }
+
+    private fun setupSplashScreen() {
+
+        splashViewModel = ViewModelProvider(this)
+                .get(SplashViewModel::class.java)
+
+        splashViewModel.screenAdSelected.observe(this, Observer {
+            SplashScreenManager(this).save(it, LocalDate.now())
+        })
+
+
+        splashViewModel.prepareNextRound(
+                cache,
+                isActiveNetworkWifi(),
+                sessionManager.loadAccount()?.membership?.tier
+        )
     }
 
     /**
@@ -485,27 +456,27 @@ class MainActivity : ScopedAppActivity(),
             return
         }
 
+        accountViewModel.stripeRetrievalResult.observe(this, Observer {
+            if (it?.success == null) {
+                return@Observer
+            }
+
+            if (!isNetworkConnected()) {
+                return@Observer
+            }
+
+            accountViewModel.refresh(account)
+        })
+
+        accountViewModel.accountRefreshed.observe(this, Observer {
+            if (it?.success == null) {
+                return@Observer
+            }
+
+            sessionManager.saveAccount(it.success)
+        })
+
         accountViewModel.retrieveStripeSub(account)
-    }
-
-    private fun onStripeSubRetrieved(result: StripeRetrievalResult?) {
-        if (result?.success == null) {
-            return
-        }
-
-        val account = sessionManager.loadAccount() ?: return
-        accountViewModel.refresh(account)
-    }
-
-    private fun onAccountRefreshed(result: AccountResult?) {
-        if (result?.success == null) {
-            return
-        }
-
-        if (!isNetworkConnected()) {
-            return
-        }
-        sessionManager.saveAccount(result.success)
     }
 
     override fun onStart() {
