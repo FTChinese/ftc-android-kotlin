@@ -80,6 +80,10 @@ class SplashScreenManager(context: Context) : AnkoLogger {
         return ad
     }
 
+    /**
+     * prepareNextRound selects a ScreenAd randomly and save it to preferences
+     * to be used the next time app launches.
+     */
     fun prepareNextRound(sch: Schedule?, tier: Tier?) {
         if (sch == null) {
             return
