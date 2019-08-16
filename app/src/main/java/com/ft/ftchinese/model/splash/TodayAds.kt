@@ -32,13 +32,4 @@ data class TodayAds(
 
         return distribution.sample()
     }
-
-    /**
-     * Download images for today's ads
-     */
-    fun downloadImages(filesDir: File) {
-        for (ad in items) {
-            ad.downloadImage(filesDir)
-        }
-    }
 }
