@@ -3,12 +3,12 @@ package com.ft.ftchinese.model.reader
 import android.os.Parcelable
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.util.*
+import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.threeten.bp.DateTimeException
 import org.threeten.bp.ZonedDateTime
 
-const val WX_AVATAR_NAME = "wx_avatar.jpg"
 
 object WxOAuth {
     const val SCOPE = "snsapi_userinfo"
@@ -111,6 +111,8 @@ data class WxSession(
     }
 }
 
+const val WX_AVATAR_NAME = "wx_avatar.jpg"
+
 /**
  * Example Wechat avatar url:
  * http://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTLB34sBwSiaL3GJmejqDUqJw4CZ8Qs0ztibsRu6wzMpg7jg5icxWKwxF73ssZUmXmee1MvSvaZ6iaqs1A/132
@@ -121,7 +123,17 @@ data class Wechat(
         val avatarUrl: String? = null
 ): Parcelable, AnkoLogger {
 
+    @IgnoredOnParcel
     val isEmpty: Boolean
         get() = nickname.isNullOrBlank() && avatarUrl.isNullOrBlank()
 
+    fun retrieveAvatar(): ByteArray? {
+        if (avatarUrl == null) {
+            return null
+        }
+
+        return Fetch()
+                .get(avatarUrl)
+                .download()
+    }
 }
