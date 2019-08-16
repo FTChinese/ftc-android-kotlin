@@ -8,7 +8,6 @@ import okhttp3.*
 import okhttp3.Request
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -199,21 +198,8 @@ class Fetch : AnkoLogger {
      * If a File is provided as destination, the downloaded content will also saved.
      * Use this to download binary files.
      */
-    fun download(dest: File? = null): ByteArray? {
-
-        val resp = end()
-
-        val input = resp.body()?.bytes()
-
-        try {
-            if (dest != null && input != null) {
-                dest.writeBytes(input)
-            }
-        } catch (e: Exception) {
-            info(e.message)
-        }
-
-        return input
+    fun download(): ByteArray? {
+        return end().body()?.bytes()
     }
 
     fun responseString(): String? {
