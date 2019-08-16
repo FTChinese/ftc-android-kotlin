@@ -2,11 +2,8 @@ package com.ft.ftchinese.model.splash
 
 import android.net.Uri
 import com.beust.klaxon.Json
-import com.ft.ftchinese.util.Fetch
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.threeten.bp.LocalDate
-import java.io.File
 
 data class ScreenAd(
         val type: String,
@@ -66,18 +63,6 @@ data class ScreenAd(
                 null
             }
         }
-
-    fun downloadImage(filesDir: File) {
-        try {
-            val file = File(filesDir, imageName)
-            if (file.exists()) {
-                return
-            }
-            Fetch().get(imageUrl).download(file)
-        } catch (e: Exception) {
-            info(e)
-        }
-    }
 
     /**
      * Collect all impression target.
