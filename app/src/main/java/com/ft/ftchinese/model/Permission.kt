@@ -9,7 +9,11 @@ package com.ft.ftchinese.model
 enum class Permission(val id: Int) {
     FREE(1), // 0001
     STANDARD(2), // 0010
-    PREMIUM(4) // 0100
+    PREMIUM(4); // 0100
+
+    fun grant(readerPermBits: Int): Boolean {
+        return (readerPermBits and id) > 0
+    }
 }
 
 enum class MemberStatus {
@@ -31,3 +35,12 @@ enum class NextStep(val id: Int) {
     Renew(2),
     Upgrade(4)
 }
+
+/**
+ * Which buttons should be visible on MemberActivity
+ */
+data class VisibleButtons(
+        val showSubscribe: Boolean,
+        val showRenew: Boolean,
+        val showUpgrade: Boolean
+)
