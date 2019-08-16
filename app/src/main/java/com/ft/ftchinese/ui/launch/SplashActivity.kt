@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.launch
 
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -157,7 +158,10 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
             return
         }
 
-        val drawable = cache.readDrawable(imageName)
+        val drawable = Drawable.createFromStream(
+                openFileInput(imageName),
+                imageName
+        )
 
         if (drawable == null) {
             exit()
