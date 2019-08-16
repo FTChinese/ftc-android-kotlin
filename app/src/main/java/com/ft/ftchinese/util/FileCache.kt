@@ -1,12 +1,12 @@
 package com.ft.ftchinese.util
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import com.ft.ftchinese.R
 import com.jakewharton.byteunits.BinaryByteUnit
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.io.File
+import java.io.FileInputStream
 
 class FileCache (private val context: Context) : AnkoLogger {
 
@@ -41,16 +41,10 @@ class FileCache (private val context: Context) : AnkoLogger {
         }
     }
 
-    fun readDrawable(name: String?): Drawable? {
-        if (name == null) {
-            return null
-        }
-
-        return if (exists(name)) {
-            Drawable.createFromStream(
-                    context.openFileInput(name),
-                    name)
-        } else {
+    fun readBinaryFile(name: String): FileInputStream? {
+        return try {
+            context.openFileInput(name)
+        } catch (e: Exception) {
             null
         }
     }
