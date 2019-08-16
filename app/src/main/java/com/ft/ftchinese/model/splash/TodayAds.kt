@@ -5,8 +5,11 @@ import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.jetbrains.anko.AnkoLogger
 import org.threeten.bp.LocalDate
-import java.io.File
 
+/**
+ * [TodayAds] contains a list of [ScreenAd] sorted out from
+ * [Schedule] for today.
+ */
 data class TodayAds(
         @KDate
         val date: LocalDate,
