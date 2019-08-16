@@ -7,6 +7,9 @@
         <variable
             name="member"
             type="com.ft.ftchinese.ui.pay.MemberInfo" />
+        <variable
+            name="buttons"
+            type="com.ft.ftchinese.model.VisibleButtons" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -143,7 +146,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/btn_start_subscription"
-                    android:visibility="@{member.showSubscribe ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{buttons.showSubscribe ? View.VISIBLE : View.GONE}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tv_remaining_days"/>
@@ -155,7 +158,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/membership_renew"
-                    android:visibility="@{member.showRenew ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{buttons.showRenew ? View.VISIBLE : View.GONE}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/subscribe_btn"/>
@@ -166,7 +169,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/membership_upgrade"
-
+                    android:visibility="@{buttons.showUpgrade ? View.VISIBLE : View.GONE}"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/renew_btn" />

@@ -80,8 +80,6 @@ class MemberActivity : ScopedAppActivity(),
 
         val member = account.membership
 
-        val visibleButtons = member.nextAction()
-
         val memberInfo = MemberInfo(
                 tier = getString(member.tierStringRes),
                 expireDate = member.localizedExpireDate(),
@@ -99,15 +97,13 @@ class MemberActivity : ScopedAppActivity(),
                         it <= 7 -> getString(R.string.member_will_expire, it)
                         else -> null
                     }
-                },
-                showSubscribe = (visibleButtons and NextStep.Resubscribe.id) > 0,
-                showRenew = (visibleButtons and NextStep.Renew.id) > 0,
-                showUpgrade = (visibleButtons and NextStep.Upgrade.id) > 0
+                }
         )
 
         info("Member info for ui: $memberInfo")
 
         binding.member = memberInfo
+        binding.buttons = member.nextVisibleButtons()
 
         subscribe_btn.setOnClickListener {
             PaywallActivity.start(this)
