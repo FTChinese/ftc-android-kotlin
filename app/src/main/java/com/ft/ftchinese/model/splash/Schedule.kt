@@ -36,7 +36,7 @@ class Schedule(
 
         val todayAds = sections
                 .filter {
-                    it.android == "yes" && !it.scheduledOn.isEmpty()
+                    it.android == "yes" && it.scheduledOn.isNotEmpty()
                 }
                 .filter {
                     if (it.targetUser == "all") {
