@@ -5,6 +5,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.MemberStatus
 import com.ft.ftchinese.model.NextStep
 import com.ft.ftchinese.model.Permission
+import com.ft.ftchinese.model.VisibleButtons
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.Parcelize
@@ -205,7 +206,11 @@ data class Membership(
         return Pair(Permission.FREE.id, null)
     }
 
-    fun nextAction(): Int {
+    /**
+     * Determines what a membership can do next:
+     * re-subscribe, renew or upgrade, or any of the combination
+     */
+    private fun nextAction(): Int {
         if (vip) {
             return NextStep.None.id
         }
@@ -236,7 +241,7 @@ data class Membership(
         if (permitRenewal()) {
             return when (tier) {
                 Tier.STANDARD -> NextStep.Renew.id or NextStep.Upgrade.id
-                Tier.PREMIUM -> NextStep.Upgrade.id
+                Tier.PREMIUM -> NextStep.Renew.id
             }
         }
 
@@ -246,6 +251,21 @@ data class Membership(
         }
 
         return NextStep.None.id
+    }
+
+    /**
+     * Determines which buttons are visible on MemberActivity
+     * to persuade user to take next action: any or combination
+     * of resubscribe,
+     */
+    fun nextVisibleButtons(): VisibleButtons {
+        val actions = nextAction()
+
+        return VisibleButtons(
+                showSubscribe = (actions and NextStep.Resubscribe.id) > 0,
+                showRenew = (actions and NextStep.Renew.id) > 0,
+                showUpgrade = (actions and NextStep.Upgrade.id) > 0
+        )
     }
 
     // Determine how user is using CheckOutActivity.
