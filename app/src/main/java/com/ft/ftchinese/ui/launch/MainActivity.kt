@@ -1,4 +1,4 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui.launch
 
 import android.app.*
 import android.content.ComponentName
@@ -16,6 +16,9 @@ import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.ft.ftchinese.BuildConfig
+import com.ft.ftchinese.R
+import com.ft.ftchinese.TestActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isActiveNetworkWifi
 import com.ft.ftchinese.ui.base.isNetworkConnected
@@ -39,7 +42,6 @@ import com.ft.ftchinese.ui.channel.TabPagerAdapter
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
-import com.ft.ftchinese.ui.splash.SplashViewModel
 import com.ft.ftchinese.util.*
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout

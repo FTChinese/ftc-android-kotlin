@@ -1,17 +1,17 @@
-package com.ft.ftchinese
+package com.ft.ftchinese.ui.launch
 
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModelProvider
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.channel.ChannelActivity
-import com.ft.ftchinese.ui.splash.SplashViewModel
 import com.ft.ftchinese.util.FileCache
 import kotlinx.android.synthetic.main.activity_splash.*
 import kotlinx.android.synthetic.main.activity_splash.ad_image

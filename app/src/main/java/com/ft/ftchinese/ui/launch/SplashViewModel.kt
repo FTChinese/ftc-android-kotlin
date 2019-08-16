@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.splash
+package com.ft.ftchinese.ui.launch
 
 import android.net.Uri
 import androidx.lifecycle.MutableLiveData

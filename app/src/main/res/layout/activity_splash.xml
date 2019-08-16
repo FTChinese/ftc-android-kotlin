@@ -5,7 +5,7 @@
     android:id="@+id/ad_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".SplashActivity">
+    tools:context=".ui.launch.SplashActivity">
 
     <ImageView
         android:id="@+id/ad_image"
