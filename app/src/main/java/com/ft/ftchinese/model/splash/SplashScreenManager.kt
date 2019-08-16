@@ -1,11 +1,10 @@
 package com.ft.ftchinese.model.splash
 
 import android.content.Context
-import com.ft.ftchinese.model.order.Tier
+import androidx.core.content.edit
 import com.ft.ftchinese.util.formatLocalDate
 import com.ft.ftchinese.util.parseLocalDate
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.threeten.bp.LocalDate
 
 const val SPLASH_SCHEDULE_FILE = "splash_schedule.json"
@@ -24,27 +23,31 @@ private const val PREF_WEIGHT = "weight"
 private const val PREF_DATE = "date"
 
 class SplashScreenManager(context: Context) : AnkoLogger {
-    private val filesDir = context.filesDir
+//    private val filesDir = context.filesDir
     private val sharedPreferences = context.getSharedPreferences(SPLASH_AD_PREF_NAME, Context.MODE_PRIVATE)
 
+    /**
+     * Save ScreenAd to be used upon app launch next time.
+     */
     fun save(ad: ScreenAd, date: LocalDate) {
-        val editor = sharedPreferences.edit()
-
-        editor.putString(PREF_TYPE, ad.type)
-        editor.putString(PREF_TITLE, ad.title)
-        editor.putString(PREF_IMAGE_URL, ad.imageUrl)
-        editor.putString(PREF_LINK_URL, ad.linkUrl)
-        editor.putString(PREF_IMPRESSION_URL_1, ad.impressionUrl1)
-        editor.putString(PREF_IMPRESSION_URL_2, ad.impressionUrl2)
-        editor.putString(PREF_IMPRESSION_URL_3, ad.impressionUrl3)
-        editor.putString(PREF_TARGET_USER, ad.targetUser)
-        editor.putStringSet(PREF_SCHEDULED_ON, ad.scheduledOn.toSet())
-        editor.putString(PREF_WEIGHT, ad.weight)
-        editor.putString(PREF_DATE, formatLocalDate(date))
-
-        editor.apply()
+        sharedPreferences.edit {
+            putString(PREF_TYPE, ad.type)
+            putString(PREF_TITLE, ad.title)
+            putString(PREF_IMAGE_URL, ad.imageUrl)
+            putString(PREF_LINK_URL, ad.linkUrl)
+            putString(PREF_IMPRESSION_URL_1, ad.impressionUrl1)
+            putString(PREF_IMPRESSION_URL_2, ad.impressionUrl2)
+            putString(PREF_IMPRESSION_URL_3, ad.impressionUrl3)
+            putString(PREF_TARGET_USER, ad.targetUser)
+            putStringSet(PREF_SCHEDULED_ON, ad.scheduledOn.toSet())
+            putString(PREF_WEIGHT, ad.weight)
+            putString(PREF_DATE, formatLocalDate(date))
+        }
     }
 
+    /**
+     * Load a single ScreenAd saved last time.
+     */
     fun load(): ScreenAd? {
 
         val imageUrl = sharedPreferences.getString(PREF_IMAGE_URL, null) ?: return null
@@ -78,27 +81,5 @@ class SplashScreenManager(context: Context) : AnkoLogger {
         ad.date = parseLocalDate(dateStr)
 
         return ad
-    }
-
-    /**
-     * prepareNextRound selects a ScreenAd randomly and save it to preferences
-     * to be used the next time app launches.
-     */
-    fun prepareNextRound(sch: Schedule?, tier: Tier?) {
-        if (sch == null) {
-            return
-        }
-
-        val todayAds = sch.findToday(tier)
-
-        info("Today's ads: $todayAds")
-
-        val screenAd = todayAds.pickRandom() ?: return
-
-        info("Selected a random ad")
-
-        save(screenAd, todayAds.date)
-
-        screenAd.downloadImage(filesDir)
     }
 }
