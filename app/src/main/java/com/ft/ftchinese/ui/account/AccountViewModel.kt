@@ -7,15 +7,16 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.ui.base.StringResult
+import com.ft.ftchinese.ui.launch.AvatarResult
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.ClientError
-import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.FileCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import java.io.ByteArrayInputStream
 
 class AccountViewModel : ViewModel(), AnkoLogger {
 
@@ -26,8 +27,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     private val _accountRefreshed = MutableLiveData<AccountResult>()
     val accountRefreshed: LiveData<AccountResult> = _accountRefreshed
 
-    private val _avatarResult = MutableLiveData<ImageResult>()
-    val avatarResult: LiveData<ImageResult> = _avatarResult
+    val avatarRetrieved = MutableLiveData<AvatarResult>()
 
     private val _wxRefreshResult = MutableLiveData<WxRefreshResult>()
     val wxRefreshResult: LiveData<WxRefreshResult> = _wxRefreshResult
@@ -106,31 +106,71 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         }
     }
 
+    fun loadWxAvatar(cache: FileCache, wechat: Wechat, online: Boolean) {
+        if (wechat.isEmpty) {
+            return
+        }
+
+        viewModelScope.launch {
+            val fileInput = withContext(Dispatchers.IO) {
+                cache.readBinaryFile(WX_AVATAR_NAME)
+            }
+
+            if (fileInput != null) {
+                avatarRetrieved.value = AvatarResult(
+                        success = fileInput
+                )
+                return@launch
+            }
+
+            if (!online) {
+                return@launch
+            }
+
+            try {
+                val bytes = withContext(Dispatchers.IO) {
+                    wechat.retrieveAvatar()
+                } ?: return@launch
+
+                avatarRetrieved.value = AvatarResult(
+                        success = ByteArrayInputStream(bytes)
+                )
+
+                // Cache it.
+                withContext(Dispatchers.IO) {
+                    cache.writeBinaryFile(WX_AVATAR_NAME, bytes)
+                }
+
+            } catch (e: Exception) {
+                avatarRetrieved.value = AvatarResult(
+                        exception = e
+                )
+            }
+        }
+    }
+
     fun fetchWxAvatar(cache: FileCache, wechat: Wechat) {
-        val url = wechat.avatarUrl ?:  return
+
         viewModelScope.launch {
             try {
                 val bytes = withContext(Dispatchers.IO) {
-                    Fetch()
-                            .get(url)
-                            .download()
-                }
+                    wechat.retrieveAvatar()
+                } ?: return@launch
 
-                _avatarResult.value = ImageResult(
-                        success = bytes
+                avatarRetrieved.value = AvatarResult(
+                        success = ByteArrayInputStream(bytes)
                 )
 
-                if (bytes == null) {
-                    return@launch
+                withContext(Dispatchers.IO) {
+                    cache.writeBinaryFile(
+                            WX_AVATAR_NAME,
+                            bytes
+                    )
                 }
-
-                cache.writeBinaryFile(
-                        WX_AVATAR_NAME,
-                        bytes
-                )
 
             } catch (e: Exception) {
-                _avatarResult.value = ImageResult(
+
+                avatarRetrieved.value = AvatarResult(
                         exception = e
                 )
             }
