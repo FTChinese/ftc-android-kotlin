@@ -86,6 +86,10 @@
                 android:layout_height="wrap_content"
                 android:text="Bottom sheet dialog"/>
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -119,7 +123,7 @@
         android:layout_height="match_parent"
         android:padding="16dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
-        app:behavior_hideable="false"
+        app:behavior_hideable="true"
         android:background="@color/colorWheat"
         android:elevation="8dp">
 
