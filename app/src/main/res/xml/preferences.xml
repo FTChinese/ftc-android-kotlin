@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
 
@@ -22,13 +21,21 @@
         app:title="通知"
         app:icon="@drawable/ic_notifications_black_24dp"
         app:summary="接收或关闭通知推送">
-
     </Preference>
+
     <Preference
         app:key="pref_check_version"
         app:title="@string/pref_check_new_version"
         app:icon="@drawable/ic_update_black_24dp"
         app:summary="@string/current_version">
+    </Preference>
+
+    <Preference
+        app:key="pref_release_log"
+        app:title="@string/pref_release_log"
+        app:icon="@drawable/ic_note_black_24dp"
+        app:summary="@string/summary_release_log">
+
     </Preference>
 
 </androidx.preference.PreferenceScreen>
