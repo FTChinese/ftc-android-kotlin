@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.base
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -24,3 +24,4 @@ class SingleLineAdapter(private val rows: Array<String>) :
         holder.textView.text = rows[position]
     }
 }
+
