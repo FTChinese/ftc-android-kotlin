@@ -21,4 +21,23 @@ data class AppRelease(
 
         val creationTime: String
                 get() = createdAt?.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) ?: ""
+
+        val cacheFile: String
+                get() = "release_log_$versionCode.json"
+
+        fun splitBody(): List<String> {
+                return body.split("\n")
+                        .map {
+                                it
+                                        .removePrefix("*")
+                                        .trim()
+                        }
+        }
+
+        companion object {
+
+                @JvmStatic
+                fun currentCacheFile() = "release_log_${BuildConfig.VERSION_CODE}.json"
+        }
+
 }
