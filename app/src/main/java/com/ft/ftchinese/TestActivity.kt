@@ -18,6 +18,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.order.*
@@ -32,6 +33,8 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.BarrierFragment
 import com.ft.ftchinese.ui.article.EXTRA_CHANNEL_ITEM
 import com.ft.ftchinese.ui.article.EXTRA_USE_JSON
+import com.ft.ftchinese.ui.base.ListAdapter
+import com.ft.ftchinese.ui.base.ListItem
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.LatestOrderActivity
 import com.ft.ftchinese.ui.pay.StripeSubActivity
@@ -174,8 +177,24 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         }
 
 
+        rv_list.apply {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(this@TestActivity)
+            adapter = ListAdapter(buildList())
+        }
     }
 
+    private fun buildList(): List<ListItem> {
+        val items = mutableListOf<ListItem>()
+        for (i in 1..10) {
+            items.add(ListItem(
+                    primaryText = "Primary $i",
+                    secondaryText = "Secondary $i"
+            ))
+        }
+
+        return items
+    }
 
     private fun createNotification() {
         val intent = Intent(this, ArticleActivity::class.java).apply {
