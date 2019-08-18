@@ -28,6 +28,7 @@ object NextApi {
     val WX_LINK = "$BASE/user/wx/link"
 
     val latestRelease = "$BASE/apps/android/latest"
+    val releaseOf = "$BASE/apps/android/releases"
 }
 
 object SubscribeApi {
