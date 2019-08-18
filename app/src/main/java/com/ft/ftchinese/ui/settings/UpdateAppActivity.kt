@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.view.View
@@ -17,12 +16,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpdateAppBinding
 import com.ft.ftchinese.model.AppRelease
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.util.RequestCode
@@ -36,9 +37,11 @@ import java.io.File
 private const val PREF_FILE_DOWNLOAD = "app_download"
 private const val PREF_DOWNLOAD_ID = "download_id"
 
-class UpdateAppActivity : AppCompatActivity(), AnkoLogger {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var settingsViewModel: SettingsViewModel
+
     private lateinit var binding: ActivityUpdateAppBinding
     private var release: AppRelease? = null
 
@@ -94,7 +97,7 @@ class UpdateAppActivity : AppCompatActivity(), AnkoLogger {
             val notiId = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -2)
 
             if (savedId == notiId) {
-                alert(Appcompat, R.string.app_download_complte, R.string.title_install) {
+                alert(Appcompat, R.string.app_download_complete, R.string.title_install) {
                     positiveButton(R.string.btn_install) {
                         it.dismiss()
                         startInstall(notiId)
@@ -123,19 +126,6 @@ class UpdateAppActivity : AppCompatActivity(), AnkoLogger {
         }
     }
 
-//    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-//        menuInflater.inflate(R.menu.menu_update_app, menu)
-//        return true
-//    }
-//
-//    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-//        R.id.action_open_download -> {
-//
-//            true
-//        }
-//        else -> super.onOptionsItemSelected(item)
-//    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -156,9 +146,10 @@ class UpdateAppActivity : AppCompatActivity(), AnkoLogger {
         settingsViewModel = ViewModelProvider(this)
                 .get(SettingsViewModel::class.java)
 
-        settingsViewModel.latestReleaseResult.observe(this, Observer{
+        settingsViewModel.releaseResult.observe(this, Observer{
             onLatestRelease(it)
         })
+
 
         if (!isNetworkConnected()) {
             toast(R.string.prompt_no_network)
@@ -171,12 +162,12 @@ class UpdateAppActivity : AppCompatActivity(), AnkoLogger {
         settingsViewModel.checkLatestRelease()
     }
 
-    private fun onLatestRelease(result: LatestReleaseResult?) {
+    private fun onLatestRelease(result: ReleaseResult?) {
 
         showProgress(false)
 
         if (result == null) {
-            toast(R.string.no_new_release)
+            toast(R.string.release_not_found)
             return
         }
 
@@ -191,13 +182,20 @@ class UpdateAppActivity : AppCompatActivity(), AnkoLogger {
         }
 
         if (result.success == null) {
-            toast(R.string.no_new_release)
+            toast(R.string.release_not_found)
             return
         }
 
         release = result.success
         binding.release = release
 
+        if (!result.success.isNew) {
+            return
+        }
+
+        supportFragmentManager.commit {
+            replace(R.id.release_detail, ReleaseLogFragment.newInstance())
+        }
 
         btn_start_download.setOnClickListener {
             if (requestPermission()) {
