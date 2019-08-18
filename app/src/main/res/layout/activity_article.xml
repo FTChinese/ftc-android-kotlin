@@ -63,15 +63,6 @@
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
 
-<!--    <com.google.android.material.bottomappbar.BottomAppBar-->
-<!--        android:id="@+id/bottom_bar"-->
-<!--        style="@style/Widget.MaterialComponents.BottomAppBar"-->
-<!--        android:backgroundTint="@color/colorPaper"-->
-<!--        app:hideOnScroll="true"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_gravity="bottom"/>-->
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_bookmark"
         android:layout_width="wrap_content"
