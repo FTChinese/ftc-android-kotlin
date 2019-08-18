@@ -11,6 +11,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.ui.base.AccountRowType
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
