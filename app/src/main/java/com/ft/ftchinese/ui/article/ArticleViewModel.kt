@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.ui.base.ShareItem
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.util.json
