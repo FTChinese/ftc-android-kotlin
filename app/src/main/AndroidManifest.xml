@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.ft.ftchinese">
 
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- Required by zhifubao -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- To auto-complete the email text field in the login form with the user's emails -->
@@ -11,6 +10,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="false"
@@ -23,31 +24,10 @@
         tools:ignore="GoogleAppIndexingWarning">
 
 
-        <provider
-            android:name="androidx.core.content.FileProvider"
-            android:authorities="com.ft.ftchinese.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/file_paths" />
-        </provider>
-
         <activity
             android:name=".TestActivity"
             android:label="Test"
             android:parentActivityName=".ui.launch.MainActivity" />
-
-        <service
-            android:name=".service.NewsMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-        <service
-            android:name=".service.PollService"
-            android:label="Poll Service" />
 
         <activity
             android:name=".ui.launch.SplashActivity"
@@ -60,12 +40,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".ui.launch.MainActivity"
             android:configChanges="orientation"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"/>
-
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ui.channel.SearchableActivity"
             android:launchMode="singleTop"
@@ -78,6 +58,7 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
+
         <activity
             android:name=".ui.channel.ChannelActivity"
             android:parentActivityName=".ui.launch.MainActivity" />
@@ -127,8 +108,6 @@
             android:name=".ui.pay.MemberActivity"
             android:label="@string/title_my_subs"
             android:parentActivityName=".ui.launch.MainActivity" />
-
-
         <activity
             android:name=".ui.pay.PaywallActivity"
             android:label="@string/title_subscription"
@@ -185,7 +164,6 @@
         <activity
             android:name=".ui.pay.LatestOrderActivity"
             android:label="@string/title_latest_order" />
-
         <activity
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/action_settings"
@@ -193,7 +171,32 @@
         <activity
             android:name=".ui.settings.UpdateAppActivity"
             android:label="@string/pref_check_new_version"
+            android:parentActivityName=".ui.settings.SettingsActivity" />
+        <activity
+            android:name=".ui.settings.CurrentReleaseActivity"
+            android:label="@string/pref_release_log"
             android:parentActivityName=".ui.settings.SettingsActivity"/>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.ft.ftchinese.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+        <service
+            android:name=".service.NewsMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".service.PollService"
+            android:label="Poll Service" />
     </application>
+
 
 </manifest>
