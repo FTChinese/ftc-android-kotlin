@@ -7,7 +7,6 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadingHistoryDao
 import com.ft.ftchinese.model.AppRelease
-import com.ft.ftchinese.ui.settings.LatestReleaseResult
 import com.ft.ftchinese.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,7 +22,8 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
     val articlesReadResult = MutableLiveData<Int>()
     val articlesClearedResult = MutableLiveData<Boolean>()
 
-    val latestReleaseResult = MutableLiveData<LatestReleaseResult>()
+    val cachedReleaseFound = MutableLiveData<Boolean>()
+    val releaseResult = MutableLiveData<ReleaseResult>()
 
     fun calculateCacheSize(cache: FileCache) {
         viewModelScope.launch {
@@ -70,33 +70,104 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun checkLatestRelease() {
+    fun loadCachedRelease(cache: FileCache) {
         viewModelScope.launch {
             try {
-                val latest = withContext(Dispatchers.IO) {
-                    fetchLatestRelease()
+                val release = withContext(Dispatchers.IO) {
+                    val text = cache.loadText(AppRelease.currentCacheFile())
+
+                    if (text == null) {
+                        null
+                    } else {
+                        json.parse<AppRelease>(text)
+                    }
                 }
 
-                latestReleaseResult.value = LatestReleaseResult(
-                        success = latest
+                if (release != null) {
+                    cachedReleaseFound.value = true
+
+                    releaseResult.value = ReleaseResult(
+                            success = release
+                    )
+
+                    return@launch
+                }
+
+                cachedReleaseFound.value = false
+            } catch (e: Exception) {
+                cachedReleaseFound.value = false
+            }
+        }
+    }
+
+    fun fetchRelease(cache: FileCache, versionName: String) {
+        viewModelScope.launch {
+            try {
+                val text = withContext(Dispatchers.IO) {
+                    retrieveRelease(versionName)
+                }
+
+                if (text == null) {
+                    releaseResult.value = ReleaseResult(
+                            error = R.string.release_not_found
+                    )
+
+                    return@launch
+                }
+
+
+                releaseResult.value = ReleaseResult(
+                        success = json.parse<AppRelease>(text)
                 )
 
+                withContext(Dispatchers.IO) {
+                    cache.saveText(AppRelease.currentCacheFile(), text)
+                }
+
             } catch (e: ClientError) {
-                latestReleaseResult.value = LatestReleaseResult(
+                releaseResult.value = ReleaseResult(
                         error = if (e.statusCode == 404) {
-                            R.string.not_found_latest_app
+                            R.string.release_not_found
                         } else null,
                         exception = e
                 )
             } catch (e: Exception) {
-                latestReleaseResult.value = LatestReleaseResult(
+                releaseResult.value = ReleaseResult(
                         exception = e
                 )
             }
         }
     }
 
-    private fun fetchLatestRelease(): AppRelease? {
+    private fun retrieveRelease(versionName: String): String? {
+        val (_, body) = Fetch()
+                .setAppId()
+                .get("${NextApi.releaseOf}/v$versionName")
+                .responseApi()
+
+        return body
+    }
+
+    fun checkLatestRelease() {
+        viewModelScope.launch {
+            try {
+                val release = withContext(Dispatchers.IO) {
+                    retrieveLatestRelease()
+                }
+
+                releaseResult.value = ReleaseResult(
+                        success = release
+                )
+
+            } catch (e: Exception) {
+                releaseResult.value = ReleaseResult(
+                        exception = e
+                )
+            }
+        }
+    }
+
+    private fun retrieveLatestRelease(): AppRelease? {
         val (_, body) = Fetch()
                 .setAppId()
                 .get(NextApi.latestRelease)
