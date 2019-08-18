@@ -1,9 +1,7 @@
 package com.ft.ftchinese.ui.settings
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
