@@ -3,15 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.ft.ftchinese">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- Required by zhifubao -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- To auto-complete the email text field in the login form with the user's emails -->
     <!-- Required by zhifubao -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="false"
@@ -23,12 +23,10 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
 
-
         <activity
             android:name=".TestActivity"
             android:label="Test"
             android:parentActivityName=".ui.launch.MainActivity" />
-
         <activity
             android:name=".ui.launch.SplashActivity"
             android:configChanges="orientation"
@@ -40,7 +38,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.launch.MainActivity"
             android:configChanges="orientation"
@@ -58,7 +55,6 @@
                 android:name="android.app.searchable"
                 android:resource="@xml/searchable" />
         </activity>
-
         <activity
             android:name=".ui.channel.ChannelActivity"
             android:parentActivityName=".ui.launch.MainActivity" />
@@ -168,6 +164,11 @@
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/action_settings"
             android:parentActivityName=".ui.launch.MainActivity" />
+
+        <activity android:name=".ui.settings.FCMActivity"
+            android:label="@string/title_notification_setting"
+            android:parentActivityName=".ui.settings.SettingsActivity"/>
+
         <activity
             android:name=".ui.settings.UpdateAppActivity"
             android:label="@string/pref_check_new_version"
@@ -175,7 +176,7 @@
         <activity
             android:name=".ui.settings.CurrentReleaseActivity"
             android:label="@string/pref_release_log"
-            android:parentActivityName=".ui.settings.SettingsActivity"/>
+            android:parentActivityName=".ui.settings.SettingsActivity" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -186,6 +187,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
         <service
             android:name=".service.NewsMessagingService"
             android:exported="false">
