@@ -21,6 +21,7 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.Permission
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.OnProgressListener
+import com.ft.ftchinese.ui.base.ShareItem
 import com.ft.ftchinese.util.FileCache
 import com.google.android.material.snackbar.Snackbar
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
