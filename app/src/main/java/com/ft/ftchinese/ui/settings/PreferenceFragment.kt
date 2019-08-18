@@ -62,6 +62,13 @@ class PreferenceFragment : PreferenceFragmentCompat(),
         prefNotification = findPreference("pref_notification")
         prefCheckVersion = findPreference("pref_check_version")
 
+        findPreference<Preference>("pref_release_log")?.setOnPreferenceClickListener {
+
+            CurrentReleaseActivity.start(context)
+
+            true
+        }
+
         prefCheckVersion?.summary = getString(R.string.current_version, BuildConfig.VERSION_NAME)
 
         // Show cache size.
