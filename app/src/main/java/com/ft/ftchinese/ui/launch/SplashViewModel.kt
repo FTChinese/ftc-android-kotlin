@@ -79,18 +79,20 @@ class SplashViewModel : ViewModel(), AnkoLogger {
         // 4. Save the selected ScreenAd.
         // 5. Download the image used by this ScreenAd
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                val schedule = loadSchedule(cache, onWifi) ?: return@withContext
+            val screenAd = withContext(Dispatchers.IO) {
+                val schedule = loadSchedule(cache, onWifi) ?: return@withContext null
 
                 val todayAds = schedule.findToday(tier)
-                val screenAd = todayAds.pickRandom() ?: return@withContext
+                todayAds.pickRandom()
+            } ?: return@launch
 
-                screenAdSelected.value = screenAd
+            screenAdSelected.value = screenAd
 
-                if (!onWifi) {
-                    return@withContext
-                }
+            if (!onWifi) {
+                return@launch
+            }
 
+            withContext(Dispatchers.IO) {
                 try {
                     val imageBytes = Fetch()
                             .get(screenAd.imageUrl)
