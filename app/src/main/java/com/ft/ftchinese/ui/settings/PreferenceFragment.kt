@@ -120,12 +120,7 @@ class PreferenceFragment : PreferenceFragmentCompat(),
         }
 
         prefNotification?.setOnPreferenceClickListener {
-            val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
-                putExtra(Settings.EXTRA_APP_PACKAGE, BuildConfig.APPLICATION_ID)
-                putExtra(Settings.EXTRA_CHANNEL_ID, getString(R.string.news_notification_channel_id))
-            }
-
-            startActivity(intent)
+            FCMActivity.start(context)
 
             true
         }
