@@ -12,8 +12,10 @@ import com.ft.ftchinese.databinding.ListItemBinding
 /**
  * Two line list.
  */
-class ListAdapter(private var rows: List<ListItem>) :
+class ListAdapter(rows: List<ListItem>) :
         RecyclerView.Adapter<ListAdapter.ViewHolder>() {
+
+    private var items: MutableList<ListItem> = rows.toMutableList()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -29,15 +31,24 @@ class ListAdapter(private var rows: List<ListItem>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 
-        holder.bind(rows[position])
+        holder.bind(items[position])
     }
 
 
-    override fun getItemCount() = rows.size
+    override fun getItemCount() = items.size
 
     fun setData(rows: List<ListItem>) {
-        this.rows = rows
+        items = rows.toMutableList()
         notifyDataSetChanged()
+    }
+
+    fun add(item: ListItem) {
+        items.add(item)
+        notifyDataSetChanged()
+    }
+
+    fun clear() {
+        items.clear()
     }
 
     class ViewHolder(
