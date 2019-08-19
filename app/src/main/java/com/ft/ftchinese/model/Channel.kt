@@ -199,9 +199,6 @@ data class ChannelItem(
         return "${type}_$id.json"
     }
 
-    fun cacheNameHtml(): String {
-        return "${type}_$id.html"
-    }
 
     fun permission(): Permission {
 
@@ -269,14 +266,14 @@ data class ChannelItem(
             TYPE_INTERACTIVE -> when (subType) {
                 //"https://api003.ftmailbox.com/$type/$id?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes"
                 SUB_TYPE_RADIO -> "$MAILBOX_URL/$type/$id?bodyonly=yes&webview=ftcapp&001&exclusive&android=${BuildConfig.VERSION_CODE}"
-                SUB_TYPE_SPEED_READING -> "$FTC_OFFICIAL_URL/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
+                SUB_TYPE_SPEED_READING -> "$MAILBOX_URL/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
 
-                SUB_TYPE_MBAGYM -> "$FTC_OFFICIAL_URL/$type/$id"
+                SUB_TYPE_MBAGYM -> "$MAILBOX_URL/$type/$id"
 
                 else -> "$MAILBOX_URL/$type/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
             }
 
-            TYPE_VIDEO -> "$FTC_OFFICIAL_URL/$type/$id?bodyonly=yes&webview=ftcapp&004"
+            TYPE_VIDEO -> "$MAILBOX_URL/$type/$id?bodyonly=yes&webview=ftcapp&004"
 
             else -> "$MAILBOX_URL/$type/$id?webview=ftcapp"
         }
