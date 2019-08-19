@@ -18,9 +18,9 @@
 
     <Preference
         app:key="pref_notification"
-        app:title="@string/pref_notification"
+        app:title="@string/fcm_pref"
         app:icon="@drawable/ic_notifications_black_24dp"
-        app:summary="@string/summary_notification">
+        app:summary="@string/fcm_summary">
     </Preference>
 
     <Preference
