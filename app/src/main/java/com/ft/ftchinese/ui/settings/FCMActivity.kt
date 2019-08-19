@@ -19,8 +19,6 @@ import com.google.firebase.iid.FirebaseInstanceId
 import kotlinx.android.synthetic.main.activity_fcm.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.jetbrains.anko.info
 
 class FCMActivity : AppCompatActivity(), AnkoLogger {
@@ -46,6 +44,8 @@ class FCMActivity : AppCompatActivity(), AnkoLogger {
             adapter = listAdapter
         }
 
+        // See https://developer.android.com/training/notify-user/channels#UpdateChannel
+        // Open settings for a specific channel
         tv_notification_setting.setOnClickListener {
             val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
                 putExtra(Settings.EXTRA_APP_PACKAGE, BuildConfig.APPLICATION_ID)
@@ -81,7 +81,7 @@ class FCMActivity : AppCompatActivity(), AnkoLogger {
             )
         } else {
             ListItem(
-                    primaryText = getString(R.string.play_server_not_available),
+                    primaryText = getString(R.string.play_service_not_available),
                     startIconRes = R.drawable.ic_error_outline_claret_24dp
             )
         }

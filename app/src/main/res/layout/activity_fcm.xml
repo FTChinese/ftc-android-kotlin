@@ -16,14 +16,14 @@
         android:layout_marginTop="16dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
         app:layout_constraintTop_toBottomOf="@+id/toolbar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
         android:background="@color/colorBlack5"
-        android:text="@string/open_system_setting" />
+        android:text="@string/channel_setting_news" />
 
     <TextView
         android:id="@+id/tv_check_fcm"
@@ -33,7 +33,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:lineSpacingExtra="8sp"
-        android:text="@string/check_notification_guide"
+        android:text="@string/fcm_check_guide"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_notification_setting" />
@@ -46,7 +46,7 @@
         app:layout_constraintTop_toBottomOf="@id/tv_check_fcm"
         app:layout_constraintStart_toStartOf="@id/tv_check_fcm"
         app:layout_constraintEnd_toEndOf="@id/tv_check_fcm"
-        android:text="开始检测"/>
+        android:text="@string/fcm_start_checking"/>
 
     <ProgressBar
         android:id="@+id/progress_bar"
