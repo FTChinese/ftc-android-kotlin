@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.channel
 
+import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -62,12 +63,25 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
         /**
          * Start [ChannelActivity] based on values passed from JS.
          */
+        @JvmStatic
         fun start(context: Context?, page: ChannelSource) {
             val intent = Intent(context, ChannelActivity::class.java).apply {
                 putExtra(EXTRA_PAGE_META, page)
             }
 
             context?.startActivity(intent)
+        }
+
+        @JvmStatic
+        fun startWithParentStack(context: Context, page: ChannelSource) {
+            val intent = Intent(context, ChannelActivity::class.java).apply {
+                putExtra(EXTRA_PAGE_META, page)
+            }
+
+            TaskStackBuilder
+                    .create(context)
+                    .addNextIntentWithParentStack(intent)
+                    .startActivities()
         }
     }
 }

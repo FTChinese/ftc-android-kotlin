@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.core.app.TaskStackBuilder
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -326,6 +327,19 @@ class ArticleActivity : ScopedAppActivity(),
             context?.startActivity(intent)
         }
 
+        @JvmStatic
+        fun startWithParentStack(context: Context, channelItem: ChannelItem) {
+            val intent = Intent(context, ArticleActivity::class.java).apply {
+                putExtra(EXTRA_CHANNEL_ITEM, channelItem)
+                putExtra(EXTRA_USE_JSON, true)
+            }
+
+            TaskStackBuilder
+                    .create(context)
+                    .addNextIntentWithParentStack(intent)
+                    .startActivities()
+        }
+
         /**
          * Load a web page based on HTML fragment.
          */
@@ -339,6 +353,21 @@ class ArticleActivity : ScopedAppActivity(),
             }
 
             context?.startActivity(intent)
+        }
+
+        @JvmStatic
+        fun startWebWithParentStack(context: Context, channelItem: ChannelItem) {
+            channelItem.isWebpage = true
+
+            val intent = Intent(context, ArticleActivity::class.java).apply {
+                putExtra(EXTRA_CHANNEL_ITEM, channelItem)
+                putExtra(EXTRA_USE_JSON, false)
+            }
+
+            TaskStackBuilder
+                    .create(context)
+                    .addNextIntentWithParentStack(intent)
+                    .startActivities()
         }
     }
 }
