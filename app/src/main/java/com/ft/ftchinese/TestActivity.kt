@@ -1,13 +1,12 @@
 package com.ft.ftchinese
 
-import android.app.Dialog
-import android.app.DownloadManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.view.Menu
@@ -18,7 +17,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.order.*
@@ -33,8 +31,6 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.BarrierFragment
 import com.ft.ftchinese.ui.article.EXTRA_CHANNEL_ITEM
 import com.ft.ftchinese.ui.article.EXTRA_USE_JSON
-import com.ft.ftchinese.ui.base.ListAdapter
-import com.ft.ftchinese.ui.base.ListItem
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.LatestOrderActivity
 import com.ft.ftchinese.ui.pay.StripeSubActivity
@@ -107,6 +103,27 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             install()
         }
 
+        create_channel.setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channelId = getString(R.string.news_notification_channel_id)
+                val channelName = getString(R.string.news_notification_channel_name)
+                val channelDesc = getString(R.string.news_notification_channel_description)
+
+                val channel = NotificationChannel(
+                        channelId,
+                        channelName,
+                        NotificationManager.IMPORTANCE_DEFAULT
+                ).apply {
+                    description = channelDesc
+                }
+
+                val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.createNotificationChannel(channel)
+
+                toast("$channelName created")
+            }
+        }
+
         create_notification.setOnClickListener {
             createNotification()
         }
@@ -118,6 +135,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             }
         }
 
+        // Subscribe a topic.
         subscribeButton.setOnClickListener {
             info("Subscribing to news topic")
 
@@ -133,6 +151,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                     }
         }
 
+        // Retrieve registration token.
         logTokenButton.setOnClickListener {
             FirebaseInstanceId
                     .getInstance()
@@ -159,6 +178,17 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             }
         }
 
+        download_google_play.setOnClickListener {
+            val googleApiAvailability = GoogleApiAvailability.getInstance()
+
+            googleApiAvailability.makeGooglePlayServicesAvailable(this)
+                    .addOnSuccessListener {
+                        toast("Success")
+                    }
+                    .addOnFailureListener {
+                        toast("Failed")
+                    }
+        }
 
         bottom_bar.replaceMenu(R.menu.activity_test_menu)
         bottom_bar.setOnMenuItemClickListener {
@@ -176,24 +206,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             fab.setImageResource(R.drawable.ic_bookmark_black_24dp)
         }
 
-
-        rv_list.apply {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(this@TestActivity)
-            adapter = ListAdapter(buildList())
-        }
-    }
-
-    private fun buildList(): List<ListItem> {
-        val items = mutableListOf<ListItem>()
-        for (i in 1..10) {
-            items.add(ListItem(
-                    primaryText = "Primary $i",
-                    secondaryText = "Secondary $i"
-            ))
-        }
-
-        return items
     }
 
     private fun createNotification() {
