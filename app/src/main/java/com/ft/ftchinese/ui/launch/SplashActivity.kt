@@ -72,28 +72,29 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
         when (msgType) {
             RemoteMessageType.Story -> {
 
-                ArticleActivity.start(this, ChannelItem(
+                ArticleActivity.startWithParentStack(this, ChannelItem(
                         id = pageId,
                         type = "story",
                         title = ""
                 ))
+
             }
             RemoteMessageType.Video -> {
-                ArticleActivity.startWeb(this, ChannelItem(
+                ArticleActivity.startWebWithParentStack(this, ChannelItem(
                         id = pageId,
                         type = "video",
                         title = ""
                 ))
             }
             RemoteMessageType.Photo -> {
-                ArticleActivity.startWeb(this, ChannelItem(
+                ArticleActivity.startWebWithParentStack(this, ChannelItem(
                         id = pageId,
                         type = "photonews",
                         title = ""
                 ))
             }
             RemoteMessageType.Academy -> {
-                ArticleActivity.startWeb(this, ChannelItem(
+                ArticleActivity.startWebWithParentStack(this, ChannelItem(
                         id = pageId,
                         type = "interactive",
                         title = ""
@@ -103,7 +104,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
 
             }
             RemoteMessageType.Tag -> {
-                ChannelActivity.start(this, ChannelSource(
+                ChannelActivity.startWithParentStack(this, ChannelSource(
                         title = pageId,
                         name = "${msgType}_$pageId",
                         contentUrl = "",
@@ -111,7 +112,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
                 ))
             }
             RemoteMessageType.Channel -> {
-                ChannelActivity.start(this, ChannelSource(
+                ChannelActivity.startWithParentStack(this, ChannelSource(
                         title = pageId,
                         name = "${msgType}_$pageId",
                         contentUrl = "",
