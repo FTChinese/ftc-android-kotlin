@@ -483,7 +483,7 @@
         <item>sc</item>
         <item>tc</item>
     </string-array>
-    <string name="fcm_start_checking">开始检测</string>
+    <string name="fcm_start_checking">检测</string>
 
 
 </resources>
