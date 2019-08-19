@@ -166,7 +166,7 @@
             android:parentActivityName=".ui.launch.MainActivity" />
 
         <activity android:name=".ui.settings.FCMActivity"
-            android:label="@string/title_notification_setting"
+            android:label="@string/fcm_setting_title"
             android:parentActivityName=".ui.settings.SettingsActivity"/>
 
         <activity
@@ -194,6 +194,9 @@
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
+            <meta-data
+                android:name="com.google.firebase.messaging.default_notification_channel_id"
+                android:value="@string/news_notification_channel_id"/>
         </service>
         <service
             android:name=".service.PollService"
