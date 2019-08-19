@@ -6,9 +6,12 @@
 
     <string name="share_template">[FT中文网]%1$s - %2$s</string>
 
+    <!--  Unique id for a channel  -->
     <string name="news_notification_channel_id">fcm_news_channel</string>
+    <!--  User-visible name of this channel  -->
     <string name="news_notification_channel_name">新闻</string>
-    <string name="news_notification_channel_description">最新新闻动态</string>
+    <!--  This is optional  -->
+    <string name="news_notification_channel_description">新闻动态</string>
 
     <!-- Bottom navigation tabs -->
     <string name="nav_news">最新</string>
@@ -387,13 +390,14 @@
     <string name="pref_clear_cache">清除缓存</string>
     <string name="pref_clear_history">清空阅读历史</string>
 
-    <string name="pref_notification">通知</string>
-    <string name="summary_notification">接收或关闭通知推送</string>
-    <string name="title_notification_setting">设置通知推送</string>
-    <string name="open_system_setting">打开系统设置</string>
-    <string name="check_notification_guide">接收通知推送需要您的设备已经安装了Google Play Service并且能够访问Firebase Cloud Messaging服务，您可以点击下方按钮检测是否满足条件</string>
-    <string name="play_service_available">Play Service可用</string>
-    <string name="play_server_not_available">Play Service不可用</string>
+    <string name="fcm_pref">通知推送</string>
+    <string name="fcm_summary">接收或关闭通知推送</string>
+    <string name="fcm_setting_title">推送设置</string>
+    <string name="channel_setting_news">设置新闻频道通知</string>
+    <string name="fcm_check_guide">接收通知推送需要您的设备已经安装了Google Play服务并且能够访问Firebase Cloud Messaging服务，点击下方按钮检测是否满足条件</string>
+    <string name="fcm_start_checking">开始检测</string>
+    <string name="play_service_available">Google Play服务可用</string>
+    <string name="play_service_not_available">Google Play服务不可用，您可以前往应用商店下载</string>
     <string name="fcm_accessible">Firebase Cloud Messaging可以访问</string>
     <string name="fcm_inaccessible">无法访问Firebase Cloud Messaging</string>
 
