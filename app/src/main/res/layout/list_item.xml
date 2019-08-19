@@ -23,7 +23,7 @@
             android:paddingEnd="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_done_black_24dp"/>
+            app:srcCompat="@drawable/ic_done_gray_24dp"/>
 
         <TextView
             android:id="@+id/tv_primary"
