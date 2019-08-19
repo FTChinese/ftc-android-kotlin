@@ -214,7 +214,7 @@ class Story (
         return ""
     }
 
-    fun isMatchInKeysAndBody(sponsor: Sponsor): Boolean {
+    private fun isMatchInKeysAndBody(sponsor: Sponsor): Boolean {
         if (sponsor.storyKeyWords.isBlank()) {
             return false
         }
@@ -233,7 +233,7 @@ class Story (
 
     // HTML for the {related-stories}
     fun htmlForRelatedStories(): String {
-        if (relatedStory == null) {
+        if (relatedStory.isEmpty()) {
             return ""
         }
         val listItems = relatedStory.mapIndexed { index, relatedStory ->
