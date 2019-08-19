@@ -7,17 +7,17 @@ import org.jetbrains.anko.info
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class NewsMessagingService : FirebaseMessagingService(), AnkoLogger {
-    override fun onMessageReceived(remoteMessage: RemoteMessage?) {
+    override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        info("From: ${remoteMessage?.from}")
+        info("From: ${remoteMessage.from}")
 
-        remoteMessage?.data?.isNotEmpty()?.let {
+        remoteMessage.data.isNotEmpty().let {
             info("Message data payload: " + remoteMessage.data)
             handleNow()
         }
 
-        remoteMessage?.notification?.let {
+        remoteMessage.notification?.let {
             info("Title: ${it.title}, Body: ${it.body}")
         }
     }
@@ -26,7 +26,7 @@ class NewsMessagingService : FirebaseMessagingService(), AnkoLogger {
         super.onDeletedMessages()
     }
 
-    override fun onNewToken(token: String?) {
+    override fun onNewToken(token: String) {
         super.onNewToken(token)
 
         info("onNewToken: $token")
@@ -34,9 +34,9 @@ class NewsMessagingService : FirebaseMessagingService(), AnkoLogger {
         sendRegistrationToServer(token)
     }
 
-    private fun scheduleJob() {
-
-    }
+//    private fun scheduleJob() {
+//
+//    }
 
     private fun handleNow() {
 
