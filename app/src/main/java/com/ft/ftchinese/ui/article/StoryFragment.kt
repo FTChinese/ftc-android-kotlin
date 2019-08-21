@@ -218,7 +218,7 @@ class StoryFragment : ScopedFragment(),
 
     private fun load(html: String) {
         web_view.loadDataWithBaseURL(
-                FTC_OFFICIAL_URL,
+                WV_BASE_URL,
                 html,
                 "text/html",
                 null,

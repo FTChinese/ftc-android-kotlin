@@ -5,8 +5,8 @@ import android.os.Parcelable
 import com.beust.klaxon.Json
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.database.StarredArticle
+import com.ft.ftchinese.util.CN_FT
 import com.ft.ftchinese.util.FTC_OFFICIAL_URL
-import com.ft.ftchinese.util.MAILBOX_URL
 import com.ft.ftchinese.util.flavorQuery
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
@@ -259,23 +259,23 @@ data class ChannelItem(
         }
 
         val url =  when(type) {
-            TYPE_STORY, TYPE_PREMIUM -> "$MAILBOX_URL/index.php/jsapi/get_story_more_info/$id"
+            TYPE_STORY, TYPE_PREMIUM -> "$CN_FT/index.php/jsapi/get_story_more_info/$id"
 
-            TYPE_COLUMN -> "$MAILBOX_URL/$type/$id?bodyonly=yes&webview=ftcapp&bodyonly=yes"
+            TYPE_COLUMN -> "$CN_FT/$type/$id?bodyonly=yes&webview=ftcapp&bodyonly=yes"
 
             TYPE_INTERACTIVE -> when (subType) {
                 //"https://api003.ftmailbox.com/$type/$id?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes"
-                SUB_TYPE_RADIO -> "$MAILBOX_URL/$type/$id?bodyonly=yes&webview=ftcapp&001&exclusive&android=${BuildConfig.VERSION_CODE}"
-                SUB_TYPE_SPEED_READING -> "$MAILBOX_URL/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
+                SUB_TYPE_RADIO -> "$CN_FT/$type/$id?bodyonly=yes&webview=ftcapp&001&exclusive&android=${BuildConfig.VERSION_CODE}"
+                SUB_TYPE_SPEED_READING -> "$CN_FT/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
 
-                SUB_TYPE_MBAGYM -> "$MAILBOX_URL/$type/$id"
+                SUB_TYPE_MBAGYM -> "$CN_FT/$type/$id"
 
-                else -> "$MAILBOX_URL/$type/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
+                else -> "$CN_FT/$type/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
             }
 
-            TYPE_VIDEO -> "$MAILBOX_URL/$type/$id?bodyonly=yes&webview=ftcapp&004"
+            TYPE_VIDEO -> "$CN_FT/$type/$id?bodyonly=yes&webview=ftcapp&004"
 
-            else -> "$MAILBOX_URL/$type/$id?webview=ftcapp"
+            else -> "$CN_FT/$type/$id?webview=ftcapp"
         }
 
         val queryValue = flavorQuery[BuildConfig.FLAVOR]

@@ -7,7 +7,7 @@ object NextApi {
         "http://192.168.10.195:8000"
 //        "http://user.ftmailbox.com/v1"
     } else {
-        "http://user.ftmailbox.com/v1"
+        "http://user.ftchinese.org/v1"
     }
     val EMAIL_EXISTS = "$BASE/users/exists"
     val LOGIN = "$BASE/users/login"
@@ -56,11 +56,16 @@ object SubscribeApi {
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
 
 const val FTC_OFFICIAL_URL = "http://www.ftchinese.com"
+const val CN_FT = "https://cn.ft.com"
 
-const val MAILBOX_URL = "https://api003.ftmailbox.com"
+//const val MAILBOX_URL = "https://api003.ftmailbox.com"
+
+
+const val WV_BASE_URL = CN_FT
 
 const val HOST_FTC = "www.ftchinese.com"
-const val HOST_MAILBOX = "api003.ftmailbox.com"
+//const val HOST_FT = "api003.ftmailbox.com"
+const val HOST_FT = "cn.ft.com"
 const val HOST_FTA = "www.ftacademy.cn"
 
 val flavorQuery = mapOf(

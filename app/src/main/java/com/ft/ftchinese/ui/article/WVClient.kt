@@ -23,7 +23,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-val hostNames = arrayOf(HOST_FTC, HOST_MAILBOX)
+val hostNames = arrayOf(HOST_FTC, HOST_FT)
 
 /**
  * Those links need to start a ChannelActivity.
@@ -229,7 +229,7 @@ open class WVClient(
                     return handleInSiteLink(uri)
                 }
                 return when (uri.host) {
-                    HOST_FTC, HOST_MAILBOX -> handleInSiteLink(uri)
+                    HOST_FTC, HOST_FT -> handleInSiteLink(uri)
                     HOST_FTA -> handleFtaLink(uri)
                     else -> handleExternalLink(uri)
                 }
@@ -565,7 +565,7 @@ open class WVClient(
     private fun buildUrlForFullPage(uri: Uri): String {
         val builder = uri.buildUpon()
                 .scheme("https")
-                .authority(HOST_MAILBOX)
+                .authority(HOST_FT)
 
         if (uri.getQueryParameter("webview") == null) {
             builder.appendQueryParameter("webview", "ftcapp")
@@ -577,7 +577,7 @@ open class WVClient(
     private fun buildUrlForFragment(uri: Uri, path: String? = null): String {
         val builder =  uri.buildUpon()
                 .scheme("https")
-                .authority(HOST_MAILBOX)
+                .authority(HOST_FT)
 
         if (uri.getQueryParameter("bodyonly") == null) {
             builder.appendQueryParameter("bodyonly", "yes")
