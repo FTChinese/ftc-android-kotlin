@@ -52,7 +52,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
             putString(PREF_EMAIL, account.email)
             putBoolean(PREF_IS_VERIFIED, account.isVerified)
             putString(PREF_AVATAR_URL, account.avatarUrl)
-            putBoolean(PREF_IS_VIP, account.isVip)
+
             putString(PREF_WX_NICKNAME, account.wechat.nickname)
             putString(PREF_WX_AVATAR, account.wechat.avatarUrl)
             putString(PREF_MEMBER_ID, account.membership.id)
@@ -62,6 +62,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
             putString(PREF_PAY_METHOD, account.membership.payMethod.toString())
             putBoolean(PREF_AUTO_RENEW, account.membership.autoRenew ?: false)
             putString(PREF_SUB_STATUS, account.membership.status.toString())
+            putBoolean(PREF_IS_VIP, account.membership.vip)
             putString(PREF_LOGIN_METHOD, account.loginMethod?.string())
             putBoolean(PREF_IS_LOGGED_IN, true)
         }
@@ -107,7 +108,8 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
                 expireDate = parseLocalDate(expireDate),
                 payMethod = PayMethod.fromString(payMethod),
                 autoRenew = autoRenew,
-                status = StripeSubStatus.fromString(status)
+                status = StripeSubStatus.fromString(status),
+                vip = isVip
         )
 
         val wechat = Wechat(
