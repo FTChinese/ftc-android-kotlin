@@ -64,6 +64,7 @@ class WxInfoFragment : ScopedFragment(),
         } ?: throw Exception("Invalid Exception")
 
 
+
         // Check whether we could refresh wechat user info.
         // If refresh token is not expired, we'll start
         // refresh user's full account data.
@@ -161,45 +162,51 @@ class WxInfoFragment : ScopedFragment(),
             )
         })
 
+        swipe_refresh.setOnRefreshListener {
+            onRefresh()
+        }
+
         val acnt = sessionManager.loadAccount() ?: return
 
-        if (acnt.isWxOnly) {
-            swipe_refresh.setOnRefreshListener {
-                val account = sessionManager.loadAccount()
+        accountViewModel.loadWxAvatar(
+                cache,
+                acnt.wechat,
+                activity?.isNetworkConnected() == true
+        )
+    }
 
-                if (account == null) {
-                    toast("Account not found")
-                    stopRefreshing()
-                    return@setOnRefreshListener
-                }
+    private fun onRefresh() {
+        val account = sessionManager.loadAccount()
 
-                if (activity?.isNetworkConnected() != true) {
-                    toast(R.string.prompt_no_network)
-                    stopRefreshing()
-                    return@setOnRefreshListener
-                }
-
-                val wxSession = sessionManager.loadWxSession()
-                if (wxSession == null) {
-                    // If a linked user logged in, the WxSession
-                    // data will be definitely not existed.
-                    // In such case, show the re-authorization dialog.
-                    accountViewModel.showReAuth()
-                    stopRefreshing()
-                    return@setOnRefreshListener
-                }
-
-                toast(R.string.refreshing_account)
-
-                accountViewModel.refreshWxInfo(wxSession)
-                accountViewModel.fetchWxAvatar(
-                        cache,
-                        acnt.wechat
-                )
-            }
-        } else {
-            swipe_refresh.isEnabled = false
+        if (account == null) {
+            toast("Account not found")
+            stopRefreshing()
+            return
         }
+
+        if (activity?.isNetworkConnected() != true) {
+            toast(R.string.prompt_no_network)
+            stopRefreshing()
+            return
+        }
+
+        val wxSession = sessionManager.loadWxSession()
+        if (wxSession == null) {
+            // If a linked user logged in, the WxSession
+            // data will be definitely not existed.
+            // In such case, show the re-authorization dialog.
+            accountViewModel.showReAuth()
+            stopRefreshing()
+            return
+        }
+
+        toast(R.string.refreshing_account)
+
+        accountViewModel.refreshWxInfo(wxSession)
+        accountViewModel.fetchWxAvatar(
+                cache,
+                account.wechat
+        )
     }
 
     private fun initUI() {
@@ -211,6 +218,11 @@ class WxInfoFragment : ScopedFragment(),
         }
 
         info("Show wechat acount: $account")
+
+        // Enable swipe refresh for wechat-only account
+        // since it is too complex to check whether
+        // Wechat OAuth expired if the account is linked.
+        swipe_refresh.isEnabled = account.isWxOnly
 
         if (account.wechat.isEmpty) {
             toast(R.string.wechat_not_found)
@@ -234,11 +246,7 @@ class WxInfoFragment : ScopedFragment(),
             }
         }
 
-        accountViewModel.loadWxAvatar(
-                cache,
-                account.wechat,
-                activity?.isNetworkConnected() == true
-        )
+
     }
 
     companion object {
