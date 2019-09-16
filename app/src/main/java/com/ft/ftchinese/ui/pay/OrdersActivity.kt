@@ -83,7 +83,7 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
                 handleApiError(e)
             } catch (e: Exception) {
                 showProgress(false)
-                handleException(e)
+                toast(parseException(e))
             }
         }
     }

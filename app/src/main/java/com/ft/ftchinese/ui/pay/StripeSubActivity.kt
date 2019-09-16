@@ -177,7 +177,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
         if (result.exception != null) {
             showProgress(false)
-            handleException(result.exception)
+            toast(parseException(result.exception))
             return
         }
 
@@ -621,7 +621,7 @@ class StripeSubActivity : ScopedAppActivity(),
         }
 
         if (accountResult.exception != null) {
-            handleException(accountResult.exception)
+            toast(parseException(accountResult.exception))
             return
         }
 

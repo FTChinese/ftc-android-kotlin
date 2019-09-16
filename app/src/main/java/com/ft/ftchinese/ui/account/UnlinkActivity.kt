@@ -9,11 +9,11 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.model.order.PayMethod
+import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_unlink.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -67,7 +67,7 @@ class UnlinkActivity : AppCompatActivity() {
             }
 
             if (unlinkResult.exception != null) {
-                handleException(unlinkResult.exception)
+                toast(parseException(unlinkResult.exception))
                 unlink_button.isEnabled = true
                 return@Observer
             }
@@ -100,7 +100,7 @@ class UnlinkActivity : AppCompatActivity() {
             }
 
             if (accountResult.exception != null) {
-                handleException(accountResult.exception)
+                toast(parseException(accountResult.exception))
                 return@Observer
             }
 

@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.*
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.pay.grantPermission
-import com.ft.ftchinese.ui.base.handleException
+import com.ft.ftchinese.ui.base.showException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.reader.SessionManager
@@ -202,7 +202,7 @@ class ChannelFragment : ScopedFragment(),
 
             if (htmlResult.exception != null) {
                 showProgress(false)
-                activity?.handleException(htmlResult.exception)
+                activity?.showException(htmlResult.exception)
                 return@Observer
             }
 

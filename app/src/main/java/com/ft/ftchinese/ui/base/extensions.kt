@@ -160,23 +160,9 @@ fun Activity.handleApiError(resp: ClientError) {
     toast(msg)
 }
 
-fun Activity.handleException(e: Exception) {
-    val msg = when (e) {
-        is IllegalStateException -> {
-            getString(R.string.api_empty_url)
-        }
-        is NetworkException -> {
-            getString(R.string.api_network_failure)
-        }
-        is IOException -> {
-           getString(R.string.api_io_error)
-        }
-        else -> {
-            e.toString()
-        }
-    }
+fun Activity.showException(e: Exception) {
 
-    toast(msg)
+    toast(parseException(e))
 }
 
 fun Activity.parseException(e: Exception): String {
@@ -191,9 +177,9 @@ fun Activity.parseException(e: Exception): String {
             getString(R.string.api_io_error)
         }
         else -> {
-            e.message ?: getString(R.string.error_unknown)
+            e.message
         }
-    }
+    } ?: getString(R.string.error_unknown)
 }
 
 /**

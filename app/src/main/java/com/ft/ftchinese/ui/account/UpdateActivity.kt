@@ -9,9 +9,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.AccountRowType
+import com.ft.ftchinese.ui.base.parseException
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
@@ -95,7 +95,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             }
 
             if (updateResult.exception != null) {
-                handleException(updateResult.exception)
+                toast(parseException(updateResult.exception))
 //                updateViewModel.enableInput(true)
                 return@Observer
             }
@@ -131,7 +131,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             }
 
             if (accountResult.exception != null) {
-                handleException(accountResult.exception)
+                toast(parseException(accountResult.exception))
                 return@Observer
             }
 

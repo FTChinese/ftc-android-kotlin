@@ -6,12 +6,9 @@ import android.os.Bundle
 import android.text.Editable
 import android.view.View
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.handleApiError
-import com.ft.ftchinese.ui.base.handleException
-import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.PasswordReset
 import com.ft.ftchinese.ui.Validator
+import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.util.ClientError
 import kotlinx.android.synthetic.main.activity_forgot_password.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -115,7 +112,7 @@ class ForgotPasswordActivity : ScopedAppActivity(),
                 showProgress(false)
                 allowInput(true)
 
-                handleException(e)
+                toast(parseException(e))
             }
         }
     }

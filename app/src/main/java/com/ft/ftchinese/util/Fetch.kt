@@ -32,7 +32,7 @@ data class ClientError(
     // returns different message.
     // 404 is not handled here too, since its meaning changes
     // for each endpoint.
-    fun parseStatusCode(): Int {
+    fun parseStatusCode(): Int? {
         return when (statusCode) {
             // If request header does not contain X-User-Id
             401 -> {
@@ -46,7 +46,7 @@ data class ClientError(
             }
             // All other errors are treated as server error.
             else -> {
-                R.string.api_server_error
+                null
             }
         }
     }

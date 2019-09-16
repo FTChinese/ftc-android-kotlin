@@ -13,7 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.handleException
+import com.ft.ftchinese.ui.base.showException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.reader.SessionManager
@@ -192,7 +192,7 @@ class StoryFragment : ScopedFragment(),
 
             if (htmlResult.exception != null) {
                 info("Loading html error")
-                activity?.handleException(htmlResult.exception)
+                activity?.showException(htmlResult.exception)
                 return@Observer
             }
 

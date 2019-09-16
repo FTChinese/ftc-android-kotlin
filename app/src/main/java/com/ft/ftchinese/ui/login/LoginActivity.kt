@@ -9,8 +9,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -72,7 +72,7 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
 
             if (findResult.exception != null) {
                 info(findResult.exception)
-                handleException(findResult.exception)
+                toast(parseException(findResult.exception))
                 return@Observer
             }
 
@@ -108,7 +108,7 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
             }
 
             if (loginResult.exception != null) {
-                handleException(loginResult.exception)
+                toast(parseException(loginResult.exception))
                 return@Observer
             }
 

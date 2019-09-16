@@ -10,7 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.handleException
+import com.ft.ftchinese.ui.base.showException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.SessionManager
@@ -80,7 +80,7 @@ class WxInfoFragment : ScopedFragment(),
 
             if (refreshResult.exception != null) {
                 stopRefreshing()
-                activity?.handleException(refreshResult.exception)
+                activity?.showException(refreshResult.exception)
 
                 return@Observer
             }
@@ -121,7 +121,7 @@ class WxInfoFragment : ScopedFragment(),
             }
 
             if (accountResult.exception != null) {
-                activity?.handleException(accountResult.exception)
+                activity?.showException(accountResult.exception)
                 return@Observer
             }
 
@@ -146,7 +146,7 @@ class WxInfoFragment : ScopedFragment(),
             }
 
             if (it.exception != null) {
-                activity?.handleException(it.exception)
+                activity?.showException(it.exception)
                 return@Observer
             }
 

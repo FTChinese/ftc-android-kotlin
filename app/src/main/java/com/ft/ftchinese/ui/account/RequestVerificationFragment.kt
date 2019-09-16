@@ -10,7 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.handleException
+import com.ft.ftchinese.ui.base.showException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.SessionManager
 import kotlinx.android.synthetic.main.fragment_request_verification.*
@@ -86,7 +86,7 @@ class RequestVerificationFragment : ScopedFragment(), AnkoLogger {
 
         if (result.exception != null) {
             enableInput(true)
-            activity?.handleException(result.exception)
+            activity?.showException(result.exception)
             return
         }
 

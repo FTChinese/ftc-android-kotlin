@@ -8,7 +8,6 @@ import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.model.reader.SessionManager
@@ -189,7 +188,7 @@ class UpgradePreviewActivity : AppCompatActivity() {
 
         if (upgradeResult.exception != null) {
             enableInput(true)
-            handleException(upgradeResult.exception)
+            toast(parseException(upgradeResult.exception))
             return
         }
 

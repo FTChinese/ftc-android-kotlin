@@ -169,7 +169,7 @@ class FtcAccountV2Fragment : ScopedFragment(), AnkoLogger {
         }
 
         if (accountResult.exception != null) {
-            activity?.handleException(accountResult.exception)
+            activity?.showException(accountResult.exception)
             return
         }
 

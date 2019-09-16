@@ -78,7 +78,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         if (findResult.exception != null) {
-            handleException(findResult.exception)
+            toast(parseException(findResult.exception))
             return
         }
 
@@ -118,7 +118,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         if (accountResult.exception != null) {
-            handleException(accountResult.exception)
+            toast(parseException(accountResult.exception))
             return
         }
 

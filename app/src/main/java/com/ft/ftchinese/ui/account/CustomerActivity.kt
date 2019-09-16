@@ -10,12 +10,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.handleException
-import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
-import com.ft.ftchinese.ui.base.StringResult
+import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.RequestCode
@@ -117,7 +114,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         if (result.exception != null) {
-            handleException(result.exception)
+            toast(parseException(result.exception))
             return
         }
 

@@ -14,7 +14,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMemberBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
@@ -22,6 +21,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.account.StripeRetrievalResult
+import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_member.*
@@ -202,7 +202,7 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         if (result.exception != null) {
-            handleException(result.exception)
+            toast(parseException(result.exception))
             refreshAccount(account)
             return
         }
@@ -230,7 +230,7 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         if (accountResult.exception != null) {
-            handleException(accountResult.exception)
+            toast(parseException(accountResult.exception))
             return
         }
 

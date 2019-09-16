@@ -250,6 +250,8 @@ class CheckOutActivity : ScopedAppActivity(),
     private fun onAliOrderFetch(orderResult: AliOrderResult?) {
         showProgress(false)
 
+        info(orderResult)
+
         if (orderResult == null) {
             enablePayBtn(true)
             return
@@ -263,7 +265,7 @@ class CheckOutActivity : ScopedAppActivity(),
         }
 
         if (orderResult.exception != null) {
-            handleException(orderResult.exception)
+            toast(parseException(orderResult.exception))
             enablePayBtn(true)
             tracker.buyFail(plan)
             return
@@ -353,7 +355,7 @@ class CheckOutActivity : ScopedAppActivity(),
         }
 
         if (accountResult.exception != null) {
-            handleException(accountResult.exception)
+            toast(parseException(accountResult.exception))
             return
         }
 
@@ -393,7 +395,7 @@ class CheckOutActivity : ScopedAppActivity(),
         }
 
         if (orderResult.exception != null) {
-            handleException(orderResult.exception)
+            toast(parseException(orderResult.exception))
             enablePayBtn(true)
             tracker.buyFail(plan)
             return

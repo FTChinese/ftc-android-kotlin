@@ -9,11 +9,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.handleException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.activity_link_preview.*
@@ -163,7 +163,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         if (linkResult.exception != null) {
-            handleException(linkResult.exception)
+            parseException(linkResult.exception)
             showProgress(false)
             enableInput(true)
             return
