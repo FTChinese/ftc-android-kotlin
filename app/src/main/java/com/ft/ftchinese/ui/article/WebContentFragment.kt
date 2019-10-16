@@ -226,8 +226,9 @@ class WebContentFragment : Fragment(),
 
         if (queryValue != null) {
             builder.appendQueryParameter("utm_source", "marketing")
-                    .appendQueryParameter("utm_mediu", "androidmarket")
+                    .appendQueryParameter("utm_medium", "androidmarket")
                     .appendQueryParameter("utm_campaign", queryValue)
+                    .appendQueryParameter("android", "${BuildConfig.VERSION_CODE}")
                     .build()
                     .toString()
         }

@@ -265,12 +265,12 @@ data class ChannelItem(
 
             TYPE_INTERACTIVE -> when (subType) {
                 //"https://api003.ftmailbox.com/$type/$id?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes"
-                SUB_TYPE_RADIO -> "$CN_FT/$type/$id?bodyonly=yes&webview=ftcapp&001&exclusive&android=${BuildConfig.VERSION_CODE}"
-                SUB_TYPE_SPEED_READING -> "$CN_FT/$type/$id?bodyonly=yes&webview=ftcapp&i=3&001&exclusive"
+                SUB_TYPE_RADIO -> "$CN_FT/$type/$id?webview=ftcapp&001&exclusive"
+                SUB_TYPE_SPEED_READING -> "$CN_FT/$type/$id?webview=ftcapp&i=3&001&exclusive"
 
                 SUB_TYPE_MBAGYM -> "$CN_FT/$type/$id"
 
-                else -> "$CN_FT/$type/$id?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
+                else -> "$CN_FT/$type/$id?webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
             }
 
             TYPE_VIDEO -> "$CN_FT/$type/$id?bodyonly=yes&webview=ftcapp&004"
