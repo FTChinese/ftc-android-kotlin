@@ -149,7 +149,7 @@ dependencies {
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
     // Payment
-    implementation(name: 'alipaySdk-15.5.7-20181023110917', ext: 'aar')
+    implementation(name: 'alipaySdk-15.6.5-20190718211148', ext: 'aar')
     implementation 'com.stripe:stripe-android:10.1.0'
 
 
