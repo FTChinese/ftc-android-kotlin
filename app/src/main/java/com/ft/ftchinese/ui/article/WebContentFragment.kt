@@ -222,17 +222,6 @@ class WebContentFragment : Fragment(),
             builder.appendQueryParameter("webview", "ftcapp")
         }
 
-        val queryValue = flavorQuery[BuildConfig.FLAVOR]
-
-        if (queryValue != null) {
-            builder.appendQueryParameter("utm_source", "marketing")
-                    .appendQueryParameter("utm_medium", "androidmarket")
-                    .appendQueryParameter("utm_campaign", queryValue)
-                    .appendQueryParameter("android", "${BuildConfig.VERSION_CODE}")
-                    .build()
-                    .toString()
-        }
-
         return builder.build().toString()
     }
 
