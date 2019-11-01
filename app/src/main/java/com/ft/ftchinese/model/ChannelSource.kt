@@ -45,7 +45,7 @@ data class ChannelSource (
             try {
                 Uri.parse(contentUrl).buildUpon()
                         .appendQueryParameter("utm_source", "marketing")
-                        .appendQueryParameter("utm_mediu", "androidmarket")
+                        .appendQueryParameter("utm_medium", "androidmarket")
                         .appendQueryParameter("utm_campaign", flavor)
                         .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
                         .build()
