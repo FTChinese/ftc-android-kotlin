@@ -8,6 +8,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.parseException
@@ -23,6 +24,7 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: LoginViewModel
+    private lateinit var statsTracker: StatsTracker
 
     private fun showProgress(show: Boolean) {
         progress_bar.visibility = if (show) View.VISIBLE else View.GONE
@@ -43,6 +45,8 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
         viewModel = ViewModelProvider(this)
                 .get(LoginViewModel::class.java)
 
+
+        statsTracker = StatsTracker.getInstance(this)
 
         setup()
         initUI()
@@ -115,6 +119,8 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
             val account = loginResult.success ?: return@Observer
 
             sessionManager.saveAccount(account)
+
+            statsTracker.setUserId(account.id)
 
             setResult(Activity.RESULT_OK)
 

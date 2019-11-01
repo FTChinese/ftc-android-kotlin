@@ -28,6 +28,10 @@ class StatsTracker private constructor(context: Context) {
     private val ga = GoogleAnalytics.getInstance(context.applicationContext)
     private val tracker = ga.newTracker(R.xml.global_tracker)
 
+    fun setUserId(id: String) {
+        firebaseAnalytics.setUserId(id)
+    }
+
     fun displayPaywall() {
 
         val source = PaywallTracker.from ?: return
