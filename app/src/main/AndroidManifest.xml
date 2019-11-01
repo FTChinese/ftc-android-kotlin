@@ -3,16 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.ft.ftchinese">
 
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- Required by zhifubao -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- To auto-complete the email text field in the login form with the user's emails -->
-    <!-- Required by zhifubao -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -61,6 +51,9 @@
         <activity
             android:name=".ui.article.ArticleActivity"
             android:parentActivityName=".ui.launch.MainActivity" />
+        <activity
+            android:name=".ui.article.AudioPlayerActivity"
+            android:parentActivityName=".ui.launch.MainActivity"/>
         <activity
             android:name=".ui.login.LoginActivity"
             android:label="@string/title_login_signup"
@@ -164,11 +157,10 @@
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/action_settings"
             android:parentActivityName=".ui.launch.MainActivity" />
-
-        <activity android:name=".ui.settings.FCMActivity"
+        <activity
+            android:name=".ui.settings.FCMActivity"
             android:label="@string/fcm_setting_title"
-            android:parentActivityName=".ui.settings.SettingsActivity"/>
-
+            android:parentActivityName=".ui.settings.SettingsActivity" />
         <activity
             android:name=".ui.settings.UpdateAppActivity"
             android:label="@string/pref_check_new_version"
@@ -194,14 +186,23 @@
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
+
             <meta-data
                 android:name="com.google.firebase.messaging.default_notification_channel_id"
-                android:value="@string/news_notification_channel_id"/>
+                android:value="@string/news_notification_channel_id" />
         </service>
         <service
             android:name=".service.PollService"
             android:label="Poll Service" />
-    </application>
+    </application> <!-- Required by zhifubao -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <!-- Required by zhifubao -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
 </manifest>
