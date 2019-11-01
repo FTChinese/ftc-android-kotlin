@@ -116,6 +116,22 @@ data class ChannelItem(
     @IgnoredOnParcel
     var langVariant: Language? = null
 
+    fun hasMp3(): Boolean {
+        return audioUrl != null || radioUrl != null
+    }
+
+    fun mp3Url(): String {
+        if (audioUrl != null) {
+            return audioUrl
+        }
+
+        if (radioUrl != null) {
+            return radioUrl
+        }
+
+        return ""
+    }
+
     fun buildGALabel(): String {
         return when (type) {
             TYPE_STORY -> when {
@@ -287,8 +303,9 @@ data class ChannelItem(
             return try {
                 Uri.parse(url).buildUpon()
                         .appendQueryParameter("utm_source", "marketing")
-                        .appendQueryParameter("utm_mediu", "androidmarket")
+                        .appendQueryParameter("utm_medium", "androidmarket")
                         .appendQueryParameter("utm_campaign", queryValue)
+                        .appendQueryParameter("android", "${BuildConfig.VERSION_CODE}")
                         .build()
                         .toString()
             } catch (e: Exception) {
