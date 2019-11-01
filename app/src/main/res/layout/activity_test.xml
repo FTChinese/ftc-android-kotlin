@@ -35,6 +35,12 @@
             android:paddingEnd="8dp">
 
             <Button
+                android:id="@+id/btn_login_in"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mock Login"/>
+
+            <Button
                 android:id="@+id/btn_start_download"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -101,6 +107,12 @@
                 android:layout_height="wrap_content"
                 android:text="Bottom sheet dialog"/>
 
+            <Button
+                android:id="@+id/audio_player"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Open Audio Player"/>
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
@@ -114,12 +126,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"/>
     
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_anchor="@id/bottom_bar"
-        app:srcCompat="@drawable/ic_bookmark_border_black_24dp"/>
+<!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+<!--        android:id="@+id/fab"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        app:layout_anchor="@id/bottom_bar"-->
+<!--        app:srcCompat="@drawable/ic_bookmark_border_black_24dp"/>-->
 
     <androidx.core.widget.ContentLoadingProgressBar
         android:id="@+id/progress_bar"
@@ -129,38 +141,5 @@
         android:layout_gravity="center"
         android:visibility="gone"/>
 
-<!--    <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:padding="16dp"-->
-<!--        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"-->
-<!--        app:behavior_hideable="true"-->
-<!--        android:background="@color/colorWheat"-->
-<!--        android:elevation="8dp">-->
-
-<!--        <TextView-->
-<!--            android:id="@+id/tv_barrier_title"-->
-<!--            style="@style/OrigamiText.ProductHeading3.Center"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent"-->
-<!--            android:layout_marginTop="16dp"-->
-<!--            android:layout_marginBottom="16dp"-->
-<!--            android:text="购买会员服务，阅读FT独家内容"/>-->
-
-<!--        <com.google.android.material.button.MaterialButton-->
-<!--            android:id="@+id/btn_barrier"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintTop_toBottomOf="@+id/tv_barrier_title"-->
-<!--            android:layout_marginTop="16dp"-->
-<!--            android:layout_marginBottom="32dp"-->
-<!--            android:text="@string/btn_start_subscription"/>-->
-
-<!--    </androidx.constraintlayout.widget.ConstraintLayout>-->
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

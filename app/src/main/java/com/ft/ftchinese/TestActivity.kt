@@ -20,17 +20,11 @@ import androidx.core.content.edit
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.order.*
-import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.LoginMethod
-import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.reader.Wechat
+import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.service.PollService
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
-import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.article.BarrierFragment
-import com.ft.ftchinese.ui.article.EXTRA_CHANNEL_ITEM
-import com.ft.ftchinese.ui.article.EXTRA_USE_JSON
+import com.ft.ftchinese.ui.article.*
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.LatestOrderActivity
 import com.ft.ftchinese.ui.pay.StripeSubActivity
@@ -53,6 +47,31 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var orderManger: OrderManager
     private var errorDialog: Dialog? = null
+    private lateinit var sessionManager: SessionManager
+    private val mockAccount = Account(
+            id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+            unionId = null,
+            stripeId = null,
+            userName = "Faker",
+            email = "faker@example.org",
+            isVerified = false,
+            avatarUrl = null,
+            loginMethod = LoginMethod.EMAIL,
+            wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+            ),
+            membership = Membership(
+                    id = "mmb_DYBOVDytt1PH",
+                    tier = Tier.STANDARD,
+                    cycle = Cycle.YEAR,
+                    expireDate = LocalDate.now().plusYears(1),
+                    payMethod = PayMethod.ALIPAY,
+                    autoRenew = false,
+                    status = null,
+                    vip = false
+            )
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,8 +83,9 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             setDisplayShowTitleEnabled(true)
         }
 
-
+        sessionManager = SessionManager.getInstance(this)
         orderManger = OrderManager.getInstance(this)
+
 
         info("Internal directory of this app: $filesDir")
         info("Internal directory for this app's temporary cache files: $cacheDir")
@@ -202,8 +222,16 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             BarrierFragment().show(supportFragmentManager, "BarrierFragment")
         }
 
-        fab.setOnClickListener {
-            fab.setImageResource(R.drawable.ic_bookmark_black_24dp)
+//        fab.setOnClickListener {
+//            fab.setImageResource(R.drawable.ic_bookmark_black_24dp)
+//        }
+
+        audio_player.setOnClickListener {
+            AudioPlayerActivity.start(this)
+        }
+
+        btn_login_in.setOnClickListener {
+            sessionManager.saveAccount(mockAccount)
         }
 
     }
