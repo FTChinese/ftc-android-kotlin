@@ -89,7 +89,7 @@ class ArticleActivity : ScopedAppActivity(),
         setup()
 
         // Meta data about current article
-        val item = intent.getParcelableExtra<ChannelItem>(EXTRA_CHANNEL_ITEM)
+        val item = intent.getParcelableExtra<ChannelItem>(EXTRA_CHANNEL_ITEM) ?: return
 
         info("Article source: $item")
 
@@ -102,6 +102,9 @@ class ArticleActivity : ScopedAppActivity(),
                 replace(R.id.fragment_article, WebContentFragment.newInstance(item))
             }
 
+            if (item.hasMp3()) {
+                replace(R.id.player_container, AudioPlayerFragment.newInstance(item.mp3Url()))
+            }
         }
 
         channelItem = item
