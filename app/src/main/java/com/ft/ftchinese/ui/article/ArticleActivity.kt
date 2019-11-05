@@ -36,8 +36,7 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import java.io.ByteArrayOutputStream
 
-const val EXTRA_CHANNEL_ITEM = "extra_channel_item"
-const val EXTRA_USE_JSON = "extra_use_json"
+const val EXTRA_ARTICLE_TEASER = "extra_article_teaser"
 
 /**
  * Host activity for [StoryFragment] or [WebContentFragment], depending on the type of contents
@@ -62,7 +61,7 @@ class ArticleActivity : ScopedAppActivity(),
     private var shareFragment: SocialShareFragment? = null
 
 
-    private var channelItem: ChannelItem? = null
+    private var channelItem: Teaser? = null
 
     // The data used for share
     private var article: StarredArticle? = null
@@ -89,25 +88,23 @@ class ArticleActivity : ScopedAppActivity(),
         setup()
 
         // Meta data about current article
-        val item = intent.getParcelableExtra<ChannelItem>(EXTRA_CHANNEL_ITEM) ?: return
+        val teaser = intent.getParcelableExtra<Teaser>(EXTRA_ARTICLE_TEASER) ?: return
 
-        info("Article source: $item")
-
-        val useJson = intent.getBooleanExtra(EXTRA_USE_JSON, false)
+        info("Article source: $teaser")
 
         supportFragmentManager.commit {
-            if (useJson) {
-                replace(R.id.fragment_article, StoryFragment.newInstance(item))
+            if (teaser.hasRestfulAPI()) {
+                replace(R.id.fragment_article, StoryFragment.newInstance(teaser))
             } else {
-                replace(R.id.fragment_article, WebContentFragment.newInstance(item))
+                replace(R.id.fragment_article, WebContentFragment.newInstance(teaser))
             }
 
-            if (item.hasMp3()) {
-                replace(R.id.player_container, AudioPlayerFragment.newInstance(item.mp3Url()))
+            if (teaser.hasMp3()) {
+                replace(R.id.player_container, AudioPlayerFragment.newInstance(teaser.mp3Url()))
             }
         }
 
-        channelItem = item
+        channelItem = teaser
     }
 
     private fun setup() {
@@ -317,54 +314,32 @@ class ArticleActivity : ScopedAppActivity(),
 
     companion object {
 
+        @JvmStatic
+        fun newIntent(context: Context?, teaser: Teaser): Intent {
+            return Intent(
+                    context,
+                    ArticleActivity::class.java
+            ).apply {
+                putExtra(EXTRA_ARTICLE_TEASER, teaser)
+            }
+        }
+
         /**
          * Load content with standard JSON API.
          */
         @JvmStatic
-        fun start(context: Context?, channelItem: ChannelItem) {
+        fun start(context: Context?, channelItem: Teaser) {
             val intent = Intent(context, ArticleActivity::class.java).apply {
-                putExtra(EXTRA_CHANNEL_ITEM, channelItem)
-                putExtra(EXTRA_USE_JSON, true)
+                putExtra(EXTRA_ARTICLE_TEASER, channelItem)
             }
 
             context?.startActivity(intent)
         }
 
         @JvmStatic
-        fun startWithParentStack(context: Context, channelItem: ChannelItem) {
+        fun startWithParentStack(context: Context, channelItem: Teaser) {
             val intent = Intent(context, ArticleActivity::class.java).apply {
-                putExtra(EXTRA_CHANNEL_ITEM, channelItem)
-                putExtra(EXTRA_USE_JSON, true)
-            }
-
-            TaskStackBuilder
-                    .create(context)
-                    .addNextIntentWithParentStack(intent)
-                    .startActivities()
-        }
-
-        /**
-         * Load a web page based on HTML fragment.
-         */
-        @JvmStatic
-        fun startWeb(context: Context?, channelItem: ChannelItem) {
-            channelItem.isWebpage = true
-
-            val intent = Intent(context, ArticleActivity::class.java).apply {
-                putExtra(EXTRA_CHANNEL_ITEM, channelItem)
-                putExtra(EXTRA_USE_JSON, false)
-            }
-
-            context?.startActivity(intent)
-        }
-
-        @JvmStatic
-        fun startWebWithParentStack(context: Context, channelItem: ChannelItem) {
-            channelItem.isWebpage = true
-
-            val intent = Intent(context, ArticleActivity::class.java).apply {
-                putExtra(EXTRA_CHANNEL_ITEM, channelItem)
-                putExtra(EXTRA_USE_JSON, false)
+                putExtra(EXTRA_ARTICLE_TEASER, channelItem)
             }
 
             TaskStackBuilder
