@@ -2,9 +2,9 @@ package com.ft.ftchinese.model
 
 import org.junit.Test
 
-class ChannelItemTest {
+class TeaserTest {
 
-    private val item = ChannelItem(
+    private val item = Teaser(
             id="13139",
             type="interactive",
             subType=null,
