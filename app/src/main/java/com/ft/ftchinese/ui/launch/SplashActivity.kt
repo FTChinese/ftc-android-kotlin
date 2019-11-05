@@ -21,8 +21,8 @@ import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-private const val EXTRA_MESSAGE_TYPE = "action"
-private const val EXTRA_CONTENT_ID = "pageId"
+private const val EXTRA_MESSAGE_TYPE = "content_type"
+private const val EXTRA_CONTENT_ID = "content_id"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class SplashActivity : ScopedAppActivity(), AnkoLogger {
@@ -49,19 +49,34 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
 
         initUI()
 
+        // FCM delivers data to the `intent` as key-value pairs,
+        // including your custom data, when the app is in background.
+        // When app is in foreground, data will be delivered to
+        // NewsMessagingService.
+        //
+        // FCM standard keys:
         // google.delivered_priority: high
         // google.sent_time: 1565331193712
         // google.ttl Value: 2419200
-        // from:
+        // from: It seems this is a fixed numeric id.
         // google.message_id:
-        // collapse_key:
+        // collapse_key: com.ft.ftchinese
+        //
+        // Following are custom data fields
+        // contentType: story | video | photo | interactive
+        // contentId: 001084989
         intent.extras?.let {
             for (key in it.keySet()) {
                 val value = intent.extras?.get(key)
-                info("Key: $key Value: $value")
+                info("$key: $value")
             }
         }
 
+        // Receive message in the background.
+        // Those data are attached in the Customer data section of FCM composer.
+        // They are key-value pairs.
+        // We use `contentType` as key for EXTRA_MESSAGE_TYPE
+        // and use `contentId` as key for article's id.
         val msgTypeStr = intent.getStringExtra(EXTRA_MESSAGE_TYPE) ?: return
         val msgType = RemoteMessageType.fromString(msgTypeStr) ?: return
 
@@ -69,63 +84,30 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
 
         info("Message type: $msgType, content id: $pageId")
 
+        val contentType = msgType.toArticleType() ?: return
         when (msgType) {
-            RemoteMessageType.Story -> {
+            RemoteMessageType.Story,
+            RemoteMessageType.Video,
+            RemoteMessageType.Photo,
+            RemoteMessageType.Interactive -> {
 
-                ArticleActivity.startWithParentStack(this, ChannelItem(
+                ArticleActivity.startWithParentStack(this, Teaser(
                         id = pageId,
-                        type = "story",
+                        type = contentType,
                         title = ""
                 ))
+            }
 
-            }
-            RemoteMessageType.Video -> {
-                ArticleActivity.startWebWithParentStack(this, ChannelItem(
-                        id = pageId,
-                        type = "video",
-                        title = ""
-                ))
-            }
-            RemoteMessageType.Photo -> {
-                ArticleActivity.startWebWithParentStack(this, ChannelItem(
-                        id = pageId,
-                        type = "photonews",
-                        title = ""
-                ))
-            }
-            RemoteMessageType.Academy -> {
-                ArticleActivity.startWebWithParentStack(this, ChannelItem(
-                        id = pageId,
-                        type = "interactive",
-                        title = ""
-                ))
-            }
-            RemoteMessageType.SpecialReport -> {
-
-            }
-            RemoteMessageType.Tag -> {
-                ChannelActivity.startWithParentStack(this, ChannelSource(
-                        title = pageId,
-                        name = "${msgType}_$pageId",
-                        contentUrl = "",
-                        htmlType = HTML_TYPE_FRAGMENT
-                ))
-            }
+            RemoteMessageType.Tag,
             RemoteMessageType.Channel -> {
                 ChannelActivity.startWithParentStack(this, ChannelSource(
                         title = pageId,
                         name = "${msgType}_$pageId",
                         contentUrl = "",
                         htmlType = HTML_TYPE_FRAGMENT
-
                 ))
             }
-            RemoteMessageType.Other -> {
 
-            }
-            RemoteMessageType.Download -> {
-
-            }
         }
 
         counterJob?.cancel()
