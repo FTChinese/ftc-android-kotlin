@@ -51,7 +51,7 @@ class ArticleViewModel(
         currentLang.value = lang
     }
 
-    fun loadFromCache(item: ChannelItem, lang: Language) {
+    fun loadFromCache(item: Teaser, lang: Language) {
         val cacheName = item.cacheNameJson()
         if (cacheName.isBlank()) {
             cacheResult.value = CachedResult(
@@ -107,8 +107,8 @@ class ArticleViewModel(
         }
     }
 
-    fun loadFromRemote(item: ChannelItem, lang: Language) {
-        val url = item.buildApiUrl()
+    fun loadFromRemote(item: Teaser, lang: Language) {
+        val url = item.contentUrl()
         info("Loading json data from $url")
 
         if (url.isBlank()) {
@@ -170,7 +170,7 @@ class ArticleViewModel(
         }
     }
 
-    private suspend fun render(item: ChannelItem, story: Story, lang: Language, follows: JSFollows) = withContext(Dispatchers.Default) {
+    private suspend fun render(item: Teaser, story: Story, lang: Language, follows: JSFollows) = withContext(Dispatchers.Default) {
         if (template == null) {
             template = cache.readStoryTemplate()
         }
