@@ -60,6 +60,16 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
     companion object {
         private const val EXTRA_PAGE_META = "extra_list_page_metadata"
 
+        @JvmStatic
+        fun newIntent(context: Context?, teaser: ChannelSource): Intent {
+            return Intent(
+                    context,
+                    ChannelActivity::class.java
+            ).apply {
+                putExtra(EXTRA_PAGE_META, teaser)
+            }
+        }
+
         /**
          * Start [ChannelActivity] based on values passed from JS.
          */
