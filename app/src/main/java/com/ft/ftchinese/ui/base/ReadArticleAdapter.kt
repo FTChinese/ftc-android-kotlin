@@ -39,11 +39,10 @@ class ReadArticleAdapter(private var articles: List<ReadArticle>) :
         holder.secondaryTextView.text = article.standfirst
 
         holder.itemView.setOnClickListener {
-            if (article.isWebpage) {
-                ArticleActivity.startWeb(holder.itemView.context, article.toChannelItem())
-            } else {
-                ArticleActivity.start(holder.itemView.context, article.toChannelItem())
-            }
+            ArticleActivity.start(
+                    holder.itemView.context,
+                    article.toChannelItem()
+            )
         }
     }
 

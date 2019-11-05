@@ -64,9 +64,6 @@ class StarredArticleAdapter(private val context: Context?) :
 //                    val customTabsInt = CustomTabsIntent.Builder().build()
 //                    customTabsInt.launchUrl(context, Uri.parse("http://next.ftchinese.com/user/starred"))
                 }
-                article.isWebpage -> {
-                    ArticleActivity.startWeb(holder.itemView.context, article.toChannelItem())
-                }
                 else -> {
                     ArticleActivity.start(holder.itemView.context, article.toChannelItem())
                 }
