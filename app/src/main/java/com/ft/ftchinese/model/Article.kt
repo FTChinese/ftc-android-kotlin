@@ -95,7 +95,7 @@ class Story (
         val relatedStory: List<RelatedStory>
 ) : AnkoLogger {
 
-    fun toStarredArticle(channelItem: ChannelItem?): StarredArticle {
+    fun toStarredArticle(channelItem: Teaser?): StarredArticle {
         return StarredArticle(
                 id = id,
                 type = channelItem?.type ?: "",
