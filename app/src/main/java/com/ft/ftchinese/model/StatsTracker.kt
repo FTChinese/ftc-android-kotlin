@@ -7,7 +7,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.order.Plan
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.splash.ScreenAd
 import com.ft.ftchinese.util.AdSlot
 import com.ft.ftchinese.util.FtcEvent
@@ -16,9 +15,6 @@ import com.ft.ftchinese.util.GACategory
 import com.google.android.gms.analytics.GoogleAnalytics
 import com.google.android.gms.analytics.HitBuilders
 import com.google.firebase.analytics.FirebaseAnalytics
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
@@ -179,7 +175,7 @@ class StatsTracker private constructor(context: Context) {
         ))
     }
 
-    fun selectListItem(item: ChannelItem) {
+    fun selectListItem(item: Teaser) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, Bundle().apply {
             putString(FirebaseAnalytics.Param.CONTENT_TYPE, item.type)
             putString(FirebaseAnalytics.Param.ITEM_ID, item.id)
@@ -208,19 +204,6 @@ class StatsTracker private constructor(context: Context) {
         ))
     }
 
-    fun engaged(account: Account?, start: Long, end: Long) {
-        if (account == null) {
-            return
-        }
-
-        GlobalScope.launch(Dispatchers.IO) {
-            try {
-                account.engaging(start, end)
-            } catch (e: Exception) {
-
-            }
-        }
-    }
 
     companion object {
         private var instance: StatsTracker? = null
