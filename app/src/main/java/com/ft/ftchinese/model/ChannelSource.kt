@@ -3,7 +3,7 @@ package com.ft.ftchinese.model
 import android.net.Uri
 import android.os.Parcelable
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.util.flavorQuery
+import com.ft.ftchinese.util.currentFlavor
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
@@ -36,23 +36,18 @@ data class ChannelSource (
     val fileName: String?
         get() = if (name.isBlank()) null else "$name.html"
 
-    fun listUrl(): String? {
-        val flavor = flavorQuery[BuildConfig.FLAVOR]
-
-        return if (flavor == null) {
+    // Attach query parameters to the original url.
+    fun normalizedUrl(): String? {
+        return try {
+            Uri.parse(contentUrl).buildUpon()
+                    .appendQueryParameter("utm_source", "marketing")
+                    .appendQueryParameter("utm_medium", "androidmarket")
+                    .appendQueryParameter("utm_campaign", currentFlavor.query)
+                    .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
+                    .build()
+                    .toString()
+        } catch (e: Exception) {
             contentUrl
-        } else {
-            try {
-                Uri.parse(contentUrl).buildUpon()
-                        .appendQueryParameter("utm_source", "marketing")
-                        .appendQueryParameter("utm_medium", "androidmarket")
-                        .appendQueryParameter("utm_campaign", flavor)
-                        .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
-                        .build()
-                        .toString()
-            } catch (e: Exception) {
-                contentUrl
-            }
         }
     }
 
