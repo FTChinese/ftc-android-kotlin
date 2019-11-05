@@ -20,7 +20,7 @@ data class PaywallSource(
 object PaywallTracker {
     var from: PaywallSource? = null
 
-    fun fromArticle(item: ChannelItem?) {
+    fun fromArticle(item: Teaser?) {
         if (item == null) {
             from = null
             return
