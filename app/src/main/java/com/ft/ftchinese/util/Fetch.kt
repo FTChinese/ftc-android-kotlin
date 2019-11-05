@@ -5,7 +5,9 @@ import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.io.IOException
@@ -163,13 +165,13 @@ class Fetch : AnkoLogger {
      */
     fun jsonBody(body: String): Fetch {
 
-        val contentType = MediaType.parse("application/json; charset=utf-8")
+        val contentType = "application/json; charset=utf-8".toMediaTypeOrNull()
 
         if (contentType == null) {
             headers.set("Content-Type", "application/json; charset=utf-8")
         }
 
-        reqBody = RequestBody.create(contentType, body)
+        reqBody = body.toRequestBody(contentType)
 
         return this
     }
@@ -178,7 +180,7 @@ class Fetch : AnkoLogger {
      * Use this to transmit binary files.
      */
     fun body(body: ByteArray): Fetch {
-        reqBody = RequestBody.create(null, body)
+        reqBody = body.toRequestBody(null)
 
         return this
     }
@@ -188,7 +190,7 @@ class Fetch : AnkoLogger {
      * okhttp does not allow nullable body.
      */
     fun body(): Fetch {
-        reqBody = RequestBody.create(null, "")
+        reqBody = "".toRequestBody(null)
 
         return this
     }
@@ -199,13 +201,13 @@ class Fetch : AnkoLogger {
      * Use this to download binary files.
      */
     fun download(): ByteArray? {
-        return end().body()?.bytes()
+        return end().body?.bytes()
     }
 
     fun responseString(): String? {
         val resp = end()
 
-        return resp.body()?.string()
+        return resp.body?.string()
     }
 
     /**
@@ -226,19 +228,19 @@ class Fetch : AnkoLogger {
          * Success response.
          * @throws IOException when reading body.
          */
-        if (resp.code() in 200 until 400) {
-            return Pair(resp, resp.body()?.string())
+        if (resp.code in 200 until 400) {
+            return Pair(resp, resp.body?.string())
         }
 
         /**
          * @throws IOException when turning to string.
          * @throws ClientError
          */
-        val body = resp.body()
+        val body = resp.body
                 ?.string()
                 ?: throw ClientError(
-                        statusCode = resp.code(),
-                        message = resp.message()
+                        statusCode = resp.code,
+                        message = resp.message
                 )
         info("API error response: $body")
 
@@ -246,14 +248,14 @@ class Fetch : AnkoLogger {
         val clientErr = try {
             Klaxon().parse<ClientError>(body)
         } catch (e: Exception) {
-            ClientError(message = resp.message())
+            ClientError(message = resp.message)
         }
 
-        clientErr?.statusCode = resp.code()
+        clientErr?.statusCode = resp.code
 
         throw clientErr ?: ClientError(
-                statusCode = resp.code(),
-                message = resp.message()
+                statusCode = resp.code,
+                message = resp.message
         )
     }
 
