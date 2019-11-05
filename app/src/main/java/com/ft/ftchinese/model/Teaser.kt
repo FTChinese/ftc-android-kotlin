@@ -5,9 +5,8 @@ import android.os.Parcelable
 import com.beust.klaxon.Json
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.util.CN_FT
 import com.ft.ftchinese.util.FTC_OFFICIAL_URL
-import com.ft.ftchinese.util.flavorQuery
+import com.ft.ftchinese.util.currentFlavor
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
@@ -47,7 +46,7 @@ data class ChannelList(
         val title: String,
         val preferLead: String,
         val sponsorAdId: String,
-        val items: List<ChannelItem>
+        val items: List<Teaser>
 )
 /**
  * ChannelItem represents an item in a page of ViewPager.
@@ -72,10 +71,10 @@ data class ChannelList(
  * This class is also used to record reading history. `standfirst` is used only for this purpose. `subType` and `shortlead` should not be used for this purpose. ArticleStore could only recored `type==story`.
  */
 @Parcelize
-data class ChannelItem(
+data class Teaser(
         val id: String,
         // For column type, you should start a ChannelActivity instead of  StoryActivity.
-        val type: String, // story | premium | video | interactive | column |
+        val type: String, // story | premium | video | photonews | interactive | column
         val subType: String? = null, // speedreading | radio
 
         @Json(name = "headline")
@@ -93,6 +92,7 @@ data class ChannelItem(
         // "线下活动,企业公告,会员专享"
         val tag: String = "",
 
+        // What's the purpose of this one?
         @Json(ignored = true)
         var webUrl: String = "",
 
@@ -116,8 +116,12 @@ data class ChannelItem(
     @IgnoredOnParcel
     var langVariant: Language? = null
 
+    fun hasRestfulAPI(): Boolean {
+        return type == "story" || type == "premium"
+    }
+
     fun hasMp3(): Boolean {
-        return audioUrl != null || radioUrl != null
+        return type == "interactive" && (audioUrl != null || radioUrl != null)
     }
 
     fun mp3Url(): String {
@@ -158,7 +162,7 @@ data class ChannelItem(
         }
     }
 
-    fun withMeta(meta: ChannelMeta?): ChannelItem {
+    fun withMeta(meta: ChannelMeta?): Teaser {
         if (meta == null) {
             return this
         }
@@ -265,52 +269,44 @@ data class ChannelItem(
     }
 
     /**
-     * URL used to fetch an article
+     * Build the URL used to retrieve content.
      * See Page/FTChinese/Main/APIs.swift
      * https://api003.ftmailbox.com/interactive/12339?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24
      */
-    fun buildApiUrl(): String {
+    fun contentUrl(): String {
         if (id.isBlank() || type.isBlank()) {
             return ""
         }
 
         val url =  when(type) {
-            TYPE_STORY, TYPE_PREMIUM -> "$CN_FT/index.php/jsapi/get_story_more_info/$id"
+            TYPE_STORY, TYPE_PREMIUM -> "${currentFlavor.baseUrl}/index.php/jsapi/get_story_more_info/$id"
 
-            TYPE_COLUMN -> "$CN_FT/$type/$id?bodyonly=yes&webview=ftcapp&bodyonly=yes"
+            TYPE_COLUMN -> "${currentFlavor.baseUrl}/$type/$id?bodyonly=yes&webview=ftcapp&bodyonly=yes"
 
             TYPE_INTERACTIVE -> when (subType) {
-                //"https://api003.ftmailbox.com/$type/$id?bodyonly=no&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&showAudioHTML=yes"
-                SUB_TYPE_RADIO -> "$CN_FT/$type/$id?webview=ftcapp&001&exclusive"
-                SUB_TYPE_SPEED_READING -> "$CN_FT/$type/$id?webview=ftcapp&i=3&001&exclusive"
+                SUB_TYPE_RADIO -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp&001&exclusive"
+                SUB_TYPE_SPEED_READING -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp&i=3&001&exclusive"
 
-                SUB_TYPE_MBAGYM -> "$CN_FT/$type/$id"
+                SUB_TYPE_MBAGYM -> "${currentFlavor.baseUrl}/$type/$id"
 
-                else -> "$CN_FT/$type/$id?webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
+                else -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
             }
 
-            TYPE_VIDEO -> "$CN_FT/$type/$id?bodyonly=yes&webview=ftcapp&004"
+            TYPE_VIDEO -> "${currentFlavor.baseUrl}/$type/$id?bodyonly=yes&webview=ftcapp&004"
 
-            else -> "$CN_FT/$type/$id?webview=ftcapp"
+            else -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp"
         }
 
-        val queryValue = flavorQuery[BuildConfig.FLAVOR]
-
-        return if (queryValue == null) {
+        return try {
+            Uri.parse(url).buildUpon()
+                    .appendQueryParameter("utm_source", "marketing")
+                    .appendQueryParameter("utm_medium", "androidmarket")
+                    .appendQueryParameter("utm_campaign", currentFlavor.query)
+                    .appendQueryParameter("android", "${BuildConfig.VERSION_CODE}")
+                    .build()
+                    .toString()
+        } catch (e: Exception) {
             url
-        } else {
-            // http://www.ftchinese.com/?utm_source=marketing&utm_medium=androidmarket&utm_campaign=an_huawei
-            return try {
-                Uri.parse(url).buildUpon()
-                        .appendQueryParameter("utm_source", "marketing")
-                        .appendQueryParameter("utm_medium", "androidmarket")
-                        .appendQueryParameter("utm_campaign", queryValue)
-                        .appendQueryParameter("android", "${BuildConfig.VERSION_CODE}")
-                        .build()
-                        .toString()
-            } catch (e: Exception) {
-                ""
-            }
         }
     }
 
@@ -436,6 +432,7 @@ data class ChannelItem(
         info("Ad channel id: $adChId")
 
         val storyHTMLOriginal = template
+                .replace("<!--{story-headline-class}-->", "")
                 .replace("{story-tag}", story.tag)
                 .replace("{story-author}", story.authorCN)
                 .replace("{story-genre}", story.genre)
