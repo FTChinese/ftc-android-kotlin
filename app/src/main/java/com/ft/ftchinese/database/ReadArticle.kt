@@ -3,7 +3,7 @@ package com.ft.ftchinese.database
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.ft.ftchinese.model.ChannelItem
+import com.ft.ftchinese.model.Teaser
 import com.ft.ftchinese.model.order.Tier
 import java.util.*
 
@@ -59,8 +59,9 @@ data class ReadArticle(
         @ColumnInfo(name = "is_webpage")
         var isWebpage: Boolean = false
 ) {
-    fun toChannelItem(): ChannelItem {
-        return ChannelItem(
+
+    fun toChannelItem(): Teaser {
+        return Teaser(
                 id = id,
                 type = type,
                 subType = subType,

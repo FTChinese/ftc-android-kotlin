@@ -2,7 +2,7 @@ package com.ft.ftchinese.database
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.ft.ftchinese.model.ChannelItem
+import com.ft.ftchinese.model.Teaser
 import com.ft.ftchinese.model.Permission
 import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.util.formatSQLDateTime
@@ -65,8 +65,9 @@ data class StarredArticle(
         @ColumnInfo(name = "is_webpage")
         var isWebpage: Boolean = false
 ) {
-    fun toChannelItem(): ChannelItem {
-        return ChannelItem(
+
+    fun toChannelItem(): Teaser {
+        return Teaser(
                 id = id,
                 type = type,
                 subType = subType,
