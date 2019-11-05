@@ -53,6 +53,9 @@
             android:parentActivityName=".ui.launch.MainActivity" />
         <activity
             android:name=".ui.article.AudioPlayerActivity"
+            android:parentActivityName=".ui.launch.MainActivity" />
+        <activity
+            android:name=".ui.article.WebViewActivity"
             android:parentActivityName=".ui.launch.MainActivity"/>
         <activity
             android:name=".ui.login.LoginActivity"
@@ -192,17 +195,20 @@
                 android:value="@string/news_notification_channel_id" />
         </service>
         <service
+            android:name=".service.ReadingDurationService"
+            android:exported="false" />
+        <service
             android:name=".service.PollService"
             android:label="Poll Service" />
-    </application> <!-- Required by zhifubao -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- To auto-complete the email text field in the login form with the user's emails -->
+    </application> <!-- To auto-complete the email text field in the login form with the user's emails -->
     <!-- Required by zhifubao -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
 </manifest>
