@@ -16,11 +16,14 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.showException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.reader.ReadingDuration
 import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.service.ReadingDurationService
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.OnProgressListener
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
 import com.ft.ftchinese.util.*
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.fragment_article.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -34,7 +37,7 @@ class StoryFragment : ScopedFragment(),
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
-    private var storyBrief: ChannelItem? = null
+    private var storyBrief: Teaser? = null
     private var currentLang: Language = Language.CHINESE
 
     private lateinit var cache: FileCache
@@ -230,11 +233,17 @@ class StoryFragment : ScopedFragment(),
     override fun onDestroy() {
         super.onDestroy()
 
-        statsTracker.engaged(
-                account = sessionManager.loadAccount(),
-                start = start,
-                end = Date().time / 1000
-        )
+        val userId = sessionManager.loadAccount()?.id ?: return
+
+        ReadingDurationService.start(context, ReadingDuration(
+                url = "http://www.ftchinese.com/",
+                refer = "http://www.ftchinese.com/",
+                startUnix = start,
+                endUnix = Date().time / 1000,
+                userId = userId,
+                functionName = "onLoad"
+        ))
+
     }
 
     @JavascriptInterface
@@ -244,14 +253,36 @@ class StoryFragment : ScopedFragment(),
         try {
             val following = json.parse<Following>(message) ?: return
 
-            followingManager.save(following)
+            val isSubscribed = followingManager.save(following)
+
+            if (isSubscribed) {
+                FirebaseMessaging.getInstance()
+                        .subscribeToTopic(following.topic)
+                        .addOnCompleteListener { task ->
+                            if (!task.isSuccessful) {
+                                info("Subscribing to topic ${following.topic} failed")
+                            } else {
+                               info("Subscribing to topic ${following.topic} succeeded")
+                            }
+                        }
+            } else {
+                FirebaseMessaging.getInstance()
+                        .unsubscribeFromTopic(following.topic)
+                        .addOnCompleteListener { task ->
+                            if (!task.isSuccessful) {
+                                info("Unsubscribing from topic ${following.topic} failed")
+                            } else {
+                                info("Unsubscribing from topic ${following.topic} succeeded")
+                            }
+                        }
+            }
         } catch (e: Exception) {
             info(e)
         }
     }
 
     companion object {
-        fun newInstance(channelItem: ChannelItem) = StoryFragment().apply {
+        fun newInstance(channelItem: Teaser) = StoryFragment().apply {
             arguments = bundleOf(
                     ARG_CHANNEL_ITEM to channelItem
             )
