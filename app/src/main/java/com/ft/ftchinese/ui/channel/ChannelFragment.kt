@@ -53,7 +53,7 @@ class ChannelFragment : ScopedFragment(),
 
     private lateinit var channelViewModel: ChannelViewModel
 
-    private var articleList: List<ChannelItem>? = null
+    private var articleList: List<Teaser>? = null
     private var channelMeta: ChannelMeta? = null
 
     private fun showProgress(value: Boolean) {
@@ -250,7 +250,7 @@ class ChannelFragment : ScopedFragment(),
             // For complete HTML, load it directly into Web view.
             HTML_TYPE_COMPLETE -> {
                 info("initLoading: web page")
-                web_view.loadUrl(chSrc.listUrl())
+                web_view.loadUrl(chSrc.normalizedUrl())
                 if (swipe_refresh.isRefreshing) {
                     toast(R.string.prompt_updated)
                 }
@@ -393,7 +393,7 @@ class ChannelFragment : ScopedFragment(),
          * Canonical URL: http://www.ftchinese.com/channel/column.html
          * Content URL: https://api003.ftmailbox.com/column/007000049?webview=ftcapp&bodyonly=yes
          */
-        if (channelItem.type == ChannelItem.TYPE_COLUMN) {
+        if (channelItem.type == Teaser.TYPE_COLUMN) {
             openColumn(channelItem)
             return
         }
@@ -416,11 +416,11 @@ class ChannelFragment : ScopedFragment(),
         }
     }
 
-    private fun openColumn(item: ChannelItem) {
+    private fun openColumn(item: Teaser) {
         val chSrc = ChannelSource(
                 title = item.title,
                 name = "${item.type}_${item.id}",
-                contentUrl = item.buildApiUrl(),
+                contentUrl = item.contentUrl(),
                 htmlType = HTML_TYPE_FRAGMENT
         )
         info("Open a column: $chSrc")
@@ -428,30 +428,23 @@ class ChannelFragment : ScopedFragment(),
         ChannelActivity.start(context, chSrc)
     }
 
-    private fun openArticle(item: ChannelItem) {
-        info("Open article for an channel item: $item")
+    private fun openArticle(teaser: Teaser) {
+        info("Open article for an channel teaser: $teaser")
 
-        when (item.type) {
-            ChannelItem.TYPE_STORY,
-            ChannelItem.TYPE_PREMIUM -> {
-                ArticleActivity.start(activity, item)
+        when (teaser.type) {
+            Teaser.TYPE_STORY,
+            Teaser.TYPE_PREMIUM -> {
+                ArticleActivity.start(activity, teaser)
             }
-            ChannelItem.TYPE_INTERACTIVE -> {
-                when (item.subType) {
-                    ChannelItem.SUB_TYPE_RADIO -> {
-                        ArticleActivity.startWeb(activity, item)
-                    }
-                    else -> {
-                        ArticleActivity.startWeb(context, item)
-                    }
-                }
+            Teaser.TYPE_INTERACTIVE -> {
+                ArticleActivity.start(activity, teaser)
             }
             else -> {
-                ArticleActivity.startWeb(context, item)
+                ArticleActivity.start(context, teaser)
             }
         }
 
-        statsTracker.selectListItem(item)
+        statsTracker.selectListItem(teaser)
     }
 
     companion object {
