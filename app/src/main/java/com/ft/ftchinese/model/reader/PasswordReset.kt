@@ -22,6 +22,6 @@ data class PasswordReset(
                 .jsonBody(json.toJsonString(this))
                 .responseApi()
 
-        return response.code() == 204
+        return response.code == 204
     }
 }

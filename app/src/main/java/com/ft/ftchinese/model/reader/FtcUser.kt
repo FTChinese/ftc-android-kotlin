@@ -33,7 +33,7 @@ data class FtcUser(
                 .jsonBody(json.toJsonString(mapOf("email" to email)))
                 .responseApi()
 
-        return resp.code() == 204
+        return resp.code == 204
     }
 
     fun updateUserName(name: String): Boolean {
@@ -43,7 +43,7 @@ data class FtcUser(
                 .jsonBody(json.toJsonString(mapOf("userName" to name)))
                 .responseApi()
 
-        return resp.code() == 204
+        return resp.code == 204
     }
 
     fun updatePassword(pw: Passwords): Boolean {
@@ -53,7 +53,7 @@ data class FtcUser(
                 .jsonBody(json.toJsonString(pw))
                 .responseApi()
 
-        return resp.code() == 204
+        return resp.code == 204
     }
 
     fun requestVerification(): Boolean {
@@ -66,7 +66,7 @@ data class FtcUser(
                 .body()
                 .responseApi()
 
-        return resp.code() == 204
+        return resp.code == 204
     }
 
     fun linkWechat(unionId: String): Boolean {
@@ -78,6 +78,6 @@ data class FtcUser(
                 )))
                 .responseApi()
 
-        return resp.code() == 204
+        return resp.code == 204
     }
 }

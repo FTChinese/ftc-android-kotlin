@@ -84,7 +84,7 @@ data class WxSession(
                 )))
                 .responseApi()
 
-        return resp.code() == 204
+        return resp.code == 204
     }
 
     /**
