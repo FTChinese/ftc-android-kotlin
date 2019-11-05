@@ -1,5 +1,6 @@
 package com.ft.ftchinese.util
 
+import android.net.Uri
 import com.ft.ftchinese.BuildConfig
 
 object NextApi {
@@ -58,28 +59,71 @@ const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/ap
 const val FTC_OFFICIAL_URL = "http://www.ftchinese.com"
 const val CN_FT = "https://cn.ft.com"
 
-//const val MAILBOX_URL = "https://api003.ftmailbox.com"
-
-
 const val WV_BASE_URL = CN_FT
 
-const val HOST_FTC = "www.ftchinese.com"
-//const val HOST_FT = "api003.ftmailbox.com"
-const val HOST_FT = "cn.ft.com"
+val HOST_FTC = Uri.parse(FTC_OFFICIAL_URL).host
+val HOST_FT = Uri.parse(CN_FT).host
 const val HOST_FTA = "www.ftacademy.cn"
 
-val flavorQuery = mapOf(
-        "play" to "play_store",
-        "xiaomi" to "an_xiaomi",
-        "huawei" to "an_huawei",
-        "baidu" to "an_baidu",
-        "sanliuling" to "an_360shouji",
-        "ftc" to "an_ftc",
-        "tencent" to "an_tencent",
-        "samsung" to "an_samsung"
-//        "meizu" to "an_meizu",
-//        "wandoujia" to "an_wandoujia",
-//        "anzhi" to "an_anzhi",
-//        "jiuyi" to "an_91",
-//        "anzhuoshichang" to "an_anzhuoshichang"
+data class Flavor (
+        var query: String,
+        var baseUrl: String
+) {
+    val host: String
+        get() = try {
+            Uri.parse(baseUrl).host ?: ""
+        } catch (e: Exception) {
+            ""
+        }
+}
+
+val defaultFlavor = Flavor(
+        query = "an_ftc",
+        baseUrl = CN_FT
 )
+
+val flavors = mapOf(
+        "play" to Flavor(
+                query = "play_store",
+                baseUrl = CN_FT
+        ),
+        "xiaomi" to Flavor(
+                query = "an_xiaomi",
+                baseUrl = CN_FT
+        ),
+        "huawei" to Flavor(
+                query =  "an_huawei",
+                baseUrl = CN_FT
+        ),
+        "baidu" to Flavor(
+                query = "an_baidu",
+                baseUrl = CN_FT
+        ),
+        "sanliuling" to Flavor(
+                query = "an_360shouji",
+                baseUrl = CN_FT
+        ),
+        "ftc" to defaultFlavor,
+        "tencent" to Flavor(
+                query = "an_tencent",
+                baseUrl = CN_FT
+        ),
+        "samsung" to Flavor(
+                query = "an_samsung",
+                baseUrl = CN_FT
+        ),
+        "standard" to Flavor(
+                query = "standard",
+                baseUrl = BuildConfig.BASE_URL_STANDARD
+        ),
+        "premium" to Flavor(
+                query = "premium",
+                baseUrl = BuildConfig.BASE_URL_PREMIUM
+        ),
+        "b2b" to Flavor(
+                query = "b2b",
+                baseUrl = BuildConfig.BASE_URL_B2B
+        )
+)
+
+val currentFlavor = flavors[BuildConfig.FLAVOR] ?: defaultFlavor
