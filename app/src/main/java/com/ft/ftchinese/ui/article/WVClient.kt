@@ -5,11 +5,12 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
-import androidx.browser.customtabs.CustomTabsIntent
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.annotation.RequiresApi
+import androidx.browser.customtabs.CustomTabsIntent
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.Tier
@@ -22,8 +23,6 @@ import com.ft.ftchinese.util.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-
-val hostNames = arrayOf(HOST_FTC, HOST_FT)
 
 /**
  * Those links need to start a ChannelActivity.
@@ -178,6 +177,7 @@ open class WVClient(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
         info("Error when requesting ${request?.url}")
 
@@ -225,11 +225,10 @@ open class WVClient(
              * For external links (mostly ads), open in external browser.
              */
             "http", "https" -> {
-                if (hostNames.contains(uri.host)) {
-                    return handleInSiteLink(uri)
-                }
                 return when (uri.host) {
-                    HOST_FTC, HOST_FT -> handleInSiteLink(uri)
+                    HOST_FTC,
+                    HOST_FT,
+                    currentFlavor.host -> handleInSiteLink(uri)
                     HOST_FTA -> handleFtaLink(uri)
                     else -> handleExternalLink(uri)
                 }
@@ -336,10 +335,10 @@ open class WVClient(
              * We could only get an article's type and id from
              * webUrl. No more information could be acquired.
              */
-            ChannelItem.TYPE_STORY,
-            ChannelItem.TYPE_PREMIUM -> {
+            Teaser.TYPE_STORY,
+            Teaser.TYPE_PREMIUM -> {
                 val lastPathSegment = uri.lastPathSegment ?: return true
-                val channelItem = ChannelItem(
+                val channelItem = Teaser(
                         id = lastPathSegment,
                         type = pathSegments[0],
                         title = "",
@@ -350,21 +349,21 @@ open class WVClient(
 
                 true
             }
-            ChannelItem.TYPE_VIDEO,
+            Teaser.TYPE_VIDEO,
             // Links on home page under FT商学院
-            ChannelItem.TYPE_PHOTO_NEWS,
+            Teaser.TYPE_PHOTO_NEWS,
             // Links on home page under FT研究院
-            ChannelItem.TYPE_INTERACTIVE -> {
+            Teaser.TYPE_INTERACTIVE -> {
 
                 val lastPathSegment = uri.lastPathSegment ?: return true
-                val channelItem = ChannelItem(
+                val teaser = Teaser(
                         id = lastPathSegment,
                         type = pathSegments[0],
                         title = "",
                         webUrl = uri.toString()
                 )
 
-                ArticleActivity.startWeb(activity, channelItem)
+                ArticleActivity.start(activity, teaser)
                 true
             }
 
@@ -377,20 +376,20 @@ open class WVClient(
              * Editor choice also use /channel path. You should handle it separately.
              * When a links is clicked on Editor choice, retrieve a HTML fragment.
              */
-            ChannelItem.TYPE_CHANNEL -> openChannelLink(uri)
+            Teaser.TYPE_CHANNEL -> openChannelLink(uri)
 
             /**
              * If the path looks like `/m/marketing/intelligence.html`
              * or /m/corp/preview.html?pageid=huawei2018
              */
-            ChannelItem.TYPE_M -> openMLink(uri)
+            Teaser.TYPE_M -> openMLink(uri)
 
             /**
              * If the path looks like `/tag/中美贸易战`, `/archiver/2019-03-05`
              * start a new page listing articles
              */
-            ChannelItem.TYPE_TAG,
-            ChannelItem.TYPE_ARCHIVE -> {
+            Teaser.TYPE_TAG,
+            Teaser.TYPE_ARCHIVE -> {
                 val page = ChannelSource(
                         title = uri.lastPathSegment ?: "",
                         name = uri.pathSegments.joinToString("_"),
@@ -404,16 +403,8 @@ open class WVClient(
             }
 
             else -> {
-                info("Open a web page directly. Original webUrl is: $uri")
-                val chSrc = ChannelSource(
-                        title = uri.lastPathSegment ?: "",
-                        name = "",
-                        contentUrl = uri.toString(),
-                        htmlType = HTML_TYPE_COMPLETE
-                )
 
-                ChannelActivity.start(activity, chSrc)
-
+                WebViewActivity.start(activity, uri.toString())
                 true
             }
         }
@@ -484,7 +475,7 @@ open class WVClient(
 
         return when (uri.pathSegments[1]) {
             // Links like /m/corp/preview.html?pageid=huawei2018
-            ChannelItem.SUB_TYPE_CORP -> {
+            Teaser.SUB_TYPE_CORP -> {
                 val pageName = uri.getQueryParameter("pageid")
 
                 val name = if (pageName != null) {
@@ -505,7 +496,7 @@ open class WVClient(
                 true
             }
             // Links like /m/marketing/intelligence.html?webview=ftcapp
-            ChannelItem.SUB_TYPE_MARKETING -> {
+            Teaser.SUB_TYPE_MARKETING -> {
                 val key = uri.lastPathSegment ?: ""
                 val listPage = ChannelSource(
                         title = pathToTitle[key] ?: "",
@@ -558,6 +549,7 @@ open class WVClient(
         // This opens an external browser
         val customTabsInt = CustomTabsIntent.Builder().build()
         customTabsInt.launchUrl(activity, uri)
+
 
         return true
     }
