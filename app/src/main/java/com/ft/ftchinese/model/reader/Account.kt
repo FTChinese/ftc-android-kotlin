@@ -3,10 +3,8 @@ package com.ft.ftchinese.model.reader
 import android.net.Uri
 import android.os.Parcelable
 import com.beust.klaxon.Klaxon
-import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.util.*
-import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -155,7 +153,7 @@ data class Account(
 
         val (resp, _) = fetch.responseApi()
 
-        return resp.code() == 204
+        return resp.code == 204
     }
 
     // Show user's account balance.
@@ -200,7 +198,7 @@ data class Account(
                 .setClient()
                 .responseApi()
 
-        return when (resp.code()) {
+        return when (resp.code) {
             204 -> Pair(true, null)
             200 -> if (body != null) {
                 try {
@@ -462,7 +460,7 @@ data class Account(
                 .setUserId(id)
                 .responseApi()
 
-        return response.code() == 204
+        return response.code == 204
     }
 
     fun unstarArticle(articleId: String): Boolean {
@@ -473,7 +471,7 @@ data class Account(
                 .body()
                 .responseApi()
 
-        return response.code() == 204
+        return response.code == 204
     }
 
     fun isStarring(articleId: String): Boolean {
@@ -483,20 +481,7 @@ data class Account(
                 .setUserId(id)
                 .responseApi()
 
-        return response.code() == 204
-    }
-
-    fun engaging(start: Long, end: Long) {
-        Fetch().post("http://www.ftchinese.com/engagment.php")
-                .jsonBody(Klaxon().toJsonString(ReadingDuration(
-                        url = "http://www.ftchinese.com/",
-                        refer = "http://www.ftchinese.com/",
-                        startUnix = start,
-                        endUnix = end,
-                        userId = id,
-                        functionName = "onLoad"
-                )))
-                .responseString()
+        return response.code == 204
     }
 }
 
