@@ -14,7 +14,6 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.util.flavorQuery
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.order.Tier
@@ -42,7 +41,7 @@ class WebContentFragment : Fragment(),
     private lateinit var cache: FileCache
     private lateinit var followingManager: FollowingManager
 
-    private var channelItem: ChannelItem? = null
+    private var teaser: Teaser? = null
 
     override fun onOpenGraphEvaluated(result: String) {
 
@@ -75,28 +74,28 @@ class WebContentFragment : Fragment(),
     private fun mergeOpenGraph(og: OpenGraphMeta?): StarredArticle {
 
         return StarredArticle(
-                id = if (channelItem?.id.isNullOrBlank()) {
+                id = if (teaser?.id.isNullOrBlank()) {
                     og?.extractId()
                 } else {
-                    channelItem?.id
+                    teaser?.id
                 } ?: "",
-                type = if (channelItem?.type.isNullOrBlank()) {
+                type = if (teaser?.type.isNullOrBlank()) {
                     og?.extractType()
                 } else {
-                    channelItem?.type
+                    teaser?.type
                 } ?: "",
-                subType = channelItem?.subType ?: "",
-                title = if (channelItem?.title.isNullOrBlank()) {
+                subType = teaser?.subType ?: "",
+                title = if (teaser?.title.isNullOrBlank()) {
                     og?.title
                 } else {
-                    channelItem?.title
+                    teaser?.title
                 } ?: "",
                 standfirst = og?.description ?: "",
-                keywords = channelItem?.tag ?: og?.keywords ?: "",
+                keywords = teaser?.tag ?: og?.keywords ?: "",
                 imageUrl = og?.image ?: "",
-                audioUrl = channelItem?.audioUrl ?: "",
-                radioUrl = channelItem?.radioUrl ?: "",
-                webUrl = channelItem?.getCanonicalUrl() ?: og?.url ?: "",
+                audioUrl = teaser?.audioUrl ?: "",
+                radioUrl = teaser?.radioUrl ?: "",
+                webUrl = teaser?.getCanonicalUrl() ?: og?.url ?: "",
                 tier =  when {
                     og?.keywords?.contains("会员专享") == true -> Tier.STANDARD.toString()
                     og?.keywords?.contains("高端专享") == true -> Tier.PREMIUM.toString()
@@ -117,9 +116,9 @@ class WebContentFragment : Fragment(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        channelItem = arguments?.getParcelable<ChannelItem>(ARG_WEBPAGE_ARTICLE)
+        teaser = arguments?.getParcelable<Teaser>(ARG_WEBPAGE_ARTICLE)
 
-        info("Web content source: $channelItem")
+        info("Web content source: $teaser")
     }
 
     override fun onCreateView(
@@ -190,24 +189,20 @@ class WebContentFragment : Fragment(),
         web_view.loadUrl(url)
 
         // Get the minimal information of an article.
-        val article = channelItem?.toStarredArticle() ?: return
+        val article = teaser?.toStarredArticle() ?: return
 
         articleViewModel.webLoaded(article)
     }
 
-    /**
-     * If passed in arg is only a uri, add query paramter to it.
-     * If passed in arg is ChannelItem, use its apiUrl. Not need to append query parameter
-     */
     private fun buildUrl(): String {
         // Use api webUrl first.
-        val apiUrl = channelItem?.buildApiUrl()
+        val apiUrl = teaser?.contentUrl()
         if (!apiUrl.isNullOrBlank()) {
             return apiUrl
         }
 
         // Fallback to canonical webUrl
-        val webUrl = channelItem?.webUrl ?: return ""
+        val webUrl = teaser?.webUrl ?: return ""
 
 
         val url = Uri.parse(webUrl)
@@ -226,7 +221,7 @@ class WebContentFragment : Fragment(),
     }
 
     companion object {
-        fun newInstance(channelItem: ChannelItem) = WebContentFragment().apply {
+        fun newInstance(channelItem: Teaser) = WebContentFragment().apply {
             arguments = bundleOf(
                     ARG_WEBPAGE_ARTICLE to channelItem
             )
