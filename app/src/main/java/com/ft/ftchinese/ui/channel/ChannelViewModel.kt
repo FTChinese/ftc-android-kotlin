@@ -43,7 +43,7 @@ class ChannelViewModel(val cache: FileCache) :
     }
 
     fun loadFromServer(channelSource: ChannelSource, shouldRender: Boolean = true) {
-        val url = channelSource.listUrl()
+        val url = channelSource.normalizedUrl()
         if (url == null) {
             renderResult.value = RenderResult(
                     error = R.string.api_empty_url
