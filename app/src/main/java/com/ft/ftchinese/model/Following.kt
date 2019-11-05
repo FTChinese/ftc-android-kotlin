@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model
 
 import android.content.Context
+import java.net.URLEncoder
 
 private val followTypes = arrayOf("tag", "topic", "area", "industry", "author", "column")
 private val FOLLOW_TYPE_TAG = followTypes[0]
@@ -31,6 +32,9 @@ data class Following(
 ) {
     val bodyUrl: String
         get() = "https://api003.ftmailbox.com/$type/$tag?bodyonly=yes&webviewftcapp"
+
+    val topic: String
+        get() = URLEncoder.encode("${type}_$tag", "utf-8")
 }
 
 /**
@@ -46,13 +50,13 @@ class FollowingManager private constructor(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(PREF_FILE_FOLLOWING, Context.MODE_PRIVATE)
     private val editor = sharedPreferences.edit()
 
-    fun save(following: Following) {
+    fun save(following: Following): Boolean {
         // Since Following#type is used as key, it must not be empty or null.
         // Even though Kotlin says call null check is redundant,
         // Gson does not work well with Kotlin's type system.
         // It insist on parsing Java's null value into Kotlin's non-null field.
-        if (following.type.isNullOrBlank()) {
-            return
+        if (following.type.isBlank()) {
+            return false
         }
 
         // Use Following#type as preferences' key
@@ -62,8 +66,10 @@ class FollowingManager private constructor(context: Context) {
         val newHs = HashSet(hs)
 
         // Use the value of Following#tag as the the value of a HashSet
+        var isSubscribed = false
         when (following.action) {
             ACTION_FOLLOW -> {
+                isSubscribed = true
                 newHs.add(following.tag)
             }
 
@@ -75,6 +81,8 @@ class FollowingManager private constructor(context: Context) {
         // Save the updated HashSet
         editor.putStringSet(following.type, newHs)
         editor.apply()
+
+        return isSubscribed
     }
 
     fun loadForJS(): JSFollows {
