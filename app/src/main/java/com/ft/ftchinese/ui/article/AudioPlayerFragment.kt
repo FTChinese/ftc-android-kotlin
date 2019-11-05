@@ -8,16 +8,14 @@ import android.view.View
 import android.view.ViewGroup
 
 import com.ft.ftchinese.R
+import com.ft.ftchinese.ui.base.ScopedFragment
 import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import kotlinx.android.synthetic.main.fragment_audio_player.*
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_AUDIO_URL = "arg_audio_url"
 
 /**
@@ -25,7 +23,8 @@ private const val ARG_AUDIO_URL = "arg_audio_url"
  * Use the [AudioPlayerFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class AudioPlayerFragment : Fragment() {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class AudioPlayerFragment : ScopedFragment() {
     private var audioUrl: String? = null
     private lateinit var player: SimpleExoPlayer
     private var audioSource: ProgressiveMediaSource? = null
@@ -61,6 +60,12 @@ class AudioPlayerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         player_view.player = player
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        player.release()
     }
 
     companion object {
