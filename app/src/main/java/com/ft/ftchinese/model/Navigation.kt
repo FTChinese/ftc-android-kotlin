@@ -1,7 +1,6 @@
 package com.ft.ftchinese.model
 
-import com.ft.ftchinese.util.CN_FT
-import com.ft.ftchinese.util.FTC_OFFICIAL_URL
+import com.ft.ftchinese.util.currentFlavor
 
 object Navigation {
 
@@ -10,27 +9,27 @@ object Navigation {
             ChannelSource(
                     title = "首页",
                     name = "news_home",
-                    contentUrl = "$CN_FT/?webview=ftcapp&bodyonly=yes&maxB=1&backupfile=localbackup&showIAP=yes&pagetype=home&001",
+                    contentUrl = "${currentFlavor.baseUrl}/?webview=ftcapp&bodyonly=yes&maxB=1&backupfile=localbackup&showIAP=yes&pagetype=home&001",
                     htmlType = HTML_TYPE_FRAGMENT
             ),
 
             ChannelSource(
                     title = "中国",
                     name = "news_china",
-                    contentUrl = "$CN_FT/channel/china.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/china.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
 
             ChannelSource(
                     title = "标准订阅",
                     name = "news_standard_only",
-                    contentUrl = "$CN_FT/channel/standardsubscription.html?webview=ftcapp&bodyonly=yes&ad=no&001",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/standardsubscription.html?webview=ftcapp&bodyonly=yes&ad=no&001",
                     htmlType = HTML_TYPE_FRAGMENT,
                     permission = Permission.STANDARD),
 
             ChannelSource(
                     title = "高端订阅",
                     name = "news_premium_only",
-                    contentUrl = "$CN_FT/channel/premiumsubscription.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/premiumsubscription.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018",
                     htmlType = HTML_TYPE_FRAGMENT,
                     permission = Permission.PREMIUM),
 
@@ -47,7 +46,7 @@ object Navigation {
             ChannelSource(
                     title = "全球",
                     name = "news_global",
-                    contentUrl = "$CN_FT/channel/world.html?webview=ftcapp&bodyonly=yes&002",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/world.html?webview=ftcapp&bodyonly=yes&002",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -61,7 +60,7 @@ object Navigation {
             ChannelSource(
                     title = "观点",
                     name = "news_opinions",
-                    contentUrl = "$CN_FT/channel/opinion.html?webview=ftcapp&bodyonly=yes&ad=no",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/opinion.html?webview=ftcapp&bodyonly=yes&ad=no",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -93,7 +92,7 @@ object Navigation {
             ChannelSource(
                     title = "专栏",
                     name = "news_column",
-                    contentUrl = "$CN_FT/channel/column.html?webview=ftcapp&bodyonly=yes&ad=no",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/column.html?webview=ftcapp&bodyonly=yes&ad=no",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -107,7 +106,7 @@ object Navigation {
             ChannelSource(
                     title = "金融市场",
                     name = "news_markets",
-                    contentUrl = "$CN_FT/channel/markets.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/markets.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -121,12 +120,12 @@ object Navigation {
             ChannelSource(
                     title = "商业",
                     name = "news_business",
-                    contentUrl = "$CN_FT/channel/business.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/business.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             ChannelSource(
                     title = "经济",
                     name = "news_economy",
-                    contentUrl = "$CN_FT/channel/economy.html?webview=ftcapp&bodyonly=yes&001",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/economy.html?webview=ftcapp&bodyonly=yes&001",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -140,7 +139,7 @@ object Navigation {
             ChannelSource(
                     title = "科技",
                     name = "news_technology",
-                    contentUrl = "$CN_FT/channel/technology.html?webview=ftcapp&bodyonly=yes&001",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/technology.html?webview=ftcapp&bodyonly=yes&001",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -154,7 +153,7 @@ object Navigation {
             ChannelSource(
                     title = "教育",
                     name = "news_education",
-                    contentUrl = "$CN_FT/channel/education.html?webview=ftcapp&bodyonly=yes&001",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/education.html?webview=ftcapp&bodyonly=yes&001",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -168,7 +167,7 @@ object Navigation {
             ChannelSource(
                     title = "管理",
                     name = "news_management",
-                    contentUrl = "$CN_FT/channel/management.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/management.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -182,7 +181,7 @@ object Navigation {
             ChannelSource(
                     title = "生活时尚",
                     name = "news_life_style",
-                    contentUrl = "$CN_FT/channel/lifestyle.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/lifestyle.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * Load it directly into WebView.
@@ -209,7 +208,7 @@ object Navigation {
             ChannelSource(
                     title = "特别报导",
                     name = "news_special_report",
-                    contentUrl = "$CN_FT/channel/special.html?webview=ftcapp&ad=no&001",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/special.html?webview=ftcapp&ad=no&001",
                     htmlType = HTML_TYPE_COMPLETE),
             /**
              * "meta": {
@@ -223,7 +222,7 @@ object Navigation {
             ChannelSource(
                     title = "热门文章",
                     name = "news_weekly",
-                    contentUrl = "$CN_FT/channel/weekly.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/weekly.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -237,7 +236,7 @@ object Navigation {
             ChannelSource(
                     title = "数据新闻",
                     name = "news_data",
-                    contentUrl = "$CN_FT/channel/datanews.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/datanews.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * This page is loaded directly into a webview.
@@ -250,17 +249,17 @@ object Navigation {
             ChannelSource(
                     title = "会议活动",
                     name = "news_events",
-                    contentUrl = "$CN_FT/m/corp/preview.html?pageid=events&webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/m/corp/preview.html?pageid=events&webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             ChannelSource(
                     title = "FT研究院",
                     name = "news_fta",
-                    contentUrl = "$CN_FT/m/corp/preview.html?pageid=fti&webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/m/corp/preview.html?pageid=fti&webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             ChannelSource(
                     title = "高端物业",
                     name = "news_property",
-                    contentUrl = "$CN_FT/m/corp/preview.html?pageid=property&webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/m/corp/preview.html?pageid=property&webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT)
     )
 
@@ -268,7 +267,7 @@ object Navigation {
             ChannelSource(
                 title = "最新",
                 name = "english_latest",
-                contentUrl = "$CN_FT/channel/english.html?webview=ftcapp&bodyonly=yes&001",
+                contentUrl = "${currentFlavor.baseUrl}/channel/english.html?webview=ftcapp&bodyonly=yes&001",
                 htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -292,7 +291,7 @@ object Navigation {
             ChannelSource(
                     title = "英语电台",
                     name = "english_radio",
-                    contentUrl = "$CN_FT/channel/radio.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/radio.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -306,7 +305,7 @@ object Navigation {
             ChannelSource(
                     "金融英语速读",
                     name = "english_speedreading",
-                    contentUrl = "$CN_FT/channel/speedread.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/speedread.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * [
@@ -337,7 +336,7 @@ object Navigation {
             ChannelSource(
                     "双语阅读",
                     name = "english_bilingual",
-                    contentUrl = "$CN_FT/channel/ce.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/ce.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -351,7 +350,7 @@ object Navigation {
             ChannelSource(
                     "原声视频",
                     name = "english_video",
-                    contentUrl = "$CN_FT/channel/ev.html?webview=ftcapp&bodyonly=yes&001",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/ev.html?webview=ftcapp&bodyonly=yes&001",
                     htmlType = HTML_TYPE_FRAGMENT)
     )
 
@@ -368,7 +367,7 @@ object Navigation {
             ChannelSource(
                     title = "商学院观察",
                     name = "fta_story",
-                    contentUrl = "$CN_FT/m/corp/preview.html?pageid=mbastory&webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/m/corp/preview.html?pageid=mbastory&webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -382,7 +381,7 @@ object Navigation {
             ChannelSource(
                     title = "热点观察",
                     name = "fta_hot",
-                    contentUrl = "$CN_FT/m/corp/preview.html?pageid=hotcourse&webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/m/corp/preview.html?pageid=hotcourse&webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -396,7 +395,7 @@ object Navigation {
             ChannelSource(
                     title = "MBA训练营",
                     name = "fta_gym",
-                    contentUrl = "$CN_FT/channel/mbagym.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/mbagym.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -410,7 +409,7 @@ object Navigation {
             ChannelSource(
                     title = "互动小测",
                     name = "fta_quiz",
-                    contentUrl = "$CN_FT/m/corp/preview.html?pageid=quizplus&webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/m/corp/preview.html?pageid=quizplus&webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * Article items for this page:
@@ -434,7 +433,7 @@ object Navigation {
             ChannelSource(
                     title = "深度阅读",
                     name = "fta_reading",
-                    contentUrl = "$CN_FT/m/corp/preview.html?pageid=mbaread&webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/m/corp/preview.html?pageid=mbaread&webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT)
     )
 
@@ -451,7 +450,7 @@ object Navigation {
             ChannelSource(
                     title = "最新",
                     name = "video_latest",
-                    contentUrl = "$CN_FT/channel/audiovideo.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/audiovideo.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -467,7 +466,7 @@ object Navigation {
             ChannelSource(
                     title = "高端视点",
                     name = "video_viewtop",
-                    contentUrl = "$CN_FT/channel/viewtop.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/viewtop.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -483,13 +482,13 @@ object Navigation {
             ChannelSource(
                     title = "麦可林学英语",
                     name = "video_learn_english",
-                    contentUrl = "$CN_FT/m/corp/preview.html?pageid=learnenglish&webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/m/corp/preview.html?pageid=learnenglish&webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
 
             ChannelSource(
                     title = "BoomEar艺术播客",
                     name = "video_boomear",
-                    contentUrl = "$CN_FT/m/corp/preview.html?pageid=boomear&webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/m/corp/preview.html?pageid=boomear&webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT
             ),
             /**
@@ -506,7 +505,7 @@ object Navigation {
             ChannelSource(
                     title = "秒懂",
                     name = "video_explain",
-                    contentUrl = "$CN_FT/channel/explainer.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/explainer.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
                     htmlType = HTML_TYPE_FRAGMENT
             ),
 
@@ -517,7 +516,7 @@ object Navigation {
             ChannelSource(
                     title = "FT看见",
                     name = "video_feature",
-                    contentUrl = "$CN_FT/channel/vfeatures.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/vfeatures.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
                     htmlType = HTML_TYPE_FRAGMENT
             ),
             /**
@@ -527,7 +526,7 @@ object Navigation {
             ChannelSource(
                     title = "有色眼镜",
                     name = "video_tinted",
-                    contentUrl = "$CN_FT/channel/videotinted.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/videotinted.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
                     htmlType = HTML_TYPE_FRAGMENT
             )
     )
