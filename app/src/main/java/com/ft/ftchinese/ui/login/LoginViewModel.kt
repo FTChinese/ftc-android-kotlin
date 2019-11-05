@@ -69,7 +69,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                             .responseApi()
                 }
 
-                if (resp.code() == 204) {
+                if (resp.code == 204) {
                     _emailResult.value = FindEmailResult(
                             success = Pair(email, true)
                     )
@@ -77,7 +77,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                 }
 
                 _emailResult.value = FindEmailResult(
-                        exception = Exception("API error ${resp.code()}")
+                        exception = Exception("API error ${resp.code}")
                 )
 
             } catch (e: ClientError) {
