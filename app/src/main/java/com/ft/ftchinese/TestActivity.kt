@@ -102,7 +102,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
         registerReceiver(onDownloadComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
-        registerReceiver(onNotificationClicked, IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED))
+        registerReceiver(onDownloadClicked, IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED))
 
         btn_start_download.setOnClickListener {
             it.isEnabled = false
@@ -238,12 +238,11 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun createNotification() {
         val intent = Intent(this, ArticleActivity::class.java).apply {
-            putExtra(EXTRA_CHANNEL_ITEM, ChannelItem(
+            putExtra(EXTRA_ARTICLE_TEASER, Teaser(
                     id = "001083331",
                     type = "story",
                     title = "波司登遭做空机构质疑 股价暴跌"
             ))
-            putExtra(EXTRA_USE_JSON, true)
         }
 
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
@@ -288,7 +287,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         return resultCode == ConnectionResult.SUCCESS
     }
 
-    private val onNotificationClicked = object : BroadcastReceiver() {
+    private val onDownloadClicked = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             info("intent: $intent")
 
@@ -532,7 +531,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(onDownloadComplete)
-        unregisterReceiver(onNotificationClicked)
+        unregisterReceiver(onDownloadClicked)
     }
 
     private val onShowNotification = object : BroadcastReceiver() {
