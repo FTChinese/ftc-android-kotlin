@@ -1,18 +1,20 @@
 package com.ft.ftchinese.model
 
+
 enum class RemoteMessageType(val symbol: String) {
     Story("story"),
     Video("video"),
     Photo("photo"),
-    Academy("gym"),
-    SpecialReport("special"),
+    Interactive("interactive"),
     Tag("tag"),
-    Channel("channel"),
-    Other("page"),
-    Download("download");
+    Channel("channel");
 
     override fun toString(): String {
         return symbol
+    }
+
+    fun toArticleType(): String? {
+        return messageToContentType[this]
     }
 
     companion object {
@@ -24,3 +26,10 @@ enum class RemoteMessageType(val symbol: String) {
         }
     }
 }
+
+private val messageToContentType = mapOf(
+        RemoteMessageType.Story to "story",
+        RemoteMessageType.Video to "video",
+        RemoteMessageType.Photo to "photo",
+        RemoteMessageType.Interactive to "interactive"
+)
