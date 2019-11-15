@@ -222,14 +222,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             BarrierFragment().show(supportFragmentManager, "BarrierFragment")
         }
 
-//        fab.setOnClickListener {
-//            fab.setImageResource(R.drawable.ic_bookmark_black_24dp)
-//        }
-
-        audio_player.setOnClickListener {
-            AudioPlayerActivity.start(this)
-        }
-
         btn_login_in.setOnClickListener {
             sessionManager.saveAccount(mockAccount)
         }
@@ -628,7 +620,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)
-        menuInflater.inflate(R.menu.article_menu, menu)
+        menuInflater.inflate(R.menu.article_top_bar, menu)
 
 //        menu?.findItem(R.id.menu_item_toggle_polling)
 //                ?.title = if (PollService.isServiceAlarmOn(this)) "Stop polling" else "Start polling"
@@ -638,7 +630,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
-            R.id.app_bar_share -> {
+            R.id.menu_share -> {
                 startActivity(Intent.createChooser(Intent().apply {
                     action = Intent.ACTION_SEND
                     putExtra(Intent.EXTRA_TEXT, "FT中文网 - test")
