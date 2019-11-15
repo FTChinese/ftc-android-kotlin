@@ -13,6 +13,9 @@
     <!--  This is optional  -->
     <string name="news_notification_channel_description">新闻动态</string>
 
+    <string name="exo_download_notification_channel_name">Downloads</string>
+    <string name="exo_download_notification_channel_description">Download mp3</string>
+
     <!-- Bottom navigation tabs -->
     <string name="nav_news">最新</string>
     <string name="nav_english">每日英语</string>
@@ -221,15 +224,18 @@
     <string name="refreshing_account">更新账号数据&#8230;</string>
     <string name="loading_failed">无法加载数据，请稍后再试</string>
 
-    <!-- Data loading and refreshing -->
-    <string name="title_share">分享</string>
+
+    <string name="menu_share">分享</string>
+    <string name="menu_audio">朗读</string>
     <string name="share_to">分享到</string>
     <string name="share_done">分享成功</string>
 
-
     <!-- Social share -->
-    <string name="article_starred">已收藏</string>
-    <string name="article_unstarred">取消收藏</string>
+    <string name="alert_starred">已收藏</string>
+    <string name="alert_unstarred">收藏已取消</string>
+    <string name="alert_downloading_audio">开始下载音频</string>
+    <string name="alert_audio_downloaded">音频下载完成</string>
+    <string name="download_start_error">无法启动下载</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_not_logged_in">您尚未登录</string>
@@ -486,6 +492,7 @@
         <item>sc</item>
         <item>tc</item>
     </string-array>
+    <string name="alert_audio_deleted">已删除下载的音频</string>
 
 
 </resources>

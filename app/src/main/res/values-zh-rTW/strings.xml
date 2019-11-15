@@ -220,14 +220,18 @@
     <string name="loading_failed">無法下載頁面，請稍後再試</string>
 
     <!-- Data loading and refreshing -->
-    <string name="title_share">分享</string>
+    <string name="menu_share">分享</string>
+    <string name="menu_audio">朗读</string>
     <string name="share_to">分享到</string>
     <string name="share_done">分享成功</string>
 
 
     <!-- Social share -->
-    <string name="article_starred">已收藏</string>
-    <string name="article_unstarred">取消收藏</string>
+    <string name="alert_starred">已收藏</string>
+    <string name="alert_unstarred">收藏已取消</string>
+    <string name="alert_downloading_audio">开始下载音频</string>
+    <string name="alert_audio_downloaded">音频下载完成</string>
+    <string name="download_start_error">无法启动下载</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_not_logged_in">您尚未登入</string>
@@ -484,6 +488,7 @@
         <item>tc</item>
     </string-array>
     <string name="fcm_start_checking">检测</string>
-
+    <string name="exo_download_notification_channel_name">Downloads</string>
+    <string name="exo_download_notification_channel_description">Download mp3</string>
 
 </resources>
