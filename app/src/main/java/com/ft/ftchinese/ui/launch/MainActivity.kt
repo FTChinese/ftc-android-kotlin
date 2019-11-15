@@ -29,6 +29,7 @@ import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.model.splash.SplashScreenManager
+import com.ft.ftchinese.service.AudioDownloadService
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.LoginActivity
@@ -40,6 +41,7 @@ import com.ft.ftchinese.ui.channel.TabPagerAdapter
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.util.*
+import com.google.android.exoplayer2.offline.DownloadService
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession
@@ -173,6 +175,12 @@ class MainActivity : ScopedAppActivity(),
         checkStripeStatus()
 
         setupSplashScreen()
+
+        try {
+            DownloadService.start(this, AudioDownloadService::class.java)
+        } catch (e: Exception) {
+            DownloadService.startForeground(this, AudioDownloadService::class.java)
+        }
     }
 
     private fun createNotificationChannel() {
