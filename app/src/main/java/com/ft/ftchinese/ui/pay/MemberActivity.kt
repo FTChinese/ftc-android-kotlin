@@ -47,7 +47,7 @@ class MemberActivity : ScopedAppActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_member)
+//        setContentView(R.layout.activity_member)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_member)
 
         setSupportActionBar(toolbar)
