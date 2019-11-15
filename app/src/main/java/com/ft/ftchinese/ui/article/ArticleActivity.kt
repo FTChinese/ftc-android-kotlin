@@ -60,8 +60,7 @@ class ArticleActivity : ScopedAppActivity(),
 
     private var shareFragment: SocialShareFragment? = null
 
-
-    private var channelItem: Teaser? = null
+    private var teaser: Teaser? = null
 
     // The data used for share
     private var article: StarredArticle? = null
@@ -82,15 +81,19 @@ class ArticleActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(false)
         }
 
+        val teaser = intent.getParcelableExtra<Teaser>(EXTRA_ARTICLE_TEASER) ?: return
+        info("Article source: $teaser")
+        this.teaser = teaser
+
+        // Hide audio button.
+        if (!teaser.hasMp3()) {
+            invalidateOptionsMenu()
+        }
+
         // Hide language switcher.
         updateLangSwitcher(show = false)
 
         setup()
-
-        // Meta data about current article
-        val teaser = intent.getParcelableExtra<Teaser>(EXTRA_ARTICLE_TEASER) ?: return
-
-        info("Article source: $teaser")
 
         supportFragmentManager.commit {
             if (teaser.hasRestfulAPI()) {
@@ -98,13 +101,7 @@ class ArticleActivity : ScopedAppActivity(),
             } else {
                 replace(R.id.fragment_article, WebContentFragment.newInstance(teaser))
             }
-
-            if (teaser.hasMp3()) {
-                replace(R.id.player_container, AudioPlayerFragment.newInstance(teaser.mp3Url()))
-            }
         }
-
-        channelItem = teaser
     }
 
     private fun setup() {
@@ -145,26 +142,45 @@ class ArticleActivity : ScopedAppActivity(),
 
         // Switch bookmark icon upon starViewModel.isStarring() finished.
         starViewModel.starred.observe(this, Observer {
+            // Updating bookmark icon.
             isStarring = it
-            updateBookmark(it)
+            updateFabIcon()
         })
 
         articleViewModel.shareItem.observe(this, Observer {
             onClickShareIcon(it)
         })
 
-        // Handle bookmakr action
         fab_bookmark.setOnClickListener {
             isStarring = !isStarring
-            updateBookmark(isStarring)
 
             if (isStarring) {
                 starViewModel.star(article)
-                Snackbar.make(it, R.string.article_starred, Snackbar.LENGTH_SHORT).show()
+
+                Snackbar.make(
+                        it,
+                        R.string.alert_starred,
+                        Snackbar.LENGTH_SHORT
+                ).show()
             } else {
                 starViewModel.unstar(article)
-                Snackbar.make(it, R.string.article_unstarred, Snackbar.LENGTH_SHORT).show()
+
+                Snackbar.make(
+                        it,
+                        R.string.alert_unstarred,
+                        Snackbar.LENGTH_SHORT
+                ).show()
             }
+
+            updateFabIcon()
+        }
+    }
+
+    private fun updateFabIcon() {
+        if (isStarring) {
+            fab_bookmark.setImageResource(R.drawable.ic_bookmark_black_24dp)
+        } else {
+            fab_bookmark.setImageResource(R.drawable.ic_bookmark_border_black_24dp)
         }
     }
 
@@ -183,7 +199,7 @@ class ArticleActivity : ScopedAppActivity(),
         lang_en_btn.setOnClickListener {
             val account = sessionManager.loadAccount()
 
-            val item = channelItem ?: return@setOnClickListener
+            val item = teaser ?: return@setOnClickListener
 
             if (!grantPermission(account, Permission.STANDARD)) {
                 disableLangSwitch()
@@ -203,7 +219,7 @@ class ArticleActivity : ScopedAppActivity(),
         lang_bi_btn.setOnClickListener {
             val account = sessionManager.loadAccount()
 
-            val item = channelItem ?: return@setOnClickListener
+            val item = teaser ?: return@setOnClickListener
 
             if (!grantPermission(account, Permission.STANDARD)) {
                 disableLangSwitch()
@@ -218,14 +234,6 @@ class ArticleActivity : ScopedAppActivity(),
         }
     }
 
-    private fun updateBookmark(ok: Boolean) {
-        if (ok) {
-            fab_bookmark.setImageResource(R.drawable.ic_bookmark_black_24dp)
-        } else {
-            fab_bookmark.setImageResource(R.drawable.ic_bookmark_border_black_24dp)
-        }
-    }
-
     private fun disableLangSwitch() {
         lang_cn_btn.isChecked = true
         lang_en_btn.isChecked = false
@@ -234,17 +242,25 @@ class ArticleActivity : ScopedAppActivity(),
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 
-        menuInflater.inflate(R.menu.article_menu, menu)
+        menuInflater.inflate(R.menu.article_top_bar, menu)
+
+        if (teaser?.hasMp3() != true) {
+            menu?.findItem(R.id.menu_audio)?.isVisible = false
+        }
 
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.app_bar_share -> {
+            R.id.menu_share -> {
                 shareFragment = SocialShareFragment()
                 shareFragment?.show(supportFragmentManager, "SocialShareFragment")
 
+                true
+            }
+            R.id.menu_audio -> {
+                AudioPlayerActivity.start(this, teaser)
                 true
             }
             else -> super.onOptionsItemSelected(item)
