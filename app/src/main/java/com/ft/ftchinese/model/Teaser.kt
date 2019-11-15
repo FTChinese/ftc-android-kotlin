@@ -121,19 +121,16 @@ data class Teaser(
     }
 
     fun hasMp3(): Boolean {
-        return type == "interactive" && (audioUrl != null || radioUrl != null)
+        return audioUrl != null || radioUrl != null
     }
 
-    fun mp3Url(): String {
-        if (audioUrl != null) {
-            return audioUrl
+    fun audioUri(): Uri? {
+        val url =  audioUrl ?: radioUrl ?: return null
+        return try {
+            Uri.parse(url)
+        } catch (e: Exception) {
+            null
         }
-
-        if (radioUrl != null) {
-            return radioUrl
-        }
-
-        return ""
     }
 
     fun buildGALabel(): String {
