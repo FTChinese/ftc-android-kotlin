@@ -20,6 +20,16 @@
             android:layout_height="wrap_content"/>
     </androidx.core.widget.NestedScrollView>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_download_audio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/player_view"
+        app:fabSize="mini"
+        app:srcCompat="@drawable/ic_file_download_black_24dp"/>
+
     <com.google.android.exoplayer2.ui.PlayerControlView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
