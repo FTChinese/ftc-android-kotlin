@@ -53,7 +53,7 @@
             android:parentActivityName=".ui.launch.MainActivity" />
         <activity
             android:name=".ui.article.AudioPlayerActivity"
-            android:parentActivityName=".ui.launch.MainActivity" />
+            android:parentActivityName=".ui.article.ArticleActivity" />
         <activity
             android:name=".ui.article.WebViewActivity"
             android:parentActivityName=".ui.launch.MainActivity"/>
@@ -197,6 +197,13 @@
         <service
             android:name=".service.ReadingDurationService"
             android:exported="false" />
+        <service android:name=".service.AudioDownloadService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.exoplayer.downloadService.action.RESTART"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </service>
         <service
             android:name=".service.PollService"
             android:label="Poll Service" />
@@ -211,4 +218,6 @@
 
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
+<!--  For ExoPlayer download service  -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 </manifest>
