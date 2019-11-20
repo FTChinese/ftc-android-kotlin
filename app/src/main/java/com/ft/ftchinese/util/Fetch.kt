@@ -120,37 +120,37 @@ class Fetch : AnkoLogger {
     }
 
     fun header(name: String, value: String): Fetch {
-        headers.set(name, value)
+        headers[name] = value
         return this
     }
 
     // Authorization: Bearer xxxxxxx
     private fun setAccessKey(): Fetch {
-        headers.set("Authorization", "Bearer ${BuildConfig.ACCESS_TOKEN}")
+        headers["Authorization"] = "Bearer ${BuildConfig.ACCESS_TOKEN}"
         return  this
     }
 
     // X-Client-Type: android
     // X-Client-Version: 2.0.0-google
     fun setClient(): Fetch {
-        headers.set("X-Client-Type", "android")
-                .set("X-Client-Version", BuildConfig.VERSION_NAME)
+        headers["X-Client-Type"] = "android"
+        headers["X-Client-Version"] = BuildConfig.VERSION_NAME
         return this
     }
 
     fun setUserId(uuid: String): Fetch {
-        headers.set("X-User-Id", uuid)
+        headers["X-User-Id"] = uuid
 
         return this
     }
 
     fun setAppId(): Fetch {
-       headers.set("X-App-Id", BuildConfig.WX_SUBS_APPID)
+        headers["X-App-Id"] = BuildConfig.WX_SUBS_APPID
         return this
     }
 
     fun setUnionId(unionId: String): Fetch {
-        headers.set("X-Union-Id", unionId)
+        headers["X-Union-Id"] = unionId
         return this
     }
 
