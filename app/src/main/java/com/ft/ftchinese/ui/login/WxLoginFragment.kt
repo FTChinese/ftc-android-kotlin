@@ -19,6 +19,11 @@ import kotlinx.android.synthetic.main.fragment_wx_login.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
+/**
+ * This fragment shows a Wechat login button inside [LoginActivity] and handles the login process.
+ * It just calls the Wechat SDK and the rest operations are
+ * delegated to wxapi.WXEntryActivity
+ */
 class WxLoginFragment : Fragment(), AnkoLogger {
 
     private var wxApi: IWXAPI? = null
@@ -48,6 +53,7 @@ class WxLoginFragment : Fragment(), AnkoLogger {
         } ?: throw Exception("Invalid Exception")
 
         wechat_oauth_btn.setOnClickListener {
+            viewModel.inProgress.value = true
             authorize()
         }
     }

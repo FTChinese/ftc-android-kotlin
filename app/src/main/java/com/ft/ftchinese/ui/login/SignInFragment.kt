@@ -80,7 +80,7 @@ class SignInFragment : ScopedFragment(),
             viewModel.passwordDataChanged(password_input.text.toString().trim())
         }
 
-        viewModel.loginFormState.observe(this, Observer {
+        viewModel.loginFormState.observe(viewLifecycleOwner, Observer {
             info("login form state: $it")
             val loginState = it ?: return@Observer
 
@@ -108,7 +108,7 @@ class SignInFragment : ScopedFragment(),
             }
 
             enableInput(false)
-            viewModel.showProgress(true)
+            viewModel.inProgress.value = true
 
             viewModel.login(Credentials(
                     email = email,
@@ -117,7 +117,7 @@ class SignInFragment : ScopedFragment(),
             ))
         }
 
-        viewModel.accountResult.observe(this, Observer {
+        viewModel.accountResult.observe(viewLifecycleOwner, Observer {
             if (it.error != null || it.exception != null) {
                 enableInput(true)
             }

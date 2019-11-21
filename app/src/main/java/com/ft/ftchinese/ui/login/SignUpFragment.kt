@@ -63,7 +63,7 @@ class SignUpFragment : ScopedFragment(),
                     .get(LoginViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
-        viewModel.loginFormState.observe(this, Observer {
+        viewModel.loginFormState.observe(viewLifecycleOwner, Observer {
             val signUpState = it ?: return@Observer
 
             sign_up_btn.isEnabled = signUpState.isPasswordValid
@@ -80,6 +80,7 @@ class SignUpFragment : ScopedFragment(),
             viewModel.passwordDataChanged(password_input.text.toString().trim())
         }
 
+        // TODO: handle wechat sign-up.
         sign_up_btn.setOnClickListener {
             if (activity?.isNetworkConnected() != true) {
                 toast(R.string.prompt_no_network)
@@ -94,19 +95,18 @@ class SignUpFragment : ScopedFragment(),
             }
 
             enableInput(false)
-            viewModel.showProgress(true)
+            viewModel.inProgress.value = true
 
             viewModel.signUp(
                 c = Credentials(
                         email = e,
                         password = password_input.text.toString().trim(),
                         deviceToken = tokenManager.getToken()
-                ),
-                wxSession = sessionManager.loadWxSession()
+                )
             )
         }
 
-        viewModel.accountResult.observe(this, Observer {
+        viewModel.accountResult.observe(viewLifecycleOwner, Observer {
             if (it.error != null || it.exception != null) {
                 enableInput(true)
             }

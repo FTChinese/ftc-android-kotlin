@@ -1,19 +1,15 @@
 package com.ft.ftchinese.ui.login
 
-import android.net.Uri
 import android.util.Patterns
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.Result
 import com.ft.ftchinese.model.reader.Credentials
-import com.ft.ftchinese.model.reader.FtcUser
-import com.ft.ftchinese.model.reader.WxOAuth
 import com.ft.ftchinese.model.reader.WxSession
+import com.ft.ftchinese.repository.ReaderRepo
 import com.ft.ftchinese.util.ClientError
-import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.NextApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -22,33 +18,43 @@ import org.jetbrains.anko.info
 
 class LoginViewModel : ViewModel(), AnkoLogger {
 
-    val inProgress = MutableLiveData<Boolean>()
+    val inProgress: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
 
-    private val _loginForm = MutableLiveData<LoginFormState>()
-    val loginFormState: LiveData<LoginFormState> =_loginForm
+    val loginFormState: MutableLiveData<LoginFormState> by lazy {
+        MutableLiveData<LoginFormState>()
+    }
 
-    private val _emailResult = MutableLiveData<FindEmailResult>()
-    val emailResult: LiveData<FindEmailResult> =_emailResult
+    val emailResult: MutableLiveData<FindEmailResult> by lazy {
+        MutableLiveData<FindEmailResult>()
+    }
 
-    private val _accountResult = MutableLiveData<AccountResult>()
-    val accountResult: LiveData<AccountResult> = _accountResult
+    val accountResult: MutableLiveData<AccountResult> by lazy {
+        MutableLiveData<AccountResult>()
+    }
 
-    private val _wxOAuthResult = MutableLiveData<WxOAuthResult>()
-    val wxOAuthResult: LiveData<WxOAuthResult> = _wxOAuthResult
+    val wxSessionResult: MutableLiveData<Result<WxSession>> by lazy {
+        MutableLiveData<Result<WxSession>>()
+    }
+
+    val pwResetLetterResult: MutableLiveData<Result<Boolean>> by lazy {
+        MutableLiveData<Result<Boolean>>()
+    }
 
     fun emailDataChanged(email: String) {
         if (!isEmailValid(email)) {
-            _loginForm.value = LoginFormState(error = R.string.error_invalid_email)
+            loginFormState.value = LoginFormState(error = R.string.error_invalid_email)
         } else {
-            _loginForm.value = LoginFormState(isEmailValid = true)
+            loginFormState.value = LoginFormState(isEmailValid = true)
         }
     }
 
     fun passwordDataChanged(password: String) {
         if (!isPasswordValid(password)) {
-            _loginForm.value = LoginFormState(error = R.string.error_invalid_password)
+            loginFormState.value = LoginFormState(error = R.string.error_invalid_password)
         } else{
-            _loginForm.value = LoginFormState(isPasswordValid = true)
+            loginFormState.value = LoginFormState(isPasswordValid = true)
         }
     }
 
@@ -58,44 +64,32 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
         viewModelScope.launch {
 
-            val apiUrl = Uri.parse(NextApi.EMAIL_EXISTS)
-                    .buildUpon()
-                    .appendQueryParameter("k", "email")
-                    .appendQueryParameter("v", email)
             try {
-                val (resp, _) = withContext(Dispatchers.IO) {
-                    Fetch()
-                            .get(apiUrl.toString())
-                            .responseApi()
+                val ok = withContext(Dispatchers.IO) {
+
+                    ReaderRepo().emailExists(email)
                 }
 
-                if (resp.code == 204) {
-                    _emailResult.value = FindEmailResult(
-                            success = Pair(email, true)
-                    )
-                    return@launch
-                }
-
-                _emailResult.value = FindEmailResult(
-                        exception = Exception("API error ${resp.code}")
+                emailResult.value = FindEmailResult(
+                        success = Pair(email, ok)
                 )
 
             } catch (e: ClientError) {
 
                 if (e.statusCode== 404) {
-                    _emailResult.value = FindEmailResult(
+                    emailResult.value = FindEmailResult(
                             success = Pair(email, false)
                     )
                     return@launch
                 }
 
-                _emailResult.value = FindEmailResult(
+                emailResult.value = FindEmailResult(
                         exception = e
                 )
 
             } catch (e:Exception) {
 
-                _emailResult.value = FindEmailResult(
+                emailResult.value = FindEmailResult(
                         exception = e
                 )
             }
@@ -106,20 +100,22 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
         viewModelScope.launch {
             try {
-                val userId = withContext(Dispatchers.IO) {
-                    c.login()
+                val account = withContext(Dispatchers.IO) {
+                    ReaderRepo().login(c)
                 }
 
-                if (userId == null) {
+                if (account == null) {
 
-                    _accountResult.value = AccountResult(
+                    accountResult.value = AccountResult(
                             error = R.string.loading_failed
                     )
 
                     return@launch
                 }
 
-                loadFtcAccount(userId)
+                accountResult.value = AccountResult(
+                        success = account
+                )
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 404) {
                     R.string.error_invalid_password
@@ -127,14 +123,14 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                     e.parseStatusCode()
                 }
 
-                _accountResult.value = AccountResult(
+                accountResult.value = AccountResult(
                         error = msgId,
                         exception = e
                 )
 
             } catch (e: Exception) {
 
-                _accountResult.value = AccountResult(
+                accountResult.value = AccountResult(
                         exception = e
                 )
             }
@@ -146,52 +142,45 @@ class LoginViewModel : ViewModel(), AnkoLogger {
      * token to get user info.
      * API responds with WxSession data to uniquely identify this login
      * session.
-     * You can user the session data later to retrieve user account.
+     * You can use the session data later to retrieve user account.
      */
     fun wxLogin(code: String) {
         viewModelScope.launch {
             try {
                 val sess = withContext(Dispatchers.IO) {
-                    WxOAuth.login(code)
+                    ReaderRepo().wxLogin(code)
                 }
 
                 // Fetched wx session data and send it to
                 // UI thread for saving, and then continues
                 // to fetch account data.
-                _wxOAuthResult.value = WxOAuthResult(
-                        success = sess
-                )
-
                 if (sess == null) {
+                    wxSessionResult.value = Result.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
+
+                wxSessionResult.value = Result.Success(sess)
+
+//                wxOAuthResult.value = WxOAuthResult(
+//                        success = sess
+//                )
+
+
 
                 // via wechat only.
                 info("Start loading wechat account")
 
                 // Here won't throw an errors.
-                loadWxAccount(sess)
-            } catch (e: ClientError) {
-                // Here the error comes from WxOAuth.login,
-                // not loadWxAccount(), which won't throw
-                // any error here.
+//                loadWxAccount(sess)
+            } catch (e: Exception) {
+                // If the error is ClientError,
                 // Possible 422 error key: code_missing_field, code_invalid.
                 // We cannot make sure the exact meaning of each error, just
                 // show user API's error message.
-                info("API error: $e")
 
-                _wxOAuthResult.value = WxOAuthResult(
-                        error = when (e.statusCode) {
-                            422 -> null
-                            else -> e.parseStatusCode()
-                        },
-                        exception = e
-                )
-            } catch (e: Exception) {
                 info("Exception: $e")
-                _wxOAuthResult.value = WxOAuthResult(
-                        exception = e
-                )
+
+                wxSessionResult.value = Result.Error(e)
             }
         }
     }
@@ -200,28 +189,24 @@ class LoginViewModel : ViewModel(), AnkoLogger {
      * Handles both a new user signup, or wechat-logged-in
      * user trying to link to a new account.
      */
-    fun signUp(c: Credentials, wxSession: WxSession? = null) {
+    fun signUp(c: Credentials) {
 
         viewModelScope.launch {
             try {
-                val userId = withContext(Dispatchers.IO) {
-                    c.signUp(wxSession?.unionId)
+                val account = withContext(Dispatchers.IO) {
+                    ReaderRepo().signUp(c)
                 }
 
-                if (userId == null) {
-                    _accountResult.value = AccountResult(
+                if (account == null) {
+                    accountResult.value = AccountResult(
                             error = R.string.loading_failed
                     )
                     return@launch
                 }
 
-
-                if (wxSession == null) {
-                    loadFtcAccount(userId)
-                    return@launch
-                }
-
-                loadWxAccount(wxSession)
+                accountResult.value = AccountResult(
+                        success = account
+                )
 
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 422) {
@@ -238,43 +223,65 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                     e.parseStatusCode()
                 }
 
-                _accountResult.value = AccountResult(
+                accountResult.value = AccountResult(
                         error = msgId,
                         exception = e
                 )
             } catch (e: Exception) {
-                _accountResult.value = AccountResult(exception = e)
+                accountResult.value = AccountResult(exception = e)
             }
         }
     }
 
+    fun requestResettingPassword(email: String) {
+        viewModelScope.launch {
+            try {
+                val ok = withContext(Dispatchers.IO) {
+                    ReaderRepo().passwordResetLetter(email)
+                }
+
+                pwResetLetterResult.value = Result.Success(ok)
+
+            } catch (e: ClientError) {
+                if (e.statusCode == 404) {
+                    pwResetLetterResult.value = Result.LocalizedError(R.string.api_email_not_found)
+                } else {
+                    pwResetLetterResult.value = Result.Error(e)
+                }
+            } catch (e: Exception) {
+                pwResetLetterResult.value = Result.Error(e)
+            }
+        }
+    }
     /**
      * Load account after user performed wechat authorization
      */
-    private suspend fun loadWxAccount(wxSession: WxSession) {
-        try {
-            val account = withContext(Dispatchers.IO) {
-                wxSession.fetchAccount()
+    fun loadWxAccount(wxSession: WxSession) {
+        viewModelScope.launch {
+            try {
+                val account = withContext(Dispatchers.IO) {
+                    ReaderRepo().loadWxAccount(wxSession.unionId)
+                }
+
+                info("Loaded wechat account: $account")
+
+                accountResult.value = AccountResult(success = account)
+            } catch (e: ClientError) {
+                val msgId = if (e.statusCode == 404) {
+                    R.string.loading_failed
+                } else {
+                    e.parseStatusCode()
+                }
+
+                accountResult.value = AccountResult(
+                        error = msgId,
+                        exception = e
+                )
+
+            } catch (e: Exception) {
+
+                accountResult.value = AccountResult(exception = e)
             }
-
-            info("Loaded wechat account: $account")
-
-            _accountResult.value = AccountResult(success = account)
-        } catch (e: ClientError) {
-            val msgId = if (e.statusCode == 404) {
-                R.string.loading_failed
-            } else {
-                e.parseStatusCode()
-            }
-
-            _accountResult.value = AccountResult(
-                    error = msgId,
-                    exception = e
-            )
-
-        } catch (e: Exception) {
-
-            _accountResult.value = AccountResult(exception = e)
         }
     }
 
@@ -282,31 +289,31 @@ class LoginViewModel : ViewModel(), AnkoLogger {
      * Load account after user's password verified
      * or signed up.
      */
-    private suspend fun loadFtcAccount(userId: String) {
-        try {
-            val account = withContext(Dispatchers.IO) {
-                FtcUser(id = userId).fetchAccount()
-            }
-
-            _accountResult.value = AccountResult(success = account)
-
-        } catch (e: ClientError) {
-            val msgId = if (e.statusCode == 404) {
-                R.string.loading_failed
-            } else {
-                e.parseStatusCode()
-            }
-
-            _accountResult.value = AccountResult(
-                    error = msgId,
-                    exception = e
-            )
-
-        } catch (e: Exception) {
-
-            _accountResult.value = AccountResult(exception = e)
-        }
-    }
+//    private suspend fun loadFtcAccount(userId: String) {
+//        try {
+//            val account = withContext(Dispatchers.IO) {
+//                FtcUser(id = userId).fetchAccount()
+//            }
+//
+//            accountResult.value = AccountResult(success = account)
+//
+//        } catch (e: ClientError) {
+//            val msgId = if (e.statusCode == 404) {
+//                R.string.loading_failed
+//            } else {
+//                e.parseStatusCode()
+//            }
+//
+//            accountResult.value = AccountResult(
+//                    error = msgId,
+//                    exception = e
+//            )
+//
+//        } catch (e: Exception) {
+//
+//            accountResult.value = AccountResult(exception = e)
+//        }
+//    }
 
 
     private fun isEmailValid(email: String): Boolean {
@@ -319,9 +326,5 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
     private fun isPasswordValid(password: String): Boolean {
         return password.length >= 6
-    }
-
-    fun showProgress(show: Boolean) {
-        inProgress.value = show
     }
 }

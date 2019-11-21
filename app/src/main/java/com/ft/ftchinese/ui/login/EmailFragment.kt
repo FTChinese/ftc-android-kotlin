@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.afterTextChanged
@@ -29,7 +29,7 @@ class EmailFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        email_input.requestFocus()
+        emailInput.requestFocus()
         next_btn.isEnabled = false
     }
 
@@ -37,24 +37,24 @@ class EmailFragment : ScopedFragment(),
         super.onActivityCreated(savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProviders.of(this)
+            ViewModelProvider(this)
                     .get(LoginViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
 
         // Validate email upon changed.
-        email_input.afterTextChanged {
-            viewModel.emailDataChanged(email_input.text.toString().trim())
+        emailInput.afterTextChanged {
+            viewModel.emailDataChanged(emailInput.text.toString().trim())
         }
 
-        viewModel.loginFormState.observe(this, Observer {
+        viewModel.loginFormState.observe(viewLifecycleOwner, Observer {
             val loginState = it ?: return@Observer
 
             next_btn.isEnabled = loginState.isEmailValid
 
             if (loginState.error != null) {
-                email_input.error = getString(loginState.error)
-                email_input.requestFocus()
+                emailInput.error = getString(loginState.error)
+                emailInput.requestFocus()
             }
         })
 
@@ -65,14 +65,14 @@ class EmailFragment : ScopedFragment(),
             }
 
             enableInput(false)
-            viewModel.showProgress(true)
+            viewModel.inProgress.value = true
 
-            viewModel.checkEmail(email_input.text.toString().trim())
+            viewModel.checkEmail(emailInput.text.toString().trim())
         }
 
         // Enable or disable input depending on network result.
         // Only re-enable button if there's any error.
-        viewModel.emailResult.observe(this, Observer {
+        viewModel.emailResult.observe(viewLifecycleOwner, Observer {
             if (it.error != null || it.exception != null) {
                 enableInput(true)
             }
@@ -80,7 +80,7 @@ class EmailFragment : ScopedFragment(),
     }
 
     private fun enableInput(enable: Boolean) {
-        email_input.isEnabled = enable
+        emailInput.isEnabled = enable
         next_btn.isEnabled = enable
     }
 
