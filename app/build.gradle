@@ -44,7 +44,7 @@ android {
         setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "WX_SUBS_APPID", props.getProperty("wechat.subs.appId")
-        buildConfigField "String", "ACCESS_TOKEN", props.getProperty("access_token")
+
         buildConfigField "String", "BASE_URL_STANDARD", props.getProperty("base_url.standard")
         buildConfigField "String", "BASE_URL_PREMIUM", props.getProperty("base_url.premium")
         buildConfigField "String", "BASE_URL_B2B", props.getProperty("base_url.b2b")
@@ -79,10 +79,12 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable false
             buildConfigField "String", "STRIPE_KEY", props.getProperty("stripe.live")
+            buildConfigField "String", "ACCESS_TOKEN", props.getProperty("access_token.live")
         }
         debug {
             debuggable true
             buildConfigField "String", "STRIPE_KEY", props.getProperty("stripe.test")
+            buildConfigField "String", "ACCESS_TOKEN", props.getProperty("access_token.test")
         }
     }
 
