@@ -75,7 +75,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         tracker = StatsTracker.getInstance(this)
 
 
-        done_button.setOnClickListener {
+        doneButton.setOnClickListener {
             onClickDone()
         }
 
@@ -304,7 +304,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     }
 
     private fun enableButton(enable: Boolean) {
-        done_button.isEnabled = enable
+        doneButton.isEnabled = enable
     }
 
     private fun showProgress(show: Boolean) {
