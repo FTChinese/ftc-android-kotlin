@@ -1,21 +1,30 @@
 package com.ft.ftchinese.repository
 
 import com.beust.klaxon.Klaxon
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.model.reader.ReadingDuration
-import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.NextApi
-import com.ft.ftchinese.util.currentFlavor
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.reader.WxSession
+import com.ft.ftchinese.util.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.json.JSONException
-import org.json.JSONObject
 import kotlin.Exception
 
 class ReaderRepo : AnkoLogger {
 
-    fun login(c: Credentials): String? {
+    fun emailExists(email: String): Boolean {
+
+        val (resp, _) = Fetch()
+                .get(NextApi.EMAIL_EXISTS)
+                .query("k", "email")
+                .query("v", email)
+                .noCache()
+                .responseApi()
+
+        return resp.code == 204
+    }
+
+    fun login(c: Credentials): Account? {
         val (_, body) = Fetch()
                 .post(NextApi.LOGIN)
                 .setClient()
@@ -26,36 +35,14 @@ class ReaderRepo : AnkoLogger {
         return if (body == null) {
             null
         } else {
-            decodeUserId(body)
+            json.parse<Account>(body)
         }
     }
 
-    private fun decodeUserId(json: String): String? {
-        return try {
-            JSONObject(json).getString("id")
-        } catch (e: JSONException) {
-            info(e)
-            null
-        }
-    }
+    fun signUp(c: Credentials): Account? {
 
-    /**
-     * If unionId is null, it indicates this is a regular registration;
-     * If unionId is not null, it indicates a
-     * wechat-logged-in user is trying to create a new
-     * account and this new account should be bound to this
-     * wechat account after creation.
-     */
-    fun signUp(c: Credentials, unionId: String? = null): String? {
-        val fetch = if (unionId != null) {
-            Fetch().post(NextApi.WX_SIGNUP)
-                    .setUnionId(unionId)
-        } else {
-            Fetch().post(NextApi.SIGN_UP)
-        }
-
-
-        val (_, body) = fetch
+        val (_, body) = Fetch()
+                .post(NextApi.SIGN_UP)
                 .setClient()
                 .noCache()
                 .jsonBody(json.toJsonString(c))
@@ -64,7 +51,65 @@ class ReaderRepo : AnkoLogger {
         return if (body == null) {
             null
         } else {
-            decodeUserId(body)
+            json.parse<Account>(body)
+        }
+    }
+
+    fun passwordResetLetter(email: String): Boolean {
+        val (response, _)= Fetch()
+                .post(NextApi.PASSWORD_RESET)
+                .setTimeout(30)
+                .noCache()
+                .jsonBody(json.toJsonString(mapOf("email" to email)))
+                .responseApi()
+
+        return response.code == 204
+    }
+
+    /**
+     * Wecaht login does not return an [Account] instance.
+     * It returns a [WxSession] which represents the access
+     * token acquired from Wechat API.
+     * Then you can use [WxSession] to retrieve Wechat
+     * info or refresh account data.
+     */
+    fun wxLogin(code: String): WxSession? {
+        val (_, body) = Fetch().post(SubscribeApi.WX_LOGIN)
+                .setClient()
+                .setAppId()
+                .noCache()
+                .jsonBody(json.toJsonString(mapOf(
+                        "code" to code
+                )))
+                .responseApi()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<WxSession>(body)
+        }
+    }
+
+    /**
+     * Fetch user account data after [wxLogin] succeeded.
+     * Account retrieved from here always has loginMethod set to `wechat`.
+     * Only used for initial login.
+     * DO NOT use this to refresh account data since WxSession only exists
+     * if user logged in via wechat OAuth.
+     * If user logged in with email + password (and the the email is bound to this wechat),
+     * WxSession never actually exists.
+     */
+    fun loadWxAccount(unionId: String): Account? {
+        val (_, body) = Fetch()
+                .get(NextApi.WX_ACCOUNT)
+                .setUnionId(unionId)
+                .noCache()
+                .responseApi()
+
+        return if (body == null) {
+            return null
+        } else {
+            json.parse<Account>(body)
         }
     }
 
@@ -79,19 +124,6 @@ class ReaderRepo : AnkoLogger {
         } catch (e: Exception) {
             info("Error when tracking reading duration $e")
             null
-        }
-    }
-
-    companion object {
-        private var instance: ReaderRepo? = null
-
-        @Synchronized
-        fun getInstance(): ReaderRepo {
-            if (instance == null) {
-                instance = ReaderRepo()
-            }
-
-            return instance!!
         }
     }
 }
