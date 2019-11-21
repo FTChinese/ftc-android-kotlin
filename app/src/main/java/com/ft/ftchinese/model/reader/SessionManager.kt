@@ -125,7 +125,6 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
                 email = email,
                 isVerified = isVerified,
                 avatarUrl = avatarUrl,
-                isVip = isVip,
                 loginMethod = LoginMethod.fromString(loginMethod),
                 wechat = wechat,
                 membership = membership
