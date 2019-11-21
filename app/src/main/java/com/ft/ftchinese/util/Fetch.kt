@@ -5,6 +5,7 @@ import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -64,11 +65,15 @@ data class Reason(
 
 class NetworkException(msg: String?, cause: Throwable?) : IOException(msg, cause)
 
+/**
+ * To use okhttp, you need to build url first using `HttpUrl.Builder`;
+ * next build request using `Request.Builder`.
+ */
 class Fetch : AnkoLogger {
 
+    private var urlBuilder = HttpUrl.Builder()
     private var method: String = "GET"
     private val headers = Headers.Builder()
-    private val reqBuilder = Request.Builder()
     private var reqBody: RequestBody? = null
     private var request: Request? = null
     private var call: Call? = null
@@ -76,33 +81,32 @@ class Fetch : AnkoLogger {
 
     private var disableCache = false
 
-    fun get(url: String): Fetch {
-        reqBuilder.url(url)
-        return this
+    fun get(url: String) = apply {
+        urlBuilder = url.toHttpUrl().newBuilder()
     }
 
-    fun post(url: String): Fetch {
-        reqBuilder.url(url)
+    fun post(url: String) = apply {
+        urlBuilder = url.toHttpUrl().newBuilder()
         method = "POST"
-        return this
     }
 
-    fun put(url: String): Fetch {
-        reqBuilder.url(url)
+    fun put(url: String) = apply {
+        urlBuilder = url.toHttpUrl().newBuilder()
         method = "PUT"
-        return this
     }
 
-    fun patch(url: String): Fetch {
-        reqBuilder.url(url)
+    fun patch(url: String) = apply {
+        urlBuilder = url.toHttpUrl().newBuilder()
         method = "PATCH"
-        return this
     }
 
-    fun delete(url: String): Fetch {
-        reqBuilder.url(url)
+    fun delete(url: String) = apply {
+        urlBuilder = url.toHttpUrl().newBuilder()
         method = "DELETE"
-        return this
+    }
+
+    fun query(name: String, value: String?) = apply {
+        urlBuilder.addQueryParameter(name, value)
     }
 
     fun cancel() {
@@ -110,89 +114,74 @@ class Fetch : AnkoLogger {
     }
 
     // Set timeout in seconds
-    fun setTimeout(timeout: Int): Fetch {
+    fun setTimeout(timeout: Int) = apply {
         this.timeout = timeout
-        return this
     }
 
     fun getRequest(): Request? {
         return request
     }
 
-    fun header(name: String, value: String): Fetch {
+    fun header(name: String, value: String) = apply {
         headers[name] = value
         return this
     }
 
     // Authorization: Bearer xxxxxxx
-    private fun setAccessKey(): Fetch {
+    private fun setAccessKey() = apply {
         headers["Authorization"] = "Bearer ${BuildConfig.ACCESS_TOKEN}"
-        return  this
     }
 
     // X-Client-Type: android
     // X-Client-Version: 2.0.0-google
-    fun setClient(): Fetch {
+    fun setClient() = apply {
         headers["X-Client-Type"] = "android"
         headers["X-Client-Version"] = BuildConfig.VERSION_NAME
-        return this
     }
 
-    fun setUserId(uuid: String): Fetch {
+    fun setUserId(uuid: String) = apply {
         headers["X-User-Id"] = uuid
-
-        return this
     }
 
-    fun setAppId(): Fetch {
+    fun setAppId() = apply {
         headers["X-App-Id"] = BuildConfig.WX_SUBS_APPID
-        return this
     }
 
-    fun setUnionId(unionId: String): Fetch {
+    fun setUnionId(unionId: String) = apply {
         headers["X-Union-Id"] = unionId
-        return this
     }
 
     // Cache-Control: no-cache, no-store, no-transform
-    fun noCache(): Fetch {
+    fun noCache() = apply {
         disableCache = true
-        return this
     }
 
     /**
      * Use this to send json content.
      */
-    fun jsonBody(body: String): Fetch {
-
+    fun jsonBody(body: String) = apply {
         val contentType = "application/json; charset=utf-8".toMediaTypeOrNull()
 
         if (contentType == null) {
-            headers.set("Content-Type", "application/json; charset=utf-8")
+            headers["Content-Type"] = "application/json; charset=utf-8"
         }
 
         reqBody = body.toRequestBody(contentType)
-
-        return this
     }
 
     /**
      * Use this to transmit binary files.
      */
-    fun body(body: ByteArray): Fetch {
+    fun body(body: ByteArray) = apply {
         reqBody = body.toRequestBody(null)
-
-        return this
     }
 
     /**
      * For POST, PUT, PATCH, PROPPATCH and REPORT method,
      * okhttp does not allow nullable body.
      */
-    fun body(): Fetch {
+    fun body() = apply {
         reqBody = "".toRequestBody(null)
-
-        return this
     }
 
     /**
@@ -224,6 +213,7 @@ class Fetch : AnkoLogger {
          */
         val resp = end()
 
+        info("Request URL: ${request?.url}")
         /**
          * Success response.
          * @throws IOException when reading body.
@@ -263,7 +253,9 @@ class Fetch : AnkoLogger {
      * @return okhttp3.Response
      */
     private fun end(): Response {
-        reqBuilder.headers(headers.build())
+        val reqBuilder = Request.Builder()
+                .url(urlBuilder.build())
+                .headers(headers.build())
 
         if (disableCache) {
             reqBuilder.cacheControl(CacheControl.Builder()
