@@ -322,7 +322,7 @@
     <string name="prompt_no_keyword">请输入关键字后搜索</string>
     <string name="instruct_password_letter">请输入您的登录FT中文网所用的电子邮箱，我们会向该邮箱发送邮件，帮您重置密码</string>
     <string name="instruct_verify_email">您的邮箱尚未验证，为保障您的账号安全，请及时验证邮箱。我们已经给您的登录邮箱发送了验证邮件，点击邮件中的链接即可。</string>
-    <string name="instruct_letter_sent">请检查您的邮件，点击邮件中的“重置密码”链接，在所打开的网页中修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。如果您已经验证过邮箱地址，请下拉刷新。</string>
+    <string name="instruct_letter_sent">请检查您的邮件，点击邮件中的“重置密码”链接，在所打开的网页中修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</string>
 
 
     <string name="instruct_link_email">您目前使用了微信账号登录FT中文网。为保障账号安全，建议您绑定在FT中文网注册的邮箱账号。</string>
@@ -487,7 +487,6 @@
         <item>繁体</item>
     </string-array>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string-array name="settings_language_values">
         <item>sc</item>
         <item>tc</item>
