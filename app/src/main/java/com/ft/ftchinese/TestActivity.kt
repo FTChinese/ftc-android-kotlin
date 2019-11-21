@@ -590,7 +590,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                         email = "",
                         isVerified = false,
                         avatarUrl = null,
-                        isVip = false,
                         loginMethod = LoginMethod.WECHAT,
                         wechat = Wechat(
                                 nickname = "aliquam_quas_minima",
@@ -603,7 +602,8 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                                 expireDate = LocalDate.now().plusDays(30),
                                 payMethod = PayMethod.WXPAY,
                                 autoRenew = false,
-                                status = null
+                                status = null,
+                                vip =  false
                         )
                 ))
             }
