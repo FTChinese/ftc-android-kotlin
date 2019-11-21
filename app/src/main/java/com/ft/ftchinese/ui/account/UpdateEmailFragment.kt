@@ -62,22 +62,22 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
             save_btn.isEnabled = updateState.isDataValid
 
             if (updateState.emailError != null) {
-                email_input.error = getString(updateState.emailError)
-                email_input.requestFocus()
+                emailInput.error = getString(updateState.emailError)
+                emailInput.requestFocus()
             }
         })
 
-        email_input.afterTextChanged {
+        emailInput.afterTextChanged {
             updateViewModel.emailDataChanged(
                     currentEmail = currentEmail ?: "",
-                    newEmail = email_input.text.toString().trim()
+                    newEmail = emailInput.text.toString().trim()
             )
         }
 
         save_btn.setOnClickListener {
             updateViewModel.emailDataChanged(
                     currentEmail = currentEmail ?: "",
-                    newEmail = email_input.text.toString().trim()
+                    newEmail = emailInput.text.toString().trim()
             )
 
             if (activity?.isNetworkConnected() != true) {
@@ -93,7 +93,7 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
 
             updateViewModel.updateEmail(
                     userId = userId,
-                    email = email_input.text.toString().trim()
+                    email = emailInput.text.toString().trim()
             )
         }
 
@@ -105,7 +105,7 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
     }
 
     private fun enableInput(value: Boolean) {
-        email_input.isEnabled = value
+        emailInput.isEnabled = value
         save_btn.isEnabled = value
     }
 
