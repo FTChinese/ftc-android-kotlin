@@ -65,7 +65,7 @@ data class Account(
      */
     val isMember: Boolean
         get() = when {
-            isVip -> true
+            membership.vip -> true
             else -> membership.tier != null
         }
 

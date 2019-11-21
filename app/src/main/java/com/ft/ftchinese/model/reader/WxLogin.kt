@@ -17,24 +17,24 @@ object WxOAuth {
         return generateNonce(5)
     }
 
-    fun login(code: String): WxSession? {
-        val data = json.toJsonString(mapOf(
-                "code" to code
-        ))
-
-        val (_, body) = Fetch().post(SubscribeApi.WX_LOGIN)
-                .setClient()
-                .setAppId()
-                .noCache()
-                .jsonBody(data)
-                .responseApi()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<WxSession>(body)
-        }
-    }
+//    fun login(code: String): WxSession? {
+//        val data = json.toJsonString(mapOf(
+//                "code" to code
+//        ))
+//
+//        val (_, body) = Fetch().post(SubscribeApi.WX_LOGIN)
+//                .setClient()
+//                .setAppId()
+//                .noCache()
+//                .jsonBody(data)
+//                .responseApi()
+//
+//        return if (body == null) {
+//            null
+//        } else {
+//            json.parse<WxSession>(body)
+//        }
+//    }
 }
 
 /**
@@ -96,19 +96,19 @@ data class WxSession(
      * If user logged in with email + password (and the the email is bound to this wechat),
      * WxSession never actually exists.
      */
-    fun fetchAccount(): Account? {
-        val (_, body) = Fetch()
-                .get(NextApi.WX_ACCOUNT)
-                .setUnionId(unionId)
-                .noCache()
-                .responseApi()
-
-        return if (body == null) {
-            return null
-        } else {
-            json.parse<Account>(body)
-        }
-    }
+//    fun fetchAccount(): Account? {
+//        val (_, body) = Fetch()
+//                .get(NextApi.WX_ACCOUNT)
+//                .setUnionId(unionId)
+//                .noCache()
+//                .responseApi()
+//
+//        return if (body == null) {
+//            return null
+//        } else {
+//            json.parse<Account>(body)
+//        }
+//    }
 }
 
 const val WX_AVATAR_NAME = "wx_avatar.jpg"
