@@ -15,8 +15,14 @@ class ReaderRepoTest {
                 functionName = "onLoad"
         )
 
-        val result = ReaderRepo.getInstance().engaged(dur)
+        val result = ReaderRepo().engaged(dur)
 
         println("Result: $result")
+    }
+
+    @Test fun emailExists() {
+        val ok = ReaderRepo().emailExists("neefrankie@outlook.com")
+
+        println("Email exists: $ok")
     }
 }
