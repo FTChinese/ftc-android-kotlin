@@ -39,7 +39,6 @@ class JsonTest {
             email = "neefrankie@163.com",
             isVerified = false,
             avatarUrl = null,
-            isVip = false,
             loginMethod = LoginMethod.EMAIL,
             wechat = Wechat(
                     nickname = null,
@@ -48,7 +47,8 @@ class JsonTest {
             membership = Membership(
                     tier = null,
                     cycle = null,
-                    expireDate = null
+                    expireDate = null,
+                    vip = false
             )
     )
 
