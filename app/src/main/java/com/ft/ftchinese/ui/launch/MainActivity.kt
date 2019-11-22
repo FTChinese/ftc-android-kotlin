@@ -358,11 +358,13 @@ class MainActivity : ScopedAppActivity(),
         headerView?.nav_header_title?.text = account.displayName
 
         // Load wechat avatar.
-        accountViewModel.loadWxAvatar(
-                cache,
-                account.wechat,
-                isNetworkConnected()
-        )
+        if (isNetworkConnected()) {
+            accountViewModel.fetchWxAvatar(
+                    cache,
+                    account.wechat
+            )
+        }
+
 
         // Hide signin/signup
         drawer_nav.menu

@@ -5,8 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.FtcUser
 import com.ft.ftchinese.model.reader.UnlinkAnchor
+import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.util.ClientError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,7 +22,10 @@ class LinkViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    FtcUser(ftcId).linkWechat(unionId)
+                    LinkRepo.link(
+                            ftcId = ftcId,
+                            unionId = unionId
+                    )
                 }
 
                 linkResult.value = BinaryResult(
@@ -60,7 +63,7 @@ class LinkViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    account.unlink(anchor)
+                    LinkRepo.unlink(account, anchor)
                 }
 
                 unlinkResult.value = BinaryResult(

@@ -68,7 +68,7 @@ class WxInfoFragment : ScopedFragment(),
         // Check whether we could refresh wechat user info.
         // If refresh token is not expired, we'll start
         // refresh user's full account data.
-        accountViewModel.wxRefreshResult.observe(this, Observer {
+        accountViewModel.wxRefreshResult.observe(viewLifecycleOwner, Observer {
             val refreshResult = it ?: return@Observer
 
             if (refreshResult.error != null) {
@@ -110,7 +110,7 @@ class WxInfoFragment : ScopedFragment(),
         })
 
         // Refreshed account data.
-        accountViewModel.accountRefreshed.observe(this, Observer {
+        accountViewModel.accountRefreshed.observe(viewLifecycleOwner, Observer {
             val accountResult = it ?: return@Observer
 
             stopRefreshing()
@@ -140,7 +140,7 @@ class WxInfoFragment : ScopedFragment(),
         })
 
         // Avatar
-        accountViewModel.avatarRetrieved.observe(this, Observer {
+        accountViewModel.avatarRetrieved.observe(viewLifecycleOwner, Observer {
             if (it == null) {
                 return@Observer
             }
@@ -168,10 +168,14 @@ class WxInfoFragment : ScopedFragment(),
 
         val acnt = sessionManager.loadAccount() ?: return
 
-        accountViewModel.loadWxAvatar(
+        if (activity?.isNetworkConnected() != true) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        accountViewModel.fetchWxAvatar(
                 cache,
-                acnt.wechat,
-                activity?.isNetworkConnected() == true
+                acnt.wechat
         )
     }
 

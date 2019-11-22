@@ -1,14 +1,12 @@
 package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
-import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.threeten.bp.DateTimeException
 import org.threeten.bp.ZonedDateTime
-
 
 object WxOAuth {
     const val SCOPE = "snsapi_userinfo"
@@ -75,17 +73,17 @@ data class WxSession(
     /**
      * Refresh Wechat user info.
      */
-    fun refreshInfo(): Boolean {
-        val (resp, _) = Fetch().put(SubscribeApi.WX_REFRESH)
-                .noCache()
-                .setAppId()
-                .jsonBody(Klaxon().toJsonString(mapOf(
-                        "sessionId" to sessionId
-                )))
-                .responseApi()
-
-        return resp.code == 204
-    }
+//    fun refreshInfo(): Boolean {
+//        val (resp, _) = Fetch().put(SubscribeApi.WX_REFRESH)
+//                .noCache()
+//                .setAppId()
+//                .jsonBody(Klaxon().toJsonString(mapOf(
+//                        "sessionId" to sessionId
+//                )))
+//                .responseApi()
+//
+//        return resp.code == 204
+//    }
 
     /**
      * Fetch user account data after wechat OAuth succeeded.
@@ -127,13 +125,13 @@ data class Wechat(
     val isEmpty: Boolean
         get() = nickname.isNullOrBlank() && avatarUrl.isNullOrBlank()
 
-    fun retrieveAvatar(): ByteArray? {
-        if (avatarUrl == null) {
-            return null
-        }
-
-        return Fetch()
-                .get(avatarUrl)
-                .download()
-    }
+//    fun retrieveAvatar(): ByteArray? {
+//        if (avatarUrl == null) {
+//            return null
+//        }
+//
+//        return Fetch()
+//                .get(avatarUrl)
+//                .download()
+//    }
 }

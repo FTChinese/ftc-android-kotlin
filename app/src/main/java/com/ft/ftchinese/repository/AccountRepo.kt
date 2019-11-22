@@ -117,4 +117,11 @@ class AccountRepo {
 
         return resp.code == 204
     }
+
+    fun loadWxAvatar(url: String): ByteArray? {
+
+        return Fetch()
+                .get(url)
+                .download()
+    }
 }

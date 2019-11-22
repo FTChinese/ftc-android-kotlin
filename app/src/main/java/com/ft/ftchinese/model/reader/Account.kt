@@ -2,7 +2,6 @@ package com.ft.ftchinese.model.reader
 
 import android.net.Uri
 import android.os.Parcelable
-import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.Parcelize
@@ -107,54 +106,54 @@ data class Account(
      * login method so that account data is always
      * consistent with that of user's initial login.
      */
-    fun refresh(): Account? {
-        val fetch = Fetch().noCache()
+//    fun refresh(): Account? {
+//        val fetch = Fetch().noCache()
+//
+//        val (_, body) = when (loginMethod) {
+//            LoginMethod.EMAIL -> {
+//                fetch.get(NextApi.ACCOUNT)
+//                        .setUserId(id)
+//                        .responseApi()
+//            }
+//            LoginMethod.WECHAT -> {
+//                if (unionId == null) {
+//                    return null
+//                }
+//
+//                fetch.get(NextApi.WX_ACCOUNT)
+//                        .setUnionId(unionId)
+//                        .responseApi()
+//            }
+//            else -> return null
+//        }
+//
+//        return if (body == null) {
+//            null
+//        } else {
+//            json.parse<Account>(body)
+//        }
+//    }
 
-        val (_, body) = when (loginMethod) {
-            LoginMethod.EMAIL -> {
-                fetch.get(NextApi.ACCOUNT)
-                        .setUserId(id)
-                        .responseApi()
-            }
-            LoginMethod.WECHAT -> {
-                if (unionId == null) {
-                    return null
-                }
-
-                fetch.get(NextApi.WX_ACCOUNT)
-                        .setUnionId(unionId)
-                        .responseApi()
-            }
-            else -> return null
-        }
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<Account>(body)
-        }
-    }
-
-    fun unlink(anchor: UnlinkAnchor?): Boolean {
-        if (unionId == null) {
-            throw Exception("Wechat account not found")
-        }
-
-        val fetch = Fetch().delete(NextApi.WX_LINK)
-                .setUserId(id)
-                .setUnionId(unionId)
-                .noCache()
-
-        if (anchor != null) {
-            fetch.jsonBody(Klaxon().toJsonString(mapOf(
-                    "anchor" to anchor.string()
-            )))
-        }
-
-        val (resp, _) = fetch.responseApi()
-
-        return resp.code == 204
-    }
+//    fun unlink(anchor: UnlinkAnchor?): Boolean {
+//        if (unionId == null) {
+//            throw Exception("Wechat account not found")
+//        }
+//
+//        val fetch = Fetch().delete(NextApi.WX_LINK)
+//                .setUserId(id)
+//                .setUnionId(unionId)
+//                .noCache()
+//
+//        if (anchor != null) {
+//            fetch.jsonBody(Klaxon().toJsonString(mapOf(
+//                    "anchor" to anchor.string()
+//            )))
+//        }
+//
+//        val (resp, _) = fetch.responseApi()
+//
+//        return resp.code == 204
+//    }
 
     // Show user's account balance.
     fun previewUpgrade(): UpgradePreview? {
@@ -452,37 +451,37 @@ data class Account(
 //        }
 //    }
 
-    fun starArticle(articleId: String): Boolean {
+//    fun starArticle(articleId: String): Boolean {
+//
+//        val (response, _) = Fetch().put("${NextApi.STARRED}/$articleId")
+//                .noCache()
+//                .body()
+//                .setUserId(id)
+//                .responseApi()
+//
+//        return response.code == 204
+//    }
 
-        val (response, _) = Fetch().put("${NextApi.STARRED}/$articleId")
-                .noCache()
-                .body()
-                .setUserId(id)
-                .responseApi()
+//    fun unstarArticle(articleId: String): Boolean {
+//
+//        val (response, _) = Fetch().delete("${NextApi.STARRED}/$articleId")
+//                .noCache()
+//                .setUserId(id)
+//                .body()
+//                .responseApi()
+//
+//        return response.code == 204
+//    }
 
-        return response.code == 204
-    }
-
-    fun unstarArticle(articleId: String): Boolean {
-
-        val (response, _) = Fetch().delete("${NextApi.STARRED}/$articleId")
-                .noCache()
-                .setUserId(id)
-                .body()
-                .responseApi()
-
-        return response.code == 204
-    }
-
-    fun isStarring(articleId: String): Boolean {
-
-        val (response, _) = Fetch().get("${NextApi.STARRED}/$articleId")
-                .noCache()
-                .setUserId(id)
-                .responseApi()
-
-        return response.code == 204
-    }
+//    fun isStarring(articleId: String): Boolean {
+//
+//        val (response, _) = Fetch().get("${NextApi.STARRED}/$articleId")
+//                .noCache()
+//                .setUserId(id)
+//                .responseApi()
+//
+//        return response.code == 204
+//    }
 }
 
 

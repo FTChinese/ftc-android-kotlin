@@ -8,7 +8,7 @@ import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.json
 
-class LinkRepo {
+object LinkRepo {
     /**
      * Link two existing accounts.
      */

@@ -1,11 +1,11 @@
 package com.ft.ftchinese.ui.account
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.*
+import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.ui.base.StringResult
 import com.ft.ftchinese.ui.launch.AvatarResult
 import com.ft.ftchinese.ui.login.AccountResult
@@ -24,13 +24,17 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     val uiType = MutableLiveData<LoginMethod>()
     val shouldReAuth = MutableLiveData<Boolean>()
 
-    private val _accountRefreshed = MutableLiveData<AccountResult>()
-    val accountRefreshed: LiveData<AccountResult> = _accountRefreshed
+    val accountRefreshed: MutableLiveData<AccountResult> by lazy {
+        MutableLiveData<AccountResult>()
+    }
 
-    val avatarRetrieved = MutableLiveData<AvatarResult>()
+    val avatarRetrieved: MutableLiveData<AvatarResult> by lazy {
+        MutableLiveData<AvatarResult>()
+    }
 
-    private val _wxRefreshResult = MutableLiveData<WxRefreshResult>()
-    val wxRefreshResult: LiveData<WxRefreshResult> = _wxRefreshResult
+    val wxRefreshResult: MutableLiveData<WxRefreshResult> by lazy {
+        MutableLiveData<WxRefreshResult>()
+    }
 
     val customerIdResult = MutableLiveData<StringResult>()
     val stripeRetrievalResult = MutableLiveData<StripeRetrievalResult>()
@@ -41,21 +45,21 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    wxSession.refreshInfo()
+                    AccountRepo().refreshWxInfo(wxSession)
                 }
 
-                _wxRefreshResult.value = WxRefreshResult(
+                wxRefreshResult.value = WxRefreshResult(
                         success = done
                 )
             } catch (e: ClientError) {
                 if (e.statusCode == 422) {
-                    _wxRefreshResult.value = WxRefreshResult(
+                    wxRefreshResult.value = WxRefreshResult(
                             isExpired = true
                     )
                     return@launch
                 }
 
-                _wxRefreshResult.value = WxRefreshResult(
+                wxRefreshResult.value = WxRefreshResult(
                         error = when (e.statusCode) {
                             404 -> R.string.api_account_not_found
                             else -> null
@@ -64,7 +68,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                 )
 
             } catch (e: Exception) {
-                _wxRefreshResult.value = WxRefreshResult(
+                wxRefreshResult.value = WxRefreshResult(
                         exception = e
                 )
             }
@@ -80,10 +84,10 @@ class AccountViewModel : ViewModel(), AnkoLogger {
             try {
 
                 val updatedAccount = withContext(Dispatchers.IO) {
-                    account.refresh()
+                    AccountRepo().refresh(account)
                 }
 
-                _accountRefreshed.value = AccountResult(
+                accountRefreshed.value = AccountResult(
                         success = updatedAccount ?: account
                 )
             } catch (e: ClientError) {
@@ -93,56 +97,13 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                     e.parseStatusCode()
                 }
 
-                _accountRefreshed.value = AccountResult(
+                accountRefreshed.value = AccountResult(
                         error = msgId,
                         exception = e
                 )
             } catch (e: Exception) {
 
-                _accountRefreshed.value = AccountResult(
-                        exception = e
-                )
-            }
-        }
-    }
-
-    fun loadWxAvatar(cache: FileCache, wechat: Wechat, online: Boolean) {
-        if (wechat.isEmpty) {
-            return
-        }
-
-        viewModelScope.launch {
-            val fileInput = withContext(Dispatchers.IO) {
-                cache.readBinaryFile(WX_AVATAR_NAME)
-            }
-
-            if (fileInput != null) {
-                avatarRetrieved.value = AvatarResult(
-                        success = fileInput
-                )
-                return@launch
-            }
-
-            if (!online) {
-                return@launch
-            }
-
-            try {
-                val bytes = withContext(Dispatchers.IO) {
-                    wechat.retrieveAvatar()
-                } ?: return@launch
-
-                avatarRetrieved.value = AvatarResult(
-                        success = ByteArrayInputStream(bytes)
-                )
-
-                // Cache it.
-                withContext(Dispatchers.IO) {
-                    cache.writeBinaryFile(WX_AVATAR_NAME, bytes)
-                }
-
-            } catch (e: Exception) {
-                avatarRetrieved.value = AvatarResult(
+                accountRefreshed.value = AccountResult(
                         exception = e
                 )
             }
@@ -150,11 +111,14 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     }
 
     fun fetchWxAvatar(cache: FileCache, wechat: Wechat) {
-
+        if (wechat.avatarUrl == null) {
+            // TODO: display error message.
+            return
+        }
         viewModelScope.launch {
             try {
                 val bytes = withContext(Dispatchers.IO) {
-                    wechat.retrieveAvatar()
+                    AccountRepo().loadWxAvatar(wechat.avatarUrl)
                 } ?: return@launch
 
                 avatarRetrieved.value = AvatarResult(

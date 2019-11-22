@@ -1,13 +1,12 @@
 package com.ft.ftchinese.ui.account
 
 import android.util.Patterns
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.reader.FtcUser
 import com.ft.ftchinese.model.reader.Passwords
+import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.util.ClientError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,30 +15,33 @@ import kotlinx.coroutines.withContext
 class UpdateViewModel : ViewModel() {
     val inProgress = MutableLiveData<Boolean>()
 
-    private val _updateForm = MutableLiveData<UpdateFormState>()
-    val updateFormState: LiveData<UpdateFormState> = _updateForm
+    val updateFormState: MutableLiveData<UpdateFormState> by lazy {
+        MutableLiveData<UpdateFormState>()
+    }
 
     private val _updateResult = MutableLiveData<BinaryResult>()
-    val updateResult: LiveData<BinaryResult> = _updateResult
+    val updateResult: MutableLiveData<BinaryResult> by lazy {
+        MutableLiveData<BinaryResult>()
+    }
 
     val sendEmailResult = MutableLiveData<BinaryResult>()
 
     fun emailDataChanged(currentEmail: String, newEmail: String) {
         if (!isEmailValid(newEmail)) {
-            _updateForm.value = UpdateFormState(
+            updateFormState.value = UpdateFormState(
                     emailError = R.string.error_invalid_email
             )
             return
         }
 
         if (currentEmail == newEmail) {
-            _updateForm.value = UpdateFormState(
+            updateFormState.value = UpdateFormState(
                     emailError = R.string.error_email_unchanged
             )
             return
         }
 
-        _updateForm.value = UpdateFormState(
+        updateFormState.value = UpdateFormState(
                 isDataValid = true
         )
     }
@@ -56,7 +58,7 @@ class UpdateViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    FtcUser(userId).updateEmail(email)
+                    AccountRepo().updateEmail(userId, email)
                 }
 
                 _updateResult.value = BinaryResult(
@@ -87,20 +89,20 @@ class UpdateViewModel : ViewModel() {
 
     fun userNameDataChanged(currentName: String, newName: String) {
         if (!isNameValid(newName)) {
-            _updateForm.value = UpdateFormState(
+            updateFormState.value = UpdateFormState(
                     nameError = R.string.error_invalid_name
             )
             return
         }
 
         if (currentName == newName) {
-            _updateForm.value = UpdateFormState(
+            updateFormState.value = UpdateFormState(
                     nameError = R.string.error_name_unchanged
             )
             return
         }
 
-        _updateForm.value = UpdateFormState(
+        updateFormState.value = UpdateFormState(
                 isDataValid = true
         )
     }
@@ -113,10 +115,10 @@ class UpdateViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    FtcUser(userId).updateUserName(name)
+                    AccountRepo().updateUserName(userId, name)
                 }
 
-                _updateResult.value = BinaryResult(
+                updateResult.value = BinaryResult(
                         success = done
                 )
             } catch (e: ClientError) {
@@ -129,12 +131,12 @@ class UpdateViewModel : ViewModel() {
                     e.parseStatusCode()
                 }
 
-                _updateResult.value = BinaryResult(
+                updateResult.value = BinaryResult(
                         error = msgId,
                         exception = e
                 )
             } catch (e: Exception) {
-                _updateResult.value = BinaryResult(
+                updateResult.value = BinaryResult(
                         exception = e
                 )
             }
@@ -145,10 +147,10 @@ class UpdateViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    FtcUser(userId).updatePassword(passwords)
+                    AccountRepo().updatePassword(userId, passwords)
                 }
 
-                _updateResult.value = BinaryResult(
+                updateResult.value = BinaryResult(
                         success = done
                 )
             } catch (e: ClientError) {
@@ -162,12 +164,12 @@ class UpdateViewModel : ViewModel() {
                     else -> e.parseStatusCode()
                 }
 
-                _updateResult.value = BinaryResult(
+                updateResult.value = BinaryResult(
                         error = msgId,
                         exception = e
                 )
             } catch (e: Exception) {
-                _updateResult.value = BinaryResult(
+                updateResult.value = BinaryResult(
                         exception = e
                 )
             }
@@ -179,7 +181,7 @@ class UpdateViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    FtcUser(userId).requestVerification()
+                    AccountRepo().requestVerification(userId)
                 }
 
                 sendEmailResult.value = BinaryResult(
