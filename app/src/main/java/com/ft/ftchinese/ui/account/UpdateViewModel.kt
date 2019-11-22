@@ -58,7 +58,7 @@ class UpdateViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    AccountRepo().updateEmail(userId, email)
+                    AccountRepo.updateEmail(userId, email)
                 }
 
                 _updateResult.value = BinaryResult(
@@ -115,7 +115,7 @@ class UpdateViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    AccountRepo().updateUserName(userId, name)
+                    AccountRepo.updateUserName(userId, name)
                 }
 
                 updateResult.value = BinaryResult(
@@ -147,7 +147,7 @@ class UpdateViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    AccountRepo().updatePassword(userId, passwords)
+                    AccountRepo.updatePassword(userId, passwords)
                 }
 
                 updateResult.value = BinaryResult(
@@ -181,7 +181,7 @@ class UpdateViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    AccountRepo().requestVerification(userId)
+                    AccountRepo.requestVerification(userId)
                 }
 
                 sendEmailResult.value = BinaryResult(

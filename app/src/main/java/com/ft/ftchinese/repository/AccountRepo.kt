@@ -10,7 +10,7 @@ import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.SubscribeApi
 import com.ft.ftchinese.util.json
 
-class AccountRepo {
+object AccountRepo {
     fun loadFtcAccount(ftcId: String): Account? {
         val(_, body) = Fetch().get(NextApi.ACCOUNT)
                 .noCache()

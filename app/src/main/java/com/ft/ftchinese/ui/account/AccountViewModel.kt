@@ -45,7 +45,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    AccountRepo().refreshWxInfo(wxSession)
+                    AccountRepo.refreshWxInfo(wxSession)
                 }
 
                 wxRefreshResult.value = WxRefreshResult(
@@ -84,7 +84,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
             try {
 
                 val updatedAccount = withContext(Dispatchers.IO) {
-                    AccountRepo().refresh(account)
+                    AccountRepo.refresh(account)
                 }
 
                 accountRefreshed.value = AccountResult(
@@ -118,7 +118,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val bytes = withContext(Dispatchers.IO) {
-                    AccountRepo().loadWxAvatar(wechat.avatarUrl)
+                    AccountRepo.loadWxAvatar(wechat.avatarUrl)
                 } ?: return@launch
 
                 avatarRetrieved.value = AvatarResult(

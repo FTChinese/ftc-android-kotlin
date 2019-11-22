@@ -22,7 +22,7 @@ class ReadingDurationService : IntentService("ReadingDurationIntentService") {
     override fun onHandleIntent(intent: Intent?) {
         val dur = intent?.getParcelableExtra<ReadingDuration>(EXTRA_READING_DURATION) ?: return
 
-        ReaderRepo().engaged(dur)
+        ReaderRepo.engaged(dur)
     }
 
     companion object {

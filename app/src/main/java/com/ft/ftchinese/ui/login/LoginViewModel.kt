@@ -67,7 +67,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
             try {
                 val ok = withContext(Dispatchers.IO) {
 
-                    ReaderRepo().emailExists(email)
+                    ReaderRepo.emailExists(email)
                 }
 
                 emailResult.value = FindEmailResult(
@@ -101,7 +101,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val account = withContext(Dispatchers.IO) {
-                    ReaderRepo().login(c)
+                    ReaderRepo.login(c)
                 }
 
                 if (account == null) {
@@ -148,7 +148,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val sess = withContext(Dispatchers.IO) {
-                    ReaderRepo().wxLogin(code)
+                    ReaderRepo.wxLogin(code)
                 }
 
                 // Fetched wx session data and send it to
@@ -194,7 +194,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val account = withContext(Dispatchers.IO) {
-                    ReaderRepo().signUp(c)
+                    ReaderRepo.signUp(c)
                 }
 
                 if (account == null) {
@@ -237,7 +237,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val ok = withContext(Dispatchers.IO) {
-                    ReaderRepo().passwordResetLetter(email)
+                    ReaderRepo.passwordResetLetter(email)
                 }
 
                 pwResetLetterResult.value = Result.Success(ok)
@@ -260,7 +260,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val account = withContext(Dispatchers.IO) {
-                    ReaderRepo().loadWxAccount(wxSession.unionId)
+                    ReaderRepo.loadWxAccount(wxSession.unionId)
                 }
 
                 info("Loaded wechat account: $account")

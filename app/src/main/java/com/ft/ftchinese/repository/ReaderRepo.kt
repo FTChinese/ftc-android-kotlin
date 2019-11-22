@@ -10,7 +10,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import kotlin.Exception
 
-class ReaderRepo : AnkoLogger {
+object ReaderRepo : AnkoLogger {
 
     fun emailExists(email: String): Boolean {
 
