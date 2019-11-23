@@ -108,8 +108,3 @@ data class Account(
 }
 
 
-data class Passwords(
-        val oldPassword: String,
-        val newPassword: String
-)
-
