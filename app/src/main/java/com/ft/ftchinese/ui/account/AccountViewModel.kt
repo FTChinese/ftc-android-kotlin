@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.repository.AccountRepo
+import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.ui.base.StringResult
 import com.ft.ftchinese.ui.launch.AvatarResult
 import com.ft.ftchinese.ui.login.AccountResult
@@ -145,7 +146,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val id = withContext(Dispatchers.IO) {
-                    account.createCustomer()
+                    SubRepo.createCustomer(account.id)
                 }
 
                 if (id == null) {
@@ -180,7 +181,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val stripeSub = withContext(Dispatchers.IO) {
-                    account.refreshStripeSub()
+                    SubRepo.refreshStripeSub(account)
                 }
 
                 stripeRetrievalResult.value = StripeRetrievalResult(

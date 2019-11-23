@@ -10,6 +10,7 @@ import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.order.Order
+import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.activity_my_orders.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -62,14 +63,14 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
             toast(R.string.prompt_no_network)
             return
         }
-
+        val acnt = sessionManager.loadAccount() ?: return
         showProgress(true)
 
         launch {
             try {
                 val orders = withContext(Dispatchers.IO) {
-                    sessionManager.loadAccount()?.getOrders()
-                } ?: return@launch
+                    SubRepo.getOrders(acnt)
+                }
 
                 showProgress(false)
 

@@ -7,6 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.order.Plan
 import com.ft.ftchinese.model.order.StripeSubParams
+import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.statusCodeMeaning
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +34,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val up = withContext(Dispatchers.IO) {
-                    account.previewUpgrade()
+                    SubRepo.previewUpgrade(account)
                 }
 
                 info("Preview upgrade $up")
@@ -63,7 +64,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val (ok, plan) = withContext(Dispatchers.IO) {
-                    account.directUpgrade()
+                    SubRepo.directUpgrade(account)
                 }
 
                 if (ok) {
@@ -103,7 +104,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val wxOrder = withContext(Dispatchers.IO) {
-                    account.wxPlaceOrder(plan.tier, plan.cycle)
+                    SubRepo.wxPlaceOrder(account, plan)
                 }
 
                 wxOrderResult.value = WxOrderResult(
@@ -132,7 +133,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val paymentStatus = withContext(Dispatchers.IO) {
-                    account.wxQueryOrder(orderId)
+                    SubRepo.wxQueryOrder(account, orderId)
                 }
 
                 wxPayResult.value = WxPayResult(
@@ -150,7 +151,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val aliOrder = withContext(Dispatchers.IO) {
-                    account.aliPlaceOrder(plan.tier, plan.cycle)
+                    SubRepo.aliPlaceOrder(account, plan)
                 }
 
                 aliOrderResult.value = AliOrderResult(
@@ -175,7 +176,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun getStripePlan(account: Account, plan: Plan?) {
+    fun getStripePlan(plan: Plan?) {
         if (plan == null) {
             stripePlanResult.value = StripePlanResult(
                     error = R.string.prompt_unknown_plan
@@ -186,7 +187,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val stripePlan = withContext(Dispatchers.IO) {
-                    account.getStripePlan(plan.getId())
+                    SubRepo.getStripePlan(plan.getId())
                 }
 
                 if (stripePlan == null) {
@@ -212,7 +213,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val sub = withContext(Dispatchers.IO) {
-                    account.createSubscription(params)
+                    SubRepo.createSubscription(account, params)
                 }
 
                 stripeSubscribedResult.value = StripeSubscribedResult(
@@ -236,7 +237,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val sub = withContext(Dispatchers.IO) {
-                    account.upgradeStripeSub(params)
+                    SubRepo.upgradeStripeSub(account, params)
                 }
 
                 stripeSubscribedResult.value = StripeSubscribedResult(

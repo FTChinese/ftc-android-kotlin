@@ -117,7 +117,7 @@ class StripeSubActivity : ScopedAppActivity(),
             return
         }
 
-        checkOutViewModel.getStripePlan(account, plan)
+        checkOutViewModel.getStripePlan(plan)
 
         if (account.stripeId == null) {
             showProgress(true)
