@@ -56,10 +56,10 @@ object SubscribeApi {
 
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
 
-const val FTC_OFFICIAL_URL = "http://www.ftchinese.com"
+const val FTC_OFFICIAL_URL = "https://www.ftchinese.com"
 const val CN_FT = "https://cn.ft.com"
 
-const val WV_BASE_URL = CN_FT
+const val BASE_URL = FTC_OFFICIAL_URL
 
 val HOST_FTC = Uri.parse(FTC_OFFICIAL_URL).host
 val HOST_FT = Uri.parse(CN_FT).host
@@ -79,38 +79,38 @@ data class Flavor (
 
 val defaultFlavor = Flavor(
         query = "an_ftc",
-        baseUrl = CN_FT
+        baseUrl = FTC_OFFICIAL_URL
 )
 
 val flavors = mapOf(
         "play" to Flavor(
                 query = "play_store",
-                baseUrl = CN_FT
+                baseUrl = BASE_URL
         ),
         "xiaomi" to Flavor(
                 query = "an_xiaomi",
-                baseUrl = CN_FT
+                baseUrl = BASE_URL
         ),
         "huawei" to Flavor(
                 query =  "an_huawei",
-                baseUrl = CN_FT
+                baseUrl = BASE_URL
         ),
         "baidu" to Flavor(
                 query = "an_baidu",
-                baseUrl = CN_FT
+                baseUrl = BASE_URL
         ),
         "sanliuling" to Flavor(
                 query = "an_360shouji",
-                baseUrl = CN_FT
+                baseUrl = BASE_URL
         ),
         "ftc" to defaultFlavor,
         "tencent" to Flavor(
                 query = "an_tencent",
-                baseUrl = CN_FT
+                baseUrl = BASE_URL
         ),
         "samsung" to Flavor(
                 query = "an_samsung",
-                baseUrl = CN_FT
+                baseUrl = BASE_URL
         ),
         "standard" to Flavor(
                 query = "standard",

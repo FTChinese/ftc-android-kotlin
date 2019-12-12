@@ -9,10 +9,8 @@ import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.article.WVClient
-import com.ft.ftchinese.util.CN_FT
-import com.ft.ftchinese.util.FTC_OFFICIAL_URL
 import com.ft.ftchinese.util.FileCache
-import com.ft.ftchinese.util.WV_BASE_URL
+import com.ft.ftchinese.util.BASE_URL
 import kotlinx.android.synthetic.main.activity_searchable.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
@@ -113,7 +111,7 @@ class SearchableActivity : AppCompatActivity(),
         template = template?.replace("{search-html}", "")
 
         search_result_wv.loadDataWithBaseURL(
-                WV_BASE_URL,
+                BASE_URL,
                 template,
                 "text/html",
                 null,

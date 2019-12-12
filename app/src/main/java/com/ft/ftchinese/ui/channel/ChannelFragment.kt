@@ -263,7 +263,7 @@ class ChannelFragment : ScopedFragment(),
         if (BuildConfig.DEBUG) {
             info("Loading web page to web view")
         }
-        web_view.loadDataWithBaseURL(WV_BASE_URL, html, "text/html", null, null)
+        web_view.loadDataWithBaseURL(BASE_URL, html, "text/html", null, null)
         showProgress(false)
     }
 
