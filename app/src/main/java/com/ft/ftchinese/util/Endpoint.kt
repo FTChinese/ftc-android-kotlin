@@ -37,7 +37,7 @@ object SubscribeApi {
 //        "http://www.ftacademy.cn/api/sandbox"
         "http://192.168.10.195:8200"
     } else {
-        "http://www.ftacademy.cn/api/v1"
+        "https://www.ftacademy.cn/api/v1"
     }
     val WX_UNIFIED_ORDER = "$BASE/wxpay/app"
     val WX_ORDER_QUERY = "$BASE/wxpay/query"
