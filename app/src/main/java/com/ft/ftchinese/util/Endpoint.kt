@@ -61,8 +61,8 @@ const val CN_FT = "https://cn.ft.com"
 
 const val BASE_URL = FTC_OFFICIAL_URL
 
-val HOST_FTC = Uri.parse(FTC_OFFICIAL_URL).host
-val HOST_FT = Uri.parse(CN_FT).host
+const val HOST_FTC = "www.ftchinese.com"
+const val HOST_FT = "cn.ft.com"
 const val HOST_FTA = "www.ftacademy.cn"
 
 data class Flavor (
