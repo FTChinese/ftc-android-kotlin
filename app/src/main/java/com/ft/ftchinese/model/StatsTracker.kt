@@ -6,7 +6,7 @@ import androidx.core.os.bundleOf
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.order.PayMethod
-import com.ft.ftchinese.model.order.Plan
+import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.splash.ScreenAd
 import com.ft.ftchinese.util.AdSlot
 import com.ft.ftchinese.util.FtcEvent
@@ -78,17 +78,17 @@ class StatsTracker private constructor(context: Context) {
         })
     }
 
-    fun buySuccess(plan: Plan, payMethod: PayMethod?) {
+    fun buySuccess(plan: Plan?, payMethod: PayMethod?) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-            putDouble(FirebaseAnalytics.Param.VALUE, plan.netPrice)
+            putDouble(FirebaseAnalytics.Param.VALUE, plan?.amount ?: 0.0)
             putString(FirebaseAnalytics.Param.METHOD, payMethod?.toString())
         })
 
 
         tracker.send(HitBuilders.EventBuilder()
                 .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(plan.gaGAAction())
+                .setAction(plan?.gaGAAction())
                 .setLabel(PaywallTracker.from?.label)
                 .build())
     }

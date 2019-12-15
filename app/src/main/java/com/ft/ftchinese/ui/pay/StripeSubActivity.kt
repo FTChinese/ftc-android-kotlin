@@ -10,9 +10,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.SessionManager
-import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.ui.base.StringResult
 import com.ft.ftchinese.ui.account.AccountViewModel
@@ -663,14 +664,14 @@ class StripeSubActivity : ScopedAppActivity(),
     private fun buildProductText(stripePlan: StripePlan?) {
         if (stripePlan != null) {
 
-            tv_net_price.visibility = View.VISIBLE
-            tv_product_overview.visibility = View.VISIBLE
+            tv_price.visibility = View.VISIBLE
+            tv_title.visibility = View.VISIBLE
 
-            tv_net_price.text = getString(R.string.formatter_price, stripePlan.currencySymbol(), stripePlan.price())
-            tv_product_overview.text = getTierCycleText(plan?.tier, plan?.cycle)
+            tv_price.text = getString(R.string.formatter_price, stripePlan.currencySymbol(), stripePlan.price())
+            tv_title.text = getTierCycleText(plan?.tier, plan?.cycle)
         } else {
-            tv_net_price.visibility = View.GONE
-            tv_product_overview.visibility = View.GONE
+            tv_price.visibility = View.GONE
+            tv_title.visibility = View.GONE
         }
     }
 

@@ -2,7 +2,7 @@ package com.ft.ftchinese.ui.pay
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel;
-import com.ft.ftchinese.model.order.Plan
+import com.ft.ftchinese.model.subscription.Plan
 
 /**
  * Used by [ProductFragment] to pass information to host
@@ -10,14 +10,11 @@ import com.ft.ftchinese.model.order.Plan
  */
 class ProductViewModel : ViewModel() {
 
-    val selected = MutableLiveData<Plan>()
-    val inputEnabled = MutableLiveData<Boolean>()
-
-    fun select(plan: Plan) {
-        selected.value = plan
+    val selected: MutableLiveData<Plan> by lazy {
+        MutableLiveData<Plan>()
     }
 
-    fun enableInput(enable: Boolean) {
-        inputEnabled.value = enable
+    val inputEnabled: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
     }
 }

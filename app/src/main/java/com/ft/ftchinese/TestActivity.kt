@@ -21,6 +21,7 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.*
+import com.ft.ftchinese.model.subscription.findPlan
 import com.ft.ftchinese.service.PollService
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
@@ -613,7 +614,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             }
             R.id.menu_stripe_subscripiton -> {
 
-                StripeSubActivity.startTest(this, subsPlans.of(Tier.STANDARD, Cycle.YEAR))
+                StripeSubActivity.startTest(this, findPlan(Tier.STANDARD, Cycle.YEAR))
             }
         }
     }

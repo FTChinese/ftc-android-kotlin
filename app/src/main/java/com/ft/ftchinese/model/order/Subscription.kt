@@ -75,21 +75,5 @@ open class Subscription(
 
         return this
     }
-
-    /**
-     * Get an subscription's original plan
-     */
-    fun plan(): Plan {
-        return Plan(
-                tier = tier,
-                cycle = cycle,
-                cycleCount = cycleCount,
-                currency = "cny",
-                extraDays = extraDays,
-                listPrice = amount,
-                netPrice = amount,
-                description = ""
-        )
-    }
 }
 

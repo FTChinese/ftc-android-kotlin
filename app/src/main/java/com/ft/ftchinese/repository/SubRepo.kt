@@ -1,7 +1,10 @@
 package com.ft.ftchinese.repository
 
+
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.subscription.PaymentIntent
+import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.SubscribeApi
@@ -12,7 +15,7 @@ import org.json.JSONException
 import org.json.JSONObject
 
 object SubRepo : AnkoLogger {
-    fun previewUpgrade(account: Account): UpgradePreview? {
+    fun previewUpgrade(account: Account): PaymentIntent? {
 
         val (_, body) = account.createFetch()
                 .get(SubscribeApi.UPGRADE_PREVIEW)
@@ -23,11 +26,11 @@ object SubRepo : AnkoLogger {
         return if (body == null) {
             null
         } else {
-            json.parse<UpgradePreview>(body)
+            json.parse<PaymentIntent>(body)
         }
     }
 
-    fun directUpgrade(account: Account): Pair<Boolean, UpgradePreview?> {
+    fun directUpgrade(account: Account): Pair<Boolean, PaymentIntent?> {
 
         val (resp, body) = account.createFetch()
                 .put(SubscribeApi.UPGRADE)
@@ -39,7 +42,7 @@ object SubRepo : AnkoLogger {
             204 -> Pair(true, null)
             200 -> if (body != null) {
                 try {
-                    Pair(true, json.parse<UpgradePreview>(body))
+                    Pair(true, json.parse<PaymentIntent>(body))
                 } catch (e: Exception) {
                     info(e)
                     Pair(false, null)

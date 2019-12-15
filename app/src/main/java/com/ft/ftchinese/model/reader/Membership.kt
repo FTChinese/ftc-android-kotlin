@@ -7,6 +7,9 @@ import com.ft.ftchinese.model.NextStep
 import com.ft.ftchinese.model.Permission
 import com.ft.ftchinese.model.VisibleButtons
 import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.model.subscription.Plan
+import com.ft.ftchinese.model.subscription.findPlan
+
 import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.Parcelize
 import org.threeten.bp.LocalDate
@@ -63,7 +66,7 @@ data class Membership(
             return null
         }
 
-        return subsPlans.of(tier, cycle)
+        return findPlan(tier, cycle)
     }
 
     fun remainingDays(): Long? {

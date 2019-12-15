@@ -19,12 +19,12 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.model.subscription.findPlan
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
-import kotlinx.android.synthetic.main.activity_member.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -41,13 +41,12 @@ class MemberActivity : ScopedAppActivity(),
 
 
     private fun stopRefresh() {
-        swipe_refresh.isRefreshing = false
+        binding.swipeRefresh.isRefreshing = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        setContentView(R.layout.activity_member)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_member)
 
         setSupportActionBar(toolbar)
@@ -56,7 +55,7 @@ class MemberActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
-        swipe_refresh.setOnRefreshListener(this)
+        binding.swipeRefresh.setOnRefreshListener(this)
 
         sessionManager = SessionManager.getInstance(this)
         accountViewModel = ViewModelProvider(this)
@@ -105,12 +104,12 @@ class MemberActivity : ScopedAppActivity(),
         binding.member = memberInfo
         binding.buttons = member.nextVisibleButtons()
 
-        subscribe_btn.setOnClickListener {
+        binding.subscribeBtn.setOnClickListener {
             PaywallActivity.start(this)
             it.isEnabled = false
         }
 
-        renew_btn.setOnClickListener {
+        binding.renewBtn.setOnClickListener {
 
             val plan = member.getPlan() ?: return@setOnClickListener
             // Tracking
@@ -119,13 +118,13 @@ class MemberActivity : ScopedAppActivity(),
             CheckOutActivity.startForResult(
                     activity = this,
                     requestCode = RequestCode.PAYMENT,
-                    plan = plan
+                    paymentIntent = plan.paymentIntent(OrderUsage.RENEW)
             )
 
             it.isEnabled = false
         }
 
-        upgrade_btn.setOnClickListener {
+        binding.upgradeBtn.setOnClickListener {
             if (member.fromWxOrAli()) {
 
                 UpgradeActivity.startForResult(this, RequestCode.PAYMENT)
@@ -134,7 +133,7 @@ class MemberActivity : ScopedAppActivity(),
                 StripeSubActivity.startForResult(
                         this,
                         RequestCode.PAYMENT,
-                        subsPlans.of(
+                        findPlan(
                                 Tier.PREMIUM,
                                 Cycle.YEAR
                         )
@@ -248,9 +247,9 @@ class MemberActivity : ScopedAppActivity(),
 
     override fun onResume() {
         super.onResume()
-        subscribe_btn.isEnabled = true
-        renew_btn.isEnabled = true
-        upgrade_btn.isEnabled = true
+        binding.subscribeBtn.isEnabled = true
+        binding.renewBtn.isEnabled = true
+        binding.upgradeBtn.isEnabled = true
 
         initUI()
     }

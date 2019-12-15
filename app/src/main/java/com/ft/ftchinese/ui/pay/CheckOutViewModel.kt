@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.order.Plan
+import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.order.StripeSubParams
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.util.ClientError

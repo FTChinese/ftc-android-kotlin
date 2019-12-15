@@ -13,6 +13,7 @@ import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.model.subscription.findPlan
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.ui.pay.*
@@ -132,7 +133,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                     showMessage(R.string.wxpay_failed)
 
                     if (subs != null) {
-                        tracker?.buyFail(subs.plan())
+                        tracker?.buyFail(findPlan(subs.tier, subs.cycle))
                     }
                 }
                 // 用户取消
@@ -157,7 +158,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             return
         }
 
-        tracker?.buySuccess(subs.plan(), PayMethod.WXPAY)
+        tracker?.buySuccess(findPlan(subs.tier, subs.cycle), PayMethod.WXPAY)
 
         if (!isNetworkConnected()) {
             info(R.string.prompt_no_network)

@@ -9,16 +9,19 @@ import android.view.MenuItem
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityCheckOutBinding
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.model.subscription.PaymentIntent
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
@@ -26,7 +29,6 @@ import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.android.synthetic.main.activity_check_out.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +39,7 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 const val EXTRA_FTC_PLAN = "extra_ftc_plan"
+const val EXTRA_PAYMENT_INTENT = "extra_payment_intent"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CheckOutActivity : ScopedAppActivity(),
@@ -51,7 +54,10 @@ class CheckOutActivity : ScopedAppActivity(),
     private lateinit var wxApi: IWXAPI
     private lateinit var tracker: StatsTracker
 
-    private var plan: Plan? = null
+    private lateinit var binding: ActivityCheckOutBinding
+
+//    private var plan: Plan? = null
+    private var paymentIntent: PaymentIntent? = null
 
     private var payMethod: PayMethod? = null
 
@@ -64,7 +70,8 @@ class CheckOutActivity : ScopedAppActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_check_out)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_check_out)
+//        setContentView(R.layout.activity_check_out)
 
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -72,28 +79,31 @@ class CheckOutActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
-        val p = intent.getParcelableExtra<Plan>(EXTRA_FTC_PLAN) ?: return
+//        val p = intent.getParcelableExtra<Plan>(EXTRA_FTC_PLAN) ?: return
+
+        val paymentIntent = intent.getParcelableExtra<PaymentIntent>(EXTRA_PAYMENT_INTENT) ?: return
 
         sessionManager = SessionManager.getInstance(this)
         orderManager = OrderManager.getInstance(this)
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
         wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
 
-        initUI(p)
+        initUI()
         setUp()
 
         tracker = StatsTracker.getInstance(this)
         // Log event: add card
-        tracker.addCart(p)
+        tracker.addCart(paymentIntent.plan)
 
-        this.plan = p
+//        this.plan = p
+        this.paymentIntent = paymentIntent
     }
 
-    private fun initUI(p: Plan) {
-        val account = sessionManager.loadAccount() ?: return
+    private fun initUI() {
+//        val account = sessionManager.loadAccount() ?: return
 
         // Show different titles
-        when (account.membership.subType(p)) {
+        when (paymentIntent?.subscriptionKind) {
             OrderUsage.RENEW ->  supportActionBar?.setTitle(R.string.title_renewal)
             OrderUsage.UPGRADE -> supportActionBar?.setTitle(R.string.title_upgrade)
             else -> {}
@@ -101,36 +111,36 @@ class CheckOutActivity : ScopedAppActivity(),
 
         // Attach price card
         supportFragmentManager.commit {
-            replace(R.id.product_in_cart, CartItemFragment.newInstance(p))
+            replace(R.id.product_in_cart, CartItemFragment.newInstance(paymentIntent))
         }
 
         // All payment methods are open to new members or expired members;
         // Wechat-only user cannot use stripe.
         // For non-expired user to renew (only applicable to
         // wechat pay and alipay), stripe should be disabled.
-        stripe_btn.isEnabled = account.permitStripe()
-
-        stripe_footnote.text = resources.getStringArray(R.array.stripe_footnotes)
+//        stripe_btn.isEnabled = account.permitStripe()
+        binding.permitStripePay = sessionManager.loadAccount()?.permitStripe() ?: true
+        binding.stripeFootnote.text = resources.getStringArray(R.array.stripe_footnotes)
                 .joinToString("\n")
 
         requestPermission()
 
-        alipay_btn.setOnClickListener {
+        binding.alipayBtn.setOnClickListener {
             payMethod = PayMethod.ALIPAY
             onSelectPayMethod()
         }
 
-        wxpay_btn.setOnClickListener {
+        binding.wxpayBtn.setOnClickListener {
             payMethod = PayMethod.WXPAY
             onSelectPayMethod()
         }
 
-        stripe_btn.setOnClickListener {
+        binding.stripeBtn.setOnClickListener {
             payMethod = PayMethod.STRIPE
             onSelectPayMethod()
         }
 
-        pay_btn.setOnClickListener {
+        binding.payBtn.setOnClickListener {
             onPayButtonClicked()
         }
     }
@@ -156,9 +166,9 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     private fun onSelectPayMethod() {
-        val priceText = getString(R.string.formatter_price, plan?.currencySymbol(), plan?.netPrice)
+        val priceText = getString(R.string.formatter_price, paymentIntent?.currencySymbol(), paymentIntent?.amount)
 
-        pay_btn.text = when(payMethod) {
+        binding.payButtonText = when(payMethod) {
             // 支付宝支付 ¥258.00
             PayMethod.ALIPAY -> getString(
                     R.string.formatter_check_out,
@@ -196,7 +206,7 @@ class CheckOutActivity : ScopedAppActivity(),
         }
 
         val account = sessionManager.loadAccount() ?: return
-        val plan = this.plan ?: return
+        val plan = paymentIntent?.plan ?: return
 
         val pm = payMethod
         if (pm == null) {
@@ -260,21 +270,21 @@ class CheckOutActivity : ScopedAppActivity(),
         if (orderResult.error != null) {
             toast(orderResult.error)
             enablePayBtn(true)
-            tracker.buyFail(plan)
+            tracker.buyFail(paymentIntent?.plan)
             return
         }
 
         if (orderResult.exception != null) {
             toast(parseException(orderResult.exception))
             enablePayBtn(true)
-            tracker.buyFail(plan)
+            tracker.buyFail(paymentIntent?.plan)
             return
         }
 
         if (orderResult.success == null) {
             toast(R.string.order_cannot_be_created)
             enablePayBtn(true)
-            tracker.buyFail(plan)
+            tracker.buyFail(paymentIntent?.plan)
             return
         }
 
@@ -285,7 +295,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private fun launchAliPay(aliOrder: AliOrder) {
 
-        val plan = this.plan ?: return
+        val plan = paymentIntent?.plan ?: return
 
         orderManager.save(aliOrder)
 
@@ -390,21 +400,21 @@ class CheckOutActivity : ScopedAppActivity(),
         if (orderResult.error != null) {
             toast(orderResult.error)
             enablePayBtn(true)
-            tracker.buyFail(plan)
+            tracker.buyFail(paymentIntent?.plan)
             return
         }
 
         if (orderResult.exception != null) {
             toast(parseException(orderResult.exception))
             enablePayBtn(true)
-            tracker.buyFail(plan)
+            tracker.buyFail(paymentIntent?.plan)
             return
         }
 
         if (orderResult.success == null) {
             toast(R.string.order_cannot_be_created)
             enablePayBtn(true)
-            tracker.buyFail(plan)
+            tracker.buyFail(paymentIntent?.plan)
             return
         }
 
@@ -484,13 +494,13 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     private fun enablePayBtn(enable: Boolean) {
-        pay_btn.isEnabled = enable
+        binding.payBtn.isEnabled = enable
     }
 
     // Enable/Disable Alipay radio button depending on
     // whether user granted permissions.
     private fun enableAlipay(enable: Boolean) {
-        alipay_btn.isEnabled = enable
+        binding.alipayBtn.isEnabled = enable
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -508,9 +518,19 @@ class CheckOutActivity : ScopedAppActivity(),
 
     companion object {
 
-        fun startForResult(activity: Activity?, requestCode: Int, plan: Plan) {
+//        @JvmStatic
+//        fun startForResult(activity: Activity?, requestCode: Int, plan: Plan) {
+//            val intent = Intent(activity, CheckOutActivity::class.java).apply {
+//                putExtra(EXTRA_FTC_PLAN, plan)
+//            }
+//
+//            activity?.startActivityForResult(intent, requestCode)
+//        }
+
+        @JvmStatic
+        fun startForResult(activity: Activity?, requestCode: Int, paymentIntent: PaymentIntent) {
             val intent = Intent(activity, CheckOutActivity::class.java).apply {
-                putExtra(EXTRA_FTC_PLAN, plan)
+                putExtra(EXTRA_PAYMENT_INTENT, paymentIntent)
             }
 
             activity?.startActivityForResult(intent, requestCode)

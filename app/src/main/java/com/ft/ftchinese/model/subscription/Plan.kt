@@ -1,7 +1,9 @@
-package com.ft.ftchinese.model.order
+package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
-import com.beust.klaxon.Json
+import com.ft.ftchinese.model.order.Cycle
+import com.ft.ftchinese.model.order.OrderUsage
+import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.util.GAAction
 import com.ft.ftchinese.util.KCycle
 import com.ft.ftchinese.util.KTier
@@ -17,11 +19,14 @@ data class Plan(
         @KCycle
         val cycle: Cycle,
 
-        val cycleCount: Long, // new
-        val currency: String, // new
-        val extraDays: Long, // new
-        val listPrice: Double,
-        val netPrice: Double,
+        val cycleCount: Long, // Deprecate
+        val extraDays: Long, // Deprecate
+
+        val price: Double,
+        val amount: Double,
+        val currency: String,
+        val listPrice: Double, // Deprecate
+        val netPrice: Double, // Deprecate
         val description: String
 ) : Parcelable {
 
@@ -38,6 +43,15 @@ data class Plan(
         }
     }
 
+    fun paymentIntent(kind: OrderUsage?): PaymentIntent {
+        return PaymentIntent(
+                amount = amount,
+                currency = currency,
+                subscriptionKind = kind,
+                plan = this
+        )
+    }
+
     fun gaGAAction(): String {
         return when (tier) {
             Tier.STANDARD -> when (cycle) {
@@ -49,58 +63,51 @@ data class Plan(
     }
 }
 
-class SubsPlans(
-        @Json(name = "standard_year")
-        val standardYear: Plan,
-
-        @Json(name = "standard_month")
-        val standardMonth: Plan,
-
-        @Json(name = "premium_year")
-        val premiumYear: Plan
-) {
-    fun of(tier: Tier, cycle: Cycle): Plan {
-        return when (tier) {
-            Tier.STANDARD -> when (cycle) {
-                Cycle.YEAR -> standardYear
-                Cycle.MONTH -> standardMonth
-            }
-            Tier.PREMIUM -> premiumYear
-        }
-    }
-}
-
-val subsPlans = SubsPlans(
-        standardYear = Plan(
+private val plans = mapOf(
+        "standard_year" to Plan(
                 tier = Tier.STANDARD,
                 cycle = Cycle.YEAR,
-                cycleCount = 1,
+                price = 258.00,
+                amount = 258.00,
                 currency = "cny",
+
+                cycleCount = 1,
                 extraDays = 1,
                 listPrice = 258.00,
                 netPrice = 258.00,
+
                 description = "FT中文网 - 年度标准会员"
         ),
-        standardMonth = Plan(
+        "standard_month" to Plan(
                 tier = Tier.STANDARD,
                 cycle = Cycle.MONTH,
+                price = 28.00,
+                amount = 28.00,
+
                 cycleCount = 1,
                 currency = "cny",
                 extraDays = 1,
                 listPrice = 28.00,
                 netPrice = 28.00,
+
                 description = "FT中文网 - 月度标准会员"
         ),
-        premiumYear = Plan(
+        "premium_year" to Plan(
                 tier = Tier.PREMIUM,
                 cycle = Cycle.YEAR,
+                price = 1998.00,
+                amount = 1998.00,
+
                 cycleCount = 1,
                 currency = "cny",
                 extraDays = 1,
                 listPrice = 1998.00,
                 netPrice = 1998.00,
+
                 description = "FT中文网 - 高端会员"
         )
 )
 
-
+fun findPlan(tier: Tier, cycle: Cycle): Plan? {
+    return plans["${tier}_$cycle"]
+}

@@ -1,47 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.pay.UpgradeActivity">
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
 
-    <include
-        layout="@layout/simple_toolbar" />
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="isFromArticle"
+            type="Boolean" />
+    </data>
 
-    <TextView
-        android:id="@+id/upgrade_to_read"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="@string/upgrade_to_read"
-        app:layout_constraintStart_toStartOf="@id/frag_upgrade_premium"
-        app:layout_constraintEnd_toEndOf="@id/frag_upgrade_premium"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:layout_constraintBottom_toTopOf="@id/frag_upgrade_premium"/>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.pay.UpgradeActivity">
 
-    <FrameLayout
-        android:id="@+id/frag_upgrade_premium"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/upgrade_to_read"
-        app:layout_constraintBottom_toTopOf="@id/how_to"/>
+        <include
+            layout="@layout/simple_toolbar" />
 
-    <TextView
-        style="@style/AppTextBody"
-        android:id="@+id/how_to"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="@string/upgrade_guide"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintStart_toStartOf="@id/frag_upgrade_premium"
-        app:layout_constraintEnd_toEndOf="@id/frag_upgrade_premium"
-        app:layout_constraintTop_toBottomOf="@id/frag_upgrade_premium" />
+        <TextView
+            android:id="@+id/upgrade_to_read"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/upgrade_to_read"
+            android:visibility="@{isFromArticle ? View.VISIBLE : View.GONE}"
+            app:layout_constraintStart_toStartOf="@id/frag_upgrade_premium"
+            app:layout_constraintEnd_toEndOf="@id/frag_upgrade_premium"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar"
+            app:layout_constraintBottom_toTopOf="@id/frag_upgrade_premium"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <FrameLayout
+            android:id="@+id/frag_upgrade_premium"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/upgrade_to_read"
+            app:layout_constraintBottom_toTopOf="@id/how_to"/>
+
+        <TextView
+            style="@style/AppTextBody"
+            android:id="@+id/how_to"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/upgrade_guide"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintStart_toStartOf="@id/frag_upgrade_premium"
+            app:layout_constraintEnd_toEndOf="@id/frag_upgrade_premium"
+            app:layout_constraintTop_toBottomOf="@id/frag_upgrade_premium" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
+

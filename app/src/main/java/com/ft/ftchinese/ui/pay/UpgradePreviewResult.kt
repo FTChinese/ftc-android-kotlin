@@ -1,9 +1,9 @@
 package com.ft.ftchinese.ui.pay
 
-import com.ft.ftchinese.model.order.UpgradePreview
+import com.ft.ftchinese.model.subscription.PaymentIntent
 
 data class UpgradePreviewResult (
-        val success: UpgradePreview? = null,
+        val success: PaymentIntent? = null,
         val errorId: Int? = null,
         val exception: Exception? = null
 )

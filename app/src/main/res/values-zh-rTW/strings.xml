@@ -198,7 +198,7 @@
     <string name="confirm_upgrade">去支付</string>
     <string name="direct_upgrade">无需支付，直接升级</string>
     <string name="upgrade_payment">升级到高端會員还需支付&quot;</string>
-    <string name="upgrade_forumla">应付额 = 定价 - 账户余额</string>
+    <string name="upgrade_formula">应付额 = 定价 - 账户余额</string>
     <string name="premium_price">高端會員定价: %1$s</string>
     <string name="account_balance">目前余额: %1$s</string>
     <string name="upgrade_success">升级成功</string>
