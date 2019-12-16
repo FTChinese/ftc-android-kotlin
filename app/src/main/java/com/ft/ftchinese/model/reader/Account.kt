@@ -20,7 +20,6 @@ data class Account(
         val email: String,
         val isVerified: Boolean = false,
         val avatarUrl: String? = null,
-        val isVip: Boolean = false,
         @KLoginMethod
         val loginMethod: LoginMethod? = null,
         val wechat: Wechat,
