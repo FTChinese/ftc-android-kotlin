@@ -37,8 +37,13 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<WxRefreshResult>()
     }
 
-    val customerIdResult = MutableLiveData<StringResult>()
-    val stripeRetrievalResult = MutableLiveData<StripeRetrievalResult>()
+    val customerIdResult: MutableLiveData<StringResult> by lazy {
+        MutableLiveData<StringResult>()
+    }
+
+    val stripeRetrievalResult: MutableLiveData<StripeRetrievalResult> by lazy {
+        MutableLiveData<StripeRetrievalResult>()
+    }
 
     // Ask API to fetch user's latest wechat info and save
     // it to database.

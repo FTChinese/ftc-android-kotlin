@@ -2,6 +2,8 @@ package com.ft.ftchinese.model.order
 
 import com.beust.klaxon.Json
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.subscription.Cycle
+import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.util.*
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime

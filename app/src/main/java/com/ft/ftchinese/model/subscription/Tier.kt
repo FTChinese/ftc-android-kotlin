@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.order
+package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
 import com.ft.ftchinese.R

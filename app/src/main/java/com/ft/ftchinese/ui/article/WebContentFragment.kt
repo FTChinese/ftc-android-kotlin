@@ -16,7 +16,7 @@ import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.ui.pay.grantPermission
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.util.FileCache

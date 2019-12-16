@@ -21,6 +21,8 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.*
+import com.ft.ftchinese.model.subscription.Cycle
+import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.subscription.findPlan
 import com.ft.ftchinese.service.PollService
 import com.ft.ftchinese.ui.account.LinkPreviewActivity

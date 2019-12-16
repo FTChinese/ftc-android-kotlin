@@ -1,5 +1,7 @@
 package com.ft.ftchinese.model.order
 
+import com.ft.ftchinese.model.subscription.Cycle
+import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.util.*
 import org.threeten.bp.ZonedDateTime
 

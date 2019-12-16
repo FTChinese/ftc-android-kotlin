@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.StatsTracker
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.splash.SPLASH_SCHEDULE_FILE
 import com.ft.ftchinese.model.splash.Schedule
 import com.ft.ftchinese.model.splash.ScreenAd

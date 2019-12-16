@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.util.formatLocalDate
 import com.ft.ftchinese.util.json
 import kotlinx.android.synthetic.main.fragment_link_target.*

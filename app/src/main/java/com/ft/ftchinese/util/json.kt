@@ -6,6 +6,8 @@ import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.UnlinkAnchor
+import com.ft.ftchinese.model.subscription.Cycle
+import com.ft.ftchinese.model.subscription.Tier
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZoneOffset
 import org.threeten.bp.ZonedDateTime

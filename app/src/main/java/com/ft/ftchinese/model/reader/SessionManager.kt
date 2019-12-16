@@ -2,10 +2,10 @@ package com.ft.ftchinese.model.reader
 
 import android.content.Context
 import androidx.core.content.edit
-import com.ft.ftchinese.model.order.Cycle
+import com.ft.ftchinese.model.subscription.Cycle
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.model.order.StripeSubStatus
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.util.formatISODateTime
 import com.ft.ftchinese.util.formatLocalDate
 import com.ft.ftchinese.util.parseISODateTime

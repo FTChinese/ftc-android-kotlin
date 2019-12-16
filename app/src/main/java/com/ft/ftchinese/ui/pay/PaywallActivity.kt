@@ -13,7 +13,7 @@ import com.ft.ftchinese.databinding.ActivityPaywallBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.subscription.Plan
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.login.LoginActivity

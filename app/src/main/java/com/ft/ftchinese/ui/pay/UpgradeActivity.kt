@@ -3,7 +3,6 @@ package com.ft.ftchinese.ui.pay
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -12,7 +11,7 @@ import com.ft.ftchinese.databinding.ActivityUpgradeBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.subscription.Plan
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.android.synthetic.main.simple_toolbar.*

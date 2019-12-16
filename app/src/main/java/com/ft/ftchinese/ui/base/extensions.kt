@@ -8,8 +8,8 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.order.Cycle
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.subscription.Cycle
+import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.NetworkException
 import org.jetbrains.anko.toast

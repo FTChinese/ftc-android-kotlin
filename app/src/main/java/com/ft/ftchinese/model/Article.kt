@@ -3,7 +3,7 @@ package com.ft.ftchinese.model
 import android.text.format.DateFormat
 import com.beust.klaxon.Json
 import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.subscription.Tier
 import org.jetbrains.anko.AnkoLogger
 import java.util.*
 

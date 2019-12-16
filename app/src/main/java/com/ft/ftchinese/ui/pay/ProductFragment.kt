@@ -12,8 +12,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentProductBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.model.order.Cycle
-import com.ft.ftchinese.model.order.Tier
+import com.ft.ftchinese.model.subscription.Cycle
+import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.subscription.findPlan
 import org.jetbrains.anko.AnkoLogger
 

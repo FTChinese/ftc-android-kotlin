@@ -1,9 +1,7 @@
 package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
-import com.ft.ftchinese.model.order.Cycle
 import com.ft.ftchinese.model.order.OrderUsage
-import com.ft.ftchinese.model.order.Tier
 import com.ft.ftchinese.util.GAAction
 import com.ft.ftchinese.util.KCycle
 import com.ft.ftchinese.util.KTier
