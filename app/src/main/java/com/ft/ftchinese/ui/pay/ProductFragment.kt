@@ -127,7 +127,7 @@ class ProductFragment : ScopedFragment(),
         viewModel.inputEnabled.observe(viewLifecycleOwner, Observer<Boolean> {
 //            yearly_price_btn.isEnabled = it
 //            monthly_price_btn.isEnabled = it
-            product.buttonEnabled = it
+            binding.buttonEnabled = it
         })
     }
 
@@ -136,7 +136,7 @@ class ProductFragment : ScopedFragment(),
     // When the fragment is resumed, enable those buttons.
     override fun onResume() {
         super.onResume()
-        product.buttonEnabled = true
+        binding.buttonEnabled = true
     }
 
     companion object {
