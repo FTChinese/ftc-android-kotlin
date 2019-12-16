@@ -42,18 +42,6 @@ class CartItemFragment : ScopedFragment() {
                 amount)
     }
 
-//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-//        super.onViewCreated(view, savedInstanceState)
-//
-//
-//        binding.tvPrice.text = getString(
-//                R.string.formatter_price,
-//                paymentIntent?.currencySymbol(),
-//                paymentIntent?.amount)
-//
-//        binding.tvTitle.text = activity?.getTierCycleText(paymentIntent?.plan?.tier, paymentIntent?.plan?.cycle)
-//    }
-
     companion object {
 
         @JvmStatic
