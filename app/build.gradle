@@ -38,8 +38,8 @@ android {
         applicationId "com.ft.ftchinese"
         minSdkVersion 21
         targetSdkVersion 29
-        versionCode 28
-        versionName "3.2.3"
+        versionCode 29
+        versionName "3.2.4"
 
         setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
