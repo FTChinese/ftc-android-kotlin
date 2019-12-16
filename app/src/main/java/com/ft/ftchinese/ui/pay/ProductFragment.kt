@@ -59,7 +59,9 @@ class ProductFragment : ScopedFragment(),
                 },
                 smallPrint = if (tier == Tier.PREMIUM) getString(R.string.premium_small_print) else null,
                 yearPrice = getString(R.string.formatter_price_year, yearlyPlan?.amount),
-                monthPrice = getString(R.string.formatter_price_month, monthlyPlan?.amount)
+                monthPrice = if (monthlyPlan != null) {
+                    getString(R.string.formatter_price_month, monthlyPlan.amount)
+                } else { null }
         )
     }
 
