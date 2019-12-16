@@ -16,10 +16,6 @@ data class Plan(
         val tier: Tier,
         @KCycle
         val cycle: Cycle,
-
-        val cycleCount: Long, // Deprecate
-        val extraDays: Long, // Deprecate
-
         val price: Double,
         val amount: Double,
         val currency: String,
@@ -68,9 +64,6 @@ private val plans = mapOf(
                 price = 258.00,
                 amount = 258.00,
                 currency = "cny",
-
-                cycleCount = 1,
-                extraDays = 1,
                 listPrice = 258.00,
                 netPrice = 258.00,
 
@@ -81,10 +74,7 @@ private val plans = mapOf(
                 cycle = Cycle.MONTH,
                 price = 28.00,
                 amount = 28.00,
-
-                cycleCount = 1,
                 currency = "cny",
-                extraDays = 1,
                 listPrice = 28.00,
                 netPrice = 28.00,
 
@@ -95,10 +85,7 @@ private val plans = mapOf(
                 cycle = Cycle.YEAR,
                 price = 1998.00,
                 amount = 1998.00,
-
-                cycleCount = 1,
                 currency = "cny",
-                extraDays = 1,
                 listPrice = 1998.00,
                 netPrice = 1998.00,
 
