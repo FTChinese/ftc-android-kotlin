@@ -41,7 +41,6 @@ class PaywallActivity : ScopedAppActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_paywall)
-//        setContentView(R.layout.activity_paywall)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
