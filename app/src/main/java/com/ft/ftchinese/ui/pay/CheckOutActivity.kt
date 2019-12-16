@@ -56,7 +56,6 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private lateinit var binding: ActivityCheckOutBinding
 
-//    private var plan: Plan? = null
     private var paymentIntent: PaymentIntent? = null
 
     private var payMethod: PayMethod? = null
@@ -71,7 +70,6 @@ class CheckOutActivity : ScopedAppActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_check_out)
-//        setContentView(R.layout.activity_check_out)
 
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -79,24 +77,26 @@ class CheckOutActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
-//        val p = intent.getParcelableExtra<Plan>(EXTRA_FTC_PLAN) ?: return
 
         val paymentIntent = intent.getParcelableExtra<PaymentIntent>(EXTRA_PAYMENT_INTENT) ?: return
+        this.paymentIntent = paymentIntent
 
         sessionManager = SessionManager.getInstance(this)
         orderManager = OrderManager.getInstance(this)
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
         wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
 
-        initUI()
-        setUp()
-
         tracker = StatsTracker.getInstance(this)
         // Log event: add card
         tracker.addCart(paymentIntent.plan)
 
-//        this.plan = p
-        this.paymentIntent = paymentIntent
+
+        // Attach price card
+        supportFragmentManager.commit {
+            replace(R.id.product_in_cart, CartItemFragment.newInstance(paymentIntent))
+        }
+        initUI()
+        setUp()
     }
 
     private fun initUI() {
@@ -109,16 +109,10 @@ class CheckOutActivity : ScopedAppActivity(),
             else -> {}
         }
 
-        // Attach price card
-        supportFragmentManager.commit {
-            replace(R.id.product_in_cart, CartItemFragment.newInstance(paymentIntent))
-        }
-
         // All payment methods are open to new members or expired members;
         // Wechat-only user cannot use stripe.
         // For non-expired user to renew (only applicable to
         // wechat pay and alipay), stripe should be disabled.
-//        stripe_btn.isEnabled = account.permitStripe()
         binding.permitStripePay = sessionManager.loadAccount()?.permitStripe() ?: true
         binding.stripeFootnote.text = resources.getStringArray(R.array.stripe_footnotes)
                 .joinToString("\n")
