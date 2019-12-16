@@ -56,7 +56,7 @@ object SubscribeApi {
 
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
 
-const val FTC_OFFICIAL_URL = "https://www.ftchinese.com"
+const val FTC_OFFICIAL_URL = "http://www.ftchinese.com"
 const val CN_FT = "https://cn.ft.com"
 
 const val BASE_URL = FTC_OFFICIAL_URL
