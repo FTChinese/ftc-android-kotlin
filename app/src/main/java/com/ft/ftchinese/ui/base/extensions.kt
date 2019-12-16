@@ -65,16 +65,18 @@ fun Activity.isActiveNetworkMobile(): Boolean {
  */
 fun Activity.getTierCycleText(tier: Tier?, cycle: Cycle?): String? {
 
+    if (tier == null || cycle == null) {
+        return null
+    }
+
     val tierText = when (tier) {
         Tier.STANDARD -> getString(R.string.tier_standard)
         Tier.PREMIUM -> getString(R.string.tier_premium)
-        else -> return null
     }
 
     val cycleText = when (cycle) {
         Cycle.YEAR -> getString(R.string.cycle_year)
         Cycle.MONTH -> getString(R.string.cycle_month)
-        else -> return null
     }
 
     return getString(R.string.formatter_tier_cycle, tierText, cycleText)
