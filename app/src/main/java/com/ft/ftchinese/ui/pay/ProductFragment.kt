@@ -69,6 +69,8 @@ class ProductFragment : ScopedFragment(),
                               savedInstanceState: Bundle?): View? {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_product, container, false)
 
+        binding.product = buildProductCard()
+
 //        return inflater.inflate(R.layout.fragment_product, container, false)
         return binding.root
     }
@@ -76,7 +78,7 @@ class ProductFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.product = buildProductCard()
+
 
 //        product_heading_tv.text = product?.heading
 //        product_benefits_tv.text = product?.description
