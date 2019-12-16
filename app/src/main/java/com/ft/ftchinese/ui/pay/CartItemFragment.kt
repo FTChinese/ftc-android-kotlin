@@ -19,25 +19,40 @@ class CartItemFragment : ScopedFragment() {
     private var paymentIntent: PaymentIntent? = null
     lateinit var binding: FragmentCartItemBinding
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        paymentIntent = arguments?.getParcelable(EXTRA_PAYMENT_INTENT)
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_cart_item, container, false)
+        binding.tvPrice.text = formatPrice(paymentIntent?.currencySymbol(), paymentIntent?.amount)
+        binding.tvTitle.text = activity?.getTierCycleText(paymentIntent?.plan?.tier, paymentIntent?.plan?.cycle)
+
         return binding.root
 //        return inflater.inflate(R.layout.fragment_cart_item, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        paymentIntent = arguments?.getParcelable(EXTRA_PAYMENT_INTENT)
-        binding.tvPrice.text = getString(
+    private fun formatPrice(currency: String?, amount: Double?): String {
+        return getString(
                 R.string.formatter_price,
-                paymentIntent?.currencySymbol(),
-                paymentIntent?.amount)
-
-        binding.tvTitle.text = activity?.getTierCycleText(paymentIntent?.plan?.tier, paymentIntent?.plan?.cycle)
+                currency,
+                amount)
     }
+
+//    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+//        super.onViewCreated(view, savedInstanceState)
+//
+//
+//        binding.tvPrice.text = getString(
+//                R.string.formatter_price,
+//                paymentIntent?.currencySymbol(),
+//                paymentIntent?.amount)
+//
+//        binding.tvTitle.text = activity?.getTierCycleText(paymentIntent?.plan?.tier, paymentIntent?.plan?.cycle)
+//    }
 
     companion object {
 
