@@ -10,12 +10,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.Result
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.subscription.Plan
+import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
-import com.ft.ftchinese.ui.base.StringResult
 import com.ft.ftchinese.ui.account.AccountViewModel
 import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.ui.login.AccountResult
@@ -87,7 +88,7 @@ class StripeSubActivity : ScopedAppActivity(),
             onSubscriptionResponse(it)
         })
 
-        accountViewModel.customerIdResult.observe(this, Observer {
+        accountViewModel.customerResult.observe(this, Observer {
             onCustomerIdCreated(it)
         })
 
@@ -165,31 +166,48 @@ class StripeSubActivity : ScopedAppActivity(),
     }
 
 
-    private fun onCustomerIdCreated(result: StringResult?) {
-        if (result == null) {
-            return
+    private fun onCustomerIdCreated(result: Result<StripeCustomer>) {
+        when (result) {
+            is Result.Success -> {
+                sessionManager.saveStripeId(result.data.stripeId)
+
+                setupCustomerSession()
+            }
+
+            is Result.LocalizedError -> {
+                showProgress(false)
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                showProgress(false)
+                toast(parseException(result.exception))
+            }
         }
 
-        if (result.error != null) {
-            showProgress(false)
-            toast(result.error)
-            return
-        }
-
-        if (result.exception != null) {
-            showProgress(false)
-            toast(parseException(result.exception))
-            return
-        }
-
-        if (result.success == null) {
-            showProgress(false)
-            return
-        }
-
-        sessionManager.saveStripeId(result.success)
-
-        setupCustomerSession()
+//        if (result == null) {
+//            return
+//        }
+//
+//        if (result.error != null) {
+//            showProgress(false)
+//            toast(result.error)
+//            return
+//        }
+//
+//        if (result.exception != null) {
+//            showProgress(false)
+//            toast(parseException(result.exception))
+//            return
+//        }
+//
+//        if (result.success == null) {
+//            showProgress(false)
+//            return
+//        }
+//
+//        sessionManager.saveStripeId(result.success)
+//
+//        setupCustomerSession()
     }
 
     private fun setupCustomerSession() {

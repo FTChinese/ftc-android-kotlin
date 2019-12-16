@@ -10,7 +10,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.Result
 import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.util.ClientError
@@ -64,7 +66,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
-        accountViewModel.customerIdResult.observe(this, Observer {
+        accountViewModel.customerResult.observe(this, Observer {
             onCustomerCreated(it)
         })
 
@@ -103,25 +105,39 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         enableButton(false)
     }
 
-    private fun onCustomerCreated(result: StringResult?) {
-        if (result == null) {
-            return
+    private fun onCustomerCreated(result: Result<StripeCustomer>)
+    {
+        when (result) {
+            is Result.Success -> {
+                sessionManager.saveStripeId(result.data.stripeId)
+
+                setupCustomerSession()
+            }
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                toast(parseException(result.exception))
+            }
         }
-
-        if (result.error != null) {
-            toast(result.error)
-            return
-        }
-
-        if (result.exception != null) {
-            toast(parseException(result.exception))
-            return
-        }
-
-        val id = result.success ?: return
-        sessionManager.saveStripeId(id)
-
-        setupCustomerSession()
+//        if (result == null) {
+//            return
+//        }
+//
+//        if (result.error != null) {
+//            toast(result.error)
+//            return
+//        }
+//
+//        if (result.exception != null) {
+//            toast(parseException(result.exception))
+//            return
+//        }
+//
+//        val id = result.success ?: return
+//        sessionManager.saveStripeId(id)
+//
+//        setupCustomerSession()
     }
 
     private fun defaultPaymentMethod() {

@@ -1,7 +1,7 @@
 package com.ft.ftchinese.service
 
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.repository.SubRepo
+import com.ft.ftchinese.repository.StripeRepo
 import com.ft.ftchinese.util.ClientError
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.EphemeralKeyUpdateListener
@@ -22,7 +22,7 @@ class StripeEphemeralKeyProvider(
         job = GlobalScope.launch {
             try {
                 val rawKey = withContext(Dispatchers.IO) {
-                    SubRepo.createEphemeralKey(account, apiVersion)
+                    StripeRepo.createEphemeralKey(account, apiVersion)
                 }
 
 

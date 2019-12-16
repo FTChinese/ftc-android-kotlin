@@ -4,10 +4,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.Result
 import com.ft.ftchinese.model.reader.*
+import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.repository.AccountRepo
-import com.ft.ftchinese.repository.SubRepo
-import com.ft.ftchinese.ui.base.StringResult
+import com.ft.ftchinese.repository.StripeRepo
 import com.ft.ftchinese.ui.launch.AvatarResult
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.ClientError
@@ -37,8 +38,12 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<WxRefreshResult>()
     }
 
-    val customerIdResult: MutableLiveData<StringResult> by lazy {
-        MutableLiveData<StringResult>()
+//    val customerIdResult: MutableLiveData<StringResult> by lazy {
+//        MutableLiveData<StringResult>()
+//    }
+
+    val customerResult: MutableLiveData<Result<StripeCustomer>> by lazy {
+        MutableLiveData<Result<StripeCustomer>>()
     }
 
     val stripeRetrievalResult: MutableLiveData<StripeRetrievalResult> by lazy {
@@ -150,33 +155,42 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     fun createCustomer(account: Account) {
         viewModelScope.launch {
             try {
-                val id = withContext(Dispatchers.IO) {
-                    SubRepo.createCustomer(account.id)
+                val customer = withContext(Dispatchers.IO) {
+                    StripeRepo.createCustomer(account.id)
                 }
 
-                if (id == null) {
-                    customerIdResult.value = StringResult(
-                            error = R.string.stripe_customer_not_created
-                    )
+                if (customer == null) {
+//                    customerIdResult.value = StringResult(
+//                            error = R.string.stripe_customer_not_created
+//                    )
+                    customerResult.value = Result.LocalizedError(R.string.stripe_customer_not_created)
                     return@launch
                 }
+//
+//                customerIdResult.value = StringResult(
+//                        success = id
+//                )
+                customerResult.value = Result.Success(customer)
 
-                customerIdResult.value = StringResult(
-                        success = id
-                )
             } catch (e: ClientError) {
-                val msgId = when (e.statusCode) {
-                    400 -> R.string.stripe_customer_not_found
-                    else -> null
+//                val msgId = when (e.statusCode) {
+//                    400 -> R.string.stripe_customer_not_found
+//                    else -> null
+//                }
+//                customerIdResult.value = StringResult(
+//                        error = msgId,
+//                        exception = e
+//                )
+                if (e.statusCode == 404) {
+                    customerResult.value = Result.LocalizedError(R.string.stripe_customer_not_found)
+                } else {
+                    customerResult.value = Result.Error(e)
                 }
-                customerIdResult.value = StringResult(
-                        error = msgId,
-                        exception = e
-                )
             } catch (e: Exception) {
-                customerIdResult.value = StringResult(
-                        exception = e
-                )
+//                customerIdResult.value = StringResult(
+//                        exception = e
+//                )
+                customerResult.value = Result.Error(e)
             }
 
         }
@@ -186,7 +200,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val stripeSub = withContext(Dispatchers.IO) {
-                    SubRepo.refreshStripeSub(account)
+                    StripeRepo.refreshStripeSub(account)
                 }
 
                 stripeRetrievalResult.value = StripeRetrievalResult(

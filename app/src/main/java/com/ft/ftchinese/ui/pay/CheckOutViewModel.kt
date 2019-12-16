@@ -7,6 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.order.StripeSubParams
+import com.ft.ftchinese.repository.StripeRepo
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.statusCodeMeaning
@@ -187,7 +188,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val stripePlan = withContext(Dispatchers.IO) {
-                    SubRepo.getStripePlan(plan.getId())
+                    StripeRepo.getStripePlan(plan.getId())
                 }
 
                 if (stripePlan == null) {
@@ -213,7 +214,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val sub = withContext(Dispatchers.IO) {
-                    SubRepo.createSubscription(account, params)
+                    StripeRepo.createSubscription(account, params)
                 }
 
                 stripeSubscribedResult.value = StripeSubscribedResult(
@@ -237,7 +238,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val sub = withContext(Dispatchers.IO) {
-                    SubRepo.upgradeStripeSub(account, params)
+                    StripeRepo.upgradeStripeSub(account, params)
                 }
 
                 stripeSubscribedResult.value = StripeSubscribedResult(
