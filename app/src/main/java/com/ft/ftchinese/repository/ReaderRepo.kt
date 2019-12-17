@@ -78,6 +78,7 @@ object ReaderRepo : AnkoLogger {
                 .setClient()
                 .setAppId()
                 .noCache()
+                .setTimeout(30)
                 .jsonBody(json.toJsonString(mapOf(
                         "code" to code
                 )))
