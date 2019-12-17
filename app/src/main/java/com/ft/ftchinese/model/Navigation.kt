@@ -327,7 +327,7 @@ object Navigation {
             ChannelSource(
                     title = "麦可林学英语",
                     name = "english_mle",
-                    contentUrl = "${currentFlavor.baseUrl}/channel/speedread.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/m/corp/preview.html?pageid=learnenglish&webview=ftcapp",
                     htmlType = HTML_TYPE_FRAGMENT
             ),
             /**
