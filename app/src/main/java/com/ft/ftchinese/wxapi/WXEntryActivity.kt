@@ -10,11 +10,11 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityWechatBinding
 import com.ft.ftchinese.model.Result
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
-import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.viewmodel.LoginViewModel
 import com.tencent.mm.opensdk.constants.ConstantsAPI
@@ -254,69 +254,107 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         }
     }
 
-    private fun onAccountRetrieved(accountResult: AccountResult?) {
+    private fun onAccountRetrieved(accountResult: Result<Account>) {
 
         binding.inProgress = false
 
-        if (accountResult == null) {
-            binding.result = UIWx(
-                    heading = getString(R.string.prompt_login_failed),
-                    body = getString(R.string.loading_failed),
-                    enableButton = true
-            )
-            return
-        }
-
-        if (accountResult.error != null) {
-            binding.result = UIWx(
-                    heading = getString(R.string.prompt_login_failed),
-                    body = getString(accountResult.error),
-                    enableButton = true
-            )
-
-            return
-        }
-
-        if (accountResult.exception != null) {
-
-            binding.result = UIWx(
-                    heading = getString(R.string.prompt_login_failed),
-                    body = accountResult.exception.message ?: "",
-                    enableButton = true
-            )
-            return
-        }
-
-        if (accountResult.success == null) {
-
-            binding.result = UIWx(
-                    heading = getString(R.string.prompt_login_failed),
-                    body = getString(R.string.loading_failed),
-                    enableButton = true
-            )
-            return
-        }
-
-        when (sessionManager.loadWxIntent()) {
-            // For login
-            WxOAuthIntent.LOGIN -> {
+        when (accountResult) {
+            is Result.LocalizedError -> {
                 binding.result = UIWx(
-                        heading = getString(R.string.prompt_logged_in),
-                        body = getString(
-                                R.string.greeting_wx_login,
-                                accountResult.success.wechat.nickname
-                        ),
+                        heading = getString(R.string.prompt_login_failed),
+                        body = getString(accountResult.msgId),
                         enableButton = true
                 )
-                sessionManager.saveAccount(accountResult.success)
             }
+            is Result.Error -> {
+                binding.result = UIWx(
+                        heading = getString(R.string.prompt_login_failed),
+                        body = accountResult.exception.message ?: "",
+                        enableButton = true
+                )
+            }
+            is Result.Success -> {
+                when (sessionManager.loadWxIntent()) {
+                    // For login
+                    WxOAuthIntent.LOGIN -> {
+                        binding.result = UIWx(
+                                heading = getString(R.string.prompt_logged_in),
+                                body = getString(
+                                        R.string.greeting_wx_login,
+                                        accountResult.data.wechat.nickname
+                                ),
+                                enableButton = true
+                        )
+                        sessionManager.saveAccount(accountResult.data)
+                    }
 
-            // For account linking
-            WxOAuthIntent.LINK -> {
-                LinkPreviewActivity.startForResult(this, accountResult.success)
-                finish()
+                    // For account linking
+                    WxOAuthIntent.LINK -> {
+                        LinkPreviewActivity.startForResult(this, accountResult.data)
+                        finish()
+                    }
+                }
             }
         }
+//        if (accountResult == null) {
+//            binding.result = UIWx(
+//                    heading = getString(R.string.prompt_login_failed),
+//                    body = getString(R.string.loading_failed),
+//                    enableButton = true
+//            )
+//            return
+//        }
+
+//        if (accountResult.error != null) {
+//            binding.result = UIWx(
+//                    heading = getString(R.string.prompt_login_failed),
+//                    body = getString(accountResult.error),
+//                    enableButton = true
+//            )
+//
+//            return
+//        }
+
+//        if (accountResult.exception != null) {
+//
+//            binding.result = UIWx(
+//                    heading = getString(R.string.prompt_login_failed),
+//                    body = accountResult.exception.message ?: "",
+//                    enableButton = true
+//            )
+//            return
+//        }
+
+//        if (accountResult.success == null) {
+//
+//            binding.result = UIWx(
+//                    heading = getString(R.string.prompt_login_failed),
+//                    body = getString(R.string.loading_failed),
+//                    enableButton = true
+//            )
+//            return
+//        }
+
+//        when (sessionManager.loadWxIntent()) {
+//            // For login
+//            WxOAuthIntent.LOGIN -> {
+//                binding.result = UIWx(
+//                        heading = getString(R.string.prompt_logged_in),
+//                        body = getString(
+//                                R.string.greeting_wx_login,
+//                                accountResult.success.wechat.nickname
+//                        ),
+//                        enableButton = true
+//                )
+//                sessionManager.saveAccount(accountResult.success)
+//            }
+//
+//            // For account linking
+//            WxOAuthIntent.LINK -> {
+//                LinkPreviewActivity.startForResult(this, accountResult.success)
+//                finish()
+//            }
+//        }
     }
 
 

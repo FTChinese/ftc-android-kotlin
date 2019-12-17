@@ -6,10 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.Result
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.repository.ReaderRepo
-import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.ui.login.FindEmailResult
 import com.ft.ftchinese.ui.login.LoginFormState
 import com.ft.ftchinese.util.ClientError
@@ -33,8 +33,8 @@ class LoginViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<FindEmailResult>()
     }
 
-    val accountResult: MutableLiveData<AccountResult> by lazy {
-        MutableLiveData<AccountResult>()
+    val accountResult: MutableLiveData<Result<Account>> by lazy {
+        MutableLiveData<Result<Account>>()
     }
 
     val wxSessionResult: MutableLiveData<Result<WxSession>> by lazy {
@@ -109,33 +109,42 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
                 if (account == null) {
 
-                    accountResult.value = AccountResult(
-                            error = R.string.loading_failed
-                    )
+//                    accountResult.value = AccountResult(
+//                            error = R.string.loading_failed
+//                    )
 
+                    accountResult.value = Result.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
 
-                accountResult.value = AccountResult(
-                        success = account
-                )
+//                accountResult.value = AccountResult(
+//                        success = account
+//                )
+                accountResult.value = Result.Success(account)
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 404) {
                     R.string.error_invalid_password
                 } else {
-                    e.parseStatusCode()
+                    statusCodes[e.statusCode]
                 }
 
-                accountResult.value = AccountResult(
-                        error = msgId,
-                        exception = e
-                )
+                accountResult.value = if (msgId != null) {
+                    Result.LocalizedError(msgId)
+                } else {
+                    Result.Error(e)
+                }
+
+//                accountResult.value = AccountResult(
+//                        error = msgId,
+//                        exception = e
+//                )
 
             } catch (e: Exception) {
+                accountResult.value = Result.Error(e)
 
-                accountResult.value = AccountResult(
-                        exception = e
-                )
+//                accountResult.value = AccountResult(
+//                        exception = e
+//                )
             }
         }
     }
@@ -155,16 +164,17 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (account == null) {
-                    accountResult.value = AccountResult(
-                            error = R.string.loading_failed
-                    )
+//                    accountResult.value = AccountResult(
+//                            error = R.string.loading_failed
+//                    )
+                    accountResult.value = Result.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
 
-                accountResult.value = AccountResult(
-                        success = account
-                )
-
+//                accountResult.value = AccountResult(
+//                        success = account
+//                )
+                accountResult.value = Result.Success(account)
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 422) {
                     when (e.error?.key) {
@@ -177,15 +187,22 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                         else -> null
                     }
                 } else {
-                    e.parseStatusCode()
+                    statusCodes[e.statusCode]
                 }
 
-                accountResult.value = AccountResult(
-                        error = msgId,
-                        exception = e
-                )
+                accountResult.value = if (msgId != null) {
+                    Result.LocalizedError(msgId)
+                } else {
+                    Result.Error(e)
+                }
+
+//                        AccountResult(
+//                        error = msgId,
+//                        exception = e
+//                )
             } catch (e: Exception) {
-                accountResult.value = AccountResult(exception = e)
+//                accountResult.value = AccountResult(exception = e)
+                accountResult.value = Result.Error(e)
             }
         }
     }
@@ -267,60 +284,41 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                     ReaderRepo.loadWxAccount(wxSession.unionId)
                 }
 
+                if (account == null) {
+                    accountResult.value = Result.LocalizedError(R.string.loading_failed)
+                    return@launch
+                }
+
                 info("Loaded wechat account: $account")
 
-                accountResult.value = AccountResult(success = account)
+//                accountResult.value = AccountResult(success = account)
+                accountResult.value = Result.Success(account)
             } catch (e: ClientError) {
                 info("Retrieving wechat account error $e")
                 val msgId = if (e.statusCode == 404) {
                     R.string.loading_failed
                 } else {
-                    e.parseStatusCode()
+                    statusCodes[e.statusCode]
                 }
 
-                accountResult.value = AccountResult(
-                        error = msgId,
-                        exception = e
-                )
+//                accountResult.value = AccountResult(
+//                        error = msgId,
+//                        exception = e
+//                )
 
+                accountResult.value = if (msgId != null) {
+                    Result.LocalizedError(msgId)
+                } else {
+                    Result.Error(e)
+                }
             } catch (e: Exception) {
 
                 info(e)
-                accountResult.value = AccountResult(exception = e)
+//                accountResult.value = AccountResult(exception = e)
+                accountResult.value = Result.Error(e)
             }
         }
     }
-
-    /**
-     * Load account after user's password verified
-     * or signed up.
-     */
-//    private suspend fun loadFtcAccount(userId: String) {
-//        try {
-//            val account = withContext(Dispatchers.IO) {
-//                FtcUser(id = userId).fetchAccount()
-//            }
-//
-//            accountResult.value = AccountResult(success = account)
-//
-//        } catch (e: ClientError) {
-//            val msgId = if (e.statusCode == 404) {
-//                R.string.loading_failed
-//            } else {
-//                e.parseStatusCode()
-//            }
-//
-//            accountResult.value = AccountResult(
-//                    error = msgId,
-//                    exception = e
-//            )
-//
-//        } catch (e: Exception) {
-//
-//            accountResult.value = AccountResult(exception = e)
-//        }
-//    }
-
 
     private fun isEmailValid(email: String): Boolean {
         return if (!email.contains('@')) {

@@ -8,6 +8,8 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.Result
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.login.*
@@ -105,38 +107,57 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 
-    private fun onAccountResult(accountResult: AccountResult?) {
+    private fun onAccountResult(accountResult: Result<Account>) {
 
         showProgress(false)
 
-        if (accountResult == null) {
-            return
-        }
+        when (accountResult) {
+            is Result.LocalizedError -> {
+                toast(accountResult.msgId)
+            }
+            is Result.Error -> {
+                toast(parseException(accountResult.exception))
+            }
+            is Result.Success -> {
+                // Is user created a new ftc account, do not show the LinkPreviewActivity since the
+                // new account is automatically linked upon creation.
+                if (isSignUp) {
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                    return
+                }
 
-        if (accountResult.error != null) {
-            toast(accountResult.error)
-            return
+                LinkPreviewActivity.startForResult(this, accountResult.data)
+            }
         }
-
-        if (accountResult.exception != null) {
-            toast(parseException(accountResult.exception))
-            return
-        }
-
-        if (accountResult.success == null) {
-            toast(R.string.loading_failed)
-            return
-        }
+//        if (accountResult == null) {
+//            return
+//        }
+//
+//        if (accountResult.error != null) {
+//            toast(accountResult.error)
+//            return
+//        }
+//
+//        if (accountResult.exception != null) {
+//            toast(parseException(accountResult.exception))
+//            return
+//        }
+//
+//        if (accountResult.success == null) {
+//            toast(R.string.loading_failed)
+//            return
+//        }
 
         // Is user created a new ftc account, do not show the LinkPreviewActivity since the
         // new account is automatically linked upon creation.
-        if (isSignUp) {
-            setResult(Activity.RESULT_OK)
-            finish()
-            return
-        }
-
-        LinkPreviewActivity.startForResult(this, accountResult.success)
+//        if (isSignUp) {
+//            setResult(Activity.RESULT_OK)
+//            finish()
+//            return
+//        }
+//
+//        LinkPreviewActivity.startForResult(this, accountResult.success)
     }
 
     /**

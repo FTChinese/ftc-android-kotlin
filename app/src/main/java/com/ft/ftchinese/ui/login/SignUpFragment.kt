@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.Result
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.model.reader.SessionManager
@@ -108,9 +109,10 @@ class SignUpFragment : ScopedFragment(),
         }
 
         viewModel.accountResult.observe(viewLifecycleOwner, Observer {
-            if (it.error != null || it.exception != null) {
-                enableInput(true)
-            }
+//            if (it.error != null || it.exception != null) {
+//                enableInput(true)
+//            }
+            enableInput(it !is Result.Success)
         })
     }
 

@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.Result
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.afterTextChanged
 import com.ft.ftchinese.ui.base.isNetworkConnected
@@ -118,10 +119,13 @@ class SignInFragment : ScopedFragment(),
             ))
         }
 
+        // Observer account in fragment only to enable/disable button.
+        // Host activity will handle the account data.
         viewModel.accountResult.observe(viewLifecycleOwner, Observer {
-            if (it.error != null || it.exception != null) {
-                enableInput(true)
-            }
+//            if (it.error != null || it.exception != null) {
+//
+//            }
+            enableInput(it !is Result.Success)
         })
     }
 

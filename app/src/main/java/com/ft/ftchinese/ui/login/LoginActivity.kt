@@ -8,6 +8,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.Result
 import com.ft.ftchinese.model.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.SessionManager
@@ -105,27 +106,45 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
         viewModel.accountResult.observe(this, Observer {
             showProgress(false)
 
-            val loginResult = it ?: return@Observer
+            when (it) {
+                is Result.LocalizedError -> {
+                    toast(it.msgId)
+                }
+                is Result.Error -> {
+                    toast(parseException(it.exception))
+                }
+                is Result.Success -> {
 
-            if (loginResult.error != null) {
-                toast(loginResult.error)
-                return@Observer
+                    sessionManager.saveAccount(it.data)
+
+                    statsTracker.setUserId(it.data.id)
+
+                    setResult(Activity.RESULT_OK)
+
+                    finish()
+                }
             }
+//            val loginResult = it ?: return@Observer
+//
+//            if (loginResult.error != null) {
+//                toast(loginResult.error)
+//                return@Observer
+//            }
+//
+//            if (loginResult.exception != null) {
+//                toast(parseException(loginResult.exception))
+//                return@Observer
+//            }
 
-            if (loginResult.exception != null) {
-                toast(parseException(loginResult.exception))
-                return@Observer
-            }
-
-            val account = loginResult.success ?: return@Observer
-
-            sessionManager.saveAccount(account)
-
-            statsTracker.setUserId(account.id)
-
-            setResult(Activity.RESULT_OK)
-
-            finish()
+//            val account = loginResult.success ?: return@Observer
+//
+//            sessionManager.saveAccount(account)
+//
+//            statsTracker.setUserId(account.id)
+//
+//            setResult(Activity.RESULT_OK)
+//
+//            finish()
         })
     }
 
