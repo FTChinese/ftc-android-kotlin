@@ -3,11 +3,12 @@ package com.ft.ftchinese.wxapi
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityWechatBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
@@ -23,8 +24,6 @@ import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.android.synthetic.main.activity_wechat.*
-import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -47,13 +46,23 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     private var sessionManager: SessionManager? = null
     private var orderManager: OrderManager? = null
     private var tracker: StatsTracker? = null
+    private var isPaymentSuccess: Boolean = false
+
+    private lateinit var binding: ActivityWechatBinding
 
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var checkoutViewModel: CheckOutViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_wechat)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_wechat)
+
+        binding.result = UIWxOAuth(
+                heading = getString(R.string.wxpay_query_order),
+                body = "Please wait",
+                enableButton = false
+        )
+
         setSupportActionBar(toolbar)
 
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
@@ -76,16 +85,12 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         tracker = StatsTracker.getInstance(this)
 
 
-        doneButton.setOnClickListener {
+        binding.doneButton.setOnClickListener {
             onClickDone()
         }
 
-        showMessage("")
-        enableButton(false)
-
         if (intent.getBooleanExtra(EXTRA_UI_TEST, false)) {
-            val order = orderManager?.load() ?: return
-            queryOrder(order)
+            queryOrder()
 
             return
         }
@@ -116,72 +121,92 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         info("onPayFinish, errCode = ${resp?.errCode}")
 
         if (resp?.type == ConstantsAPI.COMMAND_PAY_BY_WX) {
-            val subs = orderManager?.load()
 
             when (resp.errCode) {
                 // 成功
                 // 展示成功页面
                 0 -> {
-                    info("Start query order")
-                    queryOrder(subs)
+                    info("Start querying order")
+                    isPaymentSuccess = true
+                    queryOrder()
                 }
                 // 错误
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
                 -1 -> {
-                    showProgress(false)
-                    enableButton(true)
-                    showMessage(R.string.wxpay_failed)
 
-                    if (subs != null) {
-                        tracker?.buyFail(findPlan(subs.tier, subs.cycle))
+                    binding.result = UIWxOAuth(
+                            heading = getString(R.string.wxpay_failed),
+                            body = "Error code: ${resp.errCode}",
+                            enableButton = true
+                    )
+
+                    val order = orderManager?.load()
+
+                    if (order != null) {
+                        tracker?.buyFail(findPlan(order.tier, order.cycle))
                     }
                 }
                 // 用户取消
                 // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
                 -2 -> {
-                    showProgress(false)
-                    enableButton(true)
-                    showMessage(R.string.wxpay_cancelled)
+
+                    binding.result = UIWxOAuth(
+                            heading = getString(R.string.wxpay_cancelled),
+                            enableButton = true
+                    )
                 }
             }
         }
     }
 
     // This is the entry point after user paid successfully
-    private fun queryOrder(subs: Subscription?) {
-
+    private fun queryOrder() {
         info("Start querying order")
 
-        if (subs == null) {
-            showMessage(R.string.payment_done, R.string.order_cannot_be_queried)
-            enableButton(true)
+        val order = orderManager?.load()
+
+        if (order == null) {
+
+            binding.result = UIWxOAuth(
+                    heading = getString(R.string.payment_done),
+                    body = getString(R.string.order_cannot_be_queried),
+                    enableButton = true
+            )
             return
         }
 
-        tracker?.buySuccess(findPlan(subs.tier, subs.cycle), PayMethod.WXPAY)
+        tracker?.buySuccess(findPlan(order.tier, order.cycle), PayMethod.WXPAY)
 
         if (!isNetworkConnected()) {
             info(R.string.prompt_no_network)
-            showMessage(R.string.payment_done, R.string.order_cannot_be_queried)
-            showProgress(false)
+
+            binding.result = UIWxOAuth(
+                    heading = getString(R.string.payment_done),
+                    body = getString(R.string.order_cannot_be_queried),
+                    enableButton = true
+            )
             return
         }
 
         val account = sessionManager?.loadAccount() ?: return
 
-        showProgress(true)
-        showMessage(R.string.wxpay_query_order)
+        binding.inProgress = true
 
-        checkoutViewModel.queryWxPayStatus(account, subs.id)
+        checkoutViewModel.queryWxPayStatus(account, order.id)
     }
 
     private fun onWxPayStatusQueried(result: WxPayResult?) {
+        binding.inProgress = false
+
         if (result == null || result.exception != null || result.success == null) {
-            val title = getString(R.string.payment_done)
-            val msg = if (result?.exception != null) result.exception.message else getString(R.string.order_cannot_be_queried)
-            showMessage(title, msg)
-            enableButton(true)
-            showProgress(false)
+
+            binding.result = UIWxOAuth(
+                    heading = getString(R.string.payment_done),
+                    body = if (result?.exception != null) {
+                        result.exception.message ?: ""
+                    } else getString(R.string.order_cannot_be_queried),
+                    enableButton = true
+            )
             return
         }
 
@@ -192,12 +217,13 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             "REVOKED",
             "USERPAYING",
             "PAYERROR"  -> {
-                showMessage(paymentStatusId[result.success.paymentState])
-                showProgress(false)
-                enableButton(true)
+                val strId = paymentStatusId[result.success.paymentState]
+                binding.result = UIWxOAuth(
+                        heading = if (strId != null) getString(strId) else getString(R.string.payment_done),
+                        enableButton = true
+                )
             }
             "SUCCESS" -> {
-                showMessage(R.string.payment_done)
                 confirmSubscription()
             }
         }
@@ -218,34 +244,57 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         sessionManager?.updateMembership(updatedMember)
 
         // Start retrieving account data from server.
-        showMessage(R.string.payment_done, R.string.refreshing_account)
+        binding.result = UIWxOAuth(
+                getString(R.string.payment_done),
+                getString(R.string.refreshing_account)
+        )
+
         accountViewModel.refresh(account)
     }
 
     private fun onAccountRefreshed(result: AccountResult?) {
-        showProgress(false)
-        enableButton(true)
+
+        binding.inProgress = false
 
         if (result == null) {
-            showMessage(R.string.payment_done, R.string.loading_failed)
+
+            binding.result = UIWxOAuth(
+                    heading = getString(R.string.payment_done),
+                    body = getString(R.string.loading_failed),
+                    enableButton = true
+            )
             return
         }
 
         if (result.error != null) {
-            showMessage(R.string.payment_done, result.error)
+
+            binding.result = UIWxOAuth(
+                    heading = getString(R.string.payment_done),
+                    body = getString(result.error),
+                    enableButton = true
+            )
             return
         }
 
         if (result.exception != null) {
-            showMessage(getString(R.string.payment_done), result.exception.message)
+
+            binding.result = UIWxOAuth(
+                    heading = getString(R.string.payment_done),
+                    body = result.exception.message ?: "",
+                    enableButton = true
+            )
             return
         }
 
         val remoteAccount = result.success
 
         if (remoteAccount == null) {
-            showMessage(R.string.payment_done, R.string.loading_failed)
 
+            binding.result = UIWxOAuth(
+                    heading = getString(R.string.payment_done),
+                    body = getString(R.string.loading_failed),
+                    enableButton = true
+            )
             return
         }
 
@@ -255,17 +304,11 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             sessionManager?.saveAccount(remoteAccount)
         }
 
-        showMessage(R.string.payment_done, R.string.subs_success)
-    }
-
-    private fun showMessage(title: String, body: String? = null) {
-        heading_tv.text = title
-        message_tv.text = body ?: ""
-    }
-
-    private fun showMessage(title: Int?, body: Int? = null) {
-        heading_tv.text = if (title != null) getString(title) else ""
-        message_tv.text = if (body != null) getString(body) else ""
+        binding.result = UIWxOAuth(
+                heading = getString(R.string.payment_done),
+                body = getString(R.string.subs_success),
+                enableButton = true
+        )
     }
 
     /**
@@ -275,14 +318,15 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
      * if membership is still invalid.
      */
     private fun onClickDone() {
-        val account = sessionManager?.loadAccount()
 
-        if (account == null) {
+        val order = orderManager?.load()
+
+        if (order == null) {
             finish()
             return
         }
 
-        if (account.isMember) {
+        if (order.isConfirmed()) {
             LatestOrderActivity.start(this)
         } else {
             PaywallTracker.from = null
@@ -304,13 +348,6 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         onClickDone()
     }
 
-    private fun enableButton(enable: Boolean) {
-        doneButton.isEnabled = enable
-    }
-
-    private fun showProgress(show: Boolean) {
-        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
-    }
 
     companion object {
         @JvmStatic
