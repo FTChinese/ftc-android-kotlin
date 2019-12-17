@@ -137,53 +137,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    /**
-     * Uses wechat authrozation code to get an access token, and then use the
-     * token to get user info.
-     * API responds with WxSession data to uniquely identify this login
-     * session.
-     * You can use the session data later to retrieve user account.
-     */
-    fun wxLogin(code: String) {
-        viewModelScope.launch {
-            try {
-                val sess = withContext(Dispatchers.IO) {
-                    ReaderRepo.wxLogin(code)
-                }
 
-                // Fetched wx session data and send it to
-                // UI thread for saving, and then continues
-                // to fetch account data.
-                if (sess == null) {
-                    wxSessionResult.value = Result.LocalizedError(R.string.loading_failed)
-                    return@launch
-                }
-
-                wxSessionResult.value = Result.Success(sess)
-
-//                wxOAuthResult.value = WxOAuthResult(
-//                        success = sess
-//                )
-
-
-
-                // via wechat only.
-                info("Start loading wechat account")
-
-                // Here won't throw an errors.
-//                loadWxAccount(sess)
-            } catch (e: Exception) {
-                // If the error is ClientError,
-                // Possible 422 error key: code_missing_field, code_invalid.
-                // We cannot make sure the exact meaning of each error, just
-                // show user API's error message.
-
-                info("Exception: $e")
-
-                wxSessionResult.value = Result.Error(e)
-            }
-        }
-    }
 
     /**
      * Handles both a new user signup, or wechat-logged-in
@@ -253,10 +207,57 @@ class LoginViewModel : ViewModel(), AnkoLogger {
             }
         }
     }
+
+    /**
+     * Uses wechat authrozation code to get an access token, and then use the
+     * token to get user info.
+     * API responds with WxSession data to uniquely identify this login
+     * session.
+     * You can use the session data later to retrieve user account.
+     */
+    fun wxLogin(code: String) {
+        viewModelScope.launch {
+            try {
+                info("Starte requesting wechat oauth session data")
+                val sess = withContext(Dispatchers.IO) {
+                    ReaderRepo.wxLogin(code)
+                }
+
+                // Fetched wx session data and send it to
+                // UI thread for saving, and then continues
+                // to fetch account data.
+                if (sess == null) {
+                    info("Wechat oauth session is null")
+                    wxSessionResult.value = Result.LocalizedError(R.string.loading_failed)
+                    return@launch
+                }
+
+                wxSessionResult.value = Result.Success(sess)
+
+                // via wechat only.
+                info("Start loading wechat account")
+
+                // Here won't throw an errors.
+//                loadWxAccount(sess)
+            } catch (e: Exception) {
+                // If the error is ClientError,
+                // Possible 422 error key: code_missing_field, code_invalid.
+                // We cannot make sure the exact meaning of each error, just
+                // show user API's error message.
+
+                info("Exception: $e")
+
+                wxSessionResult.value = Result.Error(e)
+            }
+        }
+    }
+
     /**
      * Load account after user performed wechat authorization
      */
     fun loadWxAccount(wxSession: WxSession) {
+        info("Start retrieving wechat account")
+
         viewModelScope.launch {
             try {
                 val account = withContext(Dispatchers.IO) {
@@ -267,6 +268,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
                 accountResult.value = AccountResult(success = account)
             } catch (e: ClientError) {
+                info("Retrieving wechat account error $e")
                 val msgId = if (e.statusCode == 404) {
                     R.string.loading_failed
                 } else {
@@ -280,6 +282,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
             } catch (e: Exception) {
 
+                info(e)
                 accountResult.value = AccountResult(exception = e)
             }
         }
