@@ -77,7 +77,7 @@ class Fetch : AnkoLogger {
     private var reqBody: RequestBody? = null
     private var request: Request? = null
     private var call: Call? = null
-    private var timeout: Int = 0
+    private var timeout: Int? = null
 
     private var disableCache = false
 
@@ -114,6 +114,8 @@ class Fetch : AnkoLogger {
     }
 
     // Set timeout in seconds
+    // okhttp default timeout is 10 seconds.
+    // 0 means no timeout.
     fun setTimeout(timeout: Int) = apply {
         this.timeout = timeout
     }
@@ -281,14 +283,13 @@ class Fetch : AnkoLogger {
          * remote server accepted the request before the failure.
          * @throws IllegalStateException when the call has already been executed.
          */
-        val call = if (timeout != 0) {
+        val call = timeout?.toLong()?.let {
             client.newBuilder()
-                    .readTimeout(timeout.toLong(), TimeUnit.SECONDS)
+                    .readTimeout(it, TimeUnit.SECONDS)
                     .build()
                     .newCall(req)
-        } else {
-            client.newCall(req)
-        }
+        } ?: client.newCall(req)
+
         this.call = call
 
         return try {
