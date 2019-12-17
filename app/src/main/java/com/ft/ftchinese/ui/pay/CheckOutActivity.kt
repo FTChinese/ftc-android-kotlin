@@ -418,13 +418,13 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private fun launchWxPay(wxOrder: WxOrder) {
         val req = PayReq()
-        req.appId = wxOrder.appId
-        req.partnerId = wxOrder.partnerId
-        req.prepayId = wxOrder.prepayId
-        req.nonceStr = wxOrder.nonce
-        req.timeStamp = wxOrder.timestamp
-        req.packageValue = wxOrder.pkg
-        req.sign = wxOrder.signature
+        req.appId = wxOrder.params.appId
+        req.partnerId = wxOrder.params.partnerId
+        req.prepayId = wxOrder.params.prepayId
+        req.nonceStr = wxOrder.params.nonce
+        req.timeStamp = wxOrder.params.timestamp
+        req.packageValue = wxOrder.params.pkg
+        req.sign = wxOrder.params.signature
 
         val result = wxApi.sendReq(req)
 
