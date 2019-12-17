@@ -321,7 +321,13 @@ object Navigation {
             ChannelSource(
                     title = "音乐之生",
                     name = "english_music",
-                    contentUrl = "https://api003.ftmailbox.com/channel/lifeofasong.html?webview=ftcapp&bodyonly=yes",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/lifeofasong.html?webview=ftcapp&bodyonly=yes",
+                    htmlType = HTML_TYPE_FRAGMENT
+            ),
+            ChannelSource(
+                    title = "麦可林学英语",
+                    name = "english_mle",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/speedread.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT
             ),
             /**
@@ -334,10 +340,18 @@ object Navigation {
                 }
              */
             ChannelSource(
-                    "双语阅读",
+                    title ="双语阅读",
                     name = "english_bilingual",
                     contentUrl = "${currentFlavor.baseUrl}/channel/ce.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),
+
+            ChannelSource(
+                    title = "每日一词",
+                    name = "english_daily_word",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/dailyword.html?webview=ftcapp&bodyonly=yes",
+                    htmlType = HTML_TYPE_FRAGMENT
+            ),
+
             /**
              * "meta": {
                 "title": "原声视频",
@@ -348,7 +362,7 @@ object Navigation {
                 }
              */
             ChannelSource(
-                    "原声视频",
+                    title = "原声视频",
                     name = "english_video",
                     contentUrl = "${currentFlavor.baseUrl}/channel/ev.html?webview=ftcapp&bodyonly=yes&001",
                     htmlType = HTML_TYPE_FRAGMENT)
