@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.login
+package com.ft.ftchinese.viewmodel
 
 import android.util.Patterns
 import androidx.lifecycle.MutableLiveData
@@ -9,6 +9,9 @@ import com.ft.ftchinese.model.Result
 import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.repository.ReaderRepo
+import com.ft.ftchinese.ui.login.AccountResult
+import com.ft.ftchinese.ui.login.FindEmailResult
+import com.ft.ftchinese.ui.login.LoginFormState
 import com.ft.ftchinese.util.ClientError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

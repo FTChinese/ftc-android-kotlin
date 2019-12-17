@@ -10,7 +10,7 @@
             type="Boolean" />
         <variable
             name="result"
-            type="com.ft.ftchinese.wxapi.UIWxOAuth" />
+            type="com.ft.ftchinese.wxapi.UIWx" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

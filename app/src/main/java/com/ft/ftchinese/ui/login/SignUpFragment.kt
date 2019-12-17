@@ -12,6 +12,7 @@ import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.TokenManager
+import com.ft.ftchinese.viewmodel.LoginViewModel
 import kotlinx.android.synthetic.main.fragment_sign_up.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast

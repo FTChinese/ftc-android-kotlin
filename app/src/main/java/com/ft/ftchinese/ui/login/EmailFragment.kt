@@ -10,6 +10,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.afterTextChanged
 import com.ft.ftchinese.ui.base.isNetworkConnected
+import com.ft.ftchinese.viewmodel.LoginViewModel
 import kotlinx.android.synthetic.main.fragment_email.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast

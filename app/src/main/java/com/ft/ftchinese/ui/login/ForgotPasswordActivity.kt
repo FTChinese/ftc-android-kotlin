@@ -11,6 +11,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityForgotPasswordBinding
 import com.ft.ftchinese.model.Result
 import com.ft.ftchinese.ui.base.*
+import com.ft.ftchinese.viewmodel.LoginViewModel
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast

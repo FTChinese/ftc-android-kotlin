@@ -512,15 +512,6 @@ class CheckOutActivity : ScopedAppActivity(),
 
     companion object {
 
-//        @JvmStatic
-//        fun startForResult(activity: Activity?, requestCode: Int, plan: Plan) {
-//            val intent = Intent(activity, CheckOutActivity::class.java).apply {
-//                putExtra(EXTRA_FTC_PLAN, plan)
-//            }
-//
-//            activity?.startActivityForResult(intent, requestCode)
-//        }
-
         @JvmStatic
         fun startForResult(activity: Activity?, requestCode: Int, paymentIntent: PaymentIntent) {
             val intent = Intent(activity, CheckOutActivity::class.java).apply {

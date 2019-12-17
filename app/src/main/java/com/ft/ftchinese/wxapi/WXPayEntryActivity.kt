@@ -57,7 +57,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_wechat)
 
-        binding.result = UIWxOAuth(
+        binding.result = UIWx(
                 heading = getString(R.string.wxpay_query_order),
                 body = "Please wait",
                 enableButton = false
@@ -134,7 +134,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
                 -1 -> {
 
-                    binding.result = UIWxOAuth(
+                    binding.result = UIWx(
                             heading = getString(R.string.wxpay_failed),
                             body = "Error code: ${resp.errCode}",
                             enableButton = true
@@ -150,7 +150,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
                 -2 -> {
 
-                    binding.result = UIWxOAuth(
+                    binding.result = UIWx(
                             heading = getString(R.string.wxpay_cancelled),
                             enableButton = true
                     )
@@ -167,7 +167,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         if (order == null) {
 
-            binding.result = UIWxOAuth(
+            binding.result = UIWx(
                     heading = getString(R.string.payment_done),
                     body = getString(R.string.order_cannot_be_queried),
                     enableButton = true
@@ -180,7 +180,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         if (!isNetworkConnected()) {
             info(R.string.prompt_no_network)
 
-            binding.result = UIWxOAuth(
+            binding.result = UIWx(
                     heading = getString(R.string.payment_done),
                     body = getString(R.string.order_cannot_be_queried),
                     enableButton = true
@@ -200,7 +200,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         if (result == null || result.exception != null || result.success == null) {
 
-            binding.result = UIWxOAuth(
+            binding.result = UIWx(
                     heading = getString(R.string.payment_done),
                     body = if (result?.exception != null) {
                         result.exception.message ?: ""
@@ -218,7 +218,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             "USERPAYING",
             "PAYERROR"  -> {
                 val strId = paymentStatusId[result.success.paymentState]
-                binding.result = UIWxOAuth(
+                binding.result = UIWx(
                         heading = if (strId != null) getString(strId) else getString(R.string.payment_done),
                         enableButton = true
                 )
@@ -244,7 +244,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         sessionManager?.updateMembership(updatedMember)
 
         // Start retrieving account data from server.
-        binding.result = UIWxOAuth(
+        binding.result = UIWx(
                 getString(R.string.payment_done),
                 getString(R.string.refreshing_account)
         )
@@ -258,7 +258,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         if (result == null) {
 
-            binding.result = UIWxOAuth(
+            binding.result = UIWx(
                     heading = getString(R.string.payment_done),
                     body = getString(R.string.loading_failed),
                     enableButton = true
@@ -268,7 +268,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         if (result.error != null) {
 
-            binding.result = UIWxOAuth(
+            binding.result = UIWx(
                     heading = getString(R.string.payment_done),
                     body = getString(result.error),
                     enableButton = true
@@ -278,7 +278,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         if (result.exception != null) {
 
-            binding.result = UIWxOAuth(
+            binding.result = UIWx(
                     heading = getString(R.string.payment_done),
                     body = result.exception.message ?: "",
                     enableButton = true
@@ -290,7 +290,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         if (remoteAccount == null) {
 
-            binding.result = UIWxOAuth(
+            binding.result = UIWx(
                     heading = getString(R.string.payment_done),
                     body = getString(R.string.loading_failed),
                     enableButton = true
@@ -304,7 +304,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             sessionManager?.saveAccount(remoteAccount)
         }
 
-        binding.result = UIWxOAuth(
+        binding.result = UIWx(
                 heading = getString(R.string.payment_done),
                 body = getString(R.string.subs_success),
                 enableButton = true
