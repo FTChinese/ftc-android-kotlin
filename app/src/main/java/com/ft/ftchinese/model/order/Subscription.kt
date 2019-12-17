@@ -77,5 +77,9 @@ open class Subscription(
 
         return this
     }
+
+    fun isConfirmed(): Boolean {
+        return confirmedAt != null
+    }
 }
 
