@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.login
+package com.ft.ftchinese.viewmodel
 
 /**
  * Data validation state of the login form.
