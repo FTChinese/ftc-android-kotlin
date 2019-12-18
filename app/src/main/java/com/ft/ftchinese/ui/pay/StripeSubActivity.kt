@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.Result
+import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.SessionManager

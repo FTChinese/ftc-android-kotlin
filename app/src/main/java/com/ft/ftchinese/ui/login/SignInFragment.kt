@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.Result
+import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.afterTextChanged
 import com.ft.ftchinese.ui.base.isNetworkConnected

@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.Result
+import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider

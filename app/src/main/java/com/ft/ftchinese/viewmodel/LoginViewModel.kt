@@ -5,7 +5,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.Result
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.model.reader.WxSession

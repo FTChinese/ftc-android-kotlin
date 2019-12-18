@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityWechatBinding
-import com.ft.ftchinese.model.Result
+import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.SessionManager

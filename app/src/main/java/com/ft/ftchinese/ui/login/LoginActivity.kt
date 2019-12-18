@@ -8,7 +8,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.Result
+import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.model.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.SessionManager
