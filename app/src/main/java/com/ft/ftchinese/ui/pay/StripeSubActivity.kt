@@ -12,6 +12,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.subscription.Plan
@@ -19,7 +20,6 @@ import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.account.StripeRetrievalResult
-import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
 import com.stripe.android.*
 import com.stripe.android.model.*
@@ -628,32 +628,46 @@ class StripeSubActivity : ScopedAppActivity(),
         accountViewModel.refresh(account)
     }
 
-    private fun onAccountRefreshed(accountResult: AccountResult?) {
+    private fun onAccountRefreshed(accountResult: Result<Account>) {
         showProgress(false)
-        if (accountResult == null) {
-            return
+        when (accountResult) {
+            is Result.LocalizedError -> {
+                toast(accountResult.msgId)
+            }
+            is Result.Error -> {
+                accountResult.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                toast(R.string.prompt_updated)
+                sessionManager.saveAccount(accountResult.data)
+
+                showDone()
+            }
         }
-
-        if (accountResult.error != null) {
-            toast(accountResult.error)
-            return
-        }
-
-        if (accountResult.exception != null) {
-            toast(parseException(accountResult.exception))
-            return
-        }
-
-
-        if (accountResult.success == null) {
-            toast(R.string.order_not_found)
-            return
-        }
-
-        toast(R.string.prompt_updated)
-        sessionManager.saveAccount(accountResult.success)
-
-        showDone()
+//        if (accountResult == null) {
+//            return
+//        }
+//
+//        if (accountResult.error != null) {
+//            toast(accountResult.error)
+//            return
+//        }
+//
+//        if (accountResult.exception != null) {
+//            toast(parseException(accountResult.exception))
+//            return
+//        }
+//
+//
+//        if (accountResult.success == null) {
+//            toast(R.string.order_not_found)
+//            return
+//        }
+//
+//        toast(R.string.prompt_updated)
+//        sessionManager.saveAccount(accountResult.success)
+//
+//        showDone()
     }
 
     private fun buildRows(sub: StripeSub?): Array<String> {

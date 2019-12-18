@@ -41,6 +41,7 @@ import com.ft.ftchinese.ui.channel.TabPagerAdapter
 import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.util.*
+import com.ft.ftchinese.viewmodel.Result
 import com.google.android.exoplayer2.offline.DownloadService
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
@@ -479,11 +480,14 @@ class MainActivity : ScopedAppActivity(),
         })
 
         accountViewModel.accountRefreshed.observe(this, Observer {
-            if (it?.success == null) {
-                return@Observer
-            }
+//            if (it?.success == null) {
+//                return@Observer
+//            }
 
-            sessionManager.saveAccount(it.success)
+            if (it is Result.Success) {
+                sessionManager.saveAccount(it.data)
+            }
+//            sessionManager.saveAccount(it.success)
         })
 
         accountViewModel.retrieveStripeSub(account)

@@ -20,11 +20,12 @@ import com.ft.ftchinese.databinding.ActivityCheckOutBinding
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.subscription.PaymentIntent
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.viewmodel.Result
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -347,42 +348,65 @@ class CheckOutActivity : ScopedAppActivity(),
         accountViewModel.refresh(account)
     }
 
-    private fun onAccountRefreshed(accountResult: AccountResult?) {
+    private fun onAccountRefreshed(accountResult: Result<Account>) {
         showProgress(false)
-        if (accountResult == null) {
-            return
+        when (accountResult) {
+            is Result.LocalizedError -> {
+                toast(accountResult.msgId)
+            }
+            is Result.Error -> {
+                accountResult.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                val remoteAccount = accountResult.data
+
+                val localAccount = sessionManager.loadAccount() ?: return
+
+                if (localAccount.membership.useRemote(remoteAccount.membership)) {
+                    sessionManager.saveAccount(remoteAccount)
+                }
+
+                toast(R.string.subs_success)
+
+                LatestOrderActivity.start(this)
+                setResult(Activity.RESULT_OK)
+                finish()
+            }
         }
+//        if (accountResult == null) {
+//            return
+//        }
+//
+//        if (accountResult.error != null) {
+//            toast(accountResult.error)
+//            return
+//        }
+//
+//        if (accountResult.exception != null) {
+//            toast(parseException(accountResult.exception))
+//            return
+//        }
+//
+//
+//        if (accountResult.success == null) {
+//            toast(R.string.order_not_found)
+//            return
+//        }
 
-        if (accountResult.error != null) {
-            toast(accountResult.error)
-            return
-        }
-
-        if (accountResult.exception != null) {
-            toast(parseException(accountResult.exception))
-            return
-        }
-
-
-        if (accountResult.success == null) {
-            toast(R.string.order_not_found)
-            return
-        }
-
-        val remoteAccount = accountResult.success
-
-        val localAccount = sessionManager.loadAccount() ?: return
-
-
-        if (localAccount.membership.useRemote(remoteAccount.membership)) {
-            sessionManager.saveAccount(remoteAccount)
-        }
-
-        toast(R.string.subs_success)
-
-        LatestOrderActivity.start(this)
-        setResult(Activity.RESULT_OK)
-        finish()
+//        val remoteAccount = accountResult.success
+//
+//        val localAccount = sessionManager.loadAccount() ?: return
+//
+//
+//        if (localAccount.membership.useRemote(remoteAccount.membership)) {
+//            sessionManager.saveAccount(remoteAccount)
+//        }
+//
+//        toast(R.string.subs_success)
+//
+//        LatestOrderActivity.start(this)
+//        setResult(Activity.RESULT_OK)
+//        finish()
     }
 
     private fun onWxOrderFetched(orderResult: WxOrderResult?) {

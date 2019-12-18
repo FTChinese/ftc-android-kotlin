@@ -11,7 +11,6 @@ import com.ft.ftchinese.repository.StripeRepo
 import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.ui.account.WxRefreshResult
 import com.ft.ftchinese.ui.launch.AvatarResult
-import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.FileCache
 import kotlinx.coroutines.Dispatchers
@@ -23,12 +22,15 @@ import java.io.ByteArrayInputStream
 
 class AccountViewModel : ViewModel(), AnkoLogger {
 
-    val inProgress = MutableLiveData<Boolean>()
+    val inProgress: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
+
     val uiType = MutableLiveData<LoginMethod>()
     val shouldReAuth = MutableLiveData<Boolean>()
 
-    val accountRefreshed: MutableLiveData<AccountResult> by lazy {
-        MutableLiveData<AccountResult>()
+    val accountRefreshed: MutableLiveData<Result<Account>> by lazy {
+        MutableLiveData<Result<Account>>()
     }
 
     val avatarRetrieved: MutableLiveData<AvatarResult> by lazy {
@@ -38,10 +40,6 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     val wxRefreshResult: MutableLiveData<WxRefreshResult> by lazy {
         MutableLiveData<WxRefreshResult>()
     }
-
-//    val customerIdResult: MutableLiveData<StringResult> by lazy {
-//        MutableLiveData<StringResult>()
-//    }
 
     val customerResult: MutableLiveData<Result<StripeCustomer>> by lazy {
         MutableLiveData<Result<StripeCustomer>>()
@@ -99,25 +97,37 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                     AccountRepo.refresh(account)
                 }
 
-                accountRefreshed.value = AccountResult(
-                        success = updatedAccount ?: account
-                )
-            } catch (e: ClientError) {
-                val msgId = if (e.statusCode == 404) {
-                    R.string.api_account_not_found
-                } else {
-                    e.parseStatusCode()
+                if (updatedAccount == null) {
+                    accountRefreshed.value = Result.LocalizedError(R.string.loading_failed)
+                    return@launch
                 }
+//                accountRefreshed.value = AccountResult(
+//                        success = updatedAccount ?: account
+//                )
+                accountRefreshed.value = Result.Success(updatedAccount)
+            } catch (e: ClientError) {
+//                val msgId = if (e.statusCode == 404) {
+//                    R.string.api_account_not_found
+//                } else {
+//                    e.parseStatusCode()
+//                }
 
-                accountRefreshed.value = AccountResult(
-                        error = msgId,
-                        exception = e
-                )
+                accountRefreshed.value = if (e.statusCode == 404) {
+                    Result.LocalizedError(R.string.api_account_not_found)
+                } else {
+                    parseApiError(e)
+                }
+//                accountRefreshed.value = AccountResult(
+//                        error = msgId,
+//                        exception = e
+//                )
             } catch (e: Exception) {
 
-                accountRefreshed.value = AccountResult(
-                        exception = e
-                )
+//                accountRefreshed.value = AccountResult(
+//                        exception = e
+//                )
+
+                accountRefreshed.value = parseException(e)
             }
         }
     }

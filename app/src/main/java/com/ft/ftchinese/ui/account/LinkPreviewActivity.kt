@@ -14,9 +14,9 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.parseException
-import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.activity_link_preview.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -63,6 +63,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
             onLinkResult(it)
         })
 
+        // After link finished, retrieve new account data from API.
         accountViewModel.accountRefreshed.observe(this, Observer {
             onAccountRefreshed(it)
         })
@@ -198,16 +199,27 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
         accountViewModel.refresh(account)
     }
 
-    private fun onAccountRefreshed(accountResult: AccountResult?) {
+    private fun onAccountRefreshed(accountResult: Result<Account>) {
         showProgress(false)
 
-        if (accountResult == null) {
-            return
+        when (accountResult) {
+            is Result.LocalizedError -> {
+                toast(accountResult.msgId)
+            }
+            is Result.Error -> {
+                accountResult.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                sessionManager.saveAccount(accountResult.data)
+            }
         }
-
-        if (accountResult.success != null) {
-            sessionManager.saveAccount(accountResult.success)
-        }
+//        if (accountResult == null) {
+//            return
+//        }
+//
+//        if (accountResult.success != null) {
+//            sessionManager.saveAccount(accountResult.success)
+//        }
 
         /**
          * Pass data back to [LinkFtcActivity].

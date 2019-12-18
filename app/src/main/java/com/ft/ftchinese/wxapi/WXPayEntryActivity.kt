@@ -13,11 +13,12 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.subscription.findPlan
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.ui.pay.*
+import com.ft.ftchinese.viewmodel.Result
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
@@ -252,63 +253,94 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         accountViewModel.refresh(account)
     }
 
-    private fun onAccountRefreshed(result: AccountResult?) {
+    private fun onAccountRefreshed(result: Result<Account>) {
 
         binding.inProgress = false
 
-        if (result == null) {
+        when (result) {
+            is Result.LocalizedError -> {
+                binding.result = UIWx(
+                        heading = getString(R.string.payment_done),
+                        body = getString(result.msgId),
+                        enableButton = true
+                )
+            }
+            is Result.Error -> {
+                binding.result = UIWx(
+                        heading = getString(R.string.payment_done),
+                        body = result.exception.message ?: "",
+                        enableButton = true
+                )
+            }
+            is Result.Success -> {
+                val remoteAccount = result.data
 
-            binding.result = UIWx(
-                    heading = getString(R.string.payment_done),
-                    body = getString(R.string.loading_failed),
-                    enableButton = true
-            )
-            return
+                val localAccount = sessionManager?.loadAccount() ?: return
+
+                if (localAccount.membership.useRemote(remoteAccount.membership)) {
+                    sessionManager?.saveAccount(remoteAccount)
+                }
+
+                binding.result = UIWx(
+                        heading = getString(R.string.payment_done),
+                        body = getString(R.string.subs_success),
+                        enableButton = true
+                )
+            }
         }
-
-        if (result.error != null) {
-
-            binding.result = UIWx(
-                    heading = getString(R.string.payment_done),
-                    body = getString(result.error),
-                    enableButton = true
-            )
-            return
-        }
-
-        if (result.exception != null) {
-
-            binding.result = UIWx(
-                    heading = getString(R.string.payment_done),
-                    body = result.exception.message ?: "",
-                    enableButton = true
-            )
-            return
-        }
-
-        val remoteAccount = result.success
-
-        if (remoteAccount == null) {
-
-            binding.result = UIWx(
-                    heading = getString(R.string.payment_done),
-                    body = getString(R.string.loading_failed),
-                    enableButton = true
-            )
-            return
-        }
-
-        val localAccount = sessionManager?.loadAccount() ?: return
-
-        if (localAccount.membership.useRemote(remoteAccount.membership)) {
-            sessionManager?.saveAccount(remoteAccount)
-        }
-
-        binding.result = UIWx(
-                heading = getString(R.string.payment_done),
-                body = getString(R.string.subs_success),
-                enableButton = true
-        )
+//        if (result == null) {
+//
+//            binding.result = UIWx(
+//                    heading = getString(R.string.payment_done),
+//                    body = getString(R.string.loading_failed),
+//                    enableButton = true
+//            )
+//            return
+//        }
+//
+//        if (result.error != null) {
+//
+//            binding.result = UIWx(
+//                    heading = getString(R.string.payment_done),
+//                    body = getString(result.error),
+//                    enableButton = true
+//            )
+//            return
+//        }
+//
+//        if (result.exception != null) {
+//
+//            binding.result = UIWx(
+//                    heading = getString(R.string.payment_done),
+//                    body = result.exception.message ?: "",
+//                    enableButton = true
+//            )
+//            return
+//        }
+//
+//        val remoteAccount = result.success
+//
+//        if (remoteAccount == null) {
+//
+//            binding.result = UIWx(
+//                    heading = getString(R.string.payment_done),
+//                    body = getString(R.string.loading_failed),
+//                    enableButton = true
+//            )
+//            return
+//        }
+//
+//        val localAccount = sessionManager?.loadAccount() ?: return
+//
+//        if (localAccount.membership.useRemote(remoteAccount.membership)) {
+//            sessionManager?.saveAccount(remoteAccount)
+//        }
+//
+//        binding.result = UIWx(
+//                heading = getString(R.string.payment_done),
+//                body = getString(R.string.subs_success),
+//                enableButton = true
+//        )
     }
 
     /**

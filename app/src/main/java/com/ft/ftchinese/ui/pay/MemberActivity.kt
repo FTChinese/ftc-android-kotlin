@@ -25,8 +25,8 @@ import com.ft.ftchinese.model.subscription.findPlan
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.ui.base.parseException
-import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -218,33 +218,48 @@ class MemberActivity : ScopedAppActivity(),
         refreshAccount(account)
     }
 
-    private fun onAccountRefreshed(accountResult: AccountResult?) {
+    private fun onAccountRefreshed(accountResult: Result<Account>) {
         stopRefresh()
 
-        if (accountResult == null) {
-            return
+        when (accountResult) {
+            is Result.LocalizedError -> {
+                toast(accountResult.msgId)
+            }
+            is Result.Error -> {
+                accountResult.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                toast(R.string.prompt_updated)
+
+                sessionManager.saveAccount(accountResult.data)
+
+                initUI()
+            }
         }
+//        if (accountResult == null) {
+//            return
+//        }
+//
+//        if (accountResult.error != null) {
+//            toast(accountResult.error)
+//            return
+//        }
+//
+//        if (accountResult.exception != null) {
+//            toast(parseException(accountResult.exception))
+//            return
+//        }
+//
+//        if (accountResult.success == null) {
+//            toast("Unknown error")
+//            return
+//        }
 
-        if (accountResult.error != null) {
-            toast(accountResult.error)
-            return
-        }
-
-        if (accountResult.exception != null) {
-            toast(parseException(accountResult.exception))
-            return
-        }
-
-        if (accountResult.success == null) {
-            toast("Unknown error")
-            return
-        }
-
-        toast(R.string.prompt_updated)
-
-        sessionManager.saveAccount(accountResult.success)
-
-        initUI()
+//        toast(R.string.prompt_updated)
+//
+//        sessionManager.saveAccount(accountResult.success)
+//
+//        initUI()
     }
 
     override fun onResume() {

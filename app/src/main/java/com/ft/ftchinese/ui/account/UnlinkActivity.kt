@@ -16,6 +16,7 @@ import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.activity_unlink.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -93,30 +94,46 @@ class UnlinkActivity : AppCompatActivity() {
         accountViewModel.accountRefreshed.observe(this, Observer {
             showProgress(false)
 
-            val accountResult = it ?: return@Observer
+            when (it) {
+                is Result.LocalizedError -> {
+                    toast(it.msgId)
+                }
+                is Result.Error -> {
+                    it.exception.message?.let { toast(it) }
+                }
+                is Result.Success -> {
+                    toast(R.string.prompt_updated)
+                    sessionManager.saveAccount(it.data)
 
-            if (accountResult.error != null) {
-                toast(accountResult.error)
-                return@Observer
+                    // Signal to calling activity.
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                }
             }
+//            val accountResult = it ?: return@Observer
 
-            if (accountResult.exception != null) {
-                toast(parseException(accountResult.exception))
-                return@Observer
-            }
+//            if (accountResult.error != null) {
+//                toast(accountResult.error)
+//                return@Observer
+//            }
 
-            if (accountResult.success == null) {
-                toast("Unknown error")
-                return@Observer
-            }
+//            if (accountResult.exception != null) {
+//                toast(parseException(accountResult.exception))
+//                return@Observer
+//            }
+//
+//            if (accountResult.success == null) {
+//                toast("Unknown error")
+//                return@Observer
+//            }
 
-            toast(R.string.prompt_updated)
-
-            sessionManager.saveAccount(accountResult.success)
-
-            // Signal to calling activity.
-            setResult(Activity.RESULT_OK)
-            finish()
+//            toast(R.string.prompt_updated)
+//
+//            sessionManager.saveAccount(accountResult.success)
+//
+//            // Signal to calling activity.
+//            setResult(Activity.RESULT_OK)
+//            finish()
         })
 
         unlink_button.setOnClickListener {

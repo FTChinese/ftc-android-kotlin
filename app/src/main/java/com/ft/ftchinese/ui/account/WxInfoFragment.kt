@@ -17,6 +17,7 @@ import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.fragment_wx_account.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -112,32 +113,49 @@ class WxInfoFragment : ScopedFragment(),
 
         // Refreshed account data.
         accountViewModel.accountRefreshed.observe(viewLifecycleOwner, Observer {
-            val accountResult = it ?: return@Observer
+//            val accountResult = it ?: return@Observer
 
             stopRefreshing()
 
-            if (accountResult.error != null) {
-                toast(accountResult.error)
-                return@Observer
+            when (it) {
+                is Result.LocalizedError -> {
+                    toast(it.msgId)
+                }
+                is Result.Error -> {
+                    it.exception.message?.let { toast(it) }
+                }
+                is Result.Success -> {
+                    toast(R.string.prompt_updated)
+
+                    sessionManager.saveAccount(it.data)
+
+                    if (!it.data.isWxOnly) {
+                        accountViewModel.switchUI(LoginMethod.EMAIL)
+                    }
+                }
             }
+//            if (accountResult.error != null) {
+//                toast(accountResult.error)
+//                return@Observer
+//            }
+//
+//            if (accountResult.exception != null) {
+//                activity?.showException(accountResult.exception)
+//                return@Observer
+//            }
 
-            if (accountResult.exception != null) {
-                activity?.showException(accountResult.exception)
-                return@Observer
-            }
+//            if (accountResult.success == null) {
+//                toast("Unknown error")
+//                return@Observer
+//            }
 
-            if (accountResult.success == null) {
-                toast("Unknown error")
-                return@Observer
-            }
-
-            toast(R.string.prompt_updated)
-
-            sessionManager.saveAccount(accountResult.success)
-
-            if (!accountResult.success.isWxOnly) {
-                accountViewModel.switchUI(LoginMethod.EMAIL)
-            }
+//            toast(R.string.prompt_updated)
+//
+//            sessionManager.saveAccount(accountResult.success)
+//
+//            if (!accountResult.success.isWxOnly) {
+//                accountViewModel.switchUI(LoginMethod.EMAIL)
+//            }
         })
 
         // Avatar

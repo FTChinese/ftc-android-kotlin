@@ -9,16 +9,16 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.fragment_ftc_account_v2.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
-
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class FtcAccountV2Fragment : ScopedFragment(), AnkoLogger {
@@ -157,39 +157,60 @@ class FtcAccountV2Fragment : ScopedFragment(), AnkoLogger {
         }
     }
 
-    private fun onAccountRefreshed(accountResult: AccountResult?) {
+    private fun onAccountRefreshed(accountResult: Result<Account>) {
         stopRefreshing()
 
-        if (accountResult == null) {
-            return
+        when (accountResult) {
+            is Result.LocalizedError -> {
+                toast(accountResult.msgId)
+            }
+            is Result.Error -> {
+                accountResult.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                toast(R.string.prompt_updated)
+
+                sessionManager.saveAccount(accountResult.data)
+
+                if (accountResult.data.isWxOnly) {
+                    info("A wechat only account. Switch UI.")
+                    accountViewModel.switchUI(LoginMethod.WECHAT)
+                    return
+                }
+
+                updateUI()
+            }
         }
+//        if (accountResult == null) {
+//            return
+//        }
 
-        if (accountResult.error != null) {
-            toast(accountResult.error)
-            return
-        }
+//        if (accountResult.error != null) {
+//            toast(accountResult.error)
+//            return
+//        }
+//
+//        if (accountResult.exception != null) {
+//            activity?.showException(accountResult.exception)
+//            return
+//        }
 
-        if (accountResult.exception != null) {
-            activity?.showException(accountResult.exception)
-            return
-        }
+//        if (accountResult.success == null) {
+//            toast("Unknown error")
+//            return
+//        }
 
-        if (accountResult.success == null) {
-            toast("Unknown error")
-            return
-        }
-
-        toast(R.string.prompt_updated)
-
-        sessionManager.saveAccount(accountResult.success)
-
-        if (accountResult.success.isWxOnly) {
-            info("A wechat only account. Switch UI.")
-            accountViewModel.switchUI(LoginMethod.WECHAT)
-            return
-        }
-
-        updateUI()
+//        toast(R.string.prompt_updated)
+//
+//        sessionManager.saveAccount(accountResult.success)
+//
+//        if (accountResult.success.isWxOnly) {
+//            info("A wechat only account. Switch UI.")
+//            accountViewModel.switchUI(LoginMethod.WECHAT)
+//            return
+//        }
+//
+//        updateUI()
     }
 
     private fun stopRefreshing() {

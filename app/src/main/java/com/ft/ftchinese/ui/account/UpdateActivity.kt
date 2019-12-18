@@ -13,6 +13,7 @@ import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.AccountRowType
 import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
@@ -124,31 +125,49 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
         accountViewModel.accountRefreshed.observe(this, Observer {
             showProgress(false)
 
-            val accountResult = it ?: return@Observer
+            when (it) {
+                is Result.LocalizedError -> {
+                    toast(it.msgId)
+                }
+                is Result.Error -> {
+                    it.exception.message?.let { toast(it) }
+                }
+                is Result.Success -> {
+                    toast(R.string.prompt_updated)
 
-            if (accountResult.error != null) {
-                toast(accountResult.error)
-                return@Observer
+                    sessionManager.saveAccount(it.data)
+
+                    // Signal to calling activity
+                    setResult(Activity.RESULT_OK)
+
+                    finish()
+                }
             }
+//            val accountResult = it ?: return@Observer
 
-            if (accountResult.exception != null) {
-                toast(parseException(accountResult.exception))
-                return@Observer
-            }
+//            if (accountResult.error != null) {
+//                toast(accountResult.error)
+//                return@Observer
+//            }
+//
+//            if (accountResult.exception != null) {
+//                toast(parseException(accountResult.exception))
+//                return@Observer
+//            }
 
-            if (accountResult.success == null) {
-                toast("Refreshing account failed. Please refresh manually later.")
-                return@Observer
-            }
+//            if (accountResult.success == null) {
+//                toast("Refreshing account failed. Please refresh manually later.")
+//                return@Observer
+//            }
 
-            toast(R.string.prompt_updated)
-
-            sessionManager.saveAccount(accountResult.success)
-
-            // Signal to calling activity
-            setResult(Activity.RESULT_OK)
-
-            finish()
+//            toast(R.string.prompt_updated)
+//
+//            sessionManager.saveAccount(accountResult.success)
+//
+//            // Signal to calling activity
+//            setResult(Activity.RESULT_OK)
+//
+//            finish()
         })
     }
 
