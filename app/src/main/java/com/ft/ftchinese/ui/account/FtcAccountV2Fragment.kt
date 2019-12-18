@@ -13,6 +13,7 @@ import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.login.AccountResult
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import kotlinx.android.synthetic.main.fragment_ftc_account_v2.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -131,7 +132,7 @@ class FtcAccountV2Fragment : ScopedFragment(), AnkoLogger {
                     .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        accountViewModel.accountRefreshed.observe(this, Observer {
+        accountViewModel.accountRefreshed.observe(viewLifecycleOwner, Observer {
             onAccountRefreshed(it)
         })
 

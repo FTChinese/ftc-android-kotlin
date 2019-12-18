@@ -31,7 +31,7 @@ import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.service.AudioDownloadService
 import com.ft.ftchinese.ui.account.AccountActivity
-import com.ft.ftchinese.ui.account.AccountViewModel
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.MemberActivity

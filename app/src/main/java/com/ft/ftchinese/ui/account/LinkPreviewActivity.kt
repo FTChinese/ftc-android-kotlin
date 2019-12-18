@@ -16,6 +16,7 @@ import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import kotlinx.android.synthetic.main.activity_link_preview.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*

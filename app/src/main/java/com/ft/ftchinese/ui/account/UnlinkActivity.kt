@@ -15,6 +15,7 @@ import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.model.order.PayMethod
 import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import kotlinx.android.synthetic.main.activity_unlink.*
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*

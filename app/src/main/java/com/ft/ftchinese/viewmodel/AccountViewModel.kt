@@ -1,14 +1,15 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.StripeRepo
+import com.ft.ftchinese.ui.account.StripeRetrievalResult
+import com.ft.ftchinese.ui.account.WxRefreshResult
 import com.ft.ftchinese.ui.launch.AvatarResult
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.ClientError

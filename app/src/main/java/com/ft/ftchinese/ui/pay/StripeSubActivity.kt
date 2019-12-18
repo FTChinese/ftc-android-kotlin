@@ -17,7 +17,7 @@ import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
-import com.ft.ftchinese.ui.account.AccountViewModel
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.util.RequestCode

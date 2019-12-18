@@ -15,7 +15,7 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.subscription.findPlan
-import com.ft.ftchinese.ui.account.AccountViewModel
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.login.AccountResult
 import com.ft.ftchinese.ui.pay.*
 import com.tencent.mm.opensdk.constants.ConstantsAPI

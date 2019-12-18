@@ -19,6 +19,7 @@ import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.SubscribeApi
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.StripeError

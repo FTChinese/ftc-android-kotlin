@@ -16,6 +16,7 @@ import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.util.FileCache
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import kotlinx.android.synthetic.main.fragment_wx_account.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
