@@ -11,9 +11,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.subscription.Cycle
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.util.ClientError
-import com.ft.ftchinese.util.NetworkException
 import org.jetbrains.anko.toast
-import java.io.IOException
 
 fun Activity.getActiveNetworkInfo(): NetworkInfo? {
     return try {
@@ -171,12 +169,6 @@ fun Activity.parseException(e: Exception): String {
     return when (e) {
         is IllegalStateException -> {
             getString(R.string.api_empty_url)
-        }
-        is NetworkException -> {
-            getString(R.string.api_network_failure)
-        }
-        is IOException -> {
-            getString(R.string.api_io_error)
         }
         else -> {
             e.message

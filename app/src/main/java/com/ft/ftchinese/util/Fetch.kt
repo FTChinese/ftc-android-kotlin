@@ -63,8 +63,6 @@ data class Reason(
     val key: String = "${field}_$code"
 }
 
-class NetworkException(msg: String?, cause: Throwable?) : IOException(msg, cause)
-
 /**
  * To use okhttp, you need to build url first using `HttpUrl.Builder`;
  * next build request using `Request.Builder`.
@@ -210,9 +208,6 @@ class Fetch : AnkoLogger {
     fun responseApi(): Pair<Response, String?> {
         setAccessKey()
 
-        /**
-         * @throws NetworkException when sending request.
-         */
         val resp = end()
 
         info("Request URL: ${request?.url}")
@@ -292,12 +287,7 @@ class Fetch : AnkoLogger {
 
         this.call = call
 
-        return try {
-            call.execute()
-        } catch (e: IOException) {
-            // This is used to distinguish network failure from reading body error.
-            throw NetworkException(e.message, e.cause)
-        }
+        return call.execute()
     }
 
     companion object {
