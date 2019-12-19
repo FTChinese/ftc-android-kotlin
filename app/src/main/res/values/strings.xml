@@ -225,6 +225,7 @@
     <string name="refreshing_account">更新账号数据&#8230;</string>
     <string name="refreshing_wx_info">更新微信信息</string>
     <string name="wait_while_refresh_wx">从微信更新信息耗时较长，请耐心等候</string>
+    <string name="wait_while_wx_login">获取微信数据耗时较长，请耐心等候，如果出现超时错误，请重试或选择较快的网络</string>
     <string name="loading_failed">无法加载数据，请稍后再试</string>
 
 
