@@ -11,6 +11,7 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.afterTextChanged
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.viewmodel.LoginViewModel
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.fragment_email.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
@@ -74,7 +75,11 @@ class EmailFragment : ScopedFragment(),
         // Enable or disable input depending on network result.
         // Only re-enable button if there's any error.
         viewModel.emailResult.observe(viewLifecycleOwner, Observer {
-            if (it.error != null || it.exception != null) {
+//            if (it.error != null || it.exception != null) {
+//                enableInput(true)
+//            }
+
+            if (it !is Result.Success) {
                 enableInput(true)
             }
         })

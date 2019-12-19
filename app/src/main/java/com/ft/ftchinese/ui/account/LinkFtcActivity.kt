@@ -14,6 +14,7 @@ import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.login.*
 import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.viewmodel.Existence
 import com.ft.ftchinese.viewmodel.LoginViewModel
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -68,43 +69,67 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 
-    private fun onEmailResult(findResult: FindEmailResult?) {
+    private fun onEmailResult(result: Result<Existence>) {
 
-        if (findResult == null) {
-            return
-        }
+//        if (result == null) {
+//            return
+//        }
         showProgress(false)
 
-        if (findResult.error != null) {
-            toast(findResult.error)
-            return
-        }
-
-        if (findResult.exception != null) {
-            toast(parseException(findResult.exception))
-            return
-        }
-
-        if (findResult.success == null) {
-            toast(R.string.loading_failed)
-            return
-        }
-
-        val (email, found) = findResult.success
-        // If email is found, show login ui;
-        // otherwise show sign up ui.
-        if (found) {
-            supportFragmentManager.commit {
-                replace(R.id.double_frag_primary, SignInFragment.newInstance(email))
-                addToBackStack(null)
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
             }
-        } else {
-            isSignUp = true
-            supportFragmentManager.commit {
-                replace(R.id.double_frag_primary, SignUpFragment.newInstance(email))
-                addToBackStack(null)
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                if (result.data.found) {
+                    supportFragmentManager.commit {
+                        replace(R.id.double_frag_primary, SignInFragment.newInstance(result.data.value))
+                        addToBackStack(null)
+                    }
+
+                    return
+                }
+
+                isSignUp = true
+                supportFragmentManager.commit {
+                    replace(R.id.double_frag_primary, SignUpFragment.newInstance(result.data.value))
+                    addToBackStack(null)
+                }
             }
         }
+//        if (result.error != null) {
+//            toast(result.error)
+//            return
+//        }
+//
+//        if (result.exception != null) {
+//            toast(parseException(result.exception))
+//            return
+//        }
+//
+//        if (result.success == null) {
+//            toast(R.string.loading_failed)
+//            return
+//        }
+
+//        val (email, found) = result.success
+//        // If email is found, show login ui;
+//        // otherwise show sign up ui.
+//        if (found) {
+//            supportFragmentManager.commit {
+//                replace(R.id.double_frag_primary, SignInFragment.newInstance(email))
+//                addToBackStack(null)
+//            }
+//        } else {
+//            isSignUp = true
+//            supportFragmentManager.commit {
+//                replace(R.id.double_frag_primary, SignUpFragment.newInstance(email))
+//                addToBackStack(null)
+//            }
+//        }
     }
 
     private fun onAccountResult(accountResult: Result<Account>) {

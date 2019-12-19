@@ -151,7 +151,7 @@ class ChannelFragment : ScopedFragment(),
         channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache))
                 .get(ChannelViewModel::class.java)
 
-        channelViewModel.cacheFound.observe(this, Observer {
+        channelViewModel.cacheFound.observe(viewLifecycleOwner, Observer {
 
             info("Is cache found: $it")
 
@@ -190,7 +190,7 @@ class ChannelFragment : ScopedFragment(),
             )
         })
 
-        channelViewModel.renderResult.observe(this, Observer {
+        channelViewModel.renderResult.observe(viewLifecycleOwner, Observer {
 
             val htmlResult = it ?: return@Observer
 

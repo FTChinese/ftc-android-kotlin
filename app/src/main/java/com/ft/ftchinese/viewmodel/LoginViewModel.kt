@@ -9,7 +9,6 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.repository.ReaderRepo
-import com.ft.ftchinese.ui.login.FindEmailResult
 import com.ft.ftchinese.util.ClientError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,8 +26,8 @@ class LoginViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<LoginFormState>()
     }
 
-    val emailResult: MutableLiveData<FindEmailResult> by lazy {
-        MutableLiveData<FindEmailResult>()
+    val emailResult: MutableLiveData<Result<Existence>> by lazy {
+        MutableLiveData<Result<Existence>>()
     }
 
     val accountResult: MutableLiveData<Result<Account>> by lazy {
@@ -71,28 +70,39 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                     ReaderRepo.emailExists(email)
                 }
 
-                emailResult.value = FindEmailResult(
-                        success = Pair(email, ok)
-                )
+//                emailResult.value = FindEmailResult(
+//                        success = Pair(email, ok)
+//                )
 
+                emailResult.value = Result.Success(Existence(
+                        value = email,
+                        found = ok
+                ))
             } catch (e: ClientError) {
 
                 if (e.statusCode== 404) {
-                    emailResult.value = FindEmailResult(
-                            success = Pair(email, false)
-                    )
+//                    emailResult.value = FindEmailResult(
+//                            success = Pair(email, false)
+//                    )
+                    emailResult.value = Result.Success(Existence(
+                            value = email,
+                            found = false
+                    ))
                     return@launch
                 }
 
-                emailResult.value = FindEmailResult(
-                        exception = e
-                )
+//                emailResult.value = FindEmailResult(
+//                        exception = e
+//                )
+                emailResult.value = parseApiError(e)
 
             } catch (e:Exception) {
 
-                emailResult.value = FindEmailResult(
-                        exception = e
-                )
+//                emailResult.value = FindEmailResult(
+//                        exception = e
+//                )
+
+                emailResult.value = parseException(e)
             }
         }
     }

@@ -14,11 +14,11 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.viewmodel.Existence
 import com.ft.ftchinese.viewmodel.LoginViewModel
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -67,39 +67,41 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
         })
 
         viewModel.emailResult.observe(this, Observer {
-            val findResult = it ?:return@Observer
+            onEmailResult(it)
 
-            showProgress(false)
+//            val findResult = it ?:return@Observer
 
-            if (findResult.error != null) {
-                toast(findResult.error)
-                return@Observer
-            }
+//            showProgress(false)
 
-            if (findResult.exception != null) {
-                info(findResult.exception)
-                toast(parseException(findResult.exception))
-                return@Observer
-            }
-
-            val (email, found) = findResult.success ?: return@Observer
-
-            if (found) {
-                supportActionBar?.setTitle(R.string.title_login)
-
-                supportFragmentManager.commit {
-                    replace(R.id.double_frag_primary, SignInFragment.newInstance(email))
-                    addToBackStack(null)
-                }
-
-            } else {
-                supportActionBar?.setTitle(R.string.title_sign_up)
-
-                supportFragmentManager.commit {
-                    replace(R.id.double_frag_primary, SignUpFragment.newInstance(email))
-                    addToBackStack(null)
-                }
-            }
+//            if (findResult.error != null) {
+//                toast(findResult.error)
+//                return@Observer
+//            }
+//
+//            if (findResult.exception != null) {
+//                info(findResult.exception)
+//                toast(parseException(findResult.exception))
+//                return@Observer
+//            }
+//
+//            val (email, found) = findResult.success ?: return@Observer
+//
+//            if (found) {
+//                supportActionBar?.setTitle(R.string.title_login)
+//
+//                supportFragmentManager.commit {
+//                    replace(R.id.double_frag_primary, SignInFragment.newInstance(email))
+//                    addToBackStack(null)
+//                }
+//
+//            } else {
+//                supportActionBar?.setTitle(R.string.title_sign_up)
+//
+//                supportFragmentManager.commit {
+//                    replace(R.id.double_frag_primary, SignUpFragment.newInstance(email))
+//                    addToBackStack(null)
+//                }
+//            }
         })
 
         // Observing both login and sign up.
@@ -146,6 +148,38 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
 //
 //            finish()
         })
+    }
+
+    private fun onEmailResult(result: Result<Existence>) {
+        showProgress(false)
+
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                if (result.data.found) {
+                    supportActionBar?.setTitle(R.string.title_login)
+
+                    supportFragmentManager.commit {
+                        replace(R.id.double_frag_primary, SignInFragment.newInstance(result.data.value))
+                        addToBackStack(null)
+                    }
+
+                    return
+                }
+
+                supportActionBar?.setTitle(R.string.title_sign_up)
+
+                supportFragmentManager.commit {
+                    replace(R.id.double_frag_primary, SignUpFragment.newInstance(result.data.value))
+                    addToBackStack(null)
+                }
+            }
+        }
     }
 
     companion object {
