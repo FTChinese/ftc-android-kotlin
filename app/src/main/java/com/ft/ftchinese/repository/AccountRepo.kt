@@ -11,7 +11,7 @@ import com.ft.ftchinese.util.SubscribeApi
 import com.ft.ftchinese.util.json
 
 object AccountRepo {
-    fun loadFtcAccount(ftcId: String): Account? {
+    private fun loadFtcAccount(ftcId: String): Account? {
         val(_, body) = Fetch().get(NextApi.ACCOUNT)
                 .noCache()
                 .setUserId(ftcId)
@@ -32,7 +32,7 @@ object AccountRepo {
      * If user logged in with email + password (and the the email is bound to this wechat),
      * WxSession never actually exists.
      */
-    fun loadWxAccount(unionId: String): Account? {
+    private fun loadWxAccount(unionId: String): Account? {
         val (_, body) = Fetch()
                 .get(NextApi.WX_ACCOUNT)
                 .setUnionId(unionId)
@@ -52,7 +52,7 @@ object AccountRepo {
             LoginMethod.MOBILE -> loadFtcAccount(account.id)
 
             LoginMethod.WECHAT -> if (account.unionId != null) {
-                loadFtcAccount(account.unionId)
+                loadWxAccount(account.unionId)
             } else {
                 null
             }

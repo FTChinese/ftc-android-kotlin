@@ -124,25 +124,42 @@ class MainActivity : ScopedAppActivity(),
 
         // If avatar is downloaded from network.
         accountViewModel.avatarRetrieved.observe(this, Observer {
-            if (it == null) {
-                return@Observer
-            }
 
-            if (it.exception != null) {
-                info("Loading avatar error: ${it.exception}")
-                return@Observer
-            }
-
-            if (it.success == null) {
-                return@Observer
-            }
-
-            headerView?.nav_header_image?.setImageDrawable(
-                    Drawable.createFromStream(
-                            it.success,
-                            WX_AVATAR_NAME
+            when (it) {
+                is Result.LocalizedError -> {
+                    toast(it.msgId)
+                }
+                is Result.Error -> {
+                    it.exception.message?.let { toast(it) }
+                }
+                is Result.Success -> {
+                    headerView?.nav_header_image?.setImageDrawable(
+                            Drawable.createFromStream(
+                                    it.data,
+                                    WX_AVATAR_NAME
+                            )
                     )
-            )
+                }
+            }
+//            if (it == null) {
+//                return@Observer
+//            }
+//
+//            if (it.exception != null) {
+//                info("Loading avatar error: ${it.exception}")
+//                return@Observer
+//            }
+//
+//            if (it.success == null) {
+//                return@Observer
+//            }
+//
+//            headerView?.nav_header_image?.setImageDrawable(
+//                    Drawable.createFromStream(
+//                            it.success,
+//                            WX_AVATAR_NAME
+//                    )
+//            )
         })
 
 
@@ -468,9 +485,12 @@ class MainActivity : ScopedAppActivity(),
         }
 
         accountViewModel.stripeRetrievalResult.observe(this, Observer {
-            if (it?.success == null) {
+            if (it !is Result.Success) {
                 return@Observer
             }
+//            if (it?.success == null) {
+//                return@Observer
+//            }
 
             if (!isNetworkConnected()) {
                 return@Observer

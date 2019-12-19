@@ -23,8 +23,6 @@ import com.ft.ftchinese.model.subscription.Cycle
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.subscription.findPlan
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.account.StripeRetrievalResult
-import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.simple_toolbar.*
@@ -175,37 +173,27 @@ class MemberActivity : ScopedAppActivity(),
             return
         }
 
-        refreshAccount(account)
-    }
-
-    private fun refreshAccount(account: Account) {
         toast(R.string.refreshing_account)
         accountViewModel.refresh(account)
     }
 
-    private fun onStripeSubRetrieved(result: StripeRetrievalResult?) {
+    private fun onStripeSubRetrieved(result: Result<StripeSub>) {
         val account = sessionManager.loadAccount()
         if (account == null) {
             stopRefresh()
             return
         }
 
-        if (result == null) {
-            toast(R.string.stripe_refreshing_failed)
-            refreshAccount(account)
-            return
-        }
-
-        if (result.error != null) {
-            toast(result.error)
-            refreshAccount(account)
-            return
-        }
-
-        if (result.exception != null) {
-            toast(parseException(result.exception))
-            refreshAccount(account)
-            return
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                toast("Stripe subscription updated!")
+            }
         }
 
         // Even if user's subscription data is not refresh
@@ -215,7 +203,8 @@ class MemberActivity : ScopedAppActivity(),
         // So here we do not perform checks on subscribedResult == null.
         // It is just an indicator that network finished,
         // regardless of result.
-        refreshAccount(account)
+        toast(R.string.refreshing_account)
+        accountViewModel.refresh(account)
     }
 
     private fun onAccountRefreshed(accountResult: Result<Account>) {
@@ -236,30 +225,6 @@ class MemberActivity : ScopedAppActivity(),
                 initUI()
             }
         }
-//        if (accountResult == null) {
-//            return
-//        }
-//
-//        if (accountResult.error != null) {
-//            toast(accountResult.error)
-//            return
-//        }
-//
-//        if (accountResult.exception != null) {
-//            toast(parseException(accountResult.exception))
-//            return
-//        }
-//
-//        if (accountResult.success == null) {
-//            toast("Unknown error")
-//            return
-//        }
-
-//        toast(R.string.prompt_updated)
-//
-//        sessionManager.saveAccount(accountResult.success)
-//
-//        initUI()
     }
 
     override fun onResume() {

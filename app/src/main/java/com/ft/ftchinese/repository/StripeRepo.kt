@@ -82,6 +82,7 @@ object StripeRepo : AnkoLogger {
         }
     }
 
+    // Ask API to update user's Stripe subscription data.
     fun refreshStripeSub(account: Account): StripeSub? {
         val fetch = Fetch()
                 .get(SubscribeApi.STRIPE_SUB)

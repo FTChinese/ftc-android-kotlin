@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.showException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.SessionManager
@@ -18,10 +18,12 @@ import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.WxRefreshState
 import kotlinx.android.synthetic.main.fragment_wx_account.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
+import java.io.InputStream
 
 /**
  * Contained both by [AccountActivity] and [WxInfoActivity]
@@ -65,120 +67,21 @@ class WxInfoFragment : ScopedFragment(),
                     .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
-
-
         // Check whether we could refresh wechat user info.
         // If refresh token is not expired, we'll start
         // refresh user's full account data.
         accountViewModel.wxRefreshResult.observe(viewLifecycleOwner, Observer {
-            val refreshResult = it ?: return@Observer
-
-            if (refreshResult.error != null) {
-                stopRefreshing()
-                toast(refreshResult.error)
-
-                return@Observer
-            }
-
-            if (refreshResult.exception != null) {
-                stopRefreshing()
-                activity?.showException(refreshResult.exception)
-
-                return@Observer
-            }
-
-            if (refreshResult.isExpired) {
-                stopRefreshing()
-                // If the API tells us the refresh token
-                // is expired, notify host activity to
-                // show re-authorize dialog.
-                accountViewModel.showReAuth()
-
-                return@Observer
-            }
-
-            if (!refreshResult.success) {
-                stopRefreshing()
-                toast("Unknown error")
-
-                return@Observer
-            }
-
-            val acnt = sessionManager.loadAccount() ?: return@Observer
-
-            toast(R.string.refreshing_account)
-
-            accountViewModel.refresh(acnt)
+            onWxRefreshed(it)
         })
 
         // Refreshed account data.
         accountViewModel.accountRefreshed.observe(viewLifecycleOwner, Observer {
-//            val accountResult = it ?: return@Observer
-
-            stopRefreshing()
-
-            when (it) {
-                is Result.LocalizedError -> {
-                    toast(it.msgId)
-                }
-                is Result.Error -> {
-                    it.exception.message?.let { toast(it) }
-                }
-                is Result.Success -> {
-                    toast(R.string.prompt_updated)
-
-                    sessionManager.saveAccount(it.data)
-
-                    if (!it.data.isWxOnly) {
-                        accountViewModel.switchUI(LoginMethod.EMAIL)
-                    }
-                }
-            }
-//            if (accountResult.error != null) {
-//                toast(accountResult.error)
-//                return@Observer
-//            }
-//
-//            if (accountResult.exception != null) {
-//                activity?.showException(accountResult.exception)
-//                return@Observer
-//            }
-
-//            if (accountResult.success == null) {
-//                toast("Unknown error")
-//                return@Observer
-//            }
-
-//            toast(R.string.prompt_updated)
-//
-//            sessionManager.saveAccount(accountResult.success)
-//
-//            if (!accountResult.success.isWxOnly) {
-//                accountViewModel.switchUI(LoginMethod.EMAIL)
-//            }
+            onAccountRefresh(it)
         })
 
         // Avatar
         accountViewModel.avatarRetrieved.observe(viewLifecycleOwner, Observer {
-            if (it == null) {
-                return@Observer
-            }
-
-            if (it.exception != null) {
-                activity?.showException(it.exception)
-                return@Observer
-            }
-
-            if (it.success == null) {
-                return@Observer
-            }
-
-            wx_avatar.setImageDrawable(
-                    Drawable.createFromStream(
-                            it.success,
-                            WX_AVATAR_NAME
-                    )
-            )
+            onAvatarRetrieved(it)
         })
 
         swipe_refresh.setOnRefreshListener {
@@ -192,6 +95,7 @@ class WxInfoFragment : ScopedFragment(),
             return
         }
 
+        // Start fetching wechat avatar in background.
         accountViewModel.fetchWxAvatar(
                 cache,
                 acnt.wechat
@@ -270,6 +174,74 @@ class WxInfoFragment : ScopedFragment(),
         }
 
 
+    }
+
+    private fun onWxRefreshed(result: Result<WxRefreshState>) {
+        when (result) {
+            is Result.LocalizedError -> {
+                stopRefreshing()
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                stopRefreshing()
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                when (result.data) {
+                    WxRefreshState.ReAuth -> {
+                        stopRefreshing()
+                    }
+                    WxRefreshState.SUCCESS -> {
+                        val acnt = sessionManager.loadAccount() ?: return
+
+                        toast(R.string.refreshing_account)
+
+                        accountViewModel.refresh(acnt)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun onAccountRefresh(result: Result<Account>) {
+        stopRefreshing()
+
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                toast(R.string.prompt_updated)
+
+                sessionManager.saveAccount(result.data)
+
+                if (!result.data.isWxOnly) {
+                    accountViewModel.switchUI(LoginMethod.EMAIL)
+                }
+            }
+        }
+    }
+
+    private fun onAvatarRetrieved(result: Result<InputStream>) {
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                wx_avatar.setImageDrawable(
+                        Drawable.createFromStream(
+                                result.data,
+                                WX_AVATAR_NAME
+                        )
+                )
+            }
+        }
     }
 
     companion object {

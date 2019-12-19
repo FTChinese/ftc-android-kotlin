@@ -118,7 +118,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
                 toast(result.msgId)
             }
             is Result.Error -> {
-                toast(parseException(result.exception))
+                result.exception.message?.let { toast(it) }
             }
         }
 //        if (result == null) {

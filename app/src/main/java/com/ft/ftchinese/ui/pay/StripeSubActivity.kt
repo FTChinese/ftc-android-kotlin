@@ -19,7 +19,6 @@ import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.account.StripeRetrievalResult
 import com.ft.ftchinese.util.RequestCode
 import com.stripe.android.*
 import com.stripe.android.model.*
@@ -582,37 +581,54 @@ class StripeSubActivity : ScopedAppActivity(),
     }
 
 
-    private fun onSubRetrieved(result: StripeRetrievalResult?) {
-        if (result == null) {
-            refreshAccount()
-            return
-        }
+    private fun onSubRetrieved(result: Result<StripeSub>) {
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                rv_stripe_sub.apply {
+                    setHasFixedSize(true)
+                    layoutManager = LinearLayoutManager(this@StripeSubActivity)
+                    adapter = SingleLineAdapter(buildRows(result.data))
+                }
 
-        if (result.error != null) {
-            toast(result.error)
-            refreshAccount()
-            return
+                refreshAccount()
+            }
         }
+//        if (result == null) {
+//            refreshAccount()
+//            return
+//        }
+//
+//        if (result.error != null) {
+//            toast(result.error)
+//            refreshAccount()
+//            return
+//        }
+//
+//        if (result.exception != null) {
+//            toast(parseException(result.exception))
+//            refreshAccount()
+//            return
+//        }
+//
+//        if (result.success == null) {
+//            toast("Stripe subscription data not found")
+//            refreshAccount()
+//            return
+//        }
 
-        if (result.exception != null) {
-            toast(parseException(result.exception))
-            refreshAccount()
-            return
-        }
-
-        if (result.success == null) {
-            toast("Stripe subscription data not found")
-            refreshAccount()
-            return
-        }
-
-        rv_stripe_sub.apply {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(this@StripeSubActivity)
-            adapter = SingleLineAdapter(buildRows(result.success))
-        }
-
-        refreshAccount()
+//        rv_stripe_sub.apply {
+//            setHasFixedSize(true)
+//            layoutManager = LinearLayoutManager(this@StripeSubActivity)
+//            adapter = SingleLineAdapter(buildRows(result.success))
+//        }
+//
+//        refreshAccount()
     }
 
     /**

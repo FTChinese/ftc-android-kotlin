@@ -15,6 +15,8 @@ import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.WxRefreshState
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
@@ -67,8 +69,13 @@ class AccountActivity : ScopedAppActivity(),
             initUI()
         })
 
-        viewModel.shouldReAuth.observe(this, Observer {
-            if (it) {
+        // Launch wechat authorization if access token
+        // expired.
+        viewModel.wxRefreshResult.observe(this, Observer {
+            if (it !is Result.Success) {
+                return@Observer
+            }
+            if (it.data == WxRefreshState.ReAuth) {
 
                 WxExpireDialogFragment()
                         .show(supportFragmentManager, "WxExpireDialog")
