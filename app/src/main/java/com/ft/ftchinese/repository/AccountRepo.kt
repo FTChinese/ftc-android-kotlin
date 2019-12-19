@@ -110,6 +110,7 @@ object AccountRepo {
         val (resp, _) = Fetch().put(SubscribeApi.WX_REFRESH)
                 .noCache()
                 .setAppId()
+                .setTimeout(30)
                 .jsonBody(Klaxon().toJsonString(mapOf(
                         "sessionId" to wxSession.sessionId
                 )))
