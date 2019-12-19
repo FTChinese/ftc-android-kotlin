@@ -246,7 +246,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
     fun wxLogin(code: String) {
         viewModelScope.launch {
             try {
-                info("Starte requesting wechat oauth session data")
+                info("Start requesting wechat oauth session data")
                 val sess = withContext(Dispatchers.IO) {
                     ReaderRepo.wxLogin(code)
                 }
@@ -268,7 +268,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                 // We cannot make sure the exact meaning of each error, just
                 // show user API's error message.
 
-                info("Exception: $e")
+                info(e)
 
                 wxSessionResult.value = parseException(e)
             }
