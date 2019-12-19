@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.login
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -203,6 +204,10 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
                     Intent(activity, LoginActivity::class.java),
                     RequestCode.SIGN_IN
             )
+        }
+
+        fun start(context: Context?) {
+            context?.startActivity(Intent(context, LoginActivity::class.java))
         }
     }
 }
