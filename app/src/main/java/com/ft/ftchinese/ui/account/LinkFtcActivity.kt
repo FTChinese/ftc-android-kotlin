@@ -3,11 +3,12 @@ package com.ft.ftchinese.ui.account
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityFragmentDoubleBinding
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.*
@@ -16,7 +17,6 @@ import com.ft.ftchinese.ui.login.*
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.Existence
 import com.ft.ftchinese.viewmodel.LoginViewModel
-import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -30,16 +30,15 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: LoginViewModel
-    private var isSignUp = false
+    private lateinit var binding: ActivityFragmentDoubleBinding
 
-    private fun showProgress(show: Boolean) {
-        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
-    }
+    private var isSignUp = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_fragment_double)
 
-        setContentView(R.layout.activity_fragment_double)
+//        setContentView(R.layout.activity_fragment_double)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -53,7 +52,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
                 .get(LoginViewModel::class.java)
 
         viewModel.inProgress.observe(this, Observer<Boolean> {
-            showProgress(it)
+            binding.inProgress = it
         })
 
         viewModel.emailResult.observe(this, Observer {
@@ -71,8 +70,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun onEmailResult(result: Result<Existence>) {
 
-        showProgress(false)
-
+        binding.inProgress = false
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
@@ -101,7 +99,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun onAccountResult(accountResult: Result<Account>) {
 
-        showProgress(false)
+        binding.inProgress = false
 
         when (accountResult) {
             is Result.LocalizedError -> {
