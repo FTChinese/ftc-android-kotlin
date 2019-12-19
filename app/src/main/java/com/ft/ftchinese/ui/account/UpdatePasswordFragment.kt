@@ -13,6 +13,8 @@ import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.Passwords
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.Validator
+import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.UpdateViewModel
 import kotlinx.android.synthetic.main.fragment_update_password.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
@@ -76,8 +78,8 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
         }
 
         // Re-enable input in case errors
-        updateViewModel.updateResult.observe(this, Observer {
-            if (it.error != null || it.exception != null) {
+        updateViewModel.updateResult.observe(viewLifecycleOwner, Observer {
+            if (it !is Result.Success) {
                 enableInput(true)
             }
         })

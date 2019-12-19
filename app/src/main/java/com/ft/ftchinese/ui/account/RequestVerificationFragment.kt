@@ -10,9 +10,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.showException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.UpdateViewModel
 import kotlinx.android.synthetic.main.fragment_request_verification.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.alert
@@ -30,11 +31,6 @@ class RequestVerificationFragment : ScopedFragment(), AnkoLogger {
         sessionManager = SessionManager.getInstance(context)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
@@ -49,7 +45,7 @@ class RequestVerificationFragment : ScopedFragment(), AnkoLogger {
                     .get(UpdateViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        updateViewModel.sendEmailResult.observe(this, Observer {
+        updateViewModel.sendEmailResult.observe(viewLifecycleOwner, Observer {
             onEmailSent(it)
         })
 
@@ -71,33 +67,27 @@ class RequestVerificationFragment : ScopedFragment(), AnkoLogger {
         }
     }
 
-    private fun onEmailSent(result: BinaryResult?) {
-        if (result == null) {
-            return
-        }
+    private fun onEmailSent(result: Result<Boolean>) {
+//        if (result == null) {
+//            return
+//        }
 
-        updateViewModel.showProgress(false)
+        updateViewModel.inProgress.value = false
 
-        if (result.error != null) {
-            enableInput(true)
-            toast(result.error)
-            return
-        }
-
-        if (result.exception != null) {
-            enableInput(true)
-            activity?.showException(result.exception)
-            return
-        }
-
-        if (result.success) {
-            alert(R.string.prompt_letter_sent) {
-                positiveButton("Got it") {
-                    it.dismiss()
-                }
-            }.show()
-        } else {
-            toast("Unknown error occurred")
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                alert(R.string.prompt_letter_sent) {
+                    positiveButton("Got it") {
+                        it.dismiss()
+                    }
+                }.show()
+            }
         }
     }
 

@@ -8,12 +8,14 @@ import android.view.View
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.AccountRowType
 import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.UpdateViewModel
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
@@ -86,89 +88,62 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
         })
 
         updateViewModel.updateResult.observe(this, Observer {
-            val updateResult = it ?: return@Observer
-
-            showProgress(false)
-
-            if (updateResult.error != null) {
-                toast(updateResult.error)
-//                updateViewModel.enableInput(true)
-                return@Observer
-            }
-
-            if (updateResult.exception != null) {
-                toast(parseException(updateResult.exception))
-//                updateViewModel.enableInput(true)
-                return@Observer
-            }
-
-            if (!updateResult.success) {
-                toast("Failed to save")
-//                updateViewModel.enableInput(true)
-                return@Observer
-            }
-
-            toast(R.string.prompt_saved)
-
-            val account = sessionManager.loadAccount()
-            if (account == null) {
-                toast("Account not found")
-                return@Observer
-            }
-
-            accountViewModel.refresh(
-                    account = account
-            )
+            onUpdated(it)
         })
 
         // Observing refreshed account.
         accountViewModel.accountRefreshed.observe(this, Observer {
-            showProgress(false)
-
-            when (it) {
-                is Result.LocalizedError -> {
-                    toast(it.msgId)
-                }
-                is Result.Error -> {
-                    it.exception.message?.let { toast(it) }
-                }
-                is Result.Success -> {
-                    toast(R.string.prompt_updated)
-
-                    sessionManager.saveAccount(it.data)
-
-                    // Signal to calling activity
-                    setResult(Activity.RESULT_OK)
-
-                    finish()
-                }
-            }
-//            val accountResult = it ?: return@Observer
-
-//            if (accountResult.error != null) {
-//                toast(accountResult.error)
-//                return@Observer
-//            }
-//
-//            if (accountResult.exception != null) {
-//                toast(parseException(accountResult.exception))
-//                return@Observer
-//            }
-
-//            if (accountResult.success == null) {
-//                toast("Refreshing account failed. Please refresh manually later.")
-//                return@Observer
-//            }
-
-//            toast(R.string.prompt_updated)
-//
-//            sessionManager.saveAccount(accountResult.success)
-//
-//            // Signal to calling activity
-//            setResult(Activity.RESULT_OK)
-//
-//            finish()
+            onAccountRefreshed(it)
         })
+    }
+
+    private fun onUpdated(result: Result<Boolean>) {
+        showProgress(false)
+
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                toast(R.string.prompt_saved)
+
+                val account = sessionManager.loadAccount()
+                if (account == null) {
+                    toast("Account not found")
+                    return
+                }
+
+                accountViewModel.refresh(
+                        account = account
+                )
+            }
+        }
+    }
+
+    private fun onAccountRefreshed(result: Result<Account>) {
+        showProgress(false)
+
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                toast(R.string.prompt_updated)
+
+                sessionManager.saveAccount(result.data)
+
+                // Signal to calling activity
+                setResult(Activity.RESULT_OK)
+
+                finish()
+            }
+        }
     }
 
     companion object {

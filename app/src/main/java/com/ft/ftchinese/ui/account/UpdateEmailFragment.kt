@@ -10,6 +10,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.UpdateViewModel
 import kotlinx.android.synthetic.main.fragment_update_email.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
@@ -56,7 +58,7 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
         // Note this only works if user actually entered something.
         // If user does not enter anything, and clicked save button,
         // empty string will be submitted directly.
-        updateViewModel.updateFormState.observe(this, Observer {
+        updateViewModel.updateFormState.observe(viewLifecycleOwner, Observer {
             val updateState = it ?: return@Observer
 
             save_btn.isEnabled = updateState.isDataValid
@@ -97,8 +99,8 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
             )
         }
 
-        updateViewModel.updateResult.observe(this, Observer {
-            if (it.error != null || it.exception != null) {
+        updateViewModel.updateResult.observe(viewLifecycleOwner, Observer {
+            if (it !is Result.Success) {
                 enableInput(true)
             }
         })

@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.viewmodel
 
 import android.util.Patterns
 import androidx.lifecycle.MutableLiveData
@@ -19,12 +19,13 @@ class UpdateViewModel : ViewModel() {
         MutableLiveData<UpdateFormState>()
     }
 
-    private val _updateResult = MutableLiveData<BinaryResult>()
-    val updateResult: MutableLiveData<BinaryResult> by lazy {
-        MutableLiveData<BinaryResult>()
+    val updateResult: MutableLiveData<Result<Boolean>> by lazy {
+        MutableLiveData<Result<Boolean>>()
     }
 
-    val sendEmailResult = MutableLiveData<BinaryResult>()
+    val sendEmailResult: MutableLiveData<Result<Boolean>> by lazy {
+        MutableLiveData<Result<Boolean>>()
+    }
 
     fun emailDataChanged(currentEmail: String, newEmail: String) {
         if (!isEmailValid(newEmail)) {
@@ -61,9 +62,7 @@ class UpdateViewModel : ViewModel() {
                     AccountRepo.updateEmail(userId, email)
                 }
 
-                _updateResult.value = BinaryResult(
-                        success = done
-                )
+                updateResult.value = Result.Success(done)
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 422) {
                     when (e.error?.key) {
@@ -72,17 +71,17 @@ class UpdateViewModel : ViewModel() {
                         else -> null
                     }
                 } else {
-                    e.parseStatusCode()
+                    null
                 }
 
-                _updateResult.value = BinaryResult(
-                        error = msgId,
-                        exception = e
-                )
+                updateResult.value = if (msgId != null) {
+                    Result.LocalizedError(msgId)
+                } else {
+                    parseApiError(e)
+                }
+
             } catch (e: Exception) {
-                _updateResult.value = BinaryResult(
-                        exception = e
-                )
+                updateResult.value = parseException(e)
             }
         }
     }
@@ -118,9 +117,10 @@ class UpdateViewModel : ViewModel() {
                     AccountRepo.updateUserName(userId, name)
                 }
 
-                updateResult.value = BinaryResult(
-                        success = done
-                )
+                updateResult.value = Result.Success(done)
+//                        BinaryResult(
+//                        success = done
+//                )
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 422) {
                     when (e.error?.key) {
@@ -128,17 +128,23 @@ class UpdateViewModel : ViewModel() {
                         else -> null
                     }
                 } else {
-                    e.parseStatusCode()
+                    null
                 }
 
-                updateResult.value = BinaryResult(
-                        error = msgId,
-                        exception = e
-                )
+                updateResult.value = if (msgId != null) {
+                    Result.LocalizedError(msgId)
+                } else {
+                    parseApiError(e)
+                }
+//                        BinaryResult(
+//                        error = msgId,
+//                        exception = e
+//                )
             } catch (e: Exception) {
-                updateResult.value = BinaryResult(
-                        exception = e
-                )
+                updateResult.value = parseException(e)
+//                        BinaryResult(
+//                        exception = e
+//                )
             }
         }
     }
@@ -150,9 +156,10 @@ class UpdateViewModel : ViewModel() {
                     AccountRepo.updatePassword(userId, passwords)
                 }
 
-                updateResult.value = BinaryResult(
-                        success = done
-                )
+                updateResult.value = Result.Success(done)
+//                        BinaryResult(
+//                        success = done
+//                )
             } catch (e: ClientError) {
                 val msgId = when (e.statusCode) {
                     403 -> R.string.error_incorrect_old_password
@@ -164,14 +171,22 @@ class UpdateViewModel : ViewModel() {
                     else -> e.parseStatusCode()
                 }
 
-                updateResult.value = BinaryResult(
-                        error = msgId,
-                        exception = e
-                )
+                updateResult.value = if (msgId != null) {
+                    Result.LocalizedError(msgId)
+                } else {
+                    parseApiError(e)
+                }
+
+//                updateResult.value = BinaryResult(
+//                        error = msgId,
+//                        exception = e
+//                )
             } catch (e: Exception) {
-                updateResult.value = BinaryResult(
-                        exception = e
-                )
+//                updateResult.value = BinaryResult(
+//                        exception = e
+//                )
+
+                updateResult.value = parseException(e)
             }
 
         }
@@ -184,9 +199,7 @@ class UpdateViewModel : ViewModel() {
                     AccountRepo.requestVerification(userId)
                 }
 
-                sendEmailResult.value = BinaryResult(
-                        success = done
-                )
+                sendEmailResult.value = Result.Success(done)
 
             } catch (e: ClientError) {
                 val msgId = when (e.statusCode) {
@@ -195,18 +208,17 @@ class UpdateViewModel : ViewModel() {
                         "email_server_missing" -> R.string.api_email_server_down
                         else -> null
                     }
-                    else -> e.parseStatusCode()
+                    else -> null
                 }
 
-                sendEmailResult.value = BinaryResult(
-                        error = msgId,
-                        exception = e
-                )
+                sendEmailResult.value = if (msgId != null) {
+                    Result.LocalizedError(msgId)
+                } else {
+                    parseApiError(e)
+                }
 
             } catch (e: Exception) {
-                sendEmailResult.value = BinaryResult(
-                        exception = e
-                )
+                sendEmailResult.value = parseException(e)
             }
         }
     }

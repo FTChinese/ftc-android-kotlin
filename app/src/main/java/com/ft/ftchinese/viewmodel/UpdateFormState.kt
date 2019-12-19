@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.viewmodel
 
 data class UpdateFormState (
         val emailError: Int? = null,
