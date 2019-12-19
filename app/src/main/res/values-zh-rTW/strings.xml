@@ -490,5 +490,8 @@
     <string name="fcm_start_checking">检测</string>
     <string name="exo_download_notification_channel_name">Downloads</string>
     <string name="exo_download_notification_channel_description">Download mp3</string>
+    <string name="refreshing_wx_info">更新微信信息</string>
+    <string name="alert_audio_deleted">已删除下载的音频</string>
+    <string name="wait_while_refresh_wx">从微信更新信息耗时较长，请耐心等候</string>
 
 </resources>
