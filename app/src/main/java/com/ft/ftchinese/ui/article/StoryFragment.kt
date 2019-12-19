@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.article
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.KeyEvent
@@ -112,6 +113,7 @@ class StoryFragment : ScopedFragment(),
         articleModel.loadFromRemote(item, currentLang)
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -124,7 +126,7 @@ class StoryFragment : ScopedFragment(),
             databaseEnabled = true
         }
 
-        val wvClient = WVClient(activity)
+        val wvClient = WVClient(requireContext())
 
         web_view.apply {
             addJavascriptInterface(
@@ -157,7 +159,7 @@ class StoryFragment : ScopedFragment(),
 
         // Remember the language user selected so
         // that we know how to handle refresh.
-        articleModel.currentLang.observe(this, Observer<Language> {
+        articleModel.currentLang.observe(viewLifecycleOwner, Observer<Language> {
             currentLang = it
 
             val item = storyBrief ?: return@Observer
@@ -168,7 +170,7 @@ class StoryFragment : ScopedFragment(),
         })
 
         // If cache is not found, fetch data from remote.
-        articleModel.cacheResult.observe(this, Observer {
+        articleModel.cacheResult.observe(viewLifecycleOwner, Observer {
             if (it.found) {
                 return@Observer
             }
@@ -188,7 +190,7 @@ class StoryFragment : ScopedFragment(),
         })
 
         // Load html into web view.
-        articleModel.renderResult.observe(this, Observer {
+        articleModel.renderResult.observe(viewLifecycleOwner, Observer {
             showProgress(false)
 
             val htmlResult = it ?: return@Observer

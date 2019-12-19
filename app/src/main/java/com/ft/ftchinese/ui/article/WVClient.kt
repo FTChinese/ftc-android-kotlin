@@ -1,6 +1,6 @@
 package com.ft.ftchinese.ui.article
 
-import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -67,29 +67,21 @@ val noAccess = mapOf(
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 open class WVClient(
-        private val activity: Activity?
+        private val context: Context
 ) : WebViewClient(), AnkoLogger {
 
     // Pass click events to host.
     private var mListener: OnWebViewInteractionListener? = null
 
-    private val sessionManager = if (activity != null) {
-        SessionManager.getInstance(activity)
-    } else {
-        null
-    }
+    private val sessionManager = SessionManager.getInstance(context)
 
     private fun getPrivilegeCode(): String {
-        val prvl = if (activity != null) {
-            val account = sessionManager?.loadAccount()
+        val account = sessionManager.loadAccount()
 
-            when (account?.membership?.tier) {
-                Tier.STANDARD -> """['premium']"""
-                Tier.PREMIUM -> """['premium', 'EditorChoice']"""
-                else -> "[]"
-            }
-        } else {
-            "[]"
+        val prvl = when (account?.membership?.tier) {
+            Tier.STANDARD -> """['premium']"""
+            Tier.PREMIUM -> """['premium', 'EditorChoice']"""
+            else -> "[]"
         }
 
         return """
@@ -210,7 +202,7 @@ open class WVClient(
             // The `微信登录` button is wrapped in a link with webUrl set to `weixinlogin://www.ftchinese.com/`
             "ftcregister",
             "weixinlogin" -> {
-                LoginActivity.startForResult(activity)
+                LoginActivity.start(context)
                 return true
             }
 
@@ -260,7 +252,7 @@ open class WVClient(
                 )
             }
 
-            PaywallActivity.start(context = activity)
+            PaywallActivity.start(context = context)
         }
 
         return true
@@ -345,7 +337,7 @@ open class WVClient(
                         webUrl = uri.toString()
                 )
 
-                ArticleActivity.start(activity, channelItem)
+                ArticleActivity.start(context, channelItem)
 
                 true
             }
@@ -363,7 +355,7 @@ open class WVClient(
                         webUrl = uri.toString()
                 )
 
-                ArticleActivity.start(activity, teaser)
+                ArticleActivity.start(context, teaser)
                 true
             }
 
@@ -397,14 +389,14 @@ open class WVClient(
                         htmlType = HTML_TYPE_FRAGMENT
                 )
 
-                ChannelActivity.start(activity, page)
+                ChannelActivity.start(context, page)
 
                 true
             }
 
             else -> {
 
-                WebViewActivity.start(activity, uri.toString())
+                WebViewActivity.start(context, uri.toString())
                 true
             }
         }
@@ -447,7 +439,7 @@ open class WVClient(
                 )
 
                 info("Channel source for editor choice: $channelSource")
-                ChannelActivity.start(activity, channelSource)
+                ChannelActivity.start(context, channelSource)
             }
             else -> {
 
@@ -460,7 +452,7 @@ open class WVClient(
 
                 info("Start channel activity for $listPage")
 
-                ChannelActivity.start(activity, listPage)
+                ChannelActivity.start(context, listPage)
             }
         }
 
@@ -491,7 +483,7 @@ open class WVClient(
                         htmlType = HTML_TYPE_COMPLETE
                 )
 
-                ChannelActivity.start(activity, listPage)
+                ChannelActivity.start(context, listPage)
 
                 true
             }
@@ -505,7 +497,7 @@ open class WVClient(
                         htmlType = HTML_TYPE_COMPLETE
                 )
 
-                ChannelActivity.start(activity, listPage)
+                ChannelActivity.start(context, listPage)
 
                 true
             }
@@ -520,7 +512,7 @@ open class WVClient(
                         htmlType = HTML_TYPE_COMPLETE
                 )
 
-                ChannelActivity.start(activity, listPage)
+                ChannelActivity.start(context, listPage)
 
                 true
             }
@@ -528,7 +520,7 @@ open class WVClient(
     }
 
     private fun feedbackEmail(): Boolean {
-        val pm = activity?.packageManager ?: return true
+        val pm = context?.packageManager ?: return true
 
         val intent = Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.parse("mailto:")
@@ -537,10 +529,10 @@ open class WVClient(
         }
 
         return if (intent.resolveActivity(pm) != null) {
-            activity.startActivity(intent)
+            context.startActivity(intent)
             true
         } else {
-            activity.toast(R.string.prompt_no_email_app)
+            context.toast(R.string.prompt_no_email_app)
             true
         }
     }
@@ -548,7 +540,7 @@ open class WVClient(
     private fun handleExternalLink(uri: Uri): Boolean {
         // This opens an external browser
         val customTabsInt = CustomTabsIntent.Builder().build()
-        customTabsInt.launchUrl(activity, uri)
+        customTabsInt.launchUrl(context, uri)
 
 
         return true

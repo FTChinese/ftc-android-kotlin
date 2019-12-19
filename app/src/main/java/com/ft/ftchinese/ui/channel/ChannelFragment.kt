@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.channel
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -100,6 +101,7 @@ class ChannelFragment : ScopedFragment(),
         return inflater.inflate(R.layout.fragment_channel, container, false)
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -114,7 +116,7 @@ class ChannelFragment : ScopedFragment(),
             databaseEnabled = true
         }
 
-        val wvClient = WVClient(activity)
+        val wvClient = WVClient(requireContext())
         wvClient.setWVInteractionListener(this)
 
         web_view.apply {

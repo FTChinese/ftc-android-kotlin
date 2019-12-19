@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.article
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
@@ -127,6 +128,7 @@ class WebContentFragment : Fragment(),
             savedInstanceState: Bundle?
     ): View? = inflater.inflate(R.layout.fragment_web_view, container, false)
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -137,7 +139,7 @@ class WebContentFragment : Fragment(),
             databaseEnabled = true
         }
 
-        val wvClient = WVClient(activity)
+        val wvClient = WVClient(requireContext())
         wvClient.setWVInteractionListener(this)
 
         web_view.apply {
