@@ -14,6 +14,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.WxOAuthIntent
+import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.viewmodel.LoginViewModel
@@ -56,34 +57,7 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         // First get session data from api,
         // and then use session data to retrieve account.
         loginViewModel.wxSessionResult.observe(this, Observer {
-            when (it) {
-                is Result.Success -> {
-
-                    sessionManager.saveWxSession(it.data)
-
-                    // Start to retrieve account data
-                    loginViewModel.loadWxAccount(it.data)
-                }
-                is Result.LocalizedError -> {
-
-                    binding.inProgress = false
-                    binding.result = UIWx(
-                            heading = getString(R.string.prompt_login_failed),
-                            body = getString(it.msgId),
-                            enableButton = true
-
-                    )
-                }
-                is Result.Error -> {
-
-                    binding.inProgress = false
-                    binding.result = UIWx(
-                            heading = getString(R.string.prompt_login_failed),
-                            body = it.exception.message ?: "",
-                            enableButton = true
-                    )
-                }
-            }
+            onWxSessionResult(it)
         })
 
         // Handle wechat login or re-login after refresh token expired.
@@ -251,6 +225,37 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 binding.inProgress = false
             }
 
+        }
+    }
+
+    private fun onWxSessionResult(result: Result<WxSession>) {
+        when (result) {
+            is Result.Success -> {
+
+                sessionManager.saveWxSession(result.data)
+
+                // Start to retrieve account data
+                loginViewModel.loadWxAccount(result.data)
+            }
+            is Result.LocalizedError -> {
+
+                binding.inProgress = false
+                binding.result = UIWx(
+                        heading = getString(R.string.prompt_login_failed),
+                        body = getString(result.msgId),
+                        enableButton = true
+
+                )
+            }
+            is Result.Error -> {
+
+                binding.inProgress = false
+                binding.result = UIWx(
+                        heading = getString(R.string.prompt_login_failed),
+                        body = result.exception.message ?: "",
+                        enableButton = true
+                )
+            }
         }
     }
 

@@ -141,7 +141,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
                 toast(accountResult.msgId)
             }
             is Result.Error -> {
-                toast(parseException(accountResult.exception))
+                accountResult.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
                 // Is user created a new ftc account, do not show the LinkPreviewActivity since the

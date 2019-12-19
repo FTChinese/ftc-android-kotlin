@@ -130,16 +130,16 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 //                )
                 accountResult.value = Result.Success(account)
             } catch (e: ClientError) {
-                val msgId = if (e.statusCode == 404) {
-                    R.string.error_invalid_password
-                } else {
-                    statusCodes[e.statusCode]
-                }
+//                val msgId = if (e.statusCode == 404) {
+//                    R.string.error_invalid_password
+//                } else {
+//                    statusCodes[e.statusCode]
+//                }
 
-                accountResult.value = if (msgId != null) {
-                    Result.LocalizedError(msgId)
+                accountResult.value = if (e.statusCode == 404) {
+                    Result.LocalizedError(R.string.error_invalid_password)
                 } else {
-                    Result.Error(e)
+                    parseApiError(e)
                 }
 
 //                accountResult.value = AccountResult(
@@ -148,7 +148,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 //                )
 
             } catch (e: Exception) {
-                accountResult.value = Result.Error(e)
+                accountResult.value = parseException(e)
 
 //                accountResult.value = AccountResult(
 //                        exception = e
@@ -195,13 +195,13 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                         else -> null
                     }
                 } else {
-                    statusCodes[e.statusCode]
+                    null
                 }
 
                 accountResult.value = if (msgId != null) {
                     Result.LocalizedError(msgId)
                 } else {
-                    Result.Error(e)
+                    parseApiError(e)
                 }
 
 //                        AccountResult(
@@ -210,7 +210,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 //                )
             } catch (e: Exception) {
 //                accountResult.value = AccountResult(exception = e)
-                accountResult.value = Result.Error(e)
+                accountResult.value = parseException(e)
             }
         }
     }
@@ -228,10 +228,10 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                 if (e.statusCode == 404) {
                     pwResetLetterResult.value = Result.LocalizedError(R.string.api_email_not_found)
                 } else {
-                    pwResetLetterResult.value = Result.Error(e)
+                    pwResetLetterResult.value = parseApiError(e)
                 }
             } catch (e: Exception) {
-                pwResetLetterResult.value = Result.Error(e)
+                pwResetLetterResult.value = parseException(e)
             }
         }
     }
@@ -262,11 +262,6 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
                 wxSessionResult.value = Result.Success(sess)
 
-                // via wechat only.
-                info("Start loading wechat account")
-
-                // Here won't throw an errors.
-//                loadWxAccount(sess)
             } catch (e: Exception) {
                 // If the error is ClientError,
                 // Possible 422 error key: code_missing_field, code_invalid.
@@ -275,7 +270,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
                 info("Exception: $e")
 
-                wxSessionResult.value = Result.Error(e)
+                wxSessionResult.value = parseException(e)
             }
         }
     }
@@ -299,31 +294,20 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
                 info("Loaded wechat account: $account")
 
-//                accountResult.value = AccountResult(success = account)
                 accountResult.value = Result.Success(account)
             } catch (e: ClientError) {
                 info("Retrieving wechat account error $e")
-                val msgId = if (e.statusCode == 404) {
-                    R.string.loading_failed
+
+                accountResult.value = if (e.statusCode == 404) {
+                    Result.LocalizedError(R.string.loading_failed)
                 } else {
-                    statusCodes[e.statusCode]
+                    parseApiError(e)
                 }
 
-//                accountResult.value = AccountResult(
-//                        error = msgId,
-//                        exception = e
-//                )
-
-                accountResult.value = if (msgId != null) {
-                    Result.LocalizedError(msgId)
-                } else {
-                    Result.Error(e)
-                }
             } catch (e: Exception) {
 
                 info(e)
-//                accountResult.value = AccountResult(exception = e)
-                accountResult.value = Result.Error(e)
+                accountResult.value = parseException(e)
             }
         }
     }

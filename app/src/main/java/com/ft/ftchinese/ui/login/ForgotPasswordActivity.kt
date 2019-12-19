@@ -81,6 +81,18 @@ class ForgotPasswordActivity : ScopedAppActivity(),
             binding.inProgress = false
 
             when (it) {
+
+                is Result.LocalizedError -> {
+                    binding.enableInput = true
+                    toast(it.msgId)
+                }
+                is Result.Error -> {
+                    binding.enableInput = true
+
+                    it.exception.message?.let {msg ->
+                        toast(msg)
+                    }
+                }
                 is Result.Success -> {
                     if (it.data) {
                         binding.emailSent = true
@@ -88,14 +100,6 @@ class ForgotPasswordActivity : ScopedAppActivity(),
                         toast("Sending email failed. Pleas try again")
                         binding.enableInput = true
                     }
-                }
-                is Result.LocalizedError -> {
-                    binding.enableInput = true
-                    toast(it.msgId)
-                }
-                is Result.Error -> {
-                    binding.enableInput = true
-                    toast(parseException(it.exception))
                 }
             }
         })
