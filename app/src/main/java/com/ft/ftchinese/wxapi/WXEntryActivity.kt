@@ -38,11 +38,10 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     private lateinit var sessionManager: SessionManager
     private lateinit var loginViewModel: LoginViewModel
     private lateinit var binding: ActivityWechatBinding
-//    private lateinit var accountViewModel: AccountViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_wechat)
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_wechat)
 
         setSupportActionBar(toolbar)
@@ -192,7 +191,8 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
     private fun processLogin(resp: BaseResp) {
         binding.result = UIWx(
-                heading = getString(R.string.progress_logging)
+                heading = getString(R.string.progress_logging),
+                body = getString(R.string.wait_while_wx_login)
         )
 
         binding.inProgress = true
@@ -301,65 +301,6 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 }
             }
         }
-//        if (accountResult == null) {
-//            binding.result = UIWx(
-//                    heading = getString(R.string.prompt_login_failed),
-//                    body = getString(R.string.loading_failed),
-//                    enableButton = true
-//            )
-//            return
-//        }
-
-//        if (accountResult.error != null) {
-//            binding.result = UIWx(
-//                    heading = getString(R.string.prompt_login_failed),
-//                    body = getString(accountResult.error),
-//                    enableButton = true
-//            )
-//
-//            return
-//        }
-
-//        if (accountResult.exception != null) {
-//
-//            binding.result = UIWx(
-//                    heading = getString(R.string.prompt_login_failed),
-//                    body = accountResult.exception.message ?: "",
-//                    enableButton = true
-//            )
-//            return
-//        }
-
-//        if (accountResult.success == null) {
-//
-//            binding.result = UIWx(
-//                    heading = getString(R.string.prompt_login_failed),
-//                    body = getString(R.string.loading_failed),
-//                    enableButton = true
-//            )
-//            return
-//        }
-
-//        when (sessionManager.loadWxIntent()) {
-//            // For login
-//            WxOAuthIntent.LOGIN -> {
-//                binding.result = UIWx(
-//                        heading = getString(R.string.prompt_logged_in),
-//                        body = getString(
-//                                R.string.greeting_wx_login,
-//                                accountResult.success.wechat.nickname
-//                        ),
-//                        enableButton = true
-//                )
-//                sessionManager.saveAccount(accountResult.success)
-//            }
-//
-//            // For account linking
-//            WxOAuthIntent.LINK -> {
-//                LinkPreviewActivity.startForResult(this, accountResult.success)
-//                finish()
-//            }
-//        }
     }
 
 
