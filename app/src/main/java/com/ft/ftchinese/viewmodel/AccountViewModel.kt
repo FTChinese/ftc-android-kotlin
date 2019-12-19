@@ -56,6 +56,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                     AccountRepo.refreshWxInfo(wxSession)
                 }
 
+                info("Refresh wx info result: $done")
                 wxRefreshResult.value = if (done) {
                     Result.Success(WxRefreshState.SUCCESS)
                 } else {
@@ -63,7 +64,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                 }
 
             } catch (e: ClientError) {
-
+                info("Refresh wx info api error: $e")
                 wxRefreshResult.value = when (e.statusCode) {
                     422 -> Result.Success(WxRefreshState.ReAuth)
                     404 -> Result.LocalizedError(R.string.api_account_not_found)
@@ -71,7 +72,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                 }
 
             } catch (e: Exception) {
-
+                info("Refresh wx info exception: $e")
                 wxRefreshResult.value = parseException(e)
             }
         }
@@ -90,13 +91,16 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (updatedAccount == null) {
+                    info("Refresh account returned empty data")
                     accountRefreshed.value = Result.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
 
+                info("Refresh account success")
                 accountRefreshed.value = Result.Success(updatedAccount)
             } catch (e: ClientError) {
 
+                info("Refresh account api error $e")
 
                 accountRefreshed.value = if (e.statusCode == 404) {
                     Result.LocalizedError(R.string.api_account_not_found)
@@ -106,6 +110,8 @@ class AccountViewModel : ViewModel(), AnkoLogger {
 
             } catch (e: Exception) {
 
+                info("Refresh account exception $e")
+
                 accountRefreshed.value = parseException(e)
             }
         }
@@ -113,7 +119,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
 
     fun fetchWxAvatar(cache: FileCache, wechat: Wechat) {
         if (wechat.avatarUrl == null) {
-            // TODO: display error message.
+            info("Wx avatar url empty")
             return
         }
         viewModelScope.launch {
