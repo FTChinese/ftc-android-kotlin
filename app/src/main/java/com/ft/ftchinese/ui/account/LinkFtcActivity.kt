@@ -71,9 +71,6 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun onEmailResult(result: Result<Existence>) {
 
-//        if (result == null) {
-//            return
-//        }
         showProgress(false)
 
         when (result) {
@@ -100,36 +97,6 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
                 }
             }
         }
-//        if (result.error != null) {
-//            toast(result.error)
-//            return
-//        }
-//
-//        if (result.exception != null) {
-//            toast(parseException(result.exception))
-//            return
-//        }
-//
-//        if (result.success == null) {
-//            toast(R.string.loading_failed)
-//            return
-//        }
-
-//        val (email, found) = result.success
-//        // If email is found, show login ui;
-//        // otherwise show sign up ui.
-//        if (found) {
-//            supportFragmentManager.commit {
-//                replace(R.id.double_frag_primary, SignInFragment.newInstance(email))
-//                addToBackStack(null)
-//            }
-//        } else {
-//            isSignUp = true
-//            supportFragmentManager.commit {
-//                replace(R.id.double_frag_primary, SignUpFragment.newInstance(email))
-//                addToBackStack(null)
-//            }
-//        }
     }
 
     private fun onAccountResult(accountResult: Result<Account>) {
@@ -155,34 +122,6 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
                 LinkPreviewActivity.startForResult(this, accountResult.data)
             }
         }
-//        if (accountResult == null) {
-//            return
-//        }
-//
-//        if (accountResult.error != null) {
-//            toast(accountResult.error)
-//            return
-//        }
-//
-//        if (accountResult.exception != null) {
-//            toast(parseException(accountResult.exception))
-//            return
-//        }
-//
-//        if (accountResult.success == null) {
-//            toast(R.string.loading_failed)
-//            return
-//        }
-
-        // Is user created a new ftc account, do not show the LinkPreviewActivity since the
-        // new account is automatically linked upon creation.
-//        if (isSignUp) {
-//            setResult(Activity.RESULT_OK)
-//            finish()
-//            return
-//        }
-//
-//        LinkPreviewActivity.startForResult(this, accountResult.success)
     }
 
     /**
