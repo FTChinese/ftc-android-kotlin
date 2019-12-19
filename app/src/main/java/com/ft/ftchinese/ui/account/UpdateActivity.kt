@@ -4,19 +4,18 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityFragmentDoubleBinding
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.AccountRowType
-import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.UpdateViewModel
-import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
@@ -28,18 +27,15 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var sessionManager: SessionManager
 
-    private fun showProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
-    }
+    private lateinit var binding: ActivityFragmentDoubleBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_fragment_double)
 
-        setContentView(R.layout.activity_fragment_double)
+        binding.inProgress = false
+
+//        setContentView(R.layout.activity_fragment_double)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -84,7 +80,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun setUp() {
         updateViewModel.inProgress.observe(this, Observer<Boolean> {
-            showProgress(it)
+            binding.inProgress = it
         })
 
         updateViewModel.updateResult.observe(this, Observer {
@@ -98,7 +94,8 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun onUpdated(result: Result<Boolean>) {
-        showProgress(false)
+//        showProgress(false)
+        binding.inProgress = false
 
         when (result) {
             is Result.LocalizedError -> {
@@ -116,15 +113,13 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
                     return
                 }
 
-                accountViewModel.refresh(
-                        account = account
-                )
+                accountViewModel.refresh(account)
             }
         }
     }
 
     private fun onAccountRefreshed(result: Result<Account>) {
-        showProgress(false)
+        binding.inProgress = false
 
         when (result) {
             is Result.LocalizedError -> {
