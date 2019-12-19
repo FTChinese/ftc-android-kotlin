@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.UnlinkAnchor
+import com.ft.ftchinese.viewmodel.LinkViewModel
 import kotlinx.android.synthetic.main.fragment_unlink_anchor.*
 
 private const val ARG_IS_STRIPE = "arg_is_stripe"

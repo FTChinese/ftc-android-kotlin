@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,14 +8,23 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.parseApiError
+import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class LinkViewModel : ViewModel() {
 
-    val unlinkResult = MutableLiveData<BinaryResult>()
-    val linkResult = MutableLiveData<BinaryResult>()
+    val unlinkResult: MutableLiveData<Result<Boolean>> by lazy {
+        MutableLiveData<Result<Boolean>>()
+    }
+
+    val linkResult: MutableLiveData<Result<Boolean>> by lazy {
+        MutableLiveData<Result<Boolean>>()
+    }
+
     val anchorSelected = MutableLiveData<UnlinkAnchor>()
 
     fun link(ftcId: String, unionId: String) {
@@ -28,9 +37,11 @@ class LinkViewModel : ViewModel() {
                     )
                 }
 
-                linkResult.value = BinaryResult(
-                        success = done
-                )
+                linkResult.value = Result.Success(done)
+
+//                        BinaryResult(
+//                        success = done
+//                )
             } catch (e: ClientError) {
                 val msgId = when(e.statusCode) {
                     404 -> R.string.api_account_not_found
@@ -40,17 +51,24 @@ class LinkViewModel : ViewModel() {
                         "membership_all_valid" -> R.string.api_membership_all_valid
                         else -> null
                     }
-                    else -> e.parseStatusCode()
+                    else -> null
                 }
 
-                linkResult.value = BinaryResult(
-                        error = msgId,
-                        exception = e
-                )
+
+                linkResult.value = if (msgId != null) {
+                    Result.LocalizedError(msgId)
+                } else {
+                    parseApiError(e)
+                }
+//                        BinaryResult(
+//                        error = msgId,
+//                        exception = e
+//                )
             } catch (e: Exception) {
-                linkResult.value = BinaryResult(
-                        exception = e
-                )
+                linkResult.value = parseException(e)
+//                        BinaryResult(
+//                        exception = e
+//                )
             }
         }
     }
@@ -66,9 +84,8 @@ class LinkViewModel : ViewModel() {
                     LinkRepo.unlink(account, anchor)
                 }
 
-                unlinkResult.value = BinaryResult(
-                        success = done
-                )
+                unlinkResult.value = Result.Success(done)
+
             } catch (e: ClientError) {
                 val msgId = when (e.statusCode) {
                     422 -> when (e.error?.key) {
@@ -76,17 +93,18 @@ class LinkViewModel : ViewModel() {
                         else -> null
                     }
                     404 -> R.string.api_account_not_found
-                    else -> e.parseStatusCode()
+                    else -> null
                 }
 
-                unlinkResult.value = BinaryResult(
-                        error = msgId,
-                        exception = e
-                )
+                unlinkResult.value = if (msgId != null) {
+                    Result.LocalizedError(msgId)
+                } else {
+                    parseApiError(e)
+                }
+
             } catch (e: Exception) {
-                unlinkResult.value = BinaryResult(
-                        exception = e
-                )
+                unlinkResult.value = parseException(e)
+
             }
         }
     }

@@ -13,9 +13,9 @@ import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.SessionManager
-import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.viewmodel.LinkViewModel
 import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.activity_link_preview.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -151,52 +151,85 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 
-    private fun onLinkResult(linkResult: BinaryResult?) {
+    private fun onLinkResult(result: Result<Boolean>) {
 
-        if (linkResult == null) {
-            return
+        when (result) {
+            is Result.LocalizedError -> {
+                showProgress(false)
+                enableInput(true)
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                showProgress(false)
+                enableInput(true)
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                toast(R.string.prompt_linked)
+
+                if (!isNetworkConnected()) {
+                    showProgress(false)
+                    enableInput(true)
+                    return
+                }
+
+                // Silently refresh account since this is not
+                // required.
+                val account = sessionManager.loadAccount()
+
+                if (account == null) {
+                    showProgress(false)
+                    return
+                }
+
+                toast(R.string.refreshing_account)
+                accountViewModel.refresh(account)
+            }
         }
-
-        if (linkResult.error != null) {
-            toast(linkResult.error)
-            showProgress(false)
-            enableInput(true)
-            return
-        }
-
-        if (linkResult.exception != null) {
-            parseException(linkResult.exception)
-            showProgress(false)
-            enableInput(true)
-            return
-        }
-
-        if (!linkResult.success) {
-            toast("Unknown error")
-            showProgress(false)
-            enableInput(true)
-            return
-        }
-
-        toast(R.string.prompt_linked)
-
-        if (!isNetworkConnected()) {
-            showProgress(false)
-            enableInput(true)
-            return
-        }
-
-        // Silently refresh account since this is not
-        // required.
-        val account = sessionManager.loadAccount()
-
-        if (account == null) {
-            showProgress(false)
-            return
-        }
-
-        toast(R.string.refreshing_account)
-        accountViewModel.refresh(account)
+//        if (result == null) {
+//            return
+//        }
+//
+//        if (result.error != null) {
+//            toast(result.error)
+//            showProgress(false)
+//            enableInput(true)
+//            return
+//        }
+//
+//        if (result.exception != null) {
+//            parseException(result.exception)
+//            showProgress(false)
+//            enableInput(true)
+//            return
+//        }
+//
+//        if (!result.success) {
+//            toast("Unknown error")
+//            showProgress(false)
+//            enableInput(true)
+//            return
+//        }
+//
+//        toast(R.string.prompt_linked)
+//
+//        if (!isNetworkConnected()) {
+//            showProgress(false)
+//            enableInput(true)
+//            return
+//        }
+//
+//        // Silently refresh account since this is not
+//        // required.
+//        val account = sessionManager.loadAccount()
+//
+//        if (account == null) {
+//            showProgress(false)
+//            return
+//        }
+//
+//        toast(R.string.refreshing_account)
+//        accountViewModel.refresh(account)
     }
 
     private fun onAccountRefreshed(accountResult: Result<Account>) {

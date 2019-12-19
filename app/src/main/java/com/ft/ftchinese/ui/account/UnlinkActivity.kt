@@ -13,9 +13,10 @@ import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.model.order.PayMethod
-import com.ft.ftchinese.ui.base.parseException
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.viewmodel.LinkViewModel
 import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.activity_unlink.*
 import kotlinx.android.synthetic.main.progress_bar.*
@@ -59,57 +60,43 @@ class UnlinkActivity : AppCompatActivity() {
 
         linkViewModel.unlinkResult.observe(this, Observer {
 
-            showProgress(false)
-
-            val unlinkResult = it ?: return@Observer
-            if (unlinkResult.error != null) {
-                toast(unlinkResult.error)
-                unlink_button.isEnabled = true
-                return@Observer
-            }
-
-            if (unlinkResult.exception != null) {
-                toast(parseException(unlinkResult.exception))
-                unlink_button.isEnabled = true
-                return@Observer
-            }
-
-            if (!unlinkResult.success) {
-                toast("Unknown error occurred")
-                unlink_button.isEnabled = true
-                return@Observer
-            }
-
-            toast(R.string.prompt_unlinked)
-
-            val acnt = sessionManager.loadAccount() ?: return@Observer
-
-            // Start refreshing account.
-            showProgress(true)
-
-            toast(R.string.refreshing_data)
-            accountViewModel.refresh(acnt)
+                onUnlinked(it)
+//            showProgress(false)
+//
+//            val unlinkResult = it ?: return@Observer
+//            if (unlinkResult.error != null) {
+//                toast(unlinkResult.error)
+//                unlink_button.isEnabled = true
+//                return@Observer
+//            }
+//
+//            if (unlinkResult.exception != null) {
+//                toast(parseException(unlinkResult.exception))
+//                unlink_button.isEnabled = true
+//                return@Observer
+//            }
+//
+//            if (!unlinkResult.success) {
+//                toast("Unknown error occurred")
+//                unlink_button.isEnabled = true
+//                return@Observer
+//            }
+//
+//            toast(R.string.prompt_unlinked)
+//
+//            val acnt = sessionManager.loadAccount() ?: return@Observer
+//
+//            // Start refreshing account.
+//            showProgress(true)
+//
+//            toast(R.string.refreshing_data)
+//            accountViewModel.refresh(acnt)
         })
 
         accountViewModel.accountRefreshed.observe(this, Observer {
-            showProgress(false)
 
-            when (it) {
-                is Result.LocalizedError -> {
-                    toast(it.msgId)
-                }
-                is Result.Error -> {
-                    it.exception.message?.let { toast(it) }
-                }
-                is Result.Success -> {
-                    toast(R.string.prompt_updated)
-                    sessionManager.saveAccount(it.data)
+                onAccountRefreshed(it)
 
-                    // Signal to calling activity.
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                }
-            }
 //            val accountResult = it ?: return@Observer
 
 //            if (accountResult.error != null) {
@@ -170,6 +157,51 @@ class UnlinkActivity : AppCompatActivity() {
                                 account.membership.payMethod == PayMethod.STRIPE
                         )
                 )
+            }
+        }
+    }
+
+    private fun onUnlinked(result: Result<Boolean>) {
+        showProgress(false)
+
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                toast(R.string.prompt_unlinked)
+
+                val acnt = sessionManager.loadAccount() ?: return
+
+                // Start refreshing account.
+                showProgress(true)
+
+                toast(R.string.refreshing_data)
+                accountViewModel.refresh(acnt)
+            }
+        }
+    }
+
+    private fun onAccountRefreshed(result: Result<Account>) {
+        showProgress(false)
+
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                toast(R.string.prompt_updated)
+                sessionManager.saveAccount(result.data)
+
+                // Signal to calling activity.
+                setResult(Activity.RESULT_OK)
+                finish()
             }
         }
     }
