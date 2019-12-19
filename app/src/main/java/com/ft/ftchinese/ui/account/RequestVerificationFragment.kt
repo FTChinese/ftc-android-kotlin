@@ -68,9 +68,6 @@ class RequestVerificationFragment : ScopedFragment(), AnkoLogger {
     }
 
     private fun onEmailSent(result: Result<Boolean>) {
-//        if (result == null) {
-//            return
-//        }
 
         updateViewModel.inProgress.value = false
 
