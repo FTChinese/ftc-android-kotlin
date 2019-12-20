@@ -5,16 +5,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.FragmentSignUpBinding
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.TokenManager
 import com.ft.ftchinese.viewmodel.LoginViewModel
-import kotlinx.android.synthetic.main.fragment_sign_up.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
@@ -26,11 +27,7 @@ class SignUpFragment : ScopedFragment(),
     private lateinit var sessionManager: SessionManager
     private lateinit var tokenManager: TokenManager
     private lateinit var viewModel: LoginViewModel
-
-    private fun enableInput(enable: Boolean) {
-        password_input.isEnabled = enable
-        sign_up_btn.isEnabled = enable
-    }
+    private lateinit var binding: FragmentSignUpBinding
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -41,20 +38,18 @@ class SignUpFragment : ScopedFragment(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         email = arguments?.getString(ARG_EMAIL)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_sign_up, container, false)
 
-        return inflater.inflate(R.layout.fragment_sign_up, container, false)
-    }
+        binding.email = email
+        binding.passwordInput.requestFocus()
+        binding.signUpBtn.isEnabled = false
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        instruct_sign_up_tv.text = getString(R.string.instruct_sign_up, email)
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -68,22 +63,20 @@ class SignUpFragment : ScopedFragment(),
         viewModel.loginFormState.observe(viewLifecycleOwner, Observer {
             val signUpState = it ?: return@Observer
 
-            sign_up_btn.isEnabled = signUpState.isPasswordValid
+            binding.signUpBtn.isEnabled = signUpState.isPasswordValid
 
             if (signUpState.error != null) {
-                password_input.error = getString(signUpState.error)
-                password_input.requestFocus()
+                binding.passwordInput.error = getString(signUpState.error)
+                binding.passwordInput.requestFocus()
             }
         })
 
-
-        password_input.requestFocus()
-        password_input.afterTextChanged {
-            viewModel.passwordDataChanged(password_input.text.toString().trim())
+        binding.passwordInput.afterTextChanged {
+            viewModel.passwordDataChanged(binding.passwordInput.text.toString().trim())
         }
 
         // TODO: handle wechat sign-up.
-        sign_up_btn.setOnClickListener {
+        binding.signUpBtn.setOnClickListener {
             if (activity?.isNetworkConnected() != true) {
                 toast(R.string.prompt_no_network)
                 return@setOnClickListener
@@ -91,34 +84,29 @@ class SignUpFragment : ScopedFragment(),
 
             val e = email ?: return@setOnClickListener
 
-            if (password_input.text.toString().trim().isEmpty()) {
-                password_input.error = getString(R.string.error_invalid_password)
+            if (binding.passwordInput.text.toString().trim().isEmpty()) {
+                binding.passwordInput.error = getString(R.string.error_invalid_password)
                 return@setOnClickListener
             }
 
-            enableInput(false)
+            binding.enableInput = false
             viewModel.inProgress.value = true
 
             viewModel.signUp(
                 c = Credentials(
                         email = e,
-                        password = password_input.text.toString().trim(),
+                        password = binding.passwordInput.text.toString().trim(),
                         deviceToken = tokenManager.getToken()
                 )
             )
         }
 
         viewModel.accountResult.observe(viewLifecycleOwner, Observer {
-//            if (it.error != null || it.exception != null) {
-//                enableInput(true)
-//            }
-            enableInput(it !is Result.Success)
+            binding.enableInput = it !is Result.Success
         })
     }
 
     companion object {
-
-        private const val ARG_EMAIL = "arg_email"
 
         @JvmStatic
         fun newInstance(email: String) = SignUpFragment().apply {

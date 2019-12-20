@@ -331,8 +331,8 @@
 
     <string name="instruct_link_email">您目前使用了微信账号登录FT中文网。为保障账号安全，建议您绑定在FT中文网注册的邮箱账号。</string>
     <string name="instruct_bind_login">邮箱 %1$s 已经注册了FT中文网账号，请输入密码验证身份，即可绑定微信账号和邮箱</string>
-    <string name="instruct_sign_up">邮箱 %1$s 尚未注册FT中文网账号，请设置密码创建账号</string>
-    <string name="instruct_sign_in">邮箱 %1$s 已经注册了FT中文网账号，请输入登录密码</string>
+    <string name="instruct_sign_up">该邮箱尚未注册FT中文网账号，请设置密码创建账号</string>
+    <string name="instruct_sign_in">该邮箱已经注册了FT中文网账号，请输入登录密码</string>
     <string name="link_heading">您选择合并如下账号</string>
     <string name="accounts_already_linked">两个账号已经绑定，无需操作。如果您未看到绑定后的账号信息，请返回"账号与安全"后下拉刷新</string>
     <string name="ftc_account_linked">账号 %1$s 已经绑定了其他微信账号。一个FT中文网账号只能绑定一个微信账号。</string>

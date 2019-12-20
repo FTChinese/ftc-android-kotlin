@@ -323,8 +323,8 @@
 
     <string name="instruct_link_email">您目前使用了微信帳號登入FT中文。为保障帳號安全，建议您綁定在FT中文网註冊的信箱帳號。</string>
     <string name="instruct_bind_login">信箱 %1$s 已经註冊了FT中文網帳號，请输入密码驗證身份，即可綁定微信帳號和信箱</string>
-    <string name="instruct_sign_up">信箱 %1$s 尚未註冊FT中文網帳號，请設置密碼建立帳號</string>
-    <string name="instruct_sign_in">信箱 %1$s 已经註冊了FT中文網帳號，请输入登入密碼</string>
+    <string name="instruct_sign_up">该信箱尚未註冊FT中文網帳號，请設置密碼建立帳號</string>
+    <string name="instruct_sign_in">该信箱已经註冊了FT中文網帳號，请输入登入密碼</string>
     <string name="link_heading">您選擇合並如下帳號</string>
     <string name="accounts_already_linked">两个帳號已經綁定，无需操作。如果您未看到綁定後的帳號信息，請返回&quot;帳號与安全&quot;後下拉刷新</string>
     <string name="ftc_account_linked">帳號 %1$s 已經綁定了其他微信帳號。一个FT 中文網帳號只能綁定一个微信帳號。</string>
