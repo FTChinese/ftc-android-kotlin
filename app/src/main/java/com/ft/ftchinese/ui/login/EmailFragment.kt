@@ -80,9 +80,7 @@ class EmailFragment : ScopedFragment(),
 
             // In case any error occurred, allow user to
             // re-enter and re-submit data.
-            if (it !is Result.Success) {
-                binding.enableInput = true
-            }
+            binding.enableInput = it !is Result.Success
         })
     }
 
