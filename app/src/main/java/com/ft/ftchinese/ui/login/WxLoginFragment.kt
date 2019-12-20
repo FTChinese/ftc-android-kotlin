@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.FragmentWxLoginBinding
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.WxOAuth
 import com.ft.ftchinese.model.reader.WxOAuthIntent
@@ -16,7 +18,6 @@ import com.ft.ftchinese.viewmodel.LoginViewModel
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.android.synthetic.main.fragment_wx_login.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -30,6 +31,7 @@ class WxLoginFragment : Fragment(), AnkoLogger {
     private var wxApi: IWXAPI? = null
     private var sessionManager: SessionManager? = null
     lateinit var viewModel: LoginViewModel
+    private lateinit var binding: FragmentWxLoginBinding
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -41,8 +43,9 @@ class WxLoginFragment : Fragment(), AnkoLogger {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_wx_login, container, false)
 
-        return inflater.inflate(R.layout.fragment_wx_login, container, false)
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -53,7 +56,7 @@ class WxLoginFragment : Fragment(), AnkoLogger {
                     .get(LoginViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
-        wechat_oauth_btn.setOnClickListener {
+        binding.wechatOauthBtn.setOnClickListener {
             viewModel.inProgress.value = true
             authorize()
         }
