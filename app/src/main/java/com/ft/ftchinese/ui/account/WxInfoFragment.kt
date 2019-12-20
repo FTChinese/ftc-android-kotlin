@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.FragmentWxAccountBinding
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
@@ -19,7 +21,6 @@ import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.WxRefreshState
-import kotlinx.android.synthetic.main.fragment_wx_account.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -35,10 +36,7 @@ class WxInfoFragment : ScopedFragment(),
     private lateinit var sessionManager: SessionManager
     private lateinit var cache: FileCache
     private lateinit var accountViewModel: AccountViewModel
-
-    private fun stopRefreshing() {
-        swipe_refresh.isRefreshing = false
-    }
+    private lateinit var binding: FragmentWxAccountBinding
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -49,17 +47,13 @@ class WxInfoFragment : ScopedFragment(),
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-
-        return inflater.inflate(R.layout.fragment_wx_account, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_wx_account, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initUI()
-    }
-
-    private fun initUI() {
         val account = sessionManager.loadAccount()
 
         if (account == null) {
@@ -67,36 +61,24 @@ class WxInfoFragment : ScopedFragment(),
             return
         }
 
-        info("Show wechat acount: $account")
-
+        binding.account = account
         // Enable swipe refresh for wechat-only account
         // since it is too complex to check whether
         // Wechat OAuth expired if the account is linked.
-        swipe_refresh.isEnabled = account.isWxOnly
+        binding.swipeRefresh.isEnabled = account.isWxOnly
 
         if (account.wechat.isEmpty) {
             toast(R.string.wechat_not_found)
             return
         }
 
-        wx_nickname.text = account.wechat.nickname
-        // Test if accounts if coupled to FTC account.
-        // If true, do not show the instruction to bind accounts.
-        if (account.isLinked) {
-            tv_urge_linking.visibility = View.GONE
-
-            btn_link_or_unlink.text = getString(R.string.btn_unlink)
-            btn_link_or_unlink.setOnClickListener {
+        binding.btnLinkOrUnlink.setOnClickListener {
+            if (account.isLinked) {
                 UnlinkActivity.startForResult(activity)
-            }
-        } else {
-            btn_link_or_unlink.text = getString(R.string.btn_link)
-            btn_link_or_unlink.setOnClickListener {
+            } else {
                 LinkFtcActivity.startForResult(activity)
             }
         }
-
-
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -124,7 +106,7 @@ class WxInfoFragment : ScopedFragment(),
             onAvatarRetrieved(it)
         })
 
-        swipe_refresh.setOnRefreshListener {
+        binding.swipeRefresh.setOnRefreshListener {
             onRefresh()
         }
 
@@ -147,13 +129,13 @@ class WxInfoFragment : ScopedFragment(),
 
         if (account == null) {
             toast("Account not found")
-            stopRefreshing()
+            binding.swipeRefresh.isEnabled = false
             return
         }
 
         if (activity?.isNetworkConnected() != true) {
             toast(R.string.prompt_no_network)
-            stopRefreshing()
+            binding.swipeRefresh.isEnabled = false
             return
         }
 
@@ -163,7 +145,7 @@ class WxInfoFragment : ScopedFragment(),
             // data will be definitely not existed.
             // In such case, show the re-authorization dialog.
             accountViewModel.showReAuth()
-            stopRefreshing()
+            binding.swipeRefresh.isEnabled = false
             return
         }
 
@@ -187,11 +169,11 @@ class WxInfoFragment : ScopedFragment(),
         info("Wechat info refresh finished")
         when (result) {
             is Result.LocalizedError -> {
-                stopRefreshing()
+                binding.swipeRefresh.isEnabled = false
                 toast(result.msgId)
             }
             is Result.Error -> {
-                stopRefreshing()
+                binding.swipeRefresh.isEnabled = false
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
@@ -199,7 +181,7 @@ class WxInfoFragment : ScopedFragment(),
 
                 when (result.data) {
                     WxRefreshState.ReAuth -> {
-                        stopRefreshing()
+                        binding.swipeRefresh.isEnabled = false
                     }
                     WxRefreshState.SUCCESS -> {
                         val acnt = sessionManager.loadAccount() ?: return
@@ -214,8 +196,7 @@ class WxInfoFragment : ScopedFragment(),
     }
 
     private fun onAccountRefreshed(result: Result<Account>) {
-        stopRefreshing()
-
+        binding.swipeRefresh.isEnabled = false
         info("Account refresh finished")
 
         when (result) {
@@ -247,7 +228,7 @@ class WxInfoFragment : ScopedFragment(),
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
-                wx_avatar.setImageDrawable(
+                binding.wxAvatar.setImageDrawable(
                         Drawable.createFromStream(
                                 result.data,
                                 WX_AVATAR_NAME
