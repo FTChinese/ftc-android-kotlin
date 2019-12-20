@@ -4,11 +4,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityAccountBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.SessionManager
@@ -17,7 +18,6 @@ import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.WxRefreshState
-import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 
@@ -34,19 +34,12 @@ class AccountActivity : ScopedAppActivity(),
 
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: AccountViewModel
-
-    private fun showProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
-    }
+    private lateinit var binding: ActivityAccountBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_account)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_account)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -62,7 +55,7 @@ class AccountActivity : ScopedAppActivity(),
                 .get(AccountViewModel::class.java)
 
         viewModel.inProgress.observe(this, Observer<Boolean> {
-            showProgress(it)
+            binding.inProgress = it
         })
 
         viewModel.uiType.observe(this, Observer<LoginMethod> {
