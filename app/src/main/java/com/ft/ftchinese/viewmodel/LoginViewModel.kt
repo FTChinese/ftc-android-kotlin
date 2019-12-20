@@ -70,9 +70,6 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                     ReaderRepo.emailExists(email)
                 }
 
-//                emailResult.value = FindEmailResult(
-//                        success = Pair(email, ok)
-//                )
 
                 emailResult.value = Result.Success(Existence(
                         value = email,
@@ -81,9 +78,6 @@ class LoginViewModel : ViewModel(), AnkoLogger {
             } catch (e: ClientError) {
 
                 if (e.statusCode== 404) {
-//                    emailResult.value = FindEmailResult(
-//                            success = Pair(email, false)
-//                    )
                     emailResult.value = Result.Success(Existence(
                             value = email,
                             found = false
@@ -91,16 +85,9 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                     return@launch
                 }
 
-//                emailResult.value = FindEmailResult(
-//                        exception = e
-//                )
                 emailResult.value = parseApiError(e)
 
             } catch (e:Exception) {
-
-//                emailResult.value = FindEmailResult(
-//                        exception = e
-//                )
 
                 emailResult.value = parseException(e)
             }
@@ -117,24 +104,12 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
                 if (account == null) {
 
-//                    accountResult.value = AccountResult(
-//                            error = R.string.loading_failed
-//                    )
-
                     accountResult.value = Result.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
 
-//                accountResult.value = AccountResult(
-//                        success = account
-//                )
                 accountResult.value = Result.Success(account)
             } catch (e: ClientError) {
-//                val msgId = if (e.statusCode == 404) {
-//                    R.string.error_invalid_password
-//                } else {
-//                    statusCodes[e.statusCode]
-//                }
 
                 accountResult.value = if (e.statusCode == 404) {
                     Result.LocalizedError(R.string.error_invalid_password)
@@ -142,22 +117,11 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                     parseApiError(e)
                 }
 
-//                accountResult.value = AccountResult(
-//                        error = msgId,
-//                        exception = e
-//                )
-
             } catch (e: Exception) {
                 accountResult.value = parseException(e)
-
-//                accountResult.value = AccountResult(
-//                        exception = e
-//                )
             }
         }
     }
-
-
 
     /**
      * Handles both a new user signup, or wechat-logged-in
@@ -172,16 +136,11 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (account == null) {
-//                    accountResult.value = AccountResult(
-//                            error = R.string.loading_failed
-//                    )
+
                     accountResult.value = Result.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
 
-//                accountResult.value = AccountResult(
-//                        success = account
-//                )
                 accountResult.value = Result.Success(account)
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 422) {
@@ -204,12 +163,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                     parseApiError(e)
                 }
 
-//                        AccountResult(
-//                        error = msgId,
-//                        exception = e
-//                )
             } catch (e: Exception) {
-//                accountResult.value = AccountResult(exception = e)
                 accountResult.value = parseException(e)
             }
         }
