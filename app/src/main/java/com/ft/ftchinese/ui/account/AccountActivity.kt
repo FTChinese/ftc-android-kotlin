@@ -85,7 +85,7 @@ class AccountActivity : ScopedAppActivity(),
             if (account.isWxOnly) {
                 replace(R.id.frag_account, WxInfoFragment.newInstance())
             } else {
-                replace(R.id.frag_account, FtcAccountV2Fragment.newInstance())
+                replace(R.id.frag_account, FtcAccountFragment.newInstance())
             }
         }
     }

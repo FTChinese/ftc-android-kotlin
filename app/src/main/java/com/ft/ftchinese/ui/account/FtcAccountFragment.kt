@@ -15,13 +15,13 @@ import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
-import kotlinx.android.synthetic.main.fragment_ftc_account_v2.*
+import kotlinx.android.synthetic.main.fragment_ftc_account.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class FtcAccountV2Fragment : ScopedFragment(), AnkoLogger {
+class FtcAccountFragment : ScopedFragment(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
@@ -37,7 +37,7 @@ class FtcAccountV2Fragment : ScopedFragment(), AnkoLogger {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_ftc_account_v2, container, false)
+        return inflater.inflate(R.layout.fragment_ftc_account, container, false)
     }
 
 
@@ -220,7 +220,7 @@ class FtcAccountV2Fragment : ScopedFragment(), AnkoLogger {
     companion object {
         @JvmStatic
         fun newInstance() =
-                FtcAccountV2Fragment()
+                FtcAccountFragment()
     }
 }
 
