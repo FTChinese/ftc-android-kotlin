@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
@@ -35,7 +34,6 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_fragment_double)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_fragment_double)
 
         setSupportActionBar(toolbar)
@@ -126,77 +124,6 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
             }
         }
     }
-
-//    private fun setup() {
-//        viewModel.inProgress.observe(this, Observer<Boolean> {
-//            showProgress(it)
-//        })
-
-//        viewModel.emailResult.observe(this, Observer {
-//
-//            val findResult = it ?:return@Observer
-//
-//            showProgress(false)
-//
-//            if (findResult.error != null) {
-//                toast(findResult.error)
-//                return@Observer
-//            }
-//
-//            if (findResult.exception != null) {
-//                info(findResult.exception)
-//                toast(parseException(findResult.exception))
-//                return@Observer
-//            }
-//
-//            val (email, found) = findResult.success ?: return@Observer
-//
-//            if (found) {
-//                supportActionBar?.setTitle(R.string.title_login)
-//
-//                supportFragmentManager.commit {
-//                    replace(R.id.double_frag_primary, SignInFragment.newInstance(email))
-//                    addToBackStack(null)
-//                }
-//
-//            } else {
-//                supportActionBar?.setTitle(R.string.title_sign_up)
-//
-//                supportFragmentManager.commit {
-//                    replace(R.id.double_frag_primary, SignUpFragment.newInstance(email))
-//                    addToBackStack(null)
-//                }
-//            }
-//        })
-
-        // Observing both login and sign up.
-//        viewModel.accountResult.observe(this, Observer {
-//            showProgress(false)
-//            val loginResult = it ?: return@Observer
-//
-//            if (loginResult.error != null) {
-//                toast(loginResult.error)
-//                return@Observer
-//            }
-//
-//            if (loginResult.exception != null) {
-//                toast(parseException(loginResult.exception))
-//                return@Observer
-//            }
-//
-//            val account = loginResult.success ?: return@Observer
-//
-//            sessionManager.saveAccount(account)
-//
-//            statsTracker.setUserId(account.id)
-//
-//            setResult(Activity.RESULT_OK)
-//
-//            finish()
-//        })
-//    }
-
-
 
     companion object {
         fun startForResult(activity: Activity?) {
