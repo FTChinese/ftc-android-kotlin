@@ -4,18 +4,18 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityCustomerBinding
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.Fetch
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.util.SubscribeApi
@@ -27,33 +27,23 @@ import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import kotlinx.android.synthetic.main.activity_customer.*
-import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.*
 
-private val cardBrands = mapOf(
-        "amex" to "American Express",
-        "discover" to "Discover",
-        "jcb" to "JCB",
-        "diners" to "Diners Club",
-        "visa" to "Visa",
-        "mastercard" to "MasterCard",
-        "unionpay" to "UnionPay"
-)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private var paymentMethod: PaymentMethod? = null
     private lateinit var accountViewModel: AccountViewModel
+    private lateinit var binding: ActivityCustomerBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_customer)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_customer)
 
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -71,7 +61,15 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
             onCustomerCreated(it)
         })
 
-        initUI()
+        setCardText(null)
+
+        binding.defaultBankCard.setOnClickListener {
+            PaymentMethodsActivityStarter(this).startForResult(RequestCode.SELECT_SOURCE)
+        }
+
+        binding.btnSetDefault.setOnClickListener {
+            changeDefaultPaymentMethod()
+        }
 
         // Setup stripe customer session after ui initiated; otherwise the ui might be disabled if stripe customer data
         // is retrieved too quickly.
@@ -83,27 +81,14 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
                 return
             }
 
-            showProgress(true)
+            binding.inProgress = true
+
             toast(R.string.stripe_init)
 
             accountViewModel.createCustomer(account)
         } else {
             setupCustomerSession()
         }
-    }
-
-    private fun initUI() {
-        setCardText(null)
-
-        default_bank_card.setOnClickListener {
-            PaymentMethodsActivityStarter(this).startForResult(RequestCode.SELECT_SOURCE)
-        }
-
-        btn_set_default.setOnClickListener {
-            defaultPaymentMethod()
-        }
-
-        enableButton(false)
     }
 
     private fun onCustomerCreated(result: Result<StripeCustomer>)
@@ -121,27 +106,9 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
                 result.exception.message?.let { toast(it) }
             }
         }
-//        if (result == null) {
-//            return
-//        }
-//
-//        if (result.error != null) {
-//            toast(result.error)
-//            return
-//        }
-//
-//        if (result.exception != null) {
-//            toast(parseException(result.exception))
-//            return
-//        }
-//
-//        val id = result.success ?: return
-//        sessionManager.saveStripeId(id)
-//
-//        setupCustomerSession()
     }
 
-    private fun defaultPaymentMethod() {
+    private fun changeDefaultPaymentMethod() {
         val pmId = paymentMethod?.id
         if (pmId == null) {
             toast("您还不是Stripe用户，重新点击Stripe钱包自动注册")
@@ -155,8 +122,8 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
             return
         }
 
-        showProgress(true)
-        enableButton(false)
+        binding.inProgress = true
+        binding.enableInput = false
 
         launch {
             try {
@@ -172,15 +139,11 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
                 info(body)
 
-                showProgress(false)
+                binding.inProgress = false
                 toast("Default payment method set")
-            } catch (e: ClientError) {
-                showProgress(false)
-                enableButton(true)
-                info(e)
             } catch (e: Exception) {
-                showProgress(false)
-                enableButton(true)
+                binding.inProgress = false
+                binding.enableInput = true
                 info(e)
             }
         }
@@ -209,7 +172,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         toast(R.string.retrieve_customer)
-        showProgress(true)
+        binding.inProgress = true
 
         CustomerSession.getInstance()
                 .retrieveCurrentCustomer(customerRetrievalListener)
@@ -217,8 +180,8 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
     private val customerRetrievalListener = object : CustomerSession.ActivityCustomerRetrievalListener<CustomerActivity>(this) {
         override fun onCustomerRetrieved(customer: Customer) {
-            showProgress(false)
-            enableButton(true)
+            binding.inProgress = false
+            binding.enableInput = true
             toast("Customer retrieved")
         }
 
@@ -231,7 +194,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
                     }
                 }.show()
 
-                showProgress(false)
+                binding.inProgress = false
             }
         }
     }
@@ -248,23 +211,15 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun setCardText(card: PaymentMethod.Card?) {
+
         if (card == null) {
-            card_brand.text = getString(R.string.default_bank_brand)
-            card_number.text = getString(R.string.add_or_select_payment_method)
             return
         }
 
-        card_brand.text = cardBrands[card.brand] ?: card.brand
-        card_number.text = getString(R.string.bank_card_number, card.last4)
-    }
-
-    private fun showProgress(show: Boolean) {
-        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
-    }
-
-    private fun enableButton(enable: Boolean) {
-        btn_set_default.isEnabled = enable
-        default_bank_card.isEnabled = enable
+        binding.card = UIBankCard(
+                brand = cardBrands[card.brand] ?: card.brand,
+                number = getString(R.string.bank_card_number, card.last4)
+        )
     }
 
     companion object {

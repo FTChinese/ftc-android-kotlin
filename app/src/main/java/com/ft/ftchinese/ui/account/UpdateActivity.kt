@@ -35,7 +35,6 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
 
         binding.inProgress = false
 
-//        setContentView(R.layout.activity_fragment_double)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
