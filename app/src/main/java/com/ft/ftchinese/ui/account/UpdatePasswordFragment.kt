@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.FragmentUpdatePasswordBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.Passwords
@@ -15,7 +17,6 @@ import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.Validator
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.UpdateViewModel
-import kotlinx.android.synthetic.main.fragment_update_password.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 import java.lang.Exception
@@ -25,13 +26,7 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var updateViewModel: UpdateViewModel
-
-    private fun enableInput(value: Boolean) {
-        old_password_input.isEnabled = value
-        new_password_input.isEnabled = value
-        confirm_password_input.isEnabled = value
-        btn_save.isEnabled = value
-    }
+    private lateinit var binding: FragmentUpdatePasswordBinding
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -41,8 +36,9 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-
-        return inflater.inflate(R.layout.fragment_update_password, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_update_password, container, false)
+        binding.enableInput = true
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -58,7 +54,7 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
 
     private fun setUp() {
 
-        btn_save.setOnClickListener {
+        binding.btnSave.setOnClickListener {
             val passwords = validate() ?: return@setOnClickListener
 
             if (activity?.isNetworkConnected() != true) {
@@ -69,7 +65,7 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
             val userId = sessionManager.loadAccount()?.id ?: return@setOnClickListener
 
             updateViewModel.showProgress(true)
-            enableInput(false)
+            binding.enableInput = false
 
             updateViewModel.updatePassword(
                     userId = userId,
@@ -79,45 +75,42 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
 
         // Re-enable input in case errors
         updateViewModel.updateResult.observe(viewLifecycleOwner, Observer {
-            if (it !is Result.Success) {
-                enableInput(true)
-            }
+            binding.enableInput = it !is Result.Success
         })
     }
 
     private fun validate(): Passwords? {
-        old_password_input.error = null
-        new_password_input.error = null
-        confirm_password_input.error = null
+        binding.oldPasswordInput.error = null
+        binding.newPasswordInput.error = null
+        binding.confirmPasswordInput.error = null
 
-        val oldPassword = old_password_input.text.toString().trim()
-        val newPassword = new_password_input.text.toString().trim()
-        val confirmPassword = confirm_password_input.text.toString().trim()
+        val oldPassword = binding.oldPasswordInput.text.toString().trim()
+        val newPassword = binding.newPasswordInput.text.toString().trim()
+        val confirmPassword = binding.confirmPasswordInput.text.toString().trim()
 
         if (oldPassword.isBlank()) {
-            old_password_input.error = getString(R.string.error_invalid_password)
-            old_password_input.requestFocus()
+            binding.oldPasswordInput.error = getString(R.string.error_invalid_password)
+            binding.oldPasswordInput.requestFocus()
             return null
         }
 
         var msgId = Validator.ensurePassword(newPassword)
         if (msgId != null) {
-            new_password_input.error = getString(msgId)
-            new_password_input.requestFocus()
+            binding.newPasswordInput.error = getString(msgId)
+            binding.newPasswordInput.requestFocus()
             return null
         }
 
-
         msgId = Validator.ensurePassword(confirmPassword)
         if (msgId != null) {
-            confirm_password_input.error = getString(msgId)
-            confirm_password_input.requestFocus()
+            binding.confirmPasswordInput.error = getString(msgId)
+            binding.confirmPasswordInput.requestFocus()
             return null
         }
 
         if (newPassword != confirmPassword) {
-            confirm_password_input.error = getString(R.string.error_mismatched_confirm_password)
-            confirm_password_input.requestFocus()
+            binding.confirmPasswordInput.error = getString(R.string.error_mismatched_confirm_password)
+            binding.confirmPasswordInput.requestFocus()
             return null
         }
 
