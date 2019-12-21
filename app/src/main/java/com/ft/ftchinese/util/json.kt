@@ -128,7 +128,7 @@ val cycleConverter = object : Converter {
 
     override fun toJson(value: Any): String {
         return if (value is Cycle) {
-            """ "${value.string()}" """
+            """ "$value" """
         } else {
             """null"""
         }
