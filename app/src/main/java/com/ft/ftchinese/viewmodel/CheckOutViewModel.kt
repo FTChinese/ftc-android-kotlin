@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +9,7 @@ import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.order.StripeSubParams
 import com.ft.ftchinese.repository.StripeRepo
 import com.ft.ftchinese.repository.SubRepo
+import com.ft.ftchinese.ui.pay.*
 import com.ft.ftchinese.util.ClientError
 import com.ft.ftchinese.util.statusCodeMeaning
 import kotlinx.coroutines.Dispatchers
@@ -119,7 +120,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 wxOrderResult.value = WxOrderResult(
-                        error =  msgId,
+                        error = msgId,
                         exception = e
                 )
             } catch (e: Exception) {

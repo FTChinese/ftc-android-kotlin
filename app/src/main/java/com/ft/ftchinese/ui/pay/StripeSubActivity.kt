@@ -20,6 +20,7 @@ import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.viewmodel.CheckOutViewModel
 import com.stripe.android.*
 import com.stripe.android.model.*
 import com.stripe.android.view.PaymentMethodsActivity

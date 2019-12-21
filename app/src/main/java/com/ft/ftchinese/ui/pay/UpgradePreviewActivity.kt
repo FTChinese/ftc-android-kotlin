@@ -15,6 +15,7 @@ import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.subscription.PaymentIntent
 import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.viewmodel.CheckOutViewModel
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.alert
