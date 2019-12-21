@@ -67,17 +67,7 @@ fun Activity.getTierCycleText(tier: Tier?, cycle: Cycle?): String? {
         return null
     }
 
-    val tierText = when (tier) {
-        Tier.STANDARD -> getString(R.string.tier_standard)
-        Tier.PREMIUM -> getString(R.string.tier_premium)
-    }
-
-    val cycleText = when (cycle) {
-        Cycle.YEAR -> getString(R.string.cycle_year)
-        Cycle.MONTH -> getString(R.string.cycle_month)
-    }
-
-    return getString(R.string.formatter_tier_cycle, tierText, cycleText)
+    return getString(R.string.formatter_tier_cycle, getString(tier.stringRes), getString(cycle.stringRes))
 }
 
 // Using API 28. Unfortunately it also requires that you must increase min supported api.
