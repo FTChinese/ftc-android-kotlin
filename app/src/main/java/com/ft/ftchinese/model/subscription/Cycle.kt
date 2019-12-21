@@ -1,17 +1,20 @@
 package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
+import com.ft.ftchinese.R
 import kotlinx.android.parcel.Parcelize
+import java.time.Year
 
 @Parcelize
 enum class Cycle(val symbol: String) : Parcelable {
     MONTH("month"),
     YEAR("year");
 
-    fun string(): String {
-
-        return symbol
-    }
+    val stringRes: Int
+        get() = when (this) {
+            MONTH -> R.string.cycle_month
+            YEAR -> R.string.cycle_year
+        }
 
     override fun toString(): String {
         return symbol
