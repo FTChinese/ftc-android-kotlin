@@ -1,48 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <androidx.constraintlayout.widget.ConstraintLayout
+
+    <data>
+        <variable
+            name="member"
+            type="com.ft.ftchinese.ui.account.UIMemberStatus" />
+    </data>
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
-
-        <TextView
-            style="@style/OrigamiText.Body1.Center"
-            android:id="@+id/tv_link_heading"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="Membership Heading"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/tv_link_member_tier"/>
-
-        <TextView
-            style="@style/OrigamiText.ProductHeading2.Center"
-            android:id="@+id/tv_link_member_tier"
+        >
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:text="Member Tier"
-            app:layout_constraintStart_toStartOf="@id/tv_link_heading"
-            app:layout_constraintEnd_toEndOf="@id/tv_link_heading"
-            app:layout_constraintTop_toBottomOf="@id/tv_link_heading"
-            app:layout_constraintBottom_toTopOf="@id/tv_member_expire_date"/>
+            android:padding="16dp">
 
-        <TextView
-            style="@style/OrigamiText.Body1.Center"
-            android:id="@+id/tv_member_expire_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Expiration date"
-            app:layout_constraintStart_toStartOf="@id/tv_link_heading"
-            app:layout_constraintEnd_toEndOf="@id/tv_link_heading"
-            app:layout_constraintTop_toBottomOf="@id/tv_link_member_tier"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            <TextView
+                style="@style/OrigamiText.Body1.Center"
+                android:id="@+id/tv_link_heading"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@{member.heading}"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/tv_link_member_tier"/>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                style="@style/OrigamiText.ProductHeading2.Center"
+                android:id="@+id/tv_link_member_tier"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:text="@{member.tier}"
+                app:layout_constraintStart_toStartOf="@id/tv_link_heading"
+                app:layout_constraintEnd_toEndOf="@id/tv_link_heading"
+                app:layout_constraintTop_toBottomOf="@id/tv_link_heading"
+                app:layout_constraintBottom_toTopOf="@id/tv_member_expire_date"/>
 
-</com.google.android.material.card.MaterialCardView>
+            <TextView
+                style="@style/OrigamiText.Body1.Center"
+                android:id="@+id/tv_member_expire_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{member.expireDate}"
+                app:layout_constraintStart_toStartOf="@id/tv_link_heading"
+                app:layout_constraintEnd_toEndOf="@id/tv_link_heading"
+                app:layout_constraintTop_toBottomOf="@id/tv_link_member_tier"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>
+

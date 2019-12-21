@@ -6,22 +6,30 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.BuildConfig
 
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.FragmentLinkWxBinding
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.WxOAuth
 import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.android.synthetic.main.fragment_link_wx.*
 
-
+/**
+ * Show a wechat authorization button for a ftc-only user
+ * when click the link-wechat item in [AccountActivity].
+ * This fragment is host inside [WxInfoActivity] which attaches
+ * this one is user is not linked to wechat yet or [WxInfoFragment]
+ * if user already linked.
+ */
 class LinkWxFragment : Fragment() {
 
     private lateinit var sessionManager: SessionManager
     private var wxApi: IWXAPI? = null
+    private lateinit var binding: FragmentLinkWxBinding
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -32,14 +40,11 @@ class LinkWxFragment : Fragment() {
         wxApi?.registerApp(BuildConfig.WX_SUBS_APPID)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_link_wx, container, false)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_link_wx, container, false)
+        return binding.root
     }
 
 
@@ -50,7 +55,7 @@ class LinkWxFragment : Fragment() {
          * Start WXEntryActivity and finish the parent
          * [WxInfoActivity]
          */
-        btn_wx_authorization.setOnClickListener {
+        binding.btnWxAuthorization.setOnClickListener {
             linkWechat()
             activity?.finish()
         }

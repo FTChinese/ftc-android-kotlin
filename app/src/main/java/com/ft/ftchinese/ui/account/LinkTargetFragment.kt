@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.FragmentLinkTargetBinding
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.util.formatLocalDate
-import com.ft.ftchinese.util.json
-import kotlinx.android.synthetic.main.fragment_link_target.*
 import org.jetbrains.anko.AnkoLogger
 
 /**
@@ -20,13 +20,12 @@ class LinkTargetFragment : Fragment(), AnkoLogger {
 
     private var membership: Membership? = null
     private var heading: String? = null
+    private lateinit var binding: FragmentLinkTargetBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val m = arguments?.getString(ARG_MEMBERSHIP) ?: return
-
-        membership = json.parse<Membership>(m)
+        membership = arguments?.getParcelable(ARG_MEMBERSHIP)
         heading = arguments?.getString(ARG_HEADING)
     }
 
@@ -36,31 +35,29 @@ class LinkTargetFragment : Fragment(), AnkoLogger {
             savedInstanceState: Bundle?
     ): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_link_target, container, false)
+        buildUI(heading, membership)
 
-        return inflater.inflate(R.layout.fragment_link_target, container, false)
+        return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        tv_link_heading.text = heading
-        tv_link_member_tier.text = when (membership?.tier) {
-            Tier.STANDARD -> getString(R.string.tier_standard)
-            Tier.PREMIUM -> getString(R.string.tier_premium)
-            else -> getString(R.string.tier_free)
-        }
-        tv_member_expire_date.text = formatLocalDate(membership?.expireDate) ?: ""
-
+    private fun buildUI(heading: String?, membership: Membership?) {
+        binding.member = UIMemberStatus(
+                heading = heading,
+                tier = getString(membership?.tier?.stringRes ?: R.string.tier_free),
+                expireDate = formatLocalDate(membership?.expireDate) ?: ""
+        )
     }
 
     companion object {
         private const val ARG_MEMBERSHIP = "arg_membership"
         private const val ARG_HEADING = "arg_heading"
         fun newInstance(m: Membership, heading: String? = null) = LinkTargetFragment().apply {
-            arguments = Bundle().apply {
-                putString(ARG_MEMBERSHIP, json.toJsonString(m))
-                putString(ARG_HEADING, heading)
-            }
+
+            arguments = bundleOf(
+                    ARG_MEMBERSHIP to m,
+                    ARG_HEADING to heading
+            )
         }
     }
 }
