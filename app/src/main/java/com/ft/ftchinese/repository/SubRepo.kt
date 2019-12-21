@@ -81,13 +81,7 @@ object SubRepo : AnkoLogger {
         return if (body == null) {
             null
         } else {
-            try {
-                json.parse<WxOrder>(body)
-            } catch (e: Exception) {
-                info(e)
-
-                null
-            }
+            json.parse<WxOrder>(body)
         }
     }
 
