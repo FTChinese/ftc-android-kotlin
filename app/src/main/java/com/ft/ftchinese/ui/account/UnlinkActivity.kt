@@ -4,11 +4,12 @@ import android.app.Activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityUnlinkBinding
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.UnlinkAnchor
@@ -18,8 +19,6 @@ import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.LinkViewModel
 import com.ft.ftchinese.viewmodel.Result
-import kotlinx.android.synthetic.main.activity_unlink.*
-import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.toast
 
@@ -29,14 +28,11 @@ class UnlinkActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var linkViewModel: LinkViewModel
     private var anchor: UnlinkAnchor? = null
-
-    private fun showProgress(show: Boolean) {
-        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
-    }
+    private lateinit var binding: ActivityUnlinkBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_unlink)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_unlink)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -59,71 +55,14 @@ class UnlinkActivity : AppCompatActivity() {
         })
 
         linkViewModel.unlinkResult.observe(this, Observer {
-
                 onUnlinked(it)
-//            showProgress(false)
-//
-//            val unlinkResult = it ?: return@Observer
-//            if (unlinkResult.error != null) {
-//                toast(unlinkResult.error)
-//                unlink_button.isEnabled = true
-//                return@Observer
-//            }
-//
-//            if (unlinkResult.exception != null) {
-//                toast(parseException(unlinkResult.exception))
-//                unlink_button.isEnabled = true
-//                return@Observer
-//            }
-//
-//            if (!unlinkResult.success) {
-//                toast("Unknown error occurred")
-//                unlink_button.isEnabled = true
-//                return@Observer
-//            }
-//
-//            toast(R.string.prompt_unlinked)
-//
-//            val acnt = sessionManager.loadAccount() ?: return@Observer
-//
-//            // Start refreshing account.
-//            showProgress(true)
-//
-//            toast(R.string.refreshing_data)
-//            accountViewModel.refresh(acnt)
         })
 
         accountViewModel.accountRefreshed.observe(this, Observer {
-
                 onAccountRefreshed(it)
-
-//            val accountResult = it ?: return@Observer
-
-//            if (accountResult.error != null) {
-//                toast(accountResult.error)
-//                return@Observer
-//            }
-
-//            if (accountResult.exception != null) {
-//                toast(parseException(accountResult.exception))
-//                return@Observer
-//            }
-//
-//            if (accountResult.success == null) {
-//                toast("Unknown error")
-//                return@Observer
-//            }
-
-//            toast(R.string.prompt_updated)
-//
-//            sessionManager.saveAccount(accountResult.success)
-//
-//            // Signal to calling activity.
-//            setResult(Activity.RESULT_OK)
-//            finish()
         })
 
-        unlink_button.setOnClickListener {
+        binding.btnUnlink.setOnClickListener {
             if (!isNetworkConnected()) {
                 toast(R.string.prompt_no_network)
                 return@setOnClickListener
@@ -136,8 +75,8 @@ class UnlinkActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            progress_bar.visibility = View.VISIBLE
-            unlink_button.isEnabled = false
+            binding.inProgress = true
+            it.isEnabled = false
 
             linkViewModel.unlink(account, anchor)
         }
@@ -146,8 +85,10 @@ class UnlinkActivity : AppCompatActivity() {
     private fun initUI() {
         val account = sessionManager.loadAccount() ?: return
 
-        unlink_ftc_account.text = arrayOf(getString(R.string.label_ftc_account), account.email).joinToString("\n")
-        unlink_wx_account.text = arrayOf(getString(R.string.label_wx_account), account.wechat.nickname).joinToString("\n")
+        binding.unlinkFtcAccount.text = arrayOf(getString(R.string.label_ftc_account), account.email)
+                .joinToString("\n")
+        binding.unlinkWxAccount.text = arrayOf(getString(R.string.label_wx_account), account.wechat.nickname)
+                .joinToString("\n")
 
         if (account.isMember) {
             supportFragmentManager.commit {
@@ -162,7 +103,7 @@ class UnlinkActivity : AppCompatActivity() {
     }
 
     private fun onUnlinked(result: Result<Boolean>) {
-        showProgress(false)
+        binding.inProgress = false
 
         when (result) {
             is Result.LocalizedError -> {
@@ -177,7 +118,7 @@ class UnlinkActivity : AppCompatActivity() {
                 val acnt = sessionManager.loadAccount() ?: return
 
                 // Start refreshing account.
-                showProgress(true)
+                binding.inProgress = true
 
                 toast(R.string.refreshing_data)
                 accountViewModel.refresh(acnt)
@@ -186,7 +127,7 @@ class UnlinkActivity : AppCompatActivity() {
     }
 
     private fun onAccountRefreshed(result: Result<Account>) {
-        showProgress(false)
+        binding.inProgress = false
 
         when (result) {
             is Result.LocalizedError -> {
