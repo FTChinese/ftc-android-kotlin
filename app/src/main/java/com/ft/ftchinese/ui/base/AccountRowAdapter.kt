@@ -56,7 +56,7 @@ class AccountAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(), AnkoLogg
     class BannerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
         private val tvMessage: TextView = view.banner_message
-        private val btnPositive: MaterialButton = view.banner_positive_btn
+        private val btnPositive: MaterialButton = view.btn_send_request
         private var row: AccountRow? = null
 
         init {
