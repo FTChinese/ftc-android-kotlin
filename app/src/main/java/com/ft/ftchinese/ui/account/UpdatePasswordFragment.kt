@@ -30,7 +30,7 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
         old_password_input.isEnabled = value
         new_password_input.isEnabled = value
         confirm_password_input.isEnabled = value
-        save_btn.isEnabled = value
+        btn_save.isEnabled = value
     }
 
     override fun onAttach(context: Context) {
@@ -58,7 +58,7 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
 
     private fun setUp() {
 
-        save_btn.setOnClickListener {
+        btn_save.setOnClickListener {
             val passwords = validate() ?: return@setOnClickListener
 
             if (activity?.isNetworkConnected() != true) {

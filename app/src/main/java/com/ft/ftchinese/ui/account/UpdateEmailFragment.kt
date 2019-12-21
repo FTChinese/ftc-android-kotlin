@@ -5,14 +5,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.FragmentUpdateEmailBinding
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.UpdateViewModel
-import kotlinx.android.synthetic.main.fragment_update_email.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
@@ -21,6 +22,7 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var updateViewModel: UpdateViewModel
+    private lateinit var binding: FragmentUpdateEmailBinding
     private var currentEmail: String? = null
 
     override fun onAttach(context: Context) {
@@ -31,8 +33,11 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_update_email, container, false)
 
-        return inflater.inflate(R.layout.fragment_update_email, container, false)
+        binding.emailInput.isEnabled = true
+        binding.labelEmailTv.text
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -40,11 +45,12 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
 
         currentEmail = sessionManager.loadAccount()?.email
 
-        save_btn.isEnabled = false
-
-        label_email_tv.text = getString(R.string.label_current_email, currentEmail ?: getString(R.string.prompt_not_set))
+        binding.labelEmailTv.text = if (currentEmail != null) {
+            getString(R.string.label_current_email, currentEmail)
+        } else {
+            getString(R.string.label_current_email, getString(R.string.prompt_not_set))
+        }
     }
-
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -61,25 +67,25 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
         updateViewModel.updateFormState.observe(viewLifecycleOwner, Observer {
             val updateState = it ?: return@Observer
 
-            save_btn.isEnabled = updateState.isDataValid
+            binding.btnSave.isEnabled = updateState.isDataValid
 
             if (updateState.emailError != null) {
-                emailInput.error = getString(updateState.emailError)
-                emailInput.requestFocus()
+                binding.emailInput.error = getString(updateState.emailError)
+                binding.emailInput.requestFocus()
             }
         })
 
-        emailInput.afterTextChanged {
+        binding.emailInput.afterTextChanged {
             updateViewModel.emailDataChanged(
                     currentEmail = currentEmail ?: "",
-                    newEmail = emailInput.text.toString().trim()
+                    newEmail = binding.emailInput.text.toString().trim()
             )
         }
 
-        save_btn.setOnClickListener {
+        binding.btnSave.setOnClickListener {
             updateViewModel.emailDataChanged(
                     currentEmail = currentEmail ?: "",
-                    newEmail = emailInput.text.toString().trim()
+                    newEmail = binding.emailInput.text.toString().trim()
             )
 
             if (activity?.isNetworkConnected() != true) {
@@ -90,25 +96,18 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
 
             val userId = sessionManager.loadAccount()?.id ?: return@setOnClickListener
 
-            enableInput(false)
+            binding.enableInput = false
             updateViewModel.showProgress(true)
 
             updateViewModel.updateEmail(
                     userId = userId,
-                    email = emailInput.text.toString().trim()
+                    email = binding.emailInput.text.toString().trim()
             )
         }
 
         updateViewModel.updateResult.observe(viewLifecycleOwner, Observer {
-            if (it !is Result.Success) {
-                enableInput(true)
-            }
+            binding.enableInput = it !is Result.Success
         })
-    }
-
-    private fun enableInput(value: Boolean) {
-        emailInput.isEnabled = value
-        save_btn.isEnabled = value
     }
 
     companion object {

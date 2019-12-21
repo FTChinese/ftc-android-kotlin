@@ -86,7 +86,7 @@ class UpdateViewModel : ViewModel() {
         }
     }
 
-    fun userNameDataChanged(currentName: String, newName: String) {
+    fun userNameDataChanged(currentName: String?, newName: String) {
         if (!isNameValid(newName)) {
             updateFormState.value = UpdateFormState(
                     nameError = R.string.error_invalid_name
