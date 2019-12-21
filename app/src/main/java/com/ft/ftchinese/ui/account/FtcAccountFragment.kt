@@ -87,14 +87,14 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
                         secondary = if (account.email.isNotBlank()) {
                             account.email
                         } else {
-                            getString(R.string.prompt_not_set)
+                            getString(R.string.default_not_set)
                         }
                 ),
                 AccountRow(
                         id = AccountRowType.USER_NAME,
                         primary = getString(R.string.label_user_name),
                         secondary = if (account.userName.isNullOrBlank()) {
-                            getString(R.string.prompt_not_set)
+                            getString(R.string.default_not_set)
                         } else {
                             account.userName
                         }

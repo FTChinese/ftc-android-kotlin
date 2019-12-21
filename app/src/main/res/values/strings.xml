@@ -292,7 +292,8 @@
     <string name="label_wechat">微信</string>
 
     <!-- Account related -->
-    <string name="label_current_email">当前邮箱 %1$s</string>
+    <string name="default_not_set">未设置</string>
+    <string name="label_current_email">当前邮箱</string>
     <string name="label_new_email">新邮箱</string>
     <string name="label_current_name">当前用户名</string>
     <string name="label_user_name">用户名</string>
@@ -309,11 +310,9 @@
 
     <string name="prompt_signed_up">注册成功</string>
     <string name="prompt_login_failed">登录失败，请重试</string>
-
-
     <string name="prompt_sign_up_failed">注册失败，请重试</string>
     <string name="prompt_not_logged_in">您尚未登录，登录后可以查看</string>
-    <string name="prompt_not_set">未设置</string>
+
     <string name="prompt_no_email_app">您的设备上没有安装邮件程序，无法发送反馈邮件</string>
     <string name="prompt_saved">保存成功!</string>
     <string name="prompt_updated">更新成功!</string>

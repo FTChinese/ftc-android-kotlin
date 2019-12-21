@@ -5,6 +5,10 @@
 
     <data>
         <variable
+            name="currentEmail"
+            type="String" />
+
+        <variable
             name="enableInput"
             type="Boolean" />
     </data>
@@ -14,7 +18,7 @@
 
         <TextView
             android:id="@+id/label_email_tv"
-            style="@style/AppTextBody"
+            style="@style/OrigamiText.Body2.Light"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/label_current_email"
@@ -25,12 +29,23 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
+        <TextView
+            android:id="@+id/tv_email_value"
+            style="@style/OrigamiText.Body1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@{currentEmail ?? @string/default_not_set}"
+            app:layout_constraintTop_toBottomOf="@id/label_email_tv"
+            app:layout_constraintStart_toStartOf="@id/label_email_tv"
+            app:layout_constraintEnd_toEndOf="@id/label_email_tv"/>
+
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/email_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:layout_constraintEnd_toEndOf="@id/label_email_tv"
+            app:layout_constraintEnd_toEndOf="@id/tv_email_value"
             app:layout_constraintStart_toStartOf="@id/label_email_tv"
             app:layout_constraintTop_toBottomOf="@id/label_email_tv">
 
@@ -42,7 +57,7 @@
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:enabled="@{enableInput}"/>
+                android:enabled="@{enableInput ?? true}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -53,7 +68,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:text="@string/btn_save"
-            android:enabled="@{enableInput}"
+            android:enabled="@{enableInput ?? false}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/label_email_tv"
             app:layout_constraintStart_toStartOf="@+id/label_email_tv"

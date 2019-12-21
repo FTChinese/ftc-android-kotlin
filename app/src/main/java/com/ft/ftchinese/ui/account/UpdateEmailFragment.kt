@@ -10,6 +10,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentUpdateEmailBinding
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.viewmodel.Result
@@ -23,33 +24,20 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
     private lateinit var sessionManager: SessionManager
     private lateinit var updateViewModel: UpdateViewModel
     private lateinit var binding: FragmentUpdateEmailBinding
-    private var currentEmail: String? = null
+    private var account: Account? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
         sessionManager = SessionManager.getInstance(context)
+        account = sessionManager.loadAccount()
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_update_email, container, false)
-
-        binding.emailInput.isEnabled = true
-        binding.labelEmailTv.text
+        binding.currentEmail = account?.email
         return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        currentEmail = sessionManager.loadAccount()?.email
-
-        binding.labelEmailTv.text = if (currentEmail != null) {
-            getString(R.string.label_current_email, currentEmail)
-        } else {
-            getString(R.string.label_current_email, getString(R.string.prompt_not_set))
-        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -77,14 +65,14 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
 
         binding.emailInput.afterTextChanged {
             updateViewModel.emailDataChanged(
-                    currentEmail = currentEmail ?: "",
+                    currentEmail = account?.email ?: "",
                     newEmail = binding.emailInput.text.toString().trim()
             )
         }
 
         binding.btnSave.setOnClickListener {
             updateViewModel.emailDataChanged(
-                    currentEmail = currentEmail ?: "",
+                    currentEmail = account?.email ?: "",
                     newEmail = binding.emailInput.text.toString().trim()
             )
 
