@@ -410,35 +410,24 @@ class CheckOutActivity : ScopedAppActivity(),
 //        finish()
     }
 
-    private fun onWxOrderFetched(orderResult: WxOrderResult?) {
+    private fun onWxOrderFetched(result: Result<WxOrder>) {
         showProgress(false)
-        if (orderResult == null) {
-            return
-        }
 
-        if (orderResult.error != null) {
-            toast(orderResult.error)
-            enablePayBtn(true)
-            tracker.buyFail(paymentIntent?.plan)
-            return
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+                enablePayBtn(true)
+                tracker.buyFail(paymentIntent?.plan)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+                enablePayBtn(true)
+                tracker.buyFail(paymentIntent?.plan)
+            }
+            is Result.Success -> {
+                launchWxPay(result.data)
+            }
         }
-
-        if (orderResult.exception != null) {
-            toast(parseException(orderResult.exception))
-            enablePayBtn(true)
-            tracker.buyFail(paymentIntent?.plan)
-            return
-        }
-
-        if (orderResult.success == null) {
-            toast(R.string.order_cannot_be_created)
-            enablePayBtn(true)
-            tracker.buyFail(paymentIntent?.plan)
-            return
-        }
-
-        val wxOrder = orderResult.success
-        launchWxPay(wxOrder)
     }
 
     private fun launchWxPay(wxOrder: WxOrder) {

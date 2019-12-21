@@ -7,6 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.order.StripeSubParams
+import com.ft.ftchinese.model.order.WxOrder
 import com.ft.ftchinese.repository.StripeRepo
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.ui.pay.*
@@ -20,87 +21,18 @@ import org.jetbrains.anko.info
 
 class CheckOutViewModel : ViewModel(), AnkoLogger {
 
-    val wxOrderResult = MutableLiveData<WxOrderResult>()
+    val wxOrderResult: MutableLiveData<Result<WxOrder>> by lazy {
+        MutableLiveData<Result<WxOrder>>()
+    }
     val wxPayResult = MutableLiveData<WxPayResult>()
 
     val aliOrderResult = MutableLiveData<AliOrderResult>()
-//    val clientSecretResult = MutableLiveData<StringResult>()
 
     val stripePlanResult = MutableLiveData<StripePlanResult>()
     val stripeSubscribedResult = MutableLiveData<StripeSubscribedResult>()
 
     val upgradePreviewResult = MutableLiveData<UpgradePreviewResult>()
     val freeUpgradeResult = MutableLiveData<UpgradeResult>()
-
-    fun previewUpgrade(account: Account) {
-        viewModelScope.launch {
-            try {
-                val up = withContext(Dispatchers.IO) {
-                    SubRepo.previewUpgrade(account)
-                }
-
-                info("Preview upgrade $up")
-
-                upgradePreviewResult.value = UpgradePreviewResult(
-                        success = up
-                )
-            } catch (e: ClientError) {
-
-                upgradePreviewResult.value = UpgradePreviewResult(
-                        errorId = when (e.statusCode) {
-                            404 -> R.string.api_member_not_found
-                            else -> statusCodeMeaning[e.statusCode]
-                        },
-                        exception = e
-                )
-
-            } catch (e: Exception) {
-                upgradePreviewResult.value = UpgradePreviewResult(
-                        exception = e
-                )
-            }
-        }
-    }
-
-    fun freeUpgrade(account: Account) {
-        viewModelScope.launch {
-            try {
-                val (ok, plan) = withContext(Dispatchers.IO) {
-                    SubRepo.directUpgrade(account)
-                }
-
-                if (ok) {
-                    freeUpgradeResult.value = UpgradeResult(
-                            success = true
-                    )
-                    return@launch
-                }
-
-                freeUpgradeResult.value = UpgradeResult(
-                        preview = plan
-                )
-
-            } catch (e: ClientError) {
-                val msgId = when (e.statusCode) {
-                    404 -> R.string.api_member_not_found
-                    422 -> when (e.error?.key) {
-                        "membership_already_upgraded" -> R.string.api_already_premium
-                        else -> null
-                    }
-                    else -> e.parseStatusCode()
-                }
-
-                freeUpgradeResult.value = UpgradeResult(
-                        error = msgId,
-                        exception = e
-                )
-            } catch (e: Exception) {
-                freeUpgradeResult.value = UpgradeResult(
-                        exception = e
-                )
-            }
-        }
-    }
 
     fun createWxOrder(account: Account, plan: Plan) {
         viewModelScope.launch {
@@ -109,24 +41,20 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                     SubRepo.wxPlaceOrder(account, plan)
                 }
 
-                wxOrderResult.value = WxOrderResult(
-                        success = wxOrder
-                )
-            } catch (e: ClientError) {
-                val msgId = if (e.statusCode == 403) {
-                    R.string.duplicate_purchase
-                } else {
-                    e.parseStatusCode()
+                if (wxOrder == null) {
+                    wxOrderResult.value = Result.LocalizedError(R.string.order_cannot_be_created)
+                    return@launch
                 }
+                wxOrderResult.value = Result.Success(wxOrder)
+            } catch (e: ClientError) {
 
-                wxOrderResult.value = WxOrderResult(
-                        error = msgId,
-                        exception = e
-                )
+                wxOrderResult.value = if (e.statusCode == 403) {
+                    Result.LocalizedError(R.string.duplicate_purchase)
+                } else {
+                    parseApiError(e)
+                }
             } catch (e: Exception) {
-                wxOrderResult.value = WxOrderResult(
-                        exception = e
-                )
+                wxOrderResult.value = parseException(e)
             }
         }
     }
@@ -253,4 +181,73 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         }
     }
 
+    fun previewUpgrade(account: Account) {
+        viewModelScope.launch {
+            try {
+                val up = withContext(Dispatchers.IO) {
+                    SubRepo.previewUpgrade(account)
+                }
+
+                info("Preview upgrade $up")
+
+                upgradePreviewResult.value = UpgradePreviewResult(
+                        success = up
+                )
+            } catch (e: ClientError) {
+
+                upgradePreviewResult.value = UpgradePreviewResult(
+                        errorId = when (e.statusCode) {
+                            404 -> R.string.api_member_not_found
+                            else -> statusCodeMeaning[e.statusCode]
+                        },
+                        exception = e
+                )
+
+            } catch (e: Exception) {
+                upgradePreviewResult.value = UpgradePreviewResult(
+                        exception = e
+                )
+            }
+        }
+    }
+
+    fun freeUpgrade(account: Account) {
+        viewModelScope.launch {
+            try {
+                val (ok, plan) = withContext(Dispatchers.IO) {
+                    SubRepo.directUpgrade(account)
+                }
+
+                if (ok) {
+                    freeUpgradeResult.value = UpgradeResult(
+                            success = true
+                    )
+                    return@launch
+                }
+
+                freeUpgradeResult.value = UpgradeResult(
+                        preview = plan
+                )
+
+            } catch (e: ClientError) {
+                val msgId = when (e.statusCode) {
+                    404 -> R.string.api_member_not_found
+                    422 -> when (e.error?.key) {
+                        "membership_already_upgraded" -> R.string.api_already_premium
+                        else -> null
+                    }
+                    else -> e.parseStatusCode()
+                }
+
+                freeUpgradeResult.value = UpgradeResult(
+                        error = msgId,
+                        exception = e
+                )
+            } catch (e: Exception) {
+                freeUpgradeResult.value = UpgradeResult(
+                        exception = e
+                )
+            }
+        }
+    }
 }
