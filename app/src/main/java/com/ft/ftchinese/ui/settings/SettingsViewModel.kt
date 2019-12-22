@@ -8,6 +8,9 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadingHistoryDao
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.util.*
+import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.parseApiError
+import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -23,7 +26,9 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
     val articlesClearedResult = MutableLiveData<Boolean>()
 
     val cachedReleaseFound = MutableLiveData<Boolean>()
-    val releaseResult = MutableLiveData<ReleaseResult>()
+    val releaseResult: MutableLiveData<Result<AppRelease>> by lazy {
+        MutableLiveData<Result<AppRelease>>()
+    }
 
     fun calculateCacheSize(cache: FileCache) {
         viewModelScope.launch {
@@ -86,9 +91,7 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
                 if (release != null) {
                     cachedReleaseFound.value = true
 
-                    releaseResult.value = ReleaseResult(
-                            success = release
-                    )
+                    releaseResult.value = Result.Success(release)
 
                     return@launch
                 }
@@ -108,33 +111,32 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (text == null) {
-                    releaseResult.value = ReleaseResult(
-                            error = R.string.release_not_found
-                    )
+                    releaseResult.value = Result.LocalizedError(R.string.release_not_found)
 
                     return@launch
                 }
 
 
-                releaseResult.value = ReleaseResult(
-                        success = json.parse<AppRelease>(text)
-                )
+                val appRelease = json.parse<AppRelease>(text)
+                releaseResult.value = if (appRelease != null) {
+                    Result.Success(appRelease)
+                } else {
+                    Result.LocalizedError(R.string.loading_failed)
+                }
 
                 withContext(Dispatchers.IO) {
                     cache.saveText(AppRelease.currentCacheFile(), text)
                 }
 
             } catch (e: ClientError) {
-                releaseResult.value = ReleaseResult(
-                        error = if (e.statusCode == 404) {
-                            R.string.release_not_found
-                        } else null,
-                        exception = e
-                )
+                releaseResult.value = if (e.statusCode == 404) {
+                    Result.LocalizedError(R.string.release_not_found)
+                } else {
+                    parseApiError(e)
+                }
+
             } catch (e: Exception) {
-                releaseResult.value = ReleaseResult(
-                        exception = e
-                )
+                releaseResult.value = parseException(e)
             }
         }
     }
@@ -155,14 +157,15 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
                     retrieveLatestRelease()
                 }
 
-                releaseResult.value = ReleaseResult(
-                        success = release
-                )
+                if (release == null) {
+                    releaseResult.value = Result.LocalizedError(R.string.release_not_found)
+                    return@launch
+                }
+
+                releaseResult.value = Result.Success(release)
 
             } catch (e: Exception) {
-                releaseResult.value = ReleaseResult(
-                        exception = e
-                )
+                releaseResult.value = parseException(e)
             }
         }
     }

@@ -2,10 +2,15 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.settings.UpdateAppActivity">
 
     <data>
         <import type="android.view.View"/>
+        <variable
+            name="inProgress"
+            type="Boolean" />
+
         <variable
             name="release"
             type="com.ft.ftchinese.model.AppRelease" />
@@ -68,8 +73,9 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
+        <include layout="@layout/progress_indicator_circular"
+            bind:inProgress="@{inProgress}"/>
 
-        <include layout="@layout/progress_bar"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
 

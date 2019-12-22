@@ -16,6 +16,9 @@ import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.toast
 
+/**
+ * Show the release log of current version.
+ */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CurrentReleaseActivity : ScopedAppActivity() {
 

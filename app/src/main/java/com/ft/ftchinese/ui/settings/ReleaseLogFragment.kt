@@ -13,8 +13,13 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.ui.base.ListAdapter
 import com.ft.ftchinese.ui.base.ListItem
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.fragment_recycler.*
 
+/**
+ * Show release log. Used by both [CurrentReleaseActivity]
+ * and [UpdateAppActivity]
+ */
 class ReleaseLogFragment : Fragment() {
 
     private lateinit var settingsViewModel: SettingsViewModel
@@ -22,7 +27,6 @@ class ReleaseLogFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_recycler, container, false)
     }
 
@@ -46,13 +50,13 @@ class ReleaseLogFragment : Fragment() {
                     .get(SettingsViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        settingsViewModel.releaseResult.observe(this, Observer {
+        settingsViewModel.releaseResult.observe(viewLifecycleOwner, Observer {
 
-            if (it.success == null) {
+            if (it !is Result.Success) {
                 return@Observer
             }
 
-            listAdapter?.setData(buildList(it.success))
+            listAdapter?.setData(buildList(it.data))
         })
     }
 

@@ -10,7 +10,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -25,10 +24,8 @@ import com.ft.ftchinese.databinding.ActivityUpdateAppBinding
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.util.RequestCode
-import kotlinx.android.synthetic.main.activity_update_app.*
-import kotlinx.android.synthetic.main.progress_bar.*
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.appcompat.v7.Appcompat
@@ -76,7 +73,7 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
                 }
                 DownloadManager.STATUS_FAILED -> {
                     toast(R.string.download_failed)
-                    enableButton(true)
+                    binding.btnStartDownload.isEnabled = true
                 }
                 else -> {
                     toast("Unknown status")
@@ -111,12 +108,10 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
 
                 }.show()
 
-                btn_start_download.text = getString(R.string.btn_install)
-                enableButton(true)
+                binding.btnStartDownload.text = getString(R.string.btn_install)
+                binding.btnStartDownload.isEnabled = true
 
-                btn_start_download.setOnClickListener {
-
-
+                binding.btnStartDownload.setOnClickListener {
                     startInstall(savedId)
                 }
 
@@ -156,60 +151,51 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
             return
         }
 
-        showProgress(true)
+        binding.inProgress = true
         toast(R.string.checking_latest_release)
 
         settingsViewModel.checkLatestRelease()
     }
 
-    private fun onLatestRelease(result: ReleaseResult?) {
+    private fun onLatestRelease(result: Result<AppRelease>) {
 
-        showProgress(false)
+        binding.inProgress = false
 
-        if (result == null) {
-            toast(R.string.release_not_found)
-            return
-        }
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                release = result.data
+                binding.release = release
 
-        if (result.error != null) {
-            toast(result.error)
-            return
-        }
+                if (!result.data.isNew) {
+                    return
+                }
 
-        if (result.exception != null) {
-            toast(parseException(result.exception))
-            return
-        }
+                supportFragmentManager.commit {
+                    replace(R.id.release_detail, ReleaseLogFragment.newInstance())
+                }
 
-        if (result.success == null) {
-            toast(R.string.release_not_found)
-            return
-        }
-
-        release = result.success
-        binding.release = release
-
-        if (!result.success.isNew) {
-            return
-        }
-
-        supportFragmentManager.commit {
-            replace(R.id.release_detail, ReleaseLogFragment.newInstance())
-        }
-
-        btn_start_download.setOnClickListener {
-            if (requestPermission()) {
-                enableButton(false)
-                showProgress(true)
-                startDownload(release)
+                binding.btnStartDownload.setOnClickListener {
+                    if (requestPermission()) {
+                        binding.btnStartDownload.isEnabled = false
+                        binding.inProgress = true
+                        startDownload(release)
+                    }
+                }
             }
         }
+
     }
 
     private fun requestPermission(): Boolean {
         return if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-            enableButton(false)
+            binding.btnStartDownload.isEnabled = false
 
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 
@@ -233,12 +219,12 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
             RequestCode.PERMISSIONS -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    enableButton(false)
-                    showProgress(true)
+                    binding.inProgress = true
+                    binding.btnStartDownload.isEnabled = false
                     startDownload(release)
 
                 } else {
-                    enableButton(false)
+                    binding.btnStartDownload.isEnabled = false
                 }
             }
         }
@@ -274,7 +260,7 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
             putLong(PREF_DOWNLOAD_ID, id)
         }
 
-        showProgress(false)
+        binding.inProgress = false
 
         alert(Appcompat, R.string.wait_download_finish) {
             positiveButton(R.string.action_ok) {
@@ -399,14 +385,6 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
         } finally {
             c.close()
         }
-    }
-
-    private fun showProgress(show: Boolean) {
-        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
-    }
-
-    private fun enableButton(enable: Boolean) {
-        btn_start_download.isEnabled = enable
     }
 
     override fun onDestroy() {
