@@ -37,13 +37,13 @@ class ProductFragment : ScopedFragment(),
 //        }
     }
 
-    private fun buildProductCard(): PaywallProduct? {
+    private fun buildProductCard(): UIPaywallProduct? {
         val tier = tier ?: return null
 
         val yearlyPlan = findPlan(tier, Cycle.YEAR)
         val monthlyPlan = findPlan(tier, Cycle.MONTH)
 
-        return PaywallProduct(
+        return UIPaywallProduct(
                 tier = tier,
                 heading = when (tier) {
                     Tier.STANDARD -> getString(R.string.tier_standard)

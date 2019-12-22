@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.*
@@ -18,9 +17,8 @@ import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
-import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.viewmodel.CheckOutViewModel
+import com.ft.ftchinese.viewmodel.*
 import com.stripe.android.*
 import com.stripe.android.model.*
 import com.stripe.android.view.PaymentMethodsActivity
@@ -254,26 +252,20 @@ class StripeSubActivity : ScopedAppActivity(),
         }
     }
 
-    private fun onStripePlanFetched(result: StripePlanResult?) {
-        if (result == null) {
-            return
+    private fun onStripePlanFetched(result: Result<StripePlan>) {
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                buildProductText(result.data)
+
+                planCache.save(result.data, plan?.getId())
+            }
         }
-
-        if (result.error != null) {
-            return
-        }
-
-        if (result.exception != null) {
-            return
-        }
-
-        if (result.success == null) {
-            return
-        }
-
-        buildProductText(result.success)
-
-        planCache.save(result.success, plan?.getId())
     }
 
     private fun startSubscribing() {
@@ -331,127 +323,116 @@ class StripeSubActivity : ScopedAppActivity(),
         }
     }
 
-    private fun onSubscriptionResponse(result: StripeSubscribedResult?) {
+    private fun onSubscriptionResponse(result: Result<StripeSubResponse>) {
 
         showProgress(false)
 
         info("Subscription response: $result")
 
-        if (result == null) {
-            idempotency.clear()
-            enableButton(true)
-            alert(Appcompat,
-                    R.string.error_unknown,
-                    R.string.title_error
-            ) {
-                positiveButton(R.string.action_ok) {
-                    it.dismiss()
-                }
-            }.show()
-            return
-        }
-
-        /**
-         * For this type of error, we should clear idempotency key.
-         * {"status":400,
-         * "message":"Keys for idempotent requests can only be used for the same endpoint they were first used for ('/v1/subscriptions' vs '/v1/subscriptions/sub_FY3f6HtuRcrIxG'). Try using a key other than '985c7d9e-da40-4948-ab40-53fc5f09225a' if you meant to execute a different request.",
-         * "request_id":"req_FMvcyPKQUAAvbK",
-         * "type":"idempotency_error"
-         * }
-         */
-        if (result.isIdempotencyError) {
-            idempotency.clear()
-
-            startSubscribing()
-            return
-        }
-
-        if (result.exception != null) {
-            alert(Appcompat, parseException(result.exception), getString(R.string.title_error)) {
-                positiveButton(R.string.action_ok) {
-                    it.dismiss()
-                }
-            }.show()
-
-            enableButton(true)
-            idempotency.clear()
-            return
-        }
-
-        val response = result.success
-        if (response == null) {
-            alert(Appcompat,
-                    R.string.error_unknown,
-                    R.string.title_error
-            ) {
-                positiveButton("OK") {
-                    it.dismiss()
-                }
-            }.show()
-            enableButton(true)
-            idempotency.clear()
-            return
-        }
-
-        info("Subscription result: $response")
-
-        if (!response.requiresAction) {
-            toast(R.string.subs_success)
-            retrieveSubscription()
-
-            return
-        }
-
-        if (response.paymentIntentClientSecret == null) {
-            enableButton(true)
-            idempotency.clear()
-
-            alert(
-                    Appcompat,
-                    "Subscription failed. Please retry or change you payment card",
-                    "Failed"
-            ) {
-                positiveButton(R.string.action_ok) {
-                    it.dismiss()
-                }
-                negativeButton(R.string.action_cancel) {
-                    it.dismiss()
-                }
-            }.show()
-
-            return
-        }
-
-        // Ask user to perform authentication.
-        // This authentication is usually required only for
-        // the first time user uses a new card.
-        // If user subscribed with the same card the second time,
-        // like upgrading, authentication won't be required.
-        alert(
-                Appcompat,
-                R.string.stripe_requires_action,
-                R.string.title_requires_action
-        ) {
-            positiveButton(R.string.action_ok) {
-                it.dismiss()
-                showProgress(true)
-
-                stripe.authenticatePayment(
-                        this@StripeSubActivity,
-                        response.paymentIntentClientSecret
-                )
-
-            }
-
-            isCancelable = false
-
-            negativeButton(R.string.action_cancel) {
-                // When user clicked cancel button, clear
-                // idempotency key.
+        when (result) {
+            is Result.LocalizedError -> {
                 idempotency.clear()
-                it.dismiss()
+                enableButton(true)
+
+                alert(Appcompat,
+                        result.msgId,
+                        R.string.title_error
+                ) {
+                    positiveButton(R.string.action_ok) {
+                        it.dismiss()
+                    }
+                }.show()
             }
-        }.show()
+            is Result.Error -> {
+
+                idempotency.clear()
+                /**
+                 * For this type of error, we should clear idempotency key.
+                 * {"status":400,
+                 * "message":"Keys for idempotent requests can only be used for the same endpoint they were first used for ('/v1/subscriptions' vs '/v1/subscriptions/sub_FY3f6HtuRcrIxG'). Try using a key other than '985c7d9e-da40-4948-ab40-53fc5f09225a' if you meant to execute a different request.",
+                 * "request_id":"req_FMvcyPKQUAAvbK",
+                 * "type":"idempotency_error"
+                 * }
+                 */
+                if (result.exception is IdempotencyError) {
+                    startSubscribing()
+                    return
+                }
+
+                result.exception.message?.let {
+                    alert(Appcompat, it, getString(R.string.title_error)) {
+                        positiveButton(R.string.action_ok) {
+                            it.dismiss()
+                        }
+                    }.show()
+                }
+
+                enableButton(true)
+                return
+            }
+            is Result.Success -> {
+
+                info("Subscription result: ${result.data}")
+
+                if (!result.data.requiresAction) {
+                    toast(R.string.subs_success)
+                    retrieveSubscription()
+
+                    return
+                }
+
+                if (result.data.paymentIntentClientSecret == null) {
+                    enableButton(true)
+                    idempotency.clear()
+
+                    alert(
+                            Appcompat,
+                            "Subscription failed. Please retry or change you payment card",
+                            "Failed"
+                    ) {
+                        positiveButton(R.string.action_ok) {
+                            it.dismiss()
+                        }
+                        negativeButton(R.string.action_cancel) {
+                            it.dismiss()
+                        }
+                    }.show()
+
+                    return
+                }
+
+                // Ask user to perform authentication.
+                // This authentication is usually required only for
+                // the first time user uses a new card.
+                // If user subscribed with the same card the second time,
+                // like upgrading, authentication won't be required.
+                alert(
+                        Appcompat,
+                        R.string.stripe_requires_action,
+                        R.string.title_requires_action
+                ) {
+                    positiveButton(R.string.action_ok) {
+                        it.dismiss()
+                        showProgress(true)
+
+                        stripe.authenticatePayment(
+                                this@StripeSubActivity,
+                                result.data.paymentIntentClientSecret
+                        )
+
+                    }
+
+                    isCancelable = false
+
+                    negativeButton(R.string.action_cancel) {
+                        // When user clicked cancel button, clear
+                        // idempotency key.
+                        idempotency.clear()
+                        it.dismiss()
+                    }
+                }.show()
+            }
+        }
     }
 
     /**

@@ -12,7 +12,7 @@
             type="Boolean" />
         <variable
             name="product"
-            type="com.ft.ftchinese.ui.pay.PaywallProduct" />
+            type="com.ft.ftchinese.ui.pay.UIPaywallProduct" />
     </data>
 
     <androidx.cardview.widget.CardView

@@ -11,11 +11,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpgradePreviewBinding
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.subscription.PaymentIntent
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
+import com.ft.ftchinese.viewmodel.FreeUpgradeDeniedError
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.alert
@@ -148,69 +149,58 @@ class UpgradePreviewActivity : AppCompatActivity() {
         }
     }
 
-    private fun onPreviewFetched(previewResult: UpgradePreviewResult?) {
+    private fun onPreviewFetched(result: Result<PaymentIntent>) {
         showProgress(false)
-        if (previewResult == null) {
-            return
-        }
 
-        if (previewResult.errorId != null) {
-            alert(previewResult.errorId, R.string.title_error) {
-                yesButton {
-                    it.dismiss()
+        when (result) {
+            is Result.LocalizedError -> {
+                alert(result.msgId, R.string.title_error) {
+                    yesButton {
+                        it.dismiss()
+                    }
+                }.show()
+            }
+            is Result.Error -> {
+                result.exception.message?.let {
+                    alert(it, getString(R.string.title_error)) {
+                        yesButton {
+                            it.dismiss()
+                        }
+                    }.show()
                 }
-            }.show()
-            return
+            }
+            is Result.Success -> {
+                initUI(result.data)
+            }
         }
-
-        if (previewResult.exception != null) {
-            alert(parseException(previewResult.exception), getString(R.string.title_error)) {
-                yesButton {
-                    it.dismiss()
-                }
-            }.show()
-            return
-        }
-
-        if (previewResult.success == null) {
-            toast(R.string.balance_query_failed)
-            return
-        }
-
-        initUI(previewResult.success)
     }
 
-    private fun onUpgradedForFree(upgradeResult: UpgradeResult?) {
+    private fun onUpgradedForFree(result: Result<Boolean>) {
         showProgress(false)
-        if (upgradeResult == null) {
-            return
-        }
 
-        if (upgradeResult.error != null) {
-            binding.btnConfirmUpgrade.isEnabled = true
-            toast(upgradeResult.error)
-            return
-        }
+        when (result) {
+            is Result.LocalizedError -> {
+                binding.btnConfirmUpgrade.isEnabled = true
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                binding.btnConfirmUpgrade.isEnabled = true
 
-        if (upgradeResult.exception != null) {
-            binding.btnConfirmUpgrade.isEnabled = true
-            toast(parseException(upgradeResult.exception))
-            return
-        }
+                if (result.exception is FreeUpgradeDeniedError) {
+                    toast("无法直接升级")
+                    initUI(result.exception.paymentIntent)
+                    return
+                }
 
-        // If upgraded successfully, destroy itself
-        // and send data back to calling activity.
-        if (upgradeResult.success) {
-            toast(R.string.upgrade_success)
-            done()
-            return
-        }
-
-        if (upgradeResult.preview != null) {
-            toast("无法直接升级")
-            binding.btnConfirmUpgrade.isEnabled = true
-            initUI(upgradeResult.preview)
-            return
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                if (result.data) {
+                    toast(R.string.upgrade_success)
+                    done()
+                    return
+                }
+            }
         }
     }
 

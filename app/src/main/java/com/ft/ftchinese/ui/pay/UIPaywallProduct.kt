@@ -5,7 +5,7 @@ import com.ft.ftchinese.model.subscription.Tier
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class PaywallProduct(
+data class UIPaywallProduct(
         val tier: Tier? = null,
         val heading: String = "",
         val description: String = "",

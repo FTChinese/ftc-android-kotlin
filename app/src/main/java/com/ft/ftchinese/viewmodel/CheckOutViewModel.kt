@@ -4,15 +4,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.subscription.PaymentIntent
 import com.ft.ftchinese.model.subscription.Plan
-import com.ft.ftchinese.model.order.StripeSubParams
-import com.ft.ftchinese.model.order.WxOrder
 import com.ft.ftchinese.repository.StripeRepo
 import com.ft.ftchinese.repository.SubRepo
-import com.ft.ftchinese.ui.pay.*
 import com.ft.ftchinese.util.ClientError
-import com.ft.ftchinese.util.statusCodeMeaning
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,15 +22,29 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
     val wxOrderResult: MutableLiveData<Result<WxOrder>> by lazy {
         MutableLiveData<Result<WxOrder>>()
     }
-    val wxPayResult = MutableLiveData<WxPayResult>()
+    val wxPayResult: MutableLiveData<Result<WxPaymentStatus>> by lazy {
+        MutableLiveData<Result<WxPaymentStatus>>()
+    }
 
-    val aliOrderResult = MutableLiveData<AliOrderResult>()
+    val aliOrderResult: MutableLiveData<Result<AliOrder>> by lazy {
+        MutableLiveData<Result<AliOrder>>()
+    }
 
-    val stripePlanResult = MutableLiveData<StripePlanResult>()
-    val stripeSubscribedResult = MutableLiveData<StripeSubscribedResult>()
+    val stripePlanResult: MutableLiveData<Result<StripePlan>> by lazy {
+        MutableLiveData<Result<StripePlan>>()
+    }
 
-    val upgradePreviewResult = MutableLiveData<UpgradePreviewResult>()
-    val freeUpgradeResult = MutableLiveData<UpgradeResult>()
+    val stripeSubscribedResult: MutableLiveData<Result<StripeSubResponse>> by lazy {
+        MutableLiveData<Result<StripeSubResponse>>()
+    }
+
+    val upgradePreviewResult: MutableLiveData<Result<PaymentIntent>> by lazy {
+        MutableLiveData<Result<PaymentIntent>>()
+    }
+
+    val freeUpgradeResult: MutableLiveData<Result<Boolean>> by lazy {
+        MutableLiveData<Result<Boolean>>()
+    }
 
     fun createWxOrder(account: Account, plan: Plan) {
         viewModelScope.launch {
@@ -66,13 +78,14 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                     SubRepo.wxQueryOrder(account, orderId)
                 }
 
-                wxPayResult.value = WxPayResult(
-                        success = paymentStatus
-                )
+                if (paymentStatus == null) {
+                    wxPayResult.value = Result.LocalizedError(R.string.order_cannot_be_queried)
+                    return@launch
+                }
+
+                wxPayResult.value = Result.Success(paymentStatus)
             } catch (e: Exception) {
-                wxPayResult.value = WxPayResult(
-                        exception = e
-                )
+                wxPayResult.value = parseException(e)
             }
         }
     }
@@ -84,33 +97,32 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                     SubRepo.aliPlaceOrder(account, plan)
                 }
 
-                aliOrderResult.value = AliOrderResult(
-                        success = aliOrder
-                )
+                if (aliOrder == null) {
+                    aliOrderResult.value = Result.LocalizedError(R.string.order_cannot_be_created)
+                    return@launch
+                }
+                aliOrderResult.value = Result.Success(aliOrder)
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 403) {
                     R.string.duplicate_purchase
                 } else {
-                    e.parseStatusCode()
+                    null
                 }
 
-                aliOrderResult.value = AliOrderResult(
-                        error = msgId,
-                        exception = e
-                )
+                aliOrderResult.value = if (msgId != null) {
+                    Result.LocalizedError(msgId)
+                } else {
+                    parseApiError(e)
+                }
             } catch (e: Exception) {
-                aliOrderResult.value = AliOrderResult(
-                        exception = e
-                )
+                aliOrderResult.value = parseException(e)
             }
         }
     }
 
     fun getStripePlan(plan: Plan?) {
         if (plan == null) {
-            stripePlanResult.value = StripePlanResult(
-                    error = R.string.prompt_unknown_plan
-            )
+            stripePlanResult.value = Result.LocalizedError(R.string.prompt_unknown_plan)
             return
         }
 
@@ -121,20 +133,15 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (stripePlan == null) {
-                    stripePlanResult.value = StripePlanResult(
-                            error = R.string.prompt_unknown_plan
-                    )
+                    stripePlanResult.value = Result.LocalizedError(R.string.prompt_unknown_plan)
                     return@launch
                 }
 
-                stripePlanResult.value = StripePlanResult(
-                        success = stripePlan
-                )
+                stripePlanResult.value = Result.Success(stripePlan)
+
 
             } catch (e: Exception) {
-                stripePlanResult.value = StripePlanResult(
-                        exception = e
-                )
+                stripePlanResult.value = parseException(e)
             }
         }
     }
@@ -146,19 +153,22 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                     StripeRepo.createSubscription(account, params)
                 }
 
-                stripeSubscribedResult.value = StripeSubscribedResult(
-                        success = sub
-                )
+                if (sub == null) {
+                    stripeSubscribedResult.value = Result.LocalizedError(R.string.error_unknown)
+                    return@launch
+                }
+
+                stripeSubscribedResult.value = Result.Success(sub)
+
             } catch (e: ClientError) {
-                stripeSubscribedResult.value = StripeSubscribedResult(
-                        isIdempotencyError = e.type == "idempotency_error",
-                        exception = e
-                )
+                stripeSubscribedResult.value = if (e.type == "idempotency_error") {
+                    Result.Error(IdempotencyError())
+                } else {
+                    parseApiError(e)
+                }
 
             } catch (e: Exception) {
-                stripeSubscribedResult.value = StripeSubscribedResult(
-                        exception = e
-                )
+                stripeSubscribedResult.value = parseException(e)
             }
         }
     }
@@ -170,13 +180,15 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                     StripeRepo.upgradeStripeSub(account, params)
                 }
 
-                stripeSubscribedResult.value = StripeSubscribedResult(
-                        success = sub
-                )
+                if (sub == null) {
+                    stripeSubscribedResult.value = Result.LocalizedError(R.string.error_unknown)
+                    return@launch
+                }
+
+                stripeSubscribedResult.value = Result.Success(sub)
+
             } catch (e: Exception) {
-                stripeSubscribedResult.value = StripeSubscribedResult(
-                        exception = e
-                )
+                stripeSubscribedResult.value = parseException(e)
             }
         }
     }
@@ -189,24 +201,23 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 info("Preview upgrade $up")
+                if (up == null) {
+                    upgradePreviewResult.value = Result.LocalizedError(R.string.balance_query_failed)
+                    return@launch
+                }
 
-                upgradePreviewResult.value = UpgradePreviewResult(
-                        success = up
-                )
+                upgradePreviewResult.value = Result.Success(up)
+
             } catch (e: ClientError) {
 
-                upgradePreviewResult.value = UpgradePreviewResult(
-                        errorId = when (e.statusCode) {
-                            404 -> R.string.api_member_not_found
-                            else -> statusCodeMeaning[e.statusCode]
-                        },
-                        exception = e
-                )
+                upgradePreviewResult.value = if (e.statusCode == 404) {
+                    Result.LocalizedError(R.string.api_member_not_found)
+                } else {
+                    parseApiError(e)
+                }
 
             } catch (e: Exception) {
-                upgradePreviewResult.value = UpgradePreviewResult(
-                        exception = e
-                )
+                upgradePreviewResult.value = parseException(e)
             }
         }
     }
@@ -214,20 +225,21 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
     fun freeUpgrade(account: Account) {
         viewModelScope.launch {
             try {
-                val (ok, plan) = withContext(Dispatchers.IO) {
+                val (ok, pi) = withContext(Dispatchers.IO) {
                     SubRepo.directUpgrade(account)
                 }
 
                 if (ok) {
-                    freeUpgradeResult.value = UpgradeResult(
-                            success = true
-                    )
+                    freeUpgradeResult.value = Result.Success(ok)
                     return@launch
                 }
 
-                freeUpgradeResult.value = UpgradeResult(
-                        preview = plan
-                )
+                if (pi == null) {
+                    freeUpgradeResult.value = Result.LocalizedError(R.string.loading_failed)
+                    return@launch
+                }
+
+                freeUpgradeResult.value = Result.Error(FreeUpgradeDeniedError(pi))
 
             } catch (e: ClientError) {
                 val msgId = when (e.statusCode) {
@@ -236,17 +248,17 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                         "membership_already_upgraded" -> R.string.api_already_premium
                         else -> null
                     }
-                    else -> e.parseStatusCode()
+                    else -> null
                 }
 
-                freeUpgradeResult.value = UpgradeResult(
-                        error = msgId,
-                        exception = e
-                )
+                freeUpgradeResult.value = if (msgId != null) {
+                    Result.LocalizedError(msgId)
+                } else {
+                    parseApiError(e)
+                }
+
             } catch (e: Exception) {
-                freeUpgradeResult.value = UpgradeResult(
-                        exception = e
-                )
+                freeUpgradeResult.value = parseException(e)
             }
         }
     }

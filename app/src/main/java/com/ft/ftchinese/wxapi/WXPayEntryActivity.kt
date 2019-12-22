@@ -197,36 +197,35 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         checkoutViewModel.queryWxPayStatus(account, order.id)
     }
 
-    private fun onWxPayStatusQueried(result: WxPayResult?) {
+    private fun onWxPayStatusQueried(result: Result<WxPaymentStatus>) {
         binding.inProgress = false
 
-        if (result == null || result.exception != null || result.success == null) {
+        when (result) {
+            is Result.LocalizedError -> {
+                binding.result = UIWx(
+                        heading = getString(R.string.payment_done),
+                        body = getString(result.msgId),
+                        enableButton = true
+                )
+            }
+            is Result.Error -> {
+                binding.result = UIWx(
+                        heading = getString(R.string.payment_done),
+                        body = result.exception.message ?: "",
+                        enableButton = true
+                )
+            }
+            is Result.Success -> {
+                if (result.data.paymentState == "SUCCESS") {
+                    confirmSubscription()
+                    return
+                }
 
-            binding.result = UIWx(
-                    heading = getString(R.string.payment_done),
-                    body = if (result?.exception != null) {
-                        result.exception.message ?: ""
-                    } else getString(R.string.order_cannot_be_queried),
-                    enableButton = true
-            )
-            return
-        }
-
-        when (result.success.paymentState) {
-            "REFUND",
-            "NOTPAY",
-            "CLOSED",
-            "REVOKED",
-            "USERPAYING",
-            "PAYERROR"  -> {
-                val strId = paymentStatusId[result.success.paymentState]
+                val strId = paymentStatusId[result.data.paymentState]
                 binding.result = UIWx(
                         heading = if (strId != null) getString(strId) else getString(R.string.payment_done),
                         enableButton = true
                 )
-            }
-            "SUCCESS" -> {
-                confirmSubscription()
             }
         }
     }
