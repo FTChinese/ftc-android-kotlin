@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.order
+package com.ft.ftchinese.model.subscription
 
 data class StripePlan(
         val id: String,

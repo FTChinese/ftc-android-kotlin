@@ -19,8 +19,6 @@ data class Plan(
         val price: Double,
         val amount: Double,
         val currency: String,
-        val listPrice: Double, // Deprecate
-        val netPrice: Double, // Deprecate
         val description: String
 ) : Parcelable {
 
@@ -64,8 +62,6 @@ private val plans = mapOf(
                 price = 258.00,
                 amount = 258.00,
                 currency = "cny",
-                listPrice = 258.00,
-                netPrice = 258.00,
 
                 description = "FT中文网 - 年度标准会员"
         ),
@@ -75,8 +71,6 @@ private val plans = mapOf(
                 price = 28.00,
                 amount = 28.00,
                 currency = "cny",
-                listPrice = 28.00,
-                netPrice = 28.00,
 
                 description = "FT中文网 - 月度标准会员"
         ),
@@ -86,8 +80,6 @@ private val plans = mapOf(
                 price = 1998.00,
                 amount = 1998.00,
                 currency = "cny",
-                listPrice = 1998.00,
-                netPrice = 1998.00,
 
                 description = "FT中文网 - 高端会员"
         )

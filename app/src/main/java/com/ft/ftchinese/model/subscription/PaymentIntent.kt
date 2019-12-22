@@ -23,4 +23,16 @@ data class PaymentIntent(
     fun isPayRequired(): Boolean {
         return amount != 0.0
     }
+
+    fun withStripePlan(stripePlan: StripePlan?): PaymentIntent {
+        return PaymentIntent(
+                amount = stripePlan?.price() ?: 0.0,
+                currency = stripePlan?.currency ?: "",
+                cycleCount = 1,
+                extraDays = 0,
+                subscriptionKind = subscriptionKind,
+                wallet = wallet,
+                plan = plan
+        )
+    }
 }

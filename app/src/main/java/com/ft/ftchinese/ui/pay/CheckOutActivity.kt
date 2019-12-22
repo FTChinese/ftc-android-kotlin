@@ -241,7 +241,7 @@ class CheckOutActivity : ScopedAppActivity(),
                 StripeSubActivity.startForResult(
                         this,
                         RequestCode.PAYMENT,
-                        plan
+                        paymentIntent
                 )
                 binding.inProgress = false
             }

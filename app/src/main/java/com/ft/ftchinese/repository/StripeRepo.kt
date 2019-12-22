@@ -1,6 +1,6 @@
 package com.ft.ftchinese.repository
 
-import com.ft.ftchinese.model.order.StripePlan
+import com.ft.ftchinese.model.subscription.StripePlan
 import com.ft.ftchinese.model.order.StripeSub
 import com.ft.ftchinese.model.order.StripeSubParams
 import com.ft.ftchinese.model.order.StripeSubResponse

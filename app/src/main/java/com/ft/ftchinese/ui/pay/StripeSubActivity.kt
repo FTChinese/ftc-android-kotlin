@@ -4,18 +4,22 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityStripeSubBinding
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.model.subscription.PaymentIntent
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.StripeCustomer
+import com.ft.ftchinese.model.subscription.StripePlan
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.*
@@ -23,9 +27,6 @@ import com.stripe.android.*
 import com.stripe.android.model.*
 import com.stripe.android.view.PaymentMethodsActivity
 import com.stripe.android.view.PaymentMethodsActivityStarter
-import kotlinx.android.synthetic.main.activity_stripe_sub.*
-import kotlinx.android.synthetic.main.fragment_cart_item.*
-import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.appcompat.v7.Appcompat
@@ -39,24 +40,26 @@ private const val EXTRA_UI_TEST = "extra_ui_test"
 class StripeSubActivity : ScopedAppActivity(),
         AnkoLogger {
 
+    private lateinit var binding: ActivityStripeSubBinding
     private lateinit var sessionManager: SessionManager
     private lateinit var checkOutViewModel: CheckOutViewModel
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var idempotency: Idempotency
 
     private lateinit var stripe: Stripe
-    private lateinit var planCache: StripePlanCache
+    private lateinit var stripePlanCache: StripePlanCache
 
-    private var plan: Plan? = null
+//    private var plan: Plan? = null
+    private var paymentIntent: PaymentIntent? = null // The original PaymentIntent passed from CheckOutActivity. This is in RMB. We need to build on it to get a British pound version.
     private var paymentMethod: PaymentMethod? = null
 
-    private var subType: OrderUsage? = null
+//    private var subType: OrderUsage? = null
 
     private var isTest = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_stripe_sub)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_stripe_sub)
 
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
@@ -74,32 +77,36 @@ class StripeSubActivity : ScopedAppActivity(),
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
-        checkOutViewModel.stripePlanResult.observe(this, Observer {
-            onStripePlanFetched(it)
+        accountViewModel.customerResult.observe(this, Observer {
+            onCustomerIdCreated(it)
         })
 
-        accountViewModel.accountRefreshed.observe(this, Observer {
-            onAccountRefreshed(it)
+        checkOutViewModel.stripePlanResult.observe(this, Observer {
+            onStripePlanFetched(it)
         })
 
         checkOutViewModel.stripeSubscribedResult.observe(this, Observer {
             onSubscriptionResponse(it)
         })
 
-        accountViewModel.customerResult.observe(this, Observer {
-            onCustomerIdCreated(it)
-        })
-
         accountViewModel.stripeRetrievalResult.observe(this, Observer {
             onSubRetrieved(it)
         })
 
-        idempotency = Idempotency.getInstance(this)
-        planCache = StripePlanCache.getInstance(this)
+        accountViewModel.accountRefreshed.observe(this, Observer {
+            onAccountRefreshed(it)
+        })
 
-        plan = intent.getParcelableExtra(EXTRA_FTC_PLAN)
+        idempotency = Idempotency.getInstance(this)
+        stripePlanCache = StripePlanCache.getInstance(this)
+
+//        plan = intent.getParcelableExtra(EXTRA_FTC_PLAN)
+        val cnPI = intent.getParcelableExtra<PaymentIntent>(EXTRA_PAYMENT_INTENT)
+        paymentIntent = cnPI?.withStripePlan(stripePlanCache.load(cnPI.plan.getId()))
+
         sessionManager = SessionManager.getInstance(this)
 
+        // Initialize stripe.
         stripe = Stripe(
                 this,
                 PaymentConfiguration
@@ -108,7 +115,7 @@ class StripeSubActivity : ScopedAppActivity(),
         )
 
         val account = sessionManager.loadAccount() ?: return
-        subType = account.membership.subType(plan)
+//        subType = account.membership.subType(plan)
 
         initUI()
 
@@ -117,11 +124,11 @@ class StripeSubActivity : ScopedAppActivity(),
             return
         }
 
-        checkOutViewModel.getStripePlan(plan)
+        checkOutViewModel.getStripePlan(paymentIntent?.plan)
 
         if (account.stripeId == null) {
-            showProgress(true)
-            enableButton(false)
+            binding.inProgress = true
+            binding.enableInput = false
             toast(R.string.stripe_init)
             accountViewModel.createCustomer(account)
             return
@@ -132,22 +139,21 @@ class StripeSubActivity : ScopedAppActivity(),
 
     private fun initUI() {
 
-        enableButton(false)
-
-        if (subType == OrderUsage.UPGRADE) {
-            btn_subscribe.text = getString(R.string.title_upgrade)
+        if (paymentIntent?.subscriptionKind == OrderUsage.UPGRADE) {
+            binding.btnSubscribe.text = getString(R.string.title_upgrade)
         }
 
-        buildProductText(planCache.load(plan?.getId()))
+        supportFragmentManager.commit {
+            replace(R.id.product_in_cart, CartItemFragment.newInstance(paymentIntent))
+        }
 
-        tv_payment_method.setOnClickListener {
+        binding.tvPaymentMethod.setOnClickListener {
             PaymentMethodsActivityStarter(this)
                     .startForResult(RequestCode.SELECT_SOURCE)
         }
 
-        btn_subscribe.setOnClickListener {
-            if (subType == null) {
-                info("Subscription type: $subType")
+        binding.btnSubscribe.setOnClickListener {
+            if (paymentIntent?.subscriptionKind == null) {
                 return@setOnClickListener
             }
             startSubscribing()
@@ -155,7 +161,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
         // Testing UI.
         if (isTest) {
-            rv_stripe_sub.apply {
+            binding.rvStripeSub.apply {
                 setHasFixedSize(true)
                 layoutManager = LinearLayoutManager(this@StripeSubActivity)
                 adapter = SingleLineAdapter(buildRows(null))
@@ -173,39 +179,14 @@ class StripeSubActivity : ScopedAppActivity(),
             }
 
             is Result.LocalizedError -> {
-                showProgress(false)
+                binding.inProgress = false
                 toast(result.msgId)
             }
             is Result.Error -> {
-                showProgress(false)
+                binding.inProgress = false
                 toast(parseException(result.exception))
             }
         }
-
-//        if (result == null) {
-//            return
-//        }
-//
-//        if (result.error != null) {
-//            showProgress(false)
-//            toast(result.error)
-//            return
-//        }
-//
-//        if (result.exception != null) {
-//            showProgress(false)
-//            toast(parseException(result.exception))
-//            return
-//        }
-//
-//        if (result.success == null) {
-//            showProgress(false)
-//            return
-//        }
-//
-//        sessionManager.saveStripeId(result.success)
-//
-//        setupCustomerSession()
     }
 
     private fun setupCustomerSession() {
@@ -231,15 +212,15 @@ class StripeSubActivity : ScopedAppActivity(),
         }
 
         toast(R.string.retrieve_customer)
-        showProgress(true)
+        binding.inProgress
 
         CustomerSession.getInstance().retrieveCurrentCustomer(customerRetrievalListener)
     }
 
     private val customerRetrievalListener = object : CustomerSession.ActivityCustomerRetrievalListener<StripeSubActivity>(this) {
         override fun onCustomerRetrieved(customer: Customer) {
-            showProgress(false)
-            enableButton(true)
+            binding.inProgress = false
+            binding.enableInput = true
         }
 
         override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
@@ -247,7 +228,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
             runOnUiThread {
                 toast(errorMessage)
-                showProgress(false)
+                binding.inProgress = false
             }
         }
     }
@@ -261,16 +242,14 @@ class StripeSubActivity : ScopedAppActivity(),
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
-                buildProductText(result.data)
-
-                planCache.save(result.data, plan?.getId())
+                stripePlanCache.save(result.data, paymentIntent?.plan?.getId())
             }
         }
     }
 
     private fun startSubscribing() {
         val account = sessionManager.loadAccount() ?: return
-        val p = plan ?: return
+        val p = paymentIntent?.plan ?: return
 
         if (account.stripeId == null) {
             toast("You are not a stripe customer yet")
@@ -288,10 +267,10 @@ class StripeSubActivity : ScopedAppActivity(),
             return
         }
 
-        showProgress(true)
-        enableButton(false)
+        binding.inProgress = true
+        binding.enableInput = false
 
-        when (subType) {
+        when (paymentIntent?.subscriptionKind) {
             OrderUsage.CREATE -> {
                 toast(R.string.creating_subscription)
 
@@ -316,8 +295,8 @@ class StripeSubActivity : ScopedAppActivity(),
                 ))
             }
             else -> {
-                showProgress(false)
-                enableButton(true)
+                binding.inProgress = false
+                binding.enableInput = true
                 toast("Unknown subscription type")
             }
         }
@@ -325,14 +304,14 @@ class StripeSubActivity : ScopedAppActivity(),
 
     private fun onSubscriptionResponse(result: Result<StripeSubResponse>) {
 
-        showProgress(false)
+        binding.inProgress = false
 
         info("Subscription response: $result")
 
         when (result) {
             is Result.LocalizedError -> {
                 idempotency.clear()
-                enableButton(true)
+                binding.enableInput = true
 
                 alert(Appcompat,
                         result.msgId,
@@ -367,7 +346,7 @@ class StripeSubActivity : ScopedAppActivity(),
                     }.show()
                 }
 
-                enableButton(true)
+                binding.enableInput = true
                 return
             }
             is Result.Success -> {
@@ -382,7 +361,7 @@ class StripeSubActivity : ScopedAppActivity(),
                 }
 
                 if (result.data.paymentIntentClientSecret == null) {
-                    enableButton(true)
+                    binding.enableInput = true
                     idempotency.clear()
 
                     alert(
@@ -413,7 +392,7 @@ class StripeSubActivity : ScopedAppActivity(),
                 ) {
                     positiveButton(R.string.action_ok) {
                         it.dismiss()
-                        showProgress(true)
+                        binding.inProgress = true
 
                         stripe.authenticatePayment(
                                 this@StripeSubActivity,
@@ -448,7 +427,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
             val card = paymentMethod.card
 
-            tv_payment_method.text = getString(R.string.payment_source, card?.brand, card?.last4)
+            binding.tvPaymentMethod.text = getString(R.string.payment_source, card?.brand, card?.last4)
 
             this.paymentMethod = paymentMethod
 
@@ -463,7 +442,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
                 info("PaymentIntentResult status: ${result.status}")
 
-                showProgress(false)
+                binding.inProgress = false
                 when (result.intent.status) {
 
                     StripeIntent.Status.RequiresPaymentMethod -> {
@@ -496,13 +475,13 @@ class StripeSubActivity : ScopedAppActivity(),
                             }.show()
 
                             idempotency.clear()
-                            enableButton(true)
+                            binding.enableInput = true
                         }
                     }
 
                     StripeIntent.Status.RequiresCapture -> {
                         idempotency.clear()
-                        enableButton(true)
+                        binding.enableInput = true
                     }
                     StripeIntent.Status.Succeeded -> {
                         // {
@@ -527,7 +506,7 @@ class StripeSubActivity : ScopedAppActivity(),
                     else -> {
 
                         idempotency.clear()
-                        enableButton(true)
+                        binding.enableInput = true
 
                         alert(
                                 getString(R.string.outcome_payment_status, result.intent.status),
@@ -549,14 +528,14 @@ class StripeSubActivity : ScopedAppActivity(),
                 }
 
                 idempotency.clear()
-                enableButton(true)
+                binding.enableInput = true
             }
         })
     }
 
     private fun retrieveSubscription() {
         val account = sessionManager.loadAccount() ?: return
-        showProgress(true)
+        binding.inProgress = true
         toast(R.string.query_stripe_subscription)
 
         accountViewModel.retrieveStripeSub(account)
@@ -572,7 +551,7 @@ class StripeSubActivity : ScopedAppActivity(),
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
-                rv_stripe_sub.apply {
+                binding.rvStripeSub.apply {
                     setHasFixedSize(true)
                     layoutManager = LinearLayoutManager(this@StripeSubActivity)
                     adapter = SingleLineAdapter(buildRows(result.data))
@@ -581,36 +560,6 @@ class StripeSubActivity : ScopedAppActivity(),
                 refreshAccount()
             }
         }
-//        if (result == null) {
-//            refreshAccount()
-//            return
-//        }
-//
-//        if (result.error != null) {
-//            toast(result.error)
-//            refreshAccount()
-//            return
-//        }
-//
-//        if (result.exception != null) {
-//            toast(parseException(result.exception))
-//            refreshAccount()
-//            return
-//        }
-//
-//        if (result.success == null) {
-//            toast("Stripe subscription data not found")
-//            refreshAccount()
-//            return
-//        }
-
-//        rv_stripe_sub.apply {
-//            setHasFixedSize(true)
-//            layoutManager = LinearLayoutManager(this@StripeSubActivity)
-//            adapter = SingleLineAdapter(buildRows(result.success))
-//        }
-//
-//        refreshAccount()
     }
 
     /**
@@ -620,14 +569,15 @@ class StripeSubActivity : ScopedAppActivity(),
         val account = sessionManager.loadAccount() ?: return
 
         toast(R.string.refreshing_account)
-        showProgress(true)
-        enableButton(false)
+        binding.inProgress = true
+        binding.enableInput = false
 
         accountViewModel.refresh(account)
     }
 
     private fun onAccountRefreshed(accountResult: Result<Account>) {
-        showProgress(false)
+        binding.inProgress = false
+
         when (accountResult) {
             is Result.LocalizedError -> {
                 toast(accountResult.msgId)
@@ -642,30 +592,6 @@ class StripeSubActivity : ScopedAppActivity(),
                 showDone()
             }
         }
-//        if (accountResult == null) {
-//            return
-//        }
-//
-//        if (accountResult.error != null) {
-//            toast(accountResult.error)
-//            return
-//        }
-//
-//        if (accountResult.exception != null) {
-//            toast(parseException(accountResult.exception))
-//            return
-//        }
-//
-//
-//        if (accountResult.success == null) {
-//            toast(R.string.order_not_found)
-//            return
-//        }
-//
-//        toast(R.string.prompt_updated)
-//        sessionManager.saveAccount(accountResult.success)
-//
-//        showDone()
     }
 
     private fun buildRows(sub: StripeSub?): Array<String> {
@@ -681,7 +607,10 @@ class StripeSubActivity : ScopedAppActivity(),
             )
         }
         return arrayOf(
-               getString(R.string.order_subscribed_plan, getTierCycleText(plan?.tier, plan?.cycle)),
+               getString(
+                       R.string.order_subscribed_plan,
+                       getTierCycleText(paymentIntent?.plan?.tier, paymentIntent?.plan?.cycle)
+               ),
                 getString(R.string.outcome_payment_status, sub.status.toString()),
                 getString(
                         R.string.order_period,
@@ -691,57 +620,34 @@ class StripeSubActivity : ScopedAppActivity(),
         )
     }
 
-    private fun buildProductText(stripePlan: StripePlan?) {
-        if (stripePlan != null) {
-
-            tv_price.visibility = View.VISIBLE
-            tv_title.visibility = View.VISIBLE
-
-            tv_price.text = getString(R.string.formatter_price, stripePlan.currencySymbol(), stripePlan.price())
-            tv_title.text = getTierCycleText(plan?.tier, plan?.cycle)
-        } else {
-            tv_price.visibility = View.GONE
-            tv_title.visibility = View.GONE
-        }
-    }
-
     private fun showDone() {
-        btn_subscribe.isEnabled = true
+        binding.btnSubscribe.isEnabled = true
 
-        btn_subscribe.text = getString(R.string.action_done)
-        btn_subscribe.setOnClickListener {
+        binding.btnSubscribe.text = getString(R.string.action_done)
+        binding.btnSubscribe.setOnClickListener {
             setResult(Activity.RESULT_OK)
             MemberActivity.start(this)
             finish()
         }
     }
 
-    private fun showProgress(show: Boolean) {
-        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
-    }
-
-    private fun enableButton(enable: Boolean) {
-        btn_subscribe.isEnabled = enable
-        tv_payment_method.isEnabled = enable
-    }
-
     companion object {
 
         @JvmStatic
-        fun startForResult(activity: Activity, requestCode: Int, plan: Plan?) {
-            activity.startActivityForResult(Intent(
-                    activity,
-                    StripeSubActivity::class.java
-            ).apply {
-                putExtra(EXTRA_FTC_PLAN, plan)
-            }, requestCode)
+        fun startForResult(activity: Activity, requestCode: Int, pi: PaymentIntent?) {
+            activity.startActivityForResult(
+                    Intent(activity, StripeSubActivity::class.java).apply {
+                        putExtra(EXTRA_FTC_PLAN, pi)
+                    },
+                    requestCode
+            )
         }
 
         @JvmStatic
-        fun startTest(context: Context, plan: Plan?) {
+        fun startTest(context: Context, pi: PaymentIntent?) {
             val intent = Intent(context, StripeSubActivity::class.java).apply {
                 putExtra(EXTRA_UI_TEST, true)
-                putExtra(EXTRA_FTC_PLAN, plan)
+                putExtra(EXTRA_PAYMENT_INTENT, pi)
             }
 
             context.startActivity(intent)

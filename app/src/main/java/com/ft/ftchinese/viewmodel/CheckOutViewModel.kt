@@ -8,6 +8,7 @@ import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.PaymentIntent
 import com.ft.ftchinese.model.subscription.Plan
+import com.ft.ftchinese.model.subscription.StripePlan
 import com.ft.ftchinese.repository.StripeRepo
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.util.ClientError
