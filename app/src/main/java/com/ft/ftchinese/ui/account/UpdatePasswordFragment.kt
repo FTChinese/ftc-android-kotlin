@@ -14,7 +14,7 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.Passwords
 import com.ft.ftchinese.model.reader.SessionManager
-import com.ft.ftchinese.ui.Validator
+import com.ft.ftchinese.viewmodel.Validator
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.UpdateViewModel
 import org.jetbrains.anko.AnkoLogger
