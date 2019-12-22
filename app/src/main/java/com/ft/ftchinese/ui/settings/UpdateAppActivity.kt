@@ -26,6 +26,7 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.SettingsViewModel
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.appcompat.v7.Appcompat

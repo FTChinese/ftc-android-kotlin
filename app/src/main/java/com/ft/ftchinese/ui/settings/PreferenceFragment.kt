@@ -11,6 +11,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.database.ReadingHistoryDao
 import com.ft.ftchinese.util.FileCache
+import com.ft.ftchinese.viewmodel.SettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel

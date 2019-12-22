@@ -14,6 +14,7 @@ import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.ui.base.ListAdapter
 import com.ft.ftchinese.ui.base.ListItem
 import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.SettingsViewModel
 import kotlinx.android.synthetic.main.fragment_recycler.*
 
 /**

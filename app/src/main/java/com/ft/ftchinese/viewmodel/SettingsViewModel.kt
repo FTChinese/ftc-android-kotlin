@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.settings
+package com.ft.ftchinese.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,6 +7,7 @@ import androidx.sqlite.db.SimpleSQLiteQuery
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadingHistoryDao
 import com.ft.ftchinese.model.AppRelease
+import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.util.*
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.parseApiError
@@ -107,7 +108,7 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val text = withContext(Dispatchers.IO) {
-                    retrieveRelease(versionName)
+                    ReleaseRepo.retrieveRelease(versionName)
                 }
 
                 if (text == null) {
@@ -141,20 +142,11 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    private fun retrieveRelease(versionName: String): String? {
-        val (_, body) = Fetch()
-                .setAppId()
-                .get("${NextApi.releaseOf}/v$versionName")
-                .responseApi()
-
-        return body
-    }
-
     fun checkLatestRelease() {
         viewModelScope.launch {
             try {
                 val release = withContext(Dispatchers.IO) {
-                    retrieveLatestRelease()
+                    ReleaseRepo.latestRelease()
                 }
 
                 if (release == null) {
@@ -167,19 +159,6 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
             } catch (e: Exception) {
                 releaseResult.value = parseException(e)
             }
-        }
-    }
-
-    private fun retrieveLatestRelease(): AppRelease? {
-        val (_, body) = Fetch()
-                .setAppId()
-                .get(NextApi.latestRelease)
-                .responseApi()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse(body)
         }
     }
 }
