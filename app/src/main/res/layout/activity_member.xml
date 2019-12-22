@@ -6,7 +6,7 @@
         <import type="android.view.View"/>
         <variable
             name="member"
-            type="com.ft.ftchinese.ui.pay.MemberInfo" />
+            type="com.ft.ftchinese.ui.pay.UIMemberInfo" />
         <variable
             name="buttons"
             type="com.ft.ftchinese.model.VisibleButtons" />

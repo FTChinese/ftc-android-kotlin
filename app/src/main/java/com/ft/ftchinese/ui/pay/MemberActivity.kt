@@ -79,7 +79,7 @@ class MemberActivity : ScopedAppActivity(),
 
         val member = account.membership
 
-        val memberInfo = MemberInfo(
+        val memberInfo = UIMemberInfo(
                 tier = getString(member.tierStringRes),
                 expireDate = member.localizedExpireDate(),
                 autoRenewal = member.autoRenew ?: false,

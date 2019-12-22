@@ -1,6 +1,6 @@
 package com.ft.ftchinese.ui.pay
 
-data class MemberInfo(
+data class UIMemberInfo(
         val tier: String,
         val expireDate: String,
         val autoRenewal: Boolean,
