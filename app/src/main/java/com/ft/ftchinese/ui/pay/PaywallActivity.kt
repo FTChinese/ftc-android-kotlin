@@ -19,6 +19,7 @@ import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
+import com.ft.ftchinese.viewmodel.ProductViewModel
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info

@@ -1,11 +1,11 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel;
 import com.ft.ftchinese.model.subscription.Plan
 
 /**
- * Used by [ProductFragment] to pass information to host
+ * Used by ProductFragment to pass information to host
  * activity which product is selected.
  */
 class ProductViewModel : ViewModel() {

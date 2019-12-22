@@ -15,21 +15,24 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.model.subscription.Cycle
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.subscription.findPlan
+import com.ft.ftchinese.viewmodel.ProductViewModel
 import org.jetbrains.anko.AnkoLogger
 
+/**
+ * Show a card of product.
+ * Hosted insidie [PaywallActivity] or [UpgradeActivity].
+ */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ProductFragment : ScopedFragment(),
         AnkoLogger {
 
     private lateinit var viewModel: ProductViewModel
-//    private var product: PaywallProduct? = null
     private lateinit var binding: FragmentProductBinding
     private var tier: Tier? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        product = arguments?.getParcelable(ARG_PRODUCT)
         tier = arguments?.getParcelable(ARG_TIER)
 
 //        if (tier != null) {
@@ -45,18 +48,10 @@ class ProductFragment : ScopedFragment(),
 
         return UIPaywallProduct(
                 tier = tier,
-                heading = when (tier) {
-                    Tier.STANDARD -> getString(R.string.tier_standard)
-                    Tier.PREMIUM -> getString(R.string.tier_premium)
-                },
-                description = when (tier) {
-                    Tier.STANDARD -> resources
-                            .getStringArray(R.array.standard_benefits)
-                            .joinToString("\n")
-                    Tier.PREMIUM -> resources
-                            .getStringArray(R.array.premium_benefits)
-                            .joinToString("\n")
-                },
+                heading = getString(tier.stringRes),
+                description =resources
+                        .getStringArray(tier.productDescRes)
+                        .joinToString("\n"),
                 smallPrint = if (tier == Tier.PREMIUM) getString(R.string.premium_small_print) else null,
                 yearPrice = getString(R.string.formatter_price_year, yearlyPlan?.amount),
                 monthPrice = if (monthlyPlan != null) {
@@ -71,7 +66,6 @@ class ProductFragment : ScopedFragment(),
 
         binding.product = buildProductCard()
 
-//        return inflater.inflate(R.layout.fragment_product, container, false)
         return binding.root
     }
 
