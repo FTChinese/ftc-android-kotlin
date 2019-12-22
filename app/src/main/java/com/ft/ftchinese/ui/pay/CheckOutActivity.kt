@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.MenuItem
-import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -31,7 +30,6 @@ import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.android.synthetic.main.progress_bar.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -212,8 +210,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
         tracker.checkOut(plan, pm)
 
-        showProgress(true)
-        enablePayBtn(false)
+        binding.inProgress = true
 
         when (pm) {
             PayMethod.ALIPAY -> {
@@ -226,8 +223,7 @@ class CheckOutActivity : ScopedAppActivity(),
                 if (supportedApi < Build.PAY_SUPPORTED_SDK_INT) {
 
                     toast(R.string.wxpay_not_supported)
-                    showProgress(false)
-                    enablePayBtn(true)
+                    binding.inProgress = false
                     return
                 }
 
@@ -239,7 +235,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
                 if (account.membership.isActiveStripe() && !account.membership.expired()) {
                     toast(R.string.duplicate_purchase)
-                    showProgress(false)
+                    binding.inProgress = false
                     return
                 }
                 StripeSubActivity.startForResult(
@@ -247,29 +243,27 @@ class CheckOutActivity : ScopedAppActivity(),
                         RequestCode.PAYMENT,
                         plan
                 )
-                showProgress(false)
+                binding.inProgress = false
             }
         }
     }
 
 
     private fun onAliOrderFetch(result: Result<AliOrder>) {
-        showProgress(false)
-
+        binding.inProgress = false
         info(result)
 
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
-                enablePayBtn(true)
                 tracker.buyFail(paymentIntent?.plan)
             }
             is Result.Error -> {
                 result.exception.message?.let { toast(it) }
-                enablePayBtn(true)
                 tracker.buyFail(paymentIntent?.plan)
             }
             is Result.Success -> {
+                binding.payBtn.isEnabled = false
                 launchAliPay(result.data)
             }
         }
@@ -302,7 +296,7 @@ class CheckOutActivity : ScopedAppActivity(),
             if (resultStatus != "9000") {
 
                 toast(msg)
-                enablePayBtn(true)
+                binding.payBtn.isEnabled = true
 
                 tracker.buyFail(plan)
 
@@ -331,12 +325,12 @@ class CheckOutActivity : ScopedAppActivity(),
 
 
         toast(R.string.refreshing_account)
-        showProgress(true)
         accountViewModel.refresh(account)
     }
 
     private fun onAccountRefreshed(accountResult: Result<Account>) {
-        showProgress(false)
+        binding.inProgress = false
+
         when (accountResult) {
             is Result.LocalizedError -> {
                 toast(accountResult.msgId)
@@ -360,57 +354,22 @@ class CheckOutActivity : ScopedAppActivity(),
                 finish()
             }
         }
-//        if (accountResult == null) {
-//            return
-//        }
-//
-//        if (accountResult.error != null) {
-//            toast(accountResult.error)
-//            return
-//        }
-//
-//        if (accountResult.exception != null) {
-//            toast(parseException(accountResult.exception))
-//            return
-//        }
-//
-//
-//        if (accountResult.success == null) {
-//            toast(R.string.order_not_found)
-//            return
-//        }
-
-//        val remoteAccount = accountResult.success
-//
-//        val localAccount = sessionManager.loadAccount() ?: return
-//
-//
-//        if (localAccount.membership.useRemote(remoteAccount.membership)) {
-//            sessionManager.saveAccount(remoteAccount)
-//        }
-//
-//        toast(R.string.subs_success)
-//
-//        LatestOrderActivity.start(this)
-//        setResult(Activity.RESULT_OK)
-//        finish()
     }
 
     private fun onWxOrderFetched(result: Result<WxOrder>) {
-        showProgress(false)
+        binding.inProgress = false
 
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
-                enablePayBtn(true)
                 tracker.buyFail(paymentIntent?.plan)
             }
             is Result.Error -> {
                 result.exception.message?.let { toast(it) }
-                enablePayBtn(true)
                 tracker.buyFail(paymentIntent?.plan)
             }
             is Result.Success -> {
+                binding.payBtn.isEnabled = false
                 launchWxPay(result.data)
             }
         }
@@ -453,7 +412,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
             toast(R.string.permission_alipay_denied)
 
-            enableAlipay(false)
+            binding.alipayBtn.isEnabled = false
         }
     }
 
@@ -465,7 +424,7 @@ class CheckOutActivity : ScopedAppActivity(),
                 if (grantResults.isEmpty()) {
                     toast(R.string.permission_alipay_denied)
 
-                    enableAlipay(false)
+                    binding.alipayBtn.isEnabled = false
                     return
                 }
 
@@ -473,7 +432,7 @@ class CheckOutActivity : ScopedAppActivity(),
                     if (x == PackageManager.PERMISSION_DENIED) {
                         toast(R.string.permission_alipay_denied)
 
-                        enableAlipay(false)
+                        binding.alipayBtn.isEnabled = false
                         return
                     }
                 }
@@ -483,25 +442,11 @@ class CheckOutActivity : ScopedAppActivity(),
         }
     }
 
-    private fun showProgress(show: Boolean) {
-        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
-    }
-
-    private fun enablePayBtn(enable: Boolean) {
-        binding.payBtn.isEnabled = enable
-    }
-
-    // Enable/Disable Alipay radio button depending on
-    // whether user granted permissions.
-    private fun enableAlipay(enable: Boolean) {
-        binding.alipayBtn.isEnabled = enable
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode != Activity.RESULT_OK) {
-            enablePayBtn(true)
+            binding.inProgress = false
             return
         }
         if (requestCode == RequestCode.PAYMENT) {

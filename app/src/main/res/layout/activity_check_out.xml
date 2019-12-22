@@ -13,6 +13,9 @@
         <variable
             name="payButtonText"
             type="String" />
+        <variable
+            name="inProgress"
+            type="Boolean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -109,10 +112,12 @@
             android:layout_height="wrap_content"
             style="@style/AppButton.BottomSticky"
             android:text="@{payButtonText ?? @string/check_out}"
+            android:enabled="@{!inProgress}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintVertical_bias="1.0"/>
 
-        <include layout="@layout/progress_bar"/>
+        <include layout="@layout/progress_indicator_circular"
+            bind:inProgress="@{inProgress}"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
