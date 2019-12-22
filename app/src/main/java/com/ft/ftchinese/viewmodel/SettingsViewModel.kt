@@ -9,9 +9,6 @@ import com.ft.ftchinese.database.ReadingHistoryDao
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.util.*
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.viewmodel.parseApiError
-import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
