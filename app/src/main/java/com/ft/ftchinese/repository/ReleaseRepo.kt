@@ -10,7 +10,7 @@ object ReleaseRepo : AnkoLogger {
     fun retrieveRelease(versionName: String): String? {
         val (_, body) = Fetch()
                 .setAppId()
-                .get("${NextApi.releaseOf}/v$versionName")
+                .get("${NextApi.releaseOf}/${normalizeVersionName(versionName)}")
                 .responseApi()
 
         return body
@@ -27,5 +27,19 @@ object ReleaseRepo : AnkoLogger {
         } else {
             json.parse(body)
         }
+    }
+
+    private fun normalizeVersionName(versionName: String): String {
+        val parts = versionName.split("-")
+        if (parts.isEmpty()) {
+            return versionName
+        }
+
+        val name = parts[0]
+        if (name.startsWith("v")) {
+            return name
+        }
+
+        return "v$name"
     }
 }
