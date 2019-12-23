@@ -1,145 +1,169 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".TestActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="inProgress"
+            type="Boolean" />
+    </data>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        tools:context=".TestActivity">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <com.google.android.material.appbar.AppBarLayout
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:elevation="4dp"
-            app:layout_scrollFlags="scroll|enterAlways"/>
+            android:layout_height="wrap_content">
 
-    </com.google.android.material.appbar.AppBarLayout>
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:elevation="4dp"
+                app:layout_scrollFlags="scroll|enterAlways"/>
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scroll_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        </com.google.android.material.appbar.AppBarLayout>
 
-        <LinearLayout
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingTop="16dp"
-            android:paddingBottom="32dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp">
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <Button
-                android:id="@+id/btn_login_in"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Mock Login"/>
+                android:orientation="vertical"
+                android:paddingTop="16dp"
+                android:paddingBottom="32dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp">
 
-            <Button
-                android:id="@+id/btn_start_download"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Start Download" />
+                <Button
+                    android:id="@+id/btn_login_in"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Mock Login"
+                    android:textAllCaps="false" />
 
-            <Button
-                android:id="@+id/btn_find_download"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Find Download"/>
+                <Button
+                    android:id="@+id/btn_start_download"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Start Download"
+                    android:textAllCaps="false" />
 
-            <Button
-                android:id="@+id/btn_install_apk"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Install APK"/>
+                <Button
+                    android:id="@+id/btn_find_download"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Find Download"
+                    android:textAllCaps="false" />
 
-            <Button
-                android:id="@+id/btn_download_status"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Download Status"/>
+                <Button
+                    android:id="@+id/btn_install_apk"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Install APK"
+                    android:textAllCaps="false" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/create_channel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Create Notification Channel"/>
+                <Button
+                    android:id="@+id/btn_download_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Download Status"
+                    android:textAllCaps="false" />
 
-            <Button
-                android:id="@+id/create_notification"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Create Local Notification"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/create_channel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Create Notification Channel"
+                    android:textAllCaps="false" />
 
-            <Button
-                android:id="@+id/subscribeButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/AppButton.OutlinedButton"
-                android:text="FCM Subscribe a Topic"/>
+                <Button
+                    android:id="@+id/create_notification"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Create Local Notification"
+                    android:textAllCaps="false" />
 
-            <Button
-                android:id="@+id/check_google_api"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Check Google API"/>
+                <Button
+                    android:id="@+id/subscribeButton"
+                    style="@style/AppButton.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="FCM Subscribe a Topic"
+                    android:textAllCaps="false" />
 
-            <Button
-                android:id="@+id/logTokenButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="FCM Log Token" />
+                <Button
+                    android:id="@+id/check_google_api"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Check Google API"
+                    android:textAllCaps="false" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/download_google_play"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Download Google Play service"/>
+                <Button
+                    android:id="@+id/logTokenButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="FCM Log Token"
+                    android:textAllCaps="false" />
 
-            <Button
-                android:id="@+id/show_bottom_sheet"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Bottom sheet dialog"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/download_google_play"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Download Google Play service"
+                    android:textAllCaps="false" />
 
-            <Button
-                android:id="@+id/audio_player"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Open Audio Player"/>
+                <Button
+                    android:id="@+id/show_bottom_sheet"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Bottom sheet dialog"
+                    android:textAllCaps="false" />
 
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
+                <Button
+                    android:id="@+id/audio_player"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Open Audio Player"/>
 
-
-    <com.google.android.material.bottomappbar.BottomAppBar
-        android:id="@+id/bottom_bar"
-        style="@style/Widget.MaterialComponents.BottomAppBar"
-        android:backgroundTint="@color/colorPaper"
-        app:hideOnScroll="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"/>
-    
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_anchor="@id/bottom_bar"
-        app:srcCompat="@drawable/ic_bookmark_border_black_24dp"/>
-
-    <androidx.core.widget.ContentLoadingProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"/>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
 
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <com.google.android.material.bottomappbar.BottomAppBar
+            android:id="@+id/bottom_bar"
+            style="@style/Widget.MaterialComponents.BottomAppBar"
+            android:backgroundTint="@color/colorPaper"
+            app:hideOnScroll="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_anchor="@id/bottom_bar"
+            app:srcCompat="@drawable/ic_bookmark_border_black_24dp"/>
+
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="@{inProgress ? View.VISIBLE : View.GONE}"/>
+
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</layout>

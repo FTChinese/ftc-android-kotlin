@@ -11,26 +11,25 @@ import android.os.Bundle
 import android.os.Environment
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
+import androidx.databinding.DataBindingUtil
+import com.ft.ftchinese.databinding.ActivityTestBinding
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.subscription.Cycle
 import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.model.subscription.findPlan
 import com.ft.ftchinese.service.PollService
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
 import com.ft.ftchinese.ui.article.*
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.LatestOrderActivity
-import com.ft.ftchinese.ui.pay.StripeSubActivity
 import com.ft.ftchinese.wxapi.WXEntryActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import com.google.android.gms.common.ConnectionResult
@@ -48,6 +47,7 @@ import java.io.File
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class TestActivity : ScopedAppActivity(), AnkoLogger {
 
+    private lateinit var binding: ActivityTestBinding
     private lateinit var orderManger: OrderManager
     private var errorDialog: Dialog? = null
     private lateinit var sessionManager: SessionManager
@@ -78,8 +78,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_test)
-
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_test)
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -110,7 +109,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         btn_start_download.setOnClickListener {
             it.isEnabled = false
             toast("Start downloading")
-            showProgress(true)
+            binding.inProgress = true
             download()
         }
 
@@ -312,7 +311,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
             if (downloadId == id) {
                 btn_start_download.isEnabled = true
-                showProgress(false)
+                binding.inProgress = false
 
                 alert(Appcompat,"Download complete. Install now?", "Install") {
                     positiveButton("Install") {
@@ -504,10 +503,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         return getSharedPreferences(PREF_FILE_DOWNLOAD, Context.MODE_PRIVATE).getLong(PREF_DOWNLOAD_ID, -1)
     }
 
-    private fun showProgress(show: Boolean) {
-        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
-    }
-
     private fun isExternalStorageWritable(): Boolean {
         return Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
     }
@@ -616,7 +611,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             }
             R.id.menu_stripe_subscripiton -> {
 
-                StripeSubActivity.startTest(this, findPlan(Tier.STANDARD, Cycle.YEAR))
+//                StripeSubActivity.startTest(this, findPlan(Tier.STANDARD, Cycle.YEAR))
             }
         }
     }
@@ -631,8 +626,8 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         return true
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
             R.id.menu_share -> {
                 startActivity(Intent.createChooser(Intent().apply {
                     action = Intent.ACTION_SEND
