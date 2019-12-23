@@ -126,6 +126,7 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_update_app)
+        binding.release = AppRelease()
 
         setSupportActionBar(toolbar)
 
@@ -133,8 +134,6 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
         }
-
-        binding.release = AppRelease()
 
         registerReceiver(onNotificationClicked, IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED))
         registerReceiver(onDownloadComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
