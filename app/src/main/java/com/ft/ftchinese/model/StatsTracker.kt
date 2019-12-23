@@ -72,7 +72,7 @@ class StatsTracker private constructor(context: Context) {
 
     fun checkOut(plan: Plan, payMethod: PayMethod) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
-            putDouble(FirebaseAnalytics.Param.VALUE, plan.netPrice)
+            putDouble(FirebaseAnalytics.Param.VALUE, plan.amount)
             putString(FirebaseAnalytics.Param.CURRENCY, plan.currency)
             putString(FirebaseAnalytics.Param.METHOD, payMethod.toString())
         })

@@ -50,6 +50,7 @@ class CurrentReleaseActivity : ScopedAppActivity() {
     }
 
     private fun setup() {
+        // First tries to load release from cache. If not found, fetch from network.
         settingsViewModel.cachedReleaseFound.observe(this, Observer {
             if (it) {
                 return@Observer
@@ -69,7 +70,6 @@ class CurrentReleaseActivity : ScopedAppActivity() {
             binding.inProgress = false
         })
 
-        binding.inProgress = true
         settingsViewModel.loadCachedRelease(cache)
     }
 
