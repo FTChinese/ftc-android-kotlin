@@ -3,20 +3,22 @@ package com.ft.ftchinese.ui.settings
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
-import android.view.View
+import androidx.annotation.RequiresApi
+import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityFcmBinding
 import com.ft.ftchinese.ui.base.ListAdapter
 import com.ft.ftchinese.ui.base.ListItem
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
-import kotlinx.android.synthetic.main.activity_fcm.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -25,11 +27,12 @@ class FCMActivity : AppCompatActivity(), AnkoLogger {
 
     private var errorDialog: Dialog? = null
     private var listAdapter: ListAdapter? = null
+    private lateinit var binding: ActivityFcmBinding
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_fcm)
-
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_fcm)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -39,14 +42,14 @@ class FCMActivity : AppCompatActivity(), AnkoLogger {
 
         listAdapter = ListAdapter(listOf())
 
-        rv_fcm_progress.apply {
+        binding.rvFcmProgress.apply {
             layoutManager = LinearLayoutManager(this@FCMActivity)
             adapter = listAdapter
         }
 
         // See https://developer.android.com/training/notify-user/channels#UpdateChannel
         // Open settings for a specific channel
-        tv_notification_setting.setOnClickListener {
+        binding.tvNotificationSetting.setOnClickListener {
             val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
                 putExtra(Settings.EXTRA_APP_PACKAGE, BuildConfig.APPLICATION_ID)
                 putExtra(Settings.EXTRA_CHANNEL_ID, getString(R.string.news_notification_channel_id))
@@ -55,8 +58,8 @@ class FCMActivity : AppCompatActivity(), AnkoLogger {
             startActivity(intent)
         }
 
-        btn_check_fcm.setOnClickListener {
-            showProgress(true)
+        binding.btnCheckFcm.setOnClickListener {
+            binding.inProgress = true
 
             listAdapter?.clear()
 
@@ -66,11 +69,6 @@ class FCMActivity : AppCompatActivity(), AnkoLogger {
 
             retrieveRegistrationToken()
         }
-    }
-
-    private fun showProgress(show: Boolean) {
-        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
-        btn_check_fcm.isEnabled = !show
     }
 
     private fun buildPlayServiceText(available: Boolean): ListItem {
@@ -131,7 +129,7 @@ class FCMActivity : AppCompatActivity(), AnkoLogger {
 
                         listAdapter?.add(buildTokenText(false))
 
-                        showProgress(false)
+                        binding.inProgress = false
                         return@OnCompleteListener
                     }
 
@@ -140,7 +138,7 @@ class FCMActivity : AppCompatActivity(), AnkoLogger {
                     info("Token $token")
 
                     listAdapter?.add(buildTokenText(true))
-                    showProgress(false)
+                    binding.inProgress = false
                 })
     }
 
