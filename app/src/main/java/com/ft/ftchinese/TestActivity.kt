@@ -37,7 +37,6 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessaging
-import kotlinx.android.synthetic.main.activity_test.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.threeten.bp.LocalDate
@@ -79,7 +78,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_test)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
@@ -106,26 +105,26 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
         registerReceiver(onDownloadClicked, IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED))
 
-        btn_start_download.setOnClickListener {
+        binding.btnStartDownload.setOnClickListener {
             it.isEnabled = false
             toast("Start downloading")
             binding.inProgress = true
             download()
         }
 
-        btn_find_download.setOnClickListener {
+        binding.btnFindDownload.setOnClickListener {
             getDownloadedUri()
         }
 
-        btn_download_status.setOnClickListener {
+        binding.btnDownloadStatus.setOnClickListener {
             getDownloadStatus()
         }
 
-        btn_install_apk.setOnClickListener {
+        binding.btnInstallApk.setOnClickListener {
             install()
         }
 
-        create_channel.setOnClickListener {
+        binding.createChannel.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val channelId = getString(R.string.news_notification_channel_id)
                 val channelName = getString(R.string.news_notification_channel_name)
@@ -146,7 +145,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             }
         }
 
-        create_notification.setOnClickListener {
+        binding.createNotification.setOnClickListener {
             createNotification()
         }
 
@@ -158,7 +157,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         // Subscribe a topic.
-        subscribeButton.setOnClickListener {
+        binding.btnSubscribeTopic.setOnClickListener {
             info("Subscribing to news topic")
 
             FirebaseMessaging
@@ -174,7 +173,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         // Retrieve registration token.
-        logTokenButton.setOnClickListener {
+        binding.btnLogToken.setOnClickListener {
             FirebaseInstanceId
                     .getInstance()
                     .instanceId
@@ -192,7 +191,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                     })
         }
 
-        check_google_api.setOnClickListener {
+        binding.checkGoogleApi.setOnClickListener {
             if (checkPlayServices()) {
                 alert(Appcompat, "Play service available").show()
             } else {
@@ -200,7 +199,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             }
         }
 
-        download_google_play.setOnClickListener {
+        binding.downloadGooglePlay.setOnClickListener {
             val googleApiAvailability = GoogleApiAvailability.getInstance()
 
             googleApiAvailability.makeGooglePlayServicesAvailable(this)
@@ -212,22 +211,26 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                     }
         }
 
-        bottom_bar.replaceMenu(R.menu.activity_test_menu)
-        bottom_bar.setOnMenuItemClickListener {
+        binding.bottomBar.replaceMenu(R.menu.activity_test_menu)
+        binding.bottomBar.setOnMenuItemClickListener {
             onBottomMenuItemClicked(it)
 
             true
         }
 
-        show_bottom_sheet.setOnClickListener {
+        binding.showBottomSheet.setOnClickListener {
 
             BarrierFragment().show(supportFragmentManager, "BarrierFragment")
         }
 
-        btn_login_in.setOnClickListener {
+        binding.btnLogin.setOnClickListener {
             sessionManager.saveAccount(mockAccount)
         }
 
+        binding.progressButtonText = "Test Button with Progress Bar"
+        binding.btnProgress.button.setOnClickListener {
+            binding.inProgress = true
+        }
     }
 
     private fun createNotification() {
@@ -310,7 +313,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
 
             if (downloadId == id) {
-                btn_start_download.isEnabled = true
+                binding.btnStartDownload.isEnabled = true
                 binding.inProgress = false
 
                 alert(Appcompat,"Download complete. Install now?", "Install") {
