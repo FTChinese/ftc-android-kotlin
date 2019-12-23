@@ -34,7 +34,7 @@
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:enabled="@{enableInput}" />
+                android:enabled="@{enableInput ?? true}" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:text="@string/btn_next"
-            android:enabled="@{enableInput}"
+            android:enabled="@{enableInput ?? false}"
             app:layout_constraintEnd_toEndOf="@+id/email_container"
             app:layout_constraintStart_toStartOf="@+id/email_container"
             app:layout_constraintTop_toBottomOf="@+id/email_container" />

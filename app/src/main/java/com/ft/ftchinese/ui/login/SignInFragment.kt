@@ -30,8 +30,6 @@ class SignInFragment : ScopedFragment(),
     private lateinit var viewModel: LoginViewModel
     private lateinit var binding: FragmentSignInBinding
 
-
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
