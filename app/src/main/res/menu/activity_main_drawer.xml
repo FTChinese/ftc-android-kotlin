@@ -18,7 +18,7 @@
             android:icon="@drawable/ic_account_box_black_24dp"
             android:title="@string/title_account" />
         <item
-            android:id="@+id/action_subscription"
+            android:id="@+id/action_paywall"
             android:icon="@drawable/ic_card_membership_black_24dp"
             android:title="@string/title_subscription" />
 
@@ -38,10 +38,7 @@
             android:id="@+id/action_feedback"
             android:icon="@drawable/ic_feedback_black_24dp"
             android:title="@string/action_feedback"/>
-        <!--<item-->
-            <!--android:id="@+id/action_about"-->
-            <!--android:icon="@drawable/ic_info_black_24dp"-->
-            <!--android:title="@string/action_about"/>-->
+
         <item
             android:id="@+id/action_settings"
             android:icon="@drawable/ic_settings_black_24dp"

@@ -5,8 +5,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivitySplashBinding
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
@@ -14,9 +16,7 @@ import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.util.FileCache
-import kotlinx.android.synthetic.main.activity_splash.*
-import kotlinx.android.synthetic.main.activity_splash.ad_image
-import kotlinx.android.synthetic.main.activity_splash.ad_timer
+import com.ft.ftchinese.viewmodel.SplashViewModel
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -34,10 +34,11 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var splashViewModel: SplashViewModel
     private var counterJob: Job? = null
     private var customTabsOpened: Boolean = false
+    private lateinit var binding: ActivitySplashBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_splash)
 
         cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
@@ -116,7 +117,6 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun initUI() {
-        ad_timer.visibility = View.GONE
 
         val splashAd = splashManager.load()
 
@@ -151,7 +151,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
             return
         }
 
-        ad_timer.setOnClickListener {
+        binding.adTimer.setOnClickListener {
             statsTracker.adSkipped(splashAd)
             counterJob?.cancel()
 
@@ -159,7 +159,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
             return@setOnClickListener
         }
 
-        ad_image.setOnClickListener {
+        binding.adImage.setOnClickListener {
             statsTracker.adClicked(splashAd)
             counterJob?.cancel()
 
@@ -184,11 +184,10 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
 
             hideSystemUI()
 
-            ad_image.setImageDrawable(drawable)
-            ad_timer.visibility = View.VISIBLE
+            binding.adImage.setImageDrawable(drawable)
 
             for (i in 5 downTo  1) {
-                ad_timer.text = getString(R.string.prompt_ad_timer, i)
+                binding.timerText = getString(R.string.prompt_ad_timer, i)
                 delay(1000)
             }
 
@@ -199,8 +198,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
     // NOTE: it must be called in the main thread.
     // If you call is in a non-Main coroutine, it crashes.
     private fun exit() {
-        ad_timer.visibility = View.GONE
-        ad_image.visibility = View.GONE
+        binding.timerText = null
 
         showSystemUI()
         MainActivity.start(this)
@@ -208,7 +206,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun hideSystemUI() {
-        ad_container.systemUiVisibility = View.SYSTEM_UI_FLAG_LOW_PROFILE or
+        binding.adContainer.systemUiVisibility = View.SYSTEM_UI_FLAG_LOW_PROFILE or
                 View.SYSTEM_UI_FLAG_FULLSCREEN or
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
@@ -217,7 +215,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun showSystemUI() {
-        ad_container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+        binding.adContainer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
     }
 
     override fun onResume() {

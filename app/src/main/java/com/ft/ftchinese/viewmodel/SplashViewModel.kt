@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.launch
+package com.ft.ftchinese.viewmodel
 
 import android.net.Uri
 import androidx.lifecycle.MutableLiveData

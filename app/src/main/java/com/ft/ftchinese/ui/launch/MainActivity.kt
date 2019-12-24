@@ -14,11 +14,14 @@ import android.view.*
 import android.webkit.WebView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.TestActivity
+import com.ft.ftchinese.databinding.ActivityMainBinding
+import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isActiveNetworkWifi
 import com.ft.ftchinese.ui.base.isNetworkConnected
@@ -42,19 +45,19 @@ import com.ft.ftchinese.ui.pay.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.util.*
 import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.SplashViewModel
 import com.google.android.exoplayer2.offline.DownloadService
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.drawer_nav_header.view.*
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
+import java.io.InputStream
 
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
@@ -66,11 +69,12 @@ class MainActivity : ScopedAppActivity(),
 
     private var bottomDialog: BottomSheetDialog? = null
     private var mBackKeyPressed = false
+    private var mChannelPages: Array<ChannelSource>? = null
 
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var splashViewModel: SplashViewModel
-
-    private var mChannelPages: Array<ChannelSource>? = null
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var navHeaderBinding: DrawerNavHeaderBinding
 
     private lateinit var cache: FileCache
 
@@ -80,19 +84,13 @@ class MainActivity : ScopedAppActivity(),
 
     private lateinit var statsTracker: StatsTracker
 
-    private var headerView: View? = null
-    private var menuItemAccount: MenuItem? = null
-    private var menuItemSubs: MenuItem? = null
-    private var menuItemMySubs: MenuItem? = null
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
 
-        displayLogo(true)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        setSupportActionBar(binding.toolbar)
+
+        displayLogo()
 
         if (BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true)
@@ -112,70 +110,26 @@ class MainActivity : ScopedAppActivity(),
         sessionManager = SessionManager.getInstance(this)
         tokenManager = TokenManager.getInstance(this)
 
-        val menu = drawer_nav.menu
-        headerView = drawer_nav.getHeaderView(0)
-
-        menuItemAccount = menu.findItem(R.id.action_account)
-        menuItemSubs = menu.findItem(R.id.action_subscription)
-        menuItemMySubs = menu.findItem(R.id.action_my_subs)
-
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
-
-        // If avatar is downloaded from network.
-        accountViewModel.avatarRetrieved.observe(this, Observer {
-
-            when (it) {
-                is Result.LocalizedError -> {
-                    toast(it.msgId)
-                }
-                is Result.Error -> {
-                    it.exception.message?.let { toast(it) }
-                }
-                is Result.Success -> {
-                    headerView?.nav_header_image?.setImageDrawable(
-                            Drawable.createFromStream(
-                                    it.data,
-                                    WX_AVATAR_NAME
-                            )
-                    )
-                }
-            }
-//            if (it == null) {
-//                return@Observer
-//            }
-//
-//            if (it.exception != null) {
-//                info("Loading avatar error: ${it.exception}")
-//                return@Observer
-//            }
-//
-//            if (it.success == null) {
-//                return@Observer
-//            }
-//
-//            headerView?.nav_header_image?.setImageDrawable(
-//                    Drawable.createFromStream(
-//                            it.success,
-//                            WX_AVATAR_NAME
-//                    )
-//            )
-        })
 
 
         // Set ViewPager adapter
         setupHome()
 
         // Link ViewPager and TabLayout
-        tab_layout.setupWithViewPager(view_pager)
-        tab_layout.addOnTabSelectedListener(this)
+        binding.tabLayout.setupWithViewPager(binding.viewPager)
+        binding.tabLayout.addOnTabSelectedListener(this)
 
         setupBottomNav()
 
         setupDrawer()
 
-        // Update UI.
-        updateSessionUI()
+        // If avatar is downloaded from network.
+        // TODO: move to a method.
+        accountViewModel.avatarRetrieved.observe(this, Observer {
+            onAvatarRetrieved(it)
+        })
 
         if (BuildConfig.DEBUG) {
             info("onCreate finished. Build flavor: ${BuildConfig.FLAVOR}. Is debug: ${BuildConfig.DEBUG}")
@@ -185,10 +139,9 @@ class MainActivity : ScopedAppActivity(),
 
         checkWxSession()
 
-        drawer_nav.menu
+        // For testing
+        binding.drawerNav.menu
                 .setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
-
-//        retrieveRegistrationToken()
 
         checkStripeStatus()
 
@@ -199,6 +152,7 @@ class MainActivity : ScopedAppActivity(),
         } catch (e: Exception) {
             DownloadService.startForeground(this, AudioDownloadService::class.java)
         }
+
     }
 
     private fun createNotificationChannel() {
@@ -220,51 +174,43 @@ class MainActivity : ScopedAppActivity(),
     }
 
     private fun setupBottomNav() {
-        bottom_nav.setOnNavigationItemSelectedListener {
+        binding.bottomNav.setOnNavigationItemSelectedListener {
             info("Selected bottom nav item ${it.title}")
 
             when (it.itemId) {
                 R.id.nav_news -> {
                     setupHome()
 
-                    displayLogo(true)
+                    displayLogo()
                 }
 
                 R.id.nav_english -> {
-//                    if (mEnglishAdapter == null) {
-//                        mEnglishAdapter = TabPagerAdapter(Navigation.englishPages, supportFragmentManager)
-//                    }
-                    view_pager.adapter = TabPagerAdapter(Navigation.englishPages, supportFragmentManager)
+
+                    binding.viewPager.adapter = TabPagerAdapter(Navigation.englishPages, supportFragmentManager)
                     mChannelPages = Navigation.englishPages
 
                     displayTitle(R.string.nav_english)
                 }
 
                 R.id.nav_ftacademy -> {
-//                    if (mFtaAdapter == null) {
-//                        mFtaAdapter = TabPagerAdapter(Navigation.ftaPages, supportFragmentManager)
-//                    }
-                    view_pager.adapter = TabPagerAdapter(Navigation.ftaPages, supportFragmentManager)
+
+                    binding.viewPager.adapter = TabPagerAdapter(Navigation.ftaPages, supportFragmentManager)
                     mChannelPages = Navigation.ftaPages
 
                     displayTitle(R.string.nav_ftacademy)
                 }
 
                 R.id.nav_video -> {
-//                    if (mVideoAdapter == null) {
-//                        mVideoAdapter = TabPagerAdapter(Navigation.videoPages, supportFragmentManager)
-//                    }
-                    view_pager.adapter = TabPagerAdapter(Navigation.videoPages, supportFragmentManager)
+
+                    binding.viewPager.adapter = TabPagerAdapter(Navigation.videoPages, supportFragmentManager)
                     mChannelPages = Navigation.videoPages
 
                     displayTitle(R.string.nav_video)
                 }
 
                 R.id.nav_myft -> {
-//                    if (mMyftPagerAdapter == null) {
-//                        mMyftPagerAdapter = MyftPagerAdapter(supportFragmentManager)
-//                    }
-                    view_pager.adapter = MyftPagerAdapter(supportFragmentManager)
+
+                    binding.viewPager.adapter = MyftPagerAdapter(supportFragmentManager)
                     mChannelPages = null
 
                     displayTitle(R.string.nav_myft)
@@ -274,25 +220,39 @@ class MainActivity : ScopedAppActivity(),
         }
     }
 
+    private fun setupHome() {
+        binding.viewPager.adapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
+        mChannelPages = Navigation.newsPages
+    }
+
     /**
      * Add event listener to drawer menu.
      */
     private fun setupDrawer() {
+
+        navHeaderBinding = DataBindingUtil.inflate(
+                layoutInflater,
+                R.layout.drawer_nav_header,
+                binding.drawerNav,
+                false)
+
+        binding.drawerNav.addHeaderView(navHeaderBinding.root)
+
         val toggle = ActionBarDrawerToggle(
                 this,
-                drawer_layout,
-                toolbar,
+                binding.drawerLayout,
+                binding.toolbar,
                 R.string.navigation_drawer_open,
                 R.string.navigation_drawer_close)
-        drawer_layout.addDrawerListener(toggle)
+        binding.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
         // Set a listener that will be notified when a menu item is selected.
-        drawer_nav.setNavigationItemSelectedListener {
+        binding.drawerNav.setNavigationItemSelectedListener {
             when (it.itemId) {
                 R.id.action_login ->  LoginActivity.startForResult(this)
                 R.id.action_account -> AccountActivity.start(this)
-                R.id.action_subscription -> {
+                R.id.action_paywall -> {
                     // Tracking
                     PaywallTracker.fromDrawer()
 
@@ -314,90 +274,122 @@ class MainActivity : ScopedAppActivity(),
                 }
             }
 
-            drawer_layout.closeDrawer(GravityCompat.START)
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
 
             true
         }
 
         // Set listener on the title text inside drawer's header view
-        drawer_nav.getHeaderView(0)
-                ?.findViewById<TextView>(R.id.nav_header_title)
-                ?.setOnClickListener {
-                    if (!sessionManager.isLoggedIn()) {
-                        LoginActivity.startForResult(this)
-                        return@setOnClickListener
-                    }
+        navHeaderBinding.navHeaderTitle.setOnClickListener {
+            if (!sessionManager.isLoggedIn()) {
+                LoginActivity.startForResult(this)
+                return@setOnClickListener
+            }
 
-                    // Setup bottom dialog
-                    if (bottomDialog == null) {
-                        bottomDialog = BottomSheetDialog(this)
-                        bottomDialog?.setContentView(R.layout.fragment_logout)
-                    }
+            // Setup bottom dialog
+            if (bottomDialog == null) {
+                bottomDialog = BottomSheetDialog(this)
+                bottomDialog?.setContentView(R.layout.fragment_logout)
+            }
 
-                    bottomDialog?.findViewById<TextView>(R.id.action_logout)?.setOnClickListener{
-                        logout()
+            bottomDialog?.findViewById<TextView>(R.id.action_logout)?.setOnClickListener{
+                logout()
 
-                        bottomDialog?.dismiss()
-                        toast("账号已登出")
-                    }
+                bottomDialog?.dismiss()
+                toast("账号已登出")
+            }
 
-                    bottomDialog?.show()
-                }
-    }
+            bottomDialog?.show()
+        }
 
-    private fun setupHome() {
-        view_pager.adapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
-        mChannelPages = Navigation.newsPages
+        updateSessionUI()
     }
 
     /**
      * Update UI depending on user's login/logout state
      */
     private fun updateSessionUI() {
+
         val account = sessionManager.loadAccount()
 
-        if (account == null) {
-            headerView?.nav_header_title?.text = getString(R.string.nav_not_logged_in)
-            headerView?.nav_header_image?.setImageResource(R.drawable.ic_account_circle_black_24dp)
+        navHeaderBinding.account = account
+        // show signin/signup if account is null.
+        binding.drawerNav.menu.setGroupVisible(R.id.drawer_group_sign_in_up, account == null)
 
-            // show signin/signup
-            drawer_nav.menu
-                    .setGroupVisible(R.id.drawer_group_sign_in_up, true)
+        // Show login/signup if account does not exist.
+        binding.drawerNav.menu
+                .findItem(R.id.action_account)
+                ?.isVisible = account != null
 
-            // Do not show account
-            menuItemAccount?.isVisible = false
-            // Show subscription
-            menuItemSubs?.isVisible = true
-            // Do not show my subscription
-            menuItemMySubs?.isVisible = false
-            return
-        }
+        // Only show when user is a member.
+        binding.drawerNav.menu
+                .findItem(R.id.action_my_subs)
+                ?.isVisible = account?.isMember ?: false
 
-        headerView?.nav_header_title?.text = account.displayName
+        // If account is null, or not a member, show paywall.
+        binding.drawerNav.menu
+                .findItem(R.id.action_paywall)
+                ?.isVisible = !(account?.isMember ?: false)
 
         // Load wechat avatar.
-        if (isNetworkConnected()) {
+        if (account != null && isNetworkConnected()) {
             accountViewModel.fetchWxAvatar(
                     cache,
                     account.wechat
             )
         }
 
+//        if (account == null) {
+//            headerView?.nav_header_title?.text = getString(R.string.nav_not_logged_in)
+//            headerView?.nav_header_image?.setImageResource(R.drawable.ic_account_circle_black_24dp)
+
+            // show signin/signup
+//            binding.drawerNav.menu.setGroupVisible(R.id.drawer_group_sign_in_up, true)
+
+            // Do not show account
+//            menuItemAccount?.isVisible = false
+            // Show subscription
+//            menuItemPaywall?.isVisible = true
+            // Do not show my subscription
+//            menuItemMySubs?.isVisible = false
+//            return
+//        }
+
+//        headerView?.nav_header_title?.text = account.displayName
+
+
 
         // Hide signin/signup
-        drawer_nav.menu
-                .setGroupVisible(R.id.drawer_group_sign_in_up, false)
+//        drawer_nav.menu.setGroupVisible(R.id.drawer_group_sign_in_up, false)
         // Show account
-        menuItemAccount?.isVisible = true
+//        menuItemAccount?.isVisible = true
 
         // If user is not logged in, isMember always false.
-        val isMember = account.isMember
+//        val isMember = account.isMember
 
         // Show subscription if user is a member; otherwise
         // hide it
-        menuItemSubs?.isVisible = !isMember
+//        menuItemPaywall?.isVisible = !isMember
         // Show my subscription if user is a member; otherwise hide it.
-        menuItemMySubs?.isVisible = isMember
+//        menuItemMySubs?.isVisible = isMember
+    }
+
+    private fun onAvatarRetrieved(result: Result<InputStream>) {
+        when (result) {
+            is Result.LocalizedError -> {
+                info(getString(result.msgId))
+            }
+            is Result.Error -> {
+                info(result.exception)
+            }
+            is Result.Success -> {
+
+                navHeaderBinding.avatar = Drawable.createFromStream(
+                        result.data,
+                        WX_AVATAR_NAME
+                )
+            }
+        }
     }
 
     private fun logout() {
@@ -407,15 +399,10 @@ class MainActivity : ScopedAppActivity(),
         updateSessionUI()
     }
 
-    private fun displayLogo(show: Boolean) {
-        if (show) {
-            supportActionBar?.setDisplayUseLogoEnabled(true)
-            supportActionBar?.setDisplayShowTitleEnabled(false)
-            supportActionBar?.setLogo(R.drawable.ic_menu_masthead)
-        } else {
-            supportActionBar?.setDisplayUseLogoEnabled(false)
-            supportActionBar?.setDisplayShowTitleEnabled(false)
-        }
+    private fun displayLogo() {
+        supportActionBar?.setDisplayUseLogoEnabled(true)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+        supportActionBar?.setLogo(R.drawable.ic_menu_masthead)
     }
 
     private fun displayTitle(title: Int) {
@@ -488,9 +475,6 @@ class MainActivity : ScopedAppActivity(),
             if (it !is Result.Success) {
                 return@Observer
             }
-//            if (it?.success == null) {
-//                return@Observer
-//            }
 
             if (!isNetworkConnected()) {
                 return@Observer
@@ -500,14 +484,11 @@ class MainActivity : ScopedAppActivity(),
         })
 
         accountViewModel.accountRefreshed.observe(this, Observer {
-//            if (it?.success == null) {
-//                return@Observer
-//            }
+
 
             if (it is Result.Success) {
                 sessionManager.saveAccount(it.data)
             }
-//            sessionManager.saveAccount(it.success)
         })
 
         accountViewModel.retrieveStripeSub(account)
@@ -550,8 +531,8 @@ class MainActivity : ScopedAppActivity(),
     }
 
     override fun onBackPressed() {
-        if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
-            drawer_layout.closeDrawer(GravityCompat.START)
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
         } else {
             doubleClickToExit()
         }
