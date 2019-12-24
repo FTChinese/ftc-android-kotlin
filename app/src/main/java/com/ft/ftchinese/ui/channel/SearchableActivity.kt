@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.channel
 
+import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Intent
 import android.os.Bundle
@@ -7,12 +8,14 @@ import android.view.KeyEvent
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivitySearchableBinding
 import com.ft.ftchinese.ui.article.WVClient
 import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.util.BASE_URL
-import kotlinx.android.synthetic.main.activity_searchable.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -20,10 +23,13 @@ import org.jetbrains.anko.toast
 class SearchableActivity : AppCompatActivity(),
         AnkoLogger {
 
-    private var template: String? = null
     private lateinit var cache: FileCache
+    private lateinit var binding: ActivitySearchableBinding
+
+    private var template: String? = null
     private var keyword: String? = null
 
+    @ExperimentalCoroutinesApi
     private val wvClient = object : WVClient(this) {
         override fun onPageFinished(view: WebView?, url: String?) {
             if (keyword == null) {
@@ -39,10 +45,12 @@ class SearchableActivity : AppCompatActivity(),
         }
     }
 
+    @ExperimentalCoroutinesApi
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_searchable)
 
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_searchable)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -52,12 +60,12 @@ class SearchableActivity : AppCompatActivity(),
 
         cache = FileCache(this)
 
-        search_result_wv.settings.apply {
+        binding.wvSearchResult.settings.apply {
             javaScriptEnabled = true
             loadsImagesAutomatically = true
         }
 
-        search_result_wv.apply {
+        binding.wvSearchResult.apply {
             addJavascriptInterface(
                     this@SearchableActivity,
                     JS_INTERFACE_NAME
@@ -67,9 +75,9 @@ class SearchableActivity : AppCompatActivity(),
         }
 
         // Setup back key behavior.
-        search_result_wv.setOnKeyListener { _, keyCode, _ ->
-            if (keyCode == KeyEvent.KEYCODE_BACK && search_result_wv.canGoBack()) {
-                search_result_wv.goBack()
+        binding.wvSearchResult.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK && binding.wvSearchResult.canGoBack()) {
+                binding.wvSearchResult.goBack()
                 return@setOnKeyListener true
             }
 
@@ -110,7 +118,7 @@ class SearchableActivity : AppCompatActivity(),
 
         template = template?.replace("{search-html}", "")
 
-        search_result_wv.loadDataWithBaseURL(
+        binding.wvSearchResult.loadDataWithBaseURL(
                 BASE_URL,
                 template,
                 "text/html",

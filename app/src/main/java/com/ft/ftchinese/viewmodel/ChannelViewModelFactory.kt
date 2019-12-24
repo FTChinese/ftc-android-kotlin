@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.channel
+package com.ft.ftchinese.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

@@ -10,12 +10,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.*
+import com.ft.ftchinese.databinding.FragmentChannelBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.pay.grantPermission
-import com.ft.ftchinese.ui.base.showException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.reader.SessionManager
@@ -23,8 +24,9 @@ import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.WVClient
 import com.ft.ftchinese.util.*
-import kotlinx.android.synthetic.main.fragment_channel.*
-import kotlinx.android.synthetic.main.progress_bar.*
+import com.ft.ftchinese.viewmodel.ChannelViewModel
+import com.ft.ftchinese.viewmodel.ChannelViewModelFactory
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -51,24 +53,12 @@ class ChannelFragment : ScopedFragment(),
     private lateinit var sessionManager: SessionManager
     private lateinit var cache: FileCache
     private lateinit var statsTracker: StatsTracker
+    private lateinit var binding: FragmentChannelBinding
 
     private lateinit var channelViewModel: ChannelViewModel
 
     private var articleList: List<Teaser>? = null
     private var channelMeta: ChannelMeta? = null
-
-    private fun showProgress(value: Boolean) {
-        if (swipe_refresh.isRefreshing) {
-            toast(R.string.prompt_updated)
-        }
-
-        if (value) {
-            progress_bar?.visibility = View.VISIBLE
-        } else {
-            progress_bar?.visibility = View.GONE
-            swipe_refresh?.isRefreshing = false
-        }
-    }
 
     /**
      * Bind listeners here.
@@ -96,9 +86,14 @@ class ChannelFragment : ScopedFragment(),
                               savedInstanceState: Bundle?): View? {
 
         super.onCreateView(inflater, container, savedInstanceState)
+        binding = DataBindingUtil.inflate(
+                inflater,
+                R.layout.fragment_channel,
+                container,
+                false)
 
         info("onCreateView finished")
-        return inflater.inflate(R.layout.fragment_channel, container, false)
+        return binding.root
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -106,10 +101,10 @@ class ChannelFragment : ScopedFragment(),
         super.onViewCreated(view, savedInstanceState)
 
         // Setup swipe refresh listener
-        swipe_refresh.setOnRefreshListener(this)
+        binding.swipeRefresh.setOnRefreshListener(this)
 
         // Configure web view.
-        web_view.settings.apply {
+        binding.webView.settings.apply {
             javaScriptEnabled = true
             loadsImagesAutomatically = true
             domStorageEnabled = true
@@ -119,7 +114,7 @@ class ChannelFragment : ScopedFragment(),
         val wvClient = WVClient(requireContext())
         wvClient.setWVInteractionListener(this)
 
-        web_view.apply {
+        binding.webView.apply {
 
             // Interact with JS.
             // See Page/Layouts/Page/SuperDataViewController.swift#viewDidLoad() how iOS inject js to web view.
@@ -135,9 +130,9 @@ class ChannelFragment : ScopedFragment(),
         }
 
         // Setup back key behavior.
-        web_view.setOnKeyListener { _, keyCode, _ ->
-            if (keyCode == KeyEvent.KEYCODE_BACK && web_view.canGoBack()) {
-                web_view.goBack()
+        binding.webView.setOnKeyListener { _, keyCode, _ ->
+            if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
+                binding.webView.goBack()
                 return@setOnKeyListener true
             }
 
@@ -154,66 +149,73 @@ class ChannelFragment : ScopedFragment(),
                 .get(ChannelViewModel::class.java)
 
         channelViewModel.cacheFound.observe(viewLifecycleOwner, Observer {
-
-            info("Is cache found: $it")
-
-            // If cache is found
-            if (it) {
-                info("Cache found. Update silently.")
-
-                if (activity?.isNetworkConnected() != true) {
-                    return@Observer
-                }
-
-                val chSrc = channelSource ?: return@Observer
-
-                // Load data only. No rendering.
-                channelViewModel.loadFromServer(
-                        channelSource = chSrc,
-                        shouldRender = false
-                )
-                return@Observer
-            }
-
-            // Cache not found.
-            info("Cache not found")
-            if (activity?.isNetworkConnected() != true) {
-                showProgress(false)
-                toast(R.string.prompt_no_network)
-                return@Observer
-            }
-
-            // Fetch data from remote and cache only.
-            val chSrc = channelSource ?: return@Observer
-
-            // Load data and render.
-            channelViewModel.loadFromServer(
-                    channelSource = chSrc
-            )
+            onCacheFound(it)
         })
 
         channelViewModel.renderResult.observe(viewLifecycleOwner, Observer {
-
-            val htmlResult = it ?: return@Observer
-
-            if (htmlResult.error != null) {
-                showProgress(false)
-                toast(htmlResult.error)
-                return@Observer
-            }
-
-            if (htmlResult.exception != null) {
-                showProgress(false)
-                activity?.showException(htmlResult.exception)
-                return@Observer
-            }
-
-            val htmlStr = htmlResult.success ?: return@Observer
-
-            load(htmlStr)
+            onRenderResult(it)
         })
 
         initLoading()
+    }
+
+    private fun onCacheFound(found: Boolean) {
+        info("Is cache found: $found")
+
+        // If cache is found
+        if (found) {
+            info("Cache found. Update silently.")
+
+            if (activity?.isNetworkConnected() != true) {
+                return
+            }
+
+            val chSrc = channelSource ?: return
+
+            // Load data only. No rendering.
+            channelViewModel.loadFromServer(
+                    channelSource = chSrc,
+                    shouldRender = false
+            )
+            return
+        }
+
+        // Cache not found.
+        info("Cache not found")
+        if (activity?.isNetworkConnected() != true) {
+            binding.inProgress = false
+            binding.swipeRefresh.isRefreshing = false
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        // Fetch data from remote and cache only.
+        val chSrc = channelSource ?: return
+
+        // Load data and render.
+        channelViewModel.loadFromServer(
+                channelSource = chSrc
+        )
+    }
+
+    private fun onRenderResult(result: Result<String>) {
+        when (result) {
+            is Result.LocalizedError -> {
+                binding.inProgress = false
+                binding.swipeRefresh.isRefreshing = false
+
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                binding.inProgress = false
+                binding.swipeRefresh.isRefreshing = false
+
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                load(result.data)
+            }
+        }
     }
 
     override fun onRefresh() {
@@ -226,21 +228,21 @@ class ChannelFragment : ScopedFragment(),
     private fun initLoading() {
         val chSrc = channelSource
         if (chSrc == null) {
-            showProgress(false)
+            binding.inProgress = false
+            binding.swipeRefresh.isRefreshing = false
+
             return
         }
 
-        // Show progress bar upon loading content, regardless of
-        if (!swipe_refresh.isRefreshing) {
-            showProgress(true)
-        }
+        // Progress bar and swiping is mutually exclusive.
+        binding.inProgress = !binding.swipeRefresh.isRefreshing
 
         // For partial HTML, we need to crawl its content and render it with a template file to get the template HTML page.
         when (channelSource?.htmlType) {
             HTML_TYPE_FRAGMENT -> {
                 info("initLoading: html fragment")
 
-                if (swipe_refresh.isRefreshing) {
+                if (binding.swipeRefresh.isRefreshing) {
                     channelViewModel.loadFromServer(
                             channelSource = chSrc
                     )
@@ -252,11 +254,13 @@ class ChannelFragment : ScopedFragment(),
             // For complete HTML, load it directly into Web view.
             HTML_TYPE_COMPLETE -> {
                 info("initLoading: web page")
-                web_view.loadUrl(chSrc.normalizedUrl())
-                if (swipe_refresh.isRefreshing) {
+                binding.webView.loadUrl(chSrc.normalizedUrl())
+                if (binding.swipeRefresh.isRefreshing) {
                     toast(R.string.prompt_updated)
+                    binding.swipeRefresh.isRefreshing = false
+                } else {
+                    binding.inProgress = false
                 }
-                showProgress(false)
             }
         }
     }
@@ -265,8 +269,13 @@ class ChannelFragment : ScopedFragment(),
         if (BuildConfig.DEBUG) {
             info("Loading web page to web view")
         }
-        web_view.loadDataWithBaseURL(BASE_URL, html, "text/html", null, null)
-        showProgress(false)
+        binding.webView.loadDataWithBaseURL(BASE_URL, html, "text/html", null, null)
+        if (binding.swipeRefresh.isRefreshing) {
+            toast(R.string.prompt_updated)
+        }
+
+        binding.inProgress = false
+        binding.swipeRefresh.isRefreshing = false
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

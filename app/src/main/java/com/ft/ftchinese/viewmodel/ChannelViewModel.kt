@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.channel
+package com.ft.ftchinese.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,7 +17,9 @@ class ChannelViewModel(val cache: FileCache) :
         ViewModel(), AnkoLogger {
 
     val cacheFound = MutableLiveData<Boolean>()
-    val renderResult = MutableLiveData<RenderResult>()
+    val renderResult: MutableLiveData<Result<String>> by lazy {
+        MutableLiveData<Result<String>>()
+    }
 
     private var template: String? = null
 
@@ -36,18 +38,19 @@ class ChannelViewModel(val cache: FileCache) :
 
             val html = render(channelSource, cacheFrag)
 
-            renderResult.value = RenderResult(
-                    success = html
-            )
+            if (html == null) {
+                renderResult.value = Result.LocalizedError(R.string.loading_failed)
+                return@launch
+            }
+
+            renderResult.value = Result.Success(html)
         }
     }
 
     fun loadFromServer(channelSource: ChannelSource, shouldRender: Boolean = true) {
         val url = channelSource.normalizedUrl()
         if (url == null) {
-            renderResult.value = RenderResult(
-                    error = R.string.api_empty_url
-            )
+            renderResult.value = Result.LocalizedError(R.string.api_empty_url)
             return
         }
 
@@ -63,9 +66,7 @@ class ChannelViewModel(val cache: FileCache) :
 
                 if (remoteFrag.isNullOrBlank()) {
                     info("Channel fragment is empty")
-                    renderResult.value = RenderResult(
-                            error = R.string.api_server_error
-                    )
+                    renderResult.value = Result.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
 
@@ -77,23 +78,21 @@ class ChannelViewModel(val cache: FileCache) :
                 }
 
                 if (!shouldRender) {
-                    renderResult.value = RenderResult(
-                            success = null
-                    )
+
                     return@launch
                 }
 
                 val html = render(channelSource, remoteFrag)
 
-                renderResult.value = RenderResult(
-                        success = html
-                )
+                if (html == null) {
+                    renderResult.value = Result.LocalizedError(R.string.loading_failed)
+                    return@launch
+                }
+                renderResult.value = Result.Success(html)
 
             } catch (e: Exception) {
                 info(e)
-                renderResult.value = RenderResult(
-                        exception = e
-                )
+                renderResult.value = parseException(e)
             }
         }
     }
@@ -104,13 +103,5 @@ class ChannelViewModel(val cache: FileCache) :
         }
 
         channelSource.render(template, htmlFragment)
-    }
-
-    fun cacheData(fileName: String, data: String) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                cache.saveText(fileName, data)
-            }
-        }
     }
 }
