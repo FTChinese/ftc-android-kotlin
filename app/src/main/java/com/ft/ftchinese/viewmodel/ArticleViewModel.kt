@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.article
+package com.ft.ftchinese.viewmodel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,6 +20,9 @@ class ArticleViewModel(
         private val cache: FileCache,
         private val followingManager: FollowingManager
 ) : ViewModel(), AnkoLogger {
+
+    val inProgress = MutableLiveData<Boolean>()
+
     // Notify ArticleActivity whether to display language
     // switch button or not.
     val bilingual = MutableLiveData<Boolean>()
@@ -30,11 +33,15 @@ class ArticleViewModel(
     val articleLoaded = MutableLiveData<StarredArticle>()
 
     // Notify StoryFragment whether cached is found
-    val cacheResult = MutableLiveData<CachedResult>()
+    val cacheFound: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
 
     // Notify StoryFragment that html is ready to be loaded
     // into WebView.
-    val renderResult = MutableLiveData<RenderResult>()
+    val renderResult: MutableLiveData<Result<String>> by lazy {
+        MutableLiveData<Result<String>>()
+    }
 
     val shareItem = MutableLiveData<ShareItem>()
 
@@ -54,9 +61,7 @@ class ArticleViewModel(
     fun loadFromCache(item: Teaser, lang: Language) {
         val cacheName = item.cacheNameJson()
         if (cacheName.isBlank()) {
-            cacheResult.value = CachedResult(
-                    found = false
-            )
+            cacheFound.value = false
             return
         }
 
@@ -67,18 +72,14 @@ class ArticleViewModel(
                 }
 
                 if (data.isNullOrBlank()) {
-                    cacheResult.value = CachedResult(
-                            found = false
-                    )
+                    cacheFound.value = false
                     return@launch
                 }
 
                 val story = json.parse<Story>(data)
 
                 if (story == null) {
-                    cacheResult.value = CachedResult(
-                            found = false
-                    )
+                    cacheFound.value = false
                     return@launch
                 }
 
@@ -88,9 +89,13 @@ class ArticleViewModel(
                         lang = lang,
                         follows = followingManager.loadForJS())
 
-                renderResult.value = RenderResult(
-                        success = html
-                )
+                if (html == null) {
+                    cacheFound.value = false
+                    return@launch
+                }
+
+                // The HTML string to be loaded.
+                renderResult.value = Result.Success(html)
 
                 // Only set update articleLoaded for initial loading.
                 articleLoaded.value = story.toStarredArticle(item)
@@ -100,9 +105,7 @@ class ArticleViewModel(
 
             } catch (e: Exception) {
                 info(e)
-                cacheResult.value = CachedResult(
-                        exception = e
-                )
+                cacheFound.value = false
             }
         }
     }
@@ -112,9 +115,7 @@ class ArticleViewModel(
         info("Loading json data from $url")
 
         if (url.isBlank()) {
-            renderResult.value = RenderResult(
-                    error = R.string.api_empty_url
-            )
+            renderResult.value = Result.LocalizedError(R.string.api_empty_url)
             return
         }
 
@@ -125,9 +126,7 @@ class ArticleViewModel(
                 }
 
                 if (data.isNullOrBlank()) {
-                    renderResult.value = RenderResult(
-                            error = R.string.api_server_error
-                    )
+                    renderResult.value = Result.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
 
@@ -139,10 +138,7 @@ class ArticleViewModel(
                 val story = json.parse<Story>(data)
 
                 if (story == null) {
-                    renderResult.value = RenderResult(
-                            error = R.string.api_server_error
-                    )
-
+                    renderResult.value = Result.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
 
@@ -153,19 +149,20 @@ class ArticleViewModel(
                         follows = followingManager.loadForJS()
                 )
 
-                renderResult.value = RenderResult(
-                        success = html
-                )
+                if (html == null) {
+                    renderResult.value = Result.LocalizedError(R.string.loading_failed)
+                    return@launch
+                }
 
-// Only update it for initial loading.
+                renderResult.value = Result.Success(html)
+
+                // Only update it for initial loading.
                 articleLoaded.value = story.toStarredArticle(item)
                 bilingual.value = story.isBilingual
 
             } catch (e: Exception) {
                 info(e)
-                renderResult.value = RenderResult(
-                        exception = e
-                )
+                renderResult.value = parseException(e)
             }
         }
     }

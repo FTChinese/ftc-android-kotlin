@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ShareAdapter
+import com.ft.ftchinese.viewmodel.ArticleViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.android.synthetic.main.fragment_social_share.*
 

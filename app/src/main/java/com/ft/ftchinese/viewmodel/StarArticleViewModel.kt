@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.article
+package com.ft.ftchinese.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

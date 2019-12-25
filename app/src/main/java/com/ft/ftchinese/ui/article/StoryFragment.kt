@@ -9,23 +9,25 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.FragmentArticleBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.showException
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.reader.ReadingDuration
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.service.ReadingDurationService
 import com.ft.ftchinese.ui.ChromeClient
-import com.ft.ftchinese.ui.OnProgressListener
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
 import com.ft.ftchinese.util.*
+import com.ft.ftchinese.viewmodel.ArticleViewModel
+import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
+import com.ft.ftchinese.viewmodel.Result
 import com.google.firebase.messaging.FirebaseMessaging
-import kotlinx.android.synthetic.main.fragment_article.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -46,25 +48,12 @@ class StoryFragment : ScopedFragment(),
     private lateinit var sessionManager: SessionManager
     private lateinit var articleModel: ArticleViewModel
 
-    private var listener: OnProgressListener? = null
+//    private var listener: OnProgressListener? = null
 
     private lateinit var statsTracker: StatsTracker
+    private lateinit var binding: FragmentArticleBinding
 
     private val start = Date().time / 1000
-
-    private fun showProgress(value: Boolean) {
-        if (swipe_refresh.isRefreshing) {
-            toast(R.string.prompt_updated)
-        }
-
-        if (value) {
-            listener?.onProgress(true)
-        } else {
-            listener?.onProgress(false)
-            swipe_refresh.isRefreshing = false
-        }
-
-    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -73,10 +62,6 @@ class StoryFragment : ScopedFragment(),
         followingManager = FollowingManager.getInstance(context)
         sessionManager = SessionManager.getInstance(context)
         statsTracker = StatsTracker.getInstance(context)
-
-        if (context is OnProgressListener) {
-            listener = context
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -97,29 +82,20 @@ class StoryFragment : ScopedFragment(),
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_article, container, false)
-
-    override fun onRefresh() {
-
-        val item = storyBrief
-        if (item == null) {
-            showProgress(false)
-            return
-        }
-
-        toast(R.string.refreshing_data)
-
-        // Load and render
-        articleModel.loadFromRemote(item, currentLang)
+    ): View? {
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_article, container, false)
+        return binding.root
     }
+
+
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        swipe_refresh.setOnRefreshListener(this)
+        binding.swipeRefresh.setOnRefreshListener(this)
 
-        web_view.settings.apply {
+        binding.webView.settings.apply {
             javaScriptEnabled = true
             loadsImagesAutomatically = true
             domStorageEnabled = true
@@ -128,7 +104,7 @@ class StoryFragment : ScopedFragment(),
 
         val wvClient = WVClient(requireContext())
 
-        web_view.apply {
+        binding.webView.apply {
             addJavascriptInterface(
                     this@StoryFragment,
                     JS_INTERFACE_NAME
@@ -138,8 +114,8 @@ class StoryFragment : ScopedFragment(),
             webChromeClient = ChromeClient()
 
             setOnKeyListener { _, keyCode, _ ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && web_view.canGoBack()) {
-                    web_view.goBack()
+                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
+                    binding.webView.goBack()
                     return@setOnKeyListener true
                 }
                 false
@@ -170,66 +146,94 @@ class StoryFragment : ScopedFragment(),
         })
 
         // If cache is not found, fetch data from remote.
-        articleModel.cacheResult.observe(viewLifecycleOwner, Observer {
-            if (it.found) {
-                return@Observer
-            }
-
-            // If cache is not found, fetch data from server.
-            if (activity?.isNetworkConnected() != true) {
-                toast(R.string.prompt_no_network)
-                return@Observer
-            }
-
-            val item = storyBrief ?: return@Observer
-
-            // Load and render.
-            articleModel.loadFromRemote(
-                    item = item,
-                    lang = currentLang)
+        articleModel.cacheFound.observe(viewLifecycleOwner, Observer {
+            onCacheFound(it)
         })
 
         // Load html into web view.
         articleModel.renderResult.observe(viewLifecycleOwner, Observer {
-            showProgress(false)
-
-            val htmlResult = it ?: return@Observer
-
-            if (htmlResult.exception != null) {
-                info("Loading html error")
-                activity?.showException(htmlResult.exception)
-                return@Observer
-            }
-
-            if (htmlResult.success.isNullOrBlank()) {
-                toast(R.string.api_server_error)
-                return@Observer
-            }
-
-            load(htmlResult.success)
+            onRenderResult(it)
         })
 
-
         initLoading()
+    }
+
+    override fun onRefresh() {
+
+        val item = storyBrief
+        if (item == null) {
+            binding.swipeRefresh.isRefreshing = false
+//            showProgress(false)
+
+            return
+        }
+
+        toast(R.string.refreshing_data)
+
+        // Load and render
+        articleModel.loadFromRemote(item, currentLang)
     }
 
     private fun initLoading() {
         val item = storyBrief ?: return
 
-        showProgress(true)
+        if (!binding.swipeRefresh.isRefreshing) {
+            articleModel.inProgress.value = true
+        }
 
         articleModel.loadFromCache(item, currentLang)
     }
 
+    private fun onCacheFound(found: Boolean) {
+        if (found) {
+            return
+        }
+
+        // If cache is not found, fetch data from server.
+        if (activity?.isNetworkConnected() != true) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        val item = storyBrief ?: return
+
+        // Load and render.
+        articleModel.loadFromRemote(
+                item = item,
+                lang = currentLang)
+    }
+
+    private fun onRenderResult(result: Result<String>) {
+        articleModel.inProgress.value = false
+        binding.swipeRefresh.isRefreshing = false
+
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                load(result.data)
+            }
+        }
+    }
+
     private fun load(html: String) {
-        web_view.loadDataWithBaseURL(
+        binding.webView.loadDataWithBaseURL(
                 BASE_URL,
                 html,
                 "text/html",
                 null,
                 null)
 
-        showProgress(false)
+        if (binding.swipeRefresh.isRefreshing) {
+            binding.swipeRefresh.isRefreshing = false
+            toast(R.string.prompt_updated)
+        } else {
+            articleModel.inProgress.value = false
+        }
     }
 
     override fun onDestroy() {

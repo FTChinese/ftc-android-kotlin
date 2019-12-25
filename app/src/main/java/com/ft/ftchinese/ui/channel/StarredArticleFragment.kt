@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.article.StarArticleViewModel
+import com.ft.ftchinese.viewmodel.StarArticleViewModel
 import com.ft.ftchinese.ui.base.StarredArticleAdapter
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger

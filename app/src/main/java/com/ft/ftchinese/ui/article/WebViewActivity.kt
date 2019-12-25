@@ -1,12 +1,14 @@
 package com.ft.ftchinese.ui.article
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.KeyEvent
+import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.R
-import kotlinx.android.synthetic.main.activity_web_view.*
+import com.ft.ftchinese.databinding.ActivityWebViewBinding
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -14,11 +16,14 @@ private const val EXTRA_WEB_URL = "extra_web_url"
 
 class WebViewActivity : AppCompatActivity(), AnkoLogger {
 
+    private lateinit var binding: ActivityWebViewBinding
+
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_web_view)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_web_view)
 
-        setSupportActionBar(web_toolbar)
+        setSupportActionBar(binding.webToolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(false)
@@ -28,20 +33,20 @@ class WebViewActivity : AppCompatActivity(), AnkoLogger {
 
         info("Loading url: $url")
 
-        web_content.loadUrl(url)
+        binding.webContent.loadUrl(url)
 
-        web_content.settings.apply {
+        binding.webContent.settings.apply {
             javaScriptEnabled = true
             loadsImagesAutomatically = true
             domStorageEnabled = true
             databaseEnabled = true
         }
 
-        web_content.apply {
+        binding.webContent.apply {
 
             setOnKeyListener { _, keyCode, _ ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && web_content.canGoBack()) {
-                    web_content.goBack()
+                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webContent.canGoBack()) {
+                    binding.webContent.goBack()
                     return@setOnKeyListener true
                 }
                 false

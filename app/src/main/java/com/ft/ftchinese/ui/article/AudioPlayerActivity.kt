@@ -5,7 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityAudioPlayerBinding
 import com.ft.ftchinese.model.Teaser
 import com.ft.ftchinese.service.AudioDownloadService
 import com.ft.ftchinese.service.AudioDownloader
@@ -18,7 +20,6 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.activity_audio_player.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -37,23 +38,25 @@ class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
     private var teaser: Teaser? = null
 
     private lateinit var downloader: AudioDownloader
+    private lateinit var binding: ActivityAudioPlayerBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_audio_player)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_audio_player)
+
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(false)
         }
 
+        title = teaser?.title
+
         downloader = AudioDownloader.getInstance(this)
         teaser = intent.getParcelableExtra(EXTRA_ARTICLE_TEASER) ?: return
 
-        toolbar.title = teaser?.title
-
         player = ExoPlayerFactory.newSimpleInstance(this)
-        player_view.player = player
+        binding.playerView.player = player
 
         setupDownload()
     }
@@ -61,7 +64,7 @@ class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
     private val downloadManagerListener = object : DownloadManager.Listener {
         override fun onDownloadChanged(downloadManager: DownloadManager?, download: Download?) {
             if (download?.state == Download.STATE_COMPLETED) {
-                fab_download_audio.setImageResource(R.drawable.ic_delete_black_24dp)
+                binding.fabDownloadAudio.setImageResource(R.drawable.ic_delete_black_24dp)
 
                 toast(R.string.download_successful)
             }
@@ -71,7 +74,7 @@ class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
         val audioUri = teaser?.audioUri()
 
         if (audioUri == null) {
-            fab_download_audio.visibility = View.GONE
+            binding.fabDownloadAudio.visibility = View.GONE
             return
         }
 
@@ -80,14 +83,14 @@ class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
                 .addListener(downloadManagerListener)
 
         if (downloader.isDownloaded(audioUri)) {
-            fab_download_audio.setImageResource(R.drawable.ic_delete_black_24dp)
+            binding.fabDownloadAudio.setImageResource(R.drawable.ic_delete_black_24dp)
         }
 
         // The FAB should show 3 states:
         // Audio not downloaded, show a download icon
         // Is download, show a cancel icon
         // Downloaded, show a delete icon
-        fab_download_audio.setOnClickListener {
+        binding.fabDownloadAudio.setOnClickListener {
             val state = AudioDownloader
                     .getInstance(this)
                     .getDownloadState(audioUri)
@@ -97,7 +100,7 @@ class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
 
                     removeDownload(audioUri.toString())
 
-                    fab_download_audio.setImageResource(R.drawable.ic_file_download_black_24dp)
+                    binding.fabDownloadAudio.setImageResource(R.drawable.ic_file_download_black_24dp)
 
                     Snackbar.make(
                             it,
@@ -111,7 +114,7 @@ class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
 
                     removeDownload(audioUri.toString())
 
-                    fab_download_audio.setImageResource(R.drawable.ic_file_download_black_24dp)
+                    binding.fabDownloadAudio.setImageResource(R.drawable.ic_file_download_black_24dp)
 
                     Snackbar.make(
                             it,
@@ -123,7 +126,7 @@ class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
 
                     startDownload(audioUri)
 
-                    fab_download_audio.setImageResource(R.drawable.ic_cancel_black_24dp)
+                    binding.fabDownloadAudio.setImageResource(R.drawable.ic_cancel_black_24dp)
 
                     Snackbar.make(
                             it,

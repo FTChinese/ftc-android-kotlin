@@ -7,7 +7,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.article.ArticleViewModel
+import com.ft.ftchinese.viewmodel.ArticleViewModel
 import kotlinx.android.synthetic.main.share_item.view.*
 
 private val apps = arrayOf(

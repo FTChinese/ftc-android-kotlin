@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.article.ReadArticleViewModel
+import com.ft.ftchinese.viewmodel.ReadArticleViewModel
 import com.ft.ftchinese.ui.base.ReadArticleAdapter
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger

@@ -22,6 +22,10 @@ import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.util.FileCache
 import com.ft.ftchinese.util.json
+import com.ft.ftchinese.viewmodel.ArticleViewModel
+import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
+import com.ft.ftchinese.viewmodel.ReadArticleViewModel
+import com.ft.ftchinese.viewmodel.StarArticleViewModel
 import kotlinx.android.synthetic.main.fragment_web_view.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
