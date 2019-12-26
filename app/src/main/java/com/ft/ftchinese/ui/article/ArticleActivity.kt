@@ -8,8 +8,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.core.app.TaskStackBuilder
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -17,7 +17,6 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.databinding.ActivityArticleBinding
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.Permission
@@ -34,7 +33,9 @@ import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
 import com.tencent.mm.opensdk.modelmsg.WXWebpageObject
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
+import kotlinx.android.synthetic.main.activity_article.*
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.imageResource
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import java.io.ByteArrayOutputStream
@@ -60,8 +61,6 @@ class ArticleActivity : ScopedAppActivity(),
     private lateinit var readViewModel: ReadArticleViewModel
     private lateinit var starViewModel: StarArticleViewModel
 
-    private lateinit var binding: ActivityArticleBinding
-
     private var shareFragment: SocialShareFragment? = null
 
     private var teaser: Teaser? = null
@@ -71,15 +70,11 @@ class ArticleActivity : ScopedAppActivity(),
 
     private var isStarring = false
 
-//    override fun onProgress(show: Boolean) {
-//        progress_bar?.visibility = if (show) View.VISIBLE else View.GONE
-//    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_article)
+        setContentView(R.layout.activity_article)
 
-        setSupportActionBar(binding.articleToolbar)
+        setSupportActionBar(article_toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(false)
@@ -95,7 +90,7 @@ class ArticleActivity : ScopedAppActivity(),
         }
 
         // Hide language switcher.
-        updateLangSwitcher(show = false)
+//        updateLangSwitcher(show = false)
 
         setup()
 
@@ -125,17 +120,17 @@ class ArticleActivity : ScopedAppActivity(),
                 .get(StarArticleViewModel::class.java)
 
         articleViewModel.inProgress.observe(this, Observer {
-            binding.inProgress = it
+            showProgress(it)
         })
 
         // Observe whether the article is bilingual.
         articleViewModel.bilingual.observe(this, Observer<Boolean> {
             info("Observer found content is bilingual: $it")
-            binding.isBilingual = it
+            showLangSwitcher(it)
 
             // Only set event on language switcher when the article is bilingual.
             if (it) {
-                updateLangSwitcher(it)
+                setupLangSwitcher()
             }
         })
 
@@ -158,14 +153,14 @@ class ArticleActivity : ScopedAppActivity(),
             // Updating bookmark icon.
             isStarring = it
 //            updateFabIcon()
-            binding.isStarring = it
+            bookmarked(isStarring)
         })
 
         articleViewModel.shareItem.observe(this, Observer {
             onClickShareIcon(it)
         })
 
-        binding.fabBookmark.setOnClickListener {
+        fab_bookmark.setOnClickListener {
             isStarring = !isStarring
 
             if (isStarring) {
@@ -186,7 +181,7 @@ class ArticleActivity : ScopedAppActivity(),
                 ).show()
             }
 
-            binding.isStarring = isStarring
+            bookmarked(isStarring)
         }
     }
 
@@ -199,22 +194,18 @@ class ArticleActivity : ScopedAppActivity(),
 //        }
 //    }
 
-    private fun updateLangSwitcher(show: Boolean) {
-//        if (!show) {
-//            language_radio_group.visibility = View.GONE
-//            return
-//        }
+    private fun setupLangSwitcher() {
 
 //        language_radio_group.visibility = View.VISIBLE
         val account = sessionManager.loadAccount()
         val permissionGranted = grantPermission(account, Permission.STANDARD)
-        binding.permissionGranted = permissionGranted
+        permittedToAccessBilingual(permissionGranted)
 
-        binding.langCnBtn.setOnClickListener {
+        lang_cn_btn.setOnClickListener {
             articleViewModel.switchLang(Language.CHINESE)
         }
 
-        binding.langEnBtn.setOnClickListener {
+        lang_en_btn.setOnClickListener {
 //            val account = sessionManager.loadAccount()
 
             val item = teaser ?: return@setOnClickListener
@@ -233,7 +224,7 @@ class ArticleActivity : ScopedAppActivity(),
             articleViewModel.switchLang(Language.ENGLISH)
         }
 
-        binding.langBiBtn.setOnClickListener {
+        lang_bi_btn.setOnClickListener {
 //            val account = sessionManager.loadAccount()
 
             val item = teaser ?: return@setOnClickListener
@@ -249,6 +240,23 @@ class ArticleActivity : ScopedAppActivity(),
 
             articleViewModel.switchLang(Language.BILINGUAL)
         }
+    }
+
+    private fun showProgress(show: Boolean) {
+        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
+    private fun showLangSwitcher(show: Boolean) {
+        language_radio_group.visibility = if (show) View.VISIBLE else View.GONE
+    }
+
+    private fun permittedToAccessBilingual(ok: Boolean) {
+        lang_en_btn.isChecked = ok
+        lang_bi_btn.isChecked = ok
+    }
+
+    private fun bookmarked(ok: Boolean) {
+        fab_bookmark.imageResource = if (ok) R.drawable.ic_bookmark_black_24dp else R.drawable.ic_bookmark_border_black_24dp
     }
 
 //    private fun disableLangSwitch() {

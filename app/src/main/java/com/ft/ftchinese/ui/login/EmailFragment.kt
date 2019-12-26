@@ -84,6 +84,11 @@ class EmailFragment : ScopedFragment(),
         })
     }
 
+    override fun onResume() {
+        super.onResume()
+        binding.enableInput = true
+    }
+
     companion object {
         @JvmStatic
         fun newInstance() = EmailFragment()

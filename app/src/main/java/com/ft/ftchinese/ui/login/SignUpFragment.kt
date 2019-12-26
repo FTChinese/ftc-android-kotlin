@@ -47,7 +47,6 @@ class SignUpFragment : ScopedFragment(),
 
         binding.email = email
         binding.passwordInput.requestFocus()
-        binding.signUpBtn.isEnabled = false
 
         return binding.root
     }

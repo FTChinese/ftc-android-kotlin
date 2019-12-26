@@ -4,8 +4,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityAccountBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.util.RequestCode
@@ -16,11 +18,12 @@ import org.jetbrains.anko.AnkoLogger
 class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
+    private lateinit var binding: ActivityAccountBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_account)
+        // Here we reused the activity_account.
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_account)
         setSupportActionBar(toolbar)
 
         sessionManager = SessionManager.getInstance(this)
@@ -37,7 +40,7 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
                     replace(R.id.frag_account, WxInfoFragment.newInstance())
                 }
                 account?.isFtcOnly == true -> {
-                    replace(R.id.frag_account, LinkWxFragment.newInstance())
+                    replace(R.id.frag_account, WxAuthorizeFragment.newInstance())
                 }
             }
 
@@ -47,7 +50,7 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
     /**
      * Received results from [UnlinkActivity] with
      * RequestCode.Unlink.
-     * If [LinkWxFragment] is used inside this activity,
+     * If [WxAuthorizeFragment] is used inside this activity,
      * user starts linking wechat to FTC account, ideally
      * this activity should receive a RequestCode.Link
      * message. But I'm not sure whether this works or not.
