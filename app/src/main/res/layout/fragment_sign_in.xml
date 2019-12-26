@@ -16,38 +16,37 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.stripe.android.view.IconTextInputLayout
-            android:id="@+id/email_container"
+        <TextView
+            android:id="@+id/tv_email_label"
+            style="@style/OrigamiText.Body2.Light"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:text="@string/label_email"
             android:layout_marginTop="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/email_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@{email}"
-                android:enabled="false"
-                android:hint="@string/label_email"
-                android:inputType="textEmailAddress"
-                android:maxLines="1"
-                android:singleLine="true"/>
-
-        </com.stripe.android.view.IconTextInputLayout>
+        <TextView
+            android:id="@+id/tv_email_value"
+            style="@style/OrigamiText.Body1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@{email}"
+            app:layout_constraintTop_toBottomOf="@id/tv_email_label"
+            app:layout_constraintStart_toStartOf="@id/tv_email_label"
+            app:layout_constraintEnd_toEndOf="@id/tv_email_label"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/password_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            app:layout_constraintTop_toBottomOf="@id/email_container"
-            app:layout_constraintEnd_toEndOf="@id/email_container"
-            app:layout_constraintStart_toStartOf="@id/email_container"
+            app:layout_constraintTop_toBottomOf="@id/tv_email_label"
+            app:layout_constraintEnd_toEndOf="@id/tv_email_label"
+            app:layout_constraintStart_toStartOf="@id/tv_email_label"
             app:passwordToggleEnabled="true">
 
             <!-- When touching it on Meizu device, it throws java.lang.NullPointerException: Attempt to invoke virtual method 'int android.text.Layout.getLineForOffset(int)' on a null object reference -->
@@ -72,8 +71,8 @@
             android:layout_marginTop="8dp"
             android:text="@string/instruct_sign_in"
             app:layout_constraintTop_toBottomOf="@id/password_container"
-            app:layout_constraintEnd_toEndOf="@id/email_container"
-            app:layout_constraintStart_toStartOf="@id/email_container" />
+            app:layout_constraintEnd_toEndOf="@id/tv_email_label"
+            app:layout_constraintStart_toStartOf="@id/tv_email_label" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/sign_in_btn"
@@ -81,8 +80,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@string/btn_login"
-            app:layout_constraintEnd_toEndOf="@+id/email_container"
-            app:layout_constraintStart_toStartOf="@+id/email_container"
+            app:layout_constraintEnd_toEndOf="@id/tv_email_label"
+            app:layout_constraintStart_toStartOf="@id/tv_email_label"
             app:layout_constraintTop_toBottomOf="@+id/instruct_sign_in_tv" />
 
         <com.google.android.material.button.MaterialButton
@@ -92,8 +91,8 @@
             android:layout_height="wrap_content"
             android:text="@string/link_reset_password"
             android:enabled="@{enableInput ?? false}"
-            app:layout_constraintStart_toStartOf="@+id/sign_in_btn"
-            app:layout_constraintTop_toBottomOf="@+id/sign_in_btn" />
+            app:layout_constraintStart_toStartOf="@id/sign_in_btn"
+            app:layout_constraintTop_toBottomOf="@id/sign_in_btn" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
