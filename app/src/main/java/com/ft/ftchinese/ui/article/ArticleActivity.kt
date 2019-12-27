@@ -46,6 +46,8 @@ const val EXTRA_ARTICLE_TEASER = "extra_article_teaser"
  * Host activity for [StoryFragment] or [WebContentFragment], depending on the type of contents
  * to be displayed.
  * If the content has a standard JSON API, [StoryFragment] will be used; otherwise use [WebContentFragment].
+ * NOTE: after trial and error, as of Android Studio RC1, data binding class cannot be
+ * properly generated for CoordinatorLayout.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ArticleActivity : ScopedAppActivity(),

@@ -1,22 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.article.ArticleActivity">
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <data>
+        <import type="android.view.View"/>
+        <variable
+            name="inProgress"
+            type="Boolean" />
+        <variable
+            name="isStarring"
+            type="Boolean" />
+        <variable
+            name="isBilingual"
+            type="Boolean" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        tools:context=".ui.article.ArticleActivity">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/article_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:elevation="4dp"
-            app:layout_scrollFlags="scroll|enterAlways">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <RadioGroup
                 android:id="@+id/language_radio_group"
@@ -28,7 +42,7 @@
                 android:showDividers="middle"
                 android:background="@drawable/border_rec_teal"
                 android:checkedButton="@id/lang_cn_btn"
-                android:visibility="gone">
+                android:visibility="@{isBilingual ? View.VISIBLE : View.GONE}">
 
                 <RadioButton
                     android:id="@+id/lang_cn_btn"
@@ -57,30 +71,15 @@
 
         </androidx.appcompat.widget.Toolbar>
 
-    </com.google.android.material.appbar.AppBarLayout>
+        <FrameLayout
+            android:id="@+id/fragment_article"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="@id/article_toolbar"/>
 
-    <FrameLayout
-        android:id="@+id/fragment_article"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        <include layout="@layout/progress_indicator_circular"
+            bind:inProgress="@{inProgress}"/>
 
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_bookmark"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:layout_gravity="bottom|end"
-        app:fabSize="mini"
-        app:srcCompat="@drawable/ic_bookmark_border_black_24dp"/>
-
-    <androidx.core.widget.ContentLoadingProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"/>
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
