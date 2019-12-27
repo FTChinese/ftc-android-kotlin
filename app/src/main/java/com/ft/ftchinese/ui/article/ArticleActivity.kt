@@ -152,7 +152,6 @@ class ArticleActivity : ScopedAppActivity(),
         starViewModel.starred.observe(this, Observer {
             // Updating bookmark icon.
             isStarring = it
-//            updateFabIcon()
             bookmarked(isStarring)
         })
 
@@ -185,21 +184,10 @@ class ArticleActivity : ScopedAppActivity(),
         }
     }
 
-//    private fun updateFabIcon() {
-//        binding.isStarring = isStarring
-//        if (isStarring) {
-//            fab_bookmark.setImageResource(R.drawable.ic_bookmark_black_24dp)
-//        } else {
-//            fab_bookmark.setImageResource(R.drawable.ic_bookmark_border_black_24dp)
-//        }
-//    }
-
     private fun setupLangSwitcher() {
 
-//        language_radio_group.visibility = View.VISIBLE
         val account = sessionManager.loadAccount()
         val permissionGranted = grantPermission(account, Permission.STANDARD)
-        permittedToAccessBilingual(permissionGranted)
 
         lang_cn_btn.setOnClickListener {
             articleViewModel.switchLang(Language.CHINESE)
@@ -211,7 +199,7 @@ class ArticleActivity : ScopedAppActivity(),
             val item = teaser ?: return@setOnClickListener
 
             if (!permissionGranted) {
-//                disableLangSwitch()
+                disableLangSwitch()
 
                 item.langVariant = Language.ENGLISH
 
@@ -230,7 +218,7 @@ class ArticleActivity : ScopedAppActivity(),
             val item = teaser ?: return@setOnClickListener
 
             if (!permissionGranted) {
-//                disableLangSwitch()
+                disableLangSwitch()
 
                 item.langVariant = Language.BILINGUAL
                 PaywallTracker.fromArticle(item)
@@ -250,20 +238,15 @@ class ArticleActivity : ScopedAppActivity(),
         language_radio_group.visibility = if (show) View.VISIBLE else View.GONE
     }
 
-    private fun permittedToAccessBilingual(ok: Boolean) {
-        lang_en_btn.isChecked = ok
-        lang_bi_btn.isChecked = ok
-    }
-
     private fun bookmarked(ok: Boolean) {
         fab_bookmark.imageResource = if (ok) R.drawable.ic_bookmark_black_24dp else R.drawable.ic_bookmark_border_black_24dp
     }
 
-//    private fun disableLangSwitch() {
-//        lang_cn_btn.isChecked = true
-//        lang_en_btn.isChecked = false
-//        lang_bi_btn.isChecked = false
-//    }
+    private fun disableLangSwitch() {
+        lang_cn_btn.isChecked = true
+        lang_en_btn.isChecked = false
+        lang_bi_btn.isChecked = false
+    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 
