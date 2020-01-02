@@ -12,7 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAccountBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.LoginMethod
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel

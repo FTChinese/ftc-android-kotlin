@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentWxLoginBinding
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.reader.WxOAuth
 import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.ft.ftchinese.viewmodel.LoginViewModel

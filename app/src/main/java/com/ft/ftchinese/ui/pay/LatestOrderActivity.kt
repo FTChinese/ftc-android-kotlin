@@ -7,9 +7,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.getTierCycleText
-import com.ft.ftchinese.model.order.OrderManager
-import com.ft.ftchinese.model.order.PayMethod
-import com.ft.ftchinese.model.order.Subscription
+import com.ft.ftchinese.store.OrderManager
+import com.ft.ftchinese.model.subscription.PayMethod
+import com.ft.ftchinese.model.subscription.Order
 import kotlinx.android.synthetic.main.activity_latest_order.*
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.threeten.bp.format.DateTimeFormatter
@@ -45,7 +45,7 @@ class LatestOrderActivity : ScopedAppActivity() {
         }
     }
 
-    private fun buildRows(order: Subscription): List<OrderRow> {
+    private fun buildRows(order: Order): List<OrderRow> {
         return listOf(order).map {
             val tierCycle = getTierCycleText(it.tier, it.cycle)
 

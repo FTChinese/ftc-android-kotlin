@@ -13,6 +13,7 @@ import com.ft.ftchinese.databinding.FragmentCartItemBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.getTierCycleText
 import com.ft.ftchinese.model.subscription.PaymentIntent
+import com.ft.ftchinese.ui.base.formatPrice
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
 import com.ft.ftchinese.viewmodel.Result
 
@@ -58,27 +59,12 @@ class CartItemFragment : ScopedFragment() {
         })
     }
 
-    private fun formatPrice(currency: String?, amount: Double?): String {
-        if (currency == null || amount == null) {
-            return "..."
-        }
-
-        if (amount == 0.0) {
-            return "..."
-        }
-
-        return getString(
-                R.string.formatter_price,
-                currency,
-                amount)
-    }
-
     private fun buildProduct(pi: PaymentIntent): UIProductInCart {
         return UIProductInCart(
-                price = formatPrice(
-                        pi.currencySymbol(),
+                price = activity?.formatPrice(
+                        pi.currency,
                         pi.amount
-                ),
+                ) ?: "...",
                 name = activity?.getTierCycleText(pi.plan.tier, pi.plan.cycle) ?: ""
         )
     }

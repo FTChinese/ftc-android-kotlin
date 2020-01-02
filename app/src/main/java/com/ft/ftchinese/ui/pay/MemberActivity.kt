@@ -18,10 +18,8 @@ import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.SessionManager
-import com.ft.ftchinese.model.subscription.Cycle
-import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.model.subscription.findPlan
+import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.Result

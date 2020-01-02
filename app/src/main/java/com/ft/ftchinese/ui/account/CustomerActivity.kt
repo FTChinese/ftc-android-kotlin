@@ -12,7 +12,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCustomerBinding
 import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.ui.base.*

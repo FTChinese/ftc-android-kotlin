@@ -20,7 +20,7 @@ import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.Permission
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ShareItem
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.viewmodel.ArticleViewModel

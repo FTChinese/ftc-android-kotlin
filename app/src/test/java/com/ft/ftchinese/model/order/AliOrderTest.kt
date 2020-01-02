@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.order
 
+import com.ft.ftchinese.model.subscription.AliOrder
 import com.ft.ftchinese.util.json
-import org.junit.Assert.*
 import org.junit.Test
 
 private val orderData = """

@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.order
+package com.ft.ftchinese.model.subscription
 
 enum class PayMethod(val symbol: String) {
     ALIPAY("alipay"),

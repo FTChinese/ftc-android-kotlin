@@ -18,7 +18,7 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.util.json

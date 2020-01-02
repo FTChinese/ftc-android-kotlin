@@ -15,7 +15,7 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel

@@ -18,10 +18,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCheckOutBinding
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.*
-import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.SessionManager
-import com.ft.ftchinese.model.subscription.PaymentIntent
+import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
@@ -160,7 +160,10 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     private fun onSelectPayMethod() {
-        val priceText = getString(R.string.formatter_price, paymentIntent?.currencySymbol(), paymentIntent?.amount)
+        val priceText = formatPrice(
+                currency = paymentIntent?.currency,
+                price = paymentIntent?.amount
+        )
 
         binding.payButtonText = when(payMethod) {
             // 支付宝支付 ¥258.00
@@ -315,14 +318,14 @@ class CheckOutActivity : ScopedAppActivity(),
         val account = sessionManager.loadAccount() ?: return
         val member = account.membership
 
-        val subs = orderManager.load() ?: return
-        val confirmedSub = subs.withConfirmation(member)
-        orderManager.save(confirmedSub)
+        val order = orderManager.load() ?: return
 
-        val updatedMembership = member.withSubscription(confirmedSub)
-        sessionManager.updateMembership(updatedMembership)
-        info("New membership: $updatedMembership")
+        val (confirmedOrder, updatedMember) = confirmOrder(order, member)
 
+        orderManager.save(confirmedOrder)
+        sessionManager.updateMembership(updatedMember)
+
+        info("New membership: $updatedMember")
 
         toast(R.string.refreshing_account)
         accountViewModel.refresh(account)

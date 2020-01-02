@@ -12,7 +12,7 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.ProductViewModel
 import kotlinx.android.synthetic.main.simple_toolbar.*

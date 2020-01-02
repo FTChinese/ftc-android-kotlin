@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.order
+package com.ft.ftchinese.model.subscription
 
 /**
  * After WXPayEntryActivity received result 0, check against our server for the payment result.

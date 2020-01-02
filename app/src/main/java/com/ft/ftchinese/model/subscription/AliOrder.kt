@@ -1,7 +1,5 @@
-package com.ft.ftchinese.model.order
+package com.ft.ftchinese.model.subscription
 
-import com.ft.ftchinese.model.subscription.Cycle
-import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.util.*
 import org.threeten.bp.ZonedDateTime
 
@@ -22,7 +20,7 @@ data class AliOrder(
         override val createdAt: ZonedDateTime,
         val param: String
 
-) : Subscription(
+) : Order(
         id = id,
         tier = tier,
         cycle = cycle,

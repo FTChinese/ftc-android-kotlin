@@ -7,6 +7,8 @@ import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.model.subscription.Cycle
+import com.ft.ftchinese.model.subscription.OrderUsage
+import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.subscription.Tier
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZoneOffset

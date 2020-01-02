@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.model.order.PayMethod
+import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.splash.ScreenAd
 import com.ft.ftchinese.util.AdSlot

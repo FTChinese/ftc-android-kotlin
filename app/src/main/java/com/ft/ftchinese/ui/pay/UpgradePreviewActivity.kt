@@ -11,8 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpgradePreviewBinding
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.subscription.PaymentIntent
+import com.ft.ftchinese.ui.base.formatPrice
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
 import com.ft.ftchinese.viewmodel.FreeUpgradeDeniedError
@@ -70,14 +71,6 @@ class UpgradePreviewActivity : AppCompatActivity() {
         checkoutViewModel.previewUpgrade(account)
     }
 
-    private fun formatPrice(currency: String, price: Double): String {
-        return getString(
-                R.string.formatter_price,
-                currency,
-                price
-        )
-    }
-
     private fun initUI(paymentIntent: PaymentIntent?) {
 
         if (paymentIntent == null) {
@@ -86,20 +79,20 @@ class UpgradePreviewActivity : AppCompatActivity() {
 
         val uiData = UIUpgradePreview(
                amount =  formatPrice(
-                       paymentIntent.currencySymbol(),
+                       paymentIntent.currency,
                        paymentIntent.amount),
 
                 price = getString(
                         R.string.premium_price,
                         formatPrice(
-                                paymentIntent.plan.currencySymbol(),
+                                paymentIntent.plan.currency,
                                 paymentIntent.plan.price
                         )
                 ),
                 balance = getString(
                         R.string.account_balance,
                         formatPrice(
-                                paymentIntent.currencySymbol(),
+                                paymentIntent.currency,
                                 paymentIntent.wallet.balance
                         )
                 ),

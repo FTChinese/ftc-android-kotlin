@@ -11,9 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUnlinkBinding
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.reader.UnlinkAnchor
-import com.ft.ftchinese.model.order.PayMethod
+import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel

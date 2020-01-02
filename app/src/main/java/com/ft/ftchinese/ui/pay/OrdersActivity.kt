@@ -6,10 +6,10 @@ import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.subscription.Order
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.model.order.PayMethod
-import com.ft.ftchinese.model.reader.SessionManager
-import com.ft.ftchinese.model.order.Order
+import com.ft.ftchinese.model.subscription.PayMethod
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.util.*
 import kotlinx.android.synthetic.main.activity_my_orders.*
@@ -100,7 +100,7 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
                 PayMethod.STRIPE -> getString(R.string.pay_method_stripe)
             }
 
-            val price = getString(R.string.formatter_price, "￥", it.netPrice)
+            val price = formatPrice(it.currency, it.amount)
 
             OrderRow(
                     orderId = getString(R.string.order_id, it.id),

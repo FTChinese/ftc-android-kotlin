@@ -1,7 +1,6 @@
 package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
-import com.ft.ftchinese.model.order.OrderUsage
 import com.ft.ftchinese.util.KOrderUsage
 import kotlinx.android.parcel.Parcelize
 
@@ -16,9 +15,6 @@ data class PaymentIntent(
         val wallet: Wallet = Wallet(),
         val plan: Plan
 ) : Parcelable {
-    fun currencySymbol(): String {
-        return plan.currencySymbol()
-    }
 
     fun isPayRequired(): Boolean {
         return amount != 0.0

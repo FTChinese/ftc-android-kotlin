@@ -14,10 +14,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityStripeSubBinding
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.subscription.OrderUsage
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.subscription.PaymentIntent
-import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.model.subscription.StripePlan
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider

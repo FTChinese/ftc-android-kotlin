@@ -12,7 +12,7 @@ import com.ft.ftchinese.databinding.ActivityWechatBinding
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.ui.account.LinkPreviewActivity

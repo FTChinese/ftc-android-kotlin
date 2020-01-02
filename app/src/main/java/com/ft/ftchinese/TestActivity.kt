@@ -22,9 +22,10 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.*
-import com.ft.ftchinese.model.subscription.Cycle
-import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.service.PollService
+import com.ft.ftchinese.store.OrderManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
 import com.ft.ftchinese.ui.article.*
@@ -563,7 +564,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                 // This order actually exists, since you
                 // Wechat does not provide a fake test
                 // mechanism.
-                orderManger.save(Subscription(
+                orderManger.save(Order(
                         id = "FTEFD5E11FDFA709E0",
                         tier = Tier.PREMIUM,
                         cycle = Cycle.YEAR,

@@ -14,7 +14,7 @@ import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.model.StatsTracker
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.parseException
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.Existence

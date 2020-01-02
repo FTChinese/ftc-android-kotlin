@@ -12,7 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentUpdateUsernameBinding
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.UpdateViewModel
 import org.jetbrains.anko.AnkoLogger

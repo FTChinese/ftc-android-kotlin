@@ -1,7 +1,6 @@
 package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
-import com.ft.ftchinese.model.order.OrderUsage
 import com.ft.ftchinese.util.GAAction
 import com.ft.ftchinese.util.KCycle
 import com.ft.ftchinese.util.KTier
@@ -24,15 +23,6 @@ data class Plan(
 
     fun getId(): String {
         return "${tier}_$cycle"
-    }
-
-    fun currencySymbol(): String {
-        return when (currency) {
-            "cny" -> "¥"
-            "usd" -> "$"
-            "gbp" -> "£"
-            else -> "¥"
-        }
     }
 
     fun paymentIntent(kind: OrderUsage?): PaymentIntent {

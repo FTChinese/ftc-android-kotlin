@@ -15,7 +15,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.Permission
-import com.ft.ftchinese.model.reader.SessionManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
