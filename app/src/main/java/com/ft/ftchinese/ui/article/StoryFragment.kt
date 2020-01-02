@@ -21,6 +21,7 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.reader.ReadingDuration
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.service.ReadingDurationService
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
 import com.ft.ftchinese.util.*

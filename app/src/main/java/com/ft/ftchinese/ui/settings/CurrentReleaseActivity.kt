@@ -12,7 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCurrentReleaseBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.util.FileCache
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.viewmodel.SettingsViewModel
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.toast

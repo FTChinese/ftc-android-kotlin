@@ -15,7 +15,7 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.channel.ChannelActivity
-import com.ft.ftchinese.util.FileCache
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.viewmodel.SplashViewModel
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger

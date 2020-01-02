@@ -17,7 +17,7 @@ import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
-import com.ft.ftchinese.util.FileCache
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.WxRefreshState

@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ChannelSource
 import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.FileCache
+import com.ft.ftchinese.store.FileCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

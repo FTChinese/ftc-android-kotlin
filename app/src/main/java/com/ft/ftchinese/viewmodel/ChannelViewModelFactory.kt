@@ -2,7 +2,7 @@ package com.ft.ftchinese.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.ft.ftchinese.util.FileCache
+import com.ft.ftchinese.store.FileCache
 
 /**
 * ViewModel provider factory to instantiate LoginViewModel.

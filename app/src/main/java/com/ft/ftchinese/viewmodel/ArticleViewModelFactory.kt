@@ -3,7 +3,7 @@ package com.ft.ftchinese.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.model.FollowingManager
-import com.ft.ftchinese.util.FileCache
+import com.ft.ftchinese.store.FileCache
 
 class ArticleViewModelFactory(
         private val cache: FileCache,

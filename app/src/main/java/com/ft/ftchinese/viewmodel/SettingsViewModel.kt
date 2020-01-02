@@ -8,6 +8,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadingHistoryDao
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.repository.ReleaseRepo
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

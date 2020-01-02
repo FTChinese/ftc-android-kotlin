@@ -33,6 +33,7 @@ import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.service.AudioDownloadService
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.login.LoginActivity

@@ -22,7 +22,7 @@ import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.Permission
 import com.ft.ftchinese.model.reader.SessionManager
 import com.ft.ftchinese.ui.base.ShareItem
-import com.ft.ftchinese.util.FileCache
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.viewmodel.ArticleViewModel
 import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
