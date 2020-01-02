@@ -13,6 +13,15 @@ import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.util.ClientError
 import org.jetbrains.anko.toast
 
+fun getCurrencySymbol(currency: String): String {
+    return when (currency) {
+        "cny" -> "¥"
+        "usd" -> "$"
+        "gbp" -> "£"
+        else -> currency.toUpperCase()
+    }
+}
+
 fun Activity.getActiveNetworkInfo(): NetworkInfo? {
     return try {
         // getSystemService() throws IllegalStateException and the returned value is nullable.
@@ -68,6 +77,18 @@ fun Activity.getTierCycleText(tier: Tier?, cycle: Cycle?): String? {
     }
 
     return getString(R.string.formatter_tier_cycle, getString(tier.stringRes), getString(cycle.stringRes))
+}
+
+fun Activity.formatPrice(currency: String?, price: Double?): String {
+    if (currency == null || price == null) {
+        return ""
+    }
+
+    return getString(
+            R.string.formatter_price,
+            getCurrencySymbol(currency),
+            price
+    )
 }
 
 // Using API 28. Unfortunately it also requires that you must increase min supported api.
@@ -148,11 +169,6 @@ fun Activity.handleApiError(resp: ClientError) {
     }
 
     toast(msg)
-}
-
-fun Activity.showException(e: Exception) {
-
-    toast(parseException(e))
 }
 
 fun Activity.parseException(e: Exception): String {
