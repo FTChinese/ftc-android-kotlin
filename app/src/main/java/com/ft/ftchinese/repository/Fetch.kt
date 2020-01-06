@@ -22,32 +22,7 @@ data class ClientError(
         val code: String? = null,
         val param: String? = null,
         val type: String? = null
-) : Exception(message) {
-
-    // Transform statusCode to human readable message.
-    // Status 422 is not handled here since every endpoint
-    // returns different message.
-    // 404 is not handled here too, since its meaning changes
-    // for each endpoint.
-    fun parseStatusCode(): Int? {
-        return when (statusCode) {
-            // If request header does not contain X-User-Id
-            401 -> {
-                R.string.api_unauthorized
-            }
-            429 -> {
-                R.string.api_too_many_request
-            }
-            500 -> {
-                R.string.api_server_error
-            }
-            // All other errors are treated as server error.
-            else -> {
-                null
-            }
-        }
-    }
-}
+) : Exception(message)
 
 
 data class Reason(

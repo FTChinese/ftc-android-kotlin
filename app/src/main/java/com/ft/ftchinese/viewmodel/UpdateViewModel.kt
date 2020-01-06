@@ -118,9 +118,7 @@ class UpdateViewModel : ViewModel() {
                 }
 
                 updateResult.value = Result.Success(done)
-//                        BinaryResult(
-//                        success = done
-//                )
+
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 422) {
                     when (e.error?.key) {
@@ -136,15 +134,8 @@ class UpdateViewModel : ViewModel() {
                 } else {
                     parseApiError(e)
                 }
-//                        BinaryResult(
-//                        error = msgId,
-//                        exception = e
-//                )
             } catch (e: Exception) {
                 updateResult.value = parseException(e)
-//                        BinaryResult(
-//                        exception = e
-//                )
             }
         }
     }
@@ -157,9 +148,7 @@ class UpdateViewModel : ViewModel() {
                 }
 
                 updateResult.value = Result.Success(done)
-//                        BinaryResult(
-//                        success = done
-//                )
+
             } catch (e: ClientError) {
                 val msgId = when (e.statusCode) {
                     403 -> R.string.error_incorrect_old_password
@@ -168,7 +157,7 @@ class UpdateViewModel : ViewModel() {
                         "password_invalid" -> R.string.error_invalid_password
                         else -> null
                     }
-                    else -> e.parseStatusCode()
+                    else -> null
                 }
 
                 updateResult.value = if (msgId != null) {
@@ -177,15 +166,7 @@ class UpdateViewModel : ViewModel() {
                     parseApiError(e)
                 }
 
-//                updateResult.value = BinaryResult(
-//                        error = msgId,
-//                        exception = e
-//                )
             } catch (e: Exception) {
-//                updateResult.value = BinaryResult(
-//                        exception = e
-//                )
-
                 updateResult.value = parseException(e)
             }
 
