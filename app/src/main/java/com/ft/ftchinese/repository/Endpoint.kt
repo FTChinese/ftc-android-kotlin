@@ -1,4 +1,4 @@
-package com.ft.ftchinese.util
+package com.ft.ftchinese.repository
 
 import android.net.Uri
 import com.ft.ftchinese.BuildConfig
@@ -92,7 +92,7 @@ val flavors = mapOf(
                 baseUrl = BASE_URL
         ),
         "huawei" to Flavor(
-                query =  "an_huawei",
+                query = "an_huawei",
                 baseUrl = BASE_URL
         ),
         "baidu" to Flavor(

@@ -9,7 +9,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.repository.ReaderRepo
-import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.repository.ClientError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

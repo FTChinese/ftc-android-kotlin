@@ -3,8 +3,6 @@ package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
-import com.ft.ftchinese.util.NextApi
-import com.ft.ftchinese.util.SubscribeApi
 import com.ft.ftchinese.util.json
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info

@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
+import com.ft.ftchinese.repository.Fetch
 import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger

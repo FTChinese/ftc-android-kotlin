@@ -16,9 +16,9 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.util.Fetch
+import com.ft.ftchinese.repository.Fetch
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.util.SubscribeApi
+import com.ft.ftchinese.repository.SubscribeApi
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentConfiguration

@@ -1,4 +1,4 @@
-package com.ft.ftchinese.util
+package com.ft.ftchinese.repository
 
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
@@ -13,12 +13,6 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.io.IOException
 import java.util.concurrent.TimeUnit
-
-val statusCodeMeaning = mapOf(
-        401 to R.string.api_unauthorized,
-        429 to R.string.api_too_many_request,
-        500 to R.string.api_server_error
-)
 
 data class ClientError(
         @Json(ignored = true)

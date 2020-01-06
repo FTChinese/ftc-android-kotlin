@@ -6,8 +6,6 @@ import com.ft.ftchinese.model.order.StripeSubParams
 import com.ft.ftchinese.model.order.StripeSubResponse
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.StripeCustomer
-import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.SubscribeApi
 import com.ft.ftchinese.util.json
 import org.jetbrains.anko.AnkoLogger
 import org.json.JSONException

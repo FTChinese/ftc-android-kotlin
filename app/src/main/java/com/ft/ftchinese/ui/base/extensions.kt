@@ -10,7 +10,7 @@ import android.widget.EditText
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.subscription.Cycle
 import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.repository.ClientError
 import org.jetbrains.anko.toast
 
 fun getCurrencySymbol(currency: String): String {

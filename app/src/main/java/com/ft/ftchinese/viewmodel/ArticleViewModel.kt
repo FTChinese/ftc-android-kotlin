@@ -7,7 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.ui.base.ShareItem
-import com.ft.ftchinese.util.Fetch
+import com.ft.ftchinese.repository.Fetch
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.util.json
 import kotlinx.coroutines.Dispatchers

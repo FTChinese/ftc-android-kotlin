@@ -7,8 +7,8 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.tracking.*
-import com.ft.ftchinese.util.FTC_OFFICIAL_URL
-import com.ft.ftchinese.util.currentFlavor
+import com.ft.ftchinese.repository.FTC_OFFICIAL_URL
+import com.ft.ftchinese.repository.currentFlavor
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger

@@ -1,10 +1,7 @@
 package com.ft.ftchinese.model.content
 
-import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.HTML_TYPE_COMPLETE
-import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.util.currentFlavor
+import com.ft.ftchinese.repository.currentFlavor
 
 object Navigation {
 

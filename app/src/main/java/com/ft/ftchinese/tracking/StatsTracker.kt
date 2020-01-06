@@ -9,10 +9,6 @@ import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.splash.ScreenAd
-import com.ft.ftchinese.util.AdSlot
-import com.ft.ftchinese.util.FtcEvent
-import com.ft.ftchinese.util.GAAction
-import com.ft.ftchinese.util.GACategory
 import com.google.android.gms.analytics.GoogleAnalytics
 import com.google.android.gms.analytics.HitBuilders
 import com.google.firebase.analytics.FirebaseAnalytics

@@ -7,10 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.repository.LinkRepo
-import com.ft.ftchinese.util.ClientError
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.viewmodel.parseApiError
-import com.ft.ftchinese.viewmodel.parseException
+import com.ft.ftchinese.repository.ClientError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

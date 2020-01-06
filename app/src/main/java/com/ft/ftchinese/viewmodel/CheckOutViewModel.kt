@@ -9,7 +9,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.repository.StripeRepo
 import com.ft.ftchinese.repository.SubRepo
-import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.repository.ClientError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

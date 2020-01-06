@@ -19,6 +19,7 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.repository.BASE_URL
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.tracking.PaywallTracker

@@ -2,8 +2,6 @@ package com.ft.ftchinese.tracking
 
 import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.util.GAAction
-import com.ft.ftchinese.util.GACategory
 
 /**
  * Paywall might triggered from an article, or it might be

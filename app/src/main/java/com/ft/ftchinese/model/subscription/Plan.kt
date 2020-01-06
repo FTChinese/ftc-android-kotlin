@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
-import com.ft.ftchinese.util.GAAction
+import com.ft.ftchinese.tracking.GAAction
 import com.ft.ftchinese.util.KCycle
 import com.ft.ftchinese.util.KTier
 import kotlinx.android.parcel.Parcelize

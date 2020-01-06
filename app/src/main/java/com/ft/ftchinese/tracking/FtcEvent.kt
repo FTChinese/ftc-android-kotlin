@@ -1,4 +1,4 @@
-package com.ft.ftchinese.util
+package com.ft.ftchinese.tracking
 
 /**
  * Custom parameter name used for Firebase

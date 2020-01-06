@@ -5,9 +5,6 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Passwords
 import com.ft.ftchinese.model.reader.WxSession
-import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.NextApi
-import com.ft.ftchinese.util.SubscribeApi
 import com.ft.ftchinese.util.json
 
 object AccountRepo {

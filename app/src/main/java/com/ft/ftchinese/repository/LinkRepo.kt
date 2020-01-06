@@ -4,8 +4,6 @@ import android.net.Credentials
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.UnlinkAnchor
-import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.json
 
 object LinkRepo {

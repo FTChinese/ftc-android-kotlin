@@ -13,7 +13,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivitySearchableBinding
 import com.ft.ftchinese.ui.article.WVClient
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.util.BASE_URL
+import com.ft.ftchinese.repository.BASE_URL
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger

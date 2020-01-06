@@ -2,7 +2,7 @@ package com.ft.ftchinese.service
 
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.StripeRepo
-import com.ft.ftchinese.util.ClientError
+import com.ft.ftchinese.repository.ClientError
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.EphemeralKeyUpdateListener
 import kotlinx.coroutines.*

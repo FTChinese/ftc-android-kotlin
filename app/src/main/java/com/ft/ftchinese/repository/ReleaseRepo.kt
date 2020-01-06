@@ -1,8 +1,6 @@
 package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.model.AppRelease
-import com.ft.ftchinese.util.Fetch
-import com.ft.ftchinese.util.NextApi
 import com.ft.ftchinese.util.json
 import org.jetbrains.anko.AnkoLogger
 

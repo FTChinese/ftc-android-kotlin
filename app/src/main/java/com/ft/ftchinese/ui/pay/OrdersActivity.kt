@@ -9,6 +9,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.subscription.Order
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.subscription.PayMethod
+import com.ft.ftchinese.repository.ClientError
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.util.*
