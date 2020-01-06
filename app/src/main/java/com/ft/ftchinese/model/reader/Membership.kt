@@ -40,18 +40,6 @@ data class Membership(
             else -> R.string.tier_free
         }
 
-    fun withAliOrWxOrder(s: Order): Membership {
-        return Membership(
-                id = id,
-                tier = s.tier,
-                cycle = s.cycle,
-                expireDate = s.endDate,
-                payMethod = s.payMethod,
-                autoRenew = autoRenew,
-                status = status
-        )
-    }
-
     fun getPlan(): Plan? {
         if (tier == null) {
             return null
@@ -84,6 +72,7 @@ data class Membership(
         if (expireDate == null) {
             return ""
         }
+
         return expireDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
     }
 
@@ -106,7 +95,7 @@ data class Membership(
 
     /**
      * Checks whether membership expired.
-     * For stripe customer, if expire date is past and
+     * For stripe and apple iap, if expire date is past and
      * authRenew is true, take it as not expired.
      */
     fun expired(): Boolean {
@@ -128,16 +117,22 @@ data class Membership(
      *         today              3 years later
      * --------- | -------------- | ---------
      * expired      renew/upgrade   upgrade only for standard
+     *
+     * Calling it manual renewal might be more proper.
+     * This should only be available if current membership
+     * is purchased via ali or wx.
      */
     private fun permitRenewal(): Boolean {
         if (expireDate == null) {
             return false
         }
 
+        // For auto renewal, deny manual renewal.
         if (autoRenew == true) {
             return false
         }
 
+        // For non-ali or wx pay,
         if (!fromWxOrAli()) {
             return false
         }
@@ -166,6 +161,7 @@ data class Membership(
             )
         }
 
+        // Not a member yet.
         if (tier == null) {
             return Pair(
                     Permission.FREE.id,
@@ -173,6 +169,7 @@ data class Membership(
             )
         }
 
+        // Inactive stripe.
         if (payMethod == PayMethod.STRIPE && status != StripeSubStatus.Active) {
             return Pair(
                     Permission.FREE.id,
@@ -180,6 +177,7 @@ data class Membership(
             )
         }
 
+        // Expired.
         if (expired()) {
             return Pair(
                     Permission.FREE.id,
@@ -187,6 +185,7 @@ data class Membership(
             )
         }
 
+        // Valid standard.
         if (tier == Tier.STANDARD) {
             return Pair(
                     Permission.FREE.id or Permission.STANDARD.id,
@@ -194,6 +193,7 @@ data class Membership(
             )
         }
 
+        // Valid premium.
         if (tier == Tier.PREMIUM) {
             return Pair(
                     Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id,
@@ -208,7 +208,7 @@ data class Membership(
      * Determines what a membership can do next:
      * re-subscribe, renew or upgrade, or any of the combination
      */
-    private fun nextAction(): Int {
+    fun nextAction(): Int {
         if (vip) {
             return NextStep.None.id
         }
@@ -217,18 +217,29 @@ data class Membership(
             return NextStep.Resubscribe.id
         }
 
+        // IAP
+        if (payMethod == PayMethod.APPLE) {
+            return if (expired()) {
+                NextStep.Resubscribe.id
+            } else {
+                NextStep.None.id
+            }
+        }
+
         if (status?.shouldResubscribe() == true) {
             return NextStep.Resubscribe.id
         }
 
+        // Expired also indicates auto renewal is off.
         if (expired()) {
             return NextStep.Resubscribe.id
         }
 
-        // Not expired, or auto renew.
+        // Not expired, or auto renew is on.
 
-        // Do not show renew button for auto renew.
+        // For stripe and iap auto renewal.
         if (autoRenew == true) {
+
             return when (tier) {
                 Tier.STANDARD -> NextStep.Upgrade.id
                 Tier.PREMIUM -> NextStep.None.id
@@ -249,21 +260,6 @@ data class Membership(
         }
 
         return NextStep.None.id
-    }
-
-    /**
-     * Determines which buttons are visible on MemberActivity
-     * to persuade user to take next action: any or combination
-     * of resubscribe,
-     */
-    fun nextVisibleButtons(): VisibleButtons {
-        val actions = nextAction()
-
-        return VisibleButtons(
-                showSubscribe = (actions and NextStep.Resubscribe.id) > 0,
-                showRenew = (actions and NextStep.Renew.id) > 0,
-                showUpgrade = (actions and NextStep.Upgrade.id) > 0
-        )
     }
 
     // Determine how user is using CheckOutActivity.

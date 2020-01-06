@@ -17,6 +17,7 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
@@ -71,18 +72,16 @@ class MemberActivity : ScopedAppActivity(),
         initUI()
     }
 
-    private fun initUI() {
-
-        val account = sessionManager.loadAccount() ?: return
-
-        val member = account.membership
-
-        val memberInfo = UIMemberInfo(
+    private fun buildMemberInfo(member: Membership): UIMemberInfo {
+        return UIMemberInfo(
                 tier = getString(member.tierStringRes),
                 expireDate = member.localizedExpireDate(),
                 autoRenewal = member.autoRenew ?: false,
                 stripeStatus = if (member.payMethod == PayMethod.STRIPE && member.status != null) {
-                    getString(member.status.stringRes)
+                    getString(
+                            R.string.stripe_status,
+                            getString(member.status.stringRes)
+                    )
                 } else {
                     null
                 },
@@ -94,13 +93,19 @@ class MemberActivity : ScopedAppActivity(),
                         it <= 7 -> getString(R.string.member_will_expire, it)
                         else -> null
                     }
-                }
+                },
+                isValidIAP = member.payMethod == PayMethod.APPLE && !member.expired()
         )
+    }
 
-        info("Member info for ui: $memberInfo")
+    private fun initUI() {
 
-        binding.member = memberInfo
-        binding.buttons = member.nextVisibleButtons()
+        val account = sessionManager.loadAccount() ?: return
+
+        val member = account.membership
+
+        binding.member = buildMemberInfo(member)
+        binding.buttons = buildNextStepButtons(member.nextAction())
 
         binding.subscribeBtn.setOnClickListener {
             PaywallActivity.start(this)

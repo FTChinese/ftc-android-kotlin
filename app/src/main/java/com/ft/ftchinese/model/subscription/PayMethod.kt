@@ -3,7 +3,8 @@ package com.ft.ftchinese.model.subscription
 enum class PayMethod(val symbol: String) {
     ALIPAY("alipay"),
     WXPAY("wechat"),
-    STRIPE("stripe");
+    STRIPE("stripe"),
+    APPLE("apple");
 
     override fun toString(): String {
         return symbol

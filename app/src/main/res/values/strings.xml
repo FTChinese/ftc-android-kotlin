@@ -126,11 +126,12 @@
     <string name="sub_status_unpaid">未支付</string>
     <string name="sub_status_active">活跃</string>
     <string name="label_auto_renewal">自动续订:</string>
-    <string name="label_stripe_status">Stripe订阅状态:</string>
+    <string name="stripe_status">Stripe订阅状态: %1$s</string>
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="heading_customer_service">联系客服</string>
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
+    <string name="iap_guide">当前订阅来自苹果App内购。请在App Store中管理您的订阅。</string>
 
     <string name="heading_pay_method">选择支付方式</string>
     <string name="heading_become_member">购买FT会员</string>

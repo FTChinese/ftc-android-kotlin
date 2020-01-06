@@ -16,6 +16,9 @@ enum class Permission(val id: Int) {
     }
 }
 
+/**
+ * Membership status corresponding to a Permission.
+ */
 enum class MemberStatus {
     Vip, // MemberActivity do not show any buttons
     Empty, // Show Subscribe button only
@@ -27,7 +30,7 @@ enum class MemberStatus {
 }
 
 /**
- * Determines which buttons are visible on membership info activity.
+ * Deduce what kind of actions current membership could take.
  */
 enum class NextStep(val id: Int) {
     None(0),
@@ -36,11 +39,3 @@ enum class NextStep(val id: Int) {
     Upgrade(4)
 }
 
-/**
- * Which buttons should be visible on MemberActivity
- */
-data class VisibleButtons(
-        val showSubscribe: Boolean,
-        val showRenew: Boolean,
-        val showUpgrade: Boolean
-)
