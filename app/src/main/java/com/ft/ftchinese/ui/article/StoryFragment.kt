@@ -17,11 +17,15 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentArticleBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.content.Following
+import com.ft.ftchinese.model.content.FollowingManager
+import com.ft.ftchinese.model.content.Language
+import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.reader.ReadingDuration
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.service.ReadingDurationService
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
 import com.ft.ftchinese.util.*

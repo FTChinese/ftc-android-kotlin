@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.content
 
 import android.content.Context
 import java.net.URLEncoder

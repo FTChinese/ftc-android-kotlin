@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model
 
+import com.ft.ftchinese.model.content.Navigation
 import com.ft.ftchinese.util.Fetch
-import org.junit.Assert.*
 import org.junit.Test
 
 class NavigationTest {

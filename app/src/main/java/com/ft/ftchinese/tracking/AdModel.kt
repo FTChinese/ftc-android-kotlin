@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.tracking
 
 data class AdModel(
         val imageString: String,

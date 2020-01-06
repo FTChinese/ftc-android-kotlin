@@ -1,8 +1,10 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.content
 
 import android.net.Uri
 import android.os.Parcelable
 import com.ft.ftchinese.BuildConfig
+import com.ft.ftchinese.tracking.JSCodes
+import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.util.currentFlavor
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize

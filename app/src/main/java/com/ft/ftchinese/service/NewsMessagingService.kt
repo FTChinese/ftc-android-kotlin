@@ -6,10 +6,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.ft.ftchinese.R
 import com.ft.ftchinese.R.string.news_notification_channel_id
-import com.ft.ftchinese.model.Teaser
-import com.ft.ftchinese.model.ChannelSource
-import com.ft.ftchinese.model.HTML_TYPE_FRAGMENT
-import com.ft.ftchinese.model.RemoteMessageType
+import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
+import com.ft.ftchinese.model.content.RemoteMessageType
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -86,9 +86,9 @@ class NewsMessagingService : FirebaseMessagingService(), AnkoLogger {
             RemoteMessageType.Interactive -> ArticleActivity.newIntent(
                     baseContext,
                     Teaser(
-                        id = contentId,
-                        type = contentType,
-                        title = ""
+                            id = contentId,
+                            type = contentType,
+                            title = ""
                     )
             )
 
@@ -97,7 +97,7 @@ class NewsMessagingService : FirebaseMessagingService(), AnkoLogger {
                     baseContext,
                     ChannelSource(
                             title = contentId,
-                            name =  "${msgType}_$contentId",
+                            name = "${msgType}_$contentId",
                             contentUrl = "",
                             htmlType = HTML_TYPE_FRAGMENT
                     )

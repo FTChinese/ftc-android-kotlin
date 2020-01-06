@@ -11,7 +11,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityWechatBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.subscription.WxPaymentStatus
@@ -19,6 +18,8 @@ import com.ft.ftchinese.model.subscription.confirmOrder
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.subscription.findPlan
 import com.ft.ftchinese.store.OrderManager
+import com.ft.ftchinese.tracking.PaywallTracker
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.pay.*
 import com.ft.ftchinese.viewmodel.CheckOutViewModel

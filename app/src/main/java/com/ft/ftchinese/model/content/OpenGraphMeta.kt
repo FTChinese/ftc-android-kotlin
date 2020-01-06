@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.content
 
 /**
  * Example data

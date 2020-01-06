@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityFragmentDoubleBinding
 import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.model.StatsTracker
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.store.SessionManager

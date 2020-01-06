@@ -1,5 +1,9 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.content
 
+import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.model.content.HTML_TYPE_COMPLETE
+import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
+import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.util.currentFlavor
 
 object Navigation {
@@ -265,10 +269,10 @@ object Navigation {
 
     val englishPages = arrayOf(
             ChannelSource(
-                title = "最新",
-                name = "english_latest",
-                contentUrl = "${currentFlavor.baseUrl}/channel/english.html?webview=ftcapp&bodyonly=yes&001",
-                htmlType = HTML_TYPE_FRAGMENT),
+                    title = "最新",
+                    name = "english_latest",
+                    contentUrl = "${currentFlavor.baseUrl}/channel/english.html?webview=ftcapp&bodyonly=yes&001",
+                    htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
              *   "title": "FT英语电台",
@@ -340,7 +344,7 @@ object Navigation {
                 }
              */
             ChannelSource(
-                    title ="双语阅读",
+                    title = "双语阅读",
                     name = "english_bilingual",
                     contentUrl = "${currentFlavor.baseUrl}/channel/ce.html?webview=ftcapp&bodyonly=yes",
                     htmlType = HTML_TYPE_FRAGMENT),

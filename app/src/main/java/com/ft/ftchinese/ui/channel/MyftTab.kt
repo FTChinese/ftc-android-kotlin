@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.ui.channel
 
 data class MyftTab(
         val id: MyftTabId,

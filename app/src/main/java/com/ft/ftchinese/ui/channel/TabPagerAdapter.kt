@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.model.ChannelSource
+import com.ft.ftchinese.model.content.ChannelSource
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 

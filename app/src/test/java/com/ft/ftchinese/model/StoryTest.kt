@@ -2,6 +2,7 @@ package com.ft.ftchinese.model
 
 import com.beust.klaxon.Klaxon
 import com.beust.klaxon.Parser
+import com.ft.ftchinese.model.content.Story
 import org.junit.Test
 
 class StoryTest {

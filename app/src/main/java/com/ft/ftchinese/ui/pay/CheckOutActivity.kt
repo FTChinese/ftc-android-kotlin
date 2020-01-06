@@ -17,11 +17,11 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCheckOutBinding
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.model.*
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.OrderManager
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel

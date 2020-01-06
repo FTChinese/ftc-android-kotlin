@@ -18,11 +18,15 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.ui.pay.grantPermission
-import com.ft.ftchinese.model.*
-import com.ft.ftchinese.model.Permission
+import com.ft.ftchinese.model.reader.Permission
+import com.ft.ftchinese.model.content.FollowingManager
+import com.ft.ftchinese.model.content.Language
+import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ShareItem
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.tracking.PaywallTracker
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.viewmodel.ArticleViewModel
 import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel

@@ -1,5 +1,6 @@
 package com.ft.ftchinese.model
 
+import com.ft.ftchinese.model.content.Navigation
 import org.junit.Before
 import org.junit.Test
 

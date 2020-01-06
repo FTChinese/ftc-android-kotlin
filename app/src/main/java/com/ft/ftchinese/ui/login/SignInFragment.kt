@@ -15,7 +15,7 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.afterTextChanged
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.Credentials
-import com.ft.ftchinese.model.TokenManager
+import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.viewmodel.LoginViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info

@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.store
 
 import android.content.Context
 import com.ft.ftchinese.util.generateNonce

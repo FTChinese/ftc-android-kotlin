@@ -18,7 +18,7 @@ import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.databinding.ActivityTestBinding
-import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.*

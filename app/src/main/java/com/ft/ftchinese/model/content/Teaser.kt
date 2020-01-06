@@ -1,10 +1,12 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.content
 
 import android.net.Uri
 import android.os.Parcelable
 import com.beust.klaxon.Json
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.database.StarredArticle
+import com.ft.ftchinese.model.reader.Permission
+import com.ft.ftchinese.tracking.*
 import com.ft.ftchinese.util.FTC_OFFICIAL_URL
 import com.ft.ftchinese.util.currentFlavor
 import kotlinx.android.parcel.IgnoredOnParcel

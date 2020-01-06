@@ -14,7 +14,7 @@ import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.model.TokenManager
+import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.viewmodel.LoginViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast

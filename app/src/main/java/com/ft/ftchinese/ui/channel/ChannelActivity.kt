@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.fragment.app.commit
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.content.ChannelSource
 import com.google.firebase.analytics.FirebaseAnalytics
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger

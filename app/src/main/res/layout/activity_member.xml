@@ -9,7 +9,7 @@
             type="com.ft.ftchinese.ui.pay.UIMemberInfo" />
         <variable
             name="buttons"
-            type="com.ft.ftchinese.model.VisibleButtons" />
+            type="com.ft.ftchinese.model.reader.VisibleButtons" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

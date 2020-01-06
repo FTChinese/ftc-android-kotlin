@@ -1,5 +1,7 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.tracking
 
+import com.ft.ftchinese.model.content.Language
+import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.util.GAAction
 import com.ft.ftchinese.util.GACategory
 

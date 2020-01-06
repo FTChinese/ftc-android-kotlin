@@ -3,8 +3,6 @@ package com.ft.ftchinese.ui.channel
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
-import com.ft.ftchinese.model.MyftTab
-import com.ft.ftchinese.model.MyftTabId
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class MyftPagerAdapter(

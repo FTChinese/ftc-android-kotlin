@@ -2,10 +2,6 @@ package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.MemberStatus
-import com.ft.ftchinese.model.NextStep
-import com.ft.ftchinese.model.Permission
-import com.ft.ftchinese.model.VisibleButtons
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.subscription.*
 

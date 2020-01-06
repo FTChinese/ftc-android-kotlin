@@ -2,8 +2,8 @@ package com.ft.ftchinese.database
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.ft.ftchinese.model.Teaser
-import com.ft.ftchinese.model.Permission
+import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.util.formatSQLDateTime
 import org.threeten.bp.LocalDateTime

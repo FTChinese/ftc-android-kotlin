@@ -2,7 +2,7 @@ package com.ft.ftchinese.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.ft.ftchinese.model.FollowingManager
+import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.store.FileCache
 
 class ArticleViewModelFactory(

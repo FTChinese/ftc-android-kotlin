@@ -1,10 +1,11 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.tracking
 
 import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
+import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.splash.ScreenAd

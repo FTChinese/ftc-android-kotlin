@@ -8,7 +8,7 @@ import android.view.View
 import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAudioPlayerBinding
-import com.ft.ftchinese.model.Teaser
+import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.service.AudioDownloadService
 import com.ft.ftchinese.service.AudioDownloader
 import com.ft.ftchinese.ui.base.ScopedAppActivity

@@ -25,7 +25,8 @@ import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isActiveNetworkWifi
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.model.content.Navigation
 import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.order.StripeSubStatus
 import com.ft.ftchinese.model.reader.LoginMethod
@@ -34,6 +35,9 @@ import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.service.AudioDownloadService
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.TokenManager
+import com.ft.ftchinese.tracking.PaywallTracker
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.login.LoginActivity

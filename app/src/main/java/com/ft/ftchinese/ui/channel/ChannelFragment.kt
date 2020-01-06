@@ -18,9 +18,12 @@ import com.ft.ftchinese.databinding.FragmentChannelBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.tracking.PaywallTracker
+import com.ft.ftchinese.tracking.SponsorManager
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.WVClient

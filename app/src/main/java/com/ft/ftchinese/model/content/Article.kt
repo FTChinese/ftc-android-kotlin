@@ -1,9 +1,14 @@
-package com.ft.ftchinese.model
+package com.ft.ftchinese.model.content
 
 import android.text.format.DateFormat
 import com.beust.klaxon.Json
 import com.ft.ftchinese.database.StarredArticle
+import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.tracking.AdParser
+import com.ft.ftchinese.tracking.AdPosition
+import com.ft.ftchinese.tracking.Sponsor
+import com.ft.ftchinese.tracking.SponsorManager
 import org.jetbrains.anko.AnkoLogger
 import java.util.*
 

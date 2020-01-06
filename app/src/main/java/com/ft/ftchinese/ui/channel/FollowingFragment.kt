@@ -9,10 +9,10 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.Following
-import com.ft.ftchinese.model.FollowingManager
-import com.ft.ftchinese.model.HTML_TYPE_FRAGMENT
-import com.ft.ftchinese.model.ChannelSource
+import com.ft.ftchinese.model.content.Following
+import com.ft.ftchinese.model.content.FollowingManager
+import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
+import com.ft.ftchinese.model.content.ChannelSource
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 

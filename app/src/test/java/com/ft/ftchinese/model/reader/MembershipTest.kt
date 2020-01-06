@@ -1,6 +1,5 @@
 package com.ft.ftchinese.model.reader
 
-import com.ft.ftchinese.model.Permission
 import com.ft.ftchinese.model.subscription.Cycle
 import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.order.StripeSubStatus

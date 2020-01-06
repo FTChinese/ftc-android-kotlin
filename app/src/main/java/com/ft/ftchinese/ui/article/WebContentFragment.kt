@@ -14,13 +14,16 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.model.*
+import com.ft.ftchinese.model.content.FollowingManager
+import com.ft.ftchinese.model.content.OpenGraphMeta
+import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.util.json
 import com.ft.ftchinese.viewmodel.ArticleViewModel
 import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
