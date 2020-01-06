@@ -6,10 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.order.StripeSub
 import com.ft.ftchinese.model.reader.*
+import com.ft.ftchinese.model.subscription.Order
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.StripeRepo
 import com.ft.ftchinese.repository.ClientError
+import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.store.FileCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,6 +47,10 @@ class AccountViewModel : ViewModel(), AnkoLogger {
 
     val stripeRetrievalResult: MutableLiveData<Result<StripeSub>> by lazy {
         MutableLiveData<Result<StripeSub>>()
+    }
+
+    val ordersResult: MutableLiveData<Result<List<Order>>> by lazy {
+        MutableLiveData<Result<List<Order>>>()
     }
 
     // Ask API to fetch user's latest wechat info and save
@@ -209,5 +215,19 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     // Show re-authorzation dialog for wechat.
     fun showReAuth() {
         wxRefreshResult.value = Result.Success(WxRefreshState.ReAuth)
+    }
+
+    fun fetchOrders(account: Account) {
+        viewModelScope.launch {
+            try {
+                val orders = withContext(Dispatchers.IO) {
+                    SubRepo.getOrders(account)
+                }
+
+                ordersResult.value = Result.Success(orders)
+            } catch (e: Exception) {
+                ordersResult.value = parseException(e)
+            }
+        }
     }
 }

@@ -10,8 +10,6 @@ import android.widget.EditText
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.subscription.Cycle
 import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.repository.ClientError
-import org.jetbrains.anko.toast
 
 fun getCurrencySymbol(currency: String): String {
     return when (currency) {
@@ -133,54 +131,6 @@ fun Activity.formatPrice(currency: String?, price: Double?): String {
 //    }
 //}
 
-
-fun Activity.handleApiError(resp: ClientError) {
-    // Here handles 422 response.
-    // Currently only 422's response has `error` field.
-    if (resp.error != null) {
-        val msg = when (resp.error.key) {
-            "email_already_exists" -> getString(R.string.api_email_taken)
-            "email_invalid" -> getString(R.string.error_invalid_email)
-            "password_invalid" -> getString(R.string.error_invalid_password)
-            "email_server_missing" -> getString(R.string.api_email_server_down)
-            "userName_already_exists" -> getString(R.string.api_name_taken)
-            "membership_already_upgraded" -> getString(R.string.api_already_premium)
-            else -> resp.message
-        }
-        toast(msg)
-        return
-    }
-
-    val msg = when (resp.statusCode) {
-        400 -> {
-            getString(R.string.api_bad_request)
-        }
-        // If request header does not contain X-User-Id
-        401 -> {
-            getString(R.string.api_unauthorized)
-        }
-        429 -> {
-            getString(R.string.api_too_many_request)
-        }
-        // All other errors are treated as server error.
-        else -> {
-            getString(R.string.api_server_error)
-        }
-    }
-
-    toast(msg)
-}
-
-fun Activity.parseException(e: Exception): String {
-    return when (e) {
-        is IllegalStateException -> {
-            getString(R.string.api_empty_url)
-        }
-        else -> {
-            e.message
-        }
-    } ?: getString(R.string.error_unknown)
-}
 
 /**
  * Extension function to simplify setting an afterTextChanged action to EditText components.

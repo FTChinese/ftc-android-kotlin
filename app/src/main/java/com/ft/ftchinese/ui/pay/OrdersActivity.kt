@@ -3,22 +3,21 @@ package com.ft.ftchinese.ui.pay
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityMyOrdersBinding
 import com.ft.ftchinese.model.subscription.Order
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.subscription.PayMethod
-import com.ft.ftchinese.repository.ClientError
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.util.*
-import kotlinx.android.synthetic.main.activity_my_orders.*
-import kotlinx.android.synthetic.main.progress_bar.*
+import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.simple_toolbar.*
-import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,18 +25,13 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var viewAdapter: OrderAdapter
     private lateinit var sessionManager: SessionManager
-
-    private fun showProgress(show: Boolean) {
-        if (show) {
-            progress_bar.visibility = View.VISIBLE
-        } else {
-            progress_bar.visibility = View.GONE
-        }
-    }
+    private lateinit var binding: ActivityMyOrdersBinding
+    private lateinit var viewModel: AccountViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_my_orders)
+
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_my_orders)
         setSupportActionBar(toolbar)
 
         sessionManager = SessionManager.getInstance(this)
@@ -50,42 +44,43 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
         val viewManager = LinearLayoutManager(this)
         viewAdapter = OrderAdapter(listOf())
 
-        orders_rv.apply {
+        binding.ordersRv.apply {
             layoutManager = viewManager
             adapter = viewAdapter
         }
 
-        fetchData()
-    }
+        viewModel = ViewModelProvider(this)
+                .get(AccountViewModel::class.java)
 
-    private fun fetchData() {
+        viewModel.ordersResult.observe(this, Observer {
+            onOrdersFetch(it)
+        })
+
         if (!isNetworkConnected()) {
 
             toast(R.string.prompt_no_network)
             return
         }
+
         val acnt = sessionManager.loadAccount() ?: return
-        showProgress(true)
+        binding.inProgress = true
 
-        launch {
-            try {
-                val orders = withContext(Dispatchers.IO) {
-                    SubRepo.getOrders(acnt)
-                }
+        viewModel.fetchOrders(acnt)
+    }
 
-                showProgress(false)
+    private fun onOrdersFetch(result: Result<List<Order>>) {
+        binding.inProgress = false
 
-                info("Orders: $orders")
-
-                viewAdapter.setData(buildRows(orders))
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                viewAdapter.setData(buildRows(result.data))
                 viewAdapter.notifyDataSetChanged()
-
-            } catch (e: ClientError) {
-                showProgress(false)
-                handleApiError(e)
-            } catch (e: Exception) {
-                showProgress(false)
-                toast(parseException(e))
             }
         }
     }

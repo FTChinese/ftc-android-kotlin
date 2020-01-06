@@ -184,7 +184,7 @@ class StripeSubActivity : ScopedAppActivity(),
             }
             is Result.Error -> {
                 binding.inProgress = false
-                toast(parseException(result.exception))
+                result.exception.message?.let { toast(it) }
             }
         }
     }
