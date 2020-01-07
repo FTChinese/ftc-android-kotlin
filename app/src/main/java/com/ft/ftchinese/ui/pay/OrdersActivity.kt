@@ -90,11 +90,7 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
         return orders.map {
             val tierCycle = getTierCycleText(it.tier, it.cycle)
 
-            val payMethod = when (it.payMethod) {
-                PayMethod.ALIPAY -> getString(R.string.pay_method_ali)
-                PayMethod.WXPAY -> getString(R.string.pay_method_wechat)
-                PayMethod.STRIPE -> getString(R.string.pay_method_stripe)
-            }
+            val payMethod = getString(it.payMethod.stringRes)
 
             val price = formatPrice(it.currency, it.amount)
 

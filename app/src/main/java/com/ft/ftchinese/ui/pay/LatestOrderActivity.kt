@@ -49,11 +49,7 @@ class LatestOrderActivity : ScopedAppActivity() {
         return listOf(order).map {
             val tierCycle = getTierCycleText(it.tier, it.cycle)
 
-            val payMethod = when (it.payMethod) {
-                PayMethod.ALIPAY -> getString(R.string.pay_method_ali)
-                PayMethod.WXPAY -> getString(R.string.pay_method_wechat)
-                PayMethod.STRIPE -> getString(R.string.pay_method_stripe)
-            }
+            val payMethod = getString(it.payMethod.stringRes)
 
             val price = getString(R.string.formatter_price, "￥", it.amount)
 

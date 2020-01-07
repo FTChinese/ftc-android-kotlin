@@ -141,6 +141,7 @@
     <string name="pay_method_wechat">微信支付</string>
     <string name="pay_brand_stripe">Stripe</string>
     <string name="pay_method_stripe">Stripe支付</string>
+    <string name="pay_method_apple">苹果App内支付</string>
     <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
     <string name="payment_source">%1$s (尾号%2$s)</string>
 

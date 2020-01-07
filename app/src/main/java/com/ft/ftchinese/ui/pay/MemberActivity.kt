@@ -105,7 +105,7 @@ class MemberActivity : ScopedAppActivity(),
         val member = account.membership
 
         binding.member = buildMemberInfo(member)
-        binding.buttons = buildNextStepButtons(member.nextAction())
+        binding.next = buildNextStepButtons(member.nextAction())
 
         binding.subscribeBtn.setOnClickListener {
             PaywallActivity.start(this)
