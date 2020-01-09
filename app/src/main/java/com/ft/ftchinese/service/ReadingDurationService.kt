@@ -12,7 +12,7 @@ const val EXTRA_READING_DURATION = "extra_reading_duration"
  * A constructor is required, and must call the super [android.app.IntentService]
  * constructor with a name for the worker thread.
  */
-class ReadingDurationService : IntentService("ReadingDurationIntentService") {
+class ReadingDurationService : IntentService(ReadingDurationService::class.simpleName) {
 
     /**
      * The IntentService calls this method from the default worker thread with

@@ -6,10 +6,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.ft.ftchinese.R
 import com.ft.ftchinese.R.string.news_notification_channel_id
-import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
-import com.ft.ftchinese.model.content.RemoteMessageType
+import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -87,7 +84,7 @@ class NewsMessagingService : FirebaseMessagingService(), AnkoLogger {
                     baseContext,
                     Teaser(
                             id = contentId,
-                            type = contentType,
+                            type = ArticleType.fromString(contentType),
                             title = ""
                     )
             )
