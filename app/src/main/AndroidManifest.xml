@@ -198,6 +198,7 @@
             android:name=".service.ReadingDurationService"
             android:exported="false" />
         <service android:name=".service.AudioDownloadService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.exoplayer.downloadService.action.RESTART"/>
@@ -208,6 +209,7 @@
             android:name=".service.PollService"
             android:label="Poll Service" />
         <service android:name=".service.AudioService"
+            android:permission="android.permission.BIND_JOB_SERVICE"
             android:exported="false"/>
 
     </application> <!-- To auto-complete the email text field in the login form with the user's emails -->

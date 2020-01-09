@@ -88,16 +88,6 @@ class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
         downloader = AudioDownloader.getInstance(this)
         teaser = intent.getParcelableExtra(EXTRA_ARTICLE_TEASER) ?: return
 
-        teaser = Teaser(
-                id = "14172",
-                type = ArticleType.Interactive,
-                title = "世界末日？至少我们还有《银河系漫游指南》",
-                audioUrl = teaser?.audioUrl,
-                radioUrl = teaser?.radioUrl,
-                publishedAt = teaser?.publishedAt,
-                tag = teaser?.tag ?: ""
-        )
-
         info("Loading audio for $teaser")
 
         toolbar.title = teaser?.title
