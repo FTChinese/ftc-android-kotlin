@@ -32,6 +32,13 @@ object NextApi {
     val releaseOf = "$BASE/apps/android/releases"
 }
 
+object ContentApi {
+    private const val BASE = "http://192.168.10.195:8100"
+
+    val STORY = "$BASE/stories"
+    val INTERACTIVE = "$BASE/interactive/contents"
+}
+
 object SubscribeApi {
     private val BASE = if (BuildConfig.DEBUG) {
 //        "http://www.ftacademy.cn/api/sandbox"
