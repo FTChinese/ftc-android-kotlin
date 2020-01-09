@@ -3,6 +3,7 @@ package com.ft.ftchinese.util
 import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue
 import com.beust.klaxon.Klaxon
+import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.UnlinkAnchor
@@ -45,6 +46,9 @@ annotation class KStripeSubStatus
 
 @Target(AnnotationTarget.FIELD)
 annotation class KPaymentIntentStatus
+
+@Target(AnnotationTarget.FIELD)
+annotation class KArticleType
 
 val dateConverter = object : Converter {
     override fun canConvert(cls: Class<*>): Boolean {
@@ -248,6 +252,24 @@ val paymentIntentStatusConverter = object : Converter
     }
 }
 
+val articleTypeConverter = object : Converter {
+    override fun canConvert(cls: Class<*>): Boolean {
+        return cls == ArticleType::class.java
+    }
+
+    override fun fromJson(jv: JsonValue): Any? {
+        return ArticleType.fromString(jv.string)
+    }
+
+    override fun toJson(value: Any): String {
+        return if (value is ArticleType) {
+            """ "$value" """
+        } else {
+            """null"""
+        }
+    }
+}
+
 val json = Klaxon()
         .fieldConverter(KDate::class, dateConverter)
         .fieldConverter(KDateTime::class, dateTimeConverter)
@@ -259,3 +281,4 @@ val json = Klaxon()
         .fieldConverter(KUnlinkAnchor::class, unlinkAnchorConverter)
         .fieldConverter(KStripeSubStatus::class, stripeSubStatusConverter)
         .fieldConverter(KPaymentIntentStatus::class, paymentIntentStatusConverter)
+        .fieldConverter(KArticleType::class, articleTypeConverter)
