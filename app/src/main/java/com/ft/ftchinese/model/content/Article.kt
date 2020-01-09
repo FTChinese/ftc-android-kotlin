@@ -103,7 +103,7 @@ class Story (
     fun toStarredArticle(channelItem: Teaser?): StarredArticle {
         return StarredArticle(
                 id = id,
-                type = channelItem?.type ?: "",
+                type = channelItem?.type?.toString() ?: "",
                 subType = channelItem?.subType ?: "",
                 title = titleCN,
                 standfirst = standfirstCN,

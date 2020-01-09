@@ -9,6 +9,7 @@ import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.tracking.*
 import com.ft.ftchinese.repository.FTC_OFFICIAL_URL
 import com.ft.ftchinese.repository.currentFlavor
+import com.ft.ftchinese.util.KArticleType
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
@@ -76,7 +77,8 @@ data class ChannelList(
 data class Teaser(
         val id: String,
         // For column type, you should start a ChannelActivity instead of  StoryActivity.
-        val type: String, // story | premium | video | photonews | interactive | column
+        @KArticleType
+        val type: ArticleType, // story | premium | video | photonews | interactive | column
         val subType: String? = null, // speedreading | radio
 
         @Json(name = "headline")
@@ -119,7 +121,7 @@ data class Teaser(
     var langVariant: Language? = null
 
     fun hasRestfulAPI(): Boolean {
-        return type == "story" || type == "premium"
+        return type == ArticleType.Story || type == ArticleType.Premium
     }
 
     fun hasMp3(): Boolean {
@@ -137,16 +139,16 @@ data class Teaser(
 
     fun buildGALabel(): String {
         return when (type) {
-            TYPE_STORY -> when {
+            ArticleType.Story -> when {
                 langVariant == Language.ENGLISH -> "EnglishText/story/$id/en"
                 langVariant == Language.BILINGUAL -> "EnglishText/story/$id/ce"
                 isSevenDaysOld() -> "Archive/story/$id"
                 else -> "ExclusiveContent/premium/$id"
             }
-            TYPE_PREMIUM -> {
+            ArticleType.Premium -> {
                 "ExclusiveContent/premium/$id"
             }
-            TYPE_INTERACTIVE -> when (subType) {
+            ArticleType.Interactive -> when (subType) {
                 SUB_TYPE_RADIO -> "Radio/interactive/$id"
                 SUB_TYPE_SPEED_READING -> "SpeedReading/interactive/$id"
                 else -> when {
@@ -176,7 +178,7 @@ data class Teaser(
     fun toStarredArticle(): StarredArticle {
         return StarredArticle(
                 id = id,
-                type = type,
+                type = type.toString(),
                 subType = subType ?: "",
                 title = title,
                 standfirst = "",
@@ -229,11 +231,11 @@ data class Teaser(
             return Permission.PREMIUM
         }
 
-        if (type == "premium") {
+        if (type == ArticleType.Premium) {
             return Permission.STANDARD
         }
 
-        if (type == TYPE_INTERACTIVE) {
+        if (type == ArticleType.Interactive) {
             info("An interactive")
             return when (subType) {
                 SUB_TYPE_RADIO,
@@ -273,16 +275,16 @@ data class Teaser(
      * https://api003.ftmailbox.com/interactive/12339?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24
      */
     fun contentUrl(): String {
-        if (id.isBlank() || type.isBlank()) {
+        if (id.isBlank()) {
             return ""
         }
 
         val url =  when(type) {
-            TYPE_STORY, TYPE_PREMIUM -> "${currentFlavor.baseUrl}/index.php/jsapi/get_story_more_info/$id"
+            ArticleType.Story, ArticleType.Premium -> "${currentFlavor.baseUrl}/index.php/jsapi/get_story_more_info/$id"
 
-            TYPE_COLUMN -> "${currentFlavor.baseUrl}/$type/$id?bodyonly=yes&webview=ftcapp&bodyonly=yes"
+            ArticleType.Column -> "${currentFlavor.baseUrl}/$type/$id?bodyonly=yes&webview=ftcapp&bodyonly=yes"
 
-            TYPE_INTERACTIVE -> when (subType) {
+            ArticleType.Interactive -> when (subType) {
                 SUB_TYPE_RADIO -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp&001&exclusive"
                 SUB_TYPE_SPEED_READING -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp&i=3&001&exclusive"
 
@@ -291,7 +293,7 @@ data class Teaser(
                 else -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
             }
 
-            TYPE_VIDEO -> "${currentFlavor.baseUrl}/$type/$id?bodyonly=yes&webview=ftcapp&004"
+            ArticleType.Video -> "${currentFlavor.baseUrl}/$type/$id?bodyonly=yes&webview=ftcapp&004"
 
             else -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp"
         }
@@ -473,17 +475,11 @@ data class Teaser(
         return JSCodes.getCleanHTML(storyHTMLCheckingVideo)
     }
 
+    fun apiCacheFileName(lang: Language): String {
+        return "${type}_${id}_${lang}.api.json"
+    }
+
     companion object {
-        const val TYPE_STORY = "story"
-        const val TYPE_PREMIUM = "premium"
-        const val TYPE_VIDEO = "video"
-        const val TYPE_INTERACTIVE = "interactive"
-        const val TYPE_COLUMN = "column"
-        const val TYPE_PHOTO_NEWS = "photonews"
-        const val TYPE_CHANNEL = "channel"
-        const val TYPE_TAG = "tag"
-        const val TYPE_M = "m"
-        const val TYPE_ARCHIVE = "archiver"
 
         const val SUB_TYPE_RADIO = "radio"
         const val SUB_TYPE_USER_COMMENT = ""
@@ -501,8 +497,4 @@ data class Teaser(
     }
 }
 
-enum class Language {
-    ENGLISH,
-    CHINESE,
-    BILINGUAL
-}
+
