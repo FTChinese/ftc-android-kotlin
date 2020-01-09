@@ -40,7 +40,7 @@ class AudioDownloadService : DownloadService(
         return AudioDownloader.getInstance(baseContext).downloadManager
     }
 
-    override fun getForegroundNotification(downloads: MutableList<Download>?): Notification {
+    override fun getForegroundNotification(downloads: MutableList<Download>): Notification {
         return notificationhelper.buildProgressNotification(
                 R.drawable.ic_file_download_black_24dp,
                 null,
@@ -57,7 +57,8 @@ class AudioDownloadService : DownloadService(
         }
     }
 
-    override fun onDownloadChanged(download: Download?) {
+
+    override fun onDownloadChanged(download: Download) {
         val notification = when (download?.state) {
             Download.STATE_COMPLETED -> {
                 notificationhelper.buildDownloadCompletedNotification(
