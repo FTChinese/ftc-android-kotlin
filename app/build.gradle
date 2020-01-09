@@ -151,6 +151,7 @@ dependencies {
     def lifecycle_version = "2.2.0-rc03"
 //    def nav_version = "2.1.0-alpha05"
     def nav_version_ktx = "2.2.0-rc04"
+    def exo_player = "2.11.1"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.anko:anko:$anko_version"
@@ -195,7 +196,9 @@ dependencies {
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version_ktx"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version_ktx"
 
-    implementation 'com.google.android.exoplayer:exoplayer:2.10.6'
+    // ExoPlayer
+    implementation "com.google.android.exoplayer:exoplayer:$exo_player"
+    implementation "com.google.android.exoplayer:extension-mediasession:$exo_player"
 
     //  Network
     implementation 'com.squareup.okhttp3:okhttp:4.2.2'
