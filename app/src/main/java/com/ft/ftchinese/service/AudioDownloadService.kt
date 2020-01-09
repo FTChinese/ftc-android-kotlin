@@ -59,7 +59,7 @@ class AudioDownloadService : DownloadService(
 
 
     override fun onDownloadChanged(download: Download) {
-        val notification = when (download?.state) {
+        val notification = when (download.state) {
             Download.STATE_COMPLETED -> {
                 notificationhelper.buildDownloadCompletedNotification(
                         R.drawable.ic_done_black_24dp,
