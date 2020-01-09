@@ -207,6 +207,9 @@
         <service
             android:name=".service.PollService"
             android:label="Poll Service" />
+        <service android:name=".service.AudioService"
+            android:exported="false"/>
+
     </application> <!-- To auto-complete the email text field in the login form with the user's emails -->
     <!-- Required by zhifubao -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
