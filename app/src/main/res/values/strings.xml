@@ -16,6 +16,10 @@
     <string name="exo_download_notification_channel_name">Downloads</string>
     <string name="exo_download_notification_channel_description">Download mp3</string>
 
+    <string name="exo_playing_channel_id">exo_playing_channel</string>
+    <string name="exo_playing_channel_name">正在播放</string>
+    <string name="exo_playing_channel_description">播放音频</string>
+
     <!-- Bottom navigation tabs -->
     <string name="nav_news">最新</string>
     <string name="nav_english">每日英语</string>
