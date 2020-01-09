@@ -87,10 +87,10 @@ class WebContentFragment : Fragment(),
                 } else {
                     teaser?.id
                 } ?: "",
-                type = if (teaser?.type.isNullOrBlank()) {
+                type = if (teaser?.type == null) {
                     og?.extractType()
                 } else {
-                    teaser?.type
+                    teaser?.type?.toString()
                 } ?: "",
                 subType = teaser?.subType ?: "",
                 title = if (teaser?.title.isNullOrBlank()) {

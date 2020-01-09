@@ -12,12 +12,9 @@ import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import androidx.browser.customtabs.CustomTabsIntent
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.HTML_TYPE_COMPLETE
-import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
-import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.repository.HOST_FT
 import com.ft.ftchinese.repository.HOST_FTA
 import com.ft.ftchinese.repository.HOST_FTC
@@ -70,6 +67,16 @@ val noAccess = mapOf(
         // /channel/weekly.html
         "weekly.html" to "热门文章"
 )
+
+private const val TYPE_STORY = "story"
+private const val TYPE_PREMIUM = "premium"
+private const val TYPE_VIDEO = "video"
+private const val TYPE_INTERACTIVE = "interactive"
+private const val TYPE_PHOTO_NEWS = "photonews"
+private const val TYPE_CHANNEL = "channel"
+private const val TYPE_TAG = "tag"
+private const val TYPE_M = "m"
+private const val TYPE_ARCHIVE = "archiver"
 
 /**
  * WVClient is use mostly to handle webUrl clicks loaded into
@@ -337,12 +344,12 @@ open class WVClient(
              * We could only get an article's type and id from
              * webUrl. No more information could be acquired.
              */
-            Teaser.TYPE_STORY,
-            Teaser.TYPE_PREMIUM -> {
+            TYPE_STORY,
+            TYPE_PREMIUM -> {
                 val lastPathSegment = uri.lastPathSegment ?: return true
                 val channelItem = Teaser(
                         id = lastPathSegment,
-                        type = pathSegments[0],
+                        type = ArticleType.fromString(pathSegments[0]),
                         title = "",
                         webUrl = uri.toString()
                 )
@@ -351,16 +358,16 @@ open class WVClient(
 
                 true
             }
-            Teaser.TYPE_VIDEO,
+            TYPE_VIDEO,
             // Links on home page under FT商学院
-            Teaser.TYPE_PHOTO_NEWS,
+            TYPE_PHOTO_NEWS,
             // Links on home page under FT研究院
-            Teaser.TYPE_INTERACTIVE -> {
+            TYPE_INTERACTIVE -> {
 
                 val lastPathSegment = uri.lastPathSegment ?: return true
                 val teaser = Teaser(
                         id = lastPathSegment,
-                        type = pathSegments[0],
+                        type = ArticleType.fromString(pathSegments[0]),
                         title = "",
                         webUrl = uri.toString()
                 )
@@ -378,20 +385,20 @@ open class WVClient(
              * Editor choice also use /channel path. You should handle it separately.
              * When a links is clicked on Editor choice, retrieve a HTML fragment.
              */
-            Teaser.TYPE_CHANNEL -> openChannelLink(uri)
+            TYPE_CHANNEL -> openChannelLink(uri)
 
             /**
              * If the path looks like `/m/marketing/intelligence.html`
              * or /m/corp/preview.html?pageid=huawei2018
              */
-            Teaser.TYPE_M -> openMLink(uri)
+            TYPE_M -> openMLink(uri)
 
             /**
              * If the path looks like `/tag/中美贸易战`, `/archiver/2019-03-05`
              * start a new page listing articles
              */
-            Teaser.TYPE_TAG,
-            Teaser.TYPE_ARCHIVE -> {
+            TYPE_TAG,
+            TYPE_ARCHIVE -> {
                 val page = ChannelSource(
                         title = uri.lastPathSegment ?: "",
                         name = uri.pathSegments.joinToString("_"),

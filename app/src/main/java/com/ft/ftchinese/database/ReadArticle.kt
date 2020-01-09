@@ -3,6 +3,7 @@ package com.ft.ftchinese.database
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
+import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.subscription.Tier
 import java.util.*
@@ -63,7 +64,7 @@ data class ReadArticle(
     fun toChannelItem(): Teaser {
         return Teaser(
                 id = id,
-                type = type,
+                type = ArticleType.fromString(type),
                 subType = subType,
                 title = title,
                 audioUrl = audioUrl,

@@ -95,9 +95,6 @@ class ArticleActivity : ScopedAppActivity(),
             invalidateOptionsMenu()
         }
 
-        // Hide language switcher.
-//        updateLangSwitcher(show = false)
-
         setup()
 
         supportFragmentManager.commit {
@@ -345,7 +342,7 @@ class ArticleActivity : ScopedAppActivity(),
     companion object {
 
         @JvmStatic
-        fun newIntent(context: Context?, teaser: Teaser): Intent {
+        fun newIntent(context: Context?, teaser: Teaser?): Intent {
             return Intent(
                     context,
                     ArticleActivity::class.java

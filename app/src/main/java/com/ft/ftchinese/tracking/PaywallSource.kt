@@ -28,7 +28,7 @@ object PaywallTracker {
 
         from = PaywallSource(
                 id = item.id,
-                type = item.type,
+                type = item.type.toString(),
                 title = item.title,
                 language = item.langVariant,
                 category = GACategory.SUBSCRIPTION,

@@ -9,10 +9,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivitySplashBinding
-import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
-import com.ft.ftchinese.model.content.RemoteMessageType
-import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.splash.SplashScreenManager
@@ -98,7 +95,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
 
                 ArticleActivity.startWithParentStack(this, Teaser(
                         id = pageId,
-                        type = contentType,
+                        type = ArticleType.fromString(contentType),
                         title = ""
                 ))
             }

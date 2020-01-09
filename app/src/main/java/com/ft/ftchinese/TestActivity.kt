@@ -18,6 +18,7 @@ import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.databinding.ActivityTestBinding
+import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.order.*
@@ -238,7 +239,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         val intent = Intent(this, ArticleActivity::class.java).apply {
             putExtra(EXTRA_ARTICLE_TEASER, Teaser(
                     id = "001083331",
-                    type = "story",
+                    type = ArticleType.Story,
                     title = "波司登遭做空机构质疑 股价暴跌"
             ))
         }

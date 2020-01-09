@@ -409,7 +409,7 @@ class ChannelFragment : ScopedFragment(),
          * Canonical URL: http://www.ftchinese.com/channel/column.html
          * Content URL: https://api003.ftmailbox.com/column/007000049?webview=ftcapp&bodyonly=yes
          */
-        if (channelItem.type == Teaser.TYPE_COLUMN) {
+        if (channelItem.type == ArticleType.Column) {
             openColumn(channelItem)
             return
         }
@@ -448,11 +448,11 @@ class ChannelFragment : ScopedFragment(),
         info("Open article for an channel teaser: $teaser")
 
         when (teaser.type) {
-            Teaser.TYPE_STORY,
-            Teaser.TYPE_PREMIUM -> {
+            ArticleType.Story,
+            ArticleType.Premium -> {
                 ArticleActivity.start(activity, teaser)
             }
-            Teaser.TYPE_INTERACTIVE -> {
+            ArticleType.Interactive -> {
                 ArticleActivity.start(activity, teaser)
             }
             else -> {

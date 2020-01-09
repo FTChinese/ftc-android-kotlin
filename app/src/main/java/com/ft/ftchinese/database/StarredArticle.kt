@@ -2,6 +2,7 @@ package com.ft.ftchinese.database
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
+import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.model.subscription.Tier
@@ -69,7 +70,7 @@ data class StarredArticle(
     fun toChannelItem(): Teaser {
         return Teaser(
                 id = id,
-                type = type,
+                type = ArticleType.fromString(type),
                 subType = subType,
                 title = title,
                 audioUrl = audioUrl,
