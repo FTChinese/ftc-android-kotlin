@@ -144,9 +144,7 @@ class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
             is Result.LocalizedError -> toast(result.msgId)
             is Result.Error -> result.exception.message?.let { toast(it) }
             is Result.Success -> {
-                viewAdapter.setData(listOf(result.data.alternativeTitles.english) + result.data.body.map {
-                    it.en
-                })
+                viewAdapter.setData(result.data.lyrics())
 
                 viewAdapter.notifyDataSetChanged()
             }

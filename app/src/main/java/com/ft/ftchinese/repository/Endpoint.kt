@@ -33,7 +33,11 @@ object NextApi {
 }
 
 object ContentApi {
-    private const val BASE = "http://192.168.10.195:8100"
+    private val BASE = if (BuildConfig.DEBUG) {
+        "http://192.168.10.195:8100"
+    } else {
+        "http://api-content.ftchinese.com/v1"
+    }
 
     val STORY = "$BASE/stories"
     val INTERACTIVE = "$BASE/interactive/contents"

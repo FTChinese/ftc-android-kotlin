@@ -34,6 +34,8 @@ class AudioViewModel : ViewModel(), AnkoLogger {
     fun loadCachedStory(teaser: Teaser, cache: FileCache) {
         val cacheName = teaser.apiCacheFileName(Language.BILINGUAL)
 
+        info("Cached file: $cacheName")
+
         if (cacheName.isBlank()) {
             cacheFound.value = false
         }
@@ -45,6 +47,7 @@ class AudioViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (data.isNullOrBlank()) {
+                    info("Empty cache")
                     cacheFound.value = false
                     return@launch
                 }
@@ -66,6 +69,7 @@ class AudioViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (data == null) {
+                    info("Server response empty")
                     storyResult.value = Result.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
@@ -73,6 +77,7 @@ class AudioViewModel : ViewModel(), AnkoLogger {
                 val ok = parseData(teaser.type, data)
 
                 if (ok) {
+                    info("Caching data")
                     launch(Dispatchers.IO) {
                         cache.saveText(
                                 teaser.apiCacheFileName(Language.BILINGUAL),

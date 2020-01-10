@@ -35,14 +35,21 @@ data class InteractiveStory(
     val quiz: String? = null
 ) {
     fun lyrics(): List<String> {
+
+        val headline = if (alternativeTitles.english != null) {
+            listOf(alternativeTitles.english)
+        } else {
+            listOf()
+        }
+
         if (timeline != null) {
-            return listOf(alternativeTitles.english) + timeline.flatMap {
+            return headline + timeline.flatMap {
                 it.map { timeline: Timeline ->
                     timeline.text
                 }
             }
         }
 
-        return listOf(alternativeTitles.english) + bodyXml.split("\n")
+        return headline + bodyXml.split("\n")
     }
 }

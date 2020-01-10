@@ -49,4 +49,17 @@ data class BilingualStory(
         val translator: String? = null,
         val alternativeTitles: AlternativeTitles,
         val related: List<Related>
-)
+) {
+    fun lyrics(): List<String> {
+
+        return if (alternativeTitles.english != null) {
+            listOf(alternativeTitles.english) + body.map {
+                it.en
+            }
+        } else {
+            body.map {
+                it.en
+            }
+        }
+    }
+}
