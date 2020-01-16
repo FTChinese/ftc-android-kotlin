@@ -1,86 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.article.ArticleActivity">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <data>
+        <import type="android.view.View"/>
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/article_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:elevation="4dp"
-            app:layout_scrollFlags="scroll|enterAlways">
+        <variable
+            name="inProgress"
+            type="Boolean" />
 
-            <RadioGroup
-                android:id="@+id/language_radio_group"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="horizontal"
-                android:divider="@drawable/divider_teal"
-                android:showDividers="middle"
-                android:background="@drawable/border_rec_teal"
-                android:checkedButton="@id/lang_cn_btn"
-                android:visibility="gone">
+        <variable
+            name="isBilingual"
+            type="Boolean" />
 
-                <RadioButton
-                    android:id="@+id/lang_cn_btn"
-                    style="@style/TabRadioButton.Toolbar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:button="@null"
-                    android:text="@string/titlebar_cn" />
+        <variable
+            name="isStarring"
+            type="Boolean" />
+    </data>
 
-                <RadioButton
-                    android:id="@+id/lang_en_btn"
-                    style="@style/TabRadioButton.Toolbar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:button="@null"
-                    android:text="@string/titlebar_en" />
-
-                <RadioButton
-                    android:id="@+id/lang_bi_btn"
-                    style="@style/TabRadioButton.Toolbar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:button="@null"
-                    android:text="@string/titlebar_bilingual" />
-            </RadioGroup>
-
-        </androidx.appcompat.widget.Toolbar>
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <FrameLayout
-        android:id="@+id/fragment_article"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+        tools:context=".ui.article.ArticleActivity">
 
+        <com.google.android.material.appbar.AppBarLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_bookmark"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:layout_gravity="bottom|end"
-        app:fabSize="mini"
-        app:srcCompat="@drawable/ic_bookmark_border_black_24dp"/>
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/article_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:elevation="4dp"
+                app:layout_scrollFlags="scroll|enterAlways">
 
-    <androidx.core.widget.ContentLoadingProgressBar
-        android:id="@+id/progress_bar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone"/>
+                <RadioGroup
+                    android:id="@+id/language_radio_group"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal"
+                    android:divider="@drawable/divider_teal"
+                    android:showDividers="middle"
+                    android:background="@drawable/border_rec_teal"
+                    android:checkedButton="@id/lang_cn_btn"
+                    android:visibility="@{isBilingual ? View.VISIBLE : View.GONE}">
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+                    <RadioButton
+                        android:id="@+id/lang_cn_btn"
+                        style="@style/TabRadioButton.Toolbar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:button="@null"
+                        android:text="@string/titlebar_cn" />
+
+                    <RadioButton
+                        android:id="@+id/lang_en_btn"
+                        style="@style/TabRadioButton.Toolbar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:button="@null"
+                        android:text="@string/titlebar_en" />
+
+                    <RadioButton
+                        android:id="@+id/lang_bi_btn"
+                        style="@style/TabRadioButton.Toolbar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:button="@null"
+                        android:text="@string/titlebar_bilingual" />
+                </RadioGroup>
+
+            </androidx.appcompat.widget.Toolbar>
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <FrameLayout
+            android:id="@+id/fragment_article"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+
+<!--   It seems `app:srcCompat` does not work with data binding.     -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_bookmark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_gravity="bottom|end"
+            app:fabSize="mini"
+            android:src="@{isStarring ? @drawable/ic_bookmark_black_24dp : @drawable/ic_bookmark_border_black_24dp}"/>
+
+        <androidx.core.widget.ContentLoadingProgressBar
+            android:id="@+id/progress_bar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="@{inProgress ? View.VISIBLE : View.GONE}"/>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+</layout>
+
