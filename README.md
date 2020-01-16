@@ -117,7 +117,7 @@ Access token, refresh token should not be saved by client.
 
 ### Step 4: Use `unionid` to Get User Data
  
-## Problems
+## Knowledge base
 
 Alipay has a Maven repository `implementation 'com.alipay.sdk:alipay-sdk-java:3.3.49.ALL'`. It's the server-side SDK. DO NOT USE IT for Android!
 
@@ -130,3 +130,15 @@ Mozilla/5.0 (Linux; Android 9; TA-1041 Build/PPR1.180610.011; wv) AppleWebKit/53
 
 Mozilla/5.0 (Linux; Android 9; TA-1041) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Mobile Safari/537.36
 ```
+
+### Data binding with `app:srcCompat`
+
+It seems when you are using data binding layout, you cannot use `app:srcCompat` to set images. It won't compile. Use `android:src` instead.
+
+### Data biding with `include` tag
+
+See:
+
+https://medium.com/androiddevelopers/android-data-binding-that-include-thing-1c8791dd6038
+
+https://medium.com/@elia.maracani/android-data-binding-passing-a-variable-to-an-include-d-layout-3567099b58f
