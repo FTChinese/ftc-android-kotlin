@@ -427,6 +427,8 @@ class ChannelFragment : ScopedFragment(),
 
         val granted = activity?.grantPermission(account, contentPerm)
 
+        info("Permission granted: $granted, to content $contentPerm")
+
         if (granted == true) {
             openArticle(channelItem)
         }

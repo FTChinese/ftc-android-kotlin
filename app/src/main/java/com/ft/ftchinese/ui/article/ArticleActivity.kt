@@ -78,7 +78,6 @@ class ArticleActivity : ScopedAppActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        setContentView(R.layout.activity_article)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_article)
 
         setSupportActionBar(binding.articleToolbar)
@@ -124,14 +123,12 @@ class ArticleActivity : ScopedAppActivity(),
                 .get(StarArticleViewModel::class.java)
 
         articleViewModel.inProgress.observe(this, Observer {
-//            showProgress(it)
             binding.inProgress = it
         })
 
         // Observe whether the article is bilingual.
         articleViewModel.bilingual.observe(this, Observer<Boolean> {
             info("Observer found content is bilingual: $it")
-//            showLangSwitcher(it)
             binding.isBilingual = it
 
             // Only set event on language switcher when the article is bilingual.
@@ -158,7 +155,6 @@ class ArticleActivity : ScopedAppActivity(),
         starViewModel.starred.observe(this, Observer {
             // Updating bookmark icon.
             isStarring = it
-//            bookmarked(isStarring)
             binding.isStarring = isStarring
         })
 
@@ -187,26 +183,22 @@ class ArticleActivity : ScopedAppActivity(),
                 ).show()
             }
 
-//            bookmarked(isStarring)
             binding.isStarring = isStarring
         }
     }
 
     private fun setupLangSwitcher() {
 
-        val account = sessionManager.loadAccount()
-        val permissionGranted = grantPermission(account, Permission.STANDARD)
-
         binding.langCnBtn.setOnClickListener {
             articleViewModel.switchLang(Language.CHINESE)
         }
 
         binding.langEnBtn.setOnClickListener {
-//            val account = sessionManager.loadAccount()
+            val account = sessionManager.loadAccount()
 
             val item = teaser ?: return@setOnClickListener
 
-            if (!permissionGranted) {
+            if (!grantPermission(account, Permission.STANDARD)) {
                 disableLangSwitch()
 
                 item.langVariant = Language.ENGLISH
@@ -221,11 +213,11 @@ class ArticleActivity : ScopedAppActivity(),
         }
 
         binding.langBiBtn.setOnClickListener {
-//            val account = sessionManager.loadAccount()
+            val account = sessionManager.loadAccount()
 
             val item = teaser ?: return@setOnClickListener
 
-            if (!permissionGranted) {
+            if (!grantPermission(account, Permission.STANDARD)) {
                 disableLangSwitch()
 
                 item.langVariant = Language.BILINGUAL
