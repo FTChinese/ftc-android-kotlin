@@ -191,7 +191,7 @@ dependencies {
     implementation "androidx.preference:preference:1.1.0"
     implementation "androidx.legacy:legacy-support-v4:$support_version"
     implementation "androidx.recyclerview:recyclerview:1.1.0"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:1.1.0"
+//    implementation "androidx.coordinatorlayout:coordinatorlayout:1.1.0"
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "com.makeramen:roundedimageview:2.3.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version_ktx"
