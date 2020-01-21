@@ -54,8 +54,6 @@ class StoryFragment : ScopedFragment(),
     private lateinit var sessionManager: SessionManager
     private lateinit var articleModel: ArticleViewModel
 
-//    private var listener: OnProgressListener? = null
-
     private lateinit var statsTracker: StatsTracker
     private lateinit var binding: FragmentArticleBinding
 
@@ -168,7 +166,6 @@ class StoryFragment : ScopedFragment(),
         val item = storyBrief
         if (item == null) {
             binding.swipeRefresh.isRefreshing = false
-//            showProgress(false)
 
             return
         }
@@ -247,7 +244,7 @@ class StoryFragment : ScopedFragment(),
         val userId = sessionManager.loadAccount()?.id ?: return
 
         ReadingDurationService.start(context, ReadingDuration(
-                url = "http://www.ftchinese.com/",
+                url = "/android/${storyBrief?.type}/${storyBrief?.id}/${storyBrief?.title}",
                 refer = "http://www.ftchinese.com/",
                 startUnix = start,
                 endUnix = Date().time / 1000,

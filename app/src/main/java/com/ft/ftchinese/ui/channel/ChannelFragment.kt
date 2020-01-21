@@ -19,7 +19,9 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.reader.ReadingDuration
 import com.ft.ftchinese.repository.BASE_URL
+import com.ft.ftchinese.service.ReadingDurationService
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.tracking.PaywallTracker
@@ -36,6 +38,8 @@ import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
+import java.util.*
+import kotlin.properties.Delegates
 
 const val JS_INTERFACE_NAME = "Android"
 
@@ -64,6 +68,7 @@ class ChannelFragment : ScopedFragment(),
 
     private var articleList: List<Teaser>? = null
     private var channelMeta: ChannelMeta? = null
+    private var start by Delegates.notNull<Long>()
 
     /**
      * Bind listeners here.
@@ -85,6 +90,8 @@ class ChannelFragment : ScopedFragment(),
         channelSource = arguments?.getParcelable(ARG_CHANNEL_SOURCE) ?: return
 
         info("Channel source: $channelSource")
+
+        start = Date().time / 1000
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -463,6 +470,21 @@ class ChannelFragment : ScopedFragment(),
         }
 
         statsTracker.selectListItem(teaser)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        val userId = sessionManager.loadAccount()?.id ?: return
+
+        ReadingDurationService.start(context, ReadingDuration(
+            url = "/android/channel/${channelSource?.title}",
+            refer = "http://www.ftchinese.com/",
+            startUnix = start,
+            endUnix = Date().time / 1000,
+            userId = userId,
+            functionName = "onLoad"
+        ))
     }
 
     companion object {
