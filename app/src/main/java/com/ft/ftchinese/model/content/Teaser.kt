@@ -7,7 +7,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.tracking.*
-import com.ft.ftchinese.repository.FTC_OFFICIAL_URL
+import com.ft.ftchinese.repository.OFFICIAL_URL
 import com.ft.ftchinese.repository.currentFlavor
 import com.ft.ftchinese.util.KArticleType
 import kotlinx.android.parcel.IgnoredOnParcel
@@ -197,7 +197,7 @@ data class Teaser(
             return webUrl
         }
 
-        return "$FTC_OFFICIAL_URL/$type/$id"
+        return "$OFFICIAL_URL/$type/$id"
     }
 
     private fun isSevenDaysOld(): Boolean {
