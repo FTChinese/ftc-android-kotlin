@@ -67,14 +67,15 @@ object SubscribeApi {
 
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
 
-const val FTC_OFFICIAL_URL = "http://www.ftchinese.com"
-const val CN_FT = "https://cn.ft.com"
-
-const val BASE_URL = FTC_OFFICIAL_URL
-
 const val HOST_FTC = "www.ftchinese.com"
 const val HOST_FT = "cn.ft.com"
 const val HOST_FTA = "www.ftacademy.cn"
+
+const val OFFICIAL_URL = "http://$HOST_FTC"
+const val CN_FT = "https://$HOST_FT"
+
+// The base url used in webview
+const val BASE_URL = OFFICIAL_URL
 
 data class Flavor (
         var query: String,
@@ -90,38 +91,38 @@ data class Flavor (
 
 val defaultFlavor = Flavor(
         query = "an_ftc",
-        baseUrl = FTC_OFFICIAL_URL
+        baseUrl = OFFICIAL_URL
 )
 
 val flavors = mapOf(
         "play" to Flavor(
                 query = "play_store",
-                baseUrl = BASE_URL
+                baseUrl = OFFICIAL_URL
         ),
         "xiaomi" to Flavor(
                 query = "an_xiaomi",
-                baseUrl = BASE_URL
+                baseUrl = OFFICIAL_URL
         ),
         "huawei" to Flavor(
                 query = "an_huawei",
-                baseUrl = BASE_URL
+                baseUrl = OFFICIAL_URL
         ),
         "baidu" to Flavor(
                 query = "an_baidu",
-                baseUrl = BASE_URL
+                baseUrl = OFFICIAL_URL
         ),
         "sanliuling" to Flavor(
                 query = "an_360shouji",
-                baseUrl = BASE_URL
+                baseUrl = OFFICIAL_URL
         ),
         "ftc" to defaultFlavor,
         "tencent" to Flavor(
                 query = "an_tencent",
-                baseUrl = BASE_URL
+                baseUrl = OFFICIAL_URL
         ),
         "samsung" to Flavor(
                 query = "an_samsung",
-                baseUrl = BASE_URL
+                baseUrl = OFFICIAL_URL
         ),
         "standard" to Flavor(
                 query = "standard",
