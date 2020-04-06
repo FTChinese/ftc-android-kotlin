@@ -13,7 +13,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivitySearchableBinding
 import com.ft.ftchinese.ui.article.WVClient
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.repository.BASE_URL
+import com.ft.ftchinese.repository.currentFlavor
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
@@ -119,7 +119,7 @@ class SearchableActivity : AppCompatActivity(),
         template = template?.replace("{search-html}", "")
 
         binding.wvSearchResult.loadDataWithBaseURL(
-                BASE_URL,
+                currentFlavor.baseUrl,
                 template,
                 "text/html",
                 null,

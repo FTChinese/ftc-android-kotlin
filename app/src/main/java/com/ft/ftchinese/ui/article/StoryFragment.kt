@@ -22,7 +22,7 @@ import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.reader.ReadingDuration
-import com.ft.ftchinese.repository.BASE_URL
+import com.ft.ftchinese.repository.currentFlavor
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.service.ReadingDurationService
 import com.ft.ftchinese.store.FileCache
@@ -224,7 +224,7 @@ class StoryFragment : ScopedFragment(),
 
     private fun load(html: String) {
         binding.webView.loadDataWithBaseURL(
-                BASE_URL,
+                currentFlavor.baseUrl,
                 html,
                 "text/html",
                 null,

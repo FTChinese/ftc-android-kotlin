@@ -74,9 +74,6 @@ const val HOST_FTA = "www.ftacademy.cn"
 const val OFFICIAL_URL = "http://$HOST_FTC"
 const val CN_FT = "https://$HOST_FT"
 
-// The base url used in webview
-const val BASE_URL = OFFICIAL_URL
-
 data class Flavor (
         var query: String,
         var baseUrl: String

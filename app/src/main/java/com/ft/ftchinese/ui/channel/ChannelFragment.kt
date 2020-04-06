@@ -20,7 +20,7 @@ import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.reader.ReadingDuration
-import com.ft.ftchinese.repository.BASE_URL
+import com.ft.ftchinese.repository.currentFlavor
 import com.ft.ftchinese.service.ReadingDurationService
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.FileCache
@@ -281,7 +281,13 @@ class ChannelFragment : ScopedFragment(),
         if (BuildConfig.DEBUG) {
             info("Loading web page to web view")
         }
-        binding.webView.loadDataWithBaseURL(BASE_URL, html, "text/html", null, null)
+        binding.webView.loadDataWithBaseURL(
+            currentFlavor.baseUrl,
+            html,
+            "text/html",
+            null,
+            null)
+
         if (binding.swipeRefresh.isRefreshing) {
             toast(R.string.prompt_updated)
         }
