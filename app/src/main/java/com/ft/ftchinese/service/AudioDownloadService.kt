@@ -25,7 +25,7 @@ class AudioDownloadService : DownloadService(
         R.string.exo_download_notification_channel_description
 ) {
 
-    private lateinit var notificationhelper: DownloadNotificationHelper
+    private lateinit var notificationHelper: DownloadNotificationHelper
 
     init {
         nextNotificationId = FOREGROUND_NOTIFICATION_ID + 1
@@ -33,7 +33,7 @@ class AudioDownloadService : DownloadService(
 
     override fun onCreate() {
         super.onCreate()
-        notificationhelper = DownloadNotificationHelper(this, CHANNEL_ID)
+        notificationHelper = DownloadNotificationHelper(this, CHANNEL_ID)
     }
 
     override fun getDownloadManager(): DownloadManager {
@@ -41,7 +41,7 @@ class AudioDownloadService : DownloadService(
     }
 
     override fun getForegroundNotification(downloads: MutableList<Download>): Notification {
-        return notificationhelper.buildProgressNotification(
+        return notificationHelper.buildProgressNotification(
                 R.drawable.ic_file_download_black_24dp,
                 null,
                 null,
@@ -61,14 +61,14 @@ class AudioDownloadService : DownloadService(
     override fun onDownloadChanged(download: Download) {
         val notification = when (download.state) {
             Download.STATE_COMPLETED -> {
-                notificationhelper.buildDownloadCompletedNotification(
+                notificationHelper.buildDownloadCompletedNotification(
                         R.drawable.ic_done_black_24dp,
                         null,
                         Util.fromUtf8Bytes(download.request.data)
                 )
             }
             Download.STATE_FAILED -> {
-                notificationhelper.buildDownloadFailedNotification(
+                notificationHelper.buildDownloadFailedNotification(
                         R.drawable.ic_warning_black_24dp,
                         null,
                         Util.fromUtf8Bytes(download.request.data)
