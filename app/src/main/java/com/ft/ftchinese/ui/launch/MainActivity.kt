@@ -343,40 +343,6 @@ class MainActivity : ScopedAppActivity(),
                     account.wechat
             )
         }
-
-//        if (account == null) {
-//            headerView?.nav_header_title?.text = getString(R.string.nav_not_logged_in)
-//            headerView?.nav_header_image?.setImageResource(R.drawable.ic_account_circle_black_24dp)
-
-            // show signin/signup
-//            binding.drawerNav.menu.setGroupVisible(R.id.drawer_group_sign_in_up, true)
-
-            // Do not show account
-//            menuItemAccount?.isVisible = false
-            // Show subscription
-//            menuItemPaywall?.isVisible = true
-            // Do not show my subscription
-//            menuItemMySubs?.isVisible = false
-//            return
-//        }
-
-//        headerView?.nav_header_title?.text = account.displayName
-
-
-
-        // Hide signin/signup
-//        drawer_nav.menu.setGroupVisible(R.id.drawer_group_sign_in_up, false)
-        // Show account
-//        menuItemAccount?.isVisible = true
-
-        // If user is not logged in, isMember always false.
-//        val isMember = account.isMember
-
-        // Show subscription if user is a member; otherwise
-        // hide it
-//        menuItemPaywall?.isVisible = !isMember
-        // Show my subscription if user is a member; otherwise hide it.
-//        menuItemMySubs?.isVisible = isMember
     }
 
     private fun onAvatarRetrieved(result: Result<InputStream>) {
