@@ -31,6 +31,9 @@ android {
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
+    buildFeatures {
+        dataBinding true
+    }
     kotlinOptions {
         jvmTarget = "1.8"
     }
@@ -60,9 +63,7 @@ android {
             }
         }
     }
-    dataBinding {
-        enabled true
-    }
+
     signingConfigs {
         release {
             keyAlias keystoreProperties['keyAlias']
