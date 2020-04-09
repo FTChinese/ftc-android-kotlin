@@ -68,11 +68,7 @@ object SubscribeApi {
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
 
 const val HOST_FTC = "www.ftchinese.com"
-const val HOST_FT = "cn.ft.com"
 const val HOST_FTA = "www.ftacademy.cn"
-
-const val OFFICIAL_URL = "http://$HOST_FTC"
-const val CN_FT = "https://$HOST_FT"
 
 data class Flavor (
         var query: String,
@@ -85,6 +81,8 @@ data class Flavor (
             ""
         }
 }
+
+private const val OFFICIAL_URL = "http://$HOST_FTC"
 
 val defaultFlavor = Flavor(
         query = "an_ftc",

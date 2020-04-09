@@ -15,9 +15,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.repository.HOST_FT
 import com.ft.ftchinese.repository.HOST_FTA
-import com.ft.ftchinese.repository.HOST_FTC
 import com.ft.ftchinese.repository.currentFlavor
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.GAAction
@@ -235,8 +233,6 @@ open class WVClient(
              */
             "http", "https" -> {
                 return when (uri.host) {
-                    HOST_FTC,
-                    HOST_FT,
                     currentFlavor.host -> handleInSiteLink(uri)
                     HOST_FTA -> handleFtaLink(uri)
                     else -> handleExternalLink(uri)
@@ -537,7 +533,7 @@ open class WVClient(
     }
 
     private fun feedbackEmail(): Boolean {
-        val pm = context?.packageManager ?: return true
+        val pm = context.packageManager ?: return true
 
         val intent = Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.parse("mailto:")
@@ -566,7 +562,6 @@ open class WVClient(
     private fun buildUrlForFullPage(uri: Uri): String {
         val builder = uri.buildUpon()
                 .scheme("https")
-                .authority(HOST_FT)
 
         if (uri.getQueryParameter("webview") == null) {
             builder.appendQueryParameter("webview", "ftcapp")
@@ -578,7 +573,6 @@ open class WVClient(
     private fun buildUrlForFragment(uri: Uri, path: String? = null): String {
         val builder =  uri.buildUpon()
                 .scheme("https")
-                .authority(HOST_FT)
 
         if (uri.getQueryParameter("bodyonly") == null) {
             builder.appendQueryParameter("bodyonly", "yes")
