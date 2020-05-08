@@ -212,14 +212,17 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun setCardText(card: PaymentMethod.Card?) {
 
-        if (card == null) {
-            return
-        }
-
-        binding.card = UIBankCard(
+        binding.card = if (card == null) {
+            UIBankCard(
+                brand = getString(R.string.default_bank_brand),
+                number = getString(R.string.bank_card_number, "****")
+            )
+        } else {
+            UIBankCard(
                 brand = cardBrands[card.brand] ?: card.brand,
                 number = getString(R.string.bank_card_number, card.last4)
-        )
+            )
+        }
     }
 
     companion object {

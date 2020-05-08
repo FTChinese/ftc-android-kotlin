@@ -48,7 +48,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:text="@{card.brand ?? @string/default_bank_brand}"/>
+                    android:text="@{card.brand}"/>
 
                 <TextView
                     style="@style/AppTextBody"
@@ -56,7 +56,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="@{card.number ?? @string/bank_card_number}"/>
+                    android:text="@{card.number}"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
