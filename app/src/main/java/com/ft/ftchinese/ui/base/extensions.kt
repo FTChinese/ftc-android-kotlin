@@ -11,6 +11,9 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.subscription.Cycle
 import com.ft.ftchinese.model.subscription.Tier
 
+val Context.isConnected: Boolean
+    get() = (getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager)?.activeNetworkInfo?.isConnected == true
+
 fun getCurrencySymbol(currency: String): String {
     return when (currency) {
         "cny" -> "¥"
@@ -48,16 +51,6 @@ fun Activity.isActiveNetworkWifi(): Boolean {
     // unless you upgrade your min supported sdk, which will in return reduce your supported devices.
     return when (networkInfo?.type) {
         ConnectivityManager.TYPE_WIFI -> true
-        else -> false
-    }
-}
-
-fun Activity.isActiveNetworkMobile(): Boolean {
-    val networkInfo = getActiveNetworkInfo()
-
-    return when (networkInfo?.type) {
-        ConnectivityManager.TYPE_MOBILE,
-        ConnectivityManager.TYPE_MOBILE_DUN -> true
         else -> false
     }
 }
