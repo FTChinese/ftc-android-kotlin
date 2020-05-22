@@ -7,7 +7,9 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
+import android.webkit.WebChromeClient
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -15,25 +17,24 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentArticleBinding
+import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.content.Following
-import com.ft.ftchinese.model.content.FollowingManager
-import com.ft.ftchinese.model.content.Language
-import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.reader.ReadingDuration
 import com.ft.ftchinese.repository.currentFlavor
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.service.ReadingDurationService
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.ChromeClient
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
 import com.ft.ftchinese.util.*
 import com.ft.ftchinese.viewmodel.ArticleViewModel
 import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
 import com.ft.ftchinese.viewmodel.Result
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -71,6 +72,7 @@ class StoryFragment : ScopedFragment(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        connectionLiveData
         storyBrief = arguments?.getParcelable(ARG_CHANNEL_ITEM)
 
         if (storyBrief == null) {
@@ -114,7 +116,12 @@ class StoryFragment : ScopedFragment(),
             )
 
             webViewClient = wvClient
-            webChromeClient = ChromeClient()
+            webChromeClient = object : WebChromeClient() {
+                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                    info("${consoleMessage?.message()} -- From line ${consoleMessage?.lineNumber()} of ${consoleMessage?.sourceId()}")
+                    return super.onConsoleMessage(consoleMessage)
+                }
+            }
 
             setOnKeyListener { _, keyCode, _ ->
                 if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
@@ -132,36 +139,40 @@ class StoryFragment : ScopedFragment(),
         articleModel = activity?.run {
             ViewModelProvider(
                     this,
-                    ArticleViewModelFactory(cache, followingManager))
+                    ArticleViewModelFactory(cache))
                     .get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        // Remember the language user selected so
-        // that we know how to handle refresh.
+        connectionLiveData.observe(viewLifecycleOwner, Observer {
+            articleModel.isNetworkAvailable.value = it
+        })
+        articleModel.isNetworkAvailable.value = context?.isConnected
+
+        // Observing language switcher.
         articleModel.currentLang.observe(viewLifecycleOwner, Observer<Language> {
+            // Remember the language user selected so
+            // that we know how to handle refresh.
             currentLang = it
 
             val item = storyBrief ?: return@Observer
-            articleModel.loadFromCache(
-                    item = item,
-                    lang = it
-            )
+            articleModel.loadStory(teaser = item, bustCache = false)
         })
 
-        // If cache is not found, fetch data from remote.
-        articleModel.cacheFound.observe(viewLifecycleOwner, Observer {
-            onCacheFound(it)
-        })
-
-        // Load html into web view.
-        articleModel.renderResult.observe(viewLifecycleOwner, Observer {
-            onRenderResult(it)
+        // Receiving story json data.
+        articleModel.storyResult.observe(viewLifecycleOwner, Observer {
+            onStoryResult(it)
         })
 
         initLoading()
     }
 
     override fun onRefresh() {
+
+        if (context?.isConnected != true) {
+            binding.swipeRefresh.isRefreshing = false
+            toast(R.string.prompt_no_network)
+            return
+        }
 
         val item = storyBrief
         if (item == null) {
@@ -173,7 +184,11 @@ class StoryFragment : ScopedFragment(),
         toast(R.string.refreshing_data)
 
         // Load and render
-        articleModel.loadFromRemote(item, currentLang)
+//        articleModel.loadFromRemote(item, currentLang)
+        articleModel.loadStory(
+            teaser = item,
+            bustCache = true
+        )
     }
 
     private fun initLoading() {
@@ -183,29 +198,13 @@ class StoryFragment : ScopedFragment(),
             articleModel.inProgress.value = true
         }
 
-        articleModel.loadFromCache(item, currentLang)
+        articleModel.loadStory(
+            teaser = item,
+            bustCache = false
+        )
     }
 
-    private fun onCacheFound(found: Boolean) {
-        if (found) {
-            return
-        }
-
-        // If cache is not found, fetch data from server.
-        if (activity?.isNetworkConnected() != true) {
-            toast(R.string.prompt_no_network)
-            return
-        }
-
-        val item = storyBrief ?: return
-
-        // Load and render.
-        articleModel.loadFromRemote(
-                item = item,
-                lang = currentLang)
-    }
-
-    private fun onRenderResult(result: Result<String>) {
+    private fun onStoryResult(result: Result<Story>) {
         articleModel.inProgress.value = false
         binding.swipeRefresh.isRefreshing = false
 
@@ -217,7 +216,28 @@ class StoryFragment : ScopedFragment(),
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
-                load(result.data)
+                val teaser = storyBrief ?: return
+
+                launch {
+                    val template = cache.readStoryTemplate()
+
+                    if (template == null) {
+                        toast("Error loading data")
+                        return@launch
+                    }
+
+                    val html = withContext(Dispatchers.Default) {
+                        StoryBuilder(template)
+                            .setLanguage(currentLang)
+                            .withStory(result.data, teaser)
+                            .withFollows(followingManager.loadTemplateCtx())
+                            .withUserInfo(sessionManager.loadAccount())
+                            .render()
+
+                    }
+
+                    load(html)
+                }
             }
         }
     }

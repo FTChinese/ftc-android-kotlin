@@ -76,6 +76,8 @@ class ArticleActivity : ScopedAppActivity(),
 
     private var isStarring = false
 
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_article)
@@ -85,6 +87,8 @@ class ArticleActivity : ScopedAppActivity(),
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(false)
         }
+
+
 
         val teaser = intent.getParcelableExtra<Teaser>(EXTRA_ARTICLE_TEASER) ?: return
         info("Article source: $teaser")
@@ -113,7 +117,7 @@ class ArticleActivity : ScopedAppActivity(),
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
         followingManager = FollowingManager.getInstance(this)
 
-        articleViewModel = ViewModelProvider(this, ArticleViewModelFactory(cache, followingManager))
+        articleViewModel = ViewModelProvider(this, ArticleViewModelFactory(cache))
                 .get(ArticleViewModel::class.java)
 
         readViewModel = ViewModelProvider(this)

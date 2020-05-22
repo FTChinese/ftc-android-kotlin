@@ -1,0 +1,144 @@
+package com.ft.ftchinese.model.content
+
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.tracking.AdParser
+import com.ft.ftchinese.tracking.AdPosition
+import com.ft.ftchinese.tracking.JSCodes
+import com.ft.ftchinese.util.json
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
+
+class StoryBuilder(private val template: String) : AnkoLogger {
+    private val ctx: MutableMap<String, String> = HashMap()
+    private var language: Language = Language.CHINESE
+    private var shouldHideAd = false
+
+    init {
+        ctx["{{googletagservices-js}}"] = JSCodes.googletagservices
+    }
+
+    fun setLanguage(lang: Language): StoryBuilder {
+        this.language = lang
+        return this
+    }
+
+    fun withFollows(follows: Map<String, String>): StoryBuilder {
+
+        info(follows)
+        follows.forEach { (key, value) ->
+            ctx[key] = value
+        }
+
+        return this
+    }
+
+    fun withUserInfo(account: Account?): StoryBuilder {
+        if (account == null) {
+            return this
+        }
+        ctx["<!-- AndroidUserInfo -->"] = """
+<script>
+var androidUserInfo = ${json.toJsonString(account)};
+</script>""".trimIndent()
+
+        return this
+    }
+
+    fun withStory(story: Story, teaser: Teaser): StoryBuilder {
+        val (shouldHideAd, sponsorTitle) = story.shouldHideAd(teaser)
+
+        var body = ""
+        var title = ""
+        var lang = ""
+        when (this.language) {
+            Language.CHINESE -> {
+                body = story.getCnBody(withAd = !shouldHideAd)
+                title = story.titleCN
+                lang = "cn"
+            }
+            Language.ENGLISH -> {
+                body = story.getEnBody(withAd = !shouldHideAd)
+                title = story.titleEN
+                lang = "en"
+            }
+            Language.BILINGUAL -> {
+                body = story.getBilingualBody()
+                title = "${story.titleCN}<br>${story.titleEN}"
+                lang = "ce"
+            }
+        }
+
+        // todo
+        ctx["{{story-css}}"] = ""
+        ctx["{story-tag}"] = story.tag
+        ctx["{story-author}"] = story.authorCN
+        ctx["{story-genre}"] = story.genre
+        ctx["{story-area}"] = story.area
+        ctx["{story-industry}"] = story.industry
+        ctx["{story-main-topic}"] = ""
+        ctx["{story-sub-topic}"] = ""
+        ctx["{comments-id}"] = teaser.getCommentsId()
+        // todo
+        ctx["{{story-js-key}}"] = ""
+        ctx["{{ad-pollyfill-js}}"] = ""
+        ctx["{{db-zone-helper-js}}"] = ""
+
+        val adTopic = story.getAdTopic()
+        val cntopicScript = if (adTopic.isBlank()) "" else "window.cntopic = '$adTopic'"
+
+        ctx["<!--{{cntopic}}-->"] = cntopicScript
+
+        ctx["{story-language-class}"] = lang
+
+        ctx["{Top-Banner}"] = ""
+
+        // Follow button
+        ctx["{story-theme}"] = story.htmlForTheme(sponsorTitle)
+        ctx["<!--{story-headline-class}-->"] = ""
+        // headline. Shown two times: one in title tag
+        // other in body.
+        ctx["{story-headline}"] = title
+        // Lead-in
+        ctx["{story-lead}"] = story.standfirstCN
+        // Cover image
+        ctx["{story-image}"] = story.htmlForCoverImage()
+        ctx["{story-time}"] = story.formatPublishTime()
+        ctx["{story-byline}"] = story.byline
+        ctx["{story-body}"] = body
+
+        // todo
+        ctx["{Bottom-Banner}"] = ""
+
+        ctx["{comments-order}"] = teaser.getCommentsOrder()
+
+        // side-container
+        ctx["{Right-1}"] = ""
+        ctx["{story-container-style}"] = ""
+        ctx["{related-stories}"] = story.htmlForRelatedStories()
+        ctx["{related-topics}"] = story.htmlForRelatedTopics()
+
+        ctx["{ad-zone}"] = story.getAdZone(Teaser.HOME_AD_ZONE, Teaser.DEFAULT_STORY_AD_ZONE, teaser.adZone)
+
+        ctx["{ad-mpu}"] = if (shouldHideAd) "" else AdParser.getAdCode(AdPosition.MIDDLE_ONE)
+
+        ctx["{adchID}"] = story.pickAdchID(Teaser.HOME_AD_CH_ID, Teaser.DEFAULT_STORY_AD_CH_ID, teaser)
+
+        this.shouldHideAd = shouldHideAd
+
+        return this
+    }
+
+    fun render(): String {
+        var result = template
+
+        ctx.forEach { (key, value) ->
+            result = result.replace(key, value)
+        }
+
+        return JSCodes.getCleanHTML(
+            JSCodes.getInlineVideo(
+                AdParser.updateAdCode(result, this.shouldHideAd)
+            )
+        )
+    }
+}

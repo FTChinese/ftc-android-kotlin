@@ -1,15 +1,17 @@
 package com.ft.ftchinese.model.content
 
 import android.content.Context
+import com.ft.ftchinese.repository.currentFlavor
 import java.net.URLEncoder
 
-private val followTypes = arrayOf("tag", "topic", "area", "industry", "author", "column")
-private val FOLLOW_TYPE_TAG = followTypes[0]
-private val FOLLOW_TYPE_TOPIC = followTypes[1]
-private val FOLLOW_TYPE_AREA = followTypes[2]
-private val FOLLOW_TYPE_INDUSTRY = followTypes[3]
-private val FOLLOW_TYPE_AUTHOR = followTypes[4]
-private val FOLLOW_TYPE_COLUMN = followTypes[5]
+private val followingTemplate: Map<String, String> = hashMapOf(
+    "'{follow-tags}'" to "tag",
+    "'{follow-topics}'" to "topic",
+    "'{follow-areas}'" to "area",
+    "'{follow-industries}'" to "industry",
+    "'{follow-authors}'" to "author",
+    "'{follow-columns}'" to "column"
+)
 
 /**
  * Used to parse messages passed from JS when user clicked `FOLLOW` button.
@@ -26,12 +28,12 @@ private val FOLLOW_TYPE_COLUMN = followTypes[5]
  * ```
  */
 data class Following(
-        var type: String, // JS uses this value. Possible values: `tag`, `topic`, `industry`, `area`, `augthor`, `column`. `augthor` is a typo in JS code, but you have to keep that typo on.
+        var type: String, // JS uses this value. Possible values: `tag`, `topic`, `industry`, `area`, `author`, `column`.
         var tag: String, // This is the string shown along with the FOLLOW button
         var action: String // `follow` or `unfollow`. Used to determine if user if follow or unfollow something.
 ) {
     val bodyUrl: String
-        get() = "https://api003.ftmailbox.com/$type/$tag?bodyonly=yes&webviewftcapp"
+        get() = "${currentFlavor.baseUrl}/$type/$tag?bodyonly=yes&webviewftcapp"
 
     val topic: String
         get() = URLEncoder.encode("${type}_$tag", "utf-8")
@@ -85,38 +87,36 @@ class FollowingManager private constructor(context: Context) {
         return isSubscribed
     }
 
-    fun loadForJS(): JSFollows {
-
-        val result = mutableMapOf<String, String>()
-
-        for (key in followTypes) {
+    fun loadTemplateCtx(): Map<String, String> {
+        return followingTemplate.mapValues { (_, value) ->
             try {
-                val ss = sharedPreferences.getStringSet(key, null) ?: setOf()
+                val ss = sharedPreferences.getStringSet(value, null) ?: setOf()
 
-                result[key] = ss.joinToString { "'$it'" }
+                if (ss.isEmpty()) {
+                    ""
+                } else {
+                    ss.joinToString { "'$it'" }
+                }
 
             } catch (e: Exception) {
-                e.printStackTrace()
-                continue
+                ""
             }
         }
-
-        return JSFollows(result)
     }
 
+    // Load data as a list to build recycler view.
     fun load(): MutableList<Following> {
         val result = mutableListOf<Following>()
 
-        for (key in followTypes) {
+        followingTemplate.forEach { (_, value) ->
             try {
-                val ss = sharedPreferences.getStringSet(key, setOf()) ?: setOf()
+                val ss = sharedPreferences.getStringSet(value, setOf()) ?: setOf()
 
                 ss.forEach {
-                    result.add(Following(type = key, tag = it, action = ACTION_UNFOLLOW))
+                    result.add(Following(type = value, tag = it, action = ACTION_UNFOLLOW))
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
-                continue
+
             }
         }
 
@@ -139,24 +139,3 @@ class FollowingManager private constructor(context: Context) {
     }
 }
 
-data class JSFollows(
-        private val follows: Map<String, String>
-) {
-    val tag: String
-        get() = follows[FOLLOW_TYPE_TAG] ?: ""
-
-    val topic: String
-        get() = follows[FOLLOW_TYPE_TOPIC] ?: ""
-
-    val area: String
-        get() = follows[FOLLOW_TYPE_AREA] ?: ""
-
-    val industry: String
-        get() = follows[FOLLOW_TYPE_INDUSTRY] ?: ""
-
-    val author: String
-        get() = follows[FOLLOW_TYPE_AUTHOR] ?: ""
-
-    val column: String
-        get() = follows[FOLLOW_TYPE_COLUMN] ?: ""
-}

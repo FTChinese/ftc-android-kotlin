@@ -5,10 +5,7 @@ import com.beust.klaxon.Json
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.tracking.AdParser
-import com.ft.ftchinese.tracking.AdPosition
-import com.ft.ftchinese.tracking.Sponsor
-import com.ft.ftchinese.tracking.SponsorManager
+import com.ft.ftchinese.tracking.*
 import org.jetbrains.anko.AnkoLogger
 import java.util.*
 
@@ -217,6 +214,88 @@ class Story (
         }
 
         return ""
+    }
+
+    fun pickAdchID(homepageId: String, fallbackId: String, teaser: Teaser): String {
+
+        if (!keywords.isBlank()) {
+            for (sponsor in SponsorManager.sponsors) {
+                if ((keywords.contains(sponsor.tag) || keywords.contains(sponsor.title)) && sponsor.adid.isNotEmpty()) {
+                    return sponsor.adid
+                }
+            }
+
+            if (teaser.adId != homepageId) {
+                return teaser.adId
+            }
+
+            if (keywords.contains("lifestyle")) {
+                return "1800"
+            }
+
+            if (keywords.contains("management")) {
+                return "1700"
+            }
+
+            if (keywords.contains("opinion")) {
+                return "1600"
+            }
+
+            if (keywords.contains("创新经济")) {
+                return "2100"
+            }
+
+            if (keywords.contains("markets")) {
+                return "1400"
+            }
+
+            if (keywords.contains("economy")) {
+                return "1300"
+            }
+
+            if (keywords.contains("china")) {
+                return "1100"
+            }
+
+            return "1200"
+        }
+
+        if (teaser.adId.isNotEmpty()) {
+            return fallbackId
+        }
+        return fallbackId
+    }
+
+    // Return shouldHideAd and sponsorTitle
+    fun shouldHideAd(teaser: Teaser): Pair<Boolean, String?> {
+        if (teaser.hideAd) {
+            return Pair(true, null)
+        }
+
+        if (keywords.isBlank()) {
+            return Pair(false, null)
+        }
+
+        if (keywords.contains(Keywords.removeAd)) {
+            return Pair(true, null)
+        }
+
+        for (sponsor in SponsorManager.sponsors) {
+
+            if (sponsor.tag.isBlank()) {
+                continue
+            }
+
+            if (keywords.contains(sponsor.tag) || keywords.contains(sponsor.title)) {
+
+                return Pair(
+                    sponsor.hideAd == "yes",
+                    if (sponsor.title.isNotBlank()) sponsor.title else null
+                )
+            }
+        }
+
+        return Pair(false, null)
     }
 
     private fun isMatchInKeysAndBody(sponsor: Sponsor): Boolean {

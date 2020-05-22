@@ -6,7 +6,6 @@ import com.beust.klaxon.Json
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.tracking.*
 import com.ft.ftchinese.repository.currentFlavor
 import com.ft.ftchinese.repository.defaultFlavor
 import com.ft.ftchinese.util.KArticleType
@@ -255,7 +254,7 @@ data class Teaser(
         return Permission.FREE
     }
 
-    private fun getCommentsId(): String {
+    fun getCommentsId(): String {
         return when(subType) {
             "interactive" -> "r_interactive_$id"
             "video" -> "r_video_$id"
@@ -265,7 +264,7 @@ data class Teaser(
         }
     }
 
-    private fun getCommentsOrder(): String {
+    fun getCommentsOrder(): String {
         return "story"
     }
 
@@ -282,7 +281,7 @@ data class Teaser(
         val url =  when(type) {
             ArticleType.Story, ArticleType.Premium -> "${currentFlavor.baseUrl}/index.php/jsapi/get_story_more_info/$id"
 
-            ArticleType.Column -> "${currentFlavor.baseUrl}/$type/$id?bodyonly=yes&webview=ftcapp&bodyonly=yes"
+            ArticleType.Column -> "${currentFlavor.baseUrl}/$type/$id?bodyonly=yes&webview=ftcapp"
 
             ArticleType.Interactive -> when (subType) {
                 SUB_TYPE_RADIO -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp&001&exclusive"
@@ -309,170 +308,6 @@ data class Teaser(
         } catch (e: Exception) {
             url
         }
-    }
-
-    private fun pickAdchID(homepageId: String, fallbackId: String, keywords: String): String {
-
-        if (!keywords.isBlank()) {
-            for (sponsor in SponsorManager.sponsors) {
-                if ((keywords.contains(sponsor.tag) || keywords.contains(sponsor.title)) && sponsor.adid.isNotEmpty()) {
-                    return sponsor.adid
-                }
-            }
-
-            if (adId != homepageId) {
-                return adId
-            }
-
-            if (keywords.contains("lifestyle")) {
-                return "1800"
-            }
-
-            if (keywords.contains("management")) {
-                return "1700"
-            }
-
-            if (keywords.contains("opinion")) {
-                return "1600"
-            }
-
-            if (keywords.contains("创新经济")) {
-                return "2100"
-            }
-
-            if (keywords.contains("markets")) {
-                return "1400"
-            }
-
-            if (keywords.contains("economy")) {
-                return "1300"
-            }
-
-            if (keywords.contains("china")) {
-                return "1100"
-            }
-
-            return "1200"
-        }
-
-        if (adId.isNotEmpty()) {
-            return fallbackId
-        }
-        return fallbackId
-    }
-
-    fun renderStory(template: String?, story: Story?, language: Language, follows: JSFollows): String? {
-
-        if (template == null || story == null) {
-
-            return null
-        }
-
-        var shouldHideAd = false
-        var sponsorTitle: String? = null
-
-        if (hideAd) {
-            shouldHideAd = true
-        } else if (!story.keywords.isBlank()) {
-            info("Story keywords: ${story.keywords}")
-
-            if (story.keywords.contains(Keywords.removeAd)) {
-                shouldHideAd = true
-            } else {
-                for (sponsor in SponsorManager.sponsors) {
-                    info("Sponsor: $sponsor")
-                    if (sponsor.tag.isBlank()) {
-                        continue
-                    }
-                    if (story.keywords.contains(sponsor.tag) || story.keywords.contains(sponsor.title)) {
-                        shouldHideAd = (sponsor.hideAd == "yes")
-                        if (sponsor.title.isNotBlank()) {
-                            sponsorTitle = sponsor.title
-                        }
-                        break
-                    }
-                }
-            }
-        }
-
-        info("Should hide ad: $shouldHideAd")
-
-        val adMPU = if (shouldHideAd) "" else AdParser.getAdCode(AdPosition.MIDDLE_ONE)
-
-        info("Ad MPU: $adMPU")
-
-        var body = ""
-        var title = ""
-        var lang = ""
-
-        when (language) {
-            Language.CHINESE -> {
-                body = story.getCnBody(withAd = !shouldHideAd)
-                title = story.titleCN
-            }
-            Language.ENGLISH -> {
-                body = story.getEnBody(withAd = !shouldHideAd)
-                title = story.titleEN
-            }
-            Language.BILINGUAL -> {
-                body = story.getBilingualBody()
-                title = "${story.titleCN}<br>${story.titleEN}"
-                lang = "ce"
-            }
-        }
-
-
-//        val adZone = pickAdZone(HOME_AD_ZONE, DEFAULT_STORY_AD_ZONE, story.keywords)
-
-        val adZone = story.getAdZone(HOME_AD_ZONE, DEFAULT_STORY_AD_ZONE, adZone)
-        val adChId = pickAdchID(HOME_AD_CH_ID, DEFAULT_STORY_AD_CH_ID, story.keywords)
-        val adTopic = story.getAdTopic()
-        val cntopicScript = if (adTopic.isBlank()) "" else "window.cntopic = '$adTopic'"
-
-        info("Ad zone: $adZone")
-        info("Ad channel id: $adChId")
-
-        val storyHTMLOriginal = template
-                .replace("<!--{story-headline-class}-->", "")
-                .replace("{story-tag}", story.tag)
-                .replace("{story-author}", story.authorCN)
-                .replace("{story-genre}", story.genre)
-                .replace("{story-area}", story.area)
-                .replace("{story-industry}", story.industry)
-                .replace("{story-main-topic}", "")
-                .replace("{story-sub-topic}", "")
-                .replace("{adchID}", adChId)
-                .replace("{comments-id}", getCommentsId())
-                .replace("{story-theme}", story.htmlForTheme(sponsorTitle))
-                .replace("{story-headline}", title)
-                .replace("{story-lead}", story.standfirstCN)
-                .replace("{story-image}", story.htmlForCoverImage())
-                .replace("{story-time}", story.formatPublishTime())
-                .replace("{story-byline}", story.byline)
-                .replace("{story-body}", body)
-                .replace("{story-id}", story.id)
-                .replace("{related-stories}", story.htmlForRelatedStories())
-                .replace("{related-topics}", story.htmlForRelatedTopics())
-                .replace("{comments-order}", getCommentsOrder())
-                .replace("{story-container-style}", "")
-                .replace("'{follow-tags}'", follows.tag)
-                .replace("'{follow-topic}'", follows.topic)
-                .replace("'{follow-industry}'", follows.industry)
-                .replace("'{follow-area}'", follows.area)
-                .replace("'{follow-augthor}'", follows.author)
-                .replace("'{follow-column}'", follows.column)
-                .replace("{ad-zone}", adZone)
-                .replace("<!--{{cntopic}}-->", cntopicScript)
-                .replace("{ad-mpu}", adMPU)
-                //                        .replace("{font-class}", "")
-                .replace("{{googletagservices-js}}", JSCodes.googletagservices)
-                .replace("{story-language-class}", lang)
-
-        val storyHTML = AdParser.updateAdCode(storyHTMLOriginal, shouldHideAd)
-
-        val storyHTMLCheckingVideo = JSCodes.getInlineVideo(storyHTML)
-
-        return JSCodes.getCleanHTML(storyHTMLCheckingVideo)
     }
 
     fun apiCacheFileName(lang: Language): String {
