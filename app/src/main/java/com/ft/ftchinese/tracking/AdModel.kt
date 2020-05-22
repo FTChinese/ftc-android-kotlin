@@ -114,15 +114,17 @@ object AdLayout {
 }
 
 data class Sponsor(
-        val tag: String,
-        val title: String,
-        val adid: String,
-        val zone: String,
-        val channel: String,
-        // Example: 经济,贸易,股市,股指
-        val storyKeyWords: String,
-        val cntopic: String,
-        val hideAd: String = ""
+    // If tag or title appeares in Story#keywords
+    // then hideAdd determines whether ad should be visible.
+    val tag: String,
+    val title: String,
+    val adid: String,
+    val zone: String,
+    val channel: String,
+    // Example: 经济,贸易,股市,股指
+    val storyKeyWords: String,
+    val cntopic: String,
+    val hideAd: String = ""
 )
 
 object SponsorManager {
@@ -131,7 +133,7 @@ object SponsorManager {
 
 object Keywords {
     val reserved = arrayOf("去广告", "单页", "透明", "置顶", "白底", "靠右", "沉底", "资料", "突发", "插图", "高清")
-    val removeAd = "去广告"
+    const val removeAd = "去广告"
 }
 
 object JSCodes {
