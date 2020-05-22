@@ -147,19 +147,8 @@ class MembershipTest {
                 Permission.PREMIUM.grant(readerPermBits)
         )
 
-        val buttons = mVip.nextVisibleButtons()
-        assertFalse(
-                "VIP does not show subscribe button",
-                buttons.showSubscribe
-        )
-        assertFalse(
-                "VIP does not show renew buttons",
-                buttons.showRenew
-        )
-        assertFalse(
-                "VIP does not show upgrade buttons",
-                buttons.showUpgrade
-        )
+
+
     }
 
     @Test fun standard() {
@@ -181,19 +170,7 @@ class MembershipTest {
                 Permission.PREMIUM.grant(readerPermBits)
         )
 
-        val buttons = mStandard.nextVisibleButtons()
-        assertFalse(
-                "Standard member does not show subscribe button",
-                buttons.showSubscribe
-        )
-        assertTrue(
-                "Standard member show renew button",
-                buttons.showRenew
-        )
-        assertTrue(
-                "Standard member show upgrade button",
-                buttons.showUpgrade
-        )
+
     }
 
     @Test fun premium() {
@@ -216,22 +193,6 @@ class MembershipTest {
                 Permission.PREMIUM.grant(readerPermBits)
         )
 
-        val buttons = mPremium.nextVisibleButtons()
-        // Buttons
-        assertFalse(
-            "Valid premium member does not re-subscribe button",
-                buttons.showSubscribe
-        )
-
-        assertTrue(
-                "Valid premium member show renew button",
-                buttons.showRenew
-        )
-
-        assertFalse(
-                "Valid premium member does not show upgrade button",
-                buttons.showUpgrade
-        )
     }
 
     @Test fun empty() {
@@ -275,22 +236,7 @@ class MembershipTest {
                 Permission.PREMIUM.grant(readerPermBits)
         )
 
-        val buttons = mStandardExpired.nextVisibleButtons()
 
-        assertTrue(
-                "Expired standard show subscribe button",
-                buttons.showSubscribe
-        )
-
-        assertFalse(
-                "Expired standard does not show renew button",
-                buttons.showRenew
-        )
-
-        assertFalse(
-                "Expired standard does not show upgrade button",
-                buttons.showUpgrade
-        )
     }
 
     @Test fun premiumExpired() {
@@ -312,63 +258,9 @@ class MembershipTest {
                 Permission.PREMIUM.grant(readerPermBits)
         )
 
-        // Visible buttons
-        val buttons = mPremiumExpired.nextVisibleButtons()
-        assertTrue(
-                "Expired premium show subscribe button",
-                buttons.showSubscribe
-        )
 
-        assertFalse(
-                "Expired premium does not show renew button",
-                buttons.showRenew
-        )
-
-        assertFalse(
-                "Expired premium does not show upgrade button",
-                buttons.showUpgrade
-        )
     }
 
-    @Test fun standardBeyondRenewal() {
-        val buttons = mStandardBeyondRenewal.nextVisibleButtons()
-
-        assertFalse(
-                "Standard beyond renewal does not show subscribe button",
-                buttons.showSubscribe
-
-        )
-
-        assertFalse(
-                "Standard beyond renewal does not show renewal button",
-                buttons.showRenew
-        )
-
-        assertTrue(
-                "Standard beyond renewal show upgrade button",
-                buttons.showUpgrade
-        )
-    }
-
-    @Test fun premiumBeyondRenewal() {
-        val buttons = mPremiumBeyondRenewal.nextVisibleButtons()
-
-        assertFalse(
-                "Premium beyond renewal does not show subscribe button",
-                buttons.showSubscribe
-
-        )
-
-        assertFalse(
-                "Premium beyond renewal does not show renewal button",
-                buttons.showRenew
-        )
-
-        assertFalse(
-                "Premium beyond renewal does not show upgrade button",
-                buttons.showUpgrade
-        )
-    }
 
     @Test fun stripeStandard() {
         val (readerPermBits, status) = mStandardStripe.getPermission()
@@ -387,19 +279,7 @@ class MembershipTest {
                 Permission.PREMIUM.grant(readerPermBits)
         )
 
-        val buttons = mStandardStripe.nextVisibleButtons()
-        assertFalse(
-                "Standard stripe does not show subscribe button",
-                buttons.showSubscribe
-        )
-        assertFalse(
-                "Standard stripe does not show renew button",
-                buttons.showRenew
-        )
-        assertTrue(
-                "Standard stripe show upgrade button",
-                buttons.showUpgrade
-        )
+
     }
 
     @Test fun stripePremium() {
@@ -419,19 +299,7 @@ class MembershipTest {
                 Permission.PREMIUM.grant(readerPermBits)
         )
 
-        val buttons = mPremiumStripe.nextVisibleButtons()
-        assertFalse(
-                "Premium stripe does not show subscribe button",
-                buttons.showSubscribe
-        )
-        assertFalse(
-                "Premium stripe does not show renew button",
-                buttons.showRenew
-        )
-        assertFalse(
-                "Premium stripe does not show upgrade",
-                buttons.showUpgrade
-        )
+
     }
 
     @Test fun stripeIncomplete() {
@@ -452,19 +320,7 @@ class MembershipTest {
                 Permission.PREMIUM.grant(readerPermBits)
         )
 
-        val buttons = mStripeIncomplete.nextVisibleButtons()
-        assertFalse(
-                "Incomplete stripe does not show subscribe button",
-                buttons.showSubscribe
-        )
-        assertFalse(
-                "Incomplete stripe does not show renew button",
-                buttons.showRenew
-        )
-        assertTrue(
-                "Incomplete stripe show upgrade button",
-                buttons.showUpgrade
-        )
+
     }
 
     @Test fun stripeInactive() {
@@ -482,21 +338,6 @@ class MembershipTest {
         assertFalse(
                 "Inactive stripe cannot read premium content",
                 Permission.PREMIUM.grant(readerPermBits)
-        )
-
-        // Such user could only re-subscribe.
-        val buttons = mStripeInactive.nextVisibleButtons()
-        assertTrue(
-                "Inactive stripe show subscribe button",
-                buttons.showSubscribe
-        )
-        assertFalse(
-                "Inactive stripe does not show renew button",
-                buttons.showRenew
-        )
-        assertFalse(
-                "Inactive strip does not show upgrade button",
-                buttons.showUpgrade
         )
     }
 
