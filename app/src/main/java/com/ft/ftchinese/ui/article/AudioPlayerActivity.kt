@@ -17,14 +17,13 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAudioPlayerBinding
 import com.ft.ftchinese.model.apicontent.BilingualStory
 import com.ft.ftchinese.model.apicontent.InteractiveStory
-import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.service.AudioDownloadService
 import com.ft.ftchinese.service.AudioDownloader
 import com.ft.ftchinese.service.AudioService
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isNetworkConnected
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.AudioViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.google.android.exoplayer2.SimpleExoPlayer
@@ -100,7 +99,7 @@ class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
                 return@Observer
             }
 
-            if (!isNetworkConnected()) {
+            if (!isConnected) {
                 toast(R.string.prompt_no_network)
             }
 
