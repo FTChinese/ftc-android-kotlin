@@ -8,6 +8,8 @@ import org.jetbrains.anko.info
 import java.io.File
 import java.io.FileInputStream
 
+val templateCache: MutableMap<String, String> = HashMap()
+
 class FileCache (private val context: Context) : AnkoLogger {
 
     fun saveText(name: String, text: String) {
@@ -98,29 +100,42 @@ class FileCache (private val context: Context) : AnkoLogger {
     /**
      * Read files from the the `raw` directory of the package.
      */
-    private fun readRawFile(resId: Int): String {
-        return try {
+    private fun readTemplate(name: String, resId: Int): String {
+        var cached = templateCache[name]
+        if (cached != null) {
+            return cached
+        }
+
+        cached = try {
             context.resources
-                    .openRawResource(resId)
-                    .bufferedReader()
-                    .use {
-                        it.readText()
-                    }
+                .openRawResource(resId)
+                .bufferedReader()
+                .use {
+                    it.readText()
+                }
         } catch (e: Exception) {
+            null
+        }
+
+        return if (cached != null) {
+            templateCache[name] = cached
+
+            cached
+        } else {
             ""
         }
     }
 
     fun readChannelTemplate(): String {
-        return readRawFile(R.raw.list)
+        return readTemplate("list.html", R.raw.list)
     }
 
     fun readStoryTemplate(): String? {
-        return readRawFile(R.raw.story)
+        return readTemplate("story.html", R.raw.story)
     }
 
     fun readSearchTemplate(): String {
-        return readRawFile(R.raw.search)
+        return readTemplate("search.html", R.raw.search)
     }
 }
 
