@@ -76,7 +76,7 @@ class SignUpFragment : ScopedFragment(),
 
         // TODO: handle wechat sign-up.
         binding.signUpBtn.setOnClickListener {
-            if (activity?.isNetworkConnected() != true) {
+            if (context?.isConnected != true) {
                 toast(R.string.prompt_no_network)
                 return@setOnClickListener
             }

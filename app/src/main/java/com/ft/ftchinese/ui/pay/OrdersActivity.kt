@@ -56,7 +56,7 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
             onOrdersFetch(it)
         })
 
-        if (!isNetworkConnected()) {
+        if (!isConnected) {
 
             toast(R.string.prompt_no_network)
             return

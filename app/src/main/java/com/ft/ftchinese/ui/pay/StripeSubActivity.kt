@@ -119,7 +119,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
         initUI()
 
-        if (!isNetworkConnected()) {
+        if (!isConnected) {
             toast(R.string.prompt_no_network)
             return
         }
@@ -190,7 +190,7 @@ class StripeSubActivity : ScopedAppActivity(),
     }
 
     private fun setupCustomerSession() {
-        if (!isNetworkConnected()) {
+        if (!isConnected) {
             toast(R.string.prompt_no_network)
             return
         }
@@ -262,7 +262,7 @@ class StripeSubActivity : ScopedAppActivity(),
             return
         }
 
-        if (!isNetworkConnected()) {
+        if (!isConnected) {
             toast(R.string.prompt_no_network)
             return
         }

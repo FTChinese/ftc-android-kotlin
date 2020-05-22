@@ -24,7 +24,6 @@ import com.ft.ftchinese.databinding.ActivityMainBinding
 import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isActiveNetworkWifi
-import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Navigation
 import com.ft.ftchinese.model.subscription.PayMethod
@@ -39,6 +38,7 @@ import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.account.AccountActivity
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
@@ -337,7 +337,7 @@ class MainActivity : ScopedAppActivity(),
                 ?.isVisible = !(account?.isMember ?: false)
 
         // Load wechat avatar.
-        if (account != null && isNetworkConnected()) {
+        if (account != null && isConnected) {
             accountViewModel.fetchWxAvatar(
                     cache,
                     account.wechat
@@ -438,7 +438,7 @@ class MainActivity : ScopedAppActivity(),
             return
         }
 
-        if (!isNetworkConnected()) {
+        if (!isConnected) {
             return
         }
 
@@ -447,7 +447,7 @@ class MainActivity : ScopedAppActivity(),
                 return@Observer
             }
 
-            if (!isNetworkConnected()) {
+            if (!isConnected) {
                 return@Observer
             }
 

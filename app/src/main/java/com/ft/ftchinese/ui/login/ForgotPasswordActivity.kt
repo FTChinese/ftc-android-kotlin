@@ -62,7 +62,7 @@ class ForgotPasswordActivity : ScopedAppActivity(),
             val inputEmail = binding.emailInput.text.toString().trim()
 
 
-            if (!isNetworkConnected()) {
+            if (!isConnected) {
                 toast(R.string.prompt_no_network)
 
                 return@setOnClickListener

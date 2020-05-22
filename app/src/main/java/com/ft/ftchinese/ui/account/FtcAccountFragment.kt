@@ -134,7 +134,7 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
         })
 
         binding.swipeRefresh.setOnRefreshListener {
-            if (activity?.isNetworkConnected() != true) {
+            if (context?.isConnected != true) {
                 toast(R.string.prompt_no_network)
                 binding.swipeRefresh.isRefreshing = false
                 return@setOnRefreshListener

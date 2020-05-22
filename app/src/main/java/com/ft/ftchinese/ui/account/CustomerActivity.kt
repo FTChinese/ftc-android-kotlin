@@ -76,7 +76,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
         val account = sessionManager.loadAccount() ?: return
         if (account.stripeId == null) {
-            if (!isNetworkConnected()) {
+            if (!isConnected) {
                 toast(R.string.prompt_no_network)
                 return
             }
@@ -117,7 +117,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
         val account = sessionManager.loadAccount() ?: return
 
-        if (!isNetworkConnected()) {
+        if (!isConnected) {
             toast(R.string.prompt_no_network)
             return
         }
@@ -150,7 +150,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun setupCustomerSession() {
-        if (!isNetworkConnected()) {
+        if (!isConnected) {
             toast(R.string.prompt_no_network)
             return
         }

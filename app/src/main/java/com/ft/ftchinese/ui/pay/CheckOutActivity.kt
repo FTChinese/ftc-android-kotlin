@@ -196,7 +196,7 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     private fun onPayButtonClicked() {
-        if (!isNetworkConnected()) {
+        if (!isConnected) {
             toast(R.string.prompt_no_network)
 
             return

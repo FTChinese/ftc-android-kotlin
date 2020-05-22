@@ -17,7 +17,6 @@ import com.ft.ftchinese.*
 import com.ft.ftchinese.databinding.FragmentChannelBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.pay.grantPermission
-import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.reader.ReadingDuration
 import com.ft.ftchinese.repository.currentFlavor
@@ -30,6 +29,7 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.WVClient
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.*
 import com.ft.ftchinese.viewmodel.ChannelViewModel
 import com.ft.ftchinese.viewmodel.ChannelViewModelFactory
@@ -178,7 +178,7 @@ class ChannelFragment : ScopedFragment(),
         if (found) {
             info("Cache found. Update silently.")
 
-            if (activity?.isNetworkConnected() != true) {
+            if (context?.isConnected != true) {
                 return
             }
 
@@ -194,7 +194,7 @@ class ChannelFragment : ScopedFragment(),
 
         // Cache not found.
         info("Cache not found")
-        if (activity?.isNetworkConnected() != true) {
+        if (context?.isConnected != true) {
             binding.inProgress = false
             binding.swipeRefresh.isRefreshing = false
             toast(R.string.prompt_no_network)

@@ -11,9 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentUpdatePasswordBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.Passwords
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.Validator
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.UpdateViewModel
@@ -57,7 +57,7 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
         binding.btnSave.setOnClickListener {
             val passwords = validate() ?: return@setOnClickListener
 
-            if (activity?.isNetworkConnected() != true) {
+            if (context?.isConnected != true) {
                 toast(R.string.prompt_no_network)
                 return@setOnClickListener
             }

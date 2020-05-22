@@ -10,10 +10,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpgradePreviewBinding
-import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.subscription.PaymentIntent
 import com.ft.ftchinese.ui.base.formatPrice
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
 import com.ft.ftchinese.viewmodel.FreeUpgradeDeniedError
@@ -58,7 +58,7 @@ class UpgradePreviewActivity : AppCompatActivity() {
 
         initUI(null)
 
-        if (!isNetworkConnected()) {
+        if (!isConnected) {
             toast(R.string.prompt_no_network)
             return
         }
@@ -128,7 +128,7 @@ class UpgradePreviewActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            if (!isNetworkConnected()) {
+            if (!isConnected) {
                 toast(R.string.prompt_no_network)
 
                 return@setOnClickListener

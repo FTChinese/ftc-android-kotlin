@@ -86,7 +86,7 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
                     newName = binding.userNameInput.text.toString().trim()
             )
 
-            if (activity?.isNetworkConnected() != true) {
+            if (context?.isConnected != true) {
                 toast(R.string.prompt_no_network)
 
                 return@setOnClickListener

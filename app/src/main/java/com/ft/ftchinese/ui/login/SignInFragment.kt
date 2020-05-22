@@ -13,9 +13,9 @@ import com.ft.ftchinese.databinding.FragmentSignInBinding
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.afterTextChanged
-import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.store.TokenManager
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.LoginViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -92,7 +92,7 @@ class SignInFragment : ScopedFragment(),
 
 
         binding.signInBtn.setOnClickListener {
-            if (activity?.isNetworkConnected() != true) {
+            if (context?.isConnected != true) {
                 toast(R.string.prompt_no_network)
                 return@setOnClickListener
             }

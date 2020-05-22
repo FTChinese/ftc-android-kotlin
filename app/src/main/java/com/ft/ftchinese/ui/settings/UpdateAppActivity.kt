@@ -23,7 +23,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpdateAppBinding
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isNetworkConnected
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.SettingsViewModel
@@ -146,7 +146,7 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
         })
 
 
-        if (!isNetworkConnected()) {
+        if (!isConnected) {
             toast(R.string.prompt_no_network)
             return
         }

@@ -10,10 +10,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityLinkPreviewBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.LinkViewModel
@@ -142,7 +142,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
         val unionId = wxAccount.unionId ?: return
 
         binding.btnStartLink.setOnClickListener {
-            if (!isNetworkConnected()) {
+            if (!isConnected) {
                 toast(R.string.prompt_no_network)
                 return@setOnClickListener
             }
@@ -170,7 +170,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
             is Result.Success -> {
                 toast(R.string.prompt_linked)
 
-                if (!isNetworkConnected()) {
+                if (!isConnected) {
                     binding.inProgress = false
                     finish()
                     return

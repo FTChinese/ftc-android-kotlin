@@ -13,11 +13,11 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentWxAccountBinding
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.WxRefreshState
@@ -112,7 +112,7 @@ class WxInfoFragment : ScopedFragment(),
 
         val acnt = sessionManager.loadAccount() ?: return
 
-        if (activity?.isNetworkConnected() != true) {
+        if (context?.isConnected != true) {
             toast(R.string.prompt_no_network)
             return
         }
@@ -133,7 +133,7 @@ class WxInfoFragment : ScopedFragment(),
             return
         }
 
-        if (activity?.isNetworkConnected() != true) {
+        if (context?.isConnected != true) {
             toast(R.string.prompt_no_network)
             binding.swipeRefresh.isEnabled = false
             return

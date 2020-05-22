@@ -11,7 +11,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentEmailBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.afterTextChanged
-import com.ft.ftchinese.ui.base.isNetworkConnected
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.LoginViewModel
 import com.ft.ftchinese.viewmodel.Result
 import org.jetbrains.anko.AnkoLogger
@@ -61,7 +61,7 @@ class EmailFragment : ScopedFragment(),
         })
 
         binding.nextBtn.setOnClickListener {
-            if (activity?.isNetworkConnected() != true) {
+            if (context?.isConnected != true) {
                 toast(R.string.prompt_no_network)
                 return@setOnClickListener
             }

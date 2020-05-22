@@ -76,7 +76,7 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
                     newEmail = binding.emailInput.text.toString().trim()
             )
 
-            if (activity?.isNetworkConnected() != true) {
+            if (context?.isConnected != true) {
                 toast(R.string.prompt_no_network)
 
                 return@setOnClickListener

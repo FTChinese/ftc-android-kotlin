@@ -11,8 +11,8 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCurrentReleaseBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.SettingsViewModel
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.toast
@@ -56,7 +56,7 @@ class CurrentReleaseActivity : ScopedAppActivity() {
                 return@Observer
             }
 
-            if (!isNetworkConnected()) {
+            if (!isConnected) {
                 toast(R.string.prompt_no_network)
                 return@Observer
             }
