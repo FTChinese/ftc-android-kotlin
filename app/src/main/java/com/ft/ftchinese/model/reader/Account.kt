@@ -4,7 +4,6 @@ import android.os.Parcelable
 import com.ft.ftchinese.repository.Fetch
 import com.ft.ftchinese.util.*
 import kotlinx.android.parcel.Parcelize
-import org.jetbrains.anko.AnkoLogger
 
 /**
  * A user's essential data.
@@ -25,7 +24,7 @@ data class Account(
         val loginMethod: LoginMethod? = null,
         val wechat: Wechat,
         val membership: Membership
-): Parcelable, AnkoLogger {
+): Parcelable {
 
     /**
      * Tests whether two accounts are the same one.
