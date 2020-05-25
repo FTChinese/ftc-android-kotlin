@@ -54,6 +54,39 @@ storeFile="......."
 
 Add `google-service.json` to the `app` directory.
 
+## WebView
+
+User:
+
+```ts
+var androidUserInfo = {
+    id: string;
+    unionId: string | null;
+    stripeId: string | null;
+    userName: string | null;
+    email: string;
+    isVerified: boolean;
+    avatarUrl: string | null;
+    loginMethod: 'email' | 'wechat';
+    wechat: {
+        nickname: string | null;
+        avatarUrl: string | null;
+    };
+    membership: {
+        id: string | null;
+        tier: 'standard' | 'premium' | null;
+        cycle: 'month' | 'year' | null;
+        expireDate: string | null;
+        payMethod: 'alipay' | 'wechat' | 'stripe' | 'apple' | 'b2b';
+        autoRenew: boolean;
+        status: 'incomplete' | 'incomplete_expired' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid' | null;
+        vip: boolean;
+    };
+}
+```
+
+See `model/content/StoryBuilder#withUserInfo` method.
+
 ## Wechat Login Process
 
 ### Step 1: Launch Wechat
