@@ -9,6 +9,7 @@ import com.ft.ftchinese.model.apicontent.InteractiveStory
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.repository.ClientError
 import com.ft.ftchinese.repository.ContentAPIRepo
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.util.json
@@ -18,10 +19,9 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-class AudioViewModel : ViewModel(), AnkoLogger {
-    val cacheFound: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>()
-    }
+class AudioViewModel(private val cache: FileCache) : ViewModel(), AnkoLogger {
+
+    val isNetworkAvailable = MutableLiveData<Boolean>()
 
     val storyResult: MutableLiveData<Result<BilingualStory>> by lazy {
         MutableLiveData<Result<BilingualStory>>()
@@ -31,92 +31,89 @@ class AudioViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<InteractiveStory>>()
     }
 
-    fun loadCachedStory(teaser: Teaser, cache: FileCache) {
+    fun loadStory(teaser: Teaser, bustCache: Boolean) {
         val cacheName = teaser.apiCacheFileName(Language.BILINGUAL)
 
-        info("Cached file: $cacheName")
-
-        if (cacheName.isBlank()) {
-            cacheFound.value = false
-        }
-
         viewModelScope.launch {
-            try {
-                val data = withContext(Dispatchers.IO) {
-                    cache.loadText(cacheName)
+            if (!cacheName.isBlank() && !bustCache) {
+                try {
+                    val data = withContext(Dispatchers.IO) {
+                        cache.loadText(cacheName)
+                    }
+
+                    val ok = handleData(teaser.type, data)
+                    // If data is loaded from cached, stop.
+                    if (ok) {
+                        return@launch
+                    }
+                } catch (e: Exception) {
+                    // If error, fall to server data.
+                    info("Error loading cached story: $e")
                 }
-
-                if (data.isNullOrBlank()) {
-                    info("Empty cache")
-                    cacheFound.value = false
-                    return@launch
-                }
-
-                parseData(teaser.type, data)
-
-            } catch (e: Exception) {
-                info(e)
-                cacheFound.value = false
             }
-        }
-    }
 
-    fun loadRemoteStory(teaser: Teaser, cache: FileCache) {
-        viewModelScope.launch {
+            if (isNetworkAvailable.value != true) {
+                info("Network not available")
+                storyResult.value = Result.LocalizedError(R.string.prompt_no_network)
+                return@launch
+            }
+
             try {
                 val data = withContext(Dispatchers.IO) {
                     ContentAPIRepo.loadStory(teaser)
                 }
 
-                if (data == null) {
-                    info("Server response empty")
-                    storyResult.value = Result.LocalizedError(R.string.loading_failed)
-                    return@launch
-                }
+                val ok = handleData(teaser.type, data)
 
-                val ok = parseData(teaser.type, data)
-
+                // If data is loaded from server, cache it.
                 if (ok) {
-                    info("Caching data")
                     launch(Dispatchers.IO) {
                         cache.saveText(
-                                teaser.apiCacheFileName(Language.BILINGUAL),
-                                data
+                            teaser.apiCacheFileName(Language.BILINGUAL),
+                            data!!
                         )
                     }
+                } else {
+                    storyResult.value = Result.LocalizedError(R.string.loading_failed)
                 }
 
+            } catch (e: ClientError) {
+                info(e)
+                storyResult.value = when (e.statusCode) {
+                    404 -> Result.LocalizedError(R.string.loading_failed)
+                    else -> parseApiError(e)
+                }
             } catch (e: Exception) {
                 info(e)
+                // Notify error to any of storyResult or interactiveResult works since they are both observing
+                // in the same activity.
+                // Do not notify all of them which whill
+                // cause error message displayed multiple times.
                 storyResult.value = parseException(e)
             }
         }
     }
 
-    // Returns a boolean value to indicates whether
-    // the data is valid and therefore cached.
-    private fun parseData(type: ArticleType, data: String): Boolean {
+    private fun handleData(type: ArticleType, data: String?): Boolean {
         when (type) {
             ArticleType.Story,
             ArticleType.Premium -> {
-                val story = json.parse<BilingualStory>(data)
-
-                if (story == null) {
-                    cacheFound.value = false
-                    return false
-                }
+                val story = (if (data.isNullOrBlank()) {
+                    null
+                } else {
+                    json.parse<BilingualStory>(data)
+                }) ?: return false
 
                 storyResult.value = Result.Success(story)
                 return true
-
             }
 
             ArticleType.Interactive -> {
-                val story = json.parse<InteractiveStory>(data)
-                if (story == null) {
-                    cacheFound.value = false
-                    return false
-                }
+                val story = (if (data.isNullOrBlank()) {
+                    null
+                } else {
+                    json.parse<InteractiveStory>(data)
+                }) ?: return false
 
                 interactiveResult.value = Result.Success(story)
                 return true
