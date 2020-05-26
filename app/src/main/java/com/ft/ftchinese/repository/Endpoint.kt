@@ -5,10 +5,9 @@ import com.ft.ftchinese.BuildConfig
 
 object NextApi {
     private val BASE = if (BuildConfig.DEBUG) {
-        "http://192.168.10.195:8000"
-//        "http://user.ftmailbox.com/v1"
+        BuildConfig.API_READER_TEST
     } else {
-        "http://user.ftchinese.org/v1"
+        BuildConfig.API_READER_LIVE
     }
     val EMAIL_EXISTS = "$BASE/users/exists"
     val LOGIN = "$BASE/users/login"
@@ -34,9 +33,9 @@ object NextApi {
 
 object ContentApi {
     private val BASE = if (BuildConfig.DEBUG) {
-        "http://192.168.10.195:8100"
+        BuildConfig.API_CONTENT_LIVE
     } else {
-        "http://api-content.ftchinese.com/v1"
+        BuildConfig.API_CONTENT_LIVE
     }
 
     val STORY = "$BASE/stories"
@@ -45,10 +44,9 @@ object ContentApi {
 
 object SubscribeApi {
     private val BASE = if (BuildConfig.DEBUG) {
-//        "http://www.ftacademy.cn/api/sandbox"
-        "http://192.168.10.195:8200"
+        BuildConfig.API_SUBS_TEST
     } else {
-        "https://www.ftacademy.cn/api/v1"
+        BuildConfig.API_SUBS_LIVE
     }
     val WX_UNIFIED_ORDER = "$BASE/wxpay/app"
     val WX_ORDER_QUERY = "$BASE/wxpay/query"
