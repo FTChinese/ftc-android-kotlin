@@ -13,6 +13,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAudioPlayerBinding
 import com.ft.ftchinese.model.apicontent.BilingualStory
@@ -25,6 +26,7 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.AudioViewModel
+import com.ft.ftchinese.viewmodel.AudioViewModelFactory
 import com.ft.ftchinese.viewmodel.Result
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.offline.*
@@ -40,7 +42,7 @@ import org.jetbrains.anko.toast
 import org.jetbrains.anko.warn
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
+class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
 
     private var player: SimpleExoPlayer? = null
     private var playWhenReady = true
@@ -80,49 +82,36 @@ class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
             setDisplayShowTitleEnabled(false)
         }
 
-        viewModel = ViewModelProvider(this)
-                .get(AudioViewModel::class.java)
+        binding.swipeRefresh.setOnRefreshListener(this)
         cache = FileCache(this)
 
+        viewModel = ViewModelProvider(
+            this,
+            AudioViewModelFactory(cache))
+            .get(AudioViewModel::class.java)
+
+        // Observing network status.
+        connectionLiveData.observe(this, Observer {
+            viewModel.isNetworkAvailable.value = it
+        })
+        info("Is connected: $isConnected")
+        viewModel.isNetworkAvailable.value = isConnected
+
+
+
         downloader = AudioDownloader.getInstance(this)
+
+        // Get data passed in.
         teaser = intent.getParcelableExtra(EXTRA_ARTICLE_TEASER) ?: return
 
-        info("Loading audio for $teaser")
-
+        // Toolbar
         toolbar.title = teaser?.title
 
+        // Player
         player = SimpleExoPlayer.Builder(this).build()
         binding.playerView.player = player
 
-        viewModel.cacheFound.observe(this, Observer {
-            if (it) {
-                return@Observer
-            }
-
-            if (!isConnected) {
-                toast(R.string.prompt_no_network)
-            }
-
-            teaser?.let { t ->
-                binding.inProgress = true
-                viewModel.loadRemoteStory(t, cache)
-            }
-        })
-
-        viewModel.storyResult.observe(this, Observer {
-            binding.inProgress = false
-            onStoryLoaded(it)
-        })
-
-        viewModel.interactiveResult.observe(this, Observer {
-            binding.inProgress = false
-            onInteractiveLoaded(it)
-        })
-
-        teaser?.let {
-            viewModel.loadCachedStory(it, cache)
-        }
-
+        // Recycler view
         val layout = LinearLayoutManager(this)
         viewAdapter = LyricsAdapter(listOf())
 
@@ -131,11 +120,50 @@ class AudioPlayerActivity : ScopedAppActivity(), AnkoLogger {
             adapter = viewAdapter
         }
 
+        viewModel.storyResult.observe(this, Observer {
+            binding.inProgress = false
+            binding.swipeRefresh.isRefreshing = false
+            onStoryLoaded(it)
+        })
+
+        viewModel.interactiveResult.observe(this, Observer {
+            binding.inProgress = false
+            binding.swipeRefresh.isRefreshing = false
+            onInteractiveLoaded(it)
+        })
+
+
+
+        teaser?.let {
+            binding.inProgress = true
+            info("Starting loading teaser: $teaser")
+            viewModel.loadStory(
+                teaser = it,
+                bustCache = false
+            )
+        }
+
         setupDownload()
 
 //        AudioService.newIntent(this, teaser).also {
 //            Util.startForegroundService(this, it)
 //        }
+    }
+
+    override fun onRefresh() {
+        if (!isConnected) {
+            binding.swipeRefresh.isRefreshing = false
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        teaser?.let {
+            toast(R.string.refreshing_data)
+            viewModel.loadStory(
+                teaser = it,
+                bustCache = true
+            )
+        }
     }
 
     private fun onStoryLoaded(result: Result<BilingualStory>) {
