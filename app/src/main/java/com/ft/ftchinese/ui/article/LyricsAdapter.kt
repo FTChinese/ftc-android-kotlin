@@ -1,5 +1,7 @@
 package com.ft.ftchinese.ui.article
 
+import android.os.Build
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView
@@ -38,7 +40,20 @@ class LyricsAdapter(private var dataset: List<String>) : RecyclerView.Adapter<Ly
     override fun getItemCount() = dataset.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.textView.text = dataset[position].replace("<p>", "").replace("</p>", "")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            holder.textView.text = Html.fromHtml(
+                dataset[position]
+                    .replace("<p>", "")
+                    .replace("</p>", ""),
+                Html.FROM_HTML_MODE_COMPACT,
+                null,
+                null
+            )
+        } else {
+            holder.textView.text = dataset[position]
+                .replace("<p>", "")
+                .replace("</p>", "")
+        }
     }
 
     fun setData(data: List<String>) {
