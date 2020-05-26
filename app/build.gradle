@@ -50,7 +50,18 @@ android {
 
         buildConfigField "String", "BASE_URL_STANDARD", props.getProperty("base_url.standard")
         buildConfigField "String", "BASE_URL_PREMIUM", props.getProperty("base_url.premium")
+
         buildConfigField "String", "BASE_URL_B2B", props.getProperty("base_url.b2b")
+
+        buildConfigField "String", "API_READER_TEST", props.getProperty("api_url.reader.test")
+        buildConfigField "String", "API_READER_LIVE", props.getProperty("api_url.reader.live")
+
+        buildConfigField "String", "API_CONTENT_TEST", props.getProperty("api_url.content.test")
+        buildConfigField "String", "API_CONTENT_LIVE", props.getProperty("api_url.content.live")
+
+        buildConfigField "String", "API_SUBS_TEST", props.getProperty("api_url.subs.test")
+        buildConfigField "String", "API_SUBS_LIVE", props.getProperty("api_url.subs.live")
+
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++11"
@@ -150,7 +161,7 @@ android {
 dependencies {
     def room_version = '2.2.5'
     def lifecycle_version = "2.2.0"
-    def nav_version = "2.3.0-alpha06"
+    def nav_version = "2.3.0-beta01"
     def exo_player = "2.11.3"
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -158,10 +169,10 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     // Firebase
-    implementation 'com.google.firebase:firebase-core:17.4.1'
-    implementation 'com.google.firebase:firebase-analytics:17.4.1'
-    implementation 'com.google.firebase:firebase-iid:20.1.7'
-    implementation 'com.google.firebase:firebase-messaging:20.1.7'
+    implementation 'com.google.firebase:firebase-core:17.4.2'
+    implementation 'com.google.firebase:firebase-analytics:17.4.2'
+    implementation 'com.google.firebase:firebase-iid:20.2.0'
+    implementation 'com.google.firebase:firebase-messaging:20.2.0'
     implementation 'com.google.android.gms:play-services-analytics:17.0.0'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
