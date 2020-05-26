@@ -9,26 +9,51 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-data class ClientError(
-        @Json(ignored = true)
-        var statusCode: Int = 400, // HTTP status code
-        override val message: String,
-        val error: Reason? = null,
-        val code: String? = null,
-        val param: String? = null,
-        val type: String? = null
-) : Exception(message)
-
-
-data class Reason(
-        val field: String,
-        val code: String
+data class Unprocessable(
+    val field: String,
+    val code: String
 ) {
     val key: String = "${field}_$code"
+}
+
+data class ClientError(
+    override val message: String,
+    val error: Unprocessable? = null,
+
+    @Json(ignored = true)
+    var statusCode: Int = 400, // HTTP status code
+
+    val code: String? = null,
+    val param: String? = null,
+    val type: String? = null
+) : Exception(message)
+
+fun parseRespErr(resp: Response): ClientError? {
+    /**
+     * @throws IOException when turning to string.
+     */
+    val body = resp.body?.string()
+
+//    info("API error response: $body")
+
+    // Avoid throwing JSON parse error.
+    val clientErr = if (body != null) {
+        /**
+         * Throws JSON parse error.
+         */
+        Klaxon().parse<ClientError>(body)
+    } else {
+        ClientError(
+            message = "No response from server"
+        )
+    }
+
+    clientErr?.statusCode = resp.code
+
+    return clientErr
 }
 
 /**
@@ -43,7 +68,7 @@ class Fetch : AnkoLogger {
     private var reqBody: RequestBody? = null
     private var request: Request? = null
     private var call: Call? = null
-    private var timeout: Int? = null
+    private var timeout: Int = 30
 
     private var disableCache = false
 
@@ -178,7 +203,6 @@ class Fetch : AnkoLogger {
 
         val resp = end()
 
-        info("Request URL: ${request?.url}")
         /**
          * Success response.
          * @throws IOException when reading body.
@@ -187,30 +211,9 @@ class Fetch : AnkoLogger {
             return Pair(resp, resp.body?.string())
         }
 
-        /**
-         * @throws IOException when turning to string.
-         * @throws ClientError
-         */
-        val body = resp.body
-                ?.string()
-                ?: throw ClientError(
-                        statusCode = resp.code,
-                        message = resp.message
-                )
-        info("API error response: $body")
-
-        // Avoid throwing JSON parse error.
-        val clientErr = try {
-            Klaxon().parse<ClientError>(body)
-        } catch (e: Exception) {
-            ClientError(message = resp.message)
-        }
-
-        clientErr?.statusCode = resp.code
-
-        throw clientErr ?: ClientError(
+        throw parseRespErr(resp) ?: ClientError(
                 statusCode = resp.code,
-                message = resp.message
+                message = "Unknown error occurred when sending request"
         )
     }
 
@@ -246,12 +249,16 @@ class Fetch : AnkoLogger {
          * remote server accepted the request before the failure.
          * @throws IllegalStateException when the call has already been executed.
          */
-        val call = timeout?.toLong()?.let {
-            client.newBuilder()
+        val call = if (timeout > 0) {
+            timeout.toLong().let {
+                client.newBuilder()
                     .readTimeout(it, TimeUnit.SECONDS)
                     .build()
                     .newCall(req)
-        } ?: client.newCall(req)
+            }
+        } else {
+            client.newCall(req)
+        }
 
         this.call = call
 
