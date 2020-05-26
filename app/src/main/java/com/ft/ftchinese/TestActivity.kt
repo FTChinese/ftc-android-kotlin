@@ -17,6 +17,7 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.databinding.ActivityTestBinding
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
@@ -232,6 +233,26 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         binding.progressButtonText = "Test Button with Progress Bar"
         binding.btnProgress.button.setOnClickListener {
             binding.inProgress = true
+        }
+
+        val layout = LinearLayoutManager(this)
+        binding.rvHtml.apply {
+            layoutManager = layout
+            adapter = LyricsAdapter(listOf(
+                "<p>Rich countries are set to take on at least $17tn of extra public debt as they battle the economic consequences of the pandemic, according to the OECD, as sharp drops in tax revenues are expected to dwarf the stimulus measures put in place to battle the disease. </p>",
+                "<p>Across the OECD club of rich countries, average government financial liabilities are expected to rise from 109 per cent of gross domestic product to more than 137 per cent this year, leaving many with public debt burdens similar to the current level in Italy.</p>",
+                "<p>Additional debt of that scale would amount to a minimum of $13,000 per person across the 1.3bn people that live in OECD member countries. Debt levels could rise even further if the economic recovery from the pandemic is slower than many economists hope. </p>",
+                "<p>Randall Kroszner, of the Chicago Booth School of Business and a former Federal Reserve governor, said the situation raised questions about the long-term sustainability of high levels of public and private debt.</p>",
+                "<p>“We have to face the hard reality we’re not going to have a V-shaped recovery,” he said.</p>",
+                "<p>The OECD said that public debt among its members rose by 28 percentage points of GDP in the financial crisis of 2008-09, totalling $17tn. “For 2020, the economic impact of the Covid-19 pandemic is expected to be worse than the great financial crisis,” it said.</p>",
+                "<p>Although many governments have introduced additional fiscal measures this year ranging from 1 per cent of GDP in France and Spain to 6 per cent in the US, they are likely to be outpaced by the rise in public debt because tax revenues tend to fall even faster than economic activity in a deep recession, according to the OECD.</p>",
+                "<p>A decade ago, fashionable economic thinking suggested that beyond 90 per cent of GDP, government debt levels became unsustainable. Although most economists do not now believe there is such a clear limit, many still believe that allowing public debt to build up ever higher would threaten to undermine private sector spending, creating a drag on growth. </p>",
+                "<p>Rising debt levels will become a problem in future, Angel Gurría, OECD secretary-general, has warned, although he said that countries should not worry about their fiscal positions now in the middle of the crisis.</p>",
+                "<p>“We are going to be heavy on the wing because we are trying to fly and we were already carrying a lot of debt and now we are adding more,” he said. </p>",
+                "<p>As a result, many more countries are set to face a similar economic environment to that experienced by Japan since its financial bubble burst in the early 1990s. Concern about government debt and deficits has been a defining feature of Japan’s political economy ever since, with debt eventually stabilising at about 240 per cent of GDP under current prime minister Shinzo Abe.</p>",
+                "<p>Many politicians and business leaders are alarmed by the fresh spending packages to tackle the pandemic in Japan.</p>",
+                "<p>“Our economic strategy is using a considerable amount of money, and honestly speaking it’s going to be a big fiscal problem in the future,” said Hiroaki Nakanishi, executive chairman of Hitachi and head of the Keidanren business lobby, in a recent interview with the Financial Times. “I have no good plan. Until the economy is properly back on its feet, I don’t think there is any sensible answer.”</p>"
+            ))
         }
     }
 
