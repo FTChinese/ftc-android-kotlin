@@ -128,6 +128,8 @@ var androidUserInfo = ${json.toJsonString(account)};
         return this
     }
 
+
+
     fun render(): String {
         var result = template
 
@@ -140,5 +142,19 @@ var androidUserInfo = ${json.toJsonString(account)};
                 AdParser.updateAdCode(result, this.shouldHideAd)
             )
         )
+    }
+
+    fun withChannel(content: String): StoryBuilder {
+        ctx["{list-content}"] = content
+        return this
+    }
+
+    fun renderChannel(): String {
+        var result = template
+        ctx.forEach { (key, value) ->
+            result = result.replace(key, value)
+        }
+
+        return result
     }
 }
