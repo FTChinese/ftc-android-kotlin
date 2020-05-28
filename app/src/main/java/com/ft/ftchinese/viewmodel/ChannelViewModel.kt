@@ -16,92 +16,64 @@ import org.jetbrains.anko.info
 class ChannelViewModel(val cache: FileCache) :
         ViewModel(), AnkoLogger {
 
-    val cacheFound = MutableLiveData<Boolean>()
-    val renderResult: MutableLiveData<Result<String>> by lazy {
+    val isNetworkAvailable = MutableLiveData<Boolean>()
+    val contentResult: MutableLiveData<Result<String>> by lazy {
         MutableLiveData<Result<String>>()
     }
 
-    private var template: String? = null
+    fun load(channelSource: ChannelSource, bustCache: Boolean) {
+       val cacheName = channelSource.fileName
 
-    fun loadFromCache(channelSource: ChannelSource) {
         viewModelScope.launch {
-            val cacheFrag = withContext(Dispatchers.IO) {
-                cache.loadText(channelSource.fileName)
+            if (!cacheName.isNullOrBlank() && !bustCache) {
+                try {
+                    val data = withContext(Dispatchers.IO) {
+                        cache.loadText(cacheName)
+                    }
+
+                    if (!data.isNullOrBlank()) {
+                        contentResult.value = Result.Success(data)
+                        return@launch
+                    }
+                } catch (e: Exception) {
+                    info(e)
+                }
             }
 
-            if (cacheFrag.isNullOrBlank()) {
-                cacheFound.value = false
+            val url = channelSource.normalizedUrl()
+
+            if (url.isNullOrBlank()) {
+                contentResult.value = Result.LocalizedError(R.string.api_empty_url)
                 return@launch
             }
 
-            cacheFound.value = true
-
-            val html = render(channelSource, cacheFrag)
-
-            if (html == null) {
-                renderResult.value = Result.LocalizedError(R.string.loading_failed)
+            if (isNetworkAvailable.value != true) {
+                contentResult.value = Result.LocalizedError(R.string.prompt_no_network)
                 return@launch
             }
 
-            renderResult.value = Result.Success(html)
-        }
-    }
-
-    fun loadFromServer(channelSource: ChannelSource, shouldRender: Boolean = true) {
-        val url = channelSource.normalizedUrl()
-        if (url == null) {
-            renderResult.value = Result.LocalizedError(R.string.api_empty_url)
-            return
-        }
-
-        info("Load channel from $url")
-
-        viewModelScope.launch {
             try {
                 val remoteFrag = withContext(Dispatchers.IO) {
                     Fetch().get(url).responseString()
                 }
 
-                info("Channel fragment loaded")
-
                 if (remoteFrag.isNullOrBlank()) {
                     info("Channel fragment is empty")
-                    renderResult.value = Result.LocalizedError(R.string.api_server_error)
+                    contentResult.value = Result.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
 
-                val fileName = channelSource.fileName
-                if (fileName != null) {
+                contentResult.value = Result.Success(remoteFrag)
+
+                if (!cacheName.isNullOrBlank()) {
                     launch(Dispatchers.IO) {
-                        cache.saveText(fileName, remoteFrag)
+                        cache.saveText(cacheName, remoteFrag)
                     }
                 }
 
-                if (!shouldRender) {
-
-                    return@launch
-                }
-
-                val html = render(channelSource, remoteFrag)
-
-                if (html == null) {
-                    renderResult.value = Result.LocalizedError(R.string.loading_failed)
-                    return@launch
-                }
-                renderResult.value = Result.Success(html)
-
             } catch (e: Exception) {
-                info(e)
-                renderResult.value = parseException(e)
+                contentResult.value = parseException(e)
             }
         }
-    }
-
-    private suspend fun render(channelSource: ChannelSource, htmlFragment: String) = withContext(Dispatchers.Default) {
-        if (template == null) {
-            template = cache.readChannelTemplate()
-        }
-
-        channelSource.render(template, htmlFragment)
     }
 }
