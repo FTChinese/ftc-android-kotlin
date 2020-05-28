@@ -157,75 +157,60 @@ class ChannelFragment : ScopedFragment(),
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache))
+        channelViewModel = activity?.run {
+            ViewModelProvider(this, ChannelViewModelFactory(cache))
                 .get(ChannelViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
 
-        channelViewModel.cacheFound.observe(viewLifecycleOwner, Observer {
-            onCacheFound(it)
+        connectionLiveData.observe(viewLifecycleOwner, Observer {
+            channelViewModel.isNetworkAvailable.value = it
         })
+        channelViewModel.isNetworkAvailable.value = context?.isConnected
 
-        channelViewModel.renderResult.observe(viewLifecycleOwner, Observer {
-            onRenderResult(it)
+//        channelViewModel.cacheFound.observe(viewLifecycleOwner, Observer {
+//            onCacheFound(it)
+//        })
+
+//        channelViewModel.renderResult.observe(viewLifecycleOwner, Observer {
+//            onRenderResult(it)
+//        })
+
+        channelViewModel.contentResult.observe(viewLifecycleOwner, Observer {
+            onContentLoaded(it)
         })
 
         initLoading()
     }
 
-    private fun onCacheFound(found: Boolean) {
-        info("Is cache found: $found")
+    private fun onContentLoaded(result: Result<String>) {
+        binding.inProgress = false
+        binding.swipeRefresh.isRefreshing = false
 
-        // If cache is found
-        if (found) {
-            info("Cache found. Update silently.")
-
-            if (context?.isConnected != true) {
-                return
-            }
-
-            val chSrc = channelSource ?: return
-
-            // Load data only. No rendering.
-            channelViewModel.loadFromServer(
-                    channelSource = chSrc,
-                    shouldRender = false
-            )
-            return
-        }
-
-        // Cache not found.
-        info("Cache not found")
-        if (context?.isConnected != true) {
-            binding.inProgress = false
-            binding.swipeRefresh.isRefreshing = false
-            toast(R.string.prompt_no_network)
-            return
-        }
-
-        // Fetch data from remote and cache only.
-        val chSrc = channelSource ?: return
-
-        // Load data and render.
-        channelViewModel.loadFromServer(
-                channelSource = chSrc
-        )
-    }
-
-    private fun onRenderResult(result: Result<String>) {
         when (result) {
             is Result.LocalizedError -> {
-                binding.inProgress = false
-                binding.swipeRefresh.isRefreshing = false
-
                 toast(result.msgId)
             }
             is Result.Error -> {
-                binding.inProgress = false
-                binding.swipeRefresh.isRefreshing = false
-
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
-                load(result.data)
+                launch {
+                    val template = cache.readChannelTemplate()
+
+                    if (template.isBlank()) {
+                        toast("Error loading data")
+                        return@launch
+                    }
+
+                    val html = withContext(Dispatchers.Default) {
+                        StoryBuilder(template)
+                            .withChannel(result.data)
+                            .withUserInfo(sessionManager.loadAccount())
+                            .render()
+                    }
+
+                    load(html)
+                }
             }
         }
     }
@@ -254,13 +239,10 @@ class ChannelFragment : ScopedFragment(),
             HTML_TYPE_FRAGMENT -> {
                 info("initLoading: html fragment")
 
-                if (binding.swipeRefresh.isRefreshing) {
-                    channelViewModel.loadFromServer(
-                            channelSource = chSrc
-                    )
-                } else {
-                    channelViewModel.loadFromCache(chSrc)
-                }
+                channelViewModel.load(
+                    channelSource = chSrc,
+                    bustCache = binding.swipeRefresh.isRefreshing
+                )
 
             }
             // For complete HTML, load it directly into Web view.
@@ -327,7 +309,10 @@ class ChannelFragment : ScopedFragment(),
 
             channelSource = listPage
 
-            channelViewModel.loadFromCache(listPage)
+            channelViewModel.load(
+                channelSource = listPage,
+                bustCache = false
+            )
 
         } else {
             info("Start a new activity for $listPage")
