@@ -33,6 +33,22 @@ class ChannelViewModel(val cache: FileCache) :
 
                     if (!data.isNullOrBlank()) {
                         contentResult.value = Result.Success(data)
+
+                        if (isNetworkAvailable.value != true) {
+                            return@launch
+                        }
+
+                        // Background update cache.
+                        val url = channelSource.normalizedUrl() ?: return@launch
+
+                       try {
+                            withContext(Dispatchers.IO) {
+                                val remoteFrag = Fetch().get(url).responseString() ?: return@withContext
+                                cache.saveText(cacheName, remoteFrag)
+                            }
+                        } catch (e: Exception) {
+                            return@launch
+                        }
                         return@launch
                     }
                 } catch (e: Exception) {
