@@ -101,12 +101,14 @@ class FileCache (private val context: Context) : AnkoLogger {
      * Read files from the the `raw` directory of the package.
      */
     private fun readTemplate(name: String, resId: Int): String {
-        var cached = templateCache[name]
+        val cached = templateCache[name]
         if (cached != null) {
+            info("Using cached template: $name")
+
             return cached
         }
 
-        cached = try {
+        val content = try {
             context.resources
                 .openRawResource(resId)
                 .bufferedReader()
@@ -117,10 +119,10 @@ class FileCache (private val context: Context) : AnkoLogger {
             null
         }
 
-        return if (cached != null) {
-            templateCache[name] = cached
+        return if (content != null) {
+            templateCache[name] = content
 
-            cached
+            content
         } else {
             ""
         }

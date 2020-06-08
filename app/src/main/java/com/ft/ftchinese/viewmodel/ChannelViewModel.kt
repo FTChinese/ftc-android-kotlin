@@ -24,14 +24,18 @@ class ChannelViewModel(val cache: FileCache) :
     fun load(channelSource: ChannelSource, bustCache: Boolean) {
        val cacheName = channelSource.fileName
 
+        info("Channel page cache file: $cacheName")
+
         viewModelScope.launch {
             if (!cacheName.isNullOrBlank() && !bustCache) {
                 try {
+                    info("Loading channel cache file $cacheName")
                     val data = withContext(Dispatchers.IO) {
                         cache.loadText(cacheName)
                     }
 
                     if (!data.isNullOrBlank()) {
+                        info("Using cached channel file $cacheName")
                         contentResult.value = Result.Success(data)
 
                         if (isNetworkAvailable.value != true) {
@@ -41,6 +45,7 @@ class ChannelViewModel(val cache: FileCache) :
                         // Background update cache.
                         val url = channelSource.normalizedUrl() ?: return@launch
 
+                        info("Start background update from $url for $cacheName")
                        try {
                             withContext(Dispatchers.IO) {
                                 val remoteFrag = Fetch().get(url).responseString() ?: return@withContext
@@ -57,6 +62,7 @@ class ChannelViewModel(val cache: FileCache) :
             }
 
             val url = channelSource.normalizedUrl()
+            info("Channel cache not found. Loading from $url")
 
             if (url.isNullOrBlank()) {
                 contentResult.value = Result.LocalizedError(R.string.api_empty_url)

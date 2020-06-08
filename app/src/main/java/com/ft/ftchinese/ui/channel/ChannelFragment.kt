@@ -79,8 +79,6 @@ class ChannelFragment : ScopedFragment(),
         sessionManager = SessionManager.getInstance(context)
         cache = FileCache(context)
         statsTracker = StatsTracker.getInstance(context)
-
-        info("onAttach finished")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,7 +102,6 @@ class ChannelFragment : ScopedFragment(),
                 container,
                 false)
 
-        info("onCreateView finished")
         return binding.root
     }
 
@@ -150,17 +147,13 @@ class ChannelFragment : ScopedFragment(),
 
             false
         }
-
-        info("Initiating current page with data: $channelSource")
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        channelViewModel = activity?.run {
-            ViewModelProvider(this, ChannelViewModelFactory(cache))
-                .get(ChannelViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
+        channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache))
+            .get(ChannelViewModel::class.java)
 
         connectionLiveData.observe(viewLifecycleOwner, Observer {
             channelViewModel.isNetworkAvailable.value = it
@@ -186,6 +179,8 @@ class ChannelFragment : ScopedFragment(),
         binding.inProgress = false
         binding.swipeRefresh.isRefreshing = false
 
+        info("Loaded channel content: ${channelSource?.fileName}")
+
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
@@ -202,12 +197,14 @@ class ChannelFragment : ScopedFragment(),
                         return@launch
                     }
 
+                    info("Rendering channel page")
                     val html = withContext(Dispatchers.Default) {
                         StoryBuilder(template)
                             .withChannel(result.data)
                             .withUserInfo(sessionManager.loadAccount())
                             .render()
                     }
+
 
                     load(html)
                 }
@@ -326,7 +323,7 @@ class ChannelFragment : ScopedFragment(),
     @JavascriptInterface
     fun onPageLoaded(message: String) {
 
-        info("Channel loaded: $message")
+        info("JS onPageLoaded")
 
         val channelContent = json.parse<ChannelContent>(message) ?: return
 
@@ -338,7 +335,7 @@ class ChannelFragment : ScopedFragment(),
 
     @JavascriptInterface
     fun onSelectItem(index: String) {
-        info("select item: $index")
+        info("JS select item: $index")
 
         val i = try {
             index.toInt()

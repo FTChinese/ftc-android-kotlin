@@ -51,6 +51,8 @@ class ArticleViewModel(
 
     fun loadStory(teaser: Teaser, bustCache: Boolean) {
         val cacheName = teaser.cacheNameJson()
+        info("Cache story file: $cacheName")
+
         viewModelScope.launch {
             if (!cacheName.isBlank() && !bustCache) {
                 try {
