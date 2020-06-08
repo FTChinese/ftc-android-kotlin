@@ -22,10 +22,10 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
-            android:scaleType="centerCrop"
+            android:scaleType="centerInside"
+            android:visibility="@{timerText == null ? View.GONE : View.VISIBLE}"
             tools:layout_editor_absoluteX="-149dp"
-            tools:layout_editor_absoluteY="114dp"
-            android:visibility="@{timerText == null ? View.GONE : View.VISIBLE}"/>
+            tools:layout_editor_absoluteY="114dp" />
 
         <TextView
             android:id="@+id/ad_timer"
