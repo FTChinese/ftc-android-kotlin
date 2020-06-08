@@ -16,6 +16,7 @@ import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.HOST_FTA
+import com.ft.ftchinese.repository.HOST_FTC
 import com.ft.ftchinese.repository.currentFlavor
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.GAAction
@@ -235,6 +236,7 @@ open class WVClient(
             "http", "https" -> {
                 return when (uri.host) {
                     currentFlavor.host -> handleInSiteLink(uri)
+                    HOST_FTC -> handleInSiteLink(uri)
                     HOST_FTA -> handleFtaLink(uri)
                     else -> handleExternalLink(uri)
                 }
