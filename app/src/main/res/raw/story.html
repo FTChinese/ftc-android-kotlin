@@ -119,4 +119,11 @@ function updateBodyClass(newClass) {
     bodyClass = bodyClass.replace(/ ce/, '').replace(/ en/, '');
     bodyClass += newClass;
     document.body.className = bodyClass;
+}
+
+function updateTimeStamp(newTimeStamp) {
+    var storyTimeEle = document.querySelector('.story-time');
+    if (storyTimeEle) {
+        storyTimeEle.innerHTML = newTimeStamp;
+    }
 }</script></html>
