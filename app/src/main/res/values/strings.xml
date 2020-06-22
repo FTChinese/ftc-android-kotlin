@@ -447,6 +447,7 @@
     <string name="released_at">发布时间</string>
 
 
+    <string name="alert_audio_deleted">已删除下载的音频</string>
     <string-array name="standard_benefits">
         <item>✔ 专享订阅内容每日仅需0.7元(或按月订阅每日0.9元)</item>
         <item>✔ 精选深度分析</item>
@@ -456,23 +457,23 @@
         <item>✔ FT研究院专题报告（不含行业报告）</item>
         <item>✔ 无限浏览7日前所有历史文章（近8万篇）</item>
     </string-array>
+
     <string-array name="premium_benefits">
         <item>✔ 专享订阅内容每日仅需5.5元</item>
         <item>✔ 享受“标准会员”所有权益</item>
         <item>✔ 编辑精选，总编/各版块主编每周五为您推荐本周必读资讯，分享他们的思考与观点</item>
         <item>✔ FT中文网2018年度论坛门票2张，价值3999元/张 （不含差旅与食宿）</item>
     </string-array>
-
     <string-array name="stripe_footnotes">
         <item>* FT中文网的Stripe支付暂不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</item>
         <item>* 微信登录的用户需要绑定FT中文网账号后才可以使用Stripe订阅</item>
         <item>* 通过支付宝或者微信支付购买的会员、且会员尚未到期，无法使用Stripe订阅</item>
     </string-array>
+
     <string-array name="profile_gender_entries">
         <item>男</item>
         <item>女</item>
     </string-array>
-
     <string-array name="profile_gender_values">
         <item>M</item>
         <item>F</item>
@@ -491,16 +492,15 @@
         <item>l</item>
         <item>xl</item>
     </string-array>
+
     <string-array name="settings_language_entries">
         <item>简体</item>
         <item>繁体</item>
     </string-array>
-
     <string-array name="settings_language_values">
         <item>sc</item>
         <item>tc</item>
     </string-array>
-    <string name="alert_audio_deleted">已删除下载的音频</string>
 
 
 </resources>
