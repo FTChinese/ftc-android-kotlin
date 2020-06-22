@@ -5,7 +5,7 @@ import com.ft.ftchinese.BuildConfig
 
 object NextApi {
     private val BASE = if (BuildConfig.DEBUG) {
-        BuildConfig.API_READER_TEST
+        BuildConfig.API_READER_LIVE
     } else {
         BuildConfig.API_READER_LIVE
     }
