@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'io.fabric'
+apply plugin: "androidx.navigation.safeargs.kotlin"
 
 // See:
 // https://stackoverflow.com/questions/37101589/how-to-read-a-properties-files-and-use-the-values-in-project-gradle-script/37101792
@@ -204,8 +205,10 @@ dependencies {
 //    implementation "androidx.coordinatorlayout:coordinatorlayout:1.1.0"
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "com.makeramen:roundedimageview:2.3.0"
-    implementation "androidx.navigation:navigation-fragment-ktx:2.3.0-rc01"
-    implementation "androidx.navigation:navigation-ui-ktx:2.3.0-rc01"
+    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
+    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
+// Dynamic Feature Module Support
+    implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
 
     // ExoPlayer
     implementation "com.google.android.exoplayer:exoplayer:$exo_player"
@@ -240,7 +243,7 @@ dependencies {
     testImplementation "androidx.room:room-testing:$room_version"
     // optional - Test helpers for LiveData
     testImplementation "androidx.arch.core:core-testing:2.1.0"
-    androidTestImplementation "androidx.navigation:navigation-testing:2.3.0-rc01"
+    androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
 }
 
 apply plugin: 'com.google.gms.google-services'
