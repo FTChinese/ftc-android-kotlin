@@ -122,7 +122,7 @@ class Fetch : AnkoLogger {
 
     // Authorization: Bearer xxxxxxx
     private fun setAccessKey() = apply {
-        headers["Authorization"] = "Bearer ${BuildConfig.ACCESS_TOKEN}"
+        headers["Authorization"] = "Bearer ${Config.accessToken}"
     }
 
     // X-Client-Type: android

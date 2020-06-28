@@ -63,6 +63,9 @@ android {
         buildConfigField "String", "API_SUBS_TEST", props.getProperty("api_url.subs.test")
         buildConfigField "String", "API_SUBS_LIVE", props.getProperty("api_url.subs.live")
 
+        buildConfigField "String", "ACCESS_TOKEN_LIVE", props.getProperty("access_token.live")
+        buildConfigField "String", "ACCESS_TOKEN_TEST", props.getProperty("access_token.test")
+
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++11"
@@ -92,12 +95,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable false
             buildConfigField "String", "STRIPE_KEY", props.getProperty("stripe.live")
-            buildConfigField "String", "ACCESS_TOKEN", props.getProperty("access_token.live")
         }
         debug {
             debuggable true
             buildConfigField "String", "STRIPE_KEY", props.getProperty("stripe.test")
-            buildConfigField "String", "ACCESS_TOKEN", props.getProperty("access_token.test")
         }
     }
 
@@ -199,7 +200,7 @@ dependencies {
     implementation "com.google.android.material:material:1.3.0-alpha01"
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation "androidx.browser:browser:1.2.0"
-    implementation "androidx.preference:preference:1.1.1"
+    implementation "androidx.preference:preference-ktx:1.1.1"
     implementation "androidx.legacy:legacy-support-v4:$support_version"
     implementation "androidx.recyclerview:recyclerview:1.1.0"
 //    implementation "androidx.coordinatorlayout:coordinatorlayout:1.1.0"

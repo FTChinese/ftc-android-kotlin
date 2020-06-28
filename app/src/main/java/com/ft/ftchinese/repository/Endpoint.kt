@@ -4,11 +4,7 @@ import android.net.Uri
 import com.ft.ftchinese.BuildConfig
 
 object NextApi {
-    private val BASE = if (BuildConfig.DEBUG) {
-        BuildConfig.API_READER_LIVE
-    } else {
-        BuildConfig.API_READER_LIVE
-    }
+    private val BASE = Config.readerApiBase
     val EMAIL_EXISTS = "$BASE/users/exists"
     val LOGIN = "$BASE/users/login"
     val SIGN_UP = "$BASE/users/signup"
@@ -32,22 +28,14 @@ object NextApi {
 }
 
 object ContentApi {
-    private val BASE = if (BuildConfig.DEBUG) {
-        BuildConfig.API_CONTENT_LIVE
-    } else {
-        BuildConfig.API_CONTENT_LIVE
-    }
+    private val BASE = Config.contentApiBase
 
     val STORY = "$BASE/stories"
     val INTERACTIVE = "$BASE/interactive/contents"
 }
 
 object SubscribeApi {
-    private val BASE = if (BuildConfig.DEBUG) {
-        BuildConfig.API_SUBS_TEST
-    } else {
-        BuildConfig.API_SUBS_LIVE
-    }
+    private val BASE = Config.subsApiBase
     val WX_UNIFIED_ORDER = "$BASE/wxpay/app"
     val WX_ORDER_QUERY = "$BASE/wxpay/query"
     val ALI_ORDER = "$BASE/alipay/app"
@@ -64,71 +52,3 @@ object SubscribeApi {
 }
 
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
-
-const val HOST_FTC = "www.ftchinese.com"
-const val HOST_FTA = "www.ftacademy.cn"
-
-data class Flavor (
-        var query: String,
-        var baseUrl: String
-) {
-    val host: String
-        get() = try {
-            Uri.parse(baseUrl).host ?: ""
-        } catch (e: Exception) {
-            ""
-        }
-}
-
-private const val OFFICIAL_URL = "http://$HOST_FTC"
-
-val defaultFlavor = Flavor(
-        query = "an_ftc",
-        baseUrl = OFFICIAL_URL
-)
-
-val flavors = mapOf(
-        "play" to Flavor(
-                query = "play_store",
-                baseUrl = OFFICIAL_URL
-        ),
-        "xiaomi" to Flavor(
-                query = "an_xiaomi",
-                baseUrl = OFFICIAL_URL
-        ),
-        "huawei" to Flavor(
-                query = "an_huawei",
-                baseUrl = OFFICIAL_URL
-        ),
-        "baidu" to Flavor(
-                query = "an_baidu",
-                baseUrl = OFFICIAL_URL
-        ),
-        "sanliuling" to Flavor(
-                query = "an_360shouji",
-                baseUrl = OFFICIAL_URL
-        ),
-        "ftc" to defaultFlavor,
-        "tencent" to Flavor(
-                query = "an_tencent",
-                baseUrl = OFFICIAL_URL
-        ),
-        "samsung" to Flavor(
-                query = "an_samsung",
-                baseUrl = OFFICIAL_URL
-        ),
-        "standard" to Flavor(
-                query = "standard",
-                baseUrl = BuildConfig.BASE_URL_STANDARD
-        ),
-        "premium" to Flavor(
-                query = "premium",
-                baseUrl = BuildConfig.BASE_URL_PREMIUM
-        ),
-        "b2b" to Flavor(
-                query = "b2b",
-                baseUrl = BuildConfig.BASE_URL_B2B
-        )
-)
-
-val currentFlavor = flavors[BuildConfig.FLAVOR] ?: defaultFlavor
