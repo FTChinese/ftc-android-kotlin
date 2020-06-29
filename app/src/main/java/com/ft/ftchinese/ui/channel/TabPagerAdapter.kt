@@ -14,7 +14,7 @@ import org.jetbrains.anko.info
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class TabPagerAdapter(
-        private var pages: Array<ChannelSource>,
+        private var pages: List<ChannelSource>,
         fm: FragmentManager
 ) : FragmentStatePagerAdapter(
         fm,
