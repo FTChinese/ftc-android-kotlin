@@ -2,15 +2,12 @@ package com.ft.ftchinese.model.content
 
 import android.net.Uri
 import android.os.Parcelable
-import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.tracking.JSCodes
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.repository.currentFlavor
+import com.ft.ftchinese.repository.Config
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import java.lang.Exception
 import java.lang.NumberFormatException
 
 const val HTML_TYPE_FRAGMENT = 1
@@ -37,21 +34,6 @@ data class ChannelSource (
 
     val fileName: String?
         get() = if (name.isBlank()) null else "$name.html"
-
-    // Attach query parameters to the original url.
-    fun normalizedUrl(): String? {
-        return try {
-            Uri.parse(contentUrl).buildUpon()
-                    .appendQueryParameter("utm_source", "marketing")
-                    .appendQueryParameter("utm_medium", "androidmarket")
-                    .appendQueryParameter("utm_campaign", currentFlavor.query)
-                    .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
-                    .build()
-                    .toString()
-        } catch (e: Exception) {
-            contentUrl
-        }
-    }
 
     /**
      * Returns a new instance for a pagination link.
@@ -137,11 +119,22 @@ data class ChannelSource (
         }
     }
 
-    fun render(template: String?, listContent: String?): String? {
-        if (template == null || listContent == null) {
-            return null
-        }
-        return template.replace("{list-content}", listContent)
-                .replace("{{googletagservices-js}}", JSCodes.googletagservices)
-    }
+}
+
+fun buildFollowChannel(follow: Following): ChannelSource {
+    return ChannelSource(
+        title = follow.tag,
+        name = "${follow.type}_${follow.tag}",
+        contentUrl = "/${follow.type}/${follow.tag}?bodyonly=yes&webviewftcapp",
+        htmlType = HTML_TYPE_FRAGMENT
+    )
+}
+
+fun buildColumnChannel(item: Teaser): ChannelSource {
+    return ChannelSource(
+        title = item.title,
+        name = "${item.type}_${item.id}",
+        contentUrl = "/${item.type}/${item.id}?bodyonly=yes&webview=ftcapp",
+        htmlType = HTML_TYPE_FRAGMENT
+    )
 }
