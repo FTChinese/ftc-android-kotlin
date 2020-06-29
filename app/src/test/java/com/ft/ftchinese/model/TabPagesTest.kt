@@ -1,13 +1,13 @@
 package com.ft.ftchinese.model
 
-import com.ft.ftchinese.model.content.Navigation
+import com.ft.ftchinese.repository.TabPages
 import com.ft.ftchinese.repository.Fetch
 import org.junit.Test
 
-class NavigationTest {
+class TabPagesTest {
     @Test
     fun homePage() {
-        val content = Fetch().get(Navigation.newsPages[0].contentUrl)
+        val content = Fetch().get(TabPages.newsPages[0].contentUrl)
                 .responseString()
 
         println(content)

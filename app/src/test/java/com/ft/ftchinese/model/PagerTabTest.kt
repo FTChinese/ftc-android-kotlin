@@ -1,6 +1,6 @@
 package com.ft.ftchinese.model
 
-import com.ft.ftchinese.model.content.Navigation
+import com.ft.ftchinese.repository.TabPages
 import org.junit.Before
 import org.junit.Test
 
@@ -10,7 +10,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class PagerTabTest {
 
-    private var mPagerTab = Navigation.newsPages[1]
+    private var mPagerTab = TabPages.newsPages[1]
 
     @Before
     fun setUp() {
