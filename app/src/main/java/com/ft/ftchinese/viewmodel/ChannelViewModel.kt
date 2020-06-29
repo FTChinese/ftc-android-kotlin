@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.repository.Fetch
 import com.ft.ftchinese.store.FileCache
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +15,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-class ChannelViewModel(val cache: FileCache) :
+class ChannelViewModel(val cache: FileCache, val account: Account?) :
         ViewModel(), AnkoLogger {
 
     val isNetworkAvailable = MutableLiveData<Boolean>()
@@ -43,12 +45,12 @@ class ChannelViewModel(val cache: FileCache) :
                         }
 
                         // Background update cache.
-                        val url = channelSource.normalizedUrl() ?: return@launch
+                        val url = Config.buildChannelSourceUrl(account, channelSource) ?: return@launch
 
                         info("Start background update from $url for $cacheName")
                        try {
                             withContext(Dispatchers.IO) {
-                                val remoteFrag = Fetch().get(url).responseString() ?: return@withContext
+                                val remoteFrag = Fetch().get(url.toString()).responseString() ?: return@withContext
                                 cache.saveText(cacheName, remoteFrag)
                             }
                         } catch (e: Exception) {
@@ -61,10 +63,10 @@ class ChannelViewModel(val cache: FileCache) :
                 }
             }
 
-            val url = channelSource.normalizedUrl()
+            val url = Config.buildChannelSourceUrl(account, channelSource)
             info("Channel cache not found. Loading from $url")
 
-            if (url.isNullOrBlank()) {
+            if (url == null) {
                 contentResult.value = Result.LocalizedError(R.string.api_empty_url)
                 return@launch
             }
@@ -76,7 +78,7 @@ class ChannelViewModel(val cache: FileCache) :
 
             try {
                 val remoteFrag = withContext(Dispatchers.IO) {
-                    Fetch().get(url).responseString()
+                    Fetch().get(url.toString()).responseString()
                 }
 
                 if (remoteFrag.isNullOrBlank()) {
