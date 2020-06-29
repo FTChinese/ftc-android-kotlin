@@ -21,6 +21,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
     val inProgress: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
+    val isNetworkAvailable = MutableLiveData<Boolean>()
 
     val loginFormState: MutableLiveData<LoginFormState> by lazy {
         MutableLiveData<LoginFormState>()
