@@ -20,7 +20,7 @@ import com.ft.ftchinese.databinding.FragmentArticleBinding
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.model.reader.ReadingDuration
-import com.ft.ftchinese.repository.currentFlavor
+import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.service.ReadingDurationService
 import com.ft.ftchinese.store.FileCache
@@ -139,7 +139,7 @@ class StoryFragment : ScopedFragment(),
         articleModel = activity?.run {
             ViewModelProvider(
                     this,
-                    ArticleViewModelFactory(cache))
+                    ArticleViewModelFactory(cache, sessionManager.loadAccount()))
                     .get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
@@ -244,7 +244,7 @@ class StoryFragment : ScopedFragment(),
 
     private fun load(html: String) {
         binding.webView.loadDataWithBaseURL(
-                currentFlavor.baseUrl,
+                Config.discoverServer(sessionManager.loadAccount()),
                 html,
                 "text/html",
                 null,
@@ -265,7 +265,7 @@ class StoryFragment : ScopedFragment(),
 
         ReadingDurationService.start(context, ReadingDuration(
                 url = "/android/${storyBrief?.type}/${storyBrief?.id}/${storyBrief?.title}",
-                refer = "http://www.ftchinese.com/",
+                refer = Config.discoverServer(sessionManager.loadAccount()),
                 startUnix = start,
                 endUnix = Date().time / 1000,
                 userId = userId,
