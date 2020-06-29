@@ -3,11 +3,9 @@ package com.ft.ftchinese.model.content
 import android.net.Uri
 import android.os.Parcelable
 import com.beust.klaxon.Json
-import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.repository.currentFlavor
-import com.ft.ftchinese.repository.defaultFlavor
+import com.ft.ftchinese.repository.HOST_FTC
 import com.ft.ftchinese.util.KArticleType
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
@@ -196,7 +194,7 @@ data class Teaser(
             return webUrl
         }
 
-        return "${defaultFlavor.baseUrl}/$type/$id"
+        return "https://$HOST_FTC/$type/$id"
     }
 
     private fun isSevenDaysOld(): Boolean {
@@ -266,48 +264,6 @@ data class Teaser(
 
     fun getCommentsOrder(): String {
         return "story"
-    }
-
-    /**
-     * Build the URL used to retrieve content.
-     * See Page/FTChinese/Main/APIs.swift
-     * https://api003.ftmailbox.com/interactive/12339?bodyonly=no&webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24
-     */
-    fun contentUrl(): String {
-        if (id.isBlank()) {
-            return ""
-        }
-
-        val url =  when(type) {
-            ArticleType.Story, ArticleType.Premium -> "${currentFlavor.baseUrl}/index.php/jsapi/get_story_more_info/$id"
-
-            ArticleType.Column -> "${currentFlavor.baseUrl}/$type/$id?bodyonly=yes&webview=ftcapp"
-
-            ArticleType.Interactive -> when (subType) {
-                SUB_TYPE_RADIO -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp&001&exclusive"
-                SUB_TYPE_SPEED_READING -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp&i=3&001&exclusive"
-
-                SUB_TYPE_MBAGYM -> "${currentFlavor.baseUrl}/$type/$id"
-
-                else -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
-            }
-
-            ArticleType.Video -> "${currentFlavor.baseUrl}/$type/$id?bodyonly=yes&webview=ftcapp&004"
-
-            else -> "${currentFlavor.baseUrl}/$type/$id?webview=ftcapp"
-        }
-
-        return try {
-            Uri.parse(url).buildUpon()
-                    .appendQueryParameter("utm_source", "marketing")
-                    .appendQueryParameter("utm_medium", "androidmarket")
-                    .appendQueryParameter("utm_campaign", currentFlavor.query)
-                    .appendQueryParameter("android", "${BuildConfig.VERSION_CODE}")
-                    .build()
-                    .toString()
-        } catch (e: Exception) {
-            url
-        }
     }
 
     fun apiCacheFileName(lang: Language): String {
