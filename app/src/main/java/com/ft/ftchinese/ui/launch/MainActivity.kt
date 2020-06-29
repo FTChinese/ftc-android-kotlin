@@ -20,12 +20,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.TestActivity
+import com.ft.ftchinese.auth.AuthActivity
 import com.ft.ftchinese.databinding.ActivityMainBinding
 import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isActiveNetworkWifi
-import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.Navigation
+import com.ft.ftchinese.repository.TabPages
 import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.order.StripeSubStatus
 import com.ft.ftchinese.model.reader.LoginMethod
@@ -74,7 +74,7 @@ class MainActivity : ScopedAppActivity(),
 
     private var bottomDialog: BottomSheetDialog? = null
     private var mBackKeyPressed = false
-    private var mChannelPages: Array<ChannelSource>? = null
+    private var pagerAdapter: TabPagerAdapter? = null
 
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var splashViewModel: SplashViewModel
@@ -94,8 +94,6 @@ class MainActivity : ScopedAppActivity(),
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         setSupportActionBar(binding.toolbar)
-
-        displayLogo()
 
         if (BuildConfig.DEBUG) {
             WebView.setWebContentsDebuggingEnabled(true)
@@ -185,30 +183,25 @@ class MainActivity : ScopedAppActivity(),
             when (it.itemId) {
                 R.id.nav_news -> {
                     setupHome()
-
-                    displayLogo()
                 }
 
                 R.id.nav_english -> {
-
-                    binding.viewPager.adapter = TabPagerAdapter(Navigation.englishPages, supportFragmentManager)
-                    mChannelPages = Navigation.englishPages
+                    pagerAdapter = TabPagerAdapter(TabPages.englishPages, supportFragmentManager)
+                    binding.viewPager.adapter = pagerAdapter
 
                     displayTitle(R.string.nav_english)
                 }
 
                 R.id.nav_ftacademy -> {
-
-                    binding.viewPager.adapter = TabPagerAdapter(Navigation.ftaPages, supportFragmentManager)
-                    mChannelPages = Navigation.ftaPages
+                    pagerAdapter = TabPagerAdapter(TabPages.ftaPages, supportFragmentManager)
+                    binding.viewPager.adapter = pagerAdapter
 
                     displayTitle(R.string.nav_ftacademy)
                 }
 
                 R.id.nav_video -> {
-
-                    binding.viewPager.adapter = TabPagerAdapter(Navigation.videoPages, supportFragmentManager)
-                    mChannelPages = Navigation.videoPages
+                    pagerAdapter = TabPagerAdapter(TabPages.videoPages, supportFragmentManager)
+                    binding.viewPager.adapter = pagerAdapter
 
                     displayTitle(R.string.nav_video)
                 }
@@ -216,7 +209,7 @@ class MainActivity : ScopedAppActivity(),
                 R.id.nav_myft -> {
 
                     binding.viewPager.adapter = MyftPagerAdapter(supportFragmentManager)
-                    mChannelPages = null
+                    pagerAdapter = null
 
                     displayTitle(R.string.nav_myft)
                 }
@@ -225,9 +218,14 @@ class MainActivity : ScopedAppActivity(),
         }
     }
 
+    // Set up home page upon launching, or clicking the Home button in BottomNavigationView.
     private fun setupHome() {
-        binding.viewPager.adapter = TabPagerAdapter(Navigation.newsPages, supportFragmentManager)
-        mChannelPages = Navigation.newsPages
+        pagerAdapter = TabPagerAdapter(TabPages.newsPages, supportFragmentManager)
+        binding.viewPager.adapter = pagerAdapter
+
+        supportActionBar?.setDisplayUseLogoEnabled(true)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+        supportActionBar?.setLogo(R.drawable.ic_menu_masthead)
     }
 
     /**
@@ -255,7 +253,7 @@ class MainActivity : ScopedAppActivity(),
         // Set a listener that will be notified when a menu item is selected.
         binding.drawerNav.setNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.action_login ->  LoginActivity.startForResult(this)
+                R.id.action_login ->  AuthActivity.start(this)
                 R.id.action_account -> AccountActivity.start(this)
                 R.id.action_paywall -> {
                     // Tracking
@@ -368,12 +366,6 @@ class MainActivity : ScopedAppActivity(),
         cache.deleteFile(WX_AVATAR_NAME)
         CustomerSession.endCustomerSession()
         updateSessionUI()
-    }
-
-    private fun displayLogo() {
-        supportActionBar?.setDisplayUseLogoEnabled(true)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-        supportActionBar?.setLogo(R.drawable.ic_menu_masthead)
     }
 
     private fun displayTitle(title: Int) {
@@ -585,13 +577,13 @@ class MainActivity : ScopedAppActivity(),
         }
 
         val position = tab?.position ?: return
-        val pages = mChannelPages ?: return
+        val title = pagerAdapter?.getPageTitle(position) ?: return
 
         if (BuildConfig.DEBUG) {
-            info("View item list event: ${pages[position]}")
+            info("View item list event: $title")
         }
 
-        statsTracker.tabSelected(pages[position].title)
+        statsTracker.tabSelected(title.toString())
     }
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
