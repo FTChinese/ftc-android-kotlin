@@ -1,7 +1,6 @@
 package com.ft.ftchinese.model.content
 
 import android.content.Context
-import com.ft.ftchinese.repository.currentFlavor
 import java.net.URLEncoder
 
 private val followingTemplate: Map<String, String> = hashMapOf(
@@ -32,9 +31,6 @@ data class Following(
         var tag: String, // This is the string shown along with the FOLLOW button
         var action: String // `follow` or `unfollow`. Used to determine if user if follow or unfollow something.
 ) {
-    val bodyUrl: String
-        get() = "${currentFlavor.baseUrl}/$type/$tag?bodyonly=yes&webviewftcapp"
-
     val topic: String
         get() = URLEncoder.encode("${type}_$tag", "utf-8")
 }
