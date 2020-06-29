@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.ui.base.ShareItem
 import com.ft.ftchinese.repository.Fetch
 import com.ft.ftchinese.store.FileCache
@@ -17,7 +19,8 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
 class ArticleViewModel(
-        private val cache: FileCache
+        private val cache: FileCache,
+        private val account: Account?
 ) : ViewModel(), AnkoLogger {
 
     val inProgress = MutableLiveData<Boolean>()
@@ -81,10 +84,10 @@ class ArticleViewModel(
             }
 
             // Fetch data from server
-            val url = teaser.contentUrl()
+            val url = Config.buildArticleSourceUrl(account, teaser)
             info("Loading json data from $url")
 
-            if (url.isBlank()) {
+            if (url == null) {
                 storyResult.value = Result.LocalizedError(R.string.api_empty_url)
                 return@launch
             }
@@ -96,7 +99,7 @@ class ArticleViewModel(
 
             try {
                 val data = withContext(Dispatchers.IO) {
-                    Fetch().get(url).responseString()
+                    Fetch().get(url.toString()).responseString()
                 }
 
                 val story = if (data.isNullOrBlank()) {

@@ -117,7 +117,7 @@ class ArticleActivity : ScopedAppActivity(),
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
         followingManager = FollowingManager.getInstance(this)
 
-        articleViewModel = ViewModelProvider(this, ArticleViewModelFactory(cache))
+        articleViewModel = ViewModelProvider(this, ArticleViewModelFactory(cache, sessionManager.loadAccount()))
                 .get(ArticleViewModel::class.java)
 
         readViewModel = ViewModelProvider(this)
