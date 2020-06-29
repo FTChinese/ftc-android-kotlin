@@ -9,10 +9,7 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.content.Following
-import com.ft.ftchinese.model.content.FollowingManager
-import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
-import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.model.content.*
 import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 
@@ -80,14 +77,8 @@ class FollowingFragment : Fragment(), AnkoLogger {
             holder.secondaryText.visibility = View.GONE
 
             holder.itemView.setOnClickListener {
-                val channelMeta = ChannelSource(
-                        title = item.tag,
-                        name = "${item.type}_${item.tag}",
-                        contentUrl = item.bodyUrl,
-                        htmlType = HTML_TYPE_FRAGMENT
-                )
 
-                ChannelActivity.start(context, channelMeta)
+                ChannelActivity.start(context, buildFollowChannel(item))
             }
         }
 

@@ -19,7 +19,7 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.reader.ReadingDuration
-import com.ft.ftchinese.repository.currentFlavor
+import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.ReadingDurationService
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.FileCache
@@ -66,8 +66,11 @@ class ChannelFragment : ScopedFragment(),
 
     private lateinit var channelViewModel: ChannelViewModel
 
+    // An array of article teaser passed from JS.
+    // This is used to determine which article user is trying to read.
     private var articleList: List<Teaser>? = null
     private var channelMeta: ChannelMeta? = null
+    // Record when this page starts to load.
     private var start by Delegates.notNull<Long>()
 
     /**
@@ -152,7 +155,7 @@ class ChannelFragment : ScopedFragment(),
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache))
+        channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache, sessionManager.loadAccount()))
             .get(ChannelViewModel::class.java)
 
         connectionLiveData.observe(viewLifecycleOwner, Observer {
@@ -160,14 +163,7 @@ class ChannelFragment : ScopedFragment(),
         })
         channelViewModel.isNetworkAvailable.value = context?.isConnected
 
-//        channelViewModel.cacheFound.observe(viewLifecycleOwner, Observer {
-//            onCacheFound(it)
-//        })
-
-//        channelViewModel.renderResult.observe(viewLifecycleOwner, Observer {
-//            onRenderResult(it)
-//        })
-
+        // Whe the HTML is fetched from server.
         channelViewModel.contentResult.observe(viewLifecycleOwner, Observer {
             onContentLoaded(it)
         })
@@ -232,7 +228,7 @@ class ChannelFragment : ScopedFragment(),
         binding.inProgress = !binding.swipeRefresh.isRefreshing
 
         // For partial HTML, we need to crawl its content and render it with a template file to get the template HTML page.
-        when (channelSource?.htmlType) {
+        when (chSrc.htmlType) {
             HTML_TYPE_FRAGMENT -> {
                 info("initLoading: html fragment")
 
@@ -244,8 +240,9 @@ class ChannelFragment : ScopedFragment(),
             }
             // For complete HTML, load it directly into Web view.
             HTML_TYPE_COMPLETE -> {
-                info("initLoading: web page")
-                binding.webView.loadUrl(chSrc.normalizedUrl())
+                val url =  Config.buildChannelSourceUrl(sessionManager.loadAccount(), chSrc) ?: return
+                info("initLoading: web page on $url")
+                binding.webView.loadUrl(url.toString())
                 if (binding.swipeRefresh.isRefreshing) {
                     toast(R.string.prompt_updated)
                     binding.swipeRefresh.isRefreshing = false
@@ -261,7 +258,7 @@ class ChannelFragment : ScopedFragment(),
             info("Loading web page to web view")
         }
         binding.webView.loadDataWithBaseURL(
-            currentFlavor.baseUrl,
+            Config.discoverServer(sessionManager.loadAccount()),
             html,
             "text/html",
             null,
@@ -388,13 +385,13 @@ class ChannelFragment : ScopedFragment(),
             return
         }
 
-        val channelItem = articleList
+        val teaser = articleList
                 ?.getOrNull(index)
                 ?: return
         
-        channelItem.withMeta(channelMeta)
+        teaser.withMeta(channelMeta)
 
-        info("Select item: $channelItem")
+        info("Select item: $teaser")
 
         /**
          * {
@@ -404,8 +401,10 @@ class ChannelFragment : ScopedFragment(),
          * Canonical URL: http://www.ftchinese.com/channel/column.html
          * Content URL: https://api003.ftmailbox.com/column/007000049?webview=ftcapp&bodyonly=yes
          */
-        if (channelItem.type == ArticleType.Column) {
-            openColumn(channelItem)
+        if (teaser.type == ArticleType.Column) {
+            info("Open a column: $teaser")
+
+            ChannelActivity.start(context, buildColumnChannel(teaser))
             return
         }
 
@@ -413,10 +412,10 @@ class ChannelFragment : ScopedFragment(),
 
         info("Is channel require membership: $channelSource")
 
-        PaywallTracker.fromArticle(channelItem)
+        PaywallTracker.fromArticle(teaser)
 
         // Check whether this article requires permission.
-        val contentPerm = channelSource?.permission ?: channelItem.permission()
+        val contentPerm = channelSource?.permission ?: teaser.permission()
 
         info("Content permission: $contentPerm")
 
@@ -425,20 +424,8 @@ class ChannelFragment : ScopedFragment(),
         info("Permission granted: $granted, to content $contentPerm")
 
         if (granted == true) {
-            openArticle(channelItem)
+            openArticle(teaser)
         }
-    }
-
-    private fun openColumn(item: Teaser) {
-        val chSrc = ChannelSource(
-                title = item.title,
-                name = "${item.type}_${item.id}",
-                contentUrl = item.contentUrl(),
-                htmlType = HTML_TYPE_FRAGMENT
-        )
-        info("Open a column: $chSrc")
-
-        ChannelActivity.start(context, chSrc)
     }
 
     private fun openArticle(teaser: Teaser) {

@@ -11,9 +11,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivitySearchableBinding
+import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.ui.article.WVClient
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.repository.currentFlavor
+import com.ft.ftchinese.store.SessionManager
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
@@ -25,6 +26,7 @@ class SearchableActivity : AppCompatActivity(),
 
     private lateinit var cache: FileCache
     private lateinit var binding: ActivitySearchableBinding
+    private lateinit var session: SessionManager
 
     private var template: String? = null
     private var keyword: String? = null
@@ -59,6 +61,7 @@ class SearchableActivity : AppCompatActivity(),
         }
 
         cache = FileCache(this)
+        session = SessionManager.getInstance(this)
 
         binding.wvSearchResult.settings.apply {
             javaScriptEnabled = true
@@ -119,7 +122,7 @@ class SearchableActivity : AppCompatActivity(),
         template = template?.replace("{search-html}", "")
 
         binding.wvSearchResult.loadDataWithBaseURL(
-                currentFlavor.baseUrl,
+                Config.discoverServer(session.loadAccount()),
                 template,
                 "text/html",
                 null,
