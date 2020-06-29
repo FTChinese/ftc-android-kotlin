@@ -51,16 +51,11 @@ android {
 
         buildConfigField "String", "BASE_URL_STANDARD", props.getProperty("base_url.standard")
         buildConfigField "String", "BASE_URL_PREMIUM", props.getProperty("base_url.premium")
-
         buildConfigField "String", "BASE_URL_B2B", props.getProperty("base_url.b2b")
+        buildConfigField "String", "BASE_URL_FALLBACK", props.getProperty("base_url.fallback")
 
-        buildConfigField "String", "API_READER_TEST", props.getProperty("api_url.reader.test")
         buildConfigField "String", "API_READER_LIVE", props.getProperty("api_url.reader.live")
-
-        buildConfigField "String", "API_CONTENT_TEST", props.getProperty("api_url.content.test")
         buildConfigField "String", "API_CONTENT_LIVE", props.getProperty("api_url.content.live")
-
-        buildConfigField "String", "API_SUBS_TEST", props.getProperty("api_url.subs.test")
         buildConfigField "String", "API_SUBS_LIVE", props.getProperty("api_url.subs.live")
 
         buildConfigField "String", "ACCESS_TOKEN_LIVE", props.getProperty("access_token.live")
@@ -127,18 +122,6 @@ android {
         anzhi {
             dimension "appStore"
             versionNameSuffix "-anzhi"
-        }
-        standard {
-            dimension "appStore"
-            versionNameSuffix "-standard"
-        }
-        premium {
-            dimension "appStore"
-            versionNameSuffix "-premium"
-        }
-        b2b {
-            dimension "appStore"
-            versionNameSuffix "-b2b"
         }
     }
 
