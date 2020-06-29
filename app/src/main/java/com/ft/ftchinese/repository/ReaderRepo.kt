@@ -118,7 +118,7 @@ object ReaderRepo : AnkoLogger {
         info("Engagement length of ${dur.userId}: ${dur.startUnix} - ${dur.endUnix}")
 
         return try {
-            Fetch().post("${currentFlavor.baseUrl}/engagement.php")
+            Fetch().post("${dur.refer}/engagement.php")
                     .jsonBody(Klaxon().toJsonString(dur))
                     .responseString()
 
