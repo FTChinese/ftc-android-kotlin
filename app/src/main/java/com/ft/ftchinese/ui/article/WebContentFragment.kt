@@ -2,7 +2,6 @@ package com.ft.ftchinese.ui.article
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -19,6 +18,7 @@ import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.store.FileCache
@@ -177,7 +177,7 @@ class WebContentFragment : ScopedFragment(),
         articleViewModel = activity?.run {
             ViewModelProvider(
                     this,
-                    ArticleViewModelFactory(cache))
+                    ArticleViewModelFactory(cache, sessionManager.loadAccount()))
                     .get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
@@ -198,42 +198,17 @@ class WebContentFragment : ScopedFragment(),
             return
         }
 
-        val url = buildUrl()
+        val t = teaser ?: return
+        val url = Config.buildArticleSourceUrl(sessionManager.loadAccount(), t)
         info("Load content from: $url")
 
 
-        web_view.loadUrl(url)
+        web_view.loadUrl(url.toString())
 
         // Get the minimal information of an article.
         val article = teaser?.toStarredArticle() ?: return
 
         articleViewModel.webLoaded(article)
-    }
-
-    private fun buildUrl(): String {
-        // Use api webUrl first.
-        val apiUrl = teaser?.contentUrl()
-        if (!apiUrl.isNullOrBlank()) {
-            return apiUrl
-        }
-
-        // Fallback to canonical webUrl
-        val webUrl = teaser?.webUrl ?: return ""
-
-
-        val url = Uri.parse(webUrl)
-
-        val builder = try {
-            url.buildUpon()
-        } catch (e: Exception) {
-            return ""
-        }
-
-        if (url.getQueryParameter("webview") == null) {
-            builder.appendQueryParameter("webview", "ftcapp")
-        }
-
-        return builder.build().toString()
     }
 
     @JavascriptInterface
