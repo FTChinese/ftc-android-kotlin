@@ -1,10 +1,7 @@
 package com.ft.ftchinese.repository
 
 import com.beust.klaxon.Klaxon
-import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.Credentials
-import com.ft.ftchinese.model.reader.ReadingDuration
-import com.ft.ftchinese.model.reader.WxSession
+import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.util.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -27,7 +24,6 @@ object ReaderRepo : AnkoLogger {
     fun login(c: Credentials): Account? {
         val (_, body) = Fetch()
                 .post(NextApi.LOGIN)
-                .setClient()
                 .noCache()
                 .jsonBody(json.toJsonString(c))
                 .responseApi()
@@ -43,7 +39,6 @@ object ReaderRepo : AnkoLogger {
 
         val (_, body) = Fetch()
                 .post(NextApi.SIGN_UP)
-                .setClient()
                 .noCache()
                 .jsonBody(json.toJsonString(c))
                 .responseApi()
@@ -57,13 +52,37 @@ object ReaderRepo : AnkoLogger {
 
     fun passwordResetLetter(email: String): Boolean {
         val (response, _)= Fetch()
-                .post(NextApi.PASSWORD_RESET)
-                .setTimeout(30)
-                .noCache()
-                .jsonBody(json.toJsonString(mapOf("email" to email)))
-                .responseApi()
+            .post(NextApi.PASSWORD_RESET_LETTER)
+            .setTimeout(30)
+            .noCache()
+            .jsonBody(json.toJsonString(mapOf("email" to email)))
+            .responseApi()
 
         return response.code == 204
+    }
+
+    fun verifyPwResetCode(v: PwResetVerifier): PwResetBearer? {
+        val (_, body) = Fetch()
+            .get("${NextApi.VERIFY_PW_RESET}?email=${v.email}&code=${v.code}")
+            .noCache()
+            .responseApi()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<PwResetBearer>(body)
+        }
+    }
+
+    fun resetPassword(v: PasswordResetter): Boolean {
+        val (resp, _) = Fetch()
+            .post(NextApi.PASSWORD_RESET)
+            .setClient()
+            .noCache()
+            .jsonBody(json.toJsonString(v))
+            .responseApi()
+
+        return resp.code == 204
     }
 
     /**
