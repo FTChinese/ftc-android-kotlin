@@ -29,7 +29,7 @@
     <string name="title_login">登入FT中文網</string>
     <string name="title_sign_up">建立FT中文網帳號</string>
     <string name="title_login_signup">登入/註冊</string>
-    <string name="title_reset_password">找回密碼</string>
+    <string name="title_forgot_password">找回密碼</string>
     <string name="title_activity_profile">我的資料</string>
     <string name="title_change_password">修改密碼</string>
     <string name="title_change_email">修改登入信箱</string>
@@ -309,7 +309,7 @@
     <string name="prompt_no_email_app">您的設備上沒有安裝信件程式，無法發送反饋信件</string>
     <string name="prompt_saved">保存成功!</string>
     <string name="prompt_updated">更新成功!</string>
-    <string name="prompt_letter_sent">信件已發送。您可以稍後在邮箱中檢查FT中文網發送给您的驗證信件，點擊信件中的連接即可</string>
+    <string name="prompt_letter_sent">信件已發送</string>
 
 
     <string name="prompt_linked">帳號已绑定</string>
@@ -499,5 +499,14 @@
     <string name="exo_playing_channel_id">exo_playing_channel</string>
     <string name="exo_playing_channel_name">正在播放</string>
     <string name="exo_playing_channel_description">播放音频</string>
+    <string name="prompt_password_reset_code">请输入重置密码郵件中的验证码</string>
+    <string name="hint_password_code">验证码</string>
+    <string name="btn_verify">验证</string>
+    <string name="btn_goto_reset_code">已有验证码？</string>
+    <string name="error_invalid_code">验证码无效</string>
+    <string name="prompt_reset_password">重置%1$s的密码</string>
+    <string name="btn_reset_password">重置密码</string>
+    <string name="title_reset_password">重置密码</string>
+    <string name="api_password_code_not_found">您似乎使用了无效的验证码，请重新获取重置密码邮件</string>
 
 </resources>

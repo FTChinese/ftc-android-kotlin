@@ -38,7 +38,6 @@
     <string name="title_login">登录FT中文网</string>
     <string name="title_sign_up">创建FT中文网账号</string>
     <string name="title_login_signup">登录/注册</string>
-    <string name="title_reset_password">找回密码</string>
     <string name="title_activity_profile">我的资料</string>
     <string name="title_change_password">修改密码</string>
     <string name="title_change_email">修改登录邮箱</string>
@@ -283,8 +282,19 @@
     <string name="btn_login">登录</string>
     <string name="btn_sign_up">注册</string>
 
-    <!-- Network status -->
+    <!-- Forgot password -->
+    <string name="title_forgot_password">找回密码</string>
+    <string name="title_reset_password">重置密码</string>
     <string name="btn_password_letter">发送邮件</string>
+    <string name="prompt_password_reset_code">请输入重置密码邮件中的验证码</string>
+    <string name="hint_password_code">验证码</string>
+    <string name="btn_verify">验证</string>
+    <string name="btn_goto_reset_code">已有验证码？</string>
+    <string name="error_invalid_code">验证码无效</string>
+    <string name="prompt_reset_password">重置%1$s的密码</string>
+    <string name="btn_reset_password">重置密码</string>
+    <string name="prompt_letter_sent">邮件已发送</string>
+
 
     <!-- FTC account -->
     <string name="btn_save">保存</string>
@@ -322,7 +332,7 @@
     <string name="prompt_no_email_app">您的设备上没有安装邮件程序，无法发送反馈邮件</string>
     <string name="prompt_saved">保存成功!</string>
     <string name="prompt_updated">更新成功!</string>
-    <string name="prompt_letter_sent">邮件已发送。您可以稍后在邮箱中检查FT中文网发送给您的验证邮件，点击邮件中的链接即可。</string>
+
 
 
     <string name="prompt_linked">账号已绑定</string>
@@ -501,6 +511,7 @@
         <item>sc</item>
         <item>tc</item>
     </string-array>
+    <string name="api_password_code_not_found">您似乎使用了无效的验证码，请重新获取重置密码邮件</string>
 
 
 </resources>
