@@ -16,5 +16,6 @@ package com.ft.ftchinese.ui.login
 enum class FormUIState {
     Initial, // The initial and invalid state
     Progress, // In progress after submit button clicked
-    Ready // Data valid, http request finished.
+    Ready, // Data valid, http request finished.
+    Success // Hide progress, disabled all input.
 }
