@@ -41,6 +41,8 @@ private const val PREF_WX_UNION_ID = "wx_union_id"
 private const val PREF_WX_OAUTH_TIME = "wx_oauth_time"
 private const val PREF_WX_OAUTH_INTENT = "wx_oauth_intent"
 
+private const val PREF_PASSWORD_RESET_EMAIL = "password_reset_email"
+
 class SessionManager private constructor(context: Context) : AnkoLogger {
     private val sharedPreferences = context.getSharedPreferences(SESSION_PREF_NAME, Context.MODE_PRIVATE)
 
@@ -192,6 +194,22 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
                 unionId = unionId,
                 createdAt = createdAt
         )
+    }
+
+    fun savePasswordResetEmail(email: String) {
+        sharedPreferences.edit {
+            putString(PREF_PASSWORD_RESET_EMAIL, email)
+        }
+    }
+
+    fun loadPasswordResetEmail(): String? {
+        return sharedPreferences.getString(PREF_PASSWORD_RESET_EMAIL, null)
+    }
+
+    fun clearPasswordResetEmail() {
+        sharedPreferences.edit {
+            remove(PREF_PASSWORD_RESET_EMAIL)
+        }
     }
 
     fun logout() {
