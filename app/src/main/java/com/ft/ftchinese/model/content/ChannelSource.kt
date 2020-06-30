@@ -3,7 +3,6 @@ package com.ft.ftchinese.model.content
 import android.net.Uri
 import android.os.Parcelable
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.repository.Config
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
@@ -25,7 +24,7 @@ data class ChannelSource (
         val name: String,  // Cache filename used by this tab
         val contentUrl: String, // This is used to fetch html fragment containing a list of articles.
         val htmlType: Int, // Flag used to tell whether the webUrl should be loaded directly
-        val permission: Permission? = null
+        val permission: Permission? = null // A predefined permission that overrides individual Teaser's permission.
 
 ) : Parcelable, AnkoLogger {
 
