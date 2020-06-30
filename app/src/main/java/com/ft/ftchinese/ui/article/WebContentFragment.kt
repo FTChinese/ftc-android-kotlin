@@ -16,7 +16,7 @@ import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.ui.pay.grantPermission
+import com.ft.ftchinese.model.reader.denyPermission
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.SessionManager
@@ -68,10 +68,9 @@ class WebContentFragment : ScopedFragment(),
             info("Loaded article: $article")
         }
 
-        val account = sessionManager.loadAccount()
 
-        val granted = activity?.grantPermission(account, article.permission())
-        if (granted == null || granted == false) {
+        val denialReason = denyPermission(sessionManager.loadAccount(), article.permission())
+        if (denialReason != null) {
             PaywallTracker.fromArticle(article.toChannelItem())
 
             activity?.finish()

@@ -17,64 +17,32 @@ import org.jetbrains.anko.toast
  * access.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-fun Activity.grantPermission(account: Account?, contentPerm: Permission): Boolean {
+fun Activity.handlePermissionDenial(reason: MemberStatus, contentPerm: Permission) {
+    when (reason) {
+        MemberStatus.NotLoggedIn -> {
+            toast(R.string.prompt_login_to_read)
+            LoginActivity.startForResult(this)
+        }
+        MemberStatus.Empty -> {
+            toast(R.string.prompt_member_only)
+            PaywallActivity.start(this, contentPerm == Permission.PREMIUM)
+        }
+        MemberStatus.InactiveStripe -> {
+            toast(R.string.stripe_not_active)
+            MemberActivity.start(this)
+        }
+        MemberStatus.Expired -> {
+            toast(R.string.prompt_membership_expired)
+            PaywallActivity.start(this, contentPerm == Permission.PREMIUM)
+        }
+        MemberStatus.ActiveStandard -> {
+            toast(R.string.prompt_upgrade_premium)
+            MemberActivity.start(this)
+        }
+        // These two cases cannot happen.
+        MemberStatus.ActivePremium,
+        MemberStatus.Vip -> {
 
-    // Grant access immediately if content is free.
-    if (contentPerm == Permission.FREE) {
-        return true
-    }
-
-    // Content is not free.
-    val permResult = account?.membership?.getPermission()
-
-
-    // Indicates reader is not logged in.
-    if (permResult == null) {
-        toast(R.string.prompt_login_to_read)
-        LoginActivity.startForResult(this)
-        return false
-    }
-
-
-    val (readerPermBits, status) = permResult
-
-    // Free content is excluded when reaching here.
-    if ((readerPermBits and contentPerm.id) > 0) {
-        return true
-    }
-
-    if (status == MemberStatus.InactiveStripe) {
-        toast(R.string.stripe_not_active)
-        MemberActivity.start(this)
-        return false
-    }
-
-    if (status == MemberStatus.Empty) {
-        toast(R.string.prompt_member_only)
-        PaywallActivity.start(this, contentPerm == Permission.PREMIUM)
-        return false
-    }
-
-    if (status == MemberStatus.Expired) {
-        toast(R.string.prompt_membership_expired)
-        PaywallActivity.start(this, contentPerm == Permission.PREMIUM)
-
-        return false
-    }
-
-    if (status == MemberStatus.ActiveStandard) {
-        toast(R.string.prompt_upgrade_premium)
-        MemberActivity.start(this)
-
-        return false
-    }
-
-
-    alert(Appcompat, "There might be problems with your permission. Please check your membership or contact our customer service", "Error") {
-        positiveButton("OK") {
-            it.dismiss()
         }
     }
-
-    return false
 }

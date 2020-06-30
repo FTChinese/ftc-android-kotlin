@@ -16,9 +16,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.*
 import com.ft.ftchinese.databinding.FragmentChannelBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.reader.ReadingDuration
+import com.ft.ftchinese.model.reader.denyPermission
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.ReadingDurationService
 import com.ft.ftchinese.store.SessionManager
@@ -30,6 +30,7 @@ import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.WVClient
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.pay.handlePermissionDenial
 import com.ft.ftchinese.util.*
 import com.ft.ftchinese.viewmodel.ChannelViewModel
 import com.ft.ftchinese.viewmodel.ChannelViewModelFactory
@@ -408,23 +409,21 @@ class ChannelFragment : ScopedFragment(),
             return
         }
 
-        val account = sessionManager.loadAccount()
-
         info("Is channel require membership: $channelSource")
 
         PaywallTracker.fromArticle(teaser)
 
         // Check whether this article requires permission.
         val contentPerm = channelSource?.permission ?: teaser.permission()
-
         info("Content permission: $contentPerm")
 
-        val granted = activity?.grantPermission(account, contentPerm)
+        val denialReason = denyPermission(sessionManager.loadAccount(), contentPerm)
+        info("Denial reason: $denialReason")
 
-        info("Permission granted: $granted, to content $contentPerm")
-
-        if (granted == true) {
+        if (denialReason == null) {
             openArticle(teaser)
+        } else {
+            activity?.handlePermissionDenial(denialReason, contentPerm)
         }
     }
 

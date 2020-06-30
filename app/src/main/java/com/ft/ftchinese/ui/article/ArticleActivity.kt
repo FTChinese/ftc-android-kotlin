@@ -18,11 +18,11 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.databinding.ActivityArticleBinding
-import com.ft.ftchinese.ui.pay.grantPermission
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.reader.denyPermission
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ShareItem
 import com.ft.ftchinese.store.FileCache
@@ -202,7 +202,7 @@ class ArticleActivity : ScopedAppActivity(),
 
             val item = teaser ?: return@setOnClickListener
 
-            if (!grantPermission(account, Permission.STANDARD)) {
+            if (denyPermission(account, Permission.STANDARD) != null) {
                 disableLangSwitch()
 
                 item.langVariant = Language.ENGLISH
@@ -221,7 +221,7 @@ class ArticleActivity : ScopedAppActivity(),
 
             val item = teaser ?: return@setOnClickListener
 
-            if (!grantPermission(account, Permission.STANDARD)) {
+            if (denyPermission(account, Permission.STANDARD) != null) {
                 disableLangSwitch()
 
                 item.langVariant = Language.BILINGUAL
