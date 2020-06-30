@@ -116,7 +116,7 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
 
         return Passwords(
                 oldPassword = oldPassword,
-                newPassword = newPassword
+                password = newPassword
         )
     }
 
