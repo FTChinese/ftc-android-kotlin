@@ -27,6 +27,11 @@ object Validator {
         return null
     }
 
+    // Verification code for password reset
+    fun validateCode(c: String): Boolean {
+        return c.length == 6
+    }
+
     fun ensureUserName(name: String): Int? {
         if (name.isBlank()) {
             return R.string.error_field_required
