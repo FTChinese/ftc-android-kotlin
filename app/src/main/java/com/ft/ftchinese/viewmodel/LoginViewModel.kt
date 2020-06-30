@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Credentials
+import com.ft.ftchinese.model.reader.PwResetVerifier
 import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.repository.ReaderRepo
 import com.ft.ftchinese.repository.ClientError
@@ -53,9 +54,13 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
     fun passwordDataChanged(password: String) {
         if (!isPasswordValid(password)) {
-            loginFormState.value = LoginFormState(error = R.string.error_invalid_password)
+            loginFormState.value = LoginFormState(
+                error = R.string.error_invalid_password
+            )
         } else{
-            loginFormState.value = LoginFormState(isPasswordValid = true)
+            loginFormState.value = LoginFormState(
+                isPasswordValid = true
+            )
         }
     }
 
@@ -166,27 +171,6 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
             } catch (e: Exception) {
                 accountResult.value = parseException(e)
-            }
-        }
-    }
-
-    fun requestResettingPassword(email: String) {
-        viewModelScope.launch {
-            try {
-                val ok = withContext(Dispatchers.IO) {
-                    ReaderRepo.passwordResetLetter(email)
-                }
-
-                pwResetLetterResult.value = Result.Success(ok)
-
-            } catch (e: ClientError) {
-                if (e.statusCode == 404) {
-                    pwResetLetterResult.value = Result.LocalizedError(R.string.api_email_not_found)
-                } else {
-                    pwResetLetterResult.value = parseApiError(e)
-                }
-            } catch (e: Exception) {
-                pwResetLetterResult.value = parseException(e)
             }
         }
     }
