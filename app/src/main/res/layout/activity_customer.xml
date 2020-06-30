@@ -51,7 +51,7 @@
                     android:text="@{card.brand}"/>
 
                 <TextView
-                    style="@style/AppTextBody"
+                    style="@style/OrigamiText.Body1"
                     android:id="@+id/card_number"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

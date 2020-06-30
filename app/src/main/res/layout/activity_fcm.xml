@@ -19,7 +19,7 @@
         <include layout="@layout/simple_toolbar"/>
 
         <TextView
-            style="@style/AppTextBody"
+            style="@style/OrigamiText.Body1"
             android:id="@+id/tv_notification_setting"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

@@ -36,7 +36,7 @@
                 android:textStyle="bold" />
 
             <TextView
-                style="@style/AppTextBody.Center"
+                style="@style/OrigamiText.Body1.Center"
                 android:id="@+id/tv_product_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

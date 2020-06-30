@@ -15,7 +15,7 @@
         android:padding="16dp">
 
         <TextView
-            style="@style/AppTextBody"
+            style="@style/OrigamiText.Body1"
             android:id="@+id/order_id_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
             card_view:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            style="@style/AppTextBody"
+            style="@style/OrigamiText.Body1"
             android:id="@+id/order_subscribed_plan"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -36,7 +36,7 @@
             card_view:layout_constraintTop_toBottomOf="@id/order_id_tv"/>
 
         <TextView
-            style="@style/AppTextBody"
+            style="@style/OrigamiText.Body1"
             android:id="@+id/tv_order_amount"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -47,7 +47,7 @@
             card_view:layout_constraintTop_toBottomOf="@id/order_subscribed_plan"/>
 
         <TextView
-            style="@style/AppTextBody"
+            style="@style/OrigamiText.Body1"
             android:id="@+id/tv_payment_method"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
             card_view:layout_constraintTop_toBottomOf="@id/tv_order_amount"/>
 
         <TextView
-            style="@style/AppTextBody"
+            style="@style/OrigamiText.Body1"
             android:id="@+id/tv_creation_time"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -69,7 +69,7 @@
             card_view:layout_constraintTop_toBottomOf="@id/tv_payment_method"/>
 
         <TextView
-            style="@style/AppTextBody"
+            style="@style/OrigamiText.Body1"
             android:id="@+id/tv_order_period"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

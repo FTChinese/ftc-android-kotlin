@@ -2,8 +2,7 @@
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:bind="http://schemas.android.com/apk/res-auto">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <variable
@@ -49,7 +48,7 @@
 
         <TextView
             android:id="@+id/tv_formula"
-            style="@style/AppTextBody.Center"
+            style="@style/OrigamiText.Body1.Center"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -60,7 +59,7 @@
 
         <TextView
             android:id="@+id/tv_premium_price"
-            style="@style/AppTextBody.Center"
+            style="@style/OrigamiText.Body1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -71,7 +70,7 @@
 
         <TextView
             android:id="@+id/tv_balance"
-            style="@style/AppTextBody.Center"
+            style="@style/OrigamiText.Body1.Center"
             android:layout_width="0dp"
             android:layout_marginTop="16dp"
             android:layout_height="wrap_content"

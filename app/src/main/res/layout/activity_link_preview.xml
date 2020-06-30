@@ -71,7 +71,7 @@
                     app:layout_constraintTop_toBottomOf="@+id/link_icon"/>
 
                 <TextView
-                    style="@style/AppTextBody"
+                    style="@style/OrigamiText.Body1"
                     android:id="@+id/result_tv"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
