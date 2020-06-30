@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.TestActivity
-import com.ft.ftchinese.auth.AuthActivity
 import com.ft.ftchinese.databinding.ActivityMainBinding
 import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
@@ -253,7 +252,7 @@ class MainActivity : ScopedAppActivity(),
         // Set a listener that will be notified when a menu item is selected.
         binding.drawerNav.setNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.action_login ->  AuthActivity.start(this)
+                R.id.action_login ->  LoginActivity.startForResult(this)
                 R.id.action_account -> AccountActivity.start(this)
                 R.id.action_paywall -> {
                     // Tracking
