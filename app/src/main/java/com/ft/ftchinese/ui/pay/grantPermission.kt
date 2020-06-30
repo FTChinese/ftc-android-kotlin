@@ -56,7 +56,7 @@ fun Activity.grantPermission(account: Account?, contentPerm: Permission): Boolea
     }
 
     if (status == MemberStatus.Expired) {
-        toast(R.string.prompt_premium_only)
+        toast(R.string.prompt_membership_expired)
         PaywallActivity.start(this, contentPerm == Permission.PREMIUM)
 
         return false
