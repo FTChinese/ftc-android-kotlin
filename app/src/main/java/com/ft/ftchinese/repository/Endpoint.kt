@@ -1,14 +1,13 @@
 package com.ft.ftchinese.repository
 
-import android.net.Uri
-import com.ft.ftchinese.BuildConfig
-
 object NextApi {
     private val BASE = Config.readerApiBase
     val EMAIL_EXISTS = "$BASE/users/exists"
     val LOGIN = "$BASE/users/login"
     val SIGN_UP = "$BASE/users/signup"
-    val PASSWORD_RESET = "$BASE/users/password-reset/letter"
+    val PASSWORD_RESET = "$BASE/users/password-reset"
+    val PASSWORD_RESET_LETTER = "$PASSWORD_RESET/letter"
+    val VERIFY_PW_RESET = "$PASSWORD_RESET/codes"
     // Refresh account data.
     val ACCOUNT = "$BASE/user/account/v2"
     val PROFILE = "$BASE/user/profile"
