@@ -2,8 +2,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.ft.ftchinese">
-    <!-- To auto-complete the email text field in the login form with the user's emails -->
-    <!-- Required by zhifubao -->
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- For ExoPlayer download service -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -13,7 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".auth.AuthActivity"></activity>
+
         <activity
             android:name=".TestActivity"
             android:label="Test"
@@ -65,9 +75,15 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.login.ForgotPasswordActivity"
-            android:label="@string/title_reset_password"
+            android:label="@string/title_forgot_password"
             android:parentActivityName=".ui.login.LoginActivity"
             android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.login.VerifyResetCodeActivity"
+            android:label="@string/title_forgot_password"
+            android:parentActivityName=".ui.login.ForgotPasswordActivity"/>
+        <activity android:name=".ui.login.ResetPasswordActivity"
+            android:label="@string/title_reset_password"
+            android:parentActivityName=".ui.login.VerifyResetCodeActivity"/>
         <activity
             android:name=".ui.account.AccountActivity"
             android:label="@string/title_account"
@@ -220,16 +236,5 @@
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- For ExoPlayer download service -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
 </manifest>
