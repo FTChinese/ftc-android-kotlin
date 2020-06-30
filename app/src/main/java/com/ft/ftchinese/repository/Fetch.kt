@@ -200,6 +200,7 @@ class Fetch : AnkoLogger {
      */
     fun responseApi(): Pair<Response, String?> {
         setAccessKey()
+        setClient()
 
         val resp = end()
 
