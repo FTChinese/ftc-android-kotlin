@@ -221,11 +221,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             true
         }
 
-        binding.showBottomSheet.setOnClickListener {
-
-            BarrierFragment().show(supportFragmentManager, "BarrierFragment")
-        }
-
         binding.btnLogin.setOnClickListener {
             sessionManager.saveAccount(mockAccount)
         }
