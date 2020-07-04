@@ -14,7 +14,6 @@ import androidx.browser.customtabs.CustomTabsIntent
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.repository.HOST_FTA
 import com.ft.ftchinese.repository.HOST_FTC
@@ -29,43 +28,6 @@ import com.ft.ftchinese.ui.pay.PaywallActivity
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-
-/**
- * Those links need to start a ChannelActivity.
- * Other links include:
- * /tag/汽车未来
- */
-val pathToTitle = mapOf(
-        // /m/marketing/intelligence.html?webview=ftcapp
-        "intelligence.html" to "FT研究院",
-        // /m/marketing/businesscase.html
-        "businesscase.html" to "中国商业案例精选",
-        // /channel/editorchoice-issue.html?issue=EditorChoice-20181029
-        "editorchoice-issue.html" to "编辑精选",
-        // /channel/chinabusinesswatch.html
-        "chinabusinesswatch.html" to "宝珀·中国商业观察",
-        // /m/corp/preview.html?pageid=huawei2018
-        "huawei2018" to "+智能 见未来 重塑商业力量",
-        // /channel/tradewar.html
-        "tradewar.html" to "中美贸易战",
-        "viewtop.html" to "高端视点",
-        "Emotech2017.html" to "2018·预见人工智能",
-        "antfinancial.html" to "“新四大发明”背后的中国浪潮",
-        "teawithft.html" to "与FT共进下午茶",
-        "creditease.html" to "未来生活 未来金融",
-        "markets.html" to "金融市场",
-        "hxxf2016.html" to "透视中国PPP模式",
-        "money.html" to "理财"
-)
-
-val noAccess = mapOf(
-        // /channel/english.html?webview=ftcapp
-        "english.html" to "每日英语",
-        // /channel/mba.html?webview=ftcapp
-        "mba.html" to "FT商学院",
-        // /channel/weekly.html
-        "weekly.html" to "热门文章"
-)
 
 private const val TYPE_STORY = "story"
 private const val TYPE_PREMIUM = "premium"
@@ -345,34 +307,14 @@ open class WVClient(
              * webUrl. No more information could be acquired.
              */
             TYPE_STORY,
-            TYPE_PREMIUM -> {
-                val lastPathSegment = uri.lastPathSegment ?: return true
-                val channelItem = Teaser(
-                        id = lastPathSegment,
-                        type = ArticleType.fromString(pathSegments[0]),
-                        title = "",
-                        webUrl = uri.toString()
-                )
-
-                ArticleActivity.start(context, channelItem)
-
-                true
-            }
+            TYPE_PREMIUM,
             TYPE_VIDEO,
-            // Links on home page under FT商学院
+                // Links on home page under FT商学院
             TYPE_PHOTO_NEWS,
-            // Links on home page under FT研究院
+                // Links on home page under FT研究院
             TYPE_INTERACTIVE -> {
 
-                val lastPathSegment = uri.lastPathSegment ?: return true
-                val teaser = Teaser(
-                        id = lastPathSegment,
-                        type = ArticleType.fromString(pathSegments[0]),
-                        title = "",
-                        webUrl = uri.toString()
-                )
-
-                ArticleActivity.start(context, teaser)
+                ArticleActivity.start(context, buildTeaserFromUri(uri))
                 true
             }
 
@@ -384,14 +326,44 @@ open class WVClient(
              * Should load a full webpage without header under such cases.
              * Editor choice also use /channel path. You should handle it separately.
              * When a links is clicked on Editor choice, retrieve a HTML fragment.
+             * Handle paths like:
+             * `/channel/editorchoice-issue.html?issue=EditorChoice-xxx`,
+             * `/channel/chinabusinesswatch.html`
+             * `/channel/viewtop.html`
+             * `/channel/teawithft.html`
+             * `/channel/markets.html`
+             * `/channel/money.html`
              */
-            TYPE_CHANNEL -> openChannelLink(uri)
+            TYPE_CHANNEL -> {
+                info("Open a channel link: $uri")
+
+                val lastPathSegment = uri.lastPathSegment ?: return true
+
+                // Prevent multiple entry point for a single item.
+                if (noAccess.containsKey(lastPathSegment)) {
+                    true
+                } else {
+                    info("Open a new channel. Path: ${uri.path}")
+                    ChannelActivity.start(
+                        context,
+                        buildChannelFromUri(fragmentUri(uri))
+                    )
+                    true
+                }
+            }
 
             /**
+             * This kind of page is a list of articles
              * If the path looks like `/m/marketing/intelligence.html`
              * or /m/corp/preview.html?pageid=huawei2018
              */
-            TYPE_M -> openMLink(uri)
+            TYPE_M -> {
+                ChannelActivity.start(
+                    context,
+                    buildMarketingChannel(fullPageUri(uri))
+                )
+                true
+            }
 
             /**
              * If the path looks like `/tag/中美贸易战`, `/archiver/2019-03-05`
@@ -399,138 +371,12 @@ open class WVClient(
              */
             TYPE_TAG,
             TYPE_ARCHIVE -> {
-                val page = ChannelSource(
-                        title = uri.lastPathSegment ?: "",
-                        name = uri.pathSegments.joinToString("_"),
-                        contentUrl = buildUrlForFragment(uri),
-                        htmlType = HTML_TYPE_FRAGMENT
-                )
-
-                ChannelActivity.start(context, page)
-
+                ChannelActivity.start(context, buildTagOrArchiveChannel(uri))
                 true
             }
 
             else -> {
-
                 WebViewActivity.start(context, uri.toString())
-                true
-            }
-        }
-    }
-
-    /**
-     * Handle paths like:
-     * `/channel/editorchoice-issue.html?issue=EditorChoice-xxx`,
-     * `/channel/chinabusinesswatch.html`
-     * `/channel/viewtop.html`
-     * `/channel/teawithft.html`
-     * `/channel/markets.html`
-     * `/channel/money.html`
-    */
-    private fun openChannelLink(uri: Uri): Boolean {
-        info("Open a channel link: $uri")
-
-        val lastPathSegment = uri.lastPathSegment ?: return true
-
-        // Prevent multiple entry point for a single item.
-        if (noAccess.containsKey(lastPathSegment)) {
-            return true
-        }
-
-        when (lastPathSegment) {
-            // Handle links on this page: https://api003.ftmailbox.com/channel/editorchoice.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018
-            // The link itself looks like:
-            // http://www.ftchinese.com/channel/editorchoice-issue.html?issue=EditorChoice-20181105
-            "editorchoice-issue.html" -> {
-                info("Clicked an editor choice link: $uri")
-                val issue = uri.getQueryParameter("issue")
-                        ?: uri.pathSegments.joinToString("_").removeSuffix(".html")
-
-                val channelSource = ChannelSource(
-                        title = pathToTitle[lastPathSegment] ?: "",
-                        name = issue,
-                        contentUrl = buildUrlForFragment(uri),
-                        htmlType = HTML_TYPE_FRAGMENT,
-                        permission = Permission.PREMIUM
-                )
-
-                info("Channel source for editor choice: $channelSource")
-                ChannelActivity.start(context, channelSource)
-            }
-            else -> {
-
-                val listPage = ChannelSource(
-                        title = pathToTitle[lastPathSegment] ?: "",
-                        name = uri.pathSegments.joinToString("_").removeSuffix(".html"),
-                        contentUrl = buildUrlForFragment(uri),
-                        htmlType = HTML_TYPE_FRAGMENT
-                )
-
-                info("Start channel activity for $listPage")
-
-                ChannelActivity.start(context, listPage)
-            }
-        }
-
-        return true
-    }
-
-    /**
-     * This kind of page is a list of articles
-     */
-    private fun openMLink(uri: Uri): Boolean {
-        info("Open a m link: $uri")
-
-        return when (uri.pathSegments[1]) {
-            // Links like /m/corp/preview.html?pageid=huawei2018
-            Teaser.SUB_TYPE_CORP -> {
-                val pageName = uri.getQueryParameter("pageid")
-
-                val name = if (pageName != null) {
-                    uri.pathSegments.joinToString("_").removeSuffix(".html") + "_$pageName"
-                } else {
-                    uri.pathSegments.joinToString("_").removeSuffix(".html")
-                }
-
-                val listPage = ChannelSource(
-                        title = if (pageName != null) pathToTitle[pageName] ?: "" else "",
-                        name = name,
-                        contentUrl = buildUrlForFullPage(uri),
-                        htmlType = HTML_TYPE_COMPLETE
-                )
-
-                ChannelActivity.start(context, listPage)
-
-                true
-            }
-            // Links like /m/marketing/intelligence.html?webview=ftcapp
-            Teaser.SUB_TYPE_MARKETING -> {
-                val key = uri.lastPathSegment ?: ""
-                val listPage = ChannelSource(
-                        title = pathToTitle[key] ?: "",
-                        name = uri.pathSegments.joinToString("_").removeSuffix(".html"),
-                        contentUrl = buildUrlForFullPage(uri),
-                        htmlType = HTML_TYPE_COMPLETE
-                )
-
-                ChannelActivity.start(context, listPage)
-
-                true
-            }
-
-            else -> {
-                val key = uri.lastPathSegment ?: ""
-
-                val listPage = ChannelSource(
-                        title = pathToTitle[key] ?: "",
-                        name = "",
-                        contentUrl = buildUrlForFullPage(uri),
-                        htmlType = HTML_TYPE_COMPLETE
-                )
-
-                ChannelActivity.start(context, listPage)
-
                 true
             }
         }
@@ -563,7 +409,7 @@ open class WVClient(
         return true
     }
 
-    private fun buildUrlForFullPage(uri: Uri): String {
+    private fun fullPageUri(uri: Uri): Uri {
         val builder = uri.buildUpon()
                 .scheme("https")
 
@@ -571,10 +417,10 @@ open class WVClient(
             builder.appendQueryParameter("webview", "ftcapp")
         }
 
-        return builder.build().toString()
+        return builder.build()
     }
 
-    private fun buildUrlForFragment(uri: Uri, path: String? = null): String {
+    private fun fragmentUri(uri: Uri): Uri {
         val builder =  uri.buildUpon()
                 .scheme("https")
 
@@ -585,11 +431,7 @@ open class WVClient(
             builder.appendQueryParameter("webview", "ftcapp")
         }
 
-        if (path != null) {
-            builder.path(path)
-        }
-
-        return builder.build().toString()
+        return builder.build()
     }
 }
 
