@@ -103,8 +103,10 @@ class ArticleActivity : ScopedAppActivity(),
 
         supportFragmentManager.commit {
             if (teaser.hasRestfulAPI()) {
+                info("Render article using JSON")
                 replace(R.id.fragment_article, StoryFragment.newInstance(teaser))
             } else {
+                info("Render article using web")
                 replace(R.id.fragment_article, WebContentFragment.newInstance(teaser))
             }
         }
@@ -233,18 +235,6 @@ class ArticleActivity : ScopedAppActivity(),
             articleViewModel.switchLang(Language.BILINGUAL)
         }
     }
-
-//    private fun showProgress(show: Boolean) {
-//        progress_bar.visibility = if (show) View.VISIBLE else View.GONE
-//    }
-//
-//    private fun showLangSwitcher(show: Boolean) {
-//        language_radio_group.visibility = if (show) View.VISIBLE else View.GONE
-//    }
-//
-//    private fun bookmarked(ok: Boolean) {
-//        fab_bookmark.imageResource = if (ok) R.drawable.ic_bookmark_black_24dp else R.drawable.ic_bookmark_border_black_24dp
-//    }
 
     private fun disableLangSwitch() {
         binding.langCnBtn.isChecked = true
