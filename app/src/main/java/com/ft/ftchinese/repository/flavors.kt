@@ -2,9 +2,6 @@ package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.BuildConfig
 
-const val HOST_FTC = "www.ftchinese.com"
-const val HOST_FTA = "www.ftacademy.cn"
-
 const val defaultFlavor = "an_ftc"
 
 val flavors = mapOf(
