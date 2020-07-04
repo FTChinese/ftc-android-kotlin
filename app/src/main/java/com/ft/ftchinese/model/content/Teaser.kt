@@ -288,4 +288,12 @@ data class Teaser(
     }
 }
 
+fun buildTeaserFromUri(uri: Uri): Teaser {
+    return Teaser(
+        id = uri.lastPathSegment ?: "",
+        type = ArticleType.fromString(uri.pathSegments[0]),
+        title = "",
+        webUrl = uri.toString()
+    )
+}
 
