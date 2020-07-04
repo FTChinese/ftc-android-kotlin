@@ -6,8 +6,6 @@ import com.ft.ftchinese.model.reader.Permission
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
-import java.lang.NumberFormatException
 
 const val HTML_TYPE_FRAGMENT = 1
 const val HTML_TYPE_COMPLETE = 2
@@ -23,13 +21,15 @@ data class ChannelSource (
         // find cache.
     val name: String,  // Cache filename used by this tab
     val contentPath: String, // The resource path of the HTML fragment.
+    val path: String,
+    val query: String,
     val htmlType: Int, // Flag used to tell whether the webUrl should be loaded directly
     val permission: Permission? = null // A predefined permission that overrides individual Teaser's permission.
 
 ) : Parcelable, AnkoLogger {
 
     @IgnoredOnParcel
-    var shouldReload = false
+    var shouldReload = false // Used on pagination. If user clicked the same pagination number, just refersh the content.
 
     val fileName: String?
         get() = if (name.isBlank()) null else "$name.html"
@@ -50,74 +50,27 @@ data class ChannelSource (
      * For `news_china_3`, the next page should be `new_china_4`.
      */
     fun withPagination(pageKey: String, pageNumber: String): ChannelSource {
-        val currentUri = Uri.parse(contentPath)
+        val qs = "$pageKey=$pageNumber"
 
-        info("Current URI: $currentUri")
-
-        // Current list page is already a started from a pagination link
-        if (currentUri.getQueryParameter(pageKey) != null) {
-            val newUri = currentUri.buildUpon().clearQuery()
-
-            for (key in currentUri.queryParameterNames) {
-                info("URI query key: $key")
-
-                if (key == pageKey) {
-                    newUri.appendQueryParameter(key, pageNumber)
-                    continue
-                }
-
-                val value = currentUri.getQueryParameter(key)
-                newUri.appendQueryParameter(key, value)
-            }
-
-            return ChannelSource(
-                    title = title,
-                    name = generatePagedName(pageNumber),
-                    contentPath = newUri.build().toString(),
-                    htmlType = htmlType
-            ).apply {
+        // Somehow there's a problem on the the web page's pagination:
+        // the number on of the current page is never disabled
+        // so user could click the page 2 even if it is no page2.
+        // TO handle such situation, we just let it to refresh data rather than opening a new ChannelActivity.
+        if (query.contains(qs)) {
+            return this.apply {
                 shouldReload = true
             }
-        } else {
-            // Current page is not started from a pagination link, webUrl does not contain `page=xxx`.
-            val newUrl = currentUri.buildUpon()
-                    .appendQueryParameter(pageKey, pageNumber)
-                    .build()
-                    .toString()
-
-            return ChannelSource(
-                    title = title,
-                    name = "${name}_$pageNumber",
-                    contentPath = newUrl,
-                    htmlType = htmlType
-            )
         }
+
+        return ChannelSource(
+            title = title,
+            name = "${name}_$pageNumber",
+            contentPath = contentPath,
+            path = path,
+            query = qs,
+            htmlType = htmlType
+        )
     }
-
-    // Generate a name to be used as cache file name.
-    // It changes name with pattern `news_china_2` to `news_china_${pageNumber}`
-    private fun generatePagedName(pageNumber: String): String {
-        // Give new page a name
-        val nameParts = name.split("_").toMutableList()
-
-        return if (nameParts.size > 0) {
-            val lastPart = nameParts[nameParts.size - 1]
-            // Check if lastPart is a number
-            return try {
-                lastPart.toInt()
-
-                nameParts[nameParts.size - 1] = pageNumber
-
-                nameParts.joinToString("_")
-
-            } catch (e: NumberFormatException) {
-                "name_$pageNumber"
-            }
-        } else {
-            "name_$pageNumber"
-        }
-    }
-
 }
 
 fun buildFollowChannel(follow: Following): ChannelSource {
@@ -125,6 +78,8 @@ fun buildFollowChannel(follow: Following): ChannelSource {
         title = follow.tag,
         name = "${follow.type}_${follow.tag}",
         contentPath = "/${follow.type}/${follow.tag}?bodyonly=yes&webviewftcapp",
+        path = "/${follow.type}/${follow.tag}",
+        query = "",
         htmlType = HTML_TYPE_FRAGMENT
     )
 }
@@ -134,6 +89,8 @@ fun buildColumnChannel(item: Teaser): ChannelSource {
         title = item.title,
         name = "${item.type}_${item.id}",
         contentPath = "/${item.type}/${item.id}?bodyonly=yes&webview=ftcapp",
+        path = "/${item.type}/${item.id}",
+        query = "",
         htmlType = HTML_TYPE_FRAGMENT
     )
 }
@@ -143,6 +100,8 @@ fun buildTagOrArchiveChannel(uri: Uri): ChannelSource {
         title = uri.lastPathSegment ?: "",
         name = uri.pathSegments.joinToString("_"),
         contentPath = "/${uri.path}?${uri.query}",
+        path = uri.path ?: "",
+        query = uri.query ?: "",
         htmlType = HTML_TYPE_FRAGMENT
     )
 }
@@ -198,6 +157,8 @@ fun buildChannelFromUri(uri: Uri): ChannelSource {
                 .joinToString("_")
                 .removeSuffix(".html"),
         contentPath = "/${uri.path}?${uri.query}",
+        path = uri.path ?: "",
+        query = uri.query ?: "",
         htmlType = HTML_TYPE_FRAGMENT,
         permission = if (isEditorChoice) Permission.PREMIUM else null
     )
@@ -228,6 +189,8 @@ fun buildMarketingChannel(uri: Uri): ChannelSource {
             ?: "",
         name = name,
         contentPath = "/${uri.path}?${uri.query}",
+        path = uri.path ?: "",
+        query = uri.query ?: "",
         htmlType = HTML_TYPE_COMPLETE
     )
 }

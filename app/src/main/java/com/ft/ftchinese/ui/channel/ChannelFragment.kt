@@ -28,7 +28,8 @@ import com.ft.ftchinese.tracking.SponsorManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.article.WVClient
+import com.ft.ftchinese.ui.base.Paging
+import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.pay.handlePermissionDenial
 import com.ft.ftchinese.util.*
@@ -90,8 +91,6 @@ class ChannelFragment : ScopedFragment(),
 
         // Get metadata about current tab
         channelSource = arguments?.getParcelable(ARG_CHANNEL_SOURCE) ?: return
-
-        info("Channel source: $channelSource")
 
         start = Date().time / 1000
     }
@@ -292,26 +291,19 @@ class ChannelFragment : ScopedFragment(),
     /**
      * WVClient click pagination.
      */
-    override fun onPagination(pageKey: String, pageNumber: String) {
-        val pageMeta = channelSource ?: return
+    override fun onPagination(p: Paging) {
+        val source = channelSource ?: return
 
-        val listPage = pageMeta.withPagination(pageKey, pageNumber)
+        val pagedSource = source.withPagination(p.key, p.page)
 
-        info("Open a pagination: $listPage")
+        info("Open a pagination: $pagedSource")
 
-        if (listPage.shouldReload) {
-            info("Reloading a pagination $listPage")
-
-            channelSource = listPage
-
-            channelViewModel.load(
-                channelSource = listPage,
-                bustCache = false
-            )
-
+        // If the the pagination number is not changed, simply refresh it.
+        if (pagedSource.shouldReload) {
+            onRefresh()
         } else {
-            info("Start a new activity for $listPage")
-            ChannelActivity.start(activity, listPage)
+            info("Start a new activity for $pagedSource")
+            ChannelActivity.start(activity, pagedSource)
         }
     }
 
@@ -421,29 +413,12 @@ class ChannelFragment : ScopedFragment(),
         info("Denial reason: $denialReason")
 
         if (denialReason == null) {
-            openArticle(teaser)
+            info("Open article of teaser: $teaser")
+            ArticleActivity.start(activity, teaser)
+            statsTracker.selectListItem(teaser)
         } else {
             activity?.handlePermissionDenial(denialReason, contentPerm)
         }
-    }
-
-    private fun openArticle(teaser: Teaser) {
-        info("Open article for an channel teaser: $teaser")
-
-        when (teaser.type) {
-            ArticleType.Story,
-            ArticleType.Premium -> {
-                ArticleActivity.start(activity, teaser)
-            }
-            ArticleType.Interactive -> {
-                ArticleActivity.start(activity, teaser)
-            }
-            else -> {
-                ArticleActivity.start(context, teaser)
-            }
-        }
-
-        statsTracker.selectListItem(teaser)
     }
 
     override fun onDestroy() {
