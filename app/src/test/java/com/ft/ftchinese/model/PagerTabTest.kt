@@ -1,6 +1,6 @@
 package com.ft.ftchinese.model
 
-import com.ft.ftchinese.model.content.TabPages
+import com.ft.ftchinese.repository.TabPages
 import org.junit.Before
 import org.junit.Test
 
