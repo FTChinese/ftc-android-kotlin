@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.article
+package com.ft.ftchinese.ui.base
 
 import android.content.Context
 import android.content.Intent
@@ -15,13 +15,13 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.repository.HOST_FTA
-import com.ft.ftchinese.repository.HOST_FTC
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.GAAction
 import com.ft.ftchinese.tracking.GACategory
 import com.ft.ftchinese.tracking.PaywallSource
 import com.ft.ftchinese.tracking.PaywallTracker
+import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.article.WebViewActivity
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.pay.PaywallActivity
@@ -71,7 +71,7 @@ open class WVClient(
     interface OnWebViewInteractionListener {
 
         // Let host to handle clicks on pagination links.
-        fun onPagination(pageKey: String, pageNumber: String) {}
+        fun onPagination(p: Paging) {}
 
         fun onOpenGraphEvaluated(result: String) {}
     }
@@ -196,15 +196,13 @@ open class WVClient(
              * For external links (mostly ads), open in external browser.
              */
             "http", "https" -> {
-                val serverUrl = Uri.parse(Config.discoverServer(sessionManager.loadAccount()))
-                return when (uri.host) {
-                    serverUrl.host -> handleInSiteLink(uri)
-                    HOST_FTC -> handleInSiteLink(uri)
-                    HOST_FTA -> handleFtaLink(uri)
+                return when {
+                    Config.isInternalLink(uri.host ?: "") -> handleInSiteLink(uri)
+                    Config.isFtaLink(uri.host ?: "") -> handleFtaLink(uri)
                     else -> handleExternalLink(uri)
                 }
             }
-            // For unknown links, simply returns true to prevent
+            // For unknown schemes, simply returns true to prevent
             // crash caused by loading unknown content.
             else -> true
         }
@@ -239,16 +237,12 @@ open class WVClient(
 
     private fun handleInSiteLink(uri: Uri): Boolean {
 
-        info("Handle in-site link")
-
         val pathSegments = uri.pathSegments
 
-        info("Path segments: $pathSegments")
+        info("Handle in-site link. Path segments: $pathSegments")
 
         /**
          * Handle pagination links.
-         * What action to preform depends on whether you
-         *
          * Whichever pagination link user clicked, just start a ChannelActivity.
          *
          * Handle the pagination link of each channel
@@ -263,21 +257,25 @@ open class WVClient(
          * Speed read uses http://www.ftchinese.com/channel/speedread.html?p=2
          * Bilingual reading uses http://www.ftchinese.com/channel/ce.html?p=2
          *
-         * For all paginiation links in a ViewPerFragment, start a ChannelActivity
+         * For all pagination links in a ViewPerFragment, start a ChannelActivity
         */
-        if (uri.getQueryParameter("page") != null || uri.getQueryParameter("p") != null) {
+        val pageNumber = uri.getQueryParameter("page")
+            ?: uri.getQueryParameter("p")
+
+        if (pageNumber != null) {
             info("Open channel pagination for uri: $uri")
 
-            val pageValue = uri.getQueryParameter("page")
-                ?: uri.getQueryParameter("p")
-                ?: return true
+            val paging = Paging(
+                key = if (uri.getQueryParameter("page") != null)
+                        "page"
+                    else
+                        "p",
+                page = pageNumber
+            )
 
             // Since the pagination query parameter's key is not uniform across whole site, we have to explicitly tells host.
-            val pageKey = if (uri.getQueryParameter("page") != null) "page"
-            else "p"
-
             // Let host activity/fragment to handle pagination link
-            mListener?.onPagination(pageKey, pageValue)
+            mListener?.onPagination(paging)
 
             return true
         }
@@ -358,6 +356,7 @@ open class WVClient(
              * or /m/corp/preview.html?pageid=huawei2018
              */
             TYPE_M -> {
+                info("Loading marketing page")
                 ChannelActivity.start(
                     context,
                     buildMarketingChannel(fullPageUri(uri))
@@ -371,11 +370,13 @@ open class WVClient(
              */
             TYPE_TAG,
             TYPE_ARCHIVE -> {
+                info("Loading tag or archive")
                 ChannelActivity.start(context, buildTagOrArchiveChannel(uri))
                 true
             }
 
             else -> {
+                info("Loading a plain web page")
                 WebViewActivity.start(context, uri.toString())
                 true
             }
@@ -411,7 +412,6 @@ open class WVClient(
 
     private fun fullPageUri(uri: Uri): Uri {
         val builder = uri.buildUpon()
-                .scheme("https")
 
         if (uri.getQueryParameter("webview") == null) {
             builder.appendQueryParameter("webview", "ftcapp")
@@ -422,7 +422,6 @@ open class WVClient(
 
     private fun fragmentUri(uri: Uri): Uri {
         val builder =  uri.buildUpon()
-                .scheme("https")
 
         if (uri.getQueryParameter("bodyonly") == null) {
             builder.appendQueryParameter("bodyonly", "yes")

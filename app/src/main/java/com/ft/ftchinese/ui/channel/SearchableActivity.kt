@@ -12,7 +12,7 @@ import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivitySearchableBinding
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.ui.article.WVClient
+import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import kotlinx.android.synthetic.main.simple_toolbar.*

@@ -25,6 +25,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.service.ReadingDurationService
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
 import com.ft.ftchinese.util.*

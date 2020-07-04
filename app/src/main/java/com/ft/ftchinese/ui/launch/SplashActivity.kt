@@ -106,6 +106,8 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
                         title = pageId,
                         name = "${msgType}_$pageId",
                         contentPath = "",
+                    path = "",
+                    query = "",
                         htmlType = HTML_TYPE_FRAGMENT
                 ))
             }
