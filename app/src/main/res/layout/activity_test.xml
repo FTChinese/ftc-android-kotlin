@@ -127,13 +127,6 @@
                     android:textAllCaps="false" />
 
                 <Button
-                    android:id="@+id/show_bottom_sheet"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Bottom sheet dialog"
-                    android:textAllCaps="false" />
-
-                <Button
                     android:id="@+id/audio_player"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
