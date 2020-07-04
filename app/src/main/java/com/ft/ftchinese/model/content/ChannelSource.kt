@@ -17,14 +17,14 @@ const val HTML_TYPE_COMPLETE = 2
  */
 @Parcelize
 data class ChannelSource (
-        val title: String, // A Tab's title
+    val title: String, // A Tab's title
         // name is used to cache files.
         // If empty, do not cache it, nor should you try to
         // find cache.
-        val name: String,  // Cache filename used by this tab
-        val contentUrl: String, // This is used to fetch html fragment containing a list of articles.
-        val htmlType: Int, // Flag used to tell whether the webUrl should be loaded directly
-        val permission: Permission? = null // A predefined permission that overrides individual Teaser's permission.
+    val name: String,  // Cache filename used by this tab
+    val contentPath: String, // The resource path of the HTML fragment.
+    val htmlType: Int, // Flag used to tell whether the webUrl should be loaded directly
+    val permission: Permission? = null // A predefined permission that overrides individual Teaser's permission.
 
 ) : Parcelable, AnkoLogger {
 
@@ -50,7 +50,7 @@ data class ChannelSource (
      * For `news_china_3`, the next page should be `new_china_4`.
      */
     fun withPagination(pageKey: String, pageNumber: String): ChannelSource {
-        val currentUri = Uri.parse(contentUrl)
+        val currentUri = Uri.parse(contentPath)
 
         info("Current URI: $currentUri")
 
@@ -73,7 +73,7 @@ data class ChannelSource (
             return ChannelSource(
                     title = title,
                     name = generatePagedName(pageNumber),
-                    contentUrl = newUri.build().toString(),
+                    contentPath = newUri.build().toString(),
                     htmlType = htmlType
             ).apply {
                 shouldReload = true
@@ -88,7 +88,7 @@ data class ChannelSource (
             return ChannelSource(
                     title = title,
                     name = "${name}_$pageNumber",
-                    contentUrl = newUrl,
+                    contentPath = newUrl,
                     htmlType = htmlType
             )
         }
@@ -124,7 +124,7 @@ fun buildFollowChannel(follow: Following): ChannelSource {
     return ChannelSource(
         title = follow.tag,
         name = "${follow.type}_${follow.tag}",
-        contentUrl = "/${follow.type}/${follow.tag}?bodyonly=yes&webviewftcapp",
+        contentPath = "/${follow.type}/${follow.tag}?bodyonly=yes&webviewftcapp",
         htmlType = HTML_TYPE_FRAGMENT
     )
 }
@@ -133,7 +133,101 @@ fun buildColumnChannel(item: Teaser): ChannelSource {
     return ChannelSource(
         title = item.title,
         name = "${item.type}_${item.id}",
-        contentUrl = "/${item.type}/${item.id}?bodyonly=yes&webview=ftcapp",
+        contentPath = "/${item.type}/${item.id}?bodyonly=yes&webview=ftcapp",
         htmlType = HTML_TYPE_FRAGMENT
+    )
+}
+
+fun buildTagOrArchiveChannel(uri: Uri): ChannelSource {
+    return ChannelSource(
+        title = uri.lastPathSegment ?: "",
+        name = uri.pathSegments.joinToString("_"),
+        contentPath = "/${uri.path}?${uri.query}",
+        htmlType = HTML_TYPE_FRAGMENT
+    )
+}
+
+/**
+ * Those links need to start a ChannelActivity.
+ * Other links include:
+ * /tag/汽车未来
+ */
+val pathToTitle = mapOf(
+    // /m/marketing/intelligence.html?webview=ftcapp
+    "intelligence.html" to "FT研究院",
+    // /m/marketing/businesscase.html
+    "businesscase.html" to "中国商业案例精选",
+    // /channel/editorchoice-issue.html?issue=EditorChoice-20181029
+    "editorchoice-issue.html" to "编辑精选",
+    // /channel/chinabusinesswatch.html
+    "chinabusinesswatch.html" to "宝珀·中国商业观察",
+    // /m/corp/preview.html?pageid=huawei2018
+    "huawei2018" to "+智能 见未来 重塑商业力量",
+    // /channel/tradewar.html
+    "tradewar.html" to "中美贸易战",
+    "viewtop.html" to "高端视点",
+    "Emotech2017.html" to "2018·预见人工智能",
+    "antfinancial.html" to "“新四大发明”背后的中国浪潮",
+    "teawithft.html" to "与FT共进下午茶",
+    "creditease.html" to "未来生活 未来金融",
+    "markets.html" to "金融市场",
+    "hxxf2016.html" to "透视中国PPP模式",
+    "money.html" to "理财"
+)
+
+val noAccess = mapOf(
+    // /channel/english.html?webview=ftcapp
+    "english.html" to "每日英语",
+    // /channel/mba.html?webview=ftcapp
+    "mba.html" to "FT商学院",
+    // /channel/weekly.html
+    "weekly.html" to "热门文章"
+)
+
+fun buildChannelFromUri(uri: Uri): ChannelSource {
+    // Handle links on this page: https://api003.ftmailbox.com/channel/editorchoice.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018
+    // The link itself looks like:
+    // http://www.ftchinese.com/channel/editorchoice-issue.html?issue=EditorChoice-20181105
+    val isEditorChoice = uri.lastPathSegment == "editorchoice-issue.html"
+    val issueName = uri.getQueryParameter("issue")
+
+    return ChannelSource(
+        title = pathToTitle[uri.lastPathSegment] ?: "",
+        name = issueName
+            ?: uri.pathSegments
+                .joinToString("_")
+                .removeSuffix(".html"),
+        contentPath = "/${uri.path}?${uri.query}",
+        htmlType = HTML_TYPE_FRAGMENT,
+        permission = if (isEditorChoice) Permission.PREMIUM else null
+    )
+}
+
+fun buildMarketingChannel(uri: Uri): ChannelSource {
+
+    val pageName = uri.getQueryParameter("pageid")
+
+    val name = if (pageName != null) {
+        // Links like /m/corp/preview.html?pageid=huawei2018
+        uri.pathSegments
+            .joinToString("_")
+            .removeSuffix(".html") + "_$pageName"
+    } else {
+        // Links like /m/marketing/intelligence.html?webview=ftcapp
+        uri.pathSegments
+            .joinToString("_")
+            .removeSuffix(".html")
+    }
+
+    return ChannelSource(
+        title = pathToTitle[
+            pageName
+            ?: uri.lastPathSegment
+            ?: ""
+        ]
+            ?: "",
+        name = name,
+        contentPath = "/${uri.path}?${uri.query}",
+        htmlType = HTML_TYPE_COMPLETE
     )
 }
