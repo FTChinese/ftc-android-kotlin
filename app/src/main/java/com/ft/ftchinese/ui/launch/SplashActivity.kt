@@ -105,7 +105,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
                 ChannelActivity.startWithParentStack(this, ChannelSource(
                         title = pageId,
                         name = "${msgType}_$pageId",
-                        contentUrl = "",
+                        contentPath = "",
                         htmlType = HTML_TYPE_FRAGMENT
                 ))
             }

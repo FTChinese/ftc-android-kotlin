@@ -7,7 +7,7 @@ import org.junit.Test
 class TabPagesTest {
     @Test
     fun homePage() {
-        val content = Fetch().get(TabPages.newsPages[0].contentUrl)
+        val content = Fetch().get(TabPages.newsPages[0].contentPath)
                 .responseString()
 
         println(content)

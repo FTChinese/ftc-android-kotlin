@@ -13,27 +13,27 @@ object TabPages {
         ChannelSource(
             title = "首页",
             name = "news_home",
-            contentUrl = "/?webview=ftcapp&bodyonly=yes&maxB=1&backupfile=localbackup&showIAP=yes&pagetype=home&001",
+            contentPath = "/?webview=ftcapp&bodyonly=yes&maxB=1&backupfile=localbackup&showIAP=yes&pagetype=home&001",
             htmlType = HTML_TYPE_FRAGMENT
         ),
 
         ChannelSource(
             title = "中国",
             name = "news_china",
-            contentUrl = "/channel/china.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/china.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
 
         ChannelSource(
             title = "标准订阅",
             name = "news_standard_only",
-            contentUrl = "/channel/standardsubscription.html?webview=ftcapp&bodyonly=yes&ad=no&001",
+            contentPath = "/channel/standardsubscription.html?webview=ftcapp&bodyonly=yes&ad=no&001",
             htmlType = HTML_TYPE_FRAGMENT,
             permission = Permission.STANDARD),
 
         ChannelSource(
             title = "高端订阅",
             name = "news_premium_only",
-            contentUrl = "/channel/premiumsubscription.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018",
+            contentPath = "/channel/premiumsubscription.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018",
             htmlType = HTML_TYPE_FRAGMENT,
             permission = Permission.PREMIUM),
 
@@ -61,7 +61,7 @@ object TabPages {
         ChannelSource(
             title = "全球",
             name = "news_global",
-            contentUrl = "/channel/world.html?webview=ftcapp&bodyonly=yes&002",
+            contentPath = "/channel/world.html?webview=ftcapp&bodyonly=yes&002",
             htmlType = HTML_TYPE_FRAGMENT),
         /**
              * "meta": {
@@ -84,7 +84,7 @@ object TabPages {
         ChannelSource(
             title = "观点",
             name = "news_opinions",
-            contentUrl = "/channel/opinion.html?webview=ftcapp&bodyonly=yes&ad=no",
+            contentPath = "/channel/opinion.html?webview=ftcapp&bodyonly=yes&ad=no",
             htmlType = HTML_TYPE_FRAGMENT),
         /**
              * "meta": {
@@ -143,7 +143,7 @@ object TabPages {
         ChannelSource(
             title = "专栏",
             name = "news_column",
-            contentUrl = "/channel/column.html?webview=ftcapp&bodyonly=yes&ad=no",
+            contentPath = "/channel/column.html?webview=ftcapp&bodyonly=yes&ad=no",
             htmlType = HTML_TYPE_FRAGMENT),
         /**
              * "meta": {
@@ -166,7 +166,7 @@ object TabPages {
         ChannelSource(
             title = "金融市场",
             name = "news_markets",
-            contentUrl = "/channel/markets.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/markets.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
         /**
              * "meta": {
@@ -189,12 +189,12 @@ object TabPages {
         ChannelSource(
             title = "商业",
             name = "news_business",
-            contentUrl = "/channel/business.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/business.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
         ChannelSource(
             title = "经济",
             name = "news_economy",
-            contentUrl = "/channel/economy.html?webview=ftcapp&bodyonly=yes&001",
+            contentPath = "/channel/economy.html?webview=ftcapp&bodyonly=yes&001",
             htmlType = HTML_TYPE_FRAGMENT),
         /**
              * "meta": {
@@ -217,7 +217,7 @@ object TabPages {
         ChannelSource(
             title = "科技",
             name = "news_technology",
-            contentUrl = "/channel/technology.html?webview=ftcapp&bodyonly=yes&001",
+            contentPath = "/channel/technology.html?webview=ftcapp&bodyonly=yes&001",
             htmlType = HTML_TYPE_FRAGMENT),
         /**
              * "meta": {
@@ -240,7 +240,7 @@ object TabPages {
         ChannelSource(
             title = "教育",
             name = "news_education",
-            contentUrl = "/channel/education.html?webview=ftcapp&bodyonly=yes&001",
+            contentPath = "/channel/education.html?webview=ftcapp&bodyonly=yes&001",
             htmlType = HTML_TYPE_FRAGMENT),
         /**
              * "meta": {
@@ -263,7 +263,7 @@ object TabPages {
         ChannelSource(
             title = "管理",
             name = "news_management",
-            contentUrl = "/channel/management.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/management.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
         /**
              * "meta": {
@@ -286,7 +286,7 @@ object TabPages {
         ChannelSource(
             title = "生活时尚",
             name = "news_life_style",
-            contentUrl = "/channel/lifestyle.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/lifestyle.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
         /**
              * Load it directly into WebView.
@@ -335,7 +335,7 @@ object TabPages {
         ChannelSource(
             title = "特别报导",
             name = "news_special_report",
-            contentUrl = "/channel/special.html?webview=ftcapp&ad=no&001",
+            contentPath = "/channel/special.html?webview=ftcapp&ad=no&001",
             htmlType = HTML_TYPE_COMPLETE),
         /**
              * "meta": {
@@ -358,7 +358,7 @@ object TabPages {
         ChannelSource(
             title = "热门文章",
             name = "news_weekly",
-            contentUrl = "/channel/weekly.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/weekly.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
         /**
              * "meta": {
@@ -381,7 +381,7 @@ object TabPages {
         ChannelSource(
             title = "数据新闻",
             name = "news_data",
-            contentUrl = "/channel/datanews.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/datanews.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
         /**
              * This page is loaded directly into a webview.
@@ -402,17 +402,17 @@ object TabPages {
         ChannelSource(
             title = "会议活动",
             name = "news_events",
-            contentUrl = "/m/corp/preview.html?pageid=events&webview=ftcapp&bodyonly=yes",
+            contentPath = "/m/corp/preview.html?pageid=events&webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
         ChannelSource(
             title = "FT研究院",
             name = "news_fta",
-            contentUrl = "/m/corp/preview.html?pageid=fti&webview=ftcapp&bodyonly=yes",
+            contentPath = "/m/corp/preview.html?pageid=fti&webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
         ChannelSource(
             title = "高端物业",
             name = "news_property",
-            contentUrl = "/m/corp/preview.html?pageid=property&webview=ftcapp&bodyonly=yes",
+            contentPath = "/m/corp/preview.html?pageid=property&webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT)
     )
 
@@ -420,7 +420,7 @@ object TabPages {
         ChannelSource(
             title = "最新",
             name = "english_latest",
-            contentUrl = "/channel/english.html?webview=ftcapp&bodyonly=yes&001",
+            contentPath = "/channel/english.html?webview=ftcapp&bodyonly=yes&001",
             htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -444,7 +444,7 @@ object TabPages {
         ChannelSource(
             title = "英语电台",
             name = "english_radio",
-            contentUrl = "/channel/radio.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/radio.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -458,7 +458,7 @@ object TabPages {
         ChannelSource(
             "金融英语速读",
             name = "english_speedreading",
-            contentUrl = "/channel/speedread.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/speedread.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
             /**
              * [
@@ -474,13 +474,13 @@ object TabPages {
         ChannelSource(
             title = "音乐之生",
             name = "english_music",
-            contentUrl = "/channel/lifeofasong.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/lifeofasong.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT
         ),
         ChannelSource(
             title = "麦可林学英语",
             name = "english_mle",
-            contentUrl = "/m/corp/preview.html?pageid=learnenglish&webview=ftcapp",
+            contentPath = "/m/corp/preview.html?pageid=learnenglish&webview=ftcapp",
             htmlType = HTML_TYPE_FRAGMENT
         ),
             /**
@@ -495,13 +495,13 @@ object TabPages {
         ChannelSource(
             title = "双语阅读",
             name = "english_bilingual",
-            contentUrl = "/channel/ce.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/ce.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
 
         ChannelSource(
             title = "每日一词",
             name = "english_daily_word",
-            contentUrl = "/channel/dailyword.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/dailyword.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT
         ),
 
@@ -517,7 +517,7 @@ object TabPages {
         ChannelSource(
             title = "原声视频",
             name = "english_video",
-            contentUrl = "/channel/ev.html?webview=ftcapp&bodyonly=yes&001",
+            contentPath = "/channel/ev.html?webview=ftcapp&bodyonly=yes&001",
             htmlType = HTML_TYPE_FRAGMENT)
     )
 
@@ -534,7 +534,7 @@ object TabPages {
         ChannelSource(
             title = "商学院观察",
             name = "fta_story",
-            contentUrl = "/m/corp/preview.html?pageid=mbastory&webview=ftcapp&bodyonly=yes",
+            contentPath = "/m/corp/preview.html?pageid=mbastory&webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -548,7 +548,7 @@ object TabPages {
         ChannelSource(
             title = "热点观察",
             name = "fta_hot",
-            contentUrl = "/m/corp/preview.html?pageid=hotcourse&webview=ftcapp&bodyonly=yes",
+            contentPath = "/m/corp/preview.html?pageid=hotcourse&webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -562,7 +562,7 @@ object TabPages {
         ChannelSource(
             title = "MBA训练营",
             name = "fta_gym",
-            contentUrl = "/channel/mbagym.html?webview=ftcapp&bodyonly=yes",
+            contentPath = "/channel/mbagym.html?webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -576,7 +576,7 @@ object TabPages {
         ChannelSource(
             title = "互动小测",
             name = "fta_quiz",
-            contentUrl = "/m/corp/preview.html?pageid=quizplus&webview=ftcapp&bodyonly=yes",
+            contentPath = "/m/corp/preview.html?pageid=quizplus&webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
             /**
              * Article items for this page:
@@ -600,7 +600,7 @@ object TabPages {
         ChannelSource(
             title = "深度阅读",
             name = "fta_reading",
-            contentUrl = "/m/corp/preview.html?pageid=mbaread&webview=ftcapp&bodyonly=yes",
+            contentPath = "/m/corp/preview.html?pageid=mbaread&webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT)
     )
 
@@ -617,7 +617,7 @@ object TabPages {
         ChannelSource(
             title = "最新",
             name = "video_latest",
-            contentUrl = "/channel/audiovideo.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+            contentPath = "/channel/audiovideo.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
             htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -633,7 +633,7 @@ object TabPages {
         ChannelSource(
             title = "高端视点",
             name = "video_viewtop",
-            contentUrl = "/channel/viewtop.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+            contentPath = "/channel/viewtop.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
             htmlType = HTML_TYPE_FRAGMENT),
             /**
              * "meta": {
@@ -649,13 +649,13 @@ object TabPages {
         ChannelSource(
             title = "麦可林学英语",
             name = "video_learn_english",
-            contentUrl = "/m/corp/preview.html?pageid=learnenglish&webview=ftcapp&bodyonly=yes",
+            contentPath = "/m/corp/preview.html?pageid=learnenglish&webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT),
 
         ChannelSource(
             title = "BoomEar艺术播客",
             name = "video_boomear",
-            contentUrl = "/m/corp/preview.html?pageid=boomear&webview=ftcapp&bodyonly=yes",
+            contentPath = "/m/corp/preview.html?pageid=boomear&webview=ftcapp&bodyonly=yes",
             htmlType = HTML_TYPE_FRAGMENT
         ),
             /**
@@ -672,7 +672,7 @@ object TabPages {
         ChannelSource(
             title = "秒懂",
             name = "video_explain",
-            contentUrl = "/channel/explainer.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+            contentPath = "/channel/explainer.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
             htmlType = HTML_TYPE_FRAGMENT
         ),
 
@@ -683,7 +683,7 @@ object TabPages {
         ChannelSource(
             title = "FT看见",
             name = "video_feature",
-            contentUrl = "/channel/vfeatures.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+            contentPath = "/channel/vfeatures.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
             htmlType = HTML_TYPE_FRAGMENT
         ),
             /**
@@ -693,7 +693,7 @@ object TabPages {
         ChannelSource(
             title = "有色眼镜",
             name = "video_tinted",
-            contentUrl = "/channel/videotinted.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
+            contentPath = "/channel/videotinted.html?webview=ftcapp&bodyonly=yes&norepeat=yes",
             htmlType = HTML_TYPE_FRAGMENT
         )
     )

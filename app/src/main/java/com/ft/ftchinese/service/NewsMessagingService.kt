@@ -95,7 +95,7 @@ class NewsMessagingService : FirebaseMessagingService(), AnkoLogger {
                     ChannelSource(
                             title = contentId,
                             name = "${msgType}_$contentId",
-                            contentUrl = "",
+                            contentPath = "",
                             htmlType = HTML_TYPE_FRAGMENT
                     )
             )
