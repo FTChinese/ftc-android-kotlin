@@ -49,19 +49,22 @@ object Config {
         }
     }
 
-    private fun appendUtm(url: String): Uri {
-        return Uri.parse(url).buildUpon()
+    private fun appendUtm(builder: Uri.Builder): Uri.Builder {
+        return builder
             .appendQueryParameter("utm_source", "marketing")
             .appendQueryParameter("utm_medium", "androidmarket")
             .appendQueryParameter("utm_campaign", currentFlavor)
             .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
-            .build()
     }
 
-    fun buildChannelSourceUrl(account: Account?, channelItem: ChannelSource): Uri? {
-        val baseUrl = "${discoverServer(account)}${channelItem.contentUrl}"
+    fun buildChannelSourceUrl(account: Account?, source: ChannelSource): Uri? {
+
         return try {
-            appendUtm(baseUrl)
+            val builder = Uri.parse(discoverServer(account))
+                .buildUpon()
+                .path(source.contentPath)
+
+            appendUtm(builder).build()
         } catch (e: Exception) {
             null
         }
@@ -74,30 +77,48 @@ object Config {
             return null
         }
 
-        val baseUrl = discoverServer(account)
-        val fullUrl = "${discoverServer(account)}/${teaser.type}/${teaser.id}"
+        val builder = Uri.parse(discoverServer(account))
+            .buildUpon()
 
-        val url =  when(teaser.type) {
-            ArticleType.Story, ArticleType.Premium -> "$baseUrl/index.php/jsapi/get_story_more_info/${teaser.id}"
+        if (teaser.type == ArticleType.Story || teaser.type == ArticleType.Premium) {
+            return builder
+                .path("/index.php/jsapi/get_story_more_info/${teaser.id}")
+                .build()
+        }
 
-            ArticleType.Interactive -> when (teaser.subType) {
-                Teaser.SUB_TYPE_RADIO -> "$fullUrl?webview=ftcapp&001&exclusive"
-                Teaser.SUB_TYPE_SPEED_READING -> "$fullUrl?webview=ftcapp&i=3&001&exclusive"
+        builder
+            .appendPath("/${teaser.type}/${teaser.id}")
+            .appendQueryParameter("webview", "ftcapp")
 
-                Teaser.SUB_TYPE_MBAGYM -> "$fullUrl?webview=ftcapp"
 
-                else -> "$fullUrl?webview=ftcapp&001&exclusive&hideheader=yes&ad=no&inNavigation=yes&for=audio&enableScript=yes&v=24"
+        when(teaser.type) {
+            ArticleType.Interactive -> {
+
+                builder
+                    .appendQueryParameter("001", "")
+                    .appendQueryParameter("exclusive", "")
+
+                when (teaser.subType) {
+                    Teaser.SUB_TYPE_RADIO,
+                    Teaser.SUB_TYPE_SPEED_READING,
+                    Teaser.SUB_TYPE_MBAGYM -> {}
+
+                    else -> builder
+                        .appendQueryParameter("hideheader", "yes")
+                        .appendQueryParameter("ad", "no")
+                        .appendQueryParameter("inNavigation", "yes")
+                        .appendQueryParameter("for", "audio")
+                        .appendQueryParameter("enableScript", "yes")
+                }
             }
 
-            ArticleType.Video -> "$fullUrl?bodyonly=yes&webview=ftcapp&004"
+            ArticleType.Video -> builder
+                .appendQueryParameter("bodyonly", "yes")
+                .appendQueryParameter("004", "")
 
-            else -> "$fullUrl?webview=ftcapp"
+            else -> {}
         }
 
-        return try {
-            appendUtm(url)
-        } catch (e: Exception) {
-            null
-        }
+        return appendUtm(builder).build()
     }
 }
