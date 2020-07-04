@@ -57,6 +57,7 @@ object Config {
             .appendQueryParameter("android", BuildConfig.VERSION_CODE.toString(10))
     }
 
+    // Build the url to fetch the content of a channel based on ChannelSource
     fun buildChannelSourceUrl(account: Account?, source: ChannelSource): Uri? {
 
         return try {
