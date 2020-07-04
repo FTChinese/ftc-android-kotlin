@@ -24,6 +24,8 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
     }
 
     fun load(channelSource: ChannelSource, bustCache: Boolean) {
+        info("Loadding channel content from $channelSource")
+
        val cacheName = channelSource.fileName
 
         info("Channel page cache file: $cacheName")
