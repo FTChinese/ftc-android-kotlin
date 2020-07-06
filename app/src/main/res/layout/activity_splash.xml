@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
-            android:scaleType="centerInside"
+            android:scaleType="fitCenter"
             android:visibility="@{timerText == null ? View.GONE : View.VISIBLE}"
             tools:layout_editor_absoluteX="-149dp"
             tools:layout_editor_absoluteY="114dp" />
