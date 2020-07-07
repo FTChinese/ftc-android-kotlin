@@ -139,5 +139,18 @@ class FileCache (private val context: Context) : AnkoLogger {
     fun readSearchTemplate(): String {
         return readTemplate("search.html", R.raw.search)
     }
+
+    fun readPrivacy(): String? {
+        return try {
+            context.resources
+                .openRawResource(R.raw.service)
+                .bufferedReader()
+                .use {
+                    it.readText()
+                }
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
 
