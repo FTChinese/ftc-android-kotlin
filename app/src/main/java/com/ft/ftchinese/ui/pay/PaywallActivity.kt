@@ -81,6 +81,10 @@ class PaywallActivity : ScopedAppActivity(),
 
         initUI()
 
+        supportFragmentManager.commit {
+            replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
+        }
+
         tracker = StatsTracker.getInstance(this)
         tracker.displayPaywall()
 

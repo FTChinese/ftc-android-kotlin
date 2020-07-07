@@ -93,6 +93,13 @@
                     app:layout_constraintBottom_toBottomOf="parent"/>
 
 
+                <FrameLayout
+                    android:id="@+id/frag_customer_service"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/product_bottom"
+                    app:layout_constraintStart_toStartOf="@id/product_top"
+                    app:layout_constraintEnd_toEndOf="@id/product_top"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 

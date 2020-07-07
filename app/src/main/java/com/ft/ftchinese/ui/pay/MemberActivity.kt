@@ -3,11 +3,11 @@ package com.ft.ftchinese.ui.pay
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -70,6 +70,10 @@ class MemberActivity : ScopedAppActivity(),
         })
 
         initUI()
+
+        supportFragmentManager.commit {
+            replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
+        }
     }
 
     private fun buildMemberInfo(member: Membership): UIMemberInfo {
@@ -270,20 +274,6 @@ class MemberActivity : ScopedAppActivity(),
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_orders -> {
             MyOrdersActivity.start(this)
-            true
-        }
-        R.id.action_service -> {
-            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:subscriber.service@ftchinese.com")
-                putExtra(Intent.EXTRA_SUBJECT, "FT中文网会员订阅")
-            }
-
-            if (intent.resolveActivity(packageManager) != null) {
-                startActivity(intent)
-            } else {
-                toast(R.string.prompt_no_email_app)
-            }
-
             true
         }
         else -> super.onOptionsItemSelected(item)
