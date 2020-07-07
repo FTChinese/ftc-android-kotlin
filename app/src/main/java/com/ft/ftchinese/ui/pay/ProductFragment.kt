@@ -72,19 +72,6 @@ class ProductFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
-
-//        product_heading_tv.text = product?.heading
-//        product_benefits_tv.text = product?.description
-
-//        if (product?.smallPrint.isNullOrBlank()) {
-//            product_small_print.visibility = View.GONE
-//        } else {
-//            product_small_print.visibility = View.VISIBLE
-//        }
-
-//        yearly_price_btn.text = product?.yearPrice
-
         // When user clicked the price button, find the corresponding Plan
         // and send it to view model so that parent activity could start
         // CheckoutActivity with the selcted Plan.
@@ -101,18 +88,8 @@ class ProductFragment : ScopedFragment(),
             viewModel.selected.value = findPlan(tier, Cycle.MONTH)
             // Once this button clicked, all price buttons should be disabled.
             viewModel.inputEnabled.value = false
-//                it.isEnabled = false
         }
 
-//        if (product?.monthPrice.isNullOrBlank()) {
-//            monthly_price_btn.visibility = View.GONE
-//        } else {
-//            monthly_price_btn.text = product?.monthPrice
-//
-//            monthly_price_btn.setOnClickListener {
-//
-//            }
-//        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
