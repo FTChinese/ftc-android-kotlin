@@ -508,5 +508,7 @@
     <string name="btn_reset_password">重置密码</string>
     <string name="title_reset_password">重置密码</string>
     <string name="api_password_code_not_found">您似乎使用了无效的验证码，请重新获取重置密码邮件</string>
+    <string name="btn_accept">接受</string>
+    <string name="btn_decline">拒绝</string>
 
 </resources>
