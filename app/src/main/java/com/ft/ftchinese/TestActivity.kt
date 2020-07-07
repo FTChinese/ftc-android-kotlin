@@ -17,6 +17,7 @@ import androidx.core.app.TaskStackBuilder
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.commit
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.databinding.ActivityTestBinding
 import com.ft.ftchinese.model.content.ArticleType
@@ -27,10 +28,12 @@ import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.service.PollService
 import com.ft.ftchinese.store.OrderManager
+import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
 import com.ft.ftchinese.ui.article.*
+import com.ft.ftchinese.ui.launch.PrivacyFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.LatestOrderActivity
 import com.ft.ftchinese.wxapi.WXEntryActivity
@@ -223,6 +226,16 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
         binding.btnLogin.setOnClickListener {
             sessionManager.saveAccount(mockAccount)
+        }
+
+        binding.btnService.setOnClickListener {
+            supportFragmentManager.commit {
+                add(android.R.id.content, PrivacyFragment.newInstance())
+            }
+        }
+
+        binding.btnDeclineService.setOnClickListener {
+            ServiceAcceptance.getInstance(this).clear()
         }
 
         binding.progressButtonText = "Test Button with Progress Bar"
