@@ -15,6 +15,7 @@ import android.webkit.WebView
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
@@ -33,6 +34,7 @@ import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.service.AudioDownloadService
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
@@ -83,8 +85,11 @@ class MainActivity : ScopedAppActivity(),
     private lateinit var cache: FileCache
 
     private lateinit var sessionManager: SessionManager
+    private lateinit var acceptance: ServiceAcceptance
     private lateinit var tokenManager: TokenManager
     private lateinit var wxApi: IWXAPI
+
+    private var privacyFragment: PrivacyFragment? = null
 
     private lateinit var statsTracker: StatsTracker
 
@@ -110,6 +115,7 @@ class MainActivity : ScopedAppActivity(),
         wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
 
         sessionManager = SessionManager.getInstance(this)
+        acceptance = ServiceAcceptance.getInstance(this)
         tokenManager = TokenManager.getInstance(this)
 
         accountViewModel = ViewModelProvider(this)
@@ -155,6 +161,29 @@ class MainActivity : ScopedAppActivity(),
             DownloadService.startForeground(this, AudioDownloadService::class.java)
         }
 
+        if (!acceptance.isAccepted()) {
+            val frag = PrivacyFragment.newInstance()
+
+            supportFragmentManager.commit {
+                add(android.R.id.content, frag)
+            }
+
+            privacyFragment = frag
+        }
+
+        // If user clicked Accept button.
+        accountViewModel.serviceAccepted.observe(this, Observer {
+            if (!it) {
+                return@Observer
+            }
+            acceptance.accepted()
+
+            val frag = privacyFragment ?: return@Observer
+
+            supportFragmentManager.commit {
+                remove(frag)
+            }
+        })
     }
 
     private fun createNotificationChannel() {
