@@ -1,4 +1,6 @@
 <resources>
+    <string name="btn_accept">接受</string>
+    <string name="btn_decline">拒绝</string>
     <string name="app_name">FT中文网</string>
     <string name="action_search">搜索</string>
     <string name="action_listen_story">朗读</string>
@@ -334,7 +336,6 @@
     <string name="prompt_updated">更新成功!</string>
 
 
-
     <string name="prompt_linked">账号已绑定</string>
     <string name="prompt_unlinked">账号已解除绑定</string>
     <string name="prompt_account_updated">账号已更新</string>
@@ -512,6 +513,5 @@
         <item>tc</item>
     </string-array>
     <string name="api_password_code_not_found">您似乎使用了无效的验证码，请重新获取重置密码邮件</string>
-
 
 </resources>
