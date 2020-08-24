@@ -102,7 +102,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
 //        plan = intent.getParcelableExtra(EXTRA_FTC_PLAN)
         val cnPI = intent.getParcelableExtra<PaymentIntent>(EXTRA_PAYMENT_INTENT)
-        paymentIntent = cnPI?.withStripePlan(stripePlanCache.load(cnPI.plan.getId()))
+        paymentIntent = cnPI?.withStripePlan(stripePlanCache.load(cnPI.plan.getNamedKey()))
 
         sessionManager = SessionManager.getInstance(this)
 
@@ -242,7 +242,7 @@ class StripeSubActivity : ScopedAppActivity(),
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
-                stripePlanCache.save(result.data, paymentIntent?.plan?.getId())
+                stripePlanCache.save(result.data, paymentIntent?.plan?.getNamedKey())
             }
         }
     }

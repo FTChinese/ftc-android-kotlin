@@ -128,7 +128,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val stripePlan = withContext(Dispatchers.IO) {
-                    StripeRepo.getStripePlan(plan.getId())
+                    StripeRepo.getStripePlan(plan.getNamedKey())
                 }
 
                 if (stripePlan == null) {

@@ -46,7 +46,7 @@ class StatsTracker private constructor(context: Context) {
 
     fun addCart(plan: Plan) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle().apply {
-            putString(FirebaseAnalytics.Param.ITEM_ID, plan.getId())
+            putString(FirebaseAnalytics.Param.ITEM_ID, plan.getNamedKey())
             putString(FirebaseAnalytics.Param.ITEM_NAME, plan.tier.toString())
             putString(FirebaseAnalytics.Param.ITEM_CATEGORY, plan.cycle.toString())
             putLong(FirebaseAnalytics.Param.QUANTITY, 1)
