@@ -28,13 +28,6 @@ data class WxOrder(
         override val payMethod: PayMethod,
         @KDateTime
         override val createdAt: ZonedDateTime,
-        val appId: String, // Deprecate
-        val partnerId: String, // Deprecate
-        val prepayId: String, // Deprecate
-        val timestamp: String, // Deprecate
-        val nonce: String, // Deprecate
-        val pkg: String, // Deprecate
-        val signature: String, // Deprecate
         val params: WxPayParams
 ) : Order(
         id = id,
