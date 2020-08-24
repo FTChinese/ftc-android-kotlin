@@ -13,6 +13,7 @@ data class WxPayParams(
         val signature: String
 )
 
+// This is user's payment intent.
 data class WxOrder(
         override val id: String,
         @KTier
