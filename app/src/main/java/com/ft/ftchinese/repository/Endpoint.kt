@@ -35,6 +35,9 @@ object ContentApi {
 
 object SubscribeApi {
     private val BASE = Config.subsApiBase
+
+    val PAYWALL = "$BASE/paywall"
+
     val WX_UNIFIED_ORDER = "$BASE/wxpay/app"
     val WX_ORDER_QUERY = "$BASE/wxpay/query"
     val ALI_ORDER = "$BASE/alipay/app"

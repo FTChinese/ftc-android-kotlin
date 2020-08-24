@@ -11,17 +11,20 @@ import kotlinx.android.parcel.Parcelize
  */
 @Parcelize
 data class Plan(
+        val id: String? = null,
+        val productId: String? = null,
+        val price: Double,
         @KTier
         val tier: Tier,
         @KCycle
         val cycle: Cycle,
-        val price: Double,
-        val amount: Double,
-        val currency: String,
-        val description: String
+        val description: String,
+        val amount: Double, // Deprecate.
+        val currency: String = "cny", // Not from API
+        val discount: Discount? = null
 ) : Parcelable {
 
-    fun getId(): String {
+    fun getNamedKey(): String {
         return "${tier}_$cycle"
     }
 

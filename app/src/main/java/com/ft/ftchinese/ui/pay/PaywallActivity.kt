@@ -14,12 +14,14 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
 import com.ft.ftchinese.viewmodel.ProductViewModel
+import com.ft.ftchinese.viewmodel.ProductViewModelFactory
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -32,6 +34,7 @@ import org.jetbrains.anko.toast
 class PaywallActivity : ScopedAppActivity(),
         AnkoLogger {
 
+    private lateinit var cache: FileCache
     private lateinit var checkoutViewModel: CheckOutViewModel
     private lateinit var tracker: StatsTracker
     private lateinit var sessionManager: SessionManager
@@ -52,9 +55,10 @@ class PaywallActivity : ScopedAppActivity(),
 
         premiumFirst = intent.getBooleanExtra(EXTRA_PREMIUM_FIRST, false)
 
+        cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
 
-        productViewModel = ViewModelProvider(this)
+        productViewModel = ViewModelProvider(this, ProductViewModelFactory(cache))
                 .get(ProductViewModel::class.java)
 
         checkoutViewModel = ViewModelProvider(this)
@@ -124,36 +128,6 @@ class PaywallActivity : ScopedAppActivity(),
         binding.expiredWarning = buildExpiredWarning(account?.membership)
         binding.premiumFirst = premiumFirst
 
-//        if (account == null) {
-//            login_button.setOnClickListener {
-//                LoginActivity.startForResult(this)
-//            }
-//
-//        } else {
-//            login_button.visibility = View.GONE
-//
-//            // If user is an expired member
-//            if (account.membership.expired()) {
-//                expired_guide.visibility = View.VISIBLE
-//                expired_guide.text = expiredText(account.membership)
-//            }
-//        }
-
-
-//        val topCard = if (premiumFirst) {
-//            buildPremiumCard()
-//        } else {
-//            buildStandardCard()
-//        }
-//
-//        val bottomCard = if (premiumFirst) {
-//            buildStandardCard()
-//        } else {
-//            buildPremiumCard()
-//        }
-
-//        premium_guide.visibility = if (premiumFirst) View.VISIBLE else View.GONE
-
         if (premiumFirst) {
             supportFragmentManager.commit {
                 replace(
@@ -179,30 +153,6 @@ class PaywallActivity : ScopedAppActivity(),
         }
     }
 
-//    private fun buildStandardCard(): PaywallProduct {
-//
-//        return PaywallProduct(
-//                tier = Tier.STANDARD,
-//                heading = getString(R.string.tier_standard),
-//                description = resources
-//                        .getStringArray(R.array.standard_benefits)
-//                        .joinToString("\n"),
-//                yearPrice = getString(R.string.formatter_price_year, findPlan(Tier.STANDARD, Cycle.YEAR)?.amount),
-//                monthPrice = getString(R.string.formatter_price_month, findPlan(Tier.STANDARD, Cycle.MONTH)?.amount)
-//        )
-//    }
-
-//    private fun buildPremiumCard(): PaywallProduct {
-//        return PaywallProduct(
-//                tier = Tier.PREMIUM,
-//                heading = getString(R.string.tier_premium),
-//                description = resources
-//                        .getStringArray(R.array.premium_benefits)
-//                        .joinToString("\n"),
-//                yearPrice = getString(R.string.formatter_price_year, findPlan(Tier.PREMIUM, Cycle.YEAR)?.amount)
-//        )
-//    }
-
     // Upon payment succeeded, this activity should kill
     // itself so that user won't see it again.
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -224,7 +174,6 @@ class PaywallActivity : ScopedAppActivity(),
                     return
                 }
 
-//                login_button.visibility = View.GONE
                 binding.loggedIn = true
 
                 toast(R.string.prompt_logged_in)

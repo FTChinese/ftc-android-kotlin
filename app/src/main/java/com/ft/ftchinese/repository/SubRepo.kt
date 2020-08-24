@@ -8,6 +8,19 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
 object SubRepo : AnkoLogger {
+
+    fun loadPaywall(): Paywall? {
+        val (_, body) = Fetch().get(SubscribeApi.PAYWALL)
+            .noCache()
+            .responseApi()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<Paywall>(body)
+        }
+    }
+
     fun previewUpgrade(account: Account): PaymentIntent? {
 
         val (_, body) = account.createFetch()
@@ -69,7 +82,7 @@ object SubRepo : AnkoLogger {
                 .noCache()
                 .setClient()
                 .setAppId()
-                .body()
+                .jsonBody(json.toJsonString(plan))
                 .responseApi()
 
         info("Wx order: $body")
@@ -103,7 +116,7 @@ object SubRepo : AnkoLogger {
                 .setTimeout(30)
                 .noCache()
                 .setClient()
-                .body()
+                .jsonBody(json.toJsonString(plan))
                 .responseApi()
 
         info("Aliorder $body")

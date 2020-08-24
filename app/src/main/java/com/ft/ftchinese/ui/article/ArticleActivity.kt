@@ -77,7 +77,6 @@ class ArticleActivity : ScopedAppActivity(),
     private var isStarring = false
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_article)
