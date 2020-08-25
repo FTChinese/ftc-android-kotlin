@@ -13,5 +13,22 @@ data class Discount(
     @KDateTime
     val startUtc: ZonedDateTime? = null,
     @KDateTime
-    val endUtc: ZonedDateTime? = null
-) : Parcelable
+    val endUtc: ZonedDateTime? = null,
+    val description: String? = null
+) : Parcelable {
+
+    // isValid checks whether a discount exists and whehter it is in valid period.
+    fun isValid(): Boolean {
+        if (priceOff == null || priceOff <= 0) {
+            return false
+        }
+
+        val now = ZonedDateTime.now()
+
+        if (now.isBefore(startUtc) || now.isAfter(endUtc)) {
+            return false
+        }
+
+        return true
+    }
+}
