@@ -100,7 +100,7 @@ class FileCache (private val context: Context) : AnkoLogger {
     /**
      * Read files from the the `raw` directory of the package.
      */
-    private fun readTemplate(name: String, resId: Int): String {
+    private fun readRaw(name: String, resId: Int): String {
         val cached = templateCache[name]
         if (cached != null) {
             info("Using cached template: $name")
@@ -129,15 +129,15 @@ class FileCache (private val context: Context) : AnkoLogger {
     }
 
     fun readChannelTemplate(): String {
-        return readTemplate("list.html", R.raw.list)
+        return readRaw("list.html", R.raw.list)
     }
 
     fun readStoryTemplate(): String? {
-        return readTemplate("story.html", R.raw.story)
+        return readRaw("story.html", R.raw.story)
     }
 
     fun readSearchTemplate(): String {
-        return readTemplate("search.html", R.raw.search)
+        return readRaw("search.html", R.raw.search)
     }
 
     fun readPrivacy(): String? {
