@@ -12,12 +12,18 @@
             type="Boolean" />
         <variable
             name="product"
-            type="com.ft.ftchinese.ui.pay.UIPaywallProduct" />
+            type="com.ft.ftchinese.ui.paywall.UIProduct" />
+        <variable
+            name="yearPrice"
+            type="com.ft.ftchinese.ui.paywall.Price" />
+        <variable
+            name="monthPrice"
+            type="com.ft.ftchinese.ui.paywall.Price" />
     </data>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -36,6 +42,20 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/discount_period"/>
+
+            <TextView
+                android:id="@+id/discount_period"
+                style="@style/OrigamiText.ProductHeading3.Center"
+                android:textAlignment="center"
+                android:textColor="@color/colorClaret"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@{yearPrice.discountPeriod}"
+                android:visibility="@{yearPrice.discountPeriod == null ? View.GONE : View.VISIBLE}"
+                app:layout_constraintStart_toStartOf="@id/product_heading_tv"
+                app:layout_constraintEnd_toEndOf="@id/product_heading_tv"
+                app:layout_constraintTop_toBottomOf="@id/product_heading_tv"
                 app:layout_constraintBottom_toTopOf="@id/product_benefits_tv"/>
 
             <TextView
@@ -47,10 +67,10 @@
                 android:layout_marginBottom="16dp"
                 android:lineSpacingExtra="8sp"
                 android:text="@{product.description}"
-                app:layout_constraintStart_toStartOf="@+id/product_heading_tv"
-                app:layout_constraintEnd_toEndOf="@+id/product_heading_tv"
-                app:layout_constraintTop_toBottomOf="@+id/product_heading_tv"
-                app:layout_constraintBottom_toTopOf="@+id/product_small_print"/>
+                app:layout_constraintStart_toStartOf="@id/product_heading_tv"
+                app:layout_constraintEnd_toEndOf="@id/product_heading_tv"
+                app:layout_constraintTop_toBottomOf="@id/discount_period"
+                app:layout_constraintBottom_toTopOf="@id/product_small_print"/>
 
             <TextView
                 android:id="@+id/product_small_print"
@@ -62,20 +82,32 @@
                 app:layout_constraintStart_toStartOf="@id/product_heading_tv"
                 app:layout_constraintEnd_toEndOf="@id/product_heading_tv"
                 app:layout_constraintTop_toBottomOf="@id/product_benefits_tv"
-                app:layout_constraintBottom_toTopOf="@id/yearly_price_btn"
-                />
+                app:layout_constraintBottom_toTopOf="@id/pre_discount_price"/>
+
+            <TextView
+                android:id="@+id/pre_discount_price"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@{yearPrice.originalPrice}"
+                android:textAlignment="center"
+                android:visibility="@{yearPrice.discountPeriod == null ? View.GONE : View.VISIBLE}"
+                app:layout_constraintEnd_toEndOf="@+id/product_heading_tv"
+                app:layout_constraintStart_toStartOf="@id/product_heading_tv"
+                app:layout_constraintTop_toBottomOf="@id/product_small_print"
+                app:layout_constraintBottom_toTopOf="@id/yearly_price_btn"/>
 
             <Button
                 android:id="@+id/yearly_price_btn"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:text="@{product.yearPrice}"
+                android:text="@{yearPrice.amount}"
                 android:enabled="@{buttonEnabled}"
-                app:layout_constraintTop_toBottomOf="@+id/product_small_print"
+                app:layout_constraintTop_toBottomOf="@id/pre_discount_price"
                 app:layout_constraintStart_toStartOf="@id/product_heading_tv"
                 app:layout_constraintEnd_toEndOf="@id/product_heading_tv"
-                app:layout_constraintBottom_toTopOf="@+id/monthly_price_btn"/>
+                app:layout_constraintBottom_toTopOf="@id/monthly_price_btn"/>
+
 
             <Button
                 android:id="@+id/monthly_price_btn"
@@ -83,9 +115,9 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:text="@{product.monthPrice}"
+                android:text="@{monthPrice.amount}"
                 android:enabled="@{buttonEnabled}"
-                android:visibility="@{product.monthPrice == null ? View.GONE : View.VISIBLE}"
+                android:visibility="@{monthPrice == null ? View.GONE : View.VISIBLE}"
                 app:layout_constraintTop_toBottomOf="@+id/yearly_price_btn"
                 app:layout_constraintStart_toStartOf="@id/product_heading_tv"
                 app:layout_constraintEnd_toEndOf="@id/product_heading_tv"
