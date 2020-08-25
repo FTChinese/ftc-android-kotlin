@@ -3,11 +3,9 @@ package com.ft.ftchinese.ui.pay
 import android.app.Activity
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.MemberStatus
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.ui.login.LoginActivity
-import org.jetbrains.anko.alert
-import org.jetbrains.anko.appcompat.v7.Appcompat
+import com.ft.ftchinese.ui.paywall.PaywallActivity
 import org.jetbrains.anko.toast
 
 /**
