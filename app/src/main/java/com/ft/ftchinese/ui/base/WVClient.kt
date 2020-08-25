@@ -24,7 +24,7 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.WebViewActivity
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.login.LoginActivity
-import com.ft.ftchinese.ui.pay.PaywallActivity
+import com.ft.ftchinese.ui.paywall.PaywallActivity
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast

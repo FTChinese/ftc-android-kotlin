@@ -22,6 +22,7 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.pay.*
+import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.tencent.mm.opensdk.constants.ConstantsAPI

@@ -119,13 +119,13 @@
             android:label="@string/title_my_subs"
             android:parentActivityName=".ui.launch.MainActivity" />
         <activity
-            android:name=".ui.pay.PaywallActivity"
+            android:name=".ui.paywall.PaywallActivity"
             android:label="@string/title_subscription"
             android:parentActivityName=".ui.launch.MainActivity" />
         <activity
             android:name=".ui.pay.CheckOutActivity"
             android:label="@string/title_checkout"
-            android:parentActivityName=".ui.pay.PaywallActivity" />
+            android:parentActivityName=".ui.paywall.PaywallActivity" />
         <activity
             android:name=".ui.pay.StripeSubActivity"
             android:label="@string/pay_method_stripe"
@@ -147,7 +147,7 @@
             android:label="@string/title_my_orders"
             android:parentActivityName=".ui.pay.MemberActivity" />
         <activity
-            android:name=".ui.pay.UpgradeActivity"
+            android:name=".ui.paywall.UpgradeActivity"
             android:label="@string/title_upgrade"
             android:parentActivityName=".ui.pay.MemberActivity" />
         <activity

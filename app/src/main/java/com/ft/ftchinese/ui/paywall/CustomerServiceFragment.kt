@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.paywall
 
 import android.content.Intent
 import android.net.Uri

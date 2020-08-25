@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.paywall
 
 import android.app.Activity
 import android.content.Context
@@ -18,10 +18,9 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.login.LoginActivity
+import com.ft.ftchinese.ui.pay.CheckOutActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
-import com.ft.ftchinese.viewmodel.ProductViewModel
-import com.ft.ftchinese.viewmodel.ProductViewModelFactory
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -35,9 +34,9 @@ class PaywallActivity : ScopedAppActivity(),
         AnkoLogger {
 
     private lateinit var cache: FileCache
-    private lateinit var checkoutViewModel: CheckOutViewModel
     private lateinit var tracker: StatsTracker
     private lateinit var sessionManager: SessionManager
+    private lateinit var checkoutViewModel: CheckOutViewModel
     private lateinit var productViewModel: ProductViewModel
     private lateinit var binding: ActivityPaywallBinding
 
@@ -58,11 +57,13 @@ class PaywallActivity : ScopedAppActivity(),
         cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
 
-        productViewModel = ViewModelProvider(this, ProductViewModelFactory(cache))
+        // Init viewmodels
+        productViewModel = ViewModelProvider(this)
                 .get(ProductViewModel::class.java)
 
         checkoutViewModel = ViewModelProvider(this)
                 .get(CheckOutViewModel::class.java)
+
 
         // When a price button in ProductFragment is clicked, the selected Plan
         // is passed.
@@ -77,14 +78,16 @@ class PaywallActivity : ScopedAppActivity(),
 
             // If user logged in, go to CheckOutActivity.
             CheckOutActivity.startForResult(
-                    activity = this,
-                    requestCode = RequestCode.PAYMENT,
-                    paymentIntent = it.paymentIntent(account.membership.subType(it))
+                activity = this,
+                requestCode = RequestCode.PAYMENT,
+                paymentIntent = it.paymentIntent(account.membership.subType(it))
             )
         })
 
+
         initUI()
 
+        // Customer service
         supportFragmentManager.commit {
             replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
         }
@@ -94,6 +97,7 @@ class PaywallActivity : ScopedAppActivity(),
 
     }
 
+    // Create an expiration reminder if membership exists but expired; otherwise returns null.
     private fun buildExpiredWarning(m: Membership?): String? {
         if (m == null) {
             return null
@@ -116,38 +120,45 @@ class PaywallActivity : ScopedAppActivity(),
     }
 
     private fun initUI() {
-//        expired_guide.visibility = View.GONE
-//        premium_guide.visibility = View.GONE
 
         val account = sessionManager.loadAccount()
 
+        // Determine whether the login button should be visible.
         binding.loggedIn = account != null
+
+        // Click login to show LoginActivity.
         binding.loginButton.setOnClickListener {
             LoginActivity.startForResult(this)
         }
+
+        // Show expiration reminder if expired.
         binding.expiredWarning = buildExpiredWarning(account?.membership)
+
+        // For premium content, put the premium product card
+        // on top and show a reminding message.
         binding.premiumFirst = premiumFirst
 
+        // Insert product fragment.
         if (premiumFirst) {
             supportFragmentManager.commit {
                 replace(
                         R.id.product_top,
-                        ProductFragment.newInstance(Tier.PREMIUM)
+                    ProductFragment.newInstance(Tier.PREMIUM)
                 )
                 replace(
                         R.id.product_bottom,
-                        ProductFragment.newInstance(Tier.STANDARD)
+                    ProductFragment.newInstance(Tier.STANDARD)
                 )
             }
         } else {
             supportFragmentManager.commit {
                 replace(
                         R.id.product_top,
-                        ProductFragment.newInstance(Tier.STANDARD)
+                    ProductFragment.newInstance(Tier.STANDARD)
                 )
                 replace(
                         R.id.product_bottom,
-                        ProductFragment.newInstance(Tier.PREMIUM)
+                    ProductFragment.newInstance(Tier.PREMIUM)
                 )
             }
         }

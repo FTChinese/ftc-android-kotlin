@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.paywall
 
 import android.app.Activity
 import android.content.Intent
@@ -14,8 +14,8 @@ import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.pay.UpgradePreviewActivity
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.viewmodel.ProductViewModel
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info

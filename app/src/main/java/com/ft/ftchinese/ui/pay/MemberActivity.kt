@@ -21,6 +21,9 @@ import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.paywall.CustomerServiceFragment
+import com.ft.ftchinese.ui.paywall.PaywallActivity
+import com.ft.ftchinese.ui.paywall.UpgradeActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.Result

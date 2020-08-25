@@ -47,7 +47,7 @@ import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.channel.MyftPagerAdapter
 import com.ft.ftchinese.ui.channel.SearchableActivity
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
-import com.ft.ftchinese.ui.pay.PaywallActivity
+import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.util.*
 import com.ft.ftchinese.viewmodel.Result

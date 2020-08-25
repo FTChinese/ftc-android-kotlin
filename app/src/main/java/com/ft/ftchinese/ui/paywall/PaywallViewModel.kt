@@ -1,44 +1,41 @@
-package com.ft.ftchinese.viewmodel
+package com.ft.ftchinese.ui.paywall
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.subscription.Paywall
-import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.paywallCacheName
 import com.ft.ftchinese.repository.Fetch
 import com.ft.ftchinese.repository.SubscribeApi
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.util.json
+import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-/**
- * Used by ProductFragment to pass information to host
- * activity which product is selected.
- */
-class ProductViewModel(
+class PaywallViewModel(
     private val cache: FileCache
 ) : ViewModel(), AnkoLogger {
-
-    val selected: MutableLiveData<Plan> by lazy {
-        MutableLiveData<Plan>()
-    }
-
-    val inputEnabled: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>()
-    }
-
     val isNetworkAvailable = MutableLiveData<Boolean>()
 
-    val paywallResult: MutableLiveData<Result<Paywall>> by lazy {
+    val result: MutableLiveData<Result<Paywall>> by lazy {
         MutableLiveData<Result<Paywall>>()
     }
 
+
+    // The initial paywall data is embedded in the app.
+    // Upon UI show up, it will first try to see if cache has
+    // a copy of paywall data fetch from API.
+    // If found, use it; otherwise use the embedded data.
+    // In both case we will fetch latest data from API silently.
+    // The only exception is when user manually swipe, in which
+    // case we will fetch data directly from server, and UI
+    // should show progress.
     fun loadPaywall() {
 
         var cachedFound = false
@@ -55,7 +52,7 @@ class ProductViewModel(
                 }
 
                 if (paywall != null) {
-                    paywallResult.value = Result.Success(paywall)
+                    result.value = Result.Success(paywall)
                     cachedFound = true
                 }
             } catch (e: Exception) {
@@ -65,7 +62,7 @@ class ProductViewModel(
             if (isNetworkAvailable.value != true) {
 
                 if (!cachedFound) {
-                    paywallResult.value = Result.LocalizedError(R.string.prompt_no_network)
+                    result.value = Result.LocalizedError(R.string.prompt_no_network)
                 }
 
                 return@launch
@@ -83,17 +80,17 @@ class ProductViewModel(
                 }
 
                 if (paywall == null) {
-                    paywallResult.value = Result.LocalizedError(R.string.api_server_error)
+                    result.value = Result.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
 
-                paywallResult.value = Result.Success(paywall)
+                result.value = Result.Success(paywall)
 
                 cache.saveText(paywallCacheName, data!!)
 
             } catch (e: Exception) {
                 info(e)
-                paywallResult.value = parseException(e)
+                result.value = parseException(e)
             }
         }
     }
