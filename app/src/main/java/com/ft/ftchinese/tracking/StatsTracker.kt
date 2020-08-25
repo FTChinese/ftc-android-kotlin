@@ -69,7 +69,7 @@ class StatsTracker private constructor(context: Context) {
 
     fun checkOut(plan: Plan, payMethod: PayMethod) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
-            putDouble(FirebaseAnalytics.Param.VALUE, plan.amount)
+            putDouble(FirebaseAnalytics.Param.VALUE, plan.payableAmount())
             putString(FirebaseAnalytics.Param.CURRENCY, plan.currency)
             putString(FirebaseAnalytics.Param.METHOD, payMethod.toString())
         })
@@ -78,7 +78,7 @@ class StatsTracker private constructor(context: Context) {
     fun buySuccess(plan: Plan?, payMethod: PayMethod?) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-            putDouble(FirebaseAnalytics.Param.VALUE, plan?.amount ?: 0.0)
+            putDouble(FirebaseAnalytics.Param.VALUE, plan?.payableAmount() ?: 0.0)
             putString(FirebaseAnalytics.Param.METHOD, payMethod?.toString())
         })
 
