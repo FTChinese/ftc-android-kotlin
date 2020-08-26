@@ -14,7 +14,6 @@ import com.ft.ftchinese.databinding.FragmentProductBinding
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.ui.base.ScopedFragment
 import org.jetbrains.anko.AnkoLogger
-import org.threeten.bp.format.DateTimeFormatter
 
 /**
  * Show a card of product.
@@ -26,7 +25,17 @@ class ProductFragment : ScopedFragment(),
 
     private lateinit var viewModel: ProductViewModel
     private lateinit var binding: FragmentProductBinding
+
+    /**
+     * The tier of current product.
+     */
     private var tier: Tier? = null
+
+    /**
+     * The pricing plans for current product is stored as a map so that
+     * when use clicked we can find out which price is clicked and tells
+     * host activity what to do next.
+     */
     private val plans = mutableMapOf<Cycle, Plan>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,15 +54,19 @@ class ProductFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // When user clicked the price button, find the corresponding Plan
-        // and send it to view model so that parent activity could start
-        // CheckoutActivity with the selcted Plan.
+        /**
+         * When user clicked the price button, find the corresponding Plan
+         * and send it to view model so that parent activity could start
+         * CheckoutActivity with the selcted Plan.
+         */
         binding.yearlyPriceBtn.setOnClickListener {
             val plan = plans[Cycle.YEAR]
 
             viewModel.selected.value = plan
 
-            // Once this button clicked, all price buttons should be disabled.
+            /**
+             * Disable all buttons.
+             */
             viewModel.inputEnabled.value = false
         }
 
@@ -62,12 +75,24 @@ class ProductFragment : ScopedFragment(),
 
             viewModel.selected.value = plan
 
-            // Once this button clicked, all price buttons should be disabled.
+            /**
+             * Once this button clicked, all price buttons should be disabled.
+             */
             viewModel.inputEnabled.value = false
         }
 
+        /**
+         * The data for product UI is retrieve from embedded string resources so that there won't be any lag when drawing UI.
+         * We don't use data from since it won't change frequently and the content actually does not matter much.
+         */
         initProduct()
-        initPrice(defaultPlans)
+        //
+        /**
+         * Initially we use the hard-coded pricing plans.
+         * Then we'll load paywall data from cache,
+         * then fetch latest data from server.
+         */
+        initPrice(defaultPlans.filter { it.tier == tier })
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -84,8 +109,13 @@ class ProductFragment : ScopedFragment(),
         })
 
         // Observing products
-        viewModel.plansReceived.observe(viewLifecycleOwner, Observer<List<Plan>> {
-            initPrice(it)
+        viewModel.productsReceived.observe(viewLifecycleOwner, Observer<List<Product>> { products ->
+            products.find {
+                it.tier == tier
+            }?.let {
+                initPrice(it.plans)
+            }
+
         })
     }
 
@@ -106,9 +136,7 @@ class ProductFragment : ScopedFragment(),
     }
 
     private fun initPrice(plans: List<Plan>) {
-        plans
-            .filter { it.tier == tier }
-            .forEach { plan ->
+        plans.forEach { plan ->
 
                 this.plans[plan.cycle] = plan
 
@@ -130,23 +158,16 @@ class ProductFragment : ScopedFragment(),
                 cycleStr
             ),
 
-            discountPeriod = if (plan.discount.isValid()) {
-                 getString(
-                     R.string.discount_period,
-                     plan.discount
-                         .endUtc
-                         ?.format(DateTimeFormatter.ISO_LOCAL_DATE)
+            originalPrice = if (plan.discount.isValid()) {
+                getString(R.string.original_price) + getString(
+                    R.string.formatter_price_cycle,
+                    plan.price,
+                    cycleStr
                 )
-
             } else {
                 null
-            },
+            }
 
-            originalPrice = getString(R.string.original_price) + getString(
-                R.string.formatter_price_cycle,
-                plan.price,
-                cycleStr
-            )
         )
     }
 

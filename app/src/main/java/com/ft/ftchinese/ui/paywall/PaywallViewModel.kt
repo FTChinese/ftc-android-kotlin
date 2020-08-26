@@ -4,8 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.subscription.Paywall
-import com.ft.ftchinese.model.subscription.paywallCacheName
+import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.repository.Fetch
 import com.ft.ftchinese.repository.SubscribeApi
 import com.ft.ftchinese.store.FileCache
@@ -23,74 +22,72 @@ class PaywallViewModel(
 ) : ViewModel(), AnkoLogger {
     val isNetworkAvailable = MutableLiveData<Boolean>()
 
-    val result: MutableLiveData<Result<Paywall>> by lazy {
+    val paywallResult: MutableLiveData<Result<Paywall>> by lazy {
         MutableLiveData<Result<Paywall>>()
     }
 
-
-    // The initial paywall data is embedded in the app.
-    // Upon UI show up, it will first try to see if cache has
-    // a copy of paywall data fetch from API.
-    // If found, use it; otherwise use the embedded data.
-    // In both case we will fetch latest data from API silently.
-    // The only exception is when user manually swipe, in which
-    // case we will fetch data directly from server, and UI
-    // should show progress.
-    fun loadPaywall() {
-
-        var cachedFound = false
+    fun loadPaywall(isRefreshing: Boolean) {
         viewModelScope.launch {
-            try {
-                val data = withContext(Dispatchers.IO) {
-                    cache.loadText(paywallCacheName)
-                }
 
-                val paywall = if (!data.isNullOrBlank()) {
-                    json.parse<Paywall>(data)
-                } else {
-                    null
-                }
+            // If not manually refreshing
+            if (!isRefreshing) {
+                try {
+                    val pw = withContext(Dispatchers.IO) {
+                        val data = cache.loadText(paywallFileName)
 
-                if (paywall != null) {
-                    result.value = Result.Success(paywall)
-                    cachedFound = true
+                        if (!data.isNullOrBlank()) {
+                            json.parse<Paywall>(data)
+                        } else {
+                            null
+                        }
+                    }
+
+                    if (pw != null) {
+
+                        paywallResult.value = Result.Success(pw)
+                        // Update the in-memory cache.
+                        PlanStore.plans = pw.products.flatMap {
+                            it.plans
+                        }
+                    }
+                } catch (e: Exception) {
+                    info(e)
                 }
-            } catch (e: Exception) {
-                info(e)
             }
 
             if (isNetworkAvailable.value != true) {
 
-                if (!cachedFound) {
-                    result.value = Result.LocalizedError(R.string.prompt_no_network)
-                }
+                paywallResult.value = Result.LocalizedError(R.string.prompt_no_network)
 
                 return@launch
             }
 
             try {
-                val data = withContext(Dispatchers.IO) {
-                    Fetch().get(SubscribeApi.PAYWALL).responseString()
-                }
+                val (pw, data) = withContext(Dispatchers.IO) {
+                    val data = Fetch().get(SubscribeApi.PAYWALL).responseString()
 
-                val paywall = if(data.isNullOrBlank()) {
-                    null
-                } else {
-                    json.parse<Paywall>(data)
+                    if(!data.isNullOrBlank()) {
+                        Pair(json.parse<Paywall>(data), data)
+                    } else {
+                        null
+                    }
                 }
+                        ?: return@launch
 
-                if (paywall == null) {
-                    result.value = Result.LocalizedError(R.string.api_server_error)
+                if (pw == null) {
+                    paywallResult.value = Result.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
 
-                result.value = Result.Success(paywall)
+                paywallResult.value = Result.Success(pw)
 
-                cache.saveText(paywallCacheName, data!!)
+                withContext(Dispatchers.IO) {
+                    cache.saveText(paywallFileName, data)
+                }
 
             } catch (e: Exception) {
                 info(e)
-                result.value = parseException(e)
+                paywallResult.value = parseException(e)
             }
         }
     }

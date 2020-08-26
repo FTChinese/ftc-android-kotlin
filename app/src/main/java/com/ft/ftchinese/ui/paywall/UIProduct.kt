@@ -6,9 +6,14 @@ data class UIProduct(
         val smallPrint: String? = null
 )
 
+data class PromoUI(
+    val heading: String,
+    val subHeading: String?,
+    val terms: String?
+)
+
 data class Price(
     val amount: String, // The actually charged amount
-    val discountPeriod: String?, // The original price and discounted discount ending date.
-    val originalPrice: String
+    val originalPrice: String?
 
 )

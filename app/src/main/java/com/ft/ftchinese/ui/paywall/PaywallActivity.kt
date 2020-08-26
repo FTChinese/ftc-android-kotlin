@@ -8,36 +8,44 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityPaywallBinding
-import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.model.subscription.Plan
-import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.pay.CheckOutActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
+
+private val productOrder = listOf(
+    Pair(R.id.product_top, Tier.STANDARD),
+    Pair(R.id.product_bottom, Tier.PREMIUM)
+)
 
 /**
  * Paywall of products.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class PaywallActivity : ScopedAppActivity(),
-        AnkoLogger {
+    SwipeRefreshLayout.OnRefreshListener,
+    AnkoLogger {
 
     private lateinit var cache: FileCache
     private lateinit var tracker: StatsTracker
     private lateinit var sessionManager: SessionManager
     private lateinit var checkoutViewModel: CheckOutViewModel
     private lateinit var productViewModel: ProductViewModel
+    private lateinit var paywallViewModel: PaywallViewModel
     private lateinit var binding: ActivityPaywallBinding
 
     private var premiumFirst: Boolean = false
@@ -52,17 +60,28 @@ class PaywallActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
+        binding.swipeRefresh.setOnRefreshListener(this)
+
         premiumFirst = intent.getBooleanExtra(EXTRA_PREMIUM_FIRST, false)
 
         cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
 
         // Init viewmodels
+        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(cache))
+            .get(PaywallViewModel::class.java)
+
+        // Setup network
+        connectionLiveData.observe(this, Observer {
+            paywallViewModel.isNetworkAvailable.value = it
+        })
+        paywallViewModel.isNetworkAvailable.value = isConnected
+
         productViewModel = ViewModelProvider(this)
-                .get(ProductViewModel::class.java)
+            .get(ProductViewModel::class.java)
 
         checkoutViewModel = ViewModelProvider(this)
-                .get(CheckOutViewModel::class.java)
+            .get(CheckOutViewModel::class.java)
 
 
         // When a price button in ProductFragment is clicked, the selected Plan
@@ -85,83 +104,115 @@ class PaywallActivity : ScopedAppActivity(),
         })
 
 
+        /**
+         * Load paywall from cache, and then from server.
+         */
+        paywallViewModel.paywallResult.observe(this, Observer {
+            onPaywallResult(it)
+        })
+
+
         initUI()
 
-        // Customer service
-        supportFragmentManager.commit {
-            replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
-        }
+        /**
+         * Show login button, or expiration message.
+         */
+        productViewModel.accountChanged.value = sessionManager.loadAccount()
+
+        /**
+         * Use the hard-coded promotion.
+         */
+        setUpPromo(promotion)
+
+        /**
+         * Fetch paywall from cache, then from server.
+         */
+        paywallViewModel.loadPaywall(false)
+
 
         tracker = StatsTracker.getInstance(this)
         tracker.displayPaywall()
 
     }
 
-    // Create an expiration reminder if membership exists but expired; otherwise returns null.
-    private fun buildExpiredWarning(m: Membership?): String? {
-        if (m == null) {
-            return null
-        }
-
-        if (m.tier == null) {
-            return null
-        }
-
-        if (!m.expired()) {
-            return null
-        }
-
-        val tierText = when (m.tier) {
-            Tier.STANDARD -> getString(R.string.tier_standard)
-            Tier.PREMIUM -> getString(R.string.tier_premium)
-        }
-
-        return getString(R.string.member_expired_on, tierText, m.expireDate)
-    }
-
     private fun initUI() {
-
-        val account = sessionManager.loadAccount()
-
-        // Determine whether the login button should be visible.
-        binding.loggedIn = account != null
-
-        // Click login to show LoginActivity.
-        binding.loginButton.setOnClickListener {
-            LoginActivity.startForResult(this)
-        }
-
-        // Show expiration reminder if expired.
-        binding.expiredWarning = buildExpiredWarning(account?.membership)
-
-        // For premium content, put the premium product card
-        // on top and show a reminding message.
         binding.premiumFirst = premiumFirst
 
-        // Insert product fragment.
-        if (premiumFirst) {
-            supportFragmentManager.commit {
+
+        supportFragmentManager.commit {
+            replace(R.id.subs_status, SubsStatusFragment.newInstance())
+
+            replace(R.id.frag_promo_box, PromoBoxFragment.newInstance())
+
+            productOrder.let {
+                if (premiumFirst) {
+                    it.reversed()
+                } else {
+                    it
+                }
+            }.forEach {
                 replace(
-                        R.id.product_top,
-                    ProductFragment.newInstance(Tier.PREMIUM)
-                )
-                replace(
-                        R.id.product_bottom,
-                    ProductFragment.newInstance(Tier.STANDARD)
+                    it.first,
+                    ProductFragment.newInstance(it.second)
                 )
             }
-        } else {
-            supportFragmentManager.commit {
-                replace(
-                        R.id.product_top,
-                    ProductFragment.newInstance(Tier.STANDARD)
-                )
-                replace(
-                        R.id.product_bottom,
-                    ProductFragment.newInstance(Tier.PREMIUM)
-                )
+
+            // Customer service
+            replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
+        }
+    }
+
+    private fun onPaywallResult(result: Result<Paywall>) {
+        val showError = binding.swipeRefresh.isRefreshing
+
+        binding.swipeRefresh.isRefreshing = false
+
+        when (result) {
+            is Result.LocalizedError -> {
+                if (showError) {
+                    toast(getString(result.msgId))
+                }
+
+            }
+            is Result.Error -> {
+                if (showError) {
+                    result.exception.message?.let { toast(it) }
+                }
+            }
+            is Result.Success -> {
+
+                setUpPromo(result.data.promo)
+                productViewModel.productsReceived.value = result.data.products
+
             }
         }
+    }
+
+    private fun setUpPromo(p: Promo) {
+        if (!p.isValid()) {
+            return
+        }
+
+        val promoUI =  PromoUI(
+            heading = p.heading ?: "",
+            subHeading = p.subHeading,
+            terms = if (p.terms != null) {
+                "● " + p.terms
+                    .split("\n")
+                    .joinToString("\n● ")
+            } else {
+                null
+            }
+        )
+
+        binding.promo = promoUI
+        productViewModel.promoCreated.value = promoUI
+    }
+
+    override fun onRefresh() {
+        toast("Fetching latest pricing and promotion data...")
+
+        paywallViewModel.loadPaywall(true)
     }
 
     // Upon payment succeeded, this activity should kill
@@ -185,7 +236,7 @@ class PaywallActivity : ScopedAppActivity(),
                     return
                 }
 
-                binding.loggedIn = true
+                productViewModel.accountChanged.value = sessionManager.loadAccount()
 
                 toast(R.string.prompt_logged_in)
             }
