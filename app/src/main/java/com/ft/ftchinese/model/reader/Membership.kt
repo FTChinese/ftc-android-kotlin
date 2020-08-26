@@ -40,6 +40,9 @@ data class Membership(
             else -> R.string.tier_free
         }
 
+    /**
+     * Find the corresponding plan for current membership.
+     */
     fun getPlan(): Plan? {
         if (tier == null) {
             return null
@@ -49,7 +52,7 @@ data class Membership(
             return null
         }
 
-        return findPlan(tier, cycle)
+        return PlanStore.find(tier, cycle)
     }
 
     fun remainingDays(): Long? {

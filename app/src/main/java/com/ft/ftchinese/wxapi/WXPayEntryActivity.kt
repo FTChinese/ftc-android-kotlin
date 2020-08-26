@@ -11,11 +11,8 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityWechatBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.subscription.PayMethod
-import com.ft.ftchinese.model.subscription.WxPaymentStatus
-import com.ft.ftchinese.model.subscription.confirmOrder
+import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.model.subscription.findPlan
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
@@ -150,7 +147,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                     val order = orderManager?.load()
 
                     if (order != null) {
-                        tracker?.buyFail(findPlan(order.tier, order.cycle))
+                        tracker?.buyFail(PlanStore.find(order.tier, order.cycle))
                     }
                 }
                 // 用户取消
@@ -182,7 +179,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             return
         }
 
-        tracker?.buySuccess(findPlan(order.tier, order.cycle), PayMethod.WXPAY)
+        tracker?.buySuccess(PlanStore.find(order.tier, order.cycle), PayMethod.WXPAY)
 
         if (!isConnected) {
             info(R.string.prompt_no_network)

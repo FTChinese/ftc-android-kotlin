@@ -143,7 +143,7 @@ class MemberActivity : ScopedAppActivity(),
                 StripeSubActivity.startForResult(
                         this,
                         RequestCode.PAYMENT,
-                        findPlan(Tier.PREMIUM, Cycle.YEAR)?.paymentIntent(OrderUsage.UPGRADE)
+                        PlanStore.find(Tier.PREMIUM, Cycle.YEAR)?.paymentIntent(OrderUsage.UPGRADE)
                 )
             }
 
