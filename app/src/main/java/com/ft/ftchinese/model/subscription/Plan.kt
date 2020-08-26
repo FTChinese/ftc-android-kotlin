@@ -56,6 +56,9 @@ data class Plan(
     }
 }
 
+/**
+ * Default pricing plans.
+ */
 val defaultPlans = listOf(
     Plan(
         id = "plan_ICMPPM0UXcpZ",
@@ -100,45 +103,16 @@ val defaultPlans = listOf(
     )
 )
 
-private val plans = mapOf(
-        "standard_year" to Plan(
-            id = "plan_ICMPPM0UXcpZ",
-            productId = "prod_IxN4111S1TIP",
-            tier = Tier.STANDARD,
-            cycle = Cycle.YEAR,
-            price = 258.00,
-//                amount = 258.00,
-            currency = "cny",
+object PlanStore {
+    var plans = defaultPlans
 
-            description = "FT中文网 - 年度标准会员",
-            discount = Discount()
-        ),
-        "standard_month" to Plan(
-            id = "plan_drbwQ2gTmtOK",
-            productId = "prod_IxN4111S1TIP",
-            tier = Tier.STANDARD,
-            cycle = Cycle.MONTH,
-            price = 28.00,
-//                amount = 28.00,
-            currency = "cny",
-
-            description = "FT中文网 - 月度标准会员",
-            discount = Discount()
-        ),
-        "premium_year" to Plan(
-            id = "plan_5iIonqaehig4",
-            productId = "prod_dcHBCHaBTn3w",
-            tier = Tier.PREMIUM,
-            cycle = Cycle.YEAR,
-            price = 1998.00,
-//                amount = 1998.00,
-            currency = "cny",
-
-            description = "FT中文网 - 高端会员",
-            discount = Discount()
-        )
-)
-
-fun findPlan(tier: Tier, cycle: Cycle): Plan? {
-    return plans["${tier}_$cycle"]
+    /**
+     * Use to find out what plan an existing member is subscribed to,
+     * or what plan an order is created for.
+     */
+    fun find(tier: Tier, cycle: Cycle): Plan? {
+        return plans.find {
+            it.tier == tier && it.cycle == cycle
+        }
+    }
 }
