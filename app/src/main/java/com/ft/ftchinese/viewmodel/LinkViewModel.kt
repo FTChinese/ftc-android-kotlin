@@ -36,9 +36,6 @@ class LinkViewModel : ViewModel() {
 
                 linkResult.value = Result.Success(done)
 
-//                        BinaryResult(
-//                        success = done
-//                )
             } catch (e: ClientError) {
                 val msgId = when(e.statusCode) {
                     404 -> R.string.api_account_not_found
@@ -57,15 +54,9 @@ class LinkViewModel : ViewModel() {
                 } else {
                     parseApiError(e)
                 }
-//                        BinaryResult(
-//                        error = msgId,
-//                        exception = e
-//                )
+
             } catch (e: Exception) {
                 linkResult.value = parseException(e)
-//                        BinaryResult(
-//                        exception = e
-//                )
             }
         }
     }
