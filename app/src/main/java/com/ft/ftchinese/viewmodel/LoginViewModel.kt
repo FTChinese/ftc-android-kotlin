@@ -7,10 +7,10 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Credentials
-import com.ft.ftchinese.model.reader.PwResetVerifier
 import com.ft.ftchinese.model.reader.WxSession
-import com.ft.ftchinese.repository.ReaderRepo
 import com.ft.ftchinese.repository.ClientError
+import com.ft.ftchinese.repository.LinkRepo
+import com.ft.ftchinese.repository.ReaderRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,10 +38,6 @@ class LoginViewModel : ViewModel(), AnkoLogger {
 
     val wxSessionResult: MutableLiveData<Result<WxSession>> by lazy {
         MutableLiveData<Result<WxSession>>()
-    }
-
-    val pwResetLetterResult: MutableLiveData<Result<Boolean>> by lazy {
-        MutableLiveData<Result<Boolean>>()
     }
 
     fun emailDataChanged(email: String) {
@@ -154,9 +150,6 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                         "email_already_exists" -> R.string.api_email_taken
                         "email_invalid" -> R.string.error_invalid_email
                         "password_invalid" -> R.string.error_invalid_password
-                        // handles wechat user sign up.
-                        "account_link_already_taken" -> R.string.api_wechat_already_linked
-                        "membership_link_already_taken" -> R.string.api_wechat_member_already_linked
                         else -> null
                     }
                 } else {
@@ -210,6 +203,49 @@ class LoginViewModel : ViewModel(), AnkoLogger {
                 info(e)
 
                 wxSessionResult.value = parseException(e)
+            }
+        }
+    }
+
+    fun wxSignUp(c: Credentials, unionId: String) {
+        viewModelScope.launch {
+            try {
+                val account = withContext(Dispatchers.IO) {
+                    LinkRepo.signUp(c, unionId)
+                }
+
+                if (account == null) {
+
+                    accountResult.value = Result.LocalizedError(R.string.loading_failed)
+                    return@launch
+                }
+
+                accountResult.value = Result.Success(account)
+            } catch (e: ClientError) {
+                info(e)
+                val msgId = if (e.statusCode == 422) {
+                    when (e.error?.key) {
+                        "email_already_exists" -> R.string.api_email_taken
+                        "email_invalid" -> R.string.error_invalid_email
+                        "password_invalid" -> R.string.error_invalid_password
+                        // handles wechat user sign up.
+                        "account_link_already_taken" -> R.string.api_wechat_already_linked
+                        "membership_link_already_taken" -> R.string.api_wechat_member_already_linked
+                        else -> null
+                    }
+                } else {
+                    null
+                }
+
+                accountResult.value = if (msgId != null) {
+                    Result.LocalizedError(msgId)
+                } else {
+                    parseApiError(e)
+                }
+
+            } catch (e: Exception) {
+                info(e)
+                accountResult.value = parseException(e)
             }
         }
     }

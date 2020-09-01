@@ -19,6 +19,9 @@ import com.ft.ftchinese.viewmodel.LoginViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
+/**
+ * Hosted both in [LoginActivity] and [LinkFtcActivity]
+ */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class SignUpFragment : ScopedFragment(),
         AnkoLogger {
@@ -38,7 +41,9 @@ class SignUpFragment : ScopedFragment(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        email = arguments?.getString(ARG_EMAIL)
+        arguments?.let {
+            email = it.getString(ARG_EMAIL)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -91,16 +96,27 @@ class SignUpFragment : ScopedFragment(),
             binding.enableInput = false
             viewModel.inProgress.value = true
 
-            viewModel.signUp(
-                c = Credentials(
-                        email = e,
-                        password = binding.passwordInput.text.toString().trim(),
-                        deviceToken = tokenManager.getToken()
-                )
+            val c = Credentials(
+                email = e,
+                password = binding.passwordInput.text.toString().trim(),
+                deviceToken = tokenManager.getToken()
             )
+
+            val account = sessionManager.loadAccount()
+
+            // If account exists, this should be wechat signup.
+            if (account == null) {
+                viewModel.signUp(c)
+            } else {
+                if (account.isWxOnly) {
+                    account.unionId?.let {
+                        viewModel.wxSignUp(c, it)
+                    }
+                }
+            }
         }
 
-        viewModel.accountResult.observe(viewLifecycleOwner, Observer {
+        viewModel.accountResult.observe(viewLifecycleOwner, {
             binding.enableInput = it !is Result.Success
         })
     }

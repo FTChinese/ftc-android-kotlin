@@ -1,8 +1,8 @@
 package com.ft.ftchinese.repository
 
-import android.net.Credentials
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.util.json
 

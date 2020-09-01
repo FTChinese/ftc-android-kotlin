@@ -2,18 +2,17 @@ package com.ft.ftchinese.ui.account
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUnlinkBinding
-import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.model.subscription.PayMethod
-import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
@@ -50,15 +49,15 @@ class UnlinkActivity : AppCompatActivity() {
 
         initUI()
 
-        linkViewModel.anchorSelected.observe(this, Observer {
+        linkViewModel.anchorSelected.observe(this, {
                 anchor = it
         })
 
-        linkViewModel.unlinkResult.observe(this, Observer {
+        linkViewModel.unlinkResult.observe(this, {
                 onUnlinked(it)
         })
 
-        accountViewModel.accountRefreshed.observe(this, Observer {
+        accountViewModel.accountRefreshed.observe(this, {
                 onAccountRefreshed(it)
         })
 
@@ -141,6 +140,9 @@ class UnlinkActivity : AppCompatActivity() {
                 sessionManager.saveAccount(result.data)
 
                 // Signal to calling activity.
+                /**
+                 * Notify [WxInfoActivity] the unlink result, which should in return notify [AccountActivity]
+                 */
                 setResult(Activity.RESULT_OK)
                 finish()
             }

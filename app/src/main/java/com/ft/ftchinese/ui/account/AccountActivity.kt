@@ -10,9 +10,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAccountBinding
-import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
@@ -54,11 +53,11 @@ class AccountActivity : ScopedAppActivity(),
         viewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
-        viewModel.inProgress.observe(this, Observer<Boolean> {
+        viewModel.inProgress.observe(this, {
             binding.inProgress = it
         })
 
-        viewModel.uiType.observe(this, Observer<LoginMethod> {
+        viewModel.uiType.observe(this, {
             initUI()
         })
 
@@ -92,16 +91,18 @@ class AccountActivity : ScopedAppActivity(),
 
     /**
      * Receive results from
-     * [UpdateActivity]
-     * [LinkFtcActivity] with RequestCode.Link, which is
-     * received from [LinkPreviewActivity]
-     * [WxInfoActivity] with RequestCode.Unlink, which is
-     * received from [UnlinkActivity].
-     * In cases this activity starts [WxInfoActivity] with
-     * wechat account not linked, and user starts wechat OAuth,
-     * the request code mechanism does not work since WxEntryActivity interferes with this flow.
-     * In such case the [onResume] is the last resort to
-     * ensure UI changes.
+     * [UpdateActivity] or [LinkFtcActivity].
+     *
+     * Source and their meanings:
+     *
+     * [LinkFtcActivity] - Wechat user link to FTC by either
+     * sign up or login. Request code is RequestCode.LINK.
+     * If email alrady exists, the result is relayed from
+     * [LinkPreviewActivity].
+     *
+     * [WxInfoActivity] - Unlink wechat.
+     * The event is originated from [UnlinkActivity].
+     *
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

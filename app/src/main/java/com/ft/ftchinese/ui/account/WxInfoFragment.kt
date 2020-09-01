@@ -7,16 +7,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentWxAccountBinding
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.model.reader.LoginMethod
-import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
@@ -72,10 +71,22 @@ class WxInfoFragment : ScopedFragment(),
             return
         }
 
+        // Click on link or unlink button.
+        /**
+         * If current is not linked, launch [LinkFtcActivity] which will call setResult() to notify
+         * [AccountActivity];
+         * otherwise launch [UnlinkActivity]
+         */
         binding.btnLinkOrUnlink.setOnClickListener {
             if (account.isLinked) {
+                /**
+                 * In this case this fragment is hosted inside [WxInfoActivity]
+                 */
                 UnlinkActivity.startForResult(activity)
             } else {
+                /**
+                 * In this case this fragment ins hosted inside [AccountActivity]
+                 */
                 LinkFtcActivity.startForResult(activity)
             }
         }
@@ -92,17 +103,17 @@ class WxInfoFragment : ScopedFragment(),
         // Check whether we could refresh wechat user info.
         // If refresh token is not expired, we'll start
         // refresh user's full account data.
-        accountViewModel.wxRefreshResult.observe(viewLifecycleOwner, Observer {
+        accountViewModel.wxRefreshResult.observe(viewLifecycleOwner, {
             onWxRefreshed(it)
         })
 
         // Refreshed account data.
-        accountViewModel.accountRefreshed.observe(viewLifecycleOwner, Observer {
+        accountViewModel.accountRefreshed.observe(viewLifecycleOwner, {
             onAccountRefreshed(it)
         })
 
         // Avatar
-        accountViewModel.avatarRetrieved.observe(viewLifecycleOwner, Observer {
+        accountViewModel.avatarRetrieved.observe(viewLifecycleOwner, {
             onAvatarRetrieved(it)
         })
 

@@ -63,9 +63,8 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         /**
-         * Upon receiving RequestCode.UNLINK, which is sent
-         * from [UnlinkActivity], just destroy itself
-         * and lead user back to [AccountActivity]
+         * Chain of unwrapping:
+         * [AccountActivity] -> [WxInfoActivity] -> [UnlinkActivity]
          */
         if (requestCode == RequestCode.UNLINK) {
             setResult(Activity.RESULT_OK)

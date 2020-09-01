@@ -5,18 +5,19 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityFragmentDoubleBinding
-import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.login.*
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.login.EmailFragment
+import com.ft.ftchinese.ui.login.SignInFragment
+import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.Existence
 import com.ft.ftchinese.viewmodel.LoginViewModel
+import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -32,13 +33,14 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var viewModel: LoginViewModel
     private lateinit var binding: ActivityFragmentDoubleBinding
 
+    // A flag to determine whether LinkPreviewActivity should be shown.
+    // For new sign up, this do not show preview.
     private var isSignUp = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_fragment_double)
 
-//        setContentView(R.layout.activity_fragment_double)
         setSupportActionBar(toolbar)
 
         supportActionBar?.apply {
@@ -51,15 +53,15 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
         viewModel = ViewModelProvider(this)
                 .get(LoginViewModel::class.java)
 
-        viewModel.inProgress.observe(this, Observer<Boolean> {
+        viewModel.inProgress.observe(this, {
             binding.inProgress = it
         })
 
-        viewModel.emailResult.observe(this, Observer {
+        viewModel.emailResult.observe(this, {
             onEmailResult(it)
         })
 
-        viewModel.accountResult.observe(this, Observer {
+        viewModel.accountResult.observe(this, {
             onAccountResult(it)
         })
 
@@ -68,6 +70,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 
+    // Handle the result of checking whether email exists.
     private fun onEmailResult(result: Result<Existence>) {
 
         binding.inProgress = false
@@ -79,6 +82,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
+                // If email exists, show sign in.
                 if (result.data.found) {
                     supportFragmentManager.commit {
                         replace(R.id.double_frag_primary, SignInFragment.newInstance(result.data.value))
@@ -88,6 +92,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
                     return
                 }
 
+                // If email does not exist, show sing up.
                 isSignUp = true
                 supportFragmentManager.commit {
                     replace(R.id.double_frag_primary, SignUpFragment.newInstance(result.data.value))
@@ -112,6 +117,10 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
                 // Is user created a new ftc account, do not show the LinkPreviewActivity since the
                 // new account is automatically linked upon creation.
                 if (isSignUp) {
+                    sessionManager.saveAccount(accountResult.data)
+                    /**
+                     * Unwrapping chain: [AccountActivity] <- current activity
+                     */
                     setResult(Activity.RESULT_OK)
                     finish()
                     return
@@ -123,8 +132,8 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     /**
-     * Handle result from [LinkPreviewActivity] with
-     * RequestCode.Link
+     * Unwrapping chain:
+     * [AccountActivity] <- current activity <- [LinkPreviewActivity]
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
