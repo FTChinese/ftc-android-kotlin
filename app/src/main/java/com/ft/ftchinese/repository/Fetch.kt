@@ -151,8 +151,10 @@ class Fetch : AnkoLogger {
 
     /**
      * Use this to send json content.
+     * @body - the data to send. If omitted, default to `{}`
+     * to prevent server returns EOF error.
      */
-    fun jsonBody(body: String) = apply {
+    fun sendJson(body: String = "{}") = apply {
         val contentType = "application/json; charset=utf-8".toMediaTypeOrNull()
 
         if (contentType == null) {
@@ -165,7 +167,9 @@ class Fetch : AnkoLogger {
     /**
      * Use this to transmit binary files.
      */
-    fun body(body: ByteArray) = apply {
+    fun upload(body: ByteArray) = apply {
+        headers["Content-Type"] = "application/octet-stream"
+
         reqBody = body.toRequestBody(null)
     }
 
@@ -173,8 +177,12 @@ class Fetch : AnkoLogger {
      * For POST, PUT, PATCH, PROPPATCH and REPORT method,
      * okhttp does not allow nullable body.
      */
-    fun body() = apply {
-        reqBody = "".toRequestBody(null)
+    fun sendForm(body: String = "") = apply {
+        reqBody = body.toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
+    }
+
+    fun sendText(body: String = "") = apply {
+        reqBody = body.toRequestBody("text/plain".toMediaTypeOrNull())
     }
 
     /**

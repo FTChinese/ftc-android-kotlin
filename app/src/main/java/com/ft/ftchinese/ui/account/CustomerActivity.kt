@@ -131,7 +131,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
                     Fetch().post("${SubscribeApi.STRIPE_CUSTOMER}/${account.stripeId}/default_payment_method")
                             .setUserId(account.id)
                             .noCache()
-                            .jsonBody(Klaxon().toJsonString(mapOf(
+                            .sendJson(Klaxon().toJsonString(mapOf(
                                     "defaultPaymentMethod" to pmId
                             )))
                             .responseApi()

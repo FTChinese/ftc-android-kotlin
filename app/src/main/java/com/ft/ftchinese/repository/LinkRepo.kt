@@ -14,7 +14,7 @@ object LinkRepo {
         val (resp, _) = Fetch().put(NextApi.WX_LINK)
                 .setUnionId(unionId)
                 .noCache()
-                .jsonBody(Klaxon().toJsonString(mapOf(
+                .sendJson(Klaxon().toJsonString(mapOf(
                         "userId" to ftcId
                 )))
                 .responseApi()
@@ -30,7 +30,7 @@ object LinkRepo {
                     .setUnionId(unionId)
                     .setClient()
                     .noCache()
-                    .jsonBody(json.toJsonString(c))
+                    .sendJson(json.toJsonString(c))
                     .responseApi()
 
         return if (body == null) {
@@ -51,7 +51,7 @@ object LinkRepo {
                 .noCache()
 
         if (anchor != null) {
-            fetch.jsonBody(Klaxon().toJsonString(mapOf(
+            fetch.sendJson(Klaxon().toJsonString(mapOf(
                     "anchor" to anchor.string()
             )))
         }

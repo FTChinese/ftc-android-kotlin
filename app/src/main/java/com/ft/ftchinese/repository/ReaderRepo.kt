@@ -25,7 +25,7 @@ object ReaderRepo : AnkoLogger {
         val (_, body) = Fetch()
                 .post(NextApi.LOGIN)
                 .noCache()
-                .jsonBody(json.toJsonString(c))
+                .sendJson(json.toJsonString(c))
                 .responseApi()
 
         return if (body == null) {
@@ -40,7 +40,7 @@ object ReaderRepo : AnkoLogger {
         val (_, body) = Fetch()
                 .post(NextApi.SIGN_UP)
                 .noCache()
-                .jsonBody(json.toJsonString(c))
+                .sendJson(json.toJsonString(c))
                 .responseApi()
 
         return if (body == null) {
@@ -55,7 +55,7 @@ object ReaderRepo : AnkoLogger {
             .post(NextApi.PASSWORD_RESET_LETTER)
             .setTimeout(30)
             .noCache()
-            .jsonBody(json.toJsonString(mapOf("email" to email)))
+            .sendJson(json.toJsonString(mapOf("email" to email)))
             .responseApi()
 
         return response.code == 204
@@ -79,7 +79,7 @@ object ReaderRepo : AnkoLogger {
             .post(NextApi.PASSWORD_RESET)
             .setClient()
             .noCache()
-            .jsonBody(json.toJsonString(v))
+            .sendJson(json.toJsonString(v))
             .responseApi()
 
         return resp.code == 204
@@ -98,7 +98,7 @@ object ReaderRepo : AnkoLogger {
                 .setAppId()
                 .noCache()
                 .setTimeout(30)
-                .jsonBody(json.toJsonString(mapOf(
+                .sendJson(json.toJsonString(mapOf(
                         "code" to code
                 )))
                 .responseApi()
@@ -138,7 +138,7 @@ object ReaderRepo : AnkoLogger {
 
         return try {
             Fetch().post("${dur.refer}/engagement.php")
-                    .jsonBody(Klaxon().toJsonString(dur))
+                    .sendJson(Klaxon().toJsonString(dur))
                     .responseString()
 
         } catch (e: Exception) {

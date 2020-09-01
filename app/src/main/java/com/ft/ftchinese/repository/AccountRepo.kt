@@ -61,7 +61,7 @@ object AccountRepo {
         val (resp, _) = Fetch().patch(NextApi.UPDATE_EMAIL)
                 .noCache()
                 .setUserId(ftcId)
-                .jsonBody(json.toJsonString(mapOf("email" to email)))
+                .sendJson(json.toJsonString(mapOf("email" to email)))
                 .responseApi()
 
         return resp.code == 204
@@ -71,7 +71,7 @@ object AccountRepo {
         val (resp, _) = Fetch().patch(NextApi.UPDATE_USER_NAME)
                 .noCache()
                 .setUserId(ftcId)
-                .jsonBody(json.toJsonString(mapOf("userName" to name)))
+                .sendJson(json.toJsonString(mapOf("userName" to name)))
                 .responseApi()
 
         return resp.code == 204
@@ -81,7 +81,7 @@ object AccountRepo {
         val(resp, _) = Fetch().patch(NextApi.UPDATE_PASSWORD)
                 .noCache()
                 .setUserId(ftcId)
-                .jsonBody(json.toJsonString(pw))
+                .sendJson(json.toJsonString(pw))
                 .responseApi()
 
         return resp.code == 204
@@ -94,7 +94,7 @@ object AccountRepo {
                 .noCache()
                 .setClient()
                 .setUserId(ftcId)
-                .body()
+                .sendJson()
                 .responseApi()
 
         return resp.code == 204
@@ -108,7 +108,7 @@ object AccountRepo {
                 .noCache()
                 .setAppId()
                 .setTimeout(30)
-                .jsonBody(Klaxon().toJsonString(mapOf(
+                .sendJson(Klaxon().toJsonString(mapOf(
                         "sessionId" to wxSession.sessionId
                 )))
                 .responseApi()

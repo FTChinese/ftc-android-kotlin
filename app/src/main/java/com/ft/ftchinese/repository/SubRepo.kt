@@ -82,7 +82,7 @@ object SubRepo : AnkoLogger {
                 .noCache()
                 .setClient()
                 .setAppId()
-                .jsonBody(json.toJsonString(plan))
+                .sendJson(json.toJsonString(plan))
                 .responseApi()
 
         info("Wx order: $body")
@@ -116,7 +116,7 @@ object SubRepo : AnkoLogger {
                 .setTimeout(30)
                 .noCache()
                 .setClient()
-                .jsonBody(json.toJsonString(plan))
+                .sendJson(json.toJsonString(plan))
                 .responseApi()
 
         info("Aliorder $body")

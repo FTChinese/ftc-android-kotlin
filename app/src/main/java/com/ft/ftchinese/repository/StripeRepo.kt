@@ -16,7 +16,7 @@ object StripeRepo : AnkoLogger {
                 .put(SubscribeApi.STRIPE_CUSTOMER)
                 .setUserId(id)
                 .noCache()
-                .body()
+                .sendJson()
                 .responseApi()
 
         if (body == null) {
@@ -40,7 +40,7 @@ object StripeRepo : AnkoLogger {
                 .setUserId(account.id)
                 .query("api_version", apiVersion)
                 .noCache()
-                .body()
+                .sendJson()
                 .responseApi()
 
         return body
@@ -65,7 +65,7 @@ object StripeRepo : AnkoLogger {
                 .post(SubscribeApi.STRIPE_SUB)
                 .setUserId(account.id)
                 .noCache()
-                .jsonBody(json.toJsonString(params))
+                .sendJson(json.toJsonString(params))
 
         if (account.unionId != null) {
             fetch.setUnionId(account.unionId)
@@ -105,7 +105,7 @@ object StripeRepo : AnkoLogger {
                 .patch(SubscribeApi.STRIPE_SUB)
                 .setUserId(account.id)
                 .noCache()
-                .jsonBody(json.toJsonString(params))
+                .sendJson(json.toJsonString(params))
 
         if (account.unionId != null) {
             fetch.setUnionId(account.unionId)
