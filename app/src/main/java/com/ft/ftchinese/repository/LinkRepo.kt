@@ -6,6 +6,11 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.util.json
 
+data class UnlinkReqBody (
+    val unionId: String,
+    val anchor: UnlinkAnchor?
+)
+
 object LinkRepo {
     /**
      * Link two existing accounts.
@@ -45,18 +50,16 @@ object LinkRepo {
             throw Exception("Wechat account not found")
         }
 
-        val fetch = Fetch().delete(NextApi.WX_LINK)
-                .setUserId(account.id)
-                .setUnionId(account.unionId)
-                .noCache()
-
-        if (anchor != null) {
-            fetch.sendJson(Klaxon().toJsonString(mapOf(
-                    "anchor" to anchor.string()
+        val (resp, _) = Fetch()
+            .delete(NextApi.WX_LINK)
+            .setUserId(account.id)
+            .setUnionId(account.unionId)
+            .sendJson(json.toJsonString(UnlinkReqBody(
+                unionId = account.unionId,
+                anchor = anchor
             )))
-        }
-
-        val (resp, _) = fetch.responseApi()
+            .noCache()
+            .responseApi()
 
         return resp.code == 204
     }
