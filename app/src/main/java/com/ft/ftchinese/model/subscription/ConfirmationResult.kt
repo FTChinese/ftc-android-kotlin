@@ -38,7 +38,6 @@ fun confirmOrder(order: Order, member: Membership): ConfirmationResult {
         return ConfirmationResult(
                 order = order,
                 membership = Membership(
-                        id = null,
                         tier = order.tier,
                         cycle = order.cycle,
                         expireDate = order.endDate,

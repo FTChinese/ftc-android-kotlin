@@ -13,23 +13,22 @@ import org.threeten.bp.temporal.ChronoUnit
 
 @Parcelize
 data class Membership(
-        val id: String? = null,
-        @KTier
-        val tier: Tier? = null,
-        @KCycle
-        val cycle: Cycle? = null,
+    @KTier
+    val tier: Tier? = null,
+    @KCycle
+    val cycle: Cycle? = null,
 
-        // ISO8601 format. Example: 2019-08-05
-        @KDate
-        val expireDate: LocalDate? = null,
-        @KPayMethod
-        val payMethod: PayMethod? = null,
+    // ISO8601 format. Example: 2019-08-05
+    @KDate
+    val expireDate: LocalDate? = null,
+    @KPayMethod
+    val payMethod: PayMethod? = null,
 
-        // If autoRenew is true, ignore expireDate.
-        val autoRenew: Boolean? = false,
-        @KStripeSubStatus
-        val status: StripeSubStatus? = null,
-        val vip: Boolean = false
+    // If autoRenew is true, ignore expireDate.
+    val autoRenew: Boolean? = false,
+    @KStripeSubStatus
+    val status: StripeSubStatus? = null,
+    val vip: Boolean = false
 ) : Parcelable {
 
     val tierStringRes: Int
