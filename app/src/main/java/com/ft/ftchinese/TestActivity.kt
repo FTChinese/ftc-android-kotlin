@@ -56,29 +56,69 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var orderManger: OrderManager
     private var errorDialog: Dialog? = null
     private lateinit var sessionManager: SessionManager
-    private val mockAccount = Account(
-            id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-            unionId = null,
-            stripeId = null,
-            userName = "Faker",
-            email = "faker@example.org",
-            isVerified = false,
-            avatarUrl = null,
-            loginMethod = LoginMethod.EMAIL,
-            wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-            ),
-            membership = Membership(
-                    id = "mmb_DYBOVDytt1PH",
-                    tier = Tier.STANDARD,
-                    cycle = Cycle.YEAR,
-                    expireDate = LocalDate.now().plusYears(1),
-                    payMethod = PayMethod.ALIPAY,
-                    autoRenew = false,
-                    status = null,
-                    vip = false
-            )
+
+    private val freeUser = Account(
+        id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+        unionId = null,
+        stripeId = null,
+        userName = "Free Edition",
+        email = "free@example.org",
+        isVerified = false,
+        avatarUrl = null,
+        loginMethod = LoginMethod.EMAIL,
+        wechat = Wechat(
+            nickname = null,
+            avatarUrl = null
+        ),
+        membership = Membership()
+    )
+
+    private val stdUser = Account(
+        id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+        unionId = null,
+        stripeId = null,
+        userName = "Standard Edition",
+        email = "standard@example.org",
+        isVerified = false,
+        avatarUrl = null,
+        loginMethod = LoginMethod.EMAIL,
+        wechat = Wechat(
+            nickname = null,
+            avatarUrl = null
+        ),
+        membership = Membership(
+            tier = Tier.STANDARD,
+            cycle = Cycle.YEAR,
+            expireDate = LocalDate.now().plusYears(1),
+            payMethod = PayMethod.ALIPAY,
+            autoRenew = false,
+            status = null,
+            vip = false
+        )
+    )
+
+    private val prmUser = Account(
+        id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+        unionId = null,
+        stripeId = null,
+        userName = "Premium Edition",
+        email = "premium@example.org",
+        isVerified = false,
+        avatarUrl = null,
+        loginMethod = LoginMethod.EMAIL,
+        wechat = Wechat(
+            nickname = null,
+            avatarUrl = null
+        ),
+        membership = Membership(
+            tier = Tier.PREMIUM,
+            cycle = Cycle.YEAR,
+            expireDate = LocalDate.now().plusYears(1),
+            payMethod = PayMethod.ALIPAY,
+            autoRenew = false,
+            status = null,
+            vip = false
+        )
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -224,8 +264,16 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             true
         }
 
-        binding.btnLogin.setOnClickListener {
-            sessionManager.saveAccount(mockAccount)
+        binding.btnFreeUser.setOnClickListener {
+            sessionManager.saveAccount(freeUser)
+        }
+
+        binding.btnStandardUser.setOnClickListener {
+            sessionManager.saveAccount(stdUser)
+        }
+
+        binding.btnPremiumUser.setOnClickListener {
+            sessionManager.saveAccount(prmUser)
         }
 
         binding.btnService.setOnClickListener {
@@ -628,7 +676,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                                 avatarUrl = "https://randomuser.me/api/portraits/thumb/men/17.jpg"
                         ),
                         membership = Membership(
-                                id = "mmb_bOWD32Qf3Xzd",
                                 tier = Tier.STANDARD,
                                 cycle = Cycle.YEAR,
                                 expireDate = LocalDate.now().plusDays(30),
