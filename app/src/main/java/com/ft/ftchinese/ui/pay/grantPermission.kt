@@ -22,8 +22,13 @@ fun Activity.handlePermissionDenial(reason: MemberStatus, contentPerm: Permissio
             LoginActivity.startForResult(this)
         }
         MemberStatus.Empty -> {
-            toast(R.string.prompt_member_only)
-            PaywallActivity.start(this, contentPerm == Permission.PREMIUM)
+            if (contentPerm == Permission.PREMIUM) {
+                toast(R.string.prompt_premium_only)
+                PaywallActivity.start(this, true)
+            } else {
+                toast(R.string.prompt_member_only)
+                PaywallActivity.start(this, false)
+            }
         }
         MemberStatus.InactiveStripe -> {
             toast(R.string.stripe_not_active)
