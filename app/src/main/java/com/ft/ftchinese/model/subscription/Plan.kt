@@ -5,7 +5,6 @@ import com.ft.ftchinese.tracking.GAAction
 import com.ft.ftchinese.util.KCycle
 import com.ft.ftchinese.util.KTier
 import kotlinx.android.parcel.Parcelize
-import org.threeten.bp.ZonedDateTime
 
 /**
  * A plan for a product.
@@ -89,6 +88,11 @@ val defaultPlans = listOf(
     )
 )
 
+/**
+ * PlanStore works as a in-memory cache of all plans.
+ * This is kept for backward compatibility and many activities
+ * use this to find out which plan a member is subscribed to.
+ */
 object PlanStore {
     var plans = defaultPlans
 
