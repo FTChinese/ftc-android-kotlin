@@ -58,7 +58,6 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
 
             putString(PREF_WX_NICKNAME, account.wechat.nickname)
             putString(PREF_WX_AVATAR, account.wechat.avatarUrl)
-            putString(PREF_MEMBER_ID, account.membership.id)
             putString(PREF_MEMBER_TIER, account.membership.tier?.toString())
             putString(PREF_MEMBER_CYCLE, account.membership.cycle?.toString())
             putString(PREF_MEMBER_EXPIRE, formatLocalDate(account.membership.expireDate))
@@ -105,7 +104,6 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         val status = sharedPreferences.getString(PREF_SUB_STATUS, null)
 
         val membership = Membership(
-                id = mID,
                 tier = Tier.fromString(tier),
                 cycle = Cycle.fromString(cycle),
                 expireDate = parseLocalDate(expireDate),
