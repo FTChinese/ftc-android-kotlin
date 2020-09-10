@@ -25,22 +25,19 @@ val internalHost = listOf(
 
 object Config {
     val readerApiBase = if (BuildConfig.DEBUG) {
-//        "http://192.168.10.195:8000"
-        "http://192.168.0.40:8000"
+        "http://172.27.10.124:8000"
     } else {
         BuildConfig.API_READER_LIVE
     }
 
     val contentApiBase = if (BuildConfig.DEBUG) {
-//        "http://192.168.10.195:8100"
-        "http://192.168.0.40:8100"
+        "http://172.27.10.124:8100"
     } else {
         BuildConfig.API_CONTENT_LIVE
     }
 
     val subsApiBase = if (BuildConfig.DEBUG) {
-//        "http://192.168.10.195:8200"
-        "http://192.168.0.40:8200"
+        "http://172.27.10.124:8200"
     } else {
         BuildConfig.API_SUBS_LIVE
     }
