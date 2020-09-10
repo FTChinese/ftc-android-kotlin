@@ -12,7 +12,7 @@ object AccountRepo {
         val(_, body) = Fetch().get(NextApi.ACCOUNT)
                 .noCache()
                 .setUserId(ftcId)
-                .responseApi()
+                .endJsonText()
 
         return if (body == null) {
             null
@@ -34,7 +34,7 @@ object AccountRepo {
                 .get(NextApi.WX_ACCOUNT)
                 .setUnionId(unionId)
                 .noCache()
-                .responseApi()
+                .endJsonText()
 
         return if (body == null) {
             return null
@@ -62,7 +62,7 @@ object AccountRepo {
                 .noCache()
                 .setUserId(ftcId)
                 .sendJson(json.toJsonString(mapOf("email" to email)))
-                .responseApi()
+                .endJsonText()
 
         return resp.code == 204
     }
@@ -72,7 +72,7 @@ object AccountRepo {
                 .noCache()
                 .setUserId(ftcId)
                 .sendJson(json.toJsonString(mapOf("userName" to name)))
-                .responseApi()
+                .endJsonText()
 
         return resp.code == 204
     }
@@ -82,7 +82,7 @@ object AccountRepo {
                 .noCache()
                 .setUserId(ftcId)
                 .sendJson(json.toJsonString(pw))
-                .responseApi()
+                .endJsonText()
 
         return resp.code == 204
     }
@@ -95,7 +95,7 @@ object AccountRepo {
                 .setClient()
                 .setUserId(ftcId)
                 .sendJson()
-                .responseApi()
+                .endJsonText()
 
         return resp.code == 204
     }
@@ -111,7 +111,7 @@ object AccountRepo {
                 .sendJson(Klaxon().toJsonString(mapOf(
                         "sessionId" to wxSession.sessionId
                 )))
-                .responseApi()
+                .endJsonText()
 
         return resp.code == 204
     }

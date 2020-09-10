@@ -99,7 +99,7 @@ class ArticleViewModel(
 
             try {
                 val data = withContext(Dispatchers.IO) {
-                    Fetch().get(url.toString()).responseString()
+                    Fetch().get(url.toString()).endPlainText()
                 }
 
                 val story = if (data.isNullOrBlank()) {

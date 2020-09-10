@@ -52,7 +52,7 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
                         info("Start background update from $url for $cacheName")
                        try {
                             withContext(Dispatchers.IO) {
-                                val remoteFrag = Fetch().get(url.toString()).responseString() ?: return@withContext
+                                val remoteFrag = Fetch().get(url.toString()).endPlainText() ?: return@withContext
                                 cache.saveText(cacheName, remoteFrag)
                             }
                         } catch (e: Exception) {
@@ -80,7 +80,7 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
 
             try {
                 val remoteFrag = withContext(Dispatchers.IO) {
-                    Fetch().get(url.toString()).responseString()
+                    Fetch().get(url.toString()).endPlainText()
                 }
 
                 if (remoteFrag.isNullOrBlank()) {

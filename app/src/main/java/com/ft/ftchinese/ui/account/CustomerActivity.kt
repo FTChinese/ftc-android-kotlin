@@ -134,7 +134,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
                             .sendJson(Klaxon().toJsonString(mapOf(
                                     "defaultPaymentMethod" to pmId
                             )))
-                            .responseApi()
+                            .endJsonText()
                 }
 
                 info(body)

@@ -194,7 +194,7 @@ class Fetch : AnkoLogger {
         return end().body?.bytes()
     }
 
-    fun responseString(): String? {
+    fun endPlainText(): String? {
         val resp = end()
 
         return resp.body?.string()
@@ -206,7 +206,7 @@ class Fetch : AnkoLogger {
      * return the json string.
      * For client error response (HTTP code > 400)
      */
-    fun responseApi(): Pair<Response, String?> {
+    fun endJsonText(): Pair<Response, String?> {
         setAccessKey()
         setClient()
 

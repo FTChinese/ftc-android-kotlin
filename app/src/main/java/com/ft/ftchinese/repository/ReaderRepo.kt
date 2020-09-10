@@ -16,7 +16,7 @@ object ReaderRepo : AnkoLogger {
                 .query("k", "email")
                 .query("v", email)
                 .noCache()
-                .responseApi()
+                .endJsonText()
 
         return resp.code == 204
     }
@@ -26,7 +26,7 @@ object ReaderRepo : AnkoLogger {
                 .post(NextApi.LOGIN)
                 .noCache()
                 .sendJson(json.toJsonString(c))
-                .responseApi()
+                .endJsonText()
 
         return if (body == null) {
             null
@@ -41,7 +41,7 @@ object ReaderRepo : AnkoLogger {
                 .post(NextApi.SIGN_UP)
                 .noCache()
                 .sendJson(json.toJsonString(c))
-                .responseApi()
+                .endJsonText()
 
         return if (body == null) {
             null
@@ -56,7 +56,7 @@ object ReaderRepo : AnkoLogger {
             .setTimeout(30)
             .noCache()
             .sendJson(json.toJsonString(mapOf("email" to email)))
-            .responseApi()
+            .endJsonText()
 
         return response.code == 204
     }
@@ -65,7 +65,7 @@ object ReaderRepo : AnkoLogger {
         val (_, body) = Fetch()
             .get("${NextApi.VERIFY_PW_RESET}?email=${v.email}&code=${v.code}")
             .noCache()
-            .responseApi()
+            .endJsonText()
 
         return if (body == null) {
             null
@@ -80,7 +80,7 @@ object ReaderRepo : AnkoLogger {
             .setClient()
             .noCache()
             .sendJson(json.toJsonString(v))
-            .responseApi()
+            .endJsonText()
 
         return resp.code == 204
     }
@@ -101,7 +101,7 @@ object ReaderRepo : AnkoLogger {
                 .sendJson(json.toJsonString(mapOf(
                         "code" to code
                 )))
-                .responseApi()
+                .endJsonText()
 
         return if (body == null) {
             null
@@ -124,7 +124,7 @@ object ReaderRepo : AnkoLogger {
                 .get(NextApi.WX_ACCOUNT)
                 .setUnionId(unionId)
                 .noCache()
-                .responseApi()
+                .endJsonText()
 
         return if (body == null) {
             return null
@@ -139,7 +139,7 @@ object ReaderRepo : AnkoLogger {
         return try {
             Fetch().post("${dur.refer}/engagement.php")
                     .sendJson(Klaxon().toJsonString(dur))
-                    .responseString()
+                    .endPlainText()
 
         } catch (e: Exception) {
             info("Error when tracking reading duration $e")

@@ -58,7 +58,7 @@ class SplashViewModel : ViewModel(), AnkoLogger {
         try {
             val body = Fetch()
                     .get(LAUNCH_SCHEDULE_URL)
-                    .responseString()
+                    .endPlainText()
 
             if (body.isNullOrBlank()) {
                 return null
@@ -125,7 +125,7 @@ class SplashViewModel : ViewModel(), AnkoLogger {
                 try {
                     tracker.launchAdSent(it)
 
-                    Fetch().get(bustedUrl).responseString()
+                    Fetch().get(bustedUrl).endPlainText()
 
                     tracker.launchAdSuccess(it)
                 } catch (e: Exception) {

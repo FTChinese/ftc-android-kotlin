@@ -9,7 +9,7 @@ object ReleaseRepo : AnkoLogger {
         val (_, body) = Fetch()
                 .setAppId()
                 .get("${NextApi.releaseOf}/${normalizeVersionName(versionName)}")
-                .responseApi()
+                .endJsonText()
 
         return body
     }
@@ -18,7 +18,7 @@ object ReleaseRepo : AnkoLogger {
         val (_, body) = Fetch()
                 .setAppId()
                 .get(NextApi.latestRelease)
-                .responseApi()
+                .endJsonText()
 
         return if (body == null) {
             null

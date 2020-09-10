@@ -15,7 +15,7 @@ object SubRepo : AnkoLogger {
                 .get(SubscribeApi.UPGRADE_PREVIEW)
                 .setTimeout(30)
                 .noCache()
-                .responseApi()
+                .endJsonText()
 
         return if (body == null) {
             null
@@ -30,7 +30,7 @@ object SubRepo : AnkoLogger {
                 .put(SubscribeApi.UPGRADE)
                 .noCache()
                 .setClient()
-                .responseApi()
+                .endJsonText()
 
         return when (resp.code) {
             204 -> Pair(true, null)
@@ -53,7 +53,7 @@ object SubRepo : AnkoLogger {
         val (_, body) = account.createFetch()
                 .get(NextApi.ORDERS)
                 .noCache()
-                .responseApi()
+                .endJsonText()
 
         return if (body == null) {
             listOf()
@@ -74,7 +74,7 @@ object SubRepo : AnkoLogger {
                     tier = plan.tier,
                     cycle = plan.cycle
                 )))
-                .responseApi()
+                .endJsonText()
 
         info("Wx order: $body")
 
@@ -91,7 +91,7 @@ object SubRepo : AnkoLogger {
                 .get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
                 .noCache()
                 .setAppId() // Deprecated
-                .responseApi()
+                .endJsonText()
 
         return if (body == null) {
             null
@@ -111,7 +111,7 @@ object SubRepo : AnkoLogger {
                     tier = plan.tier,
                     cycle = plan.cycle
                 )))
-                .responseApi()
+                .endJsonText()
 
         info("Aliorder $body")
 

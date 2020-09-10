@@ -23,7 +23,7 @@ object LinkRepo {
                     "userId" to ftcId, // Deprecated.
                     "ftcId" to ftcId
                 )))
-                .responseApi()
+                .endJsonText()
 
         return resp.code == 204
     }
@@ -37,7 +37,7 @@ object LinkRepo {
                     .setClient()
                     .noCache()
                     .sendJson(json.toJsonString(c))
-                    .responseApi()
+                    .endJsonText()
 
         return if (body == null) {
             null
@@ -59,7 +59,7 @@ object LinkRepo {
                 anchor = anchor
             )))
             .noCache()
-            .responseApi()
+            .endJsonText()
 
         return resp.code == 204
     }

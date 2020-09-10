@@ -17,7 +17,7 @@ object StripeRepo : AnkoLogger {
                 .setUserId(id)
                 .noCache()
                 .sendJson()
-                .responseApi()
+                .endJsonText()
 
         if (body == null) {
             return null
@@ -41,7 +41,7 @@ object StripeRepo : AnkoLogger {
                 .query("api_version", apiVersion)
                 .noCache()
                 .sendJson()
-                .responseApi()
+                .endJsonText()
 
         return body
     }
@@ -50,7 +50,7 @@ object StripeRepo : AnkoLogger {
         val (_, body) = Fetch()
                 .get("${SubscribeApi.STRIPE_PLAN}/$id")
                 .setUserId(id)
-                .responseApi()
+                .endJsonText()
 
         return if (body == null) {
             return null
@@ -71,7 +71,7 @@ object StripeRepo : AnkoLogger {
             fetch.setUnionId(account.unionId)
         }
 
-        val (_, body ) = fetch.responseApi()
+        val (_, body ) = fetch.endJsonText()
 
         return if (body == null) {
             null
@@ -91,7 +91,7 @@ object StripeRepo : AnkoLogger {
             fetch.setUnionId(account.unionId)
         }
 
-        val (_, body) = fetch.responseApi()
+        val (_, body) = fetch.endJsonText()
 
         return if (body == null) {
             null
@@ -111,7 +111,7 @@ object StripeRepo : AnkoLogger {
             fetch.setUnionId(account.unionId)
         }
 
-        val (_, body) = fetch.responseApi()
+        val (_, body) = fetch.endJsonText()
         return if (body == null) {
             null
         } else {

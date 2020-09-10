@@ -18,7 +18,7 @@ object ContentAPIRepo : AnkoLogger {
 
         val (_, body) = Fetch()
                 .get(url)
-                .responseApi()
+                .endJsonText()
 
         return body
     }
