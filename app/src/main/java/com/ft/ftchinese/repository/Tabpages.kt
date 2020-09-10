@@ -453,7 +453,26 @@ object TabPages {
             contentPath = "/m/corp/preview.html?pageid=property&webview=ftcapp&bodyonly=yes",
             path = "/m/corp/preview.html",
             query = "pageid=property",
-            htmlType = HTML_TYPE_FRAGMENT)
+            htmlType = HTML_TYPE_FRAGMENT),
+        /**
+         * Steps to renderUI:
+         *
+         * ViewPager -> ChannelFragment -> WVClient
+         * -> shouldOverrideUrlLoading -> handleInSiteLink
+         * -> TYPE_M -> ChannelFragment
+         * ... recursively.
+         *
+         * Each item on this page leads to another page of list.
+         */
+        ChannelSource(
+            title = "电子书",
+            name = "news_samsungebook",
+            contentPath = "/m/corp/preview.html?pageid=samsungebook&to=all",
+            path = "/m/corp/preview.html",
+            query = "pageid=samsungebook&to=all",
+            htmlType = HTML_TYPE_FRAGMENT,
+            permission = Permission.PREMIUM
+        )
     )
 
     val englishPages = listOf(
