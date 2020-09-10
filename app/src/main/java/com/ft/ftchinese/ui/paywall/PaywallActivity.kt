@@ -27,10 +27,6 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-private val productOrder = listOf(
-    Pair(R.id.product_top, Tier.STANDARD),
-    Pair(R.id.product_bottom, Tier.PREMIUM)
-)
 
 /**
  * Paywall of products.
@@ -72,7 +68,7 @@ class PaywallActivity : ScopedAppActivity(),
             .get(PaywallViewModel::class.java)
 
         // Setup network
-        connectionLiveData.observe(this, Observer {
+        connectionLiveData.observe(this, {
             paywallViewModel.isNetworkAvailable.value = it
         })
         paywallViewModel.isNetworkAvailable.value = isConnected
@@ -107,7 +103,7 @@ class PaywallActivity : ScopedAppActivity(),
         /**
          * Load paywall from cache, and then from server.
          */
-        paywallViewModel.paywallResult.observe(this, Observer {
+        paywallViewModel.paywallResult.observe(this, {
             onPaywallResult(it)
         })
 
@@ -139,22 +135,21 @@ class PaywallActivity : ScopedAppActivity(),
         binding.premiumFirst = premiumFirst
 
 
+        if (premiumFirst) {
+            info("Should show premium card on top")
+        }
+
         supportFragmentManager.commit {
             replace(R.id.subs_status, SubsStatusFragment.newInstance())
 
             replace(R.id.frag_promo_box, PromoBoxFragment.newInstance())
 
-            productOrder.let {
-                if (premiumFirst) {
-                    it.reversed()
-                } else {
-                    it
-                }
-            }.forEach {
-                replace(
-                    it.first,
-                    ProductFragment.newInstance(it.second)
-                )
+            if (premiumFirst) {
+                replace(R.id.product_top, ProductFragment.newInstance(Tier.PREMIUM))
+                replace(R.id.product_bottom, ProductFragment.newInstance(Tier.STANDARD))
+            } else {
+                replace(R.id.product_top, ProductFragment.newInstance(Tier.STANDARD))
+                replace(R.id.product_bottom, ProductFragment.newInstance(Tier.PREMIUM))
             }
 
             // Customer service
