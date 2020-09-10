@@ -134,7 +134,6 @@ class MainActivity : ScopedAppActivity(),
         setupDrawer()
 
         // If avatar is downloaded from network.
-        // TODO: move to a method.
         accountViewModel.avatarRetrieved.observe(this, Observer {
             onAvatarRetrieved(it)
         })
@@ -246,7 +245,9 @@ class MainActivity : ScopedAppActivity(),
         }
     }
 
-    // Set up home page upon launching, or clicking the Home button in BottomNavigationView.
+    /**
+     * Set up home page upon launching, or clicking the Home button in BottomNavigationView.
+     */
     private fun setupHome() {
         pagerAdapter = TabPagerAdapter(TabPages.newsPages, supportFragmentManager)
         binding.viewPager.adapter = pagerAdapter

@@ -3,7 +3,6 @@ package com.ft.ftchinese.ui.channel
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -11,32 +10,33 @@ import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.ft.ftchinese.*
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.ft.ftchinese.BuildConfig
+import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentChannelBinding
-import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.reader.ReadingDuration
 import com.ft.ftchinese.model.reader.denyPermission
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.ReadingDurationService
-import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.SponsorManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.base.Paging
-import com.ft.ftchinese.ui.base.WVClient
-import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.pay.handlePermissionDenial
-import com.ft.ftchinese.util.*
+import com.ft.ftchinese.util.json
 import com.ft.ftchinese.viewmodel.ChannelViewModel
 import com.ft.ftchinese.viewmodel.ChannelViewModelFactory
 import com.ft.ftchinese.viewmodel.Result
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -67,6 +67,7 @@ class ChannelFragment : ScopedFragment(),
     private lateinit var binding: FragmentChannelBinding
 
     private lateinit var channelViewModel: ChannelViewModel
+    private lateinit var wvViewModel: WVViewModel
 
     // An array of article teaser passed from JS.
     // This is used to determine which article user is trying to read.
@@ -123,7 +124,9 @@ class ChannelFragment : ScopedFragment(),
             databaseEnabled = true
         }
 
-        val wvClient = WVClient(requireContext())
+        val wvClient = WVClient(
+            context = requireContext(),
+        )
         wvClient.setWVInteractionListener(this)
 
         binding.webView.apply {
@@ -158,15 +161,37 @@ class ChannelFragment : ScopedFragment(),
         channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache, sessionManager.loadAccount()))
             .get(ChannelViewModel::class.java)
 
-        connectionLiveData.observe(viewLifecycleOwner, Observer {
+        wvViewModel = ViewModelProvider(this).get(WVViewModel::class.java)
+
+        connectionLiveData.observe(viewLifecycleOwner, {
             channelViewModel.isNetworkAvailable.value = it
         })
         channelViewModel.isNetworkAvailable.value = context?.isConnected
 
+
         // Whe the HTML is fetched from server.
-        channelViewModel.contentResult.observe(viewLifecycleOwner, Observer {
+        channelViewModel.contentResult.observe(viewLifecycleOwner, {
             onContentLoaded(it)
         })
+
+        wvViewModel.urlChannelSelected.observe(viewLifecycleOwner, {
+            onUrlChannelClicked(it)
+        })
+
+        binding.webView.apply {
+
+            // Interact with JS.
+            // See Page/Layouts/Page/SuperDataViewController.swift#viewDidLoad() how iOS inject js to web view.
+            addJavascriptInterface(
+                this@ChannelFragment,
+                JS_INTERFACE_NAME
+            )
+
+            // Set WebViewClient to handle various links
+            webViewClient = WVClient(requireContext(), wvViewModel)
+
+            webChromeClient = ChromeClient()
+        }
 
         initLoading()
     }
@@ -372,8 +397,12 @@ class ChannelFragment : ScopedFragment(),
         }
     }
 
-    // User click on an item of article list.
+    /**
+     * When user clicks on an item of article list,
+     * the js interface sends the clickd item index back.
+     */
     private fun selectItem(index: Int) {
+        info("JS interface responding to click on an item")
         if (index < 0) {
             return
         }
@@ -418,6 +447,22 @@ class ChannelFragment : ScopedFragment(),
             statsTracker.selectListItem(teaser)
         } else {
             activity?.handlePermissionDenial(denialReason, contentPerm)
+        }
+    }
+
+    private fun onUrlChannelClicked(clicked: ChannelSource) {
+        val current = channelSource
+
+        if (current?.permission == null) {
+            ChannelActivity.start(context, clicked)
+            return
+        }
+
+        val denialReason = denyPermission(sessionManager.loadAccount(), current.permission)
+        if (denialReason == null) {
+            ChannelActivity.start(context, clicked)
+        } else {
+            activity?.handlePermissionDenial(denialReason, current.permission)
         }
     }
 

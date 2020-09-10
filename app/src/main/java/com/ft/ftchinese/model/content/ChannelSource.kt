@@ -20,7 +20,7 @@ data class ChannelSource (
         // If empty, do not cache it, nor should you try to
         // find cache.
     val name: String,  // Cache filename used by this tab
-    val contentPath: String, // The resource path of the HTML fragment.
+    val contentPath: String, // Deprecated. Repaced by path and query.
     val path: String,
     val query: String,
     val htmlType: Int, // Flag used to tell whether the webUrl should be loaded directly
@@ -131,7 +131,29 @@ val pathToTitle = mapOf(
     "creditease.html" to "未来生活 未来金融",
     "markets.html" to "金融市场",
     "hxxf2016.html" to "透视中国PPP模式",
-    "money.html" to "理财"
+    "money.html" to "理财",
+    "whoisstealingmydata" to "大数据时代 数据也在偷偷看你",
+    "travel2018" to "跟着欧洲玩家小众游",
+    "ebooklxkyzygbygr" to "留学可以怎样改变一个人",
+    "ebooksfqkljstjypm" to "是非区块链",
+    "ebookygtomzdslhssb" to "英国脱欧 II",
+    "ebooknjnxb30nzcgcl5" to "30年职场观察录",
+    "ebooknjnxb30nzcgcl4" to "",
+    "ebooknjnxb30nzcgcl3" to "",
+    "ebooknjnxb30nzcgcl2" to "",
+    "ebooknjnxb30nzcgcl1" to "",
+    "ebookmdtlptzzgjjhzxhf" to "面对特朗普挑战 中国经济走向何方",
+    "ebookmgrwsmzctlp" to "美国人为什么支持特朗普",
+    "ebookxzaqdym" to "寻找安全的疫苗",
+    "ebookylwjywzgmtrdrbgc" to "日本观察: 以邻为鉴",
+    "ebookszcnxyydzd" to "职场女性: 优雅地战斗",
+    "ebookcfbj" to "拆分北京",
+    "ebooklszh" to "楼市之惑",
+    "yearbook2018" to "2018: 中美博弈之年",
+    "yearbook2017" to "2017: 自信下的焦虑",
+    "ebook-english-1" to "读FT学英语",
+    "2018lunchwiththeft1" to "与FT共进午餐"
+
 )
 
 val noAccess = mapOf(
@@ -143,10 +165,13 @@ val noAccess = mapOf(
     "weekly.html" to "热门文章"
 )
 
+/**
+ * Handle urls like:
+ * /channel/editorchoice-issue.html?issue=EditorChoice-20181105
+ * Those links appears on under page with links like:
+ * /channel/editorchoice.html
+ */
 fun buildChannelFromUri(uri: Uri): ChannelSource {
-    // Handle links on this page: https://api003.ftmailbox.com/channel/editorchoice.html?webview=ftcapp&bodyonly=yes&ad=no&showEnglishAudio=yes&018
-    // The link itself looks like:
-    // http://www.ftchinese.com/channel/editorchoice-issue.html?issue=EditorChoice-20181105
     val isEditorChoice = uri.lastPathSegment == "editorchoice-issue.html"
     val issueName = uri.getQueryParameter("issue")
 
@@ -164,25 +189,27 @@ fun buildChannelFromUri(uri: Uri): ChannelSource {
     )
 }
 
+/**
+ * Turn url path like
+ * /m/marketing/intelligence.html or
+ * /m/corp/preview.html?pageid=huawei2018
+ * to ChannelSource.
+ */
 fun buildMarketingChannel(uri: Uri): ChannelSource {
 
-    val pageName = uri.getQueryParameter("pageid")
+    val pageId = uri.getQueryParameter("pageid")
 
-    val name = if (pageName != null) {
-        // Links like /m/corp/preview.html?pageid=huawei2018
-        uri.pathSegments
-            .joinToString("_")
-            .removeSuffix(".html") + "_$pageName"
+    val name = uri.pathSegments
+        .joinToString("_")
+        .removeSuffix(".html") + if (pageId != null) {
+        "_$pageId"
     } else {
-        // Links like /m/marketing/intelligence.html?webview=ftcapp
-        uri.pathSegments
-            .joinToString("_")
-            .removeSuffix(".html")
+        ""
     }
 
     return ChannelSource(
         title = pathToTitle[
-            pageName
+            pageId
             ?: uri.lastPathSegment
             ?: ""
         ]

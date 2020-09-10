@@ -22,7 +22,6 @@ import com.ft.ftchinese.tracking.PaywallSource
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.WebViewActivity
-import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import org.jetbrains.anko.AnkoLogger
@@ -45,11 +44,13 @@ private const val TYPE_ARCHIVE = "archiver"
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 open class WVClient(
-        private val context: Context
+        private val context: Context,
+        private val viewModel: WVViewModel? = null
 ) : WebViewClient(), AnkoLogger {
 
     // Pass click events to host.
     private var mListener: OnWebViewInteractionListener? = null
+
 
     private val sessionManager = SessionManager.getInstance(context)
 
@@ -317,7 +318,7 @@ open class WVClient(
             }
 
             /**
-             * Load content in into [ChannelActivity].
+             * Load content in into ChannelActivity.
              * If the path looks like `/channel/english.html`
              * On home page '每日英语' section, the title is a link
              * Similar to TYPE_COLUMN
@@ -342,10 +343,7 @@ open class WVClient(
                     true
                 } else {
                     info("Open a new channel. Path: ${uri.path}")
-                    ChannelActivity.start(
-                        context,
-                        buildChannelFromUri(fragmentUri(uri))
-                    )
+                    viewModel?.urlChannelSelected?.value = buildChannelFromUri(uri)
                     true
                 }
             }
@@ -357,10 +355,9 @@ open class WVClient(
              */
             TYPE_M -> {
                 info("Loading marketing page")
-                ChannelActivity.start(
-                    context,
-                    buildMarketingChannel(fullPageUri(uri))
-                )
+
+                viewModel?.urlChannelSelected?.value = buildMarketingChannel(uri)
+
                 true
             }
 
@@ -371,7 +368,7 @@ open class WVClient(
             TYPE_TAG,
             TYPE_ARCHIVE -> {
                 info("Loading tag or archive")
-                ChannelActivity.start(context, buildTagOrArchiveChannel(uri))
+                viewModel?.urlChannelSelected?.value = buildTagOrArchiveChannel(uri)
                 true
             }
 
@@ -408,29 +405,6 @@ open class WVClient(
 
 
         return true
-    }
-
-    private fun fullPageUri(uri: Uri): Uri {
-        val builder = uri.buildUpon()
-
-        if (uri.getQueryParameter("webview") == null) {
-            builder.appendQueryParameter("webview", "ftcapp")
-        }
-
-        return builder.build()
-    }
-
-    private fun fragmentUri(uri: Uri): Uri {
-        val builder =  uri.buildUpon()
-
-        if (uri.getQueryParameter("bodyonly") == null) {
-            builder.appendQueryParameter("bodyonly", "yes")
-        }
-        if (uri.getQueryParameter("webview") == null) {
-            builder.appendQueryParameter("webview", "ftcapp")
-        }
-
-        return builder.build()
     }
 }
 
