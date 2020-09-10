@@ -144,13 +144,13 @@ class StoryFragment : ScopedFragment(),
                     .get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        connectionLiveData.observe(viewLifecycleOwner, Observer {
+        connectionLiveData.observe(viewLifecycleOwner, {
             articleModel.isNetworkAvailable.value = it
         })
         articleModel.isNetworkAvailable.value = context?.isConnected
 
         // Observing language switcher.
-        articleModel.currentLang.observe(viewLifecycleOwner, Observer<Language> {
+        articleModel.currentLang.observe(viewLifecycleOwner, Observer {
             // Remember the language user selected so
             // that we know how to handle refresh.
             currentLang = it
@@ -160,7 +160,7 @@ class StoryFragment : ScopedFragment(),
         })
 
         // Receiving story json data.
-        articleModel.storyResult.observe(viewLifecycleOwner, Observer {
+        articleModel.storyResult.observe(viewLifecycleOwner, {
             onStoryResult(it)
         })
 

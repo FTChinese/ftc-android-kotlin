@@ -122,7 +122,7 @@ data class Teaser(
     }
 
     fun hasMp3(): Boolean {
-        return audioUrl != null || radioUrl != null
+        return !audioUrl.isNullOrBlank() || !radioUrl.isNullOrBlank()
     }
 
     fun audioUri(): Uri? {

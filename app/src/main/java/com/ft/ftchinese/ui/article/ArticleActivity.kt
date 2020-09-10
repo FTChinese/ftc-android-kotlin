@@ -11,23 +11,22 @@ import android.view.MenuItem
 import androidx.core.app.TaskStackBuilder
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.databinding.ActivityArticleBinding
-import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.model.reader.denyPermission
-import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.ShareItem
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.ShareItem
 import com.ft.ftchinese.viewmodel.ArticleViewModel
 import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
@@ -87,8 +86,6 @@ class ArticleActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(false)
         }
 
-
-
         val teaser = intent.getParcelableExtra<Teaser>(EXTRA_ARTICLE_TEASER) ?: return
         info("Article source: $teaser")
         this.teaser = teaser
@@ -127,12 +124,12 @@ class ArticleActivity : ScopedAppActivity(),
         starViewModel = ViewModelProvider(this)
                 .get(StarArticleViewModel::class.java)
 
-        articleViewModel.inProgress.observe(this, Observer {
+        articleViewModel.inProgress.observe(this, {
             binding.inProgress = it
         })
 
         // Observe whether the article is bilingual.
-        articleViewModel.bilingual.observe(this, Observer<Boolean> {
+        articleViewModel.bilingual.observe(this, {
             info("Observer found content is bilingual: $it")
             binding.isBilingual = it
 
@@ -142,9 +139,8 @@ class ArticleActivity : ScopedAppActivity(),
             }
         })
 
-        // Get article data that can be saved to db
-        // after article is loaded.
-        articleViewModel.articleLoaded.observe(this, Observer {
+        // StoryFragment send this message after content loaded.
+        articleViewModel.articleLoaded.observe(this, {
             article = it
 
             // Check whether this article is bookmarked.
@@ -157,13 +153,13 @@ class ArticleActivity : ScopedAppActivity(),
         })
 
         // Switch bookmark icon upon starViewModel.isStarring() finished.
-        starViewModel.starred.observe(this, Observer {
+        starViewModel.starred.observe(this, {
             // Updating bookmark icon.
             isStarring = it
             binding.isStarring = isStarring
         })
 
-        articleViewModel.shareItem.observe(this, Observer {
+        articleViewModel.shareItem.observe(this, {
             onClickShareIcon(it)
         })
 
@@ -241,13 +237,14 @@ class ArticleActivity : ScopedAppActivity(),
         binding.langBiBtn.isChecked = false
     }
 
+    /**
+     * Setup share button and audio button.
+     */
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 
         menuInflater.inflate(R.menu.article_top_bar, menu)
 
-        if (teaser?.hasMp3() != true) {
-            menu?.findItem(R.id.menu_audio)?.isVisible = false
-        }
+        menu?.findItem(R.id.menu_audio)?.isVisible = teaser?.hasMp3() ?: false
 
         return super.onCreateOptionsMenu(menu)
     }
