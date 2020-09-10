@@ -67,14 +67,7 @@ val defaultPlans = listOf(
         tier = Tier.STANDARD,
         cycle = Cycle.YEAR,
         description = "Standard Yearly Plan",
-        discount = Discount(
-            id = "dsc_PqU34aIHEErX",
-            priceOff = 130.0,
-            percent = null,
-            startUtc = ZonedDateTime.parse("2020-08-18T16:00:00Z"),
-            endUtc = ZonedDateTime.parse("2020-09-02T16:00:00Z"),
-            description = null
-        )
+        discount = Discount()
     ),
     Plan(
         id = "plan_drbwQ2gTmtOK",
@@ -92,14 +85,7 @@ val defaultPlans = listOf(
         tier = Tier.PREMIUM,
         cycle = Cycle.YEAR,
         description = "Premium Yearly Plan",
-        discount = Discount(
-            id = "dsc_hwvNK0Cfyiny",
-            priceOff = 1000.0,
-            percent = null,
-            startUtc = ZonedDateTime.parse("2020-08-18T16:00:00Z"),
-            endUtc = ZonedDateTime.parse("2020-09-02T16:00:00Z"),
-            description =  null
-        )
+        discount = Discount()
     )
 )
 

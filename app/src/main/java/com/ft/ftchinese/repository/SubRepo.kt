@@ -1,25 +1,13 @@
 package com.ft.ftchinese.repository
 
-
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.util.json
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
+
 object SubRepo : AnkoLogger {
-
-    fun loadPaywall(): Paywall? {
-        val (_, body) = Fetch().get(SubscribeApi.PAYWALL)
-            .noCache()
-            .responseApi()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<Paywall>(body)
-        }
-    }
 
     fun previewUpgrade(account: Account): PaymentIntent? {
 
@@ -81,8 +69,11 @@ object SubRepo : AnkoLogger {
                 .setTimeout(30)
                 .noCache()
                 .setClient()
-                .setAppId()
-                .sendJson(json.toJsonString(plan))
+                .setAppId() // Deprecated
+                .sendJson(json.toJsonString(Edition(
+                    tier = plan.tier,
+                    cycle = plan.cycle
+                )))
                 .responseApi()
 
         info("Wx order: $body")
@@ -99,7 +90,7 @@ object SubRepo : AnkoLogger {
         val (_, body) = account.createFetch()
                 .get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
                 .noCache()
-                .setAppId()
+                .setAppId() // Deprecated
                 .responseApi()
 
         return if (body == null) {
@@ -116,7 +107,10 @@ object SubRepo : AnkoLogger {
                 .setTimeout(30)
                 .noCache()
                 .setClient()
-                .sendJson(json.toJsonString(plan))
+                .sendJson(json.toJsonString(Edition(
+                    tier = plan.tier,
+                    cycle = plan.cycle
+                )))
                 .responseApi()
 
         info("Aliorder $body")
