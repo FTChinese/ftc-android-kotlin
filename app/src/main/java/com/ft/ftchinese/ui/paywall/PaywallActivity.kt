@@ -157,20 +157,23 @@ class PaywallActivity : ScopedAppActivity(),
         }
     }
 
+    /**
+     * After the complete paywall data received,
+     */
     private fun onPaywallResult(result: Result<Paywall>) {
-        val showError = binding.swipeRefresh.isRefreshing
+        val isManual = binding.swipeRefresh.isRefreshing
 
         binding.swipeRefresh.isRefreshing = false
 
         when (result) {
             is Result.LocalizedError -> {
-                if (showError) {
+                if (isManual) {
                     toast(getString(result.msgId))
                 }
 
             }
             is Result.Error -> {
-                if (showError) {
+                if (isManual) {
                     result.exception.message?.let { toast(it) }
                 }
             }
@@ -179,10 +182,14 @@ class PaywallActivity : ScopedAppActivity(),
                 setUpPromo(result.data.promo)
                 productViewModel.productsReceived.value = result.data.products
 
+                if (isManual) {
+                    toast(R.string.paywall_updated)
+                }
             }
         }
     }
 
+    // Convert Promo to PromoUI if it is valid.
     private fun setUpPromo(p: Promo) {
         if (!p.isValid()) {
             return
@@ -205,7 +212,7 @@ class PaywallActivity : ScopedAppActivity(),
     }
 
     override fun onRefresh() {
-        toast("Fetching latest pricing and promotion data...")
+        toast(R.string.refresh_paywall)
 
         paywallViewModel.loadPaywall(true)
     }

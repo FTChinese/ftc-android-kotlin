@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentPromoBoxBinding
@@ -41,7 +40,7 @@ class PromoBoxFragment : Fragment(), AnkoLogger {
             ViewModelProvider(this).get(ProductViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        productViewModel.promoCreated.observe(viewLifecycleOwner, Observer {
+        productViewModel.promoCreated.observe(viewLifecycleOwner, {
             info(it)
             binding.promo = it
         })

@@ -6,12 +6,13 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentProductBinding
-import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.model.subscription.Cycle
+import com.ft.ftchinese.model.subscription.Plan
+import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.model.subscription.defaultPlans
 import com.ft.ftchinese.ui.base.ScopedFragment
 import org.jetbrains.anko.AnkoLogger
 
@@ -104,12 +105,12 @@ class ProductFragment : ScopedFragment(),
         } ?: throw Exception("Invalid Exception")
 
         // Enable or disable button
-        viewModel.inputEnabled.observe(viewLifecycleOwner, Observer<Boolean> {
+        viewModel.inputEnabled.observe(viewLifecycleOwner, {
             binding.buttonEnabled = it
         })
 
         // Observing products
-        viewModel.productsReceived.observe(viewLifecycleOwner, Observer<List<Product>> { products ->
+        viewModel.productsReceived.observe(viewLifecycleOwner, { products ->
             products.find {
                 it.tier == tier
             }?.let {

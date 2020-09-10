@@ -64,7 +64,10 @@ class PaywallViewModel(
 
             try {
                 val (pw, data) = withContext(Dispatchers.IO) {
-                    val data = Fetch().get(SubscribeApi.PAYWALL).responseString()
+
+                    val (_, data) = Fetch().get(SubscribeApi.PAYWALL).endJsonText()
+
+                    info("Fetch paywall data $data")
 
                     if(!data.isNullOrBlank()) {
                         Pair(json.parse<Paywall>(data), data)
