@@ -49,10 +49,24 @@
                 android:paddingEnd="8dp">
 
                 <Button
-                    android:id="@+id/btn_login"
+                    android:id="@+id/btn_free_user"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Mock Login"
+                    android:text="Free Edition"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btn_standard_user"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Standard Edition"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btn_premium_user"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Premium Edition"
                     android:textAllCaps="false" />
 
                 <Button
