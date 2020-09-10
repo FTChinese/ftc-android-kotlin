@@ -72,6 +72,8 @@
 
     <!-- Paywall -->
 
+    <string name="refresh_paywall">获取最新产品价格...</string>
+    <string name="paywall_updated">数据已更新</string>
     <!-- Example: ¥1,998.00/年 -->
     <string name="formatter_price_year">¥%1$,.2f/年</string>
     <string name="formatter_price_month">¥%1$,.2f/月</string>

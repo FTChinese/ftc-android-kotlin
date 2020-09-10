@@ -511,5 +511,7 @@
     <string name="btn_accept">接受</string>
     <string name="btn_decline">拒绝</string>
     <string name="original_price">原价</string>
+    <string name="refresh_paywall">获取最新产品价格...</string>
+    <string name="paywall_updated">数据已更新</string>
 
 </resources>
