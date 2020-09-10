@@ -7,7 +7,7 @@ import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.util.json
 
 data class UnlinkReqBody (
-    val unionId: String,
+    val ftcId: String,
     val anchor: UnlinkAnchor?
 )
 
@@ -20,7 +20,8 @@ object LinkRepo {
                 .setUnionId(unionId)
                 .noCache()
                 .sendJson(Klaxon().toJsonString(mapOf(
-                        "userId" to ftcId
+                    "userId" to ftcId, // Deprecated.
+                    "ftcId" to ftcId
                 )))
                 .responseApi()
 
@@ -52,10 +53,9 @@ object LinkRepo {
 
         val (resp, _) = Fetch()
             .delete(NextApi.WX_LINK)
-            .setUserId(account.id)
             .setUnionId(account.unionId)
             .sendJson(json.toJsonString(UnlinkReqBody(
-                unionId = account.unionId,
+                ftcId = account.id,
                 anchor = anchor
             )))
             .noCache()
