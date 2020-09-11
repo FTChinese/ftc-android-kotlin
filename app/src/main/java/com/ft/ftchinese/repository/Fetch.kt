@@ -100,9 +100,9 @@ class Fetch : AnkoLogger {
         urlBuilder.addQueryParameter(name, value)
     }
 
-    fun setSandbox(yes: Boolean) = apply {
+    fun setTest(yes: Boolean) = apply {
         if (yes) {
-            urlBuilder.addQueryParameter("sandbox", "true")
+            urlBuilder.addQueryParameter("test", "true")
         }
     }
 

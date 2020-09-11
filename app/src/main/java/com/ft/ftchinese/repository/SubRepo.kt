@@ -64,11 +64,12 @@ object SubRepo : AnkoLogger {
 
     fun wxPlaceOrder(account: Account, plan: Plan): WxOrder? {
 
-        val isSandbox = account.isSandbox
+        // If current account is a testing one, always send request to sandbox.
+        val isTest = account.isTest
 
         val (_, body) = account.createFetch()
-            .post("${SubscribeApi.wxOrderUrl(isSandbox)}/${plan.tier}/${plan.cycle}")
-            .setSandbox(isSandbox)
+            .post("${SubscribeApi.wxOrderUrl(isTest)}/${plan.tier}/${plan.cycle}")
+            .setTest(isTest)
             .setTimeout(30)
             .noCache()
             .setClient()
@@ -105,11 +106,11 @@ object SubRepo : AnkoLogger {
 
     fun aliPlaceOrder(account: Account, plan: Plan): AliOrder? {
 
-        val isSandbox = account.isSandbox
+        val isTest = account.isTest
 
         val (_, body) = account.createFetch()
-            .post("${SubscribeApi.aliOrderUrl(isSandbox)}/${plan.tier}/${plan.cycle}")
-            .setSandbox(isSandbox)
+            .post("${SubscribeApi.aliOrderUrl(isTest)}/${plan.tier}/${plan.cycle}")
+            .setTest(isTest)
             .setTimeout(30)
             .noCache()
             .setClient()
