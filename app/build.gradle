@@ -58,6 +58,7 @@ android {
         buildConfigField "String", "API_READER_LIVE", props.getProperty("api_url.reader.live")
         buildConfigField "String", "API_CONTENT_LIVE", props.getProperty("api_url.content.live")
         buildConfigField "String", "API_SUBS_LIVE", props.getProperty("api_url.subs.live")
+        buildConfigField "String", "API_SUBS_SANDBOX", props.getProperty("api_url.subs.sandbox")
 
         buildConfigField "String", "ACCESS_TOKEN_LIVE", props.getProperty("access_token.live")
         buildConfigField "String", "ACCESS_TOKEN_TEST", props.getProperty("access_token.test")

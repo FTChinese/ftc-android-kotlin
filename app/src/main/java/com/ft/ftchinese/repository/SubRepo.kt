@@ -64,17 +64,20 @@ object SubRepo : AnkoLogger {
 
     fun wxPlaceOrder(account: Account, plan: Plan): WxOrder? {
 
+        val isSandbox = account.isSandbox
+
         val (_, body) = account.createFetch()
-                .post("${SubscribeApi.WX_UNIFIED_ORDER}/${plan.tier}/${plan.cycle}")
-                .setTimeout(30)
-                .noCache()
-                .setClient()
-                .setAppId() // Deprecated
-                .sendJson(json.toJsonString(Edition(
-                    tier = plan.tier,
-                    cycle = plan.cycle
-                )))
-                .endJsonText()
+            .post("${SubscribeApi.wxOrderUrl(isSandbox)}/${plan.tier}/${plan.cycle}")
+            .setSandbox(isSandbox)
+            .setTimeout(30)
+            .noCache()
+            .setClient()
+            .setAppId() // Deprecated
+            .sendJson(json.toJsonString(Edition(
+                tier = plan.tier,
+                cycle = plan.cycle
+            )))
+            .endJsonText()
 
         info("Wx order: $body")
 
@@ -102,16 +105,19 @@ object SubRepo : AnkoLogger {
 
     fun aliPlaceOrder(account: Account, plan: Plan): AliOrder? {
 
+        val isSandbox = account.isSandbox
+
         val (_, body) = account.createFetch()
-                .post("${SubscribeApi.ALI_ORDER}/${plan.tier}/${plan.cycle}")
-                .setTimeout(30)
-                .noCache()
-                .setClient()
-                .sendJson(json.toJsonString(Edition(
-                    tier = plan.tier,
-                    cycle = plan.cycle
-                )))
-                .endJsonText()
+            .post("${SubscribeApi.aliOrderUrl(isSandbox)}/${plan.tier}/${plan.cycle}")
+            .setSandbox(isSandbox)
+            .setTimeout(30)
+            .noCache()
+            .setClient()
+            .sendJson(json.toJsonString(Edition(
+                tier = plan.tier,
+                cycle = plan.cycle
+            )))
+            .endJsonText()
 
         info("Aliorder $body")
 

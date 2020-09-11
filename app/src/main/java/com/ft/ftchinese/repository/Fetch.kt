@@ -100,6 +100,12 @@ class Fetch : AnkoLogger {
         urlBuilder.addQueryParameter(name, value)
     }
 
+    fun setSandbox(yes: Boolean) = apply {
+        if (yes) {
+            urlBuilder.addQueryParameter("sandbox", "true")
+        }
+    }
+
     fun cancel() {
         call?.cancel()
     }

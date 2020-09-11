@@ -26,6 +26,8 @@ data class Account(
         val membership: Membership
 ): Parcelable {
 
+    val isSandbox: Boolean
+        get() = email.endsWith(".sandbox@ftchinese.com")
     /**
      * Tests whether two accounts are the same one.
      */

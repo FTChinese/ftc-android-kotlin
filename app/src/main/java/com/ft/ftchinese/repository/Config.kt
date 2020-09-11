@@ -36,11 +36,13 @@ object Config {
         BuildConfig.API_CONTENT_LIVE
     }
 
-    val subsApiBase = if (BuildConfig.DEBUG) {
+    val subsApiProdBase = if (BuildConfig.DEBUG) {
         "http://172.27.10.124:8200"
     } else {
         BuildConfig.API_SUBS_LIVE
     }
+
+    val subsApiSandboxBase = BuildConfig.API_SUBS_SANDBOX
 
     val accessToken = if (BuildConfig.DEBUG) {
         BuildConfig.ACCESS_TOKEN_TEST

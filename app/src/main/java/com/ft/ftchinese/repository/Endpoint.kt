@@ -34,14 +34,11 @@ object ContentApi {
 }
 
 object SubscribeApi {
-    private val BASE = Config.subsApiBase
+    private val BASE = Config.subsApiProdBase
 
     val PAYWALL = "$BASE/paywall"
-    val PRICING = "$BASE/paywall/pricing"
 
-    val WX_UNIFIED_ORDER = "$BASE/wxpay/app"
     val WX_ORDER_QUERY = "$BASE/wxpay/query"
-    val ALI_ORDER = "$BASE/alipay/app"
 
     val WX_LOGIN = "$BASE/wx/oauth/login"
     val WX_REFRESH = "$BASE/wx/oauth/refresh"
@@ -52,6 +49,33 @@ object SubscribeApi {
     val STRIPE_PLAN = "$BASE/stripe/plans"
     val STRIPE_CUSTOMER = "$BASE/stripe/customers"
     val STRIPE_SUB = "$BASE/stripe/subscriptions"
+
+    private const val CREATE_ALI_ORDER = "/alipay/app"
+    private const val CREATE_WX_ORDER = "/wxpay/app"
+
+    private fun baseUrl(sandbox: Boolean): String {
+        return if (sandbox) {
+            Config.subsApiSandboxBase
+        } else {
+            Config.subsApiProdBase
+        }
+    }
+
+    fun aliOrderUrl(sandbox: Boolean): String {
+        return if (sandbox) {
+            "${baseUrl(sandbox)}${CREATE_ALI_ORDER}"
+        } else {
+            "${baseUrl(sandbox)}${CREATE_ALI_ORDER}"
+        }
+    }
+
+    fun wxOrderUrl(sandbox: Boolean): String {
+        return if (sandbox) {
+            "${baseUrl(sandbox)}${CREATE_WX_ORDER}"
+        } else {
+            "${baseUrl(sandbox)}${CREATE_WX_ORDER}"
+        }
+    }
 }
 
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
