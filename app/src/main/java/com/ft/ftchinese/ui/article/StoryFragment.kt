@@ -7,7 +7,6 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import androidx.core.os.bundleOf
@@ -117,12 +116,7 @@ class StoryFragment : ScopedFragment(),
             )
 
             webViewClient = wvClient
-            webChromeClient = object : WebChromeClient() {
-                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-                    info("${consoleMessage?.message()} -- From line ${consoleMessage?.lineNumber()} of ${consoleMessage?.sourceId()}")
-                    return super.onConsoleMessage(consoleMessage)
-                }
-            }
+            webChromeClient = WebChromeClient()
 
             setOnKeyListener { _, keyCode, _ ->
                 if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
@@ -184,8 +178,6 @@ class StoryFragment : ScopedFragment(),
 
         toast(R.string.refreshing_data)
 
-        // Load and render
-//        articleModel.loadFromRemote(item, currentLang)
         articleModel.loadStory(
             teaser = item,
             bustCache = true
@@ -195,6 +187,7 @@ class StoryFragment : ScopedFragment(),
     private fun initLoading() {
         val item = storyBrief ?: return
 
+        // Show progress indicator
         if (!binding.swipeRefresh.isRefreshing) {
             articleModel.inProgress.value = true
         }

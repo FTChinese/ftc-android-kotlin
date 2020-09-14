@@ -10,4 +10,16 @@ class WVViewModel () : ViewModel() {
     val urlChannelSelected: MutableLiveData<ChannelSource> by lazy {
         MutableLiveData<ChannelSource>()
     }
+
+    val pageFinished: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
+
+    val pagingBtnClicked: MutableLiveData<Paging> by lazy {
+        MutableLiveData<Paging>()
+    }
+
+    val openGraphEvaluated: MutableLiveData<String> by lazy {
+        MutableLiveData<String>()
+    }
 }

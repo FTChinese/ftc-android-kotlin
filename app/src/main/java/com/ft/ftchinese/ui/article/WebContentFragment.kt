@@ -25,6 +25,7 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.WVClient
+import com.ft.ftchinese.ui.base.WVViewModel
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
 import com.ft.ftchinese.util.json
@@ -41,12 +42,12 @@ private const val ARG_WEBPAGE_ARTICLE = "arg_web_article"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class WebContentFragment : ScopedFragment(),
-        WVClient.OnWebViewInteractionListener,
         AnkoLogger {
 
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var starViewModel: StarArticleViewModel
     private lateinit var readViewModel: ReadArticleViewModel
+    private lateinit var wvViewModel: WVViewModel
 
     private lateinit var sessionManager: SessionManager
     private lateinit var cache: FileCache
@@ -54,7 +55,7 @@ class WebContentFragment : ScopedFragment(),
 
     private var teaser: Teaser? = null
 
-    override fun onOpenGraphEvaluated(result: String) {
+    private fun onOpenGraphEvaluated(result: String) {
 
         val og = try {
             json.parse<OpenGraphMeta>(result)
@@ -147,28 +148,6 @@ class WebContentFragment : ScopedFragment(),
             domStorageEnabled = true
             databaseEnabled = true
         }
-
-        val wvClient = WVClient(requireContext())
-        wvClient.setWVInteractionListener(this)
-
-        web_view.apply {
-
-            addJavascriptInterface(
-                this@WebContentFragment,
-                JS_INTERFACE_NAME
-            )
-
-            webViewClient = wvClient
-            webChromeClient = ChromeClient()
-
-            setOnKeyListener { _, keyCode, _ ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && web_view.canGoBack()) {
-                    web_view.goBack()
-                    return@setOnKeyListener true
-                }
-                false
-            }
-        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -181,6 +160,10 @@ class WebContentFragment : ScopedFragment(),
                     .get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
+        wvViewModel = activity?.run {
+            ViewModelProvider(this).get(WVViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+
         starViewModel = activity?.run {
             ViewModelProvider(this).get(StarArticleViewModel::class.java)
         } ?: throw java.lang.Exception("Invalid Activity")
@@ -188,6 +171,34 @@ class WebContentFragment : ScopedFragment(),
         readViewModel = activity?.run {
             ViewModelProvider(this).get(ReadArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
+
+
+        wvViewModel.openGraphEvaluated.observe(viewLifecycleOwner, {
+            onOpenGraphEvaluated(it)
+        })
+
+        wvViewModel.pageFinished.observe(viewLifecycleOwner, {
+            articleViewModel.inProgress.value = !it
+        })
+
+        web_view.apply {
+
+            addJavascriptInterface(
+                this@WebContentFragment,
+                JS_INTERFACE_NAME
+            )
+
+            webViewClient = WVClient(requireContext(), wvViewModel)
+            webChromeClient = ChromeClient()
+
+            setOnKeyListener { _, keyCode, _ ->
+                if (keyCode == KeyEvent.KEYCODE_BACK && web_view.canGoBack()) {
+                    web_view.goBack()
+                    return@setOnKeyListener true
+                }
+                false
+            }
+        }
 
         load()
     }
@@ -197,6 +208,8 @@ class WebContentFragment : ScopedFragment(),
             toast(R.string.prompt_no_network)
             return
         }
+
+        articleViewModel.inProgress.value = true
 
         val t = teaser ?: return
         val url = Config.buildArticleSourceUrl(sessionManager.loadAccount(), t)

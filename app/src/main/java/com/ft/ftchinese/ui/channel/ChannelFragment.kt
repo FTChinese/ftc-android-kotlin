@@ -51,7 +51,6 @@ const val JS_INTERFACE_NAME = "Android"
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ChannelFragment : ScopedFragment(),
-        WVClient.OnWebViewInteractionListener,
         SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
@@ -124,26 +123,6 @@ class ChannelFragment : ScopedFragment(),
             databaseEnabled = true
         }
 
-        val wvClient = WVClient(
-            context = requireContext(),
-        )
-        wvClient.setWVInteractionListener(this)
-
-        binding.webView.apply {
-
-            // Interact with JS.
-            // See Page/Layouts/Page/SuperDataViewController.swift#viewDidLoad() how iOS inject js to web view.
-            addJavascriptInterface(
-                    this@ChannelFragment,
-                    JS_INTERFACE_NAME
-            )
-
-            // Set WebViewClient to handle various links
-            webViewClient = wvClient
-
-            webChromeClient = ChromeClient()
-        }
-
         // Setup back key behavior.
         binding.webView.setOnKeyListener { _, keyCode, _ ->
             if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
@@ -174,8 +153,22 @@ class ChannelFragment : ScopedFragment(),
             onContentLoaded(it)
         })
 
+        // Handle web view should override url loading.
         wvViewModel.urlChannelSelected.observe(viewLifecycleOwner, {
             onUrlChannelClicked(it)
+        })
+
+        // If web view signaled that loading a url is finished.
+        wvViewModel.pageFinished.observe(viewLifecycleOwner, {
+            // If finished loading, stop progress.
+            if (it) {
+                binding.inProgress = false
+                binding.swipeRefresh.isRefreshing = false
+            }
+        })
+
+        wvViewModel.pagingBtnClicked.observe(viewLifecycleOwner, {
+            onPagination(it)
         })
 
         binding.webView.apply {
@@ -196,6 +189,7 @@ class ChannelFragment : ScopedFragment(),
         initLoading()
     }
 
+    // Handle loading text into web view.
     private fun onContentLoaded(result: Result<String>) {
         binding.inProgress = false
         binding.swipeRefresh.isRefreshing = false
@@ -271,8 +265,6 @@ class ChannelFragment : ScopedFragment(),
                 if (binding.swipeRefresh.isRefreshing) {
                     toast(R.string.prompt_updated)
                     binding.swipeRefresh.isRefreshing = false
-                } else {
-                    binding.inProgress = false
                 }
             }
         }
@@ -316,7 +308,7 @@ class ChannelFragment : ScopedFragment(),
     /**
      * WVClient click pagination.
      */
-    override fun onPagination(p: Paging) {
+    private fun onPagination(p: Paging) {
         val source = channelSource ?: return
 
         val pagedSource = source.withPagination(p.key, p.page)

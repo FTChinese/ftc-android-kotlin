@@ -48,10 +48,6 @@ open class WVClient(
         private val viewModel: WVViewModel? = null
 ) : WebViewClient(), AnkoLogger {
 
-    // Pass click events to host.
-    private var mListener: OnWebViewInteractionListener? = null
-
-
     private val sessionManager = SessionManager.getInstance(context)
 
     private fun getPrivilegeCode(): String {
@@ -69,18 +65,6 @@ open class WVClient(
         """.trimIndent()
     }
 
-    interface OnWebViewInteractionListener {
-
-        // Let host to handle clicks on pagination links.
-        fun onPagination(p: Paging) {}
-
-        fun onOpenGraphEvaluated(result: String) {}
-    }
-
-    fun setWVInteractionListener(listener: OnWebViewInteractionListener?) {
-        mListener = listener
-    }
-
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
@@ -90,8 +74,11 @@ open class WVClient(
 
     override fun onPageFinished(view: WebView?, url: String?) {
         super.onPageFinished(view, url)
-
         info("Finished loading $url")
+
+        info("WVViewModel $viewModel")
+        viewModel?.pageFinished?.value = true
+
 
         view?.evaluateJavascript("""
             (function() {
@@ -145,7 +132,8 @@ open class WVClient(
         })();
         """.trimIndent()) {
             info("JS evaluation result: $it")
-            mListener?.onOpenGraphEvaluated(it)
+            viewModel?.openGraphEvaluated?.value = it
+//            mListener?.onOpenGraphEvaluated(it)
         }
     }
 
@@ -276,7 +264,9 @@ open class WVClient(
 
             // Since the pagination query parameter's key is not uniform across whole site, we have to explicitly tells host.
             // Let host activity/fragment to handle pagination link
-            mListener?.onPagination(paging)
+//            mListener?.onPagination(paging)
+
+            viewModel?.pagingBtnClicked?.value = paging
 
             return true
         }

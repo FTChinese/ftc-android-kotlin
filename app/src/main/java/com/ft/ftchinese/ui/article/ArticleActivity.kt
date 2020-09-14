@@ -124,6 +124,7 @@ class ArticleActivity : ScopedAppActivity(),
         starViewModel = ViewModelProvider(this)
                 .get(StarArticleViewModel::class.java)
 
+        // Show/Hide progress indicator which should be controlled by child fragment.
         articleViewModel.inProgress.observe(this, {
             binding.inProgress = it
         })
