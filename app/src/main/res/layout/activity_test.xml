@@ -70,6 +70,13 @@
                     android:textAllCaps="false" />
 
                 <Button
+                    android:id="@+id/btn_vip_user"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="VIP User"
+                    android:textAllCaps="false"/>
+
+                <Button
                     android:id="@+id/btn_decline_service"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

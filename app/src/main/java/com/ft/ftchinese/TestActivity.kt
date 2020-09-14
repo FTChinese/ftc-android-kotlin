@@ -121,6 +121,30 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         )
     )
 
+    private val vipUser = Account(
+        id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+        unionId = null,
+        stripeId = null,
+        userName = "Premium Edition",
+        email = "premium@example.org",
+        isVerified = false,
+        avatarUrl = null,
+        loginMethod = LoginMethod.EMAIL,
+        wechat = Wechat(
+            nickname = null,
+            avatarUrl = null
+        ),
+        membership = Membership(
+            tier = Tier.PREMIUM,
+            cycle = Cycle.YEAR,
+            expireDate = LocalDate.now().plusYears(1),
+            payMethod = PayMethod.ALIPAY,
+            autoRenew = false,
+            status = null,
+            vip = true
+        )
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_test)
@@ -274,6 +298,10 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
         binding.btnPremiumUser.setOnClickListener {
             sessionManager.saveAccount(prmUser)
+        }
+
+        binding.btnVipUser.setOnClickListener {
+            sessionManager.saveAccount(vipUser)
         }
 
         binding.btnService.setOnClickListener {
