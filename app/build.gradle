@@ -1,3 +1,6 @@
+plugins {
+    id "base"
+}
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
@@ -5,6 +8,7 @@ apply plugin: 'kotlin-kapt'
 //apply plugin: 'io.fabric'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: "androidx.navigation.safeargs.kotlin"
+
 
 // See:
 // https://stackoverflow.com/questions/37101589/how-to-read-a-properties-files-and-use-the-values-in-project-gradle-script/37101792
@@ -234,3 +238,9 @@ dependencies {
 }
 
 apply plugin: 'com.google.gms.google-services'
+
+task zip(type: Zip, group: "Archive", description: "Archives sources in a zip file") {
+    from "../config.properties"
+    archiveFileName = "ftc-android.zip"
+    destinationDirectory = file("../")
+}
