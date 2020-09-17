@@ -1,5 +1,6 @@
 package com.ft.ftchinese.repository
 
+import android.util.Log
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
@@ -37,7 +38,7 @@ fun parseRespErr(resp: Response): ClientError? {
      */
     val body = resp.body?.string()
 
-//    info("API error response: $body")
+    Log.d("APIError", body)
 
     // Avoid throwing JSON parse error.
     val clientErr = if (body != null) {

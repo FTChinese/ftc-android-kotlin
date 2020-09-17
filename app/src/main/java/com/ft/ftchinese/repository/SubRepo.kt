@@ -110,7 +110,7 @@ object SubRepo : AnkoLogger {
 
         val (_, body) = account.createFetch()
             .post("${SubscribeApi.aliOrderUrl(isTest)}/${plan.tier}/${plan.cycle}")
-            .setTest(isTest)
+//            .setTest(isTest)
             .setTimeout(30)
             .noCache()
             .setClient()
@@ -120,11 +120,11 @@ object SubRepo : AnkoLogger {
             )))
             .endJsonText()
 
-        info("Aliorder $body")
-
         return if (body == null) {
+            info("Ali order response no body")
             null
         } else {
+            info("Parse ali order response $body")
             json.parse<AliOrder>(body)
         }
     }

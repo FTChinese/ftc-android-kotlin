@@ -25,4 +25,14 @@ class ReaderRepoTest {
 
         println("Email exists: $ok")
     }
+
+    @Test
+    fun login() {
+
+    }
+
+    @Test
+    fun signUp() {
+
+    }
 }

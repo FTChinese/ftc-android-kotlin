@@ -102,6 +102,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
                 aliOrderResult.value = Result.Success(aliOrder)
             } catch (e: ClientError) {
+                info(e)
                 val msgId = if (e.statusCode == 403) {
                     R.string.duplicate_purchase
                 } else {
@@ -114,6 +115,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                     parseApiError(e)
                 }
             } catch (e: Exception) {
+                info(e)
                 aliOrderResult.value = parseException(e)
             }
         }
