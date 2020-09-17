@@ -110,7 +110,7 @@ object SubRepo : AnkoLogger {
 
         val (_, body) = account.createFetch()
             .post("${SubscribeApi.aliOrderUrl(isTest)}/${plan.tier}/${plan.cycle}")
-//            .setTest(isTest)
+            .setTest(isTest)
             .setTimeout(30)
             .noCache()
             .setClient()
