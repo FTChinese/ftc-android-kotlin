@@ -53,27 +53,27 @@ object SubscribeApi {
     private const val CREATE_ALI_ORDER = "/alipay/app"
     private const val CREATE_WX_ORDER = "/wxpay/app"
 
-    private fun baseUrl(sandbox: Boolean): String {
-        return if (sandbox) {
+    private fun baseUrl(isTest: Boolean): String {
+        return if (isTest) {
             Config.subsApiSandboxBase
         } else {
             Config.subsApiProdBase
         }
     }
 
-    fun aliOrderUrl(sandbox: Boolean): String {
-        return if (sandbox) {
-            "${baseUrl(sandbox)}${CREATE_ALI_ORDER}"
+    fun aliOrderUrl(isTest: Boolean): String {
+        return if (isTest) {
+            "${baseUrl(isTest)}${CREATE_ALI_ORDER}"
         } else {
-            "${baseUrl(sandbox)}${CREATE_ALI_ORDER}"
+            "${baseUrl(isTest)}${CREATE_ALI_ORDER}"
         }
     }
 
-    fun wxOrderUrl(sandbox: Boolean): String {
-        return if (sandbox) {
-            "${baseUrl(sandbox)}${CREATE_WX_ORDER}"
+    fun wxOrderUrl(isTest: Boolean): String {
+        return if (isTest) {
+            "${baseUrl(isTest)}${CREATE_WX_ORDER}"
         } else {
-            "${baseUrl(sandbox)}${CREATE_WX_ORDER}"
+            "${baseUrl(isTest)}${CREATE_WX_ORDER}"
         }
     }
 }
