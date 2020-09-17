@@ -108,6 +108,8 @@ object SubRepo : AnkoLogger {
 
         val isTest = account.isTest
 
+        info("Is test pay $isTest")
+
         val (_, body) = account.createFetch()
             .post("${SubscribeApi.aliOrderUrl(isTest)}/${plan.tier}/${plan.cycle}")
             .setTest(isTest)
