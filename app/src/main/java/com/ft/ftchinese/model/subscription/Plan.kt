@@ -39,7 +39,7 @@ data class Plan(
         return PaymentIntent(
                 amount = payableAmount(),
                 currency = currency,
-                subscriptionKind = kind,
+                kind = kind,
                 plan = this
         )
     }

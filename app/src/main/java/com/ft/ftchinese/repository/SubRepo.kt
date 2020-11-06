@@ -89,10 +89,10 @@ object SubRepo : AnkoLogger {
         }
     }
 
-    fun wxQueryOrder(account: Account, orderId: String): WxPaymentStatus? {
+    fun wxQueryOrder(account: Account, orderId: String): PaymentResult? {
 
-        val (_, body) = account.createFetch()
-                .get("${SubscribeApi.WX_ORDER_QUERY}/$orderId")
+        val (_, body) = Fetch()
+                .post(SubscribeApi.verifyPaymentUrl(orderId, account.isTest))
                 .noCache()
                 .setAppId() // Deprecated
                 .endJsonText()
@@ -100,7 +100,7 @@ object SubRepo : AnkoLogger {
         return if (body == null) {
             null
         } else {
-            json.parse<WxPaymentStatus>(body)
+            json.parse<PaymentResult>(body)
         }
     }
 
@@ -128,6 +128,19 @@ object SubRepo : AnkoLogger {
         } else {
             info("Parse ali order response $body")
             json.parse<AliOrder>(body)
+        }
+    }
+
+    fun verifyPayment(account: Account, orderId: String):  PaymentResult? {
+        val (_, body) = Fetch()
+            .post(SubscribeApi.verifyPaymentUrl(orderId, account.isTest))
+            .noCache()
+            .endJsonText()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<PaymentResult>(body)
         }
     }
 }

@@ -4,22 +4,25 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityWechatBinding
-import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.subscription.*
-import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.model.subscription.PayMethod
+import com.ft.ftchinese.model.subscription.PaymentResult
+import com.ft.ftchinese.model.subscription.PlanStore
+import com.ft.ftchinese.model.subscription.confirmOrder
 import com.ft.ftchinese.store.OrderManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.pay.*
+import com.ft.ftchinese.ui.pay.LatestOrderActivity
+import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.tencent.mm.opensdk.constants.ConstantsAPI
@@ -78,11 +81,11 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         checkoutViewModel = ViewModelProvider(this)
                 .get(CheckOutViewModel::class.java)
 
-        checkoutViewModel.wxPayResult.observe(this, Observer {
-            onWxPayStatusQueried(it)
+        checkoutViewModel.payResult.observe(this, {
+            onPaymentVerified(it)
         })
 
-        accountViewModel.accountRefreshed.observe(this, Observer {
+        accountViewModel.accountRefreshed.observe(this, {
             onAccountRefreshed(it)
         })
 
@@ -196,10 +199,10 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         binding.inProgress = true
 
-        checkoutViewModel.queryWxPayStatus(account, order.id)
+        checkoutViewModel.verifyPayment(account, order.id)
     }
 
-    private fun onWxPayStatusQueried(result: Result<WxPaymentStatus>) {
+    private fun onPaymentVerified(result: Result<PaymentResult>) {
         binding.inProgress = false
 
         when (result) {

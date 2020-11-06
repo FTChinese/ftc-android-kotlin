@@ -38,8 +38,6 @@ object SubscribeApi {
 
     val PAYWALL = "$BASE/paywall"
 
-    val WX_ORDER_QUERY = "$BASE/wxpay/query"
-
     val WX_LOGIN = "$BASE/wx/oauth/login"
     val WX_REFRESH = "$BASE/wx/oauth/refresh"
 
@@ -50,9 +48,6 @@ object SubscribeApi {
     val STRIPE_CUSTOMER = "$BASE/stripe/customers"
     val STRIPE_SUB = "$BASE/stripe/subscriptions"
 
-    private const val CREATE_ALI_ORDER = "/alipay/app"
-    private const val CREATE_WX_ORDER = "/wxpay/app"
-
     private fun baseUrl(isTest: Boolean): String {
         return if (isTest) {
             Config.subsApiSandboxBase
@@ -62,19 +57,15 @@ object SubscribeApi {
     }
 
     fun aliOrderUrl(isTest: Boolean): String {
-        return if (isTest) {
-            "${baseUrl(isTest)}${CREATE_ALI_ORDER}"
-        } else {
-            "${baseUrl(isTest)}${CREATE_ALI_ORDER}"
-        }
+        return "${baseUrl(isTest)}/alipay/app"
     }
 
     fun wxOrderUrl(isTest: Boolean): String {
-        return if (isTest) {
-            "${baseUrl(isTest)}${CREATE_WX_ORDER}"
-        } else {
-            "${baseUrl(isTest)}${CREATE_WX_ORDER}"
-        }
+        return "${baseUrl(isTest)}/wxpay/app"
+    }
+
+    fun verifyPaymentUrl(orderId: String, isTest: Boolean): String {
+        return "${baseUrl(isTest)}/${orderId}/verify-payment"
     }
 }
 

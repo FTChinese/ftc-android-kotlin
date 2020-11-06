@@ -21,8 +21,8 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
     val wxOrderResult: MutableLiveData<Result<WxOrder>> by lazy {
         MutableLiveData<Result<WxOrder>>()
     }
-    val wxPayResult: MutableLiveData<Result<WxPaymentStatus>> by lazy {
-        MutableLiveData<Result<WxPaymentStatus>>()
+    val payResult: MutableLiveData<Result<PaymentResult>> by lazy {
+        MutableLiveData<Result<PaymentResult>>()
     }
 
     val aliOrderResult: MutableLiveData<Result<AliOrder>> by lazy {
@@ -78,13 +78,13 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (paymentStatus == null) {
-                    wxPayResult.value = Result.LocalizedError(R.string.order_cannot_be_queried)
+                    payResult.value = Result.LocalizedError(R.string.order_cannot_be_queried)
                     return@launch
                 }
 
-                wxPayResult.value = Result.Success(paymentStatus)
+                payResult.value = Result.Success(paymentStatus)
             } catch (e: Exception) {
-                wxPayResult.value = parseException(e)
+                payResult.value = parseException(e)
             }
         }
     }
@@ -117,6 +117,25 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
             } catch (e: Exception) {
                 info(e)
                 aliOrderResult.value = parseException(e)
+            }
+        }
+    }
+
+    fun verifyPayment(account: Account, orderId: String) {
+        viewModelScope.launch {
+            try {
+                val pr = withContext(Dispatchers.IO) {
+                    SubRepo.verifyPayment(account, orderId)
+                }
+
+                if (pr == null) {
+                    payResult.value = Result.LocalizedError(R.string.order_cannot_be_queried)
+                    return@launch
+                }
+
+                payResult.value = Result.Success(pr)
+            } catch (e: Exception) {
+                payResult.value = parseException(e)
             }
         }
     }

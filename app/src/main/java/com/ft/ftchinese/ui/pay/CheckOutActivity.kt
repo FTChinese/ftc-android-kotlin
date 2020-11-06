@@ -10,20 +10,21 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCheckOutBinding
-import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
-import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.OrderManager
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.formatPrice
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.tencent.mm.opensdk.constants.Build
@@ -103,7 +104,7 @@ class CheckOutActivity : ScopedAppActivity(),
 //        val account = sessionManager.loadAccount() ?: return
 
         // Show different titles
-        when (paymentIntent?.subscriptionKind) {
+        when (paymentIntent?.kind) {
             OrderUsage.RENEW ->  supportActionBar?.setTitle(R.string.title_renewal)
             OrderUsage.UPGRADE -> supportActionBar?.setTitle(R.string.title_upgrade)
             else -> {}
@@ -146,15 +147,15 @@ class CheckOutActivity : ScopedAppActivity(),
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
-        checkOutViewModel.wxOrderResult.observe(this, Observer {
+        checkOutViewModel.wxOrderResult.observe(this, {
             onWxOrderFetched(it)
         })
 
-        checkOutViewModel.aliOrderResult.observe(this, Observer {
+        checkOutViewModel.aliOrderResult.observe(this, {
             onAliOrderFetch(it)
         })
 
-        accountViewModel.accountRefreshed.observe(this, Observer {
+        accountViewModel.accountRefreshed.observe(this, {
             onAccountRefreshed(it)
         })
     }

@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model
 
 import com.ft.ftchinese.model.subscription.Order
-import com.ft.ftchinese.model.subscription.WxPaymentStatus
+import com.ft.ftchinese.model.subscription.PaymentResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
@@ -136,7 +136,7 @@ class JsonTest {
         }
         """.trimIndent()
 
-        val result = json.parse<WxPaymentStatus>(data)
+        val result = json.parse<PaymentResult>(data)
 
         println(result)
     }

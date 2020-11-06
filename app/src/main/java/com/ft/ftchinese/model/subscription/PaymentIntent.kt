@@ -6,14 +6,14 @@ import kotlinx.android.parcel.Parcelize
 
 @Parcelize
 data class PaymentIntent(
-        val amount: Double,
-        val currency: String,
-        val cycleCount: Int = 1,
-        val extraDays: Int = 1,
-        @KOrderUsage
-        val subscriptionKind: OrderUsage? = null,
-        val wallet: Wallet = Wallet(),
-        val plan: Plan
+    val amount: Double,
+    val currency: String,
+    val cycleCount: Int = 1,
+    val extraDays: Int = 1,
+    @KOrderUsage
+    val kind: OrderUsage? = null,
+    val wallet: Wallet = Wallet(),
+    val plan: Plan
 ) : Parcelable {
 
     fun isPayRequired(): Boolean {
@@ -26,7 +26,7 @@ data class PaymentIntent(
                 currency = stripePlan?.currency ?: "",
                 cycleCount = 1,
                 extraDays = 0,
-                subscriptionKind = subscriptionKind,
+                kind = kind,
                 wallet = wallet,
                 plan = plan
         )

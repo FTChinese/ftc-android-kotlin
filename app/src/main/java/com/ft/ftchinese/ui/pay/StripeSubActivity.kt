@@ -139,7 +139,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
     private fun initUI() {
 
-        if (paymentIntent?.subscriptionKind == OrderUsage.UPGRADE) {
+        if (paymentIntent?.kind == OrderUsage.UPGRADE) {
             binding.btnSubscribe.text = getString(R.string.title_upgrade)
         }
 
@@ -153,7 +153,7 @@ class StripeSubActivity : ScopedAppActivity(),
         }
 
         binding.btnSubscribe.setOnClickListener {
-            if (paymentIntent?.subscriptionKind == null) {
+            if (paymentIntent?.kind == null) {
                 return@setOnClickListener
             }
             startSubscribing()
@@ -270,7 +270,7 @@ class StripeSubActivity : ScopedAppActivity(),
         binding.inProgress = true
         binding.enableInput = false
 
-        when (paymentIntent?.subscriptionKind) {
+        when (paymentIntent?.kind) {
             OrderUsage.CREATE -> {
                 toast(R.string.creating_subscription)
 
