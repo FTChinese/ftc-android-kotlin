@@ -482,7 +482,8 @@
         <item>✔ 专享订阅内容每日仅需5.5元</item>
         <item>✔ 享受“标准会员”所有权益</item>
         <item>✔ 编辑精选，总编/各版块主编每周五为您推荐本周必读资讯，分享他们的思考与观点</item>
-        <item>✔ FT中文网2018年度论坛门票2张，价值3999元/张 （不含差旅与食宿）</item>
+        <item>✔ FT研究院专题报告和行业报告</item>
+        <item>✔ FT中文网2021年度论坛门票2张</item>
     </string-array>
     <string-array name="stripe_footnotes">
         <item>* FT中文网的Stripe支付不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</item>

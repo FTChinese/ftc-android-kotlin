@@ -5,6 +5,7 @@ import com.ft.ftchinese.tracking.GAAction
 import com.ft.ftchinese.util.KCycle
 import com.ft.ftchinese.util.KTier
 import kotlinx.android.parcel.Parcelize
+import org.threeten.bp.ZonedDateTime
 
 /**
  * A plan for a product.
@@ -66,7 +67,12 @@ val defaultPlans = listOf(
         tier = Tier.STANDARD,
         cycle = Cycle.YEAR,
         description = "Standard Yearly Plan",
-        discount = Discount()
+        discount = Discount(
+            id = "dsc_UQKuPqxAZvmR",
+            priceOff = 40.0,
+            startUtc = ZonedDateTime.parse("2020-11-09T04:00:00Z"),
+            endUtc = ZonedDateTime.parse("2020-11-11T16:00:00Z")
+        )
     ),
     Plan(
         id = "plan_drbwQ2gTmtOK",
@@ -78,13 +84,18 @@ val defaultPlans = listOf(
         discount = Discount()
     ),
     Plan(
-        id = "plan_5iIonqaehig4",
-        productId = "prod_dcHBCHaBTn3w",
+        id = "plan_d6KVqcmEBqjv",
+        productId = "prod_hNUYgnJR62Zt",
         price =  1998.0,
         tier = Tier.PREMIUM,
         cycle = Cycle.YEAR,
         description = "Premium Yearly Plan",
-        discount = Discount()
+        discount = Discount(
+            id = "dsc_cqgp9zBTwSnY",
+            priceOff = 300.0,
+            startUtc = ZonedDateTime.parse("2020-11-09T04:00:00Z"),
+            endUtc = ZonedDateTime.parse("2020-11-11T16:00:00Z")
+        )
     )
 )
 
