@@ -62,7 +62,7 @@ object SubRepo : AnkoLogger {
         } ?: listOf()
     }
 
-    fun wxPlaceOrder(account: Account, plan: Plan): WxOrder? {
+    fun wxPlaceOrder(account: Account, plan: Plan): WxPayIntent? {
 
         // If current account is a testing one, always send request to sandbox.
         val isTest = account.isTest
@@ -85,7 +85,7 @@ object SubRepo : AnkoLogger {
         return if (body == null) {
             null
         } else {
-            json.parse<WxOrder>(body)
+            json.parse<WxPayIntent>(body)
         }
     }
 
