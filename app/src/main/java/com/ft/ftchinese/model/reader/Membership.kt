@@ -339,7 +339,7 @@ data class Membership(
             return remote.expireDate.isAfter(expireDate)
         }
 
-        // For upgrading we canno compare the expire date.
+        // For upgrading we cannot compare the expire date.
         if (tier == Tier.STANDARD && remote.tier
          == Tier.PREMIUM) {
             return true
