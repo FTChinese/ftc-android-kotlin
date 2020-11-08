@@ -18,6 +18,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.work.*
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.TestActivity
@@ -33,6 +34,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.service.AudioDownloadService
+import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.TokenManager
@@ -64,6 +66,7 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
 import java.io.InputStream
+import java.util.concurrent.TimeUnit
 
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
@@ -134,7 +137,7 @@ class MainActivity : ScopedAppActivity(),
         setupDrawer()
 
         // If avatar is downloaded from network.
-        accountViewModel.avatarRetrieved.observe(this, Observer {
+        accountViewModel.avatarRetrieved.observe(this, {
             onAvatarRetrieved(it)
         })
 
@@ -160,6 +163,7 @@ class MainActivity : ScopedAppActivity(),
             DownloadService.startForeground(this, AudioDownloadService::class.java)
         }
 
+        // Service acceptance
         if (!acceptance.isAccepted()) {
             val frag = PrivacyFragment.newInstance()
 
@@ -183,6 +187,8 @@ class MainActivity : ScopedAppActivity(),
                 remove(frag)
             }
         })
+
+        setupVerifySubsWorker()
     }
 
     private fun createNotificationChannel() {
@@ -201,6 +207,25 @@ class MainActivity : ScopedAppActivity(),
             val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
         }
+    }
+
+    private fun setupVerifySubsWorker() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.UNMETERED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+
+        val verifyRequest = PeriodicWorkRequestBuilder<VerifySubsWorker>(24, TimeUnit.HOURS)
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager
+            .getInstance(this)
+            .enqueueUniquePeriodicWork(
+                "verifySubscription",
+                ExistingPeriodicWorkPolicy.KEEP,
+                verifyRequest
+            )
     }
 
     private fun setupBottomNav() {
@@ -408,7 +433,7 @@ class MainActivity : ScopedAppActivity(),
         splashViewModel = ViewModelProvider(this)
                 .get(SplashViewModel::class.java)
 
-        splashViewModel.screenAdSelected.observe(this, Observer {
+        splashViewModel.screenAdSelected.observe(this, {
             SplashScreenManager(this).save(it, LocalDate.now())
         })
 
@@ -475,7 +500,7 @@ class MainActivity : ScopedAppActivity(),
             accountViewModel.refresh(account)
         })
 
-        accountViewModel.accountRefreshed.observe(this, Observer {
+        accountViewModel.accountRefreshed.observe(this, {
 
 
             if (it is Result.Success) {
