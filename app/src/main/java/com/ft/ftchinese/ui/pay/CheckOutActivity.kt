@@ -11,12 +11,13 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import androidx.work.*
 import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCheckOutBinding
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
@@ -147,16 +148,12 @@ class CheckOutActivity : ScopedAppActivity(),
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
-        checkOutViewModel.wxOrderResult.observe(this, {
+        checkOutViewModel.wxPayIntentResult.observe(this, {
             onWxOrderFetched(it)
         })
 
         checkOutViewModel.aliOrderResult.observe(this, {
             onAliOrderFetch(it)
-        })
-
-        accountViewModel.accountRefreshed.observe(this, {
-            onAccountRefreshed(it)
         })
     }
 
@@ -277,7 +274,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
         val plan = paymentIntent?.plan ?: return
 
-        orderManager.save(aliOrder)
+        orderManager.save(aliOrder.order)
 
         launch {
             /**
@@ -307,7 +304,7 @@ class CheckOutActivity : ScopedAppActivity(),
                 return@launch
             }
 
-            toast(R.string.payment_done)
+//            toast(R.string.payment_done)
 
             tracker.buySuccess(plan, payMethod)
 
@@ -321,46 +318,58 @@ class CheckOutActivity : ScopedAppActivity(),
 
         val order = orderManager.load() ?: return
 
-        val (confirmedOrder, updatedMember) = confirmOrder(order, member)
+        val (confirmedOrder, updatedMember) = order.confirm(member)
 
         orderManager.save(confirmedOrder)
         sessionManager.updateMembership(updatedMember)
 
         info("New membership: $updatedMember")
 
-        toast(R.string.refreshing_account)
-        accountViewModel.refresh(account)
+        val verifyRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifySubsWorker>()
+            .setConstraints(Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build())
+            .build()
+
+        WorkManager.getInstance(this).enqueue(verifyRequest)
+
+        toast(R.string.subs_success)
+
+        LatestOrderActivity.start(this)
+        setResult(Activity.RESULT_OK)
+        finish()
+//        accountViewModel.refresh(account)
     }
 
-    private fun onAccountRefreshed(accountResult: Result<Account>) {
-        binding.inProgress = false
+//    private fun onAccountRefreshed(accountResult: Result<Account>) {
+//        binding.inProgress = false
+//
+//        when (accountResult) {
+//            is Result.LocalizedError -> {
+//                toast(accountResult.msgId)
+//            }
+//            is Result.Error -> {
+//                accountResult.exception.message?.let { toast(it) }
+//            }
+//            is Result.Success -> {
+//                val remoteAccount = accountResult.data
+//
+//                val localAccount = sessionManager.loadAccount() ?: return
+//
+//                if (localAccount.membership.useRemote(remoteAccount.membership)) {
+//                    sessionManager.saveAccount(remoteAccount)
+//                }
+//
+//                toast(R.string.subs_success)
+//
+//                LatestOrderActivity.start(this)
+//                setResult(Activity.RESULT_OK)
+//                finish()
+//            }
+//        }
+//    }
 
-        when (accountResult) {
-            is Result.LocalizedError -> {
-                toast(accountResult.msgId)
-            }
-            is Result.Error -> {
-                accountResult.exception.message?.let { toast(it) }
-            }
-            is Result.Success -> {
-                val remoteAccount = accountResult.data
-
-                val localAccount = sessionManager.loadAccount() ?: return
-
-                if (localAccount.membership.useRemote(remoteAccount.membership)) {
-                    sessionManager.saveAccount(remoteAccount)
-                }
-
-                toast(R.string.subs_success)
-
-                LatestOrderActivity.start(this)
-                setResult(Activity.RESULT_OK)
-                finish()
-            }
-        }
-    }
-
-    private fun onWxOrderFetched(result: Result<WxOrder>) {
+    private fun onWxOrderFetched(result: Result<WxPayIntent>) {
         binding.inProgress = false
 
         when (result) {
@@ -379,22 +388,22 @@ class CheckOutActivity : ScopedAppActivity(),
         }
     }
 
-    private fun launchWxPay(wxOrder: WxOrder) {
+    private fun launchWxPay(wxPayIntent: WxPayIntent) {
         val req = PayReq()
-        req.appId = wxOrder.params.appId
-        req.partnerId = wxOrder.params.partnerId
-        req.prepayId = wxOrder.params.prepayId
-        req.nonceStr = wxOrder.params.nonce
-        req.timeStamp = wxOrder.params.timestamp
-        req.packageValue = wxOrder.params.pkg
-        req.sign = wxOrder.params.signature
+        req.appId = wxPayIntent.params.appId
+        req.partnerId = wxPayIntent.params.partnerId
+        req.prepayId = wxPayIntent.params.prepayId
+        req.nonceStr = wxPayIntent.params.nonce
+        req.timeStamp = wxPayIntent.params.timestamp
+        req.packageValue = wxPayIntent.params.pkg
+        req.sign = wxPayIntent.params.signature
 
         val result = wxApi.sendReq(req)
 
         if (result) {
 
             // Save subscription details to shared preference so that we could use it in WXPayEntryActivity
-            orderManager.save(wxOrder)
+            orderManager.save(wxPayIntent.order)
         }
 
         setResult(Activity.RESULT_OK)

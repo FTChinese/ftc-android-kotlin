@@ -5,26 +5,22 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.work.*
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityWechatBinding
-import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.subscription.PayMethod
-import com.ft.ftchinese.model.subscription.PaymentResult
 import com.ft.ftchinese.model.subscription.PlanStore
-import com.ft.ftchinese.model.subscription.confirmOrder
+import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.pay.LatestOrderActivity
 import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
-import com.ft.ftchinese.viewmodel.Result
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
@@ -32,28 +28,36 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.android.synthetic.main.simple_toolbar.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-private val paymentStatusId = mapOf(
-        "REFUND" to R.string.wxpay_refund,
-        "NOTPAY" to R.string.wxpay_not_paid,
-        "CLOSED" to R.string.wxpay_closed,
-        "REVOKED" to R.string.wxpay_revoked,
-        "USERPAYING" to R.string.wxpay_pending,
-        "PAYERROR" to R.string.wxpay_failed
-)
+//private val paymentStatusId = mapOf(
+//        "REFUND" to R.string.wxpay_refund,
+//        "NOTPAY" to R.string.wxpay_not_paid,
+//        "CLOSED" to R.string.wxpay_closed,
+//        "REVOKED" to R.string.wxpay_revoked,
+//        "USERPAYING" to R.string.wxpay_pending,
+//        "PAYERROR" to R.string.wxpay_failed
+//)
 
 private const val EXTRA_UI_TEST = "extra_ui_test"
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
+/**
+ * https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=8_5
+ * The the callback part of wechat pay.
+ * Initially you should send request to server-side API to create an order. Pass the response data
+ * to wechat sdk, which will call Wechat. After you paid inside wechat app, you will be redirected
+ * to this page.
+ */
+@ExperimentalCoroutinesApi
 class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
     private var api: IWXAPI? = null
     private var sessionManager: SessionManager? = null
     private var orderManager: OrderManager? = null
     private var tracker: StatsTracker? = null
-    private var isPaymentSuccess: Boolean = false
+//    private var isPaymentSuccess: Boolean = false
 
     private lateinit var binding: ActivityWechatBinding
 
@@ -81,26 +85,25 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         checkoutViewModel = ViewModelProvider(this)
                 .get(CheckOutViewModel::class.java)
 
-        checkoutViewModel.payResult.observe(this, {
-            onPaymentVerified(it)
-        })
+//        checkoutViewModel.payResult.observe(this, {
+//            onPaymentVerified(it)
+//        })
 
-        accountViewModel.accountRefreshed.observe(this, {
-            onAccountRefreshed(it)
-        })
+//        accountViewModel.accountRefreshed.observe(this, {
+//            onAccountRefreshed(it)
+//        })
 
         tracker = StatsTracker.getInstance(this)
-
 
         binding.doneButton.setOnClickListener {
             onClickDone()
         }
 
-        if (intent.getBooleanExtra(EXTRA_UI_TEST, false)) {
-            queryOrder()
-
-            return
-        }
+//        if (intent.getBooleanExtra(EXTRA_UI_TEST, false)) {
+//            queryOrder()
+//
+//            return
+//        }
 
         api?.handleIntent(intent, this)
     }
@@ -123,6 +126,12 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     // Reference https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=8_5
     /**
      * The BaseResp wraps a Bundle.
+     * 4、支付结果回调
+     * 参照微信SDK Sample，在net.sourceforge.simcpux.wxapi包路径中实现WXPayEntryActivity类(包名或类名不一致会造成无法回调)，
+     * 在WXPayEntryActivity类中实现onResp函数，支付完成后，微信APP会返回到商户APP并回调onResp函数，
+     * 开发者需要在该函数中接收通知，判断返回错误码，如果支付成功则去后台查询支付结果再展示用户实际支付结果。
+     *  注意一定不能以客户端返回作为用户支付的结果，应以服务器端的接收的支付通知或查询API返回的结果为准.
+     *  No this is crap. Use the result of client and schedule a background task to verify against server.
      */
     override fun onResp(resp: BaseResp?) {
         info("onPayFinish, errCode = ${resp?.errCode}")
@@ -134,8 +143,8 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 // 展示成功页面
                 0 -> {
                     info("Start querying order")
-                    isPaymentSuccess = true
-                    queryOrder()
+//                    isPaymentSuccess = true
+                    confirmSubscription()
                 }
                 // 错误
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
@@ -167,75 +176,76 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     }
 
     // This is the entry point after user paid successfully
-    private fun queryOrder() {
-        info("Start querying order")
+//    private fun queryOrder() {
+//        info("Start querying order")
+//
+//        val order = orderManager?.load()
+//
+//        if (order == null) {
+//
+//            binding.result = UIWx(
+//                    heading = getString(R.string.payment_done),
+//                    body = getString(R.string.order_cannot_be_queried),
+//                    enableButton = true
+//            )
+//            return
+//        }
+//
+//        tracker?.buySuccess(PlanStore.find(order.tier, order.cycle), PayMethod.WXPAY)
+//
+//        if (!isConnected) {
+//            info(R.string.prompt_no_network)
+//
+//            binding.result = UIWx(
+//                    heading = getString(R.string.payment_done),
+//                    body = getString(R.string.order_cannot_be_queried),
+//                    enableButton = true
+//            )
+//            return
+//        }
+//
+//        val account = sessionManager?.loadAccount() ?: return
+//
+//        binding.inProgress = true
+//
+//        checkoutViewModel.verifyPayment(account, order.id)
+//    }
 
-        val order = orderManager?.load()
-
-        if (order == null) {
-
-            binding.result = UIWx(
-                    heading = getString(R.string.payment_done),
-                    body = getString(R.string.order_cannot_be_queried),
-                    enableButton = true
-            )
-            return
-        }
-
-        tracker?.buySuccess(PlanStore.find(order.tier, order.cycle), PayMethod.WXPAY)
-
-        if (!isConnected) {
-            info(R.string.prompt_no_network)
-
-            binding.result = UIWx(
-                    heading = getString(R.string.payment_done),
-                    body = getString(R.string.order_cannot_be_queried),
-                    enableButton = true
-            )
-            return
-        }
-
-        val account = sessionManager?.loadAccount() ?: return
-
-        binding.inProgress = true
-
-        checkoutViewModel.verifyPayment(account, order.id)
-    }
-
-    private fun onPaymentVerified(result: Result<PaymentResult>) {
-        binding.inProgress = false
-
-        when (result) {
-            is Result.LocalizedError -> {
-                binding.result = UIWx(
-                        heading = getString(R.string.payment_done),
-                        body = getString(result.msgId),
-                        enableButton = true
-                )
-            }
-            is Result.Error -> {
-                binding.result = UIWx(
-                        heading = getString(R.string.payment_done),
-                        body = result.exception.message ?: "",
-                        enableButton = true
-                )
-            }
-            is Result.Success -> {
-                if (result.data.paymentState == "SUCCESS") {
-                    confirmSubscription()
-                    return
-                }
-
-                val strId = paymentStatusId[result.data.paymentState]
-                binding.result = UIWx(
-                        heading = if (strId != null) getString(strId) else getString(R.string.payment_done),
-                        enableButton = true
-                )
-            }
-        }
-    }
+//    private fun onPaymentVerified(result: Result<PaymentResult>) {
+//        binding.inProgress = false
+//
+//        when (result) {
+//            is Result.LocalizedError -> {
+//                binding.result = UIWx(
+//                        heading = getString(R.string.payment_done),
+//                        body = getString(result.msgId),
+//                        enableButton = true
+//                )
+//            }
+//            is Result.Error -> {
+//                binding.result = UIWx(
+//                        heading = getString(R.string.payment_done),
+//                        body = result.exception.message ?: "",
+//                        enableButton = true
+//                )
+//            }
+//            is Result.Success -> {
+//                if (result.data.paymentState == "SUCCESS") {
+//                    confirmSubscription()
+//                    return
+//                }
+//
+//                val strId = paymentStatusId[result.data.paymentState]
+//                binding.result = UIWx(
+//                        heading = if (strId != null) getString(strId) else getString(R.string.payment_done),
+//                        enableButton = true
+//                )
+//            }
+//        }
+//    }
 
     private fun confirmSubscription() {
+
         // Load current membership
         val account = sessionManager?.loadAccount() ?: return
         val member = account.membership
@@ -243,7 +253,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         // Confirm the order locally sand save it.
         val order = orderManager?.load() ?: return
 
-        val (confirmedOrder, updatedMember) = confirmOrder(order, member)
+        val (confirmedOrder, updatedMember) = order.confirm(member)
 
         orderManager?.save(confirmedOrder)
 
@@ -251,102 +261,58 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         // Start retrieving account data from server.
         binding.result = UIWx(
-                getString(R.string.payment_done),
-                getString(R.string.refreshing_account)
+            heading = getString(R.string.payment_done),
+            body = getString(R.string.subs_success),
+            enableButton = true
         )
 
-        accountViewModel.refresh(account)
+        val verifyRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifySubsWorker>()
+            .setConstraints(Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build())
+            .build()
+
+        WorkManager.getInstance(this).enqueue(verifyRequest)
+
+//        accountViewModel.refresh(account)
     }
 
-    private fun onAccountRefreshed(result: Result<Account>) {
-
-        binding.inProgress = false
-
-        when (result) {
-            is Result.LocalizedError -> {
-                binding.result = UIWx(
-                        heading = getString(R.string.payment_done),
-                        body = getString(result.msgId),
-                        enableButton = true
-                )
-            }
-            is Result.Error -> {
-                binding.result = UIWx(
-                        heading = getString(R.string.payment_done),
-                        body = result.exception.message ?: "",
-                        enableButton = true
-                )
-            }
-            is Result.Success -> {
-                val remoteAccount = result.data
-
-                val localAccount = sessionManager?.loadAccount() ?: return
-
-                if (localAccount.membership.useRemote(remoteAccount.membership)) {
-                    sessionManager?.saveAccount(remoteAccount)
-                }
-
-                binding.result = UIWx(
-                        heading = getString(R.string.payment_done),
-                        body = getString(R.string.subs_success),
-                        enableButton = true
-                )
-            }
-        }
-//        if (result == null) {
+//    private fun onAccountRefreshed(result: Result<Account>) {
 //
-//            binding.result = UIWx(
-//                    heading = getString(R.string.payment_done),
-//                    body = getString(R.string.loading_failed),
-//                    enableButton = true
-//            )
-//            return
+//        binding.inProgress = false
+//
+//        when (result) {
+//            is Result.LocalizedError -> {
+//                binding.result = UIWx(
+//                        heading = getString(R.string.payment_done),
+//                        body = getString(result.msgId),
+//                        enableButton = true
+//                )
+//            }
+//            is Result.Error -> {
+//                binding.result = UIWx(
+//                        heading = getString(R.string.payment_done),
+//                        body = result.exception.message ?: "",
+//                        enableButton = true
+//                )
+//            }
+//            is Result.Success -> {
+//                val remoteAccount = result.data
+//
+//                val localAccount = sessionManager?.loadAccount() ?: return
+//
+//                if (localAccount.membership.useRemote(remoteAccount.membership)) {
+//                    sessionManager?.saveAccount(remoteAccount)
+//                }
+//
+//                binding.result = UIWx(
+//                        heading = getString(R.string.payment_done),
+//                        body = getString(R.string.subs_success),
+//                        enableButton = true
+//                )
+//            }
 //        }
-//
-//        if (result.error != null) {
-//
-//            binding.result = UIWx(
-//                    heading = getString(R.string.payment_done),
-//                    body = getString(result.error),
-//                    enableButton = true
-//            )
-//            return
-//        }
-//
-//        if (result.exception != null) {
-//
-//            binding.result = UIWx(
-//                    heading = getString(R.string.payment_done),
-//                    body = result.exception.message ?: "",
-//                    enableButton = true
-//            )
-//            return
-//        }
-//
-//        val remoteAccount = result.success
-//
-//        if (remoteAccount == null) {
-//
-//            binding.result = UIWx(
-//                    heading = getString(R.string.payment_done),
-//                    body = getString(R.string.loading_failed),
-//                    enableButton = true
-//            )
-//            return
-//        }
-//
-//        val localAccount = sessionManager?.loadAccount() ?: return
-//
-//        if (localAccount.membership.useRemote(remoteAccount.membership)) {
-//            sessionManager?.saveAccount(remoteAccount)
-//        }
-//
-//        binding.result = UIWx(
-//                heading = getString(R.string.payment_done),
-//                body = getString(R.string.subs_success),
-//                enableButton = true
-//        )
-    }
+//    }
 
     /**
      * After user paid by wechat, show the done button
