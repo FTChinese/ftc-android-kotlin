@@ -18,8 +18,8 @@ import org.jetbrains.anko.info
 
 class CheckOutViewModel : ViewModel(), AnkoLogger {
 
-    val wxOrderResult: MutableLiveData<Result<WxOrder>> by lazy {
-        MutableLiveData<Result<WxOrder>>()
+    val wxPayIntentResult: MutableLiveData<Result<WxPayIntent>> by lazy {
+        MutableLiveData<Result<WxPayIntent>>()
     }
     val payResult: MutableLiveData<Result<PaymentResult>> by lazy {
         MutableLiveData<Result<PaymentResult>>()
@@ -53,19 +53,19 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (wxOrder == null) {
-                    wxOrderResult.value = Result.LocalizedError(R.string.order_cannot_be_created)
+                    wxPayIntentResult.value = Result.LocalizedError(R.string.order_cannot_be_created)
                     return@launch
                 }
-                wxOrderResult.value = Result.Success(wxOrder)
+                wxPayIntentResult.value = Result.Success(wxOrder)
             } catch (e: ClientError) {
 
-                wxOrderResult.value = if (e.statusCode == 403) {
+                wxPayIntentResult.value = if (e.statusCode == 403) {
                     Result.LocalizedError(R.string.duplicate_purchase)
                 } else {
                     parseApiError(e)
                 }
             } catch (e: Exception) {
-                wxOrderResult.value = parseException(e)
+                wxPayIntentResult.value = parseException(e)
             }
         }
     }
