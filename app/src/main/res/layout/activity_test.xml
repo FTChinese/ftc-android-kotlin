@@ -77,6 +77,32 @@
                     android:textAllCaps="false"/>
 
                 <Button
+                    android:id="@+id/single_task"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Single Task"/>
+
+                <Button
+                    android:id="@+id/periodic_task"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Periodic Task"/>
+
+                <Button
+                    android:id="@+id/recurring_task"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Recurring Task"/>
+
+                <Button
+                    android:id="@+id/constraint_task"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Constraint Task"/>
+
+
+
+                <Button
                     android:id="@+id/btn_decline_service"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

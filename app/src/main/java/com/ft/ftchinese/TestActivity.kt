@@ -19,6 +19,9 @@ import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
 import com.ft.ftchinese.databinding.ActivityTestBinding
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
@@ -27,6 +30,7 @@ import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.service.PollService
+import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
@@ -56,6 +60,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var orderManger: OrderManager
     private var errorDialog: Dialog? = null
     private lateinit var sessionManager: SessionManager
+    private lateinit var workManager: WorkManager
 
     private val freeUser = Account(
         id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
@@ -156,7 +161,17 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
         sessionManager = SessionManager.getInstance(this)
         orderManger = OrderManager.getInstance(this)
+        workManager = WorkManager.getInstance(this)
 
+        binding.singleTask.setOnClickListener {
+            val request = OneTimeWorkRequestBuilder<VerifySubsWorker>().build()
+            workManager.enqueue(request)
+        }
+
+        val uploadWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifySubsWorker>()
+            .build()
+
+        WorkManager.getInstance(this).enqueue(uploadWorkRequest)
 
         info("Internal directory of this app: $filesDir")
         info("Internal directory for this app's temporary cache files: $cacheDir")
