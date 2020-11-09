@@ -10,8 +10,8 @@ import org.threeten.bp.temporal.ChronoUnit
  * This is used to store subscription order locally,
  * and also used to to parse orders retrieved from API.
  */
-open class Order(
-    open val id: String,
+data class Order(
+    val id: String,
 
     val ftcId: String? = null,
     val unionId: String? = null,
@@ -20,37 +20,37 @@ open class Order(
     val price: Double? = null,
 
     @KTier
-    open val tier: Tier,
+    val tier: Tier,
 
     @KCycle
-    open val cycle: Cycle,
+    val cycle: Cycle,
 
     // Charge
-    open var amount: Double, // Why this is var?
+    var amount: Double, // Why this is var?
 
     // Not included when getting order list.
-    open val currency: String = "cny",
+    val currency: String = "cny",
 
     // Duration
     // After supporting upgrading, the purchased membership
     // duration might not be exactly one cycle.
     // Not included when getting order list
-    open val cycleCount: Long = 1,
+    val cycleCount: Long = 1,
     // 1 day less than server side so that we could compare
     // locally saved date against server data.
     // Not included when getting order list.
-    open val extraDays: Long = 0,
+    val extraDays: Long = 0,
 
     @KOrderUsage
-    open val usageType: OrderUsage,
+    val usageType: OrderUsage,
 
     @KPayMethod
-    open val payMethod: PayMethod,
+    val payMethod: PayMethod,
 
-    val totalBalance: Double = 0.0,
+    val totalBalance: Double? = null,
 
     @KDateTime
-    open val createdAt: ZonedDateTime = ZonedDateTime.now(),
+    val createdAt: ZonedDateTime = ZonedDateTime.now(),
 
     @KDateTime
     var confirmedAt: ZonedDateTime? = null,
@@ -101,7 +101,7 @@ open class Order(
     }
 }
 
-data class AliOrder(
+data class AliPayIntent(
     val order: Order,
     val param: String
 
