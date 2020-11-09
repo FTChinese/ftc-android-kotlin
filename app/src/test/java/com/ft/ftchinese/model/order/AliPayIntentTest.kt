@@ -1,6 +1,6 @@
 package com.ft.ftchinese.model.order
 
-import com.ft.ftchinese.model.subscription.AliOrder
+import com.ft.ftchinese.model.subscription.AliPayIntent
 import com.ft.ftchinese.util.json
 import org.junit.Test
 
@@ -24,9 +24,9 @@ private val orderData = """
 }    
 """.trimIndent()
 
-class AliOrderTest {
+class AliPayIntentTest {
     @Test fun parseOrder() {
-        val result = json.parse<AliOrder>(orderData)
+        val result = json.parse<AliPayIntent>(orderData)
 
         println(result)
     }

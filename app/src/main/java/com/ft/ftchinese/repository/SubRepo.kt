@@ -104,7 +104,7 @@ object SubRepo : AnkoLogger {
         }
     }
 
-    fun aliPlaceOrder(account: Account, plan: Plan): AliOrder? {
+    fun aliPlaceOrder(account: Account, plan: Plan): AliPayIntent? {
 
         val isTest = account.isTest
 
@@ -127,7 +127,7 @@ object SubRepo : AnkoLogger {
             null
         } else {
             info("Parse ali order response $body")
-            json.parse<AliOrder>(body)
+            json.parse<AliPayIntent>(body)
         }
     }
 

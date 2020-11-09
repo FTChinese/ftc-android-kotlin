@@ -25,8 +25,8 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<PaymentResult>>()
     }
 
-    val aliOrderResult: MutableLiveData<Result<AliOrder>> by lazy {
-        MutableLiveData<Result<AliOrder>>()
+    val aliPayIntentResult: MutableLiveData<Result<AliPayIntent>> by lazy {
+        MutableLiveData<Result<AliPayIntent>>()
     }
 
     val stripePlanResult: MutableLiveData<Result<StripePlan>> by lazy {
@@ -97,10 +97,10 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (aliOrder == null) {
-                    aliOrderResult.value = Result.LocalizedError(R.string.order_cannot_be_created)
+                    aliPayIntentResult.value = Result.LocalizedError(R.string.order_cannot_be_created)
                     return@launch
                 }
-                aliOrderResult.value = Result.Success(aliOrder)
+                aliPayIntentResult.value = Result.Success(aliOrder)
             } catch (e: ClientError) {
                 info(e)
                 val msgId = if (e.statusCode == 403) {
@@ -109,14 +109,14 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                     null
                 }
 
-                aliOrderResult.value = if (msgId != null) {
+                aliPayIntentResult.value = if (msgId != null) {
                     Result.LocalizedError(msgId)
                 } else {
                     parseApiError(e)
                 }
             } catch (e: Exception) {
                 info(e)
-                aliOrderResult.value = parseException(e)
+                aliPayIntentResult.value = parseException(e)
             }
         }
     }

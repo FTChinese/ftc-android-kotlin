@@ -152,7 +152,7 @@ class CheckOutActivity : ScopedAppActivity(),
             onWxOrderFetched(it)
         })
 
-        checkOutViewModel.aliOrderResult.observe(this, {
+        checkOutViewModel.aliPayIntentResult.observe(this, {
             onAliOrderFetch(it)
         })
     }
@@ -250,7 +250,7 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
 
-    private fun onAliOrderFetch(result: Result<AliOrder>) {
+    private fun onAliOrderFetch(result: Result<AliPayIntent>) {
         binding.inProgress = false
         info(result)
 
@@ -270,11 +270,11 @@ class CheckOutActivity : ScopedAppActivity(),
         }
     }
 
-    private fun launchAliPay(aliOrder: AliOrder) {
+    private fun launchAliPay(aliPayIntent: AliPayIntent) {
 
         val plan = paymentIntent?.plan ?: return
 
-        orderManager.save(aliOrder.order)
+        orderManager.save(aliPayIntent.order)
 
         launch {
             /**
@@ -286,7 +286,7 @@ class CheckOutActivity : ScopedAppActivity(),
              * You could only use it as a string
              */
             val payResult = withContext(Dispatchers.IO) {
-                PayTask(this@CheckOutActivity).payV2(aliOrder.param, true)
+                PayTask(this@CheckOutActivity).payV2(aliPayIntent.param, true)
             }
 
             info("Alipay result: $payResult")
