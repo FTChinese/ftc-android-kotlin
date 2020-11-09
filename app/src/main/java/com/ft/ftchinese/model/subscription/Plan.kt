@@ -19,7 +19,7 @@ data class Plan(
         val tier: Tier,
         @KCycle
         val cycle: Cycle,
-        val description: String,
+        val description: String? = null,
         val currency: String = "cny", // Not from API
         val discount: Discount
 ) : Parcelable {
