@@ -67,7 +67,9 @@ class OrderManager private constructor(context: Context) {
             putLong(PREF_EXTRA_DAYS, order.extraDays)
             putString(PREF_USAGE, order.usageType.toString())
             putString(PREF_PAYMENT_METHOD, order.payMethod.toString())
-            putDouble(PREF_BALANCE, order.totalBalance)
+            if (order.totalBalance != null) {
+                putDouble(PREF_BALANCE, order.totalBalance)
+            }
             putString(PREF_CREATED_AT, formatISODateTime(order.createdAt))
             putString(PREF_CONFIRMED_AT, formatISODateTime(order.confirmedAt))
             putString(PREF_START_DATE, formatLocalDate(order.startDate))
