@@ -3,11 +3,7 @@ package com.ft.ftchinese.store
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.ft.ftchinese.model.subscription.OrderUsage
-import com.ft.ftchinese.model.subscription.PayMethod
-import com.ft.ftchinese.model.subscription.Order
-import com.ft.ftchinese.model.subscription.Cycle
-import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.util.formatISODateTime
 import com.ft.ftchinese.util.formatLocalDate
 import com.ft.ftchinese.util.parseISODateTime
@@ -134,16 +130,71 @@ class OrderManager private constructor(context: Context) {
 }
 
 private const val PREF_FILE_LAST_ORDER = "com.ft.ftchinese.last_paid_order"
+private const val PREF_PAYMENT_STATE = "payment_state"
+private const val PREF_PAYMENT_STATE_DESC = "payment_state_desc"
+private const val PREF_TOTAL_FEE = "total_fee"
+private const val PREF_TX_ID = "tx_id"
+private const val PREF_PAID_AT = "paid_at"
+private const val PREF_PAY_METHOD = "pay_method"
 
-fun lastPaidOrderId(ctx: Context): String? {
-    return ctx
-        .getSharedPreferences(PREF_FILE_LAST_ORDER, Context.MODE_PRIVATE)
-        .getString(PREF_ORDER_ID, null)
-}
+class PaymentManager private constructor(ctx: Context) {
+    private val sharedPreferences = ctx.getSharedPreferences(PREF_FILE_LAST_ORDER, Context.MODE_PRIVATE)
 
-fun saveLastPaidOrderId(ctx: Context, id: String) {
-    ctx.getSharedPreferences(PREF_FILE_LAST_ORDER, Context.MODE_PRIVATE)
-        .edit {
+    fun saveOrderId(id: String) {
+        sharedPreferences.edit {
+            clear()
+        }
+
+        sharedPreferences.edit {
             putString(PREF_ORDER_ID, id)
         }
+    }
+
+    fun save(pr: PaymentResult) {
+        sharedPreferences.edit {
+            clear()
+        }
+
+        sharedPreferences.edit {
+            putString(PREF_PAYMENT_STATE, pr.paymentState)
+            putString(PREF_PAYMENT_STATE_DESC, pr.paymentStateDesc)
+            putInt(PREF_TOTAL_FEE, pr.totalFee)
+            putString(PREF_TX_ID, pr.transactionId)
+            putString(PREF_ORDER_ID, pr.ftcOrderId)
+            putString(PREF_PAID_AT, pr.paidAt)
+            putString(PREF_PAY_METHOD, pr.payMethod.toString())
+        }
+    }
+
+    fun load(): PaymentResult {
+        val paymentState = sharedPreferences.getString(PREF_PAYMENT_STATE, "")
+        val paymentStateDesc = sharedPreferences.getString(PREF_PAYMENT_STATE_DESC, "")
+        val totalFee = sharedPreferences.getInt(PREF_TOTAL_FEE, 0)
+        val txId = sharedPreferences.getString(PREF_TX_ID, "")
+        val orderId = sharedPreferences.getString(PREF_ORDER_ID, "")
+        val paidAt = sharedPreferences.getString(PREF_PAID_AT, "")
+        val payMethod = sharedPreferences.getString(PREF_PAYMENT_METHOD, "")
+
+        return PaymentResult(
+            paymentState = paymentState ?: "",
+            paymentStateDesc = paymentStateDesc ?: "",
+            totalFee = totalFee,
+            transactionId = txId ?: "",
+            ftcOrderId = orderId ?: "",
+            paidAt = paidAt ?: "",
+            payMethod = PayMethod.fromString(payMethod)
+        )
+    }
+
+    companion object {
+        private var instance: PaymentManager? = null
+
+        @Synchronized fun getInstance(ctx: Context): PaymentManager {
+            if (instance == null) {
+                instance = PaymentManager(ctx)
+            }
+
+            return instance!!
+        }
+    }
 }
