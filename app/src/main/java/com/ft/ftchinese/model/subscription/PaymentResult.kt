@@ -1,5 +1,6 @@
 package com.ft.ftchinese.model.subscription
 
+import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.util.KPayMethod
 
 val paymentSuccessStates = arrayOf("TRADE_SUCCESS", "SUCCESS")
@@ -22,3 +23,9 @@ data class PaymentResult(
         return paymentSuccessStates.contains(paymentState)
     }
 }
+
+data class VerificationResult(
+    val order: Order,
+    val payment: PaymentResult,
+    val membership: Membership
+)
