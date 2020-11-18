@@ -59,7 +59,7 @@
 
         <TextView
             android:id="@+id/tv_premium_price"
-            style="@style/OrigamiText.Body1"
+            style="@style/OrigamiText.Body1.Center"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
