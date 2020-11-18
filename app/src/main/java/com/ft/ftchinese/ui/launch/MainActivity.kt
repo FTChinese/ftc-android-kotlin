@@ -229,7 +229,7 @@ class MainActivity : ScopedAppActivity(),
         workManager.enqueueUniqueWork("verifySubscription", ExistingWorkPolicy.REPLACE, verifyWork)
 
         workManager.getWorkInfoByIdLiveData(verifyWork.id).observe(this) { workInfo ->
-            toast("verifyWork state ${workInfo.state}")
+            info("verifyWork state ${workInfo.state}")
         }
     }
 
