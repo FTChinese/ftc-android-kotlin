@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.order.StripeSub
 import com.ft.ftchinese.model.reader.*
+import com.ft.ftchinese.model.subscription.IAPSubs
 import com.ft.ftchinese.model.subscription.Order
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.repository.AccountRepo
@@ -51,6 +52,10 @@ class AccountViewModel : ViewModel(), AnkoLogger {
 
     val stripeRetrievalResult: MutableLiveData<Result<StripeSub>> by lazy {
         MutableLiveData<Result<StripeSub>>()
+    }
+
+    val iapRefreshResult: MutableLiveData<Result<IAPSubs>> by lazy {
+        MutableLiveData<Result<IAPSubs>>()
     }
 
     val ordersResult: MutableLiveData<Result<List<Order>>> by lazy {
@@ -208,6 +213,32 @@ class AccountViewModel : ViewModel(), AnkoLogger {
 
             } catch (e: Exception) {
                 stripeRetrievalResult.value = parseException(e)
+            }
+        }
+    }
+
+    fun refreshIAPSub(account: Account) {
+        viewModelScope.launch {
+            try {
+                val iapSubs = withContext(Dispatchers.IO) {
+                    SubRepo.refreshIAP(account)
+                }
+
+                iapRefreshResult.value = if (iapSubs == null) {
+                    Result.LocalizedError(R.string.iap_refresh_failed)
+                } else {
+                    Result.Success(iapSubs)
+                }
+
+            } catch (e: ClientError) {
+                iapRefreshResult.value =  if (e.statusCode == 404) {
+                    Result.LocalizedError(R.string.loading_failed)
+                } else {
+                    parseApiError(e)
+                }
+
+            } catch (e: Exception) {
+                iapRefreshResult.value = parseException(e)
             }
         }
     }
