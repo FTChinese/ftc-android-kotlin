@@ -131,7 +131,7 @@ object SubRepo : AnkoLogger {
         }
     }
 
-    fun verifyPayment(account: Account, orderId: String):  PaymentResult? {
+    fun verifyPayment(account: Account, orderId: String):  VerificationResult? {
         val (_, body) = Fetch()
             .post(SubscribeApi.verifyPaymentUrl(orderId, account.isTest))
             .noCache()
@@ -140,7 +140,7 @@ object SubRepo : AnkoLogger {
         return if (body == null) {
             null
         } else {
-            json.parse<PaymentResult>(body)
+            json.parse<VerificationResult>(body)
         }
     }
 
