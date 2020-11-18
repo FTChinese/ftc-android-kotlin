@@ -135,6 +135,7 @@ object SubRepo : AnkoLogger {
         val (_, body) = Fetch()
             .post(SubscribeApi.verifyPaymentUrl(orderId, account.isTest))
             .noCache()
+            .sendJson()
             .endJsonText()
 
         return if (body == null) {
