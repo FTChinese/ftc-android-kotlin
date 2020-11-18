@@ -143,4 +143,21 @@ object SubRepo : AnkoLogger {
             json.parse<PaymentResult>(body)
         }
     }
+
+    fun refreshIAP(account: Account): IAPSubs? {
+        if (account.membership.appleSubsId == null) {
+            return null
+        }
+
+        val (_, body) = Fetch()
+            .patch(SubscribeApi.refreshIAP(account.membership.appleSubsId, account.isTest))
+            .noCache()
+            .endJsonText()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<IAPSubs>(body)
+        }
+    }
 }
