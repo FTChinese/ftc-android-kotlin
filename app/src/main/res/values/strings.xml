@@ -172,8 +172,10 @@
     <string name="stripe_authentication_failed">Stripe支付验证似乎失败了</string>
     <string name="stripe_unable_to_authenticate">无法验证，请联系客服</string>
     <string name="refreshing_stripe_sub">更新Stripe订阅信息&#8230;</string>
+    <string name="refresh_iap_sub">正在访问App Store获取您的订阅数据</string>
     <string name="query_stripe_subscription">查询Stripe订阅状态&#8230;</string>
     <string name="stripe_refreshing_failed">无法更新Stripe订阅信息</string>
+    <string name="iap_refresh_failed">无法更新苹果内购的订阅</string>
     <string name="title_requires_action">需要验证</string>
     <string name="stripe_requires_action">Stripe支付尚未完成，您的发卡行需要进行安全验证，点击确认开始验证</string>
     <string name="creating_subscription">创建订阅&#8230;</string>
