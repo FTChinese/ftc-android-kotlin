@@ -1,6 +1,9 @@
 package com.ft.ftchinese.ui.launch
 
-import android.app.*
+import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.SearchManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -8,12 +11,13 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import androidx.core.view.GravityCompat
-import androidx.appcompat.app.ActionBarDrawerToggle
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
 import android.webkit.WebView
 import android.widget.TextView
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.Observer
@@ -24,34 +28,34 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.TestActivity
 import com.ft.ftchinese.databinding.ActivityMainBinding
 import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
-import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isActiveNetworkWifi
-import com.ft.ftchinese.repository.TabPages
-import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.order.StripeSubStatus
 import com.ft.ftchinese.model.reader.LoginMethod
-import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.model.splash.SplashScreenManager
+import com.ft.ftchinese.model.subscription.PayMethod
+import com.ft.ftchinese.repository.TabPages
 import com.ft.ftchinese.service.AudioDownloadService
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.ServiceAcceptance
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.account.AccountActivity
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.isActiveNetworkWifi
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.login.LoginActivity
-import com.ft.ftchinese.ui.login.WxExpireDialogFragment
-import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.channel.MyftPagerAdapter
 import com.ft.ftchinese.ui.channel.SearchableActivity
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
+import com.ft.ftchinese.ui.login.LoginActivity
+import com.ft.ftchinese.ui.login.WxExpireDialogFragment
+import com.ft.ftchinese.ui.pay.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
-import com.ft.ftchinese.util.*
+import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.SplashViewModel
 import com.google.android.exoplayer2.offline.DownloadService
@@ -60,13 +64,14 @@ import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.coroutines.*
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
 import java.io.InputStream
-import java.util.concurrent.TimeUnit
 
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
@@ -91,6 +96,7 @@ class MainActivity : ScopedAppActivity(),
     private lateinit var acceptance: ServiceAcceptance
     private lateinit var tokenManager: TokenManager
     private lateinit var wxApi: IWXAPI
+    private lateinit var workManager: WorkManager
 
     private var privacyFragment: PrivacyFragment? = null
 
@@ -120,6 +126,7 @@ class MainActivity : ScopedAppActivity(),
         sessionManager = SessionManager.getInstance(this)
         acceptance = ServiceAcceptance.getInstance(this)
         tokenManager = TokenManager.getInstance(this)
+        workManager = WorkManager.getInstance(this)
 
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
@@ -188,7 +195,7 @@ class MainActivity : ScopedAppActivity(),
             }
         })
 
-        setupVerifySubsWorker()
+        setupWorker()
     }
 
     private fun createNotificationChannel() {
@@ -209,23 +216,21 @@ class MainActivity : ScopedAppActivity(),
         }
     }
 
-    private fun setupVerifySubsWorker() {
+    private fun setupWorker() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.UNMETERED)
             .setRequiresBatteryNotLow(true)
             .build()
 
-        val verifyRequest = PeriodicWorkRequestBuilder<VerifySubsWorker>(24, TimeUnit.HOURS)
+        val verifyWork = OneTimeWorkRequestBuilder<VerifySubsWorker>()
             .setConstraints(constraints)
             .build()
 
-        WorkManager
-            .getInstance(this)
-            .enqueueUniquePeriodicWork(
-                "verifySubscription",
-                ExistingPeriodicWorkPolicy.KEEP,
-                verifyRequest
-            )
+        workManager.enqueueUniqueWork("verifySubscription", ExistingWorkPolicy.REPLACE, verifyWork)
+
+        workManager.getWorkInfoByIdLiveData(verifyWork.id).observe(this) { workInfo ->
+            toast("verifyWork state ${workInfo.state}")
+        }
     }
 
     private fun setupBottomNav() {
