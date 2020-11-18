@@ -14,20 +14,24 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentArticleBinding
 import com.ft.ftchinese.model.content.*
-import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.model.reader.ReadingDuration
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.service.ReadingDurationService
+import com.ft.ftchinese.service.*
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
-import com.ft.ftchinese.util.*
+import com.ft.ftchinese.util.json
 import com.ft.ftchinese.viewmodel.ArticleViewModel
 import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
 import com.ft.ftchinese.viewmodel.Result
@@ -255,16 +259,41 @@ class StoryFragment : ScopedFragment(),
     override fun onDestroy() {
         super.onDestroy()
 
-        val userId = sessionManager.loadAccount()?.id ?: return
+        val account = sessionManager.loadAccount() ?: return
 
-        ReadingDurationService.start(context, ReadingDuration(
-                url = "/android/${storyBrief?.type}/${storyBrief?.id}/${storyBrief?.title}",
-                refer = Config.discoverServer(sessionManager.loadAccount()),
-                startUnix = start,
-                endUnix = Date().time / 1000,
-                userId = userId,
-                functionName = "onLoad"
-        ))
+        if (account.id == "") {
+            return
+        }
+
+        sendReadLen(account)
+
+//        ReadingDurationService.start(context, ReadingDuration(
+//                url = "/android/${storyBrief?.type}/${storyBrief?.id}/${storyBrief?.title}",
+//                refer = Config.discoverServer(account),
+//                startUnix = start,
+//                endUnix = Date().time / 1000,
+//                userId = account.id,
+//                functionName = "onLoad"
+//        ))
+
+    }
+
+    private fun sendReadLen(account: Account) {
+        val data: Data = workDataOf(
+            KEY_DUR_URL to "/android/${storyBrief?.type}/${storyBrief?.id}/${storyBrief?.title}",
+            KEY_DUR_REFER to Config.discoverServer(account),
+            KEY_DUR_START to start,
+            KEY_DUR_END to Date().time / 1000,
+            KEY_DUR_USER_ID to account.id
+        )
+
+        val lenWorker = OneTimeWorkRequestBuilder<ReadingDurationWorker>()
+            .setInputData(data)
+            .build()
+
+        context?.run {
+            WorkManager.getInstance(this).enqueue(lenWorker)
+        }
 
     }
 

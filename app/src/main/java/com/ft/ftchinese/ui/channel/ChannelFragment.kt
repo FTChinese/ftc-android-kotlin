@@ -12,14 +12,18 @@ import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentChannelBinding
 import com.ft.ftchinese.model.content.*
-import com.ft.ftchinese.model.reader.ReadingDuration
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.denyPermission
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.service.ReadingDurationService
+import com.ft.ftchinese.service.*
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
@@ -461,16 +465,43 @@ class ChannelFragment : ScopedFragment(),
     override fun onDestroy() {
         super.onDestroy()
 
-        val userId = sessionManager.loadAccount()?.id ?: return
+        val account = sessionManager.loadAccount() ?: return
 
-        ReadingDurationService.start(context, ReadingDuration(
-            url = "/android/channel/${channelSource?.title}",
-            refer = "http://www.ftchinese.com/",
-            startUnix = start,
-            endUnix = Date().time / 1000,
-            userId = userId,
-            functionName = "onLoad"
-        ))
+        if (account.id == "") {
+            return
+        }
+
+        sendReadLen(account)
+
+//        val userId = sessionManager.loadAccount()?.id ?: return
+//
+//        ReadingDurationService.start(context, ReadingDuration(
+//            url = "/android/channel/${channelSource?.title}",
+//            refer = "http://www.ftchinese.com/",
+//            startUnix = start,
+//            endUnix = Date().time / 1000,
+//            userId = userId,
+//            functionName = "onLoad"
+//        ))
+    }
+
+    private fun sendReadLen(account: Account) {
+        val data: Data = workDataOf(
+            KEY_DUR_URL to "/android/channel/${channelSource?.title}",
+            KEY_DUR_REFER to "http://www.ftchinese.com/",
+            KEY_DUR_START to start,
+            KEY_DUR_END to Date().time / 1000,
+            KEY_DUR_USER_ID to account.id
+        )
+
+        val lenWorker = OneTimeWorkRequestBuilder<ReadingDurationWorker>()
+            .setInputData(data)
+            .build()
+
+        context?.run {
+            WorkManager.getInstance(this).enqueue(lenWorker)
+        }
+
     }
 
     companion object {
