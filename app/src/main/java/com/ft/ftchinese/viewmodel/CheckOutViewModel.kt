@@ -21,9 +21,6 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
     val wxPayIntentResult: MutableLiveData<Result<WxPayIntent>> by lazy {
         MutableLiveData<Result<WxPayIntent>>()
     }
-    val payResult: MutableLiveData<Result<PaymentResult>> by lazy {
-        MutableLiveData<Result<PaymentResult>>()
-    }
 
     val aliPayIntentResult: MutableLiveData<Result<AliPayIntent>> by lazy {
         MutableLiveData<Result<AliPayIntent>>()
@@ -70,25 +67,6 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun queryWxPayStatus(account: Account, orderId: String) {
-        viewModelScope.launch {
-            try {
-                val paymentStatus = withContext(Dispatchers.IO) {
-                    SubRepo.wxQueryOrder(account, orderId)
-                }
-
-                if (paymentStatus == null) {
-                    payResult.value = Result.LocalizedError(R.string.order_cannot_be_queried)
-                    return@launch
-                }
-
-                payResult.value = Result.Success(paymentStatus)
-            } catch (e: Exception) {
-                payResult.value = parseException(e)
-            }
-        }
-    }
-
     fun createAliOrder(account: Account, plan: Plan) {
         viewModelScope.launch {
             try {
@@ -117,25 +95,6 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
             } catch (e: Exception) {
                 info(e)
                 aliPayIntentResult.value = parseException(e)
-            }
-        }
-    }
-
-    fun verifyPayment(account: Account, orderId: String) {
-        viewModelScope.launch {
-            try {
-                val pr = withContext(Dispatchers.IO) {
-                    SubRepo.verifyPayment(account, orderId)
-                }
-
-                if (pr == null) {
-                    payResult.value = Result.LocalizedError(R.string.order_cannot_be_queried)
-                    return@launch
-                }
-
-                payResult.value = Result.Success(pr)
-            } catch (e: Exception) {
-                payResult.value = parseException(e)
             }
         }
     }
