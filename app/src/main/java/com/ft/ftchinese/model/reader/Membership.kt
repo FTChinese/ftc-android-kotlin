@@ -23,11 +23,13 @@ data class Membership(
     val expireDate: LocalDate? = null,
     @KPayMethod
     val payMethod: PayMethod? = null,
-
+    val stripeSubsId: String? = null,
     // If autoRenew is true, ignore expireDate.
     val autoRenew: Boolean? = false,
     @KStripeSubStatus
     val status: StripeSubStatus? = null,
+    val appleSubsId: String? = null,
+    val b2bLicenceId: String? = null,
     val vip: Boolean = false
 ) : Parcelable {
 
@@ -90,7 +92,7 @@ data class Membership(
         return payMethod == PayMethod.STRIPE && status != StripeSubStatus.Active
     }
 
-    fun fromWxOrAli(): Boolean {
+    fun isWxOrAli(): Boolean {
         // The first condition is used for backward compatibility.
         return (tier != null && payMethod == null) || payMethod == PayMethod.ALIPAY || payMethod == PayMethod.WXPAY
     }
@@ -135,7 +137,7 @@ data class Membership(
         }
 
         // For non-ali or wx pay,
-        if (!fromWxOrAli()) {
+        if (!isWxOrAli()) {
             return false
         }
 
