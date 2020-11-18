@@ -1,5 +1,7 @@
 package com.ft.ftchinese.model.subscription
 
+import com.ft.ftchinese.util.KPayMethod
+
 val paymentSuccessStates = arrayOf("TRADE_SUCCESS", "SUCCESS")
 
 /**
@@ -13,7 +15,8 @@ data class PaymentResult(
     val transactionId: String,
     val ftcOrderId: String,
     val paidAt: String, // ISO8601
-    val payMethod: PayMethod
+    @KPayMethod
+    val payMethod: PayMethod? = null
 ) {
     fun isOrderPaid(): Boolean {
         return paymentSuccessStates.contains(paymentState)
