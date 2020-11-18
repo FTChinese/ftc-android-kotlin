@@ -81,6 +81,7 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         }
 
         val remains = m.remainingDays()
+        info("Membership remaining days $remains")
 
         if (remains == null || remains > 10) {
             return
@@ -117,19 +118,21 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         val pr = paymentManager.load()
 
         if (pr.isOrderPaid()) {
+            info("Order already paid. Stop verification")
             return true
         }
 
         try {
             val result = SubRepo.verifyPayment(account, pr.ftcOrderId) ?: return false
 
-            paymentManager.save(result)
+            paymentManager.save(result.payment)
 
-            if (!result.isOrderPaid()) {
+            if (!result.payment.isOrderPaid()) {
                 return true
             }
 
         } catch (e: Exception) {
+            info(e)
             return false
         }
 
@@ -140,6 +143,7 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         try {
             SubRepo.refreshIAP(account) ?: return false
         } catch (e: Exception) {
+            info(e)
             return false
         }
 
@@ -150,6 +154,7 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         try {
             StripeRepo.refreshStripeSub(account) ?: return false
         } catch (e: Exception) {
+            info(e)
             return false
         }
 
