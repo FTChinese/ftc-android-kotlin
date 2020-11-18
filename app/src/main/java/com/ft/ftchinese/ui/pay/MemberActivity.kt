@@ -8,24 +8,23 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMemberBinding
-import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.model.order.StripeSub
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.paywall.CustomerServiceFragment
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.ui.paywall.UpgradeActivity
-import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
@@ -64,13 +63,17 @@ class MemberActivity : ScopedAppActivity(),
                 .get(AccountViewModel::class.java)
 
 
-        accountViewModel.stripeRetrievalResult.observe(this, Observer {
-                onStripeSubRetrieved(it)
-        })
+        accountViewModel.stripeRetrievalResult.observe(this) {
+            onStripeSubRetrieved(it)
+        }
 
-        accountViewModel.accountRefreshed.observe(this, Observer {
+        accountViewModel.iapRefreshResult.observe(this) {
+            onIAPRefresh(it)
+        }
+
+        accountViewModel.accountRefreshed.observe(this) {
             onAccountRefreshed(it)
-        })
+        }
 
         initUI()
 
@@ -81,27 +84,27 @@ class MemberActivity : ScopedAppActivity(),
 
     private fun buildMemberInfo(member: Membership): UIMemberInfo {
         return UIMemberInfo(
-                tier = getString(member.tierStringRes),
-                expireDate = member.localizedExpireDate(),
-                autoRenewal = member.autoRenew ?: false,
-                stripeStatus = if (member.payMethod == PayMethod.STRIPE && member.status != null) {
-                    getString(
-                            R.string.stripe_status,
-                            getString(member.status.stringRes)
-                    )
-                } else {
-                    null
-                },
-                stripeInactive = member.stripeInactive(),
-                remains = member.remainingDays().let {
-                    when {
-                        it == null -> null
-                        it < 0 -> getString(R.string.member_status_expired)
-                        it <= 7 -> getString(R.string.member_will_expire, it)
-                        else -> null
-                    }
-                },
-                isValidIAP = member.payMethod == PayMethod.APPLE && !member.expired()
+            tier = getString(member.tierStringRes),
+            expireDate = member.localizedExpireDate(),
+            autoRenewal = member.autoRenew ?: false,
+            stripeStatus = if (member.payMethod == PayMethod.STRIPE && member.status != null) {
+                getString(
+                        R.string.stripe_status,
+                        getString(member.status.stringRes)
+                )
+            } else {
+                null
+            },
+            stripeInactive = member.stripeInactive(),
+            remains = member.remainingDays().let {
+                when {
+                    it == null -> null
+                    it < 0 -> getString(R.string.member_status_expired)
+                    it <= 7 -> getString(R.string.member_will_expire, it)
+                    else -> null
+                }
+            },
+            isValidIAP = member.payMethod == PayMethod.APPLE && !member.expired()
         )
     }
 
@@ -135,7 +138,7 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         binding.upgradeBtn.setOnClickListener {
-            if (member.fromWxOrAli()) {
+            if (member.isWxOrAli()) {
 
                 UpgradeActivity.startForResult(this, RequestCode.PAYMENT)
 
@@ -171,17 +174,20 @@ class MemberActivity : ScopedAppActivity(),
             return
         }
 
-
-        if (account.membership.payMethod == PayMethod.STRIPE) {
-            toast(R.string.refreshing_stripe_sub)
-
-            accountViewModel.retrieveStripeSub(account)
-
-            return
+        when (account.membership.payMethod) {
+            PayMethod.ALIPAY, PayMethod.WXPAY, null -> {
+                toast(R.string.refreshing_account)
+                accountViewModel.refresh(account)
+            }
+            PayMethod.STRIPE -> {
+                toast(R.string.refreshing_stripe_sub)
+                accountViewModel.retrieveStripeSub(account)
+            }
+            PayMethod.APPLE -> {
+                toast(R.string.refresh_iap_sub)
+                accountViewModel.refreshIAPSub(account)
+            }
         }
-
-        toast(R.string.refreshing_account)
-        accountViewModel.refresh(account)
     }
 
     private fun onStripeSubRetrieved(result: Result<StripeSub>) {
@@ -210,6 +216,29 @@ class MemberActivity : ScopedAppActivity(),
         // So here we do not perform checks on subscribedResult == null.
         // It is just an indicator that network finished,
         // regardless of result.
+        toast(R.string.refreshing_account)
+        accountViewModel.refresh(account)
+    }
+
+    private fun onIAPRefresh(result: Result<IAPSubs>) {
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
+                toast("Apple IAP subscription updated!")
+            }
+        }
+
+        val account = sessionManager.loadAccount()
+        if (account == null) {
+            stopRefresh()
+            return
+        }
+
         toast(R.string.refreshing_account)
         accountViewModel.refresh(account)
     }
