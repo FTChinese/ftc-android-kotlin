@@ -18,6 +18,7 @@ class ReadingDurationWorker(appContext: Context, workerParams: WorkerParameters)
     Worker(appContext, workerParams), AnkoLogger {
 
     override fun doWork(): Result {
+        info("Start running ReadingDurationWorker")
         val url = inputData.getString(KEY_DUR_URL) ?: return Result.success()
         val refer = inputData.getString(KEY_DUR_REFER) ?: return Result.success()
         val startUnix = inputData.getLong(KEY_DUR_START, 0)
@@ -25,7 +26,6 @@ class ReadingDurationWorker(appContext: Context, workerParams: WorkerParameters)
         val userId = inputData.getString(KEY_DUR_USER_ID) ?: return Result.success()
 
         try {
-            info("Send reading duration")
             ReaderRepo.engaged(ReadingDuration(
                 url = url,
                 refer = refer,
