@@ -2,10 +2,9 @@ package com.ft.ftchinese.repository
 
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.reader.*
-import com.ft.ftchinese.util.*
+import com.ft.ftchinese.util.json
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import kotlin.Exception
 
 object ReaderRepo : AnkoLogger {
 
@@ -136,14 +135,8 @@ object ReaderRepo : AnkoLogger {
     fun engaged(dur: ReadingDuration): String? {
         info("Engagement length of ${dur.userId}: ${dur.startUnix} - ${dur.endUnix}")
 
-        return try {
-            Fetch().post("${dur.refer}/engagement.php")
-                    .sendJson(Klaxon().toJsonString(dur))
-                    .endPlainText()
-
-        } catch (e: Exception) {
-            info("Error when tracking reading duration $e")
-            null
-        }
+        return Fetch().post("${dur.refer}/engagement.php")
+            .sendJson(Klaxon().toJsonString(dur))
+            .endPlainText()
     }
 }
