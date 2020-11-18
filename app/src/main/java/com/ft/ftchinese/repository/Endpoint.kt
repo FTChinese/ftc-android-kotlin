@@ -65,7 +65,11 @@ object SubscribeApi {
     }
 
     fun verifyPaymentUrl(orderId: String, isTest: Boolean): String {
-        return "${baseUrl(isTest)}/${orderId}/verify-payment"
+        return "${baseUrl(isTest)}/orders/${orderId}/verify-payment"
+    }
+
+    fun refreshIAP(origTxId: String, isTest: Boolean): String {
+        return "${baseUrl(isTest)}/apple/subs/${origTxId}"
     }
 }
 
