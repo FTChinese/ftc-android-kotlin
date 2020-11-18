@@ -124,6 +124,7 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
 
         try {
             val result = SubRepo.verifyPayment(account, pr.ftcOrderId) ?: return false
+            info(result)
 
             paymentManager.save(result.payment)
 
