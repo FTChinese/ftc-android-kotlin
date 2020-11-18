@@ -89,21 +89,6 @@ object SubRepo : AnkoLogger {
         }
     }
 
-    fun wxQueryOrder(account: Account, orderId: String): PaymentResult? {
-
-        val (_, body) = Fetch()
-                .post(SubscribeApi.verifyPaymentUrl(orderId, account.isTest))
-                .noCache()
-                .setAppId() // Deprecated
-                .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<PaymentResult>(body)
-        }
-    }
-
     fun aliPlaceOrder(account: Account, plan: Plan): AliPayIntent? {
 
         val isTest = account.isTest
