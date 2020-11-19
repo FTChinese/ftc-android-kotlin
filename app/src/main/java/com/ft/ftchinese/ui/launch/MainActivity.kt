@@ -35,6 +35,7 @@ import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.repository.TabPages
 import com.ft.ftchinese.service.AudioDownloadService
+import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.ServiceAcceptance
@@ -231,6 +232,12 @@ class MainActivity : ScopedAppActivity(),
         workManager.getWorkInfoByIdLiveData(verifyWork.id).observe(this) { workInfo ->
             info("verifyWork state ${workInfo.state}")
         }
+
+        val upgradeWork = OneTimeWorkRequestBuilder<LatestReleaseWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        workManager.enqueueUniqueWork("latestRelease", ExistingWorkPolicy.REPLACE, upgradeWork)
     }
 
     private fun setupBottomNav() {
