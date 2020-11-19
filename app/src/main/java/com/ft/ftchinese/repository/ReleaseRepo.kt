@@ -5,25 +5,30 @@ import com.ft.ftchinese.util.json
 import org.jetbrains.anko.AnkoLogger
 
 object ReleaseRepo : AnkoLogger {
-    fun retrieveRelease(versionName: String): String? {
+
+    fun getRelease(versionName: String): Pair<AppRelease?, String>? {
         val (_, body) = Fetch()
                 .setAppId()
                 .get("${NextApi.releaseOf}/${normalizeVersionName(versionName)}")
                 .endJsonText()
 
-        return body
+        return if (body == null) {
+            null
+        } else {
+            Pair(json.parse(body), body)
+        }
     }
 
-    fun latestRelease(): AppRelease? {
+    fun getLatest(): Pair<AppRelease?, String>? {
         val (_, body) = Fetch()
-                .setAppId()
-                .get(NextApi.latestRelease)
-                .endJsonText()
+            .setAppId()
+            .get(NextApi.latestRelease)
+            .endJsonText()
 
         return if (body == null) {
             null
         } else {
-            json.parse(body)
+            Pair(json.parse(body), body)
         }
     }
 
