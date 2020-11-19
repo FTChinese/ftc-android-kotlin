@@ -1,8 +1,7 @@
 package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
-import com.ft.ftchinese.repository.Fetch
-import com.ft.ftchinese.util.*
+import com.ft.ftchinese.util.KLoginMethod
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -96,15 +95,18 @@ data class Account(
         return membership.permitStripe()
     }
 
-    fun createFetch(): Fetch {
-        return when {
-            id.isNotBlank() && !unionId.isNullOrBlank() -> Fetch()
-                    .setUserId(id)
-                    .setUnionId(unionId)
-            id.isNotBlank() -> Fetch().setUserId(id)
-            !unionId.isNullOrBlank() -> Fetch().setUnionId(unionId)
-            else -> throw Exception("Not logged in")
+    fun headers(): Map<String, String> {
+        val m = hashMapOf<String, String>()
+
+        if (id.isNotBlank()) {
+            m["X-User-Id"] = id
         }
+
+        if (!unionId.isNullOrBlank()) {
+            m["X-Union-Id"] = unionId
+        }
+
+        return m
     }
 }
 
