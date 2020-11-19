@@ -122,9 +122,17 @@ class Fetch : AnkoLogger {
         return request
     }
 
-    fun header(name: String, value: String) = apply {
+    fun addHeader(name: String, value: String) = apply {
+
         headers[name] = value
         return this
+    }
+
+    fun addHeaders(m: Map<String, String>) = apply {
+
+        for (item in m) {
+            headers[item.key] = item.value
+        }
     }
 
     // Authorization: Bearer xxxxxxx
