@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.sqlite.db.SimpleSQLiteQuery
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadingHistoryDao
 import com.ft.ftchinese.model.AppRelease
@@ -17,7 +18,11 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-class SettingsViewModel : ViewModel(), AnkoLogger {
+class SettingsViewModel(
+    private val cache: FileCache
+) : ViewModel(), AnkoLogger {
+
+    val isNetworkAvailable = MutableLiveData<Boolean>()
 
     val cacheSizeResult = MutableLiveData<String>()
     val cacheClearedResult = MutableLiveData<Boolean>()
@@ -30,7 +35,7 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<AppRelease>>()
     }
 
-    fun calculateCacheSize(cache: FileCache) {
+    fun calculateCacheSize() {
         viewModelScope.launch {
             val size = withContext(Dispatchers.IO) {
                 cache.space()
@@ -40,7 +45,7 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun clearCache(cache: FileCache) {
+    fun clearCache() {
         viewModelScope.launch {
             val result = withContext(Dispatchers.IO) {
                 cache.clear()
@@ -75,11 +80,12 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun loadCachedRelease(cache: FileCache) {
+    // Load current version's release log from cache.
+    fun loadCachedRelease(filename: String) {
         viewModelScope.launch {
             try {
                 val release = withContext(Dispatchers.IO) {
-                    val text = cache.loadText(AppRelease.currentCacheFile())
+                    val text = cache.loadText(filename)
 
                     if (text == null) {
                         null
@@ -103,29 +109,39 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun fetchRelease(cache: FileCache, versionName: String) {
+    // Fetch release log for either current version of latest version.
+    fun fetchRelease(current: Boolean) {
+        if (isNetworkAvailable.value != true) {
+            releaseResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
-                val text = withContext(Dispatchers.IO) {
-                    ReleaseRepo.retrieveRelease(versionName)
+                val respData = withContext(Dispatchers.IO) {
+                    if (current) {
+                        ReleaseRepo.getRelease(BuildConfig.VERSION_NAME)
+                    } else {
+                        ReleaseRepo.getLatest()
+                    }
                 }
 
-                if (text == null) {
+                if (respData == null) {
                     releaseResult.value = Result.LocalizedError(R.string.release_not_found)
 
                     return@launch
                 }
 
-
-                val appRelease = json.parse<AppRelease>(text)
-                releaseResult.value = if (appRelease != null) {
-                    Result.Success(appRelease)
-                } else {
-                    Result.LocalizedError(R.string.loading_failed)
+                val (release, raw) = respData
+                if (release == null) {
+                    releaseResult.value = Result.LocalizedError(R.string.release_not_found)
+                    return@launch
                 }
 
+                releaseResult.value = Result.Success(release)
+
                 withContext(Dispatchers.IO) {
-                    cache.saveText(AppRelease.currentCacheFile(), text)
+                    cache.saveText(release.cacheFileName(), raw)
                 }
 
             } catch (e: ClientError) {
@@ -134,26 +150,6 @@ class SettingsViewModel : ViewModel(), AnkoLogger {
                 } else {
                     parseApiError(e)
                 }
-
-            } catch (e: Exception) {
-                releaseResult.value = parseException(e)
-            }
-        }
-    }
-
-    fun checkLatestRelease() {
-        viewModelScope.launch {
-            try {
-                val release = withContext(Dispatchers.IO) {
-                    ReleaseRepo.latestRelease()
-                }
-
-                if (release == null) {
-                    releaseResult.value = Result.LocalizedError(R.string.release_not_found)
-                    return@launch
-                }
-
-                releaseResult.value = Result.Success(release)
 
             } catch (e: Exception) {
                 releaseResult.value = parseException(e)

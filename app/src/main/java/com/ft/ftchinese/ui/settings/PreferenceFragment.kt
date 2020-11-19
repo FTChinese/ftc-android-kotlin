@@ -2,7 +2,6 @@ package com.ft.ftchinese.ui.settings
 
 import android.content.Context
 import android.os.Bundle
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
@@ -12,6 +11,7 @@ import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.database.ReadingHistoryDao
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.viewmodel.SettingsViewModel
+import com.ft.ftchinese.viewmodel.SettingsViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -41,10 +41,12 @@ class PreferenceFragment : PreferenceFragmentCompat(),
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        settingsViewModel = ViewModelProvider(this)
-                .get(SettingsViewModel::class.java)
+        settingsViewModel = ViewModelProvider(
+            this,
+            SettingsViewModelFactory(cache)
+        ).get(SettingsViewModel::class.java)
 
-        settingsViewModel.calculateCacheSize(cache)
+        settingsViewModel.calculateCacheSize()
         settingsViewModel.countReadArticles(readingHistoryDao)
 
         super.onCreate(savedInstanceState)
@@ -71,43 +73,43 @@ class PreferenceFragment : PreferenceFragmentCompat(),
         prefCheckVersion?.summary = getString(R.string.current_version, BuildConfig.VERSION_NAME)
 
         // Show cache size.
-        settingsViewModel.cacheSizeResult.observe(this, Observer {
+        settingsViewModel.cacheSizeResult.observe(this) {
             prefClearCache?.summary = it
-        })
+        }
 
         // Wait for cache clearing result.
-        settingsViewModel.cacheClearedResult.observe(this, Observer {
-            
+        settingsViewModel.cacheClearedResult.observe(this) {
+
             // After cache is cleared, re-calculate cache size.
-            settingsViewModel.calculateCacheSize(cache)
+            settingsViewModel.calculateCacheSize()
 
             if (it) {
                 toast(R.string.prompt_cache_cleared)
             } else {
                 toast(R.string.prompt_cache_not_cleared)
             }
-        })
+        }
 
 
         // Show how many articles user read.
-        settingsViewModel.articlesReadResult.observe(this, Observer {
+        settingsViewModel.articlesReadResult.observe(this) {
             prefClearHistory?.summary = getString(R.string.summary_articles_read, it)
-        })
+        }
 
         // Show result of clearing reading history.
-        settingsViewModel.articlesClearedResult.observe(this, Observer {
+        settingsViewModel.articlesClearedResult.observe(this) {
             if (it) {
                 toast(R.string.prompt_reading_history)
             } else {
                 toast("Cannot truncate your reading history")
             }
-        })
+        }
 
 
         // Delete cached files
         prefClearCache?.setOnPreferenceClickListener {
 
-            settingsViewModel.clearCache(cache)
+            settingsViewModel.clearCache()
             true
         }
 
