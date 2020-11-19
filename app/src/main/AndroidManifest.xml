@@ -213,9 +213,6 @@
                 android:value="@string/news_notification_channel_id" />
         </service>
         <service
-            android:name=".service.ReadingDurationService"
-            android:exported="false" />
-        <service
             android:name="com.google.android.exoplayer2.scheduler.PlatformScheduler$PlatformSchedulerService"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
