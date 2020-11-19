@@ -117,8 +117,14 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         val paymentManager = PaymentManager.getInstance(ctx)
         val pr = paymentManager.load()
 
+
         if (pr.isOrderPaid()) {
             info("Order already paid. Stop verification")
+            return true
+        }
+
+        if (pr.ftcOrderId.isEmpty()) {
+            info("Order id not found")
             return true
         }
 
