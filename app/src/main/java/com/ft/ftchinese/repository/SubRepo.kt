@@ -11,11 +11,12 @@ object SubRepo : AnkoLogger {
 
     fun previewUpgrade(account: Account): PaymentIntent? {
 
-        val (_, body) = account.createFetch()
-                .get(SubscribeApi.UPGRADE_PREVIEW)
-                .setTimeout(30)
-                .noCache()
-                .endJsonText()
+        val (_, body) = Fetch()
+            .get(SubscribeApi.UPGRADE_PREVIEW)
+            .addHeaders(account.headers())
+            .setTimeout(30)
+            .noCache()
+            .endJsonText()
 
         return if (body == null) {
             null
@@ -26,11 +27,12 @@ object SubRepo : AnkoLogger {
 
     fun directUpgrade(account: Account): Pair<Boolean, PaymentIntent?> {
 
-        val (resp, body) = account.createFetch()
-                .put(SubscribeApi.UPGRADE)
-                .noCache()
-                .setClient()
-                .endJsonText()
+        val (resp, body) = Fetch()
+            .put(SubscribeApi.UPGRADE)
+            .addHeaders(account.headers())
+            .noCache()
+            .setClient()
+            .endJsonText()
 
         return when (resp.code) {
             204 -> Pair(true, null)
@@ -50,10 +52,11 @@ object SubRepo : AnkoLogger {
 
     fun getOrders(account: Account): List<Order> {
 
-        val (_, body) = account.createFetch()
-                .get(NextApi.ORDERS)
-                .noCache()
-                .endJsonText()
+        val (_, body) = Fetch()
+            .get(NextApi.ORDERS)
+            .addHeaders(account.headers())
+            .noCache()
+            .endJsonText()
 
         return if (body == null) {
             listOf()
@@ -67,9 +70,9 @@ object SubRepo : AnkoLogger {
         // If current account is a testing one, always send request to sandbox.
         val isTest = account.isTest
 
-        val (_, body) = account.createFetch()
+        val (_, body) = Fetch()
             .post("${SubscribeApi.wxOrderUrl(isTest)}/${plan.tier}/${plan.cycle}")
-            .setTest(isTest)
+            .addHeaders(account.headers())
             .setTimeout(30)
             .noCache()
             .setClient()
@@ -95,10 +98,10 @@ object SubRepo : AnkoLogger {
 
         info("Is test pay $isTest")
 
-        val (_, body) = account.createFetch()
+        val (_, body) = Fetch()
             .post("${SubscribeApi.aliOrderUrl(isTest)}/${plan.tier}/${plan.cycle}")
-            .setTest(isTest)
             .setTimeout(30)
+            .addHeaders(account.headers())
             .noCache()
             .setClient()
             .sendJson(json.toJsonString(Edition(
@@ -123,6 +126,7 @@ object SubRepo : AnkoLogger {
             .sendJson()
             .endJsonText()
 
+        info("Raw verification response $body")
         return if (body == null) {
             null
         } else {
