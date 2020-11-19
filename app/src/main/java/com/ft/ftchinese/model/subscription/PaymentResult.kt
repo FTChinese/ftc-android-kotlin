@@ -15,7 +15,7 @@ data class PaymentResult(
     val totalFee: Int,
     val transactionId: String,
     val ftcOrderId: String,
-    val paidAt: String, // ISO8601
+    val paidAt: String? = null, // ISO8601
     @KPayMethod
     val payMethod: PayMethod? = null
 ) {
