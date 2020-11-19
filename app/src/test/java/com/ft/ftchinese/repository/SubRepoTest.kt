@@ -31,4 +31,13 @@ class SubRepoTest {
 
         println(order)
     }
+
+    @Test
+    fun verifyPayment() {
+        val vr = SubRepo.verifyPayment(account, "FT42E4DCD44F0D06FE")
+
+        assertNotNull(vr)
+
+        print(vr)
+    }
 }
