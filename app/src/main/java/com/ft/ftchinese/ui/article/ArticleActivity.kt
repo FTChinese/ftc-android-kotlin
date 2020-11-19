@@ -351,6 +351,8 @@ class ArticleActivity : ScopedAppActivity(),
             context?.startActivity(intent)
         }
 
+        // When app is in background and user clicked notification message, open the activity with parent stack
+        // so that back button works.
         @JvmStatic
         fun startWithParentStack(context: Context, channelItem: Teaser) {
             val intent = Intent(context, ArticleActivity::class.java).apply {
