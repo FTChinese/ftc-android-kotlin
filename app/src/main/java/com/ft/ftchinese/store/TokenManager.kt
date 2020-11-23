@@ -21,7 +21,7 @@ class TokenManager private constructor(context: Context) : AnkoLogger {
                 ?: return createToken()
     }
 
-    fun createToken(): String {
+    private fun createToken(): String {
         val t = generateNonce(32)
 
         editor.putString(PREF_TOKEN, t)
