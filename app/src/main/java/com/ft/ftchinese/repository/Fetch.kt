@@ -38,8 +38,6 @@ fun parseRespErr(resp: Response): ClientError? {
      */
     val body = resp.body?.string()
 
-    Log.d("APIError", body)
-
     // Avoid throwing JSON parse error.
     val clientErr = if (body != null) {
         /**
