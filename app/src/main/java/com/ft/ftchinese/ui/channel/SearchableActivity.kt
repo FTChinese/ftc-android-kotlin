@@ -119,11 +119,11 @@ class SearchableActivity : AppCompatActivity(),
 
         supportActionBar?.title = getString(R.string.title_search, keyword)
 
-        template = template?.replace("{search-html}", "")
+        val tmpl = template?.replace("{search-html}", "") ?: return
 
         binding.wvSearchResult.loadDataWithBaseURL(
                 Config.discoverServer(session.loadAccount()),
-                template,
+                tmpl,
                 "text/html",
                 null,
                 null

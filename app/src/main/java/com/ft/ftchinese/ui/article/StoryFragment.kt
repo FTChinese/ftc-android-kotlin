@@ -266,16 +266,6 @@ class StoryFragment : ScopedFragment(),
         }
 
         sendReadLen(account)
-
-//        ReadingDurationService.start(context, ReadingDuration(
-//                url = "/android/${storyBrief?.type}/${storyBrief?.id}/${storyBrief?.title}",
-//                refer = Config.discoverServer(account),
-//                startUnix = start,
-//                endUnix = Date().time / 1000,
-//                userId = account.id,
-//                functionName = "onLoad"
-//        ))
-
     }
 
     private fun sendReadLen(account: Account) {

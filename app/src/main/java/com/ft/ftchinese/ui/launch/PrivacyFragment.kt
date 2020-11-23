@@ -56,7 +56,7 @@ class PrivacyFragment : ScopedFragment(), AnkoLogger {
             ViewModelProvider(this).get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        val text = cache.readPrivacy()
+        val text = cache.readPrivacy() ?: return
 
         info(text)
 
