@@ -29,7 +29,6 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.subscription.*
-import com.ft.ftchinese.service.PollService
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.store.ServiceAcceptance
@@ -632,12 +631,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         return Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
     }
 
-    override fun onStart() {
-        super.onStart()
-        val filter = IntentFilter(PollService.ACTION_SHOW_NOTIFICATION)
-        registerReceiver(onShowNotification, filter)
-    }
-
     override fun onStop() {
         super.onStop()
         unregisterReceiver(onShowNotification)
@@ -658,8 +651,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
     private fun onBottomMenuItemClicked(item: MenuItem) {
         when (item.itemId) {
             R.id.menu_item_toggle_polling -> {
-                val shouldStartAlarm = !PollService.isServiceAlarmOn(this)
-                PollService.setServiceAlarm(this, shouldStartAlarm)
                 invalidateOptionsMenu()
 
             }
