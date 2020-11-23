@@ -219,6 +219,7 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
                     replace(R.id.release_detail, ReleaseLogFragment.newInstance())
                 }
 
+                // Button to start download.
                 binding.btnStartDownload.setOnClickListener {
                     if (requestPermission()) {
                         binding.btnStartDownload.isEnabled = false
