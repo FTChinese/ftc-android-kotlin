@@ -30,12 +30,4 @@
         app:summary="@string/current_version">
     </Preference>
 
-    <Preference
-        app:key="pref_release_log"
-        app:title="@string/pref_release_log"
-        app:icon="@drawable/ic_note_black_24dp"
-        app:summary="@string/summary_release_log">
-
-    </Preference>
-
 </androidx.preference.PreferenceScreen>

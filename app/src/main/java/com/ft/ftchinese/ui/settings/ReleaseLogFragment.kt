@@ -22,8 +22,7 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 /**
- * Show release log. Used by both [CurrentReleaseActivity]
- * and [UpdateAppActivity]
+ * Show release log. Used by both [UpdateAppActivity]
  */
 class ReleaseLogFragment : Fragment(), AnkoLogger {
 

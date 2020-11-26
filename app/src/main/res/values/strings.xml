@@ -267,7 +267,6 @@
     <!-- Drawer -->
     <string name="action_logout">退出登录</string>
     <string name="action_settings">设置</string>
-    <string name="action_download_app">APP下载</string>
     <string name="myft_reading_history">阅读历史</string>
     <string name="myft_starred_articles">收藏文章</string>
     <string name="myft_following">关注</string>
@@ -459,7 +458,7 @@
     <string name="wait_download_finish">开始后台下载，请稍候。下载完成后会提示您安装，或者点击通知栏的下载完成通知开始安装。您也可以下载完成后手动安装，文件位于手机存储的下载文件夹下。</string>
     <string name="action_open_download">打开下载文件夹</string>
     <string name="summary_articles_read">已阅读 %1$d 篇文章</string>
-    <string name="pref_release_log">更新日志</string>
+    <string name="pref_release_log">更新历史</string>
     <string name="summary_release_log">查看本版功能变动</string>
 
 

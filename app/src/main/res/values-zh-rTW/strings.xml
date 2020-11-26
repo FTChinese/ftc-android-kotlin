@@ -243,7 +243,6 @@
     <string name="action_feedback">意見回應</string>
     <string name="action_logout">退出登入</string>
     <string name="action_settings">設置</string>
-    <string name="action_download_app">APP下载</string>
     <string name="myft_reading_history">閱讀歷史</string>
     <string name="myft_starred_articles">收藏文章</string>
     <string name="myft_following">關注</string>
@@ -428,7 +427,7 @@
 
     <string name="summary_articles_read">已閱讀 %1$d 篇文章</string>
 
-    <string name="pref_release_log">更新日志</string>
+    <string name="pref_release_log">更新历史</string>
     <string name="summary_release_log">查看本版功能变动</string>
     <string name="version_name">版本</string>
     <string name="released_at">发布时间</string>
