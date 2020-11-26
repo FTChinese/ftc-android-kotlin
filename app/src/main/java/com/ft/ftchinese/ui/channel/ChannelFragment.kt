@@ -472,17 +472,6 @@ class ChannelFragment : ScopedFragment(),
         }
 
         sendReadLen(account)
-
-//        val userId = sessionManager.loadAccount()?.id ?: return
-//
-//        ReadingDurationService.start(context, ReadingDuration(
-//            url = "/android/channel/${channelSource?.title}",
-//            refer = "http://www.ftchinese.com/",
-//            startUnix = start,
-//            endUnix = Date().time / 1000,
-//            userId = userId,
-//            functionName = "onLoad"
-//        ))
     }
 
     private fun sendReadLen(account: Account) {
