@@ -95,7 +95,7 @@ class MemberActivity : ScopedAppActivity(),
             } else {
                 null
             },
-            stripeInactive = member.stripeInactive(),
+            stripeInactive = member.stripeInvalid(),
             remains = member.remainingDays().let {
                 when {
                     it == null -> null

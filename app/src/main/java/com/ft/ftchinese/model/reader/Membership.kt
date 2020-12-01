@@ -88,8 +88,8 @@ data class Membership(
         return payMethod == PayMethod.STRIPE && status == StripeSubStatus.Active
     }
 
-    fun stripeInactive(): Boolean {
-        return payMethod == PayMethod.STRIPE && status != StripeSubStatus.Active
+    fun stripeInvalid(): Boolean {
+        return payMethod == PayMethod.STRIPE && status?.isInvalid() == true
     }
 
     fun isWxOrAli(): Boolean {
@@ -174,12 +174,12 @@ data class Membership(
         }
 
         // Inactive stripe.
-        if (payMethod == PayMethod.STRIPE && status != StripeSubStatus.Active) {
-            return Pair(
-                    Permission.FREE.id,
-                    MemberStatus.InactiveStripe
-            )
-        }
+//        if (payMethod == PayMethod.STRIPE && status != StripeSubStatus.Active) {
+//            return Pair(
+//                    Permission.FREE.id,
+//                    MemberStatus.InactiveStripe
+//            )
+//        }
 
         // Expired.
         if (expired()) {

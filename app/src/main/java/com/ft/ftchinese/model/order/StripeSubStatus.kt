@@ -40,6 +40,10 @@ enum class StripeSubStatus(val symbol: String) {
         return this == IncompleteExpired || this == PastDue || this == Canceled || this == Unpaid
     }
 
+    fun isInvalid(): Boolean {
+        return arrayOf(Incomplete, IncompleteExpired, PastDue, Unpaid).contains(this)
+    }
+
     companion object {
         private val stringToEnum: Map<String, StripeSubStatus> = values().associateBy { it.symbol }
 
