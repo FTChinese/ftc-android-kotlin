@@ -85,7 +85,7 @@ class MemberActivity : ScopedAppActivity(),
     private fun buildMemberInfo(member: Membership): UIMemberInfo {
         return UIMemberInfo(
             tier = getString(member.tierStringRes),
-            expireDate = member.localizedExpireDate(),
+            expireDate = member.localizeExpireDate(),
             autoRenewal = member.autoRenew ?: false,
             stripeStatus = if (member.payMethod == PayMethod.STRIPE && member.status != null) {
                 getString(
@@ -95,16 +95,16 @@ class MemberActivity : ScopedAppActivity(),
             } else {
                 null
             },
-            stripeInactive = member.stripeInvalid(),
+            stripeInactive = member.isInvalidStripe(),
             remains = member.remainingDays().let {
                 when {
                     it == null -> null
-                    it < 0 -> getString(R.string.member_status_expired)
+                    it < 0 -> getString(R.string.member_has_expired)
                     it <= 7 -> getString(R.string.member_will_expire, it)
                     else -> null
                 }
             },
-            isValidIAP = member.payMethod == PayMethod.APPLE && !member.expired()
+            isValidIAP = member.isIAP() && !member.expired()
         )
     }
 
