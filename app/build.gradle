@@ -34,14 +34,21 @@ androidExtensions {
 android {
     compileSdkVersion 30
     compileOptions {
-        sourceCompatibility 1.8
-        targetCompatibility 1.8
-    }
-    buildFeatures {
-        dataBinding true
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        useIR = true
+    }
+    buildFeatures {
+        dataBinding true
+        viewBinding true
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerVersion '1.4.20'
+        kotlinCompilerExtensionVersion '1.0.0-alpha08'
     }
     defaultConfig {
         applicationId "com.ft.ftchinese"
@@ -165,8 +172,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-iid:21.0.0'
     implementation 'com.google.firebase:firebase-messaging:21.0.0'
     implementation 'com.google.android.gms:play-services-analytics:17.0.0'
-//    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
-    implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
+    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
 
     // Payment
     implementation(name: 'alipaySdk-15.6.5-20190718211148', ext: 'aar')
@@ -179,7 +185,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "androidx.fragment:fragment-ktx:1.2.5"
-//    kapt "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
 
     implementation 'android.arch.work:work-runtime:1.0.1'
@@ -191,19 +196,33 @@ dependencies {
 
     //  UI
     implementation "androidx.appcompat:appcompat:1.2.0"
-    implementation "com.google.android.material:material:1.3.0-alpha03"
+    implementation "com.google.android.material:material:1.3.0-alpha04"
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation "androidx.browser:browser:1.2.0"
+    implementation "androidx.browser:browser:1.3.0"
     implementation "androidx.preference:preference-ktx:1.1.1"
     implementation "androidx.legacy:legacy-support-v4:$support_version"
     implementation "androidx.recyclerview:recyclerview:1.1.0"
-//    implementation "androidx.coordinatorlayout:coordinatorlayout:1.1.0"
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "com.makeramen:roundedimageview:2.3.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 // Dynamic Feature Module Support
     implementation "androidx.navigation:navigation-dynamic-features-fragment:$nav_version"
+
+    // Compose
+    implementation 'androidx.compose.ui:ui:1.0.0-alpha08'
+    // Tooling support (Previews, etc.)
+    implementation 'androidx.compose.ui:ui-tooling:1.0.0-alpha08'
+    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
+    implementation 'androidx.compose.foundation:foundation:1.0.0-alpha08'
+    // Material Design
+    implementation 'androidx.compose.material:material:1.0.0-alpha08'
+    // Material design icons
+    implementation 'androidx.compose.material:material-icons-core:1.0.0-alpha08'
+    implementation 'androidx.compose.material:material-icons-extended:1.0.0-alpha08'
+    // Integration with observables
+    implementation 'androidx.compose.runtime:runtime-livedata:1.0.0-alpha08'
+    implementation 'androidx.compose.runtime:runtime-rxjava2:1.0.0-alpha08'
 
     // ExoPlayer
     implementation "com.google.android.exoplayer:exoplayer:$exo_player"
@@ -240,6 +259,8 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:2.1.0"
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
     androidTestImplementation "androidx.work:work-testing:$work_version"
+    // UI Tests
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.0.0-alpha08'
 }
 
 apply plugin: 'com.google.gms.google-services'
