@@ -155,6 +155,7 @@
     <string name="pay_brand_stripe">Stripe</string>
     <string name="pay_method_stripe">Stripe支付</string>
     <string name="pay_method_apple">苹果App内支付</string>
+    <string name="pay_method_b2b">企业订阅</string>
     <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
     <string name="payment_source">%1$s (尾号%2$s)</string>
     <string name="stripe_in_pounds">* 使用Stripe订阅FT中文网会员以英镑计价</string>

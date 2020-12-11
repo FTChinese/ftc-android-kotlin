@@ -497,6 +497,7 @@
     <string name="wait_while_wx_login">获取微信数据耗时较长，请耐心等候，如果出现超时错误，请重试或选择较快的网络</string>
     <string name="iap_guide">当前订阅来自苹果App内购。请在App Store中管理您的订阅。</string>
     <string name="pay_method_apple">苹果App内支付</string>
+    <string name="pay_method_b2b">企业订阅</string>
     <string name="exo_playing_channel_id">exo_playing_channel</string>
     <string name="exo_playing_channel_name">正在播放</string>
     <string name="exo_playing_channel_description">播放音频</string>
