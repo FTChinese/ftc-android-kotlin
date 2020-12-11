@@ -56,6 +56,22 @@ data class Membership(
         return PlanStore.find(tier, cycle)
     }
 
+    /**
+     * Checks whether membership expired.
+     * For stripe and apple iap, if expire date is past and
+     * authRenew is true, take it as not expired.
+     */
+    fun expired(): Boolean {
+        if (vip) {
+            return false
+        }
+
+        if (expireDate == null) {
+            return true
+        }
+        return expireDate.isBefore(LocalDate.now()) && (autoRenew == false)
+    }
+
     fun remainingDays(): Long? {
         if (expireDate == null) {
             return null
@@ -81,6 +97,32 @@ data class Membership(
     }
 
     /**
+     * Checks wehther the current membership is purchased
+     * via alipay or wechat pay.
+     */
+    fun isAliOrWxPay(): Boolean {
+        // For backward compatibility with legacy db format.
+        if (tier != null && payMethod == null) {
+            return true
+        }
+
+        // The first condition is used for backward compatibility.
+        return payMethod == PayMethod.ALIPAY || payMethod == PayMethod.WXPAY
+    }
+
+    fun isStripe(): Boolean {
+        return payMethod == PayMethod.STRIPE && stripeSubsId != null
+    }
+
+    fun isIAP(): Boolean {
+        return payMethod == PayMethod.APPLE && appleSubsId != null
+    }
+
+    fun isB2B(): Boolean {
+        return  payMethod == PayMethod.B2B && b2bLicenceId != null
+    }
+
+    /**
      * Determine whether to display a warning message
      * on membership info.
      */
@@ -92,26 +134,6 @@ data class Membership(
         return payMethod == PayMethod.STRIPE && status?.isInvalid() == true
     }
 
-    fun isWxOrAli(): Boolean {
-        // The first condition is used for backward compatibility.
-        return (tier != null && payMethod == null) || payMethod == PayMethod.ALIPAY || payMethod == PayMethod.WXPAY
-    }
-
-    /**
-     * Checks whether membership expired.
-     * For stripe and apple iap, if expire date is past and
-     * authRenew is true, take it as not expired.
-     */
-    fun expired(): Boolean {
-        if (vip) {
-            return false
-        }
-
-        if (expireDate == null) {
-            return true
-        }
-        return expireDate.isBefore(LocalDate.now()) && (autoRenew == false)
-    }
 
     /**
      * Determines whether the Renew button should be visible.
@@ -137,7 +159,7 @@ data class Membership(
         }
 
         // For non-ali or wx pay,
-        if (!isWxOrAli()) {
+        if (!isAliOrWxPay()) {
             return false
         }
 
@@ -230,7 +252,7 @@ data class Membership(
             }
         }
 
-        if (status?.shouldResubscribe() == true) {
+        if (status?.isInvalid() == true) {
             return NextStep.Resubscribe.id
         }
 
@@ -280,11 +302,11 @@ data class Membership(
             return OrderUsage.CREATE
         }
 
-        if (status?.shouldResubscribe() == true) {
+        if (expired()) {
             return OrderUsage.CREATE
         }
 
-        if (expired()) {
+        if (status?.isInvalid() == true) {
             return OrderUsage.CREATE
         }
 
@@ -308,7 +330,7 @@ data class Membership(
             return true
         }
 
-        if (status?.shouldResubscribe() == true) {
+        if (status?.isInvalid() == true) {
             return true
         }
 

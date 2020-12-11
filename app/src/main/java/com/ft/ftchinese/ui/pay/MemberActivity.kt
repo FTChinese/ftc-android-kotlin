@@ -138,7 +138,7 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         binding.upgradeBtn.setOnClickListener {
-            if (member.isWxOrAli()) {
+            if (member.isAliOrWxPay()) {
 
                 UpgradeActivity.startForResult(this, RequestCode.PAYMENT)
 
