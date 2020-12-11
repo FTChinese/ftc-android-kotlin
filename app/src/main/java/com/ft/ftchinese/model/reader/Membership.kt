@@ -57,47 +57,7 @@ data class Membership(
     }
 
     /**
-     * Checks whether membership expired.
-     * For stripe and apple iap, if expire date is past and
-     * authRenew is true, take it as not expired.
-     */
-    fun expired(): Boolean {
-        if (vip) {
-            return false
-        }
-
-        if (expireDate == null) {
-            return true
-        }
-        return expireDate.isBefore(LocalDate.now()) && (autoRenew == false)
-    }
-
-    fun remainingDays(): Long? {
-        if (expireDate == null) {
-            return null
-        }
-
-        if (autoRenew == true) {
-            return null
-        }
-
-        return LocalDate.now().until(expireDate, ChronoUnit.DAYS)
-    }
-
-    fun localizedExpireDate(): String {
-        if (vip) {
-            return "无限期"
-        }
-
-        if (expireDate == null) {
-            return ""
-        }
-
-        return expireDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
-    }
-
-    /**
-     * Checks wehther the current membership is purchased
+     * Checks whether the current membership is purchased
      * via alipay or wechat pay.
      */
     fun isAliOrWxPay(): Boolean {
@@ -110,10 +70,6 @@ data class Membership(
         return payMethod == PayMethod.ALIPAY || payMethod == PayMethod.WXPAY
     }
 
-    fun isStripe(): Boolean {
-        return payMethod == PayMethod.STRIPE && stripeSubsId != null
-    }
-
     fun isIAP(): Boolean {
         return payMethod == PayMethod.APPLE && appleSubsId != null
     }
@@ -122,18 +78,21 @@ data class Membership(
         return  payMethod == PayMethod.B2B && b2bLicenceId != null
     }
 
+    fun isStripe(): Boolean {
+        return payMethod == PayMethod.STRIPE && stripeSubsId != null
+    }
+
     /**
      * Determine whether to display a warning message
      * on membership info.
      */
     fun isActiveStripe(): Boolean {
-        return payMethod == PayMethod.STRIPE && status == StripeSubStatus.Active
+        return isStripe() && status == StripeSubStatus.Active
     }
 
-    fun stripeInvalid(): Boolean {
-        return payMethod == PayMethod.STRIPE && status?.isInvalid() == true
+    fun isInvalidStripe(): Boolean {
+        return isStripe() && status?.isInvalid() == true
     }
-
 
     /**
      * Determines whether the Renew button should be visible.
@@ -148,13 +107,8 @@ data class Membership(
      * This should only be available if current membership
      * is purchased via ali or wx.
      */
-    private fun permitRenewal(): Boolean {
+    fun canRenewViaAliWx(): Boolean {
         if (expireDate == null) {
-            return false
-        }
-
-        // For auto renewal, deny manual renewal.
-        if (autoRenew == true) {
             return false
         }
 
@@ -166,7 +120,89 @@ data class Membership(
         val today = LocalDate.now()
         val threeYearsLater = today.plusYears(3)
 
-        return expireDate.isBefore(threeYearsLater)
+        return expireDate.isBefore(threeYearsLater) && expireDate.isAfter(today)
+    }
+
+    /**
+     * Determine if we should show upgrade button.
+     * Only when membership is not expired yet, and created via
+     * Alipay, Wechat, or Stripe, and standard edition should we allow
+     * upgrade.
+     */
+    fun canUpgrade(): Boolean {
+        if (!isAliOrWxPay() || !isStripe()) {
+            return false
+        }
+
+        if (expired()) {
+            return false
+        }
+
+        if (tier != Tier.STANDARD) {
+            return false
+        }
+
+        return true
+    }
+
+    /**
+     * Determine whether we should allow Stripe and Apple user to
+     * buy addon via Alipay or Wechat.
+     */
+    fun canPurchaseAddOn(): Boolean {
+        return isStripe() || isIAP()
+    }
+
+    /**
+     * Checks whether membership expired.
+     * For stripe and apple iap, if expire date is past and
+     * autoRenew is true, take it as not expired.
+     * For stripe invalid status, take it as expired.
+     */
+    fun expired(): Boolean {
+        if (vip) {
+            return false
+        }
+
+        if (expireDate == null) {
+            return true
+        }
+
+        if (isInvalidStripe()) {
+            return true
+        }
+
+        return expireDate.isBefore(LocalDate.now()) && (autoRenew == false)
+    }
+
+    /**
+     * Calculate remaining days before expiration.
+     * This is only applicable to Alipay or Wechat pay.
+     * You should check whether the subscription is stripe and in invalid state before checking this.
+     * For invalid stripe, it is meaningless to calculate reaming days.
+     */
+    fun remainingDays(): Long? {
+        if (expireDate == null) {
+            return null
+        }
+
+        if (!isAliOrWxPay()) {
+            return null
+        }
+
+        return LocalDate.now().until(expireDate, ChronoUnit.DAYS)
+    }
+
+    fun localizeExpireDate(): String {
+        if (vip) {
+            return "无限期"
+        }
+
+        if (expireDate == null) {
+            return ""
+        }
+
+        return expireDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
     }
 
     /**
@@ -273,7 +309,7 @@ data class Membership(
         }
 
         // Membership is not auto renewal, and not expired.
-        if (permitRenewal()) {
+        if (canRenewViaAliWx()) {
             return when (tier) {
                 Tier.STANDARD -> NextStep.Renew.id or NextStep.Upgrade.id
                 Tier.PREMIUM -> NextStep.Renew.id
