@@ -6,7 +6,8 @@ enum class PayMethod(val symbol: String) {
     ALIPAY("alipay"),
     WXPAY("wechat"),
     STRIPE("stripe"),
-    APPLE("apple");
+    APPLE("apple"),
+    B2B("b2b");
 
     val stringRes: Int
         get() = when (this) {
@@ -14,6 +15,7 @@ enum class PayMethod(val symbol: String) {
             WXPAY -> R.string.pay_method_wechat
             STRIPE -> R.string.pay_method_stripe
             APPLE -> R.string.pay_method_apple
+            B2B -> R.string.pay_method_b2b
         }
 
     override fun toString(): String {
