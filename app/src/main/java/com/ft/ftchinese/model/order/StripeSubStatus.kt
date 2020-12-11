@@ -36,12 +36,9 @@ enum class StripeSubStatus(val symbol: String) {
         return symbol
     }
 
-    fun shouldResubscribe(): Boolean {
-        return this == IncompleteExpired || this == PastDue || this == Canceled || this == Unpaid
-    }
-
+    // Status in an invalid final state. If membership is in one of these state, it's invalid.
     fun isInvalid(): Boolean {
-        return arrayOf(Incomplete, IncompleteExpired, PastDue, Unpaid).contains(this)
+        return arrayOf(IncompleteExpired, PastDue, Canceled, Unpaid).contains(this)
     }
 
     companion object {
