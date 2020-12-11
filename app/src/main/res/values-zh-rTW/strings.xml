@@ -107,11 +107,12 @@
     <string name="prompt_restricted_login">會員登入后可以閱讀</string>
     <string name="stripe_not_active">Stripe訂閱状态异常</string>
     <string name="member_status_invalid">訂閱状态异常，請刷新或聯繫客服</string>
-    <string name="member_status_expired">會員已过期</string>
+    <string name="member_has_expired">會員已过期</string>
+    <string name="member_is_expiring">會員将于今日过期</string>
 
     <string name="member_will_expire">會員还有 %1$d 天过期，請及时續訂</string>
     <string name="member_expired_on">您訂閱的%1$s已經于%2$s日过期，继续閱讀請續訂</string>
-    <string name="sub_status_incomplete">支付未完成</string>
+    <string name="sub_status_incomplete">等待支付</string>
     <string name="sub_status_incomplete_expired">支付已过期</string>
 
     <!--    Membership info-->
