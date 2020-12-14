@@ -8,7 +8,7 @@ import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.model.subscription.Cycle
-import com.ft.ftchinese.model.subscription.OrderUsage
+import com.ft.ftchinese.model.subscription.OrderKind
 import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.subscription.Tier
 import org.threeten.bp.LocalDate
@@ -143,17 +143,17 @@ val cycleConverter = object : Converter {
 
 val orderUsageConverter = object : Converter {
     override fun canConvert(cls: Class<*>): Boolean {
-        return cls == OrderUsage::class.java
+        return cls == OrderKind::class.java
     }
 
     override fun fromJson(jv: JsonValue): Any? {
         return jv.string?.let {
-            OrderUsage.fromString(it)
+            OrderKind.fromString(it)
         }
     }
 
     override fun toJson(value: Any): String {
-        return if (value is OrderUsage) {
+        return if (value is OrderKind) {
             """ "$value" """
         } else {
             """null"""

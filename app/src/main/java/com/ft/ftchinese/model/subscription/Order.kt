@@ -42,7 +42,7 @@ data class Order(
     val extraDays: Long = 0,
 
     @KOrderUsage
-    val usageType: OrderUsage,
+    val usageType: OrderKind,
 
     @KPayMethod
     val payMethod: PayMethod,
@@ -73,7 +73,7 @@ data class Order(
 
         val start = when {
             member.expireDate == null -> today
-            usageType == OrderUsage.UPGRADE -> today
+            usageType == OrderKind.UPGRADE -> today
             member.expired() -> today
             else -> member.expireDate
         }

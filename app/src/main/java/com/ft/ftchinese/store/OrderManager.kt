@@ -83,7 +83,7 @@ class OrderManager private constructor(context: Context) {
         val tier = Tier.fromString(sharedPreferences.getString(PREF_TIER, null)) ?: return null
         val amount = sharedPreferences.getDouble(PREF_AMOUNT, 0.0)
         val cycle = Cycle.fromString(sharedPreferences.getString(PREF_CYCLE, null)) ?: return null
-        val usageType = OrderUsage.fromString(sharedPreferences.getString(PREF_USAGE, null))
+        val usageType = OrderKind.fromString(sharedPreferences.getString(PREF_USAGE, null))
                 ?: return null
         val payMethod = PayMethod.fromString(sharedPreferences.getString(PREF_PAYMENT_METHOD, null))
             ?: return null
