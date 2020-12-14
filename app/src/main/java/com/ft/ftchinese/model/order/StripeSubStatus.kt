@@ -28,7 +28,7 @@ enum class StripeSubStatus(val symbol: String) {
             IncompleteExpired -> R.string.sub_status_incomplete_expired
             Trialing -> R.string.sub_status_trialing
             PastDue -> R.string.sub_status_past_due
-            Canceled -> R.string.sub_status_cancled
+            Canceled -> R.string.sub_status_canceled
             Unpaid -> R.string.sub_status_unpaid
         }
 
