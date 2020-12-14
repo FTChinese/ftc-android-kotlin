@@ -95,7 +95,7 @@ class PaywallActivity : ScopedAppActivity(),
             CheckOutActivity.startForResult(
                 activity = this,
                 requestCode = RequestCode.PAYMENT,
-                paymentIntent = it.paymentIntent(account.membership.subType(it))
+                paymentIntent = it.paymentIntent(account.membership.orderKind(it))
             )
         })
 
