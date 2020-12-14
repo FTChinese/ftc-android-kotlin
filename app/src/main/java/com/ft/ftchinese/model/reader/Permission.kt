@@ -71,13 +71,4 @@ enum class MemberStatus {
     Vip // MemberActivity do not show any buttons
 }
 
-/**
- * Deduce what kind of actions current membership could take.
- */
-enum class NextStep(val id: Int) {
-    None(0),
-    Resubscribe(1),
-    Renew(2),
-    Upgrade(4)
-}
 

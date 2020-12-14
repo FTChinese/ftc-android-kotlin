@@ -109,8 +109,8 @@ class CheckOutActivity : ScopedAppActivity(),
 
         // Show different titles
         when (paymentIntent?.kind) {
-            OrderUsage.RENEW ->  supportActionBar?.setTitle(R.string.title_renewal)
-            OrderUsage.UPGRADE -> supportActionBar?.setTitle(R.string.title_upgrade)
+            OrderKind.RENEW ->  supportActionBar?.setTitle(R.string.title_renewal)
+            OrderKind.UPGRADE -> supportActionBar?.setTitle(R.string.title_upgrade)
             else -> {}
         }
 

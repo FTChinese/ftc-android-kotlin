@@ -14,7 +14,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMemberBinding
 import com.ft.ftchinese.model.order.StripeSub
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
@@ -39,7 +38,6 @@ class MemberActivity : ScopedAppActivity(),
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var binding: ActivityMemberBinding
-
 
     private fun stopRefresh() {
         binding.swipeRefresh.isRefreshing = false
@@ -82,40 +80,13 @@ class MemberActivity : ScopedAppActivity(),
         }
     }
 
-    private fun buildMemberInfo(member: Membership): UIMemberInfo {
-        return UIMemberInfo(
-            tier = getString(member.tierStringRes),
-            expireDate = member.localizeExpireDate(),
-            autoRenewal = member.autoRenew ?: false,
-            stripeStatus = if (member.payMethod == PayMethod.STRIPE && member.status != null) {
-                getString(
-                        R.string.stripe_status,
-                        getString(member.status.stringRes)
-                )
-            } else {
-                null
-            },
-            stripeInactive = member.isInvalidStripe(),
-            remains = member.remainingDays().let {
-                when {
-                    it == null -> null
-                    it < 0 -> getString(R.string.member_has_expired)
-                    it <= 7 -> getString(R.string.member_will_expire, it)
-                    else -> null
-                }
-            },
-            isValidIAP = member.isIAP() && !member.expired()
-        )
-    }
-
     private fun initUI() {
 
         val account = sessionManager.loadAccount() ?: return
 
         val member = account.membership
 
-        binding.member = buildMemberInfo(member)
-        binding.next = buildNextStepButtons(member.nextAction())
+        binding.member = buildMemberStatus(this, member)
 
         binding.subscribeBtn.setOnClickListener {
             PaywallActivity.start(this)
@@ -131,7 +102,7 @@ class MemberActivity : ScopedAppActivity(),
             CheckOutActivity.startForResult(
                     activity = this,
                     requestCode = RequestCode.PAYMENT,
-                    paymentIntent = plan.paymentIntent(OrderUsage.RENEW)
+                    paymentIntent = plan.paymentIntent(OrderKind.RENEW)
             )
 
             it.isEnabled = false
@@ -146,7 +117,7 @@ class MemberActivity : ScopedAppActivity(),
                 StripeSubActivity.startForResult(
                         this,
                         RequestCode.PAYMENT,
-                        PlanStore.find(Tier.PREMIUM, Cycle.YEAR)?.paymentIntent(OrderUsage.UPGRADE)
+                        PlanStore.find(Tier.PREMIUM, Cycle.YEAR)?.paymentIntent(OrderKind.UPGRADE)
                 )
             }
 

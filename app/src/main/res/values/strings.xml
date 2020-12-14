@@ -134,29 +134,37 @@
     <string name="sub_status_incomplete_expired">支付已过期</string>
     <string name="sub_status_trialing">试用</string>
     <string name="sub_status_past_due">自动续费失败</string>
-    <string name="sub_status_cancled">已取消</string>
+    <string name="sub_status_canceled">已取消</string>
 
     <!--    Membership info-->
     <string name="sub_status_unpaid">未支付</string>
     <string name="sub_status_active">活跃</string>
-    <string name="label_auto_renewal">自动续订:</string>
-    <string name="stripe_status">Stripe订阅状态: %1$s</string>
+
+    <string name="auto_renew_on">自动续订已开启</string>
+    <string name="auto_renew_off">自动续订已关闭</string>
+    <string name="stripe_status_invalid">Stripe订阅状态异常: %1$s，请刷新或联系客服</string>
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="heading_customer_service">联系客服</string>
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
-    <string name="iap_guide">当前订阅来自苹果App内购。请在App Store中管理您的订阅。</string>
+
     <string name="heading_pay_method">选择支付方式</string>
     <string name="heading_become_member">购买FT会员</string>
+
+    <string name="subs_brand_b2b">企业订阅</string>
+    <string name="subs_brand_apple">苹果App内购</string>
+    <string name="subs_brand_stripe">Stripe订阅</string>
+
+    <string name="iap_guide">当前订阅来自苹果App内购。请在App Store中管理您的订阅。</string>
+
     <string name="pay_brand_ali">支付宝</string>
+    <string name="pay_brand_wechat">微信支付</string>
+    <string name="pay_brand_stripe">Stripe</string>
 
     <string name="pay_method_ali">支付宝支付</string>
-    <string name="pay_brand_wechat">微信支付</string>
     <string name="pay_method_wechat">微信支付</string>
-    <string name="pay_brand_stripe">Stripe</string>
     <string name="pay_method_stripe">Stripe支付</string>
-    <string name="pay_method_apple">苹果App内支付</string>
-    <string name="pay_method_b2b">企业订阅</string>
+
     <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
     <string name="payment_source">%1$s (尾号%2$s)</string>
     <string name="stripe_in_pounds">* 使用Stripe订阅FT中文网会员以英镑计价</string>

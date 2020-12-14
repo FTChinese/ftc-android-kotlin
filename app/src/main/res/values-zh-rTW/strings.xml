@@ -118,11 +118,12 @@
     <!--    Membership info-->
     <string name="sub_status_trialing">试用</string>
     <string name="sub_status_past_due">自动续费失敗</string>
-    <string name="sub_status_cancled">已取消</string>
+    <string name="sub_status_canceled">已取消</string>
     <string name="sub_status_unpaid">未支付</string>
     <string name="sub_status_active">活跃</string>
-    <string name="label_auto_renewal">自动續訂:</string>
-    <string name="stripe_status">Stripe訂閱状态: %1$s</string>
+    <string name="auto_renew_on">自动續訂已开启</string>
+    <string name="auto_renew_off">自动續訂已关闭</string>
+    <string name="stripe_status_invalid">Stripe訂閱状态异常: %1$s，請刷新或聯繫客服</string>
     <string name="yes">是</string>
     <string name="no">否</string>
     <string name="heading_customer_service">聯繫客服</string>
@@ -497,8 +498,9 @@
     <string name="wait_while_refresh_wx">从微信更新信息耗时较长，请耐心等候</string>
     <string name="wait_while_wx_login">获取微信数据耗时较长，请耐心等候，如果出现超时错误，请重试或选择较快的网络</string>
     <string name="iap_guide">当前订阅来自苹果App内购。请在App Store中管理您的订阅。</string>
-    <string name="pay_method_apple">苹果App内支付</string>
-    <string name="pay_method_b2b">企业订阅</string>
+    <string name="subs_brand_apple">苹果App内购</string>
+    <string name="subs_brand_b2b">企业订阅</string>
+    <string name="subs_brand_stripe">Stripe订阅</string>
     <string name="exo_playing_channel_id">exo_playing_channel</string>
     <string name="exo_playing_channel_name">正在播放</string>
     <string name="exo_playing_channel_description">播放音频</string>

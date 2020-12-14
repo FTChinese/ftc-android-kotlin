@@ -266,66 +266,8 @@ data class Membership(
         return Pair(Permission.FREE.id, null)
     }
 
-    /**
-     * Determines what a membership can do next:
-     * re-subscribe, renew or upgrade, or any of the combination
-     */
-    fun nextAction(): Int {
-        if (vip) {
-            return NextStep.None.id
-        }
-
-        if (tier == null) {
-            return NextStep.Resubscribe.id
-        }
-
-        // IAP
-        if (payMethod == PayMethod.APPLE) {
-            return if (expired()) {
-                NextStep.Resubscribe.id
-            } else {
-                NextStep.None.id
-            }
-        }
-
-        if (status?.isInvalid() == true) {
-            return NextStep.Resubscribe.id
-        }
-
-        // Expired also indicates auto renewal is off.
-        if (expired()) {
-            return NextStep.Resubscribe.id
-        }
-
-        // Not expired, or auto renew is on.
-
-        // For stripe and iap auto renewal.
-        if (autoRenew == true) {
-
-            return when (tier) {
-                Tier.STANDARD -> NextStep.Upgrade.id
-                Tier.PREMIUM -> NextStep.None.id
-            }
-        }
-
-        // Membership is not auto renewal, and not expired.
-        if (canRenewViaAliWx()) {
-            return when (tier) {
-                Tier.STANDARD -> NextStep.Renew.id or NextStep.Upgrade.id
-                Tier.PREMIUM -> NextStep.Renew.id
-            }
-        }
-
-        // Renewal is not allowed. The only options left is upgrade.
-        if (tier == Tier.STANDARD) {
-            return NextStep.Upgrade.id
-        }
-
-        return NextStep.None.id
-    }
-
     // Determine how user is using CheckOutActivity.
-    fun subType(plan: Plan?): OrderUsage? {
+    fun orderKind(plan: Plan?): OrderKind? {
         if (plan == null) {
             return null
         }
@@ -335,23 +277,23 @@ data class Membership(
         }
 
         if (tier == null) {
-            return OrderUsage.CREATE
+            return OrderKind.CREATE
         }
 
         if (expired()) {
-            return OrderUsage.CREATE
+            return OrderKind.CREATE
         }
 
         if (status?.isInvalid() == true) {
-            return OrderUsage.CREATE
+            return OrderKind.CREATE
         }
 
         if (tier == plan.tier) {
-            return OrderUsage.RENEW
+            return OrderKind.RENEW
         }
 
         if (tier == Tier.STANDARD && plan.tier == Tier.PREMIUM) {
-            return OrderUsage.UPGRADE
+            return OrderKind.UPGRADE
         }
 
         return null
