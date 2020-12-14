@@ -14,7 +14,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityStripeSubBinding
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.subscription.OrderUsage
+import com.ft.ftchinese.model.subscription.OrderKind
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.subscription.PaymentIntent
@@ -139,7 +139,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
     private fun initUI() {
 
-        if (paymentIntent?.kind == OrderUsage.UPGRADE) {
+        if (paymentIntent?.kind == OrderKind.UPGRADE) {
             binding.btnSubscribe.text = getString(R.string.title_upgrade)
         }
 
@@ -271,7 +271,7 @@ class StripeSubActivity : ScopedAppActivity(),
         binding.enableInput = false
 
         when (paymentIntent?.kind) {
-            OrderUsage.CREATE -> {
+            OrderKind.CREATE -> {
                 toast(R.string.creating_subscription)
 
                 checkOutViewModel.createStripeSub(account, StripeSubParams(
@@ -282,7 +282,7 @@ class StripeSubActivity : ScopedAppActivity(),
                         idempotency = idempotency.retrieveKey()
                 ))
             }
-            OrderUsage.UPGRADE -> {
+            OrderKind.UPGRADE -> {
                 toast(R.string.upgrading_subscription)
                 idempotency.clear()
 

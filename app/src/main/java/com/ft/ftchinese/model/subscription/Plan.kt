@@ -36,7 +36,7 @@ data class Plan(
         return "${tier}_$cycle"
     }
 
-    fun paymentIntent(kind: OrderUsage?): PaymentIntent {
+    fun paymentIntent(kind: OrderKind?): PaymentIntent {
         return PaymentIntent(
                 amount = payableAmount(),
                 currency = currency,
