@@ -139,10 +139,10 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             avatarUrl = null
         ),
         membership = Membership(
-            tier = Tier.PREMIUM,
-            cycle = Cycle.YEAR,
-            expireDate = LocalDate.now().plusYears(1),
-            payMethod = PayMethod.ALIPAY,
+            tier = null,
+            cycle = null,
+            expireDate = null,
+            payMethod = null,
             autoRenew = false,
             status = null,
             vip = true
