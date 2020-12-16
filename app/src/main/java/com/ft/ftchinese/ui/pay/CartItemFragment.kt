@@ -6,36 +6,40 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentCartItemBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.getTierCycleText
-import com.ft.ftchinese.model.subscription.PaymentIntent
-import com.ft.ftchinese.ui.base.formatPrice
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
-import com.ft.ftchinese.viewmodel.Result
 
+const val ARG_CART_ITEM = "arg_cart_item"
+
+/**
+ * Used to show the an overview of the item user purchased.
+ */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CartItemFragment : ScopedFragment() {
 
-    private var paymentIntent: PaymentIntent? = null
+    private var cartItem: CartItem? = null
     private lateinit var binding: FragmentCartItemBinding
     private lateinit var checkOutViewModel: CheckOutViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        paymentIntent = arguments?.getParcelable(EXTRA_PAYMENT_INTENT)
+        cartItem = arguments?.getParcelable(ARG_CART_ITEM)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_cart_item, container, false)
-        paymentIntent?.let {
-            binding.product = buildProduct(it)
-        }
+        binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_cart_item,
+            container,
+            false
+        )
 
         return binding.root
     }
@@ -44,36 +48,31 @@ class CartItemFragment : ScopedFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        checkOutViewModel = activity?.run {
-            ViewModelProvider(this).get(CheckOutViewModel::class.java)
-        } ?: throw Exception("Invalid Exception")
-
-        checkOutViewModel.stripePlanResult.observe(viewLifecycleOwner, Observer {
-            if (it !is Result.Success) {
-                return@Observer
-            }
-
-            paymentIntent = paymentIntent?.withStripePlan(it.data)?.also { paymentIntent ->
-                binding.product = buildProduct(paymentIntent)
-            }
-        })
+//        checkOutViewModel = activity?.run {
+//            ViewModelProvider(this).get(CheckOutViewModel::class.java)
+//        } ?: throw Exception("Invalid Exception")
+//
+//        checkOutViewModel.stripePriceResult.observe(viewLifecycleOwner, Observer {
+//            if (it !is Result.Success) {
+//                return@Observer
+//            }
+//
+//            paymentIntent = paymentIntent?.withStripePlan(it.data)?.also { paymentIntent ->
+//                binding.product = buildProduct(paymentIntent)
+//            }
+//        })
+//
+        cartItem?.let {
+            binding.product = it
+        }
     }
 
-    private fun buildProduct(pi: PaymentIntent): UIProductInCart {
-        return UIProductInCart(
-                price = activity?.formatPrice(
-                        pi.currency,
-                        pi.amount
-                ) ?: "...",
-                name = activity?.getTierCycleText(pi.plan.tier, pi.plan.cycle) ?: ""
-        )
-    }
 
     companion object {
 
         @JvmStatic
-        fun newInstance(pi: PaymentIntent?) = CartItemFragment().apply {
-            arguments = bundleOf(EXTRA_PAYMENT_INTENT to pi)
+        fun newInstance(cartItem: CartItem) = CartItemFragment().apply {
+            arguments = bundleOf(ARG_CART_ITEM to cartItem)
         }
     }
 }
