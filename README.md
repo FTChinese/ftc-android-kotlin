@@ -12,6 +12,34 @@ Reference: https://stackoverflow.com/questions/15248207/actionbar-logo-size
 * drawable-hdpi/ic_logo_wide.png (112 x 48 px)
 * drawable-xhdpi/ic_logo_wide.png (149 x 64 px)
 
+## Data Binding
+
+### Nested Layout
+
+If you include a layout inside another layout:
+
+```
+<include
+    android:id="@+id/toolbar"
+    layout="@layout/simple_toolbar" />
+```
+
+And the toolbar:
+
+```
+<androidx.appcompat.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/toolbar"
+    android:layout_width="0dp"
+    android:layout_height="?attr/actionBarSize"
+    android:elevation="4dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+```
+
+The IDs are chained like this: `binding.toolbar.toolbar`
+
 ## Localization
 
 ```
