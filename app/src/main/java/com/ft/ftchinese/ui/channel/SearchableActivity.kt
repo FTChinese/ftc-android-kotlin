@@ -15,7 +15,6 @@ import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -53,7 +52,7 @@ class SearchableActivity : AppCompatActivity(),
         super.onCreate(savedInstanceState)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_searchable)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)

@@ -17,7 +17,6 @@ import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.LinkViewModel
 import com.ft.ftchinese.viewmodel.Result
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -39,7 +38,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_link_preview)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)

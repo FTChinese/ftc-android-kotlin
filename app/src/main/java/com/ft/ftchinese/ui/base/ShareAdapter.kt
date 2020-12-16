@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.viewmodel.ArticleViewModel
-import kotlinx.android.synthetic.main.share_item.view.*
 
 private val apps = arrayOf(
         SocialApp(
@@ -51,8 +50,8 @@ class ShareAdapter(
 ) : RecyclerView.Adapter<ShareAdapter.ViewHolder>() {
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        private val iconView: ImageView = itemView.share_icon_view
-        private val textView: TextView = itemView.share_text_view
+        private val iconView: ImageView = itemView.findViewById(R.id.share_icon_view)
+        private val textView: TextView = itemView.findViewById(R.id.share_text_view)
 
         fun bind(app: SocialApp) {
             iconView.setImageResource(app.icon)

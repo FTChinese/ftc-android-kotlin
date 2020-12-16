@@ -28,7 +28,6 @@ import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.SettingsViewModel
 import com.ft.ftchinese.viewmodel.SettingsViewModelFactory
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
@@ -132,7 +131,7 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_update_app)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)

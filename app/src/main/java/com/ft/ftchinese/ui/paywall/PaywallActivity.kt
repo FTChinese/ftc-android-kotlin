@@ -19,10 +19,10 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.pay.CheckOutActivity
+import com.ft.ftchinese.ui.pay.FtcCheckout
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
 import com.ft.ftchinese.viewmodel.Result
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -49,7 +49,7 @@ class PaywallActivity : ScopedAppActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_paywall)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -91,11 +91,15 @@ class PaywallActivity : ScopedAppActivity(),
                 return@Observer
             }
 
+            val orderKind = account.membership.orderKind(it) ?: return@Observer
             // If user logged in, go to CheckOutActivity.
             CheckOutActivity.startForResult(
                 activity = this,
                 requestCode = RequestCode.PAYMENT,
-                paymentIntent = it.paymentIntent(account.membership.orderKind(it))
+                checkout = FtcCheckout(
+                    kind = orderKind,
+                    plan = it
+                )
             )
         })
 

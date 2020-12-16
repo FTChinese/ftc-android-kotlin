@@ -76,7 +76,7 @@ class EmailFragment : ScopedFragment(),
 
         // Enable or disable input depending on network result.
         // Only re-enable button if there's any error.
-        viewModel.emailResult.observe(viewLifecycleOwner, Observer {
+        viewModel.emailResult.observe(viewLifecycleOwner, {
 
             // In case any error occurred, allow user to
             // re-enter and re-submit data.

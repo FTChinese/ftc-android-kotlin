@@ -17,6 +17,7 @@
         tools:context=".ui.article.AudioPlayerActivity">
 
         <include
+            android:id="@+id/toolbar"
             layout="@layout/simple_toolbar" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

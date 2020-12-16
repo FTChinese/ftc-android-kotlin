@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
 import com.ft.ftchinese.ui.base.ReadArticleAdapter
-import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,7 +38,7 @@ class ReadArticleFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recycler_view.apply {
+        view.findViewById<RecyclerView>(R.id.recycler_view)?.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = viewAdapter
         }

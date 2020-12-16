@@ -6,11 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ShareAdapter
 import com.ft.ftchinese.viewmodel.ArticleViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.android.synthetic.main.fragment_social_share.*
 
 /**
  * Popup for share menu.
@@ -35,7 +35,8 @@ class SocialShareFragment :
                     .get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        share_rv.apply {
+
+        activity?.findViewById<RecyclerView>(R.id.share_rv)?.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context).apply {
                 orientation = LinearLayoutManager.HORIZONTAL

@@ -10,8 +10,6 @@ import com.ft.ftchinese.ui.account.CustomerActivity
 import com.ft.ftchinese.ui.account.UpdateActivity
 import com.ft.ftchinese.ui.account.WxInfoActivity
 import com.google.android.material.button.MaterialButton
-import kotlinx.android.synthetic.main.banner.view.*
-import kotlinx.android.synthetic.main.account_list_item.view.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -26,8 +24,8 @@ class AccountAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(), AnkoLogg
 
 
     class ItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        private val titleView: TextView = view.tv_primary
-        private val secondaryView: TextView = view.tv_secondary
+        private val titleView: TextView = view.findViewById(R.id.tv_primary)
+        private val secondaryView: TextView = view.findViewById(R.id.tv_secondary)
         private val context = itemView.context
         private var row: AccountRow? = null
 
@@ -55,8 +53,8 @@ class AccountAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(), AnkoLogg
 
     class BannerViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        private val tvMessage: TextView = view.banner_message
-        private val btnPositive: MaterialButton = view.btn_send_request
+        private val tvMessage: TextView = view.findViewById(R.id.banner_message)
+        private val btnPositive: MaterialButton = view.findViewById(R.id.btn_send_request)
         private var row: AccountRow? = null
 
         init {

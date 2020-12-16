@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.pay.LatestOrderActivity">
 
-    <include layout="@layout/simple_toolbar"/>
+    <include android:id="@+id/toolbar" layout="@layout/simple_toolbar"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_last_order"

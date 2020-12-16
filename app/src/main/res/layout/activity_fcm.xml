@@ -16,7 +16,7 @@
         android:layout_height="match_parent"
         tools:context=".ui.settings.FCMActivity">
 
-        <include layout="@layout/simple_toolbar"/>
+        <include android:id="@+id/toolbar" layout="@layout/simple_toolbar"/>
 
         <TextView
             style="@style/OrigamiText.Body1"

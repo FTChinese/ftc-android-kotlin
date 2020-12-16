@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.channel.ChannelActivity">
 
-    <include layout="@layout/simple_toolbar"/>
+    <include android:id="@+id/toolbar" layout="@layout/simple_toolbar"/>
 
     <FrameLayout
         android:id="@+id/channel_frag_holder"

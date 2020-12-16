@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.ui.article.ArticleActivity
-import kotlinx.android.synthetic.main.card_primary_secondary.view.*
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class StarredArticleAdapter(private val context: Context?) :
@@ -25,8 +24,8 @@ class StarredArticleAdapter(private val context: Context?) :
     ))
 
     class ViewHolder(view: View): RecyclerView.ViewHolder(view) {
-        val primaryTextView: TextView = itemView.primary_text_view
-        val secondaryTextView: TextView = itemView.secondary_text_view
+        val primaryTextView: TextView = itemView.findViewById(R.id.primary_text_view)
+        val secondaryTextView: TextView = itemView.findViewById(R.id.secondary_text_view)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

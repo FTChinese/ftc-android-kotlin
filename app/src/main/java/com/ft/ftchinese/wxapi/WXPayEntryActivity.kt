@@ -28,19 +28,9 @@ import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-
-//private val paymentStatusId = mapOf(
-//        "REFUND" to R.string.wxpay_refund,
-//        "NOTPAY" to R.string.wxpay_not_paid,
-//        "CLOSED" to R.string.wxpay_closed,
-//        "REVOKED" to R.string.wxpay_revoked,
-//        "USERPAYING" to R.string.wxpay_pending,
-//        "PAYERROR" to R.string.wxpay_failed
-//)
 
 private const val EXTRA_UI_TEST = "extra_ui_test"
 
@@ -75,7 +65,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 enableButton = false
         )
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
 
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
 

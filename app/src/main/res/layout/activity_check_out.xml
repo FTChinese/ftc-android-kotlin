@@ -24,6 +24,7 @@
         tools:context=".ui.pay.CheckOutActivity">
 
         <include
+            android:id="@+id/toolbar"
             layout="@layout/simple_toolbar" />
 
         <androidx.core.widget.NestedScrollView

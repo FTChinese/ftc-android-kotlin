@@ -8,9 +8,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.*
-import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,6 +18,7 @@ class FollowingFragment : Fragment(), AnkoLogger {
 
     private var adapter: Adapter? = null
     private lateinit var followingManager: FollowingManager
+    private var rv: RecyclerView? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -33,7 +34,8 @@ class FollowingFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recycler_view.layoutManager = GridLayoutManager(context, 3)
+        rv = view.findViewById(R.id.recycler_view)
+        rv?.layoutManager = GridLayoutManager(context, 3)
         updateUI()
     }
 
@@ -42,7 +44,7 @@ class FollowingFragment : Fragment(), AnkoLogger {
 
         if (adapter == null) {
             adapter = Adapter(follows)
-            recycler_view.adapter = adapter
+            rv?.adapter = adapter
         } else {
             adapter?.setFollows(follows)
             adapter?.notifyDataSetChanged()

@@ -17,6 +17,7 @@
         tools:context=".ui.pay.MyOrdersActivity">
 
         <include
+            android:id="@+id/toolbar"
             layout="@layout/simple_toolbar" />
 
         <androidx.recyclerview.widget.RecyclerView

@@ -11,7 +11,6 @@ import com.ft.ftchinese.databinding.ActivityAccountBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.util.RequestCode
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,7 +23,7 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         // Here we reused the activity_account.
         binding = DataBindingUtil.setContentView(this, R.layout.activity_account)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
 
         sessionManager = SessionManager.getInstance(this)
 

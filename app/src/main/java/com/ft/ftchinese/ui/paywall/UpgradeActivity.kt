@@ -16,7 +16,6 @@ import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.pay.UpgradePreviewActivity
 import com.ft.ftchinese.util.RequestCode
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -34,7 +33,7 @@ class UpgradeActivity : ScopedAppActivity(), AnkoLogger {
         binding = DataBindingUtil.setContentView(this,R.layout.activity_upgrade )
 //        setContentView(R.layout.activity_upgrade)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)

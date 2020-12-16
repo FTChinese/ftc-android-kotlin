@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.store.FileCache
@@ -16,7 +17,6 @@ import com.ft.ftchinese.ui.base.ListItem
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.SettingsViewModel
 import com.ft.ftchinese.viewmodel.SettingsViewModelFactory
-import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -39,7 +39,7 @@ class ReleaseLogFragment : Fragment(), AnkoLogger {
 
         listAdapter = ListAdapter(listOf())
 
-        recycler_view.apply {
+        view.findViewById<RecyclerView>(R.id.recycler_view)?.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context)
             adapter = listAdapter

@@ -35,7 +35,6 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.android.synthetic.main.simple_toolbar.toolbar
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -76,7 +75,7 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_audio_player)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(false)
@@ -105,7 +104,7 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
         teaser = intent.getParcelableExtra(EXTRA_ARTICLE_TEASER) ?: return
 
         // Toolbar
-        toolbar.title = teaser?.title
+        binding.toolbar.toolbar.title = teaser?.title
 
         // Player
         player = SimpleExoPlayer.Builder(this).build()

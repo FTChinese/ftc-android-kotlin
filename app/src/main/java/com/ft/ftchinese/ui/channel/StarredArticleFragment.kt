@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.viewmodel.StarArticleViewModel
 import com.ft.ftchinese.ui.base.StarredArticleAdapter
-import kotlinx.android.synthetic.main.fragment_recycler.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -21,6 +21,7 @@ class StarredArticleFragment : ScopedFragment(),
 
     private lateinit var starViewModel: StarArticleViewModel
     private lateinit var viewAdapter: StarredArticleAdapter
+    private var rv: RecyclerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +47,8 @@ class StarredArticleFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        recycler_view.apply {
+        rv = view.findViewById(R.id.recycler_view)
+        rv?.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = viewAdapter
         }

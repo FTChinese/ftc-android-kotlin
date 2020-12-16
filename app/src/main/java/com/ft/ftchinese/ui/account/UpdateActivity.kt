@@ -16,7 +16,6 @@ import com.ft.ftchinese.ui.base.AccountRowType
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.UpdateViewModel
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
@@ -35,7 +34,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
 
         binding.inProgress = false
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)

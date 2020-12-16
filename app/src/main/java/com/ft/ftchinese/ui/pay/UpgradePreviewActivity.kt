@@ -10,16 +10,16 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpgradePreviewBinding
+import com.ft.ftchinese.model.subscription.OrderKind
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.subscription.PaymentIntent
+import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.ui.base.formatPrice
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
 import com.ft.ftchinese.viewmodel.FreeUpgradeDeniedError
 import com.ft.ftchinese.viewmodel.Result
-import kotlinx.android.synthetic.main.progress_bar.*
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.yesButton
@@ -37,7 +37,7 @@ class UpgradePreviewActivity : AppCompatActivity() {
 //        setContentView(R.layout.activity_upgrade_preview)
         binding.preview = UIUpgradePreview()
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
@@ -122,7 +122,11 @@ class UpgradePreviewActivity : AppCompatActivity() {
                 CheckOutActivity.startForResult(
                         activity = this,
                         requestCode = RequestCode.PAYMENT,
-                        paymentIntent = paymentIntent)
+                        checkout = FtcCheckout(
+                            kind = OrderKind.UPGRADE,
+                            plan = paymentIntent.plan
+                        )
+                )
                 finish()
 
                 return@setOnClickListener
@@ -218,9 +222,9 @@ class UpgradePreviewActivity : AppCompatActivity() {
 
     private fun showProgress(show: Boolean) {
         if (show) {
-            progress_bar.visibility = View.VISIBLE
+            binding.progress.progressBar.visibility = View.VISIBLE
         } else {
-            progress_bar.visibility = View.GONE
+            binding.progress.progressBar.visibility = View.GONE
         }
     }
 

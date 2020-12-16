@@ -15,7 +15,6 @@ import com.ft.ftchinese.ui.base.afterTextChanged
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.*
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
@@ -60,7 +59,7 @@ class ResetPasswordActivity : ScopedAppActivity(), AnkoLogger {
 
         setUIState(FormUIState.Initial)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)

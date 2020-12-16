@@ -5,11 +5,12 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityChannelBinding
 import com.ft.ftchinese.model.content.ChannelSource
 import com.google.firebase.analytics.FirebaseAnalytics
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
@@ -21,11 +22,13 @@ import org.jetbrains.anko.toast
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ChannelActivity : AppCompatActivity(), AnkoLogger {
 
+    lateinit var binding: ActivityChannelBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_channel)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_channel)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -40,7 +43,7 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
         /**
          * Set toolbar's title so that user knows where he is now.
          */
-        toolbar.title = channelSource.title
+        binding.toolbar.toolbar.title = channelSource.title
 
         supportFragmentManager.commit {
             replace(R.id.channel_frag_holder, ChannelFragment.newInstance(channelSource))

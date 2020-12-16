@@ -8,6 +8,9 @@
         <variable
             name="preview"
             type="com.ft.ftchinese.ui.pay.UIUpgradePreview" />
+        <variable
+            name="progress"
+            type="Boolean" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -15,6 +18,7 @@
         tools:context=".ui.pay.UpgradePreviewActivity">
 
         <include
+            android:id="@+id/toolbar"
             layout="@layout/simple_toolbar" />
 
         <TextView
@@ -99,7 +103,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintVertical_bias="1.0"/>
 
-        <include layout="@layout/progress_bar"/>
+        <include
+            android:id="@+id/progress"
+            layout="@layout/progress_bar"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -10,13 +10,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMyOrdersBinding
 import com.ft.ftchinese.model.subscription.Order
-import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.util.*
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.formatPrice
+import com.ft.ftchinese.ui.base.getTierCycleText
+import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.util.formatISODateTime
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
@@ -32,7 +33,7 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_my_orders)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
 
         sessionManager = SessionManager.getInstance(this)
 

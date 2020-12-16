@@ -17,6 +17,7 @@
         tools:context=".ui.account.UnlinkActivity">
 
         <include
+            android:id="@+id/toolbar"
             layout="@layout/simple_toolbar" />
 
         <TextView

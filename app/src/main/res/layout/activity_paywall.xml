@@ -19,6 +19,7 @@
         tools:context=".ui.paywall.PaywallActivity">
 
         <include
+            android:id="@+id/toolbar"
             layout="@layout/simple_toolbar" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout

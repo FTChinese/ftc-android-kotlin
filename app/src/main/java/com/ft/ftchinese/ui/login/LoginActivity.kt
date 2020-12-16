@@ -18,7 +18,6 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.Existence
 import com.ft.ftchinese.viewmodel.LoginViewModel
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
@@ -35,7 +34,7 @@ class LoginActivity : ScopedAppActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_fragment_double)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
 
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)

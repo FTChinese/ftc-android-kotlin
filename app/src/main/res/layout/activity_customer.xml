@@ -25,6 +25,7 @@
         tools:context=".ui.account.CustomerActivity">
 
         <include
+            android:id="@+id/toolbar"
             layout="@layout/simple_toolbar" />
 
         <com.google.android.material.card.MaterialCardView

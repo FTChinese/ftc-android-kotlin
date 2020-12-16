@@ -24,6 +24,7 @@
         tools:context=".ui.login.ForgotPasswordActivity">
 
         <include
+            android:id="@+id/toolbar"
             layout="@layout/simple_toolbar" />
 
         <TextView

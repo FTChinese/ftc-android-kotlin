@@ -3,15 +3,14 @@ package com.ft.ftchinese.ui.pay
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityLatestOrderBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.getTierCycleText
 import com.ft.ftchinese.store.OrderManager
-import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.subscription.Order
-import kotlinx.android.synthetic.main.activity_latest_order.*
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.threeten.bp.format.DateTimeFormatter
 
 /**
@@ -20,10 +19,13 @@ import org.threeten.bp.format.DateTimeFormatter
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class LatestOrderActivity : ScopedAppActivity() {
 
+    lateinit var binding: ActivityLatestOrderBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_latest_order)
-        setSupportActionBar(toolbar)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_latest_order)
+
+        setSupportActionBar(binding.toolbar.toolbar)
         supportActionBar?.apply {
 //            setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
@@ -31,14 +33,14 @@ class LatestOrderActivity : ScopedAppActivity() {
 
         val orderManager = OrderManager.getInstance(this)
 
-        btn_subscription_done.setOnClickListener {
+        binding.btnSubscriptionDone.setOnClickListener {
             MemberActivity.start(this)
             finish()
         }
 
         val order = orderManager.load() ?: return
 
-        rv_last_order.apply {
+        binding.rvLastOrder.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@LatestOrderActivity)
             adapter = OrderAdapter(buildRows(order))

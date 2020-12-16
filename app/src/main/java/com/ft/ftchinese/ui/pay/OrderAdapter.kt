@@ -6,18 +6,17 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
-import kotlinx.android.synthetic.main.card_order.view.*
 
 class OrderAdapter(private var orders: List<OrderRow>) :
         RecyclerView.Adapter<OrderAdapter.ViewHolder>() {
 
     class ViewHolder (view: View): RecyclerView.ViewHolder(view) {
-        private val orderIdView: TextView = view.order_id_tv
-        private val planView: TextView = view.order_subscribed_plan
-        private val amountView: TextView = view.tv_order_amount
-        private val payMethodView: TextView = view.tv_payment_method
-        private val createdAtView: TextView = view.tv_creation_time
-        private val periodView: TextView = view.tv_order_period
+        private val orderIdView: TextView = view.findViewById(R.id.order_id_tv)
+        private val planView: TextView = view.findViewById(R.id.order_subscribed_plan)
+        private val amountView: TextView = view.findViewById(R.id.tv_order_amount)
+        private val payMethodView: TextView = view.findViewById(R.id.tv_payment_method)
+        private val createdAtView: TextView = view.findViewById(R.id.tv_creation_time)
+        private val periodView: TextView = view.findViewById(R.id.tv_order_period)
 
         fun bind(row: OrderRow) {
             orderIdView.text = row.orderId

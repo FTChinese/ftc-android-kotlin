@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.WebView
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
@@ -33,7 +34,6 @@ import com.ft.ftchinese.viewmodel.ArticleViewModel
 import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
 import com.ft.ftchinese.viewmodel.StarArticleViewModel
-import kotlinx.android.synthetic.main.fragment_web_view.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -52,6 +52,8 @@ class WebContentFragment : ScopedFragment(),
     private lateinit var sessionManager: SessionManager
     private lateinit var cache: FileCache
     private lateinit var followingManager: FollowingManager
+
+    private var webView: WebView? = null
 
     private var teaser: Teaser? = null
 
@@ -141,8 +143,9 @@ class WebContentFragment : ScopedFragment(),
     @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        webView = activity?.findViewById(R.id.web_view)
 
-        web_view.settings.apply {
+        webView?.settings?.apply {
             javaScriptEnabled = true
             loadsImagesAutomatically = true
             domStorageEnabled = true
@@ -181,7 +184,7 @@ class WebContentFragment : ScopedFragment(),
             articleViewModel.inProgress.value = !it
         })
 
-        web_view.apply {
+        webView?.apply {
 
             addJavascriptInterface(
                 this@WebContentFragment,
@@ -192,8 +195,8 @@ class WebContentFragment : ScopedFragment(),
             webChromeClient = ChromeClient()
 
             setOnKeyListener { _, keyCode, _ ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && web_view.canGoBack()) {
-                    web_view.goBack()
+                if (keyCode == KeyEvent.KEYCODE_BACK && webView?.canGoBack() == true) {
+                    webView?.goBack()
                     return@setOnKeyListener true
                 }
                 false
@@ -216,7 +219,7 @@ class WebContentFragment : ScopedFragment(),
         info("Load content from: $url")
 
 
-        web_view.loadUrl(url.toString())
+        webView?.loadUrl(url.toString())
 
         // Get the minimal information of an article.
         val article = teaser?.toStarredArticle() ?: return
@@ -227,7 +230,7 @@ class WebContentFragment : ScopedFragment(),
     @JavascriptInterface
     fun onScrollTo(x: Int, y: Int) {
         info("Position: $x, $y")
-        web_view.scrollTo(0, 0)
+        webView?.scrollTo(0, 0)
     }
 
     companion object {
