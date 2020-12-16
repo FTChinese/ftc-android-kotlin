@@ -7,7 +7,7 @@
     <data>
         <variable
             name="product"
-            type="com.ft.ftchinese.ui.pay.UIProductInCart" />
+            type="com.ft.ftchinese.ui.pay.CartItem" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -24,6 +24,7 @@
             android:layout_height="wrap_content"
             android:paddingBottom="16dp"
             android:orientation="vertical">
+
             <TextView
                 android:id="@+id/tv_product_price"
                 android:layout_width="match_parent"
