@@ -15,6 +15,7 @@
         android:layout_height="match_parent">
 
         <include
+            android:id="@+id/toolbar"
             layout="@layout/simple_toolbar" />
 
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -75,7 +76,8 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/tv_expire_date"
-                    android:text="@{member.autoRenewal ? @string/yes : @string/no}"/>
+                    android:visibility="@{member.autoRenewal == null ? View.GONE : View.VISIBLE}"
+                    android:text="@{member.autoRenewal}"/>
 
                 <TextView
                     android:id="@+id/tv_payment_method"
