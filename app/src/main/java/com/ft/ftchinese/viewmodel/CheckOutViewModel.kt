@@ -18,6 +18,8 @@ import org.jetbrains.anko.info
 
 class CheckOutViewModel : ViewModel(), AnkoLogger {
 
+    val isNetworkAvailable = MutableLiveData<Boolean>()
+
     val wxPayIntentResult: MutableLiveData<Result<WxPayIntent>> by lazy {
         MutableLiveData<Result<WxPayIntent>>()
     }
@@ -26,12 +28,12 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<AliPayIntent>>()
     }
 
-    val stripePlanResult: MutableLiveData<Result<StripePlan>> by lazy {
-        MutableLiveData<Result<StripePlan>>()
+    val stripePriceResult: MutableLiveData<Result<StripePrice>> by lazy {
+        MutableLiveData<Result<StripePrice>>()
     }
 
-    val stripeSubscribedResult: MutableLiveData<Result<StripeSubResponse>> by lazy {
-        MutableLiveData<Result<StripeSubResponse>>()
+    val stripeSubscribedResult: MutableLiveData<Result<StripeSubResult>> by lazy {
+        MutableLiveData<Result<StripeSubResult>>()
     }
 
     val upgradePreviewResult: MutableLiveData<Result<PaymentIntent>> by lazy {
@@ -100,27 +102,32 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
     }
 
     fun getStripePlan(plan: Plan?) {
+        if (isNetworkAvailable.value == false) {
+            stripePriceResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         if (plan == null) {
-            stripePlanResult.value = Result.LocalizedError(R.string.prompt_unknown_plan)
+            stripePriceResult.value = Result.LocalizedError(R.string.prompt_unknown_plan)
             return
         }
 
         viewModelScope.launch {
             try {
                 val stripePlan = withContext(Dispatchers.IO) {
-                    StripeRepo.getStripePlan(plan.getNamedKey())
+                    StripeRepo.loadPlan(plan.getNamedKey())
                 }
 
                 if (stripePlan == null) {
-                    stripePlanResult.value = Result.LocalizedError(R.string.prompt_unknown_plan)
+                    stripePriceResult.value = Result.LocalizedError(R.string.prompt_unknown_plan)
                     return@launch
                 }
 
-                stripePlanResult.value = Result.Success(stripePlan)
+                stripePriceResult.value = Result.Success(stripePlan)
 
 
             } catch (e: Exception) {
-                stripePlanResult.value = parseException(e)
+                stripePriceResult.value = parseException(e)
             }
         }
     }
@@ -156,7 +163,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val sub = withContext(Dispatchers.IO) {
-                    StripeRepo.upgradeStripeSub(account, params)
+                    StripeRepo.upgradeSub(account, params)
                 }
 
                 if (sub == null) {

@@ -12,7 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMemberBinding
-import com.ft.ftchinese.model.order.StripeSub
+import com.ft.ftchinese.model.order.StripeSubResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.store.SessionManager
@@ -25,7 +25,6 @@ import com.ft.ftchinese.ui.paywall.UpgradeActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -48,7 +47,7 @@ class MemberActivity : ScopedAppActivity(),
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_member)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
@@ -61,8 +60,8 @@ class MemberActivity : ScopedAppActivity(),
                 .get(AccountViewModel::class.java)
 
 
-        accountViewModel.stripeRetrievalResult.observe(this) {
-            onStripeSubRetrieved(it)
+        accountViewModel.stripeSubsRefreshed.observe(this) {
+            onStripeSubRefreshed(it)
         }
 
         accountViewModel.iapRefreshResult.observe(this) {
@@ -86,7 +85,11 @@ class MemberActivity : ScopedAppActivity(),
 
         val member = account.membership
 
+        info(member)
+
         binding.member = buildMemberStatus(this, member)
+
+        info(buildMemberStatus(this, member))
 
         binding.subscribeBtn.setOnClickListener {
             PaywallActivity.start(this)
@@ -102,7 +105,10 @@ class MemberActivity : ScopedAppActivity(),
             CheckOutActivity.startForResult(
                     activity = this,
                     requestCode = RequestCode.PAYMENT,
-                    paymentIntent = plan.paymentIntent(OrderKind.RENEW)
+                    checkout = FtcCheckout(
+                        kind = OrderKind.RENEW,
+                        plan = plan
+                    )
             )
 
             it.isEnabled = false
@@ -114,10 +120,14 @@ class MemberActivity : ScopedAppActivity(),
                 UpgradeActivity.startForResult(this, RequestCode.PAYMENT)
 
             } else if (member.payMethod == PayMethod.STRIPE) {
+                val price = StripePriceStore
+                    .find(Tier.PREMIUM, Cycle.YEAR)
+                    ?: return@setOnClickListener
+
                 StripeSubActivity.startForResult(
-                        this,
-                        RequestCode.PAYMENT,
-                        PlanStore.find(Tier.PREMIUM, Cycle.YEAR)?.paymentIntent(OrderKind.UPGRADE)
+                    activity = this,
+                    requestCode = RequestCode.PAYMENT,
+                    price = price
                 )
             }
 
@@ -152,7 +162,7 @@ class MemberActivity : ScopedAppActivity(),
             }
             PayMethod.STRIPE -> {
                 toast(R.string.refreshing_stripe_sub)
-                accountViewModel.retrieveStripeSub(account)
+                accountViewModel.refreshStripeSub(account)
             }
             PayMethod.APPLE -> {
                 toast(R.string.refresh_iap_sub)
@@ -161,12 +171,8 @@ class MemberActivity : ScopedAppActivity(),
         }
     }
 
-    private fun onStripeSubRetrieved(result: Result<StripeSub>) {
-        val account = sessionManager.loadAccount()
-        if (account == null) {
-            stopRefresh()
-            return
-        }
+    private fun onStripeSubRefreshed(result: Result<StripeSubResult>) {
+        stopRefresh()
 
         when (result) {
             is Result.LocalizedError -> {
@@ -176,19 +182,10 @@ class MemberActivity : ScopedAppActivity(),
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
-                toast("Stripe subscription updated!")
+                toast("Stripe subscription refreshed!")
+                sessionManager.saveMembership(result.data.membership)
             }
         }
-
-        // Even if user's subscription data is not refresh
-        // (for example, API responded 404, in which case
-        // subscribedResult.success is null), account still
-        // needs to be refreshed.
-        // So here we do not perform checks on subscribedResult == null.
-        // It is just an indicator that network finished,
-        // regardless of result.
-        toast(R.string.refreshing_account)
-        accountViewModel.refresh(account)
     }
 
     private fun onIAPRefresh(result: Result<IAPSubs>) {

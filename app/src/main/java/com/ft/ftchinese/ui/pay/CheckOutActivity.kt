@@ -33,7 +33,6 @@ import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,7 +41,7 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 const val EXTRA_FTC_PLAN = "extra_ftc_plan"
-const val EXTRA_PAYMENT_INTENT = "extra_payment_intent"
+const val EXTRA_FTC_CHECKOUT = "extra_ftc_checkout"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CheckOutActivity : ScopedAppActivity(),
@@ -60,7 +59,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private lateinit var binding: ActivityCheckOutBinding
 
-    private var paymentIntent: PaymentIntent? = null
+    private var checkout: FtcCheckout? = null
 
     private var payMethod: PayMethod? = null
 
@@ -75,15 +74,15 @@ class CheckOutActivity : ScopedAppActivity(),
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_check_out)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
         }
 
 
-        val paymentIntent = intent.getParcelableExtra<PaymentIntent>(EXTRA_PAYMENT_INTENT) ?: return
-        this.paymentIntent = paymentIntent
+        val co = intent.getParcelableExtra<FtcCheckout>(EXTRA_FTC_CHECKOUT) ?: return
+        this.checkout = co
 
         sessionManager = SessionManager.getInstance(this)
         paymentManager = PaymentManager.getInstance(this)
@@ -93,12 +92,17 @@ class CheckOutActivity : ScopedAppActivity(),
 
         tracker = StatsTracker.getInstance(this)
         // Log event: add card
-        tracker.addCart(paymentIntent.plan)
+        tracker.addCart(co.plan)
 
 
         // Attach price card
         supportFragmentManager.commit {
-            replace(R.id.product_in_cart, CartItemFragment.newInstance(paymentIntent))
+            replace(
+                R.id.product_in_cart,
+                CartItemFragment.newInstance(
+                    ftcCartItem(this@CheckOutActivity, co.plan)
+                )
+            )
         }
         initUI()
         setUp()
@@ -108,7 +112,7 @@ class CheckOutActivity : ScopedAppActivity(),
 //        val account = sessionManager.loadAccount() ?: return
 
         // Show different titles
-        when (paymentIntent?.kind) {
+        when (checkout?.kind) {
             OrderKind.RENEW ->  supportActionBar?.setTitle(R.string.title_renewal)
             OrderKind.UPGRADE -> supportActionBar?.setTitle(R.string.title_upgrade)
             else -> {}
@@ -162,8 +166,8 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private fun onSelectPayMethod() {
         val priceText = formatPrice(
-                currency = paymentIntent?.currency,
-                price = paymentIntent?.amount
+                currency = checkout?.plan?.currency,
+                price = checkout?.plan?.payableAmount()
         )
 
         binding.payButtonText = when(payMethod) {
@@ -204,7 +208,7 @@ class CheckOutActivity : ScopedAppActivity(),
         }
 
         val account = sessionManager.loadAccount() ?: return
-        val plan = paymentIntent?.plan ?: return
+        val plan = checkout?.plan ?: return
 
         val pm = payMethod
         if (pm == null) {
@@ -242,10 +246,16 @@ class CheckOutActivity : ScopedAppActivity(),
                     binding.inProgress = false
                     return
                 }
+
+                val plan = checkout?.plan ?: return
+                val price = StripePriceStore.find(
+                    tier = plan.tier,
+                    cycle = plan.cycle
+                ) ?: return
                 StripeSubActivity.startForResult(
-                        this,
-                        RequestCode.PAYMENT,
-                        paymentIntent
+                        activity = this,
+                        requestCode = RequestCode.PAYMENT,
+                        price = price
                 )
                 binding.inProgress = false
             }
@@ -260,11 +270,11 @@ class CheckOutActivity : ScopedAppActivity(),
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
-                tracker.buyFail(paymentIntent?.plan)
+                tracker.buyFail(checkout?.plan)
             }
             is Result.Error -> {
                 result.exception.message?.let { toast(it) }
-                tracker.buyFail(paymentIntent?.plan)
+                tracker.buyFail(checkout?.plan)
             }
             is Result.Success -> {
                 binding.payBtn.isEnabled = false
@@ -275,7 +285,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private fun launchAliPay(aliPayIntent: AliPayIntent) {
 
-        val plan = paymentIntent?.plan ?: return
+        val plan = checkout?.plan ?: return
 
         orderManager.save(aliPayIntent.order)
 
@@ -306,8 +316,6 @@ class CheckOutActivity : ScopedAppActivity(),
 
                 return@launch
             }
-
-//            toast(R.string.payment_done)
 
             tracker.buySuccess(plan, payMethod)
 
@@ -356,11 +364,11 @@ class CheckOutActivity : ScopedAppActivity(),
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
-                tracker.buyFail(paymentIntent?.plan)
+                tracker.buyFail(checkout?.plan)
             }
             is Result.Error -> {
                 result.exception.message?.let { toast(it) }
-                tracker.buyFail(paymentIntent?.plan)
+                tracker.buyFail(checkout?.plan)
             }
             is Result.Success -> {
                 binding.payBtn.isEnabled = false
@@ -452,9 +460,9 @@ class CheckOutActivity : ScopedAppActivity(),
     companion object {
 
         @JvmStatic
-        fun startForResult(activity: Activity?, requestCode: Int, paymentIntent: PaymentIntent) {
+        fun startForResult(activity: Activity?, requestCode: Int, checkout: FtcCheckout) {
             val intent = Intent(activity, CheckOutActivity::class.java).apply {
-                putExtra(EXTRA_PAYMENT_INTENT, paymentIntent)
+                putExtra(EXTRA_FTC_CHECKOUT, checkout)
             }
 
             activity?.startActivityForResult(intent, requestCode)

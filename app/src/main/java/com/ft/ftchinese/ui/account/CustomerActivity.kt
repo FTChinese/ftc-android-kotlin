@@ -1,6 +1,5 @@
 package com.ft.ftchinese.ui.account
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -11,23 +10,17 @@ import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCustomerBinding
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.subscription.StripeCustomer
-import com.ft.ftchinese.service.StripeEphemeralKeyProvider
-import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.repository.Fetch
-import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.repository.SubscribeApi
+import com.ft.ftchinese.service.StripeEphemeralKeyProvider
+import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.stripe.android.CustomerSession
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.StripeError
+import com.ft.ftchinese.viewmodel.Result
+import com.stripe.android.*
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.view.PaymentMethodsActivity
-import com.stripe.android.view.PaymentMethodsActivityStarter
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -38,6 +31,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private var paymentMethod: PaymentMethod? = null
+    private lateinit var paymentSession: PaymentSession
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var binding: ActivityCustomerBinding
 
@@ -45,26 +39,51 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_customer)
 
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
         }
 
-        PaymentConfiguration.init(BuildConfig.STRIPE_KEY)
+        // Initialize stripe configuration.
+        PaymentConfiguration.init(
+            this,
+            BuildConfig.STRIPE_KEY
+        )
 
         sessionManager = SessionManager.getInstance(this)
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
+        connectionLiveData.observe(this, {
+            accountViewModel.isNetworkAvailable.value = it
+        })
+        accountViewModel.isNetworkAvailable.value = isNetworkConnected()
 
-        accountViewModel.customerResult.observe(this, Observer {
-            onCustomerCreated(it)
+        accountViewModel.customerResult.observe(this, {
+            onStripeCustomer(it)
         })
 
+        setup()
+        initUI()
+
+        paymentSession = PaymentSession(
+            this@CustomerActivity,
+            PaymentSessionConfig.Builder()
+                .setShippingInfoRequired(false)
+                .setShippingMethodsRequired(false)
+                .setShouldShowGooglePay(false)
+                .build()
+        )
+
+        paymentSession.init(createPaymentSessionListener())
+    }
+
+    private fun initUI() {
         setCardText(null)
 
         binding.defaultBankCard.setOnClickListener {
-            PaymentMethodsActivityStarter(this).startForResult(RequestCode.SELECT_SOURCE)
+//            PaymentMethodsActivityStarter(this).startForResult(RequestCode.SELECT_SOURCE)
+            paymentSession.presentPaymentMethodSelection()
         }
 
         binding.btnSetDefault.setOnClickListener {
@@ -73,29 +92,29 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
         // Setup stripe customer session after ui initiated; otherwise the ui might be disabled if stripe customer data
         // is retrieved too quickly.
+    }
 
+    private fun setup() {
         val account = sessionManager.loadAccount() ?: return
-        if (account.stripeId == null) {
-            if (!isConnected) {
-                toast(R.string.prompt_no_network)
-                return
-            }
 
+        if (account.stripeId == null) {
             binding.inProgress = true
 
             toast(R.string.stripe_init)
 
             accountViewModel.createCustomer(account)
-        } else {
-            setupCustomerSession()
+
+            return
         }
+
+        setupCustomerSession()
     }
 
-    private fun onCustomerCreated(result: Result<StripeCustomer>)
+    private fun onStripeCustomer(result: Result<StripeCustomer>)
     {
         when (result) {
             is Result.Success -> {
-                sessionManager.saveStripeId(result.data.stripeId)
+                sessionManager.saveStripeId(result.data.id)
 
                 setupCustomerSession()
             }
@@ -104,6 +123,86 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
             }
             is Result.Error -> {
                 result.exception.message?.let { toast(it) }
+            }
+        }
+    }
+
+    private fun setupCustomerSession() {
+        if (!isConnected) {
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        val account = sessionManager.loadAccount() ?: return
+
+        try {
+            CustomerSession.getInstance()
+            info("CustomerSession already instantiated")
+        } catch (e: Exception) {
+            info(e)
+            // Pass ftc user id to subscription api,
+            // which retrieves stripe's customer id and use
+            // the id to change for a ephemeral key.
+            CustomerSession.initCustomerSession(
+                this,
+                StripeEphemeralKeyProvider(account)
+            )
+        }
+
+        toast(R.string.retrieve_customer)
+        binding.inProgress = true
+
+        CustomerSession
+            .getInstance()
+            .retrieveCurrentCustomer(createCustomerRetrievalListener())
+    }
+
+    private fun createCustomerRetrievalListener(): CustomerSession.CustomerRetrievalListener {
+        return object : CustomerSession.CustomerRetrievalListener {
+            override fun onCustomerRetrieved(customer: Customer) {
+                // Create payment session after customer retrieved.
+
+
+                binding.inProgress = false
+                binding.enableInput = true
+                toast("Customer retrieved")
+            }
+
+            override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
+
+                runOnUiThread {
+                    alert(errorMessage) {
+                        yesButton {
+                            it.dismiss()
+                        }
+                    }.show()
+
+                    binding.inProgress = false
+                }
+            }
+        }
+    }
+
+    private fun createPaymentSessionListener(): PaymentSession.PaymentSessionListener {
+        return object : PaymentSession.PaymentSessionListener {
+            override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
+                binding.inProgress = isCommunicating
+            }
+
+            override fun onError(errorCode: Int, errorMessage: String) {
+                toast(errorMessage)
+            }
+
+            override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
+                info(data)
+
+                if (data.paymentMethod != null) {
+                    paymentMethod = data.paymentMethod
+
+                    setCardText(data.paymentMethod?.card)
+
+                    return
+                }
             }
         }
     }
@@ -149,64 +248,11 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 
-    private fun setupCustomerSession() {
-        if (!isConnected) {
-            toast(R.string.prompt_no_network)
-            return
-        }
-
-        val account = sessionManager.loadAccount() ?: return
-
-        try {
-            CustomerSession.getInstance()
-            info("CustomerSession already instantiated")
-        } catch (e: Exception) {
-            info(e)
-            // Pass ftc user id to subscription api,
-            // which retrieves stripe's customer id and use
-            // the id to change for a ephemeral key.
-            CustomerSession.initCustomerSession(
-                    this,
-                    StripeEphemeralKeyProvider(account)
-            )
-        }
-
-        toast(R.string.retrieve_customer)
-        binding.inProgress = true
-
-        CustomerSession.getInstance()
-                .retrieveCurrentCustomer(customerRetrievalListener)
-    }
-
-    private val customerRetrievalListener = object : CustomerSession.ActivityCustomerRetrievalListener<CustomerActivity>(this) {
-        override fun onCustomerRetrieved(customer: Customer) {
-            binding.inProgress = false
-            binding.enableInput = true
-            toast("Customer retrieved")
-        }
-
-        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
-
-            runOnUiThread {
-                alert(errorMessage) {
-                    yesButton {
-                        it.dismiss()
-                    }
-                }.show()
-
-                binding.inProgress = false
-            }
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == RequestCode.SELECT_SOURCE && resultCode == Activity.RESULT_OK) {
-            val paymentMethod = data?.getParcelableExtra<PaymentMethod>(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT) ?: return
-
-            setCardText(paymentMethod.card)
-            this.paymentMethod = paymentMethod
+        if (data != null) {
+            paymentSession.handlePaymentData(requestCode, resultCode, data)
         }
     }
 
@@ -219,7 +265,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
             )
         } else {
             UIBankCard(
-                brand = cardBrands[card.brand] ?: card.brand,
+                brand = card.brand.displayName,
                 number = getString(R.string.bank_card_number, card.last4)
             )
         }
