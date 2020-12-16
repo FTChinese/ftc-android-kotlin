@@ -65,7 +65,9 @@ class PaywallViewModel(
             try {
                 val (pw, data) = withContext(Dispatchers.IO) {
 
-                    val (_, data) = Fetch().get(SubscribeApi.PAYWALL).endJsonText()
+                    val (_, data) = Fetch()
+                        .get(SubscribeApi.PAYWALL)
+                        .endJsonText()
 
                     info("Fetch paywall data $data")
 
@@ -94,4 +96,6 @@ class PaywallViewModel(
             }
         }
     }
+
+    // TODO: fetch stripe prices in background.
 }
