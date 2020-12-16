@@ -46,7 +46,7 @@ object SubscribeApi {
 
     val STRIPE_PLAN = "$BASE/stripe/plans"
     val STRIPE_CUSTOMER = "$BASE/stripe/customers"
-    val STRIPE_SUB = "$BASE/stripe/subscriptions"
+    val STRIPE_SUB = "$BASE/stripe/subs"
 
     private fun baseUrl(isTest: Boolean): String {
         return if (isTest) {
@@ -70,6 +70,33 @@ object SubscribeApi {
 
     fun refreshIAP(origTxId: String, isTest: Boolean): String {
         return "${baseUrl(isTest)}/apple/subs/${origTxId}"
+    }
+
+    fun stripeCustomer(isTest: Boolean): String {
+        return "${baseUrl(isTest)}/stripe/customers"
+    }
+
+    fun stripeSubBase(isTest: Boolean): String {
+        return "${baseUrl(isTest)}/stripe/subs"
+    }
+
+    fun stripeSub(id: String, isTest: Boolean): String {
+        return "${stripeSubBase(isTest)}/${id}"
+    }
+    fun stripeRefresh(id: String, isTest: Boolean): String {
+        return "${stripeSub(id, isTest)}/refresh"
+    }
+
+    fun stripeUpgrade(id: String, isTest: Boolean): String {
+        return "${stripeSub(id, isTest)}/upgrade"
+    }
+
+    fun stripeCancel(id: String, isTest: Boolean): String {
+        return "${stripeSub(id, isTest)}/cancel"
+    }
+
+    fun stripeReactivate(id: String, isTest: Boolean): String {
+        return "${stripeSub(id, isTest)}/reactivate"
     }
 }
 
