@@ -10,7 +10,7 @@ data class StripeSubParams(
         val tier: Tier,
         @KCycle
         val cycle: Cycle,
-        val customer: String,
+        val customer: String, // Deprecated
         val coupon: String? = null,
         val defaultPaymentMethod: String?,
         val idempotency: String? = null
