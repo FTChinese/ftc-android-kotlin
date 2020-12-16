@@ -4,20 +4,54 @@ import com.ft.ftchinese.model.subscription.Cycle
 import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.order.StripeSubStatus
 import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.util.*
 import org.junit.Assert.*
 import org.junit.Test
 import org.threeten.bp.LocalDate
 import org.threeten.bp.Month
 import org.threeten.bp.temporal.ChronoUnit
 
+data class TestType(
+    @KTier
+    val tier: Tier? = null,
+    @KCycle
+    val cycle: Cycle? = null,
+    @KDate
+    val expireDate: LocalDate? = null,
+    @KPayMethod
+    val payMethod: PayMethod? = null,
+    val stripeSubsId: String? = null,
+    val autoRenew: Boolean = false,
+    @KStripeSubStatus
+    val status: StripeSubStatus? = null,
+    val appleSubsId: String? = null,
+    val b2bLicenceId: String? = null,
+    val vip: Boolean = false
+)
+
 class MembershipTest {
+
+    private val jsonData = """
+    {
+        "tier": "premium",
+        "cycle": "year",
+        "expireDate": "2021-12-11",
+        "payMethod": "stripe",
+        "stripeSubsId": "sub_IY75arTimVigIr",
+        "autoRenew": true,
+        "status": "active",
+        "appleSubsId": null,
+        "b2bLicenceId": null,
+        "vip": false
+    }
+    """.trimIndent()
 
     private val mVip =  Membership(
             tier = null,
             cycle = null,
             expireDate = null,
             payMethod = null,
-            autoRenew = null,
+            autoRenew = false,
             status = null,
             vip = true
     )
@@ -263,7 +297,7 @@ class MembershipTest {
 
 
     @Test fun stripeStandard() {
-        val (readerPermBits, status) = mStandardStripe.getPermission()
+        val (readerPermBits, _) = mStandardStripe.getPermission()
 
         assertTrue(
                 "Active stripe standard can read free content",
@@ -283,7 +317,7 @@ class MembershipTest {
     }
 
     @Test fun stripePremium() {
-        val (readerPermBits, status) = mPremiumStripe.getPermission()
+        val (readerPermBits, _) = mPremiumStripe.getPermission()
 
         assertTrue(
                 "Active stripe premium can read free content",
@@ -303,7 +337,7 @@ class MembershipTest {
     }
 
     @Test fun stripeIncomplete() {
-        val (readerPermBits, status) = mStripeIncomplete.getPermission()
+        val (readerPermBits, _) = mStripeIncomplete.getPermission()
 
         assertTrue(
                 "Incomplete stripe can read free content",
@@ -324,7 +358,7 @@ class MembershipTest {
     }
 
     @Test fun stripeInactive() {
-        val (readerPermBits, status) = mStripeInactive.getPermission()
+        val (readerPermBits, _) = mStripeInactive.getPermission()
 
         assertTrue(
                 "Inactive stripe can read free content",
@@ -339,6 +373,14 @@ class MembershipTest {
                 "Inactive stripe cannot read premium content",
                 Permission.PREMIUM.grant(readerPermBits)
         )
+    }
+
+    @Test
+    fun parseJSON() {
+
+        val m = json.parse<TestType>(jsonData)
+
+        println(m)
     }
 
 }
