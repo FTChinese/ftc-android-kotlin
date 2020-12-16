@@ -2,7 +2,7 @@ package com.ft.ftchinese.model.order
 
 import android.content.Context
 import androidx.core.content.edit
-import com.ft.ftchinese.model.subscription.StripePlan
+import com.ft.ftchinese.model.subscription.StripePrice
 import com.ft.ftchinese.util.json
 
 private const val PREF_FILE_NAME = "stripe_plans"
@@ -10,19 +10,19 @@ private const val PREF_FILE_NAME = "stripe_plans"
 class StripePlanCache private constructor(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
 
-    fun save(plan: StripePlan, key: String?) {
+    fun save(price: StripePrice, key: String?) {
         if (key == null) {
             return
         }
 
-        val data = json.toJsonString(plan)
+        val data = json.toJsonString(price)
 
         sharedPreferences.edit {
             putString(key, data)
         }
     }
 
-    fun load(key: String?): StripePlan? {
+    fun load(key: String?): StripePrice? {
         if (key == null) {
             return null
         }
@@ -30,7 +30,7 @@ class StripePlanCache private constructor(context: Context) {
         val data = sharedPreferences.getString(key, null) ?: return null
 
         return try {
-            json.parse<StripePlan>(data)
+            json.parse<StripePrice>(data)
         } catch (e: Exception) {
             null
         }
