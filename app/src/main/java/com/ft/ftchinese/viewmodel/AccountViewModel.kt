@@ -4,14 +4,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.order.StripeSub
+import com.ft.ftchinese.model.order.StripeSubResult
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.subscription.IAPSubs
 import com.ft.ftchinese.model.subscription.Order
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.repository.AccountRepo
-import com.ft.ftchinese.repository.StripeRepo
 import com.ft.ftchinese.repository.ClientError
+import com.ft.ftchinese.repository.StripeRepo
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.store.FileCache
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +27,8 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     val inProgress: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
+
+    val isNetworkAvailable = MutableLiveData<Boolean>()
 
     val serviceAccepted: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
@@ -50,8 +52,8 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<StripeCustomer>>()
     }
 
-    val stripeRetrievalResult: MutableLiveData<Result<StripeSub>> by lazy {
-        MutableLiveData<Result<StripeSub>>()
+    val stripeSubsRefreshed: MutableLiveData<Result<StripeSubResult>> by lazy {
+        MutableLiveData<Result<StripeSubResult>>()
     }
 
     val iapRefreshResult: MutableLiveData<Result<IAPSubs>> by lazy {
@@ -96,6 +98,10 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     // Refresh a user's account data, regardless of logged in
     // via email or wecaht.
     fun refresh(account: Account) {
+        if (isNetworkAvailable.value == false) {
+            accountRefreshed.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
         viewModelScope.launch {
             info("Start refreshing account")
 
@@ -160,10 +166,15 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     }
 
     fun createCustomer(account: Account) {
+        if (isNetworkAvailable.value == false) {
+            customerResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val customer = withContext(Dispatchers.IO) {
-                    StripeRepo.createCustomer(account.id)
+                    StripeRepo.createCustomer(account)
                 }
 
                 if (customer == null) {
@@ -190,29 +201,30 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     }
 
     // Ask the latest stripe subscription data.
-    fun retrieveStripeSub(account: Account) {
+    fun refreshStripeSub(account: Account) {
         viewModelScope.launch {
             try {
                 val stripeSub = withContext(Dispatchers.IO) {
-                    StripeRepo.refreshStripeSub(account)
+                    StripeRepo.refreshSub(account)
                 }
 
-                stripeRetrievalResult.value = if (stripeSub == null) {
+                stripeSubsRefreshed.value = if (stripeSub == null) {
                     Result.LocalizedError(R.string.stripe_refreshing_failed)
                 } else {
                     Result.Success(stripeSub)
                 }
 
             } catch (e: ClientError) {
-
-                stripeRetrievalResult.value = if (e.statusCode == 404) {
+                info(e)
+                stripeSubsRefreshed.value = if (e.statusCode == 404) {
                     Result.LocalizedError(R.string.loading_failed)
                 } else {
                     parseApiError(e)
                 }
 
             } catch (e: Exception) {
-                stripeRetrievalResult.value = parseException(e)
+                info(e)
+                stripeSubsRefreshed.value = parseException(e)
             }
         }
     }
