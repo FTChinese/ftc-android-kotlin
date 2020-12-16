@@ -493,7 +493,7 @@ class MainActivity : ScopedAppActivity(),
             return
         }
 
-        accountViewModel.stripeRetrievalResult.observe(this, Observer {
+        accountViewModel.stripeSubsRefreshed.observe(this, Observer {
             if (it !is Result.Success) {
                 return@Observer
             }
@@ -513,7 +513,7 @@ class MainActivity : ScopedAppActivity(),
             }
         })
 
-        accountViewModel.retrieveStripeSub(account)
+        accountViewModel.refreshStripeSub(account)
     }
 
     override fun onStart() {
