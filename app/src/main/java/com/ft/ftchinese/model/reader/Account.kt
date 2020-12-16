@@ -2,7 +2,7 @@ package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
 import com.ft.ftchinese.util.KLoginMethod
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * A user's essential data.

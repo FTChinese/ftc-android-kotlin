@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.subscription.*
 
 import com.ft.ftchinese.util.*
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.temporal.ChronoUnit
@@ -25,7 +25,7 @@ data class Membership(
     val payMethod: PayMethod? = null,
     val stripeSubsId: String? = null,
     // If autoRenew is true, ignore expireDate.
-    val autoRenew: Boolean? = false,
+    val autoRenew: Boolean = false,
     @KStripeSubStatus
     val status: StripeSubStatus? = null,
     val appleSubsId: String? = null,

@@ -3,7 +3,7 @@ package com.ft.ftchinese.model.subscription
 import android.os.Parcelable
 import com.ft.ftchinese.util.KCycle
 import com.ft.ftchinese.util.KTier
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class Edition(

@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 enum class OrderKind(val code: String) : Parcelable {

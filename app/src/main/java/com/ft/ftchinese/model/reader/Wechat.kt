@@ -2,7 +2,7 @@ package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
 import kotlinx.android.parcel.IgnoredOnParcel
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.jetbrains.anko.AnkoLogger
 
 /**

@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 data class Passwords(
         val oldPassword: String,

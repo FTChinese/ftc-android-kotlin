@@ -4,7 +4,7 @@ import android.os.Parcelable
 import com.ft.ftchinese.tracking.GAAction
 import com.ft.ftchinese.util.KCycle
 import com.ft.ftchinese.util.KTier
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.threeten.bp.ZonedDateTime
 
 /**
@@ -34,15 +34,6 @@ data class Plan(
 
     fun getNamedKey(): String {
         return "${tier}_$cycle"
-    }
-
-    fun paymentIntent(kind: OrderKind?): PaymentIntent {
-        return PaymentIntent(
-                amount = payableAmount(),
-                currency = currency,
-                kind = kind,
-                plan = this
-        )
     }
 
     fun gaGAAction(): String {
@@ -105,6 +96,7 @@ val defaultPlans = listOf(
  * use this to find out which plan a member is subscribed to.
  */
 object PlanStore {
+    // Will be updated once paywall data is fetched from server or cache.
     var plans = defaultPlans
 
     /**

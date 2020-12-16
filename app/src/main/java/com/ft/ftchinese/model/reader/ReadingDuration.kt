@@ -2,7 +2,7 @@ package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
 import com.beust.klaxon.Json
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class ReadingDuration(

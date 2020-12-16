@@ -2,7 +2,7 @@ package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
 import com.ft.ftchinese.R
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 enum class Tier(val symbol: String) : Parcelable {

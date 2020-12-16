@@ -8,7 +8,7 @@ import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.HOST_FTC
 import com.ft.ftchinese.util.KArticleType
 import kotlinx.android.parcel.IgnoredOnParcel
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import java.util.*
