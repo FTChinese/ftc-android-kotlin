@@ -1,23 +1,23 @@
 package com.ft.ftchinese.repository
 
-import com.ft.ftchinese.model.subscription.StripePlan
-import com.ft.ftchinese.model.order.StripeSub
 import com.ft.ftchinese.model.order.StripeSubParams
-import com.ft.ftchinese.model.order.StripeSubResponse
+import com.ft.ftchinese.model.order.StripeSubResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.StripeCustomer
+import com.ft.ftchinese.model.subscription.StripePrice
 import com.ft.ftchinese.util.json
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import org.json.JSONException
 
 object StripeRepo : AnkoLogger {
-    fun createCustomer(id: String): StripeCustomer? {
+    fun createCustomer(account: Account): StripeCustomer? {
         val (_, body) = Fetch()
-                .put(SubscribeApi.STRIPE_CUSTOMER)
-                .setUserId(id)
-                .noCache()
-                .sendJson()
-                .endJsonText()
+            .post(SubscribeApi.stripeSubBase(account.isTest))
+            .setUserId(account.id)
+            .noCache()
+            .sendJson()
+            .endJsonText()
 
         if (body == null) {
             return null
@@ -36,62 +36,57 @@ object StripeRepo : AnkoLogger {
         }
 
         val (_, body) = Fetch()
-                .post("${SubscribeApi.STRIPE_CUSTOMER}/${account.stripeId}/ephemeral_keys")
-                .setUserId(account.id)
-                .query("api_version", apiVersion)
-                .noCache()
-                .sendJson()
-                .endJsonText()
+            .post("${SubscribeApi.STRIPE_CUSTOMER}/${account.stripeId}/ephemeral_keys")
+            .setUserId(account.id)
+            .query("api_version", apiVersion)
+            .noCache()
+            .sendJson()
+            .endJsonText()
 
         return body
     }
 
-    fun getStripePlan(id: String): StripePlan? {
+    fun loadPlan(id: String): StripePrice? {
         val (_, body) = Fetch()
-                .get("${SubscribeApi.STRIPE_PLAN}/$id")
-                .setUserId(id)
-                .endJsonText()
+            .get("${SubscribeApi.STRIPE_PLAN}/$id")
+            .setUserId(id)
+            .endJsonText()
 
         return if (body == null) {
             return null
         } else {
-            json.parse<StripePlan>(body)
+            json.parse<StripePrice>(body)
         }
     }
 
-    fun createSubscription(account: Account, params: StripeSubParams): StripeSubResponse? {
+    fun createSubscription(account: Account, params: StripeSubParams): StripeSubResult? {
 
-        val fetch = Fetch()
-                .post(SubscribeApi.STRIPE_SUB)
-                .setUserId(account.id)
-                .noCache()
-                .sendJson(json.toJsonString(params))
-
-        if (account.unionId != null) {
-            fetch.setUnionId(account.unionId)
-        }
-
-        val (_, body ) = fetch.endJsonText()
+        val (_, body ) = Fetch()
+            .post(SubscribeApi.stripeSubBase(account.isTest))
+            .setUserId(account.id)
+            .noCache()
+            .sendJson(json.toJsonString(params))
+            .endJsonText()
 
         return if (body == null) {
             null
         } else {
-            json.parse<StripeSubResponse>(body)
+            json.parse<StripeSubResult>(body)
         }
     }
 
     // Ask API to update user's Stripe subscription data.
-    fun refreshStripeSub(account: Account): StripeSub? {
-        val fetch = Fetch()
-                .get(SubscribeApi.STRIPE_SUB)
-                .setUserId(account.id)
-                .noCache()
+    fun refreshSub(account: Account): StripeSubResult? {
 
-        if (account.unionId != null) {
-            fetch.setUnionId(account.unionId)
-        }
+        val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
-        val (_, body) = fetch.endJsonText()
+        val (_, body) = Fetch()
+            .get(SubscribeApi.stripeRefresh(subsId, account.isTest))
+            .setUserId(account.id)
+            .noCache()
+            .endJsonText()
+
+        info(body)
 
         return if (body == null) {
             null
@@ -100,18 +95,51 @@ object StripeRepo : AnkoLogger {
         }
     }
 
-    fun upgradeStripeSub(account: Account, params: StripeSubParams): StripeSubResponse? {
-        val fetch = Fetch()
-                .patch(SubscribeApi.STRIPE_SUB)
-                .setUserId(account.id)
-                .noCache()
-                .sendJson(json.toJsonString(params))
+    fun upgradeSub(account: Account, params: StripeSubParams): StripeSubResult? {
 
-        if (account.unionId != null) {
-            fetch.setUnionId(account.unionId)
+        val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
+
+        val (_, body) = Fetch()
+            .post(SubscribeApi.stripeUpgrade(subsId, account.isTest))
+            .setUserId(account.id)
+            .noCache()
+            .sendJson(json.toJsonString(params))
+            .endJsonText()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse(body)
         }
+    }
 
-        val (_, body) = fetch.endJsonText()
+    fun cancelSub(account: Account): StripeSubResult? {
+        val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
+
+        val (_, body) = Fetch()
+            .post(SubscribeApi.stripeCancel(subsId, account.isTest))
+            .setUserId(account.id)
+            .noCache()
+            .sendJson()
+            .endJsonText()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse(body)
+        }
+    }
+
+    fun reactivateSub(account: Account): StripeSubResult? {
+        val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
+
+        val (_, body) = Fetch()
+            .post(SubscribeApi.stripeReactivate(subsId, account.isTest))
+            .setUserId(account.id)
+            .noCache()
+            .sendJson()
+            .endJsonText()
+
         return if (body == null) {
             null
         } else {
