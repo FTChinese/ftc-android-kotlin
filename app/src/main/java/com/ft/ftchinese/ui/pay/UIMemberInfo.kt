@@ -21,6 +21,19 @@ data class MemberStatus(
 
 
 fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
+    if (m.vip) {
+        return MemberStatus(
+            reminder = null,
+            tier = ctx.getString(R.string.tier_vip),
+            expiration = m.localizeExpireDate(),
+            autoRenewal = null,
+            payMethod = null,
+            renewalBtn = false,
+            upgradeBtn = false,
+            addOnBtn = false,
+            reSubscribeBtn = false
+        )
+    }
 
     val autoRenewal = when (m.autoRenew) {
         true -> ctx.getString(R.string.auto_renew_on)
@@ -112,16 +125,17 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
                 reSubscribeBtn = isExpired
             )
         }
+        // VIP
         else -> MemberStatus(
             reminder = null,
             tier = ctx.getString(m.tierStringRes),
             expiration = m.localizeExpireDate(),
             autoRenewal = null,
             payMethod = null,
-            renewalBtn = m.canRenewViaAliWx(),
-            upgradeBtn = m.canUpgrade(),
+            renewalBtn = false,
+            upgradeBtn = false,
             addOnBtn = false,
-            reSubscribeBtn = m.expired()
+            reSubscribeBtn = false
         )
     }
 }
