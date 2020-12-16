@@ -70,6 +70,18 @@ fun Activity.getTierCycleText(tier: Tier?, cycle: Cycle?): String? {
     return getString(R.string.formatter_tier_cycle, getString(tier.stringRes), getString(cycle.stringRes))
 }
 
+fun formatTierCycle(ctx: Context, tier: Tier?, cycle: Cycle?): String {
+    if (tier == null || cycle == null) {
+        return ""
+    }
+
+    return ctx.getString(
+        R.string.formatter_tier_cycle,
+        ctx.getString(tier.stringRes),
+        ctx.getString(cycle.stringRes)
+    )
+}
+
 fun Activity.formatPrice(currency: String?, price: Double?): String {
     if (currency == null || price == null) {
         return ""
@@ -79,6 +91,18 @@ fun Activity.formatPrice(currency: String?, price: Double?): String {
             R.string.formatter_price,
             getCurrencySymbol(currency),
             price
+    )
+}
+
+fun formatPrice(ctx: Context, currency: String?, price: Double?): String {
+    if (currency == null || price == null) {
+        return ""
+    }
+
+    return ctx.getString(
+        R.string.formatter_price,
+        getCurrencySymbol(currency),
+        price
     )
 }
 
