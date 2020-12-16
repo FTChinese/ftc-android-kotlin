@@ -159,7 +159,7 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
 
     private fun refreshStripe(account: Account): Boolean {
         try {
-            StripeRepo.refreshStripeSub(account) ?: return false
+            StripeRepo.refreshSub(account) ?: return false
         } catch (e: Exception) {
             info(e)
             return false
