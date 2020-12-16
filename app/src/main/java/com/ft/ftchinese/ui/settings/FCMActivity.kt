@@ -19,7 +19,6 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
-import kotlinx.android.synthetic.main.simple_toolbar.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -33,7 +32,7 @@ class FCMActivity : AppCompatActivity(), AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_fcm)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(binding.toolbar.toolbar)
 
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(true)
