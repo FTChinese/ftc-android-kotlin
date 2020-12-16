@@ -4,7 +4,7 @@ import android.net.Uri
 import android.os.Parcelable
 import com.ft.ftchinese.model.reader.Permission
 import kotlinx.android.parcel.IgnoredOnParcel
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import org.jetbrains.anko.AnkoLogger
 
 const val HTML_TYPE_FRAGMENT = 1
