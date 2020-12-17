@@ -10,10 +10,37 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.json.JSONException
 
-object StripeRepo : AnkoLogger {
+object StripeClient : AnkoLogger {
+
+    private fun baseUrl(isTest: Boolean) =
+        "${Endpoint.subsBase(isTest)}/stripe"
+
+    // Retrieve a list of stripe prices.
+    // If use is logged-in and it is a test account, use sandbox
+    // api to get test prices; otherwise retrieve prices from live mode.
+    fun listPrices(account: Account?): JSONResult<List<StripePrice>>? {
+        val isTest = account?.isTest ?: false
+
+        val (_, body) = Fetch()
+            .get(baseUrl(isTest) + "/stripe/prices")
+            .noCache()
+            .endJsonText()
+
+        if (body == null) {
+            return null
+        }
+
+        val prices = json.parseArray<StripePrice>(body)
+        return if (prices == null) {
+            null
+        } else {
+            JSONResult(prices, body)
+        }
+    }
+
     fun createCustomer(account: Account): StripeCustomer? {
         val (_, body) = Fetch()
-            .post(SubscribeApi.stripeSubBase(account.isTest))
+            .post(baseUrl(account.isTest) + "/customers")
             .setUserId(account.id)
             .noCache()
             .sendJson()
@@ -36,7 +63,7 @@ object StripeRepo : AnkoLogger {
         }
 
         val (_, body) = Fetch()
-            .post("${SubscribeApi.STRIPE_CUSTOMER}/${account.stripeId}/ephemeral_keys")
+            .post(baseUrl(account.isTest) + "/customers/${account.stripeId}/ephemeral_keys")
             .setUserId(account.id)
             .query("api_version", apiVersion)
             .noCache()
@@ -46,9 +73,10 @@ object StripeRepo : AnkoLogger {
         return body
     }
 
+    // Deprecated
     fun loadPlan(id: String): StripePrice? {
         val (_, body) = Fetch()
-            .get("${SubscribeApi.STRIPE_PLAN}/$id")
+            .get("${SubsApi.STRIPE_PLAN}/$id")
             .setUserId(id)
             .endJsonText()
 
@@ -62,7 +90,7 @@ object StripeRepo : AnkoLogger {
     fun createSubscription(account: Account, params: StripeSubParams): StripeSubResult? {
 
         val (_, body ) = Fetch()
-            .post(SubscribeApi.stripeSubBase(account.isTest))
+            .post(baseUrl(account.isTest) + "/subs")
             .setUserId(account.id)
             .noCache()
             .sendJson(json.toJsonString(params))
@@ -81,7 +109,7 @@ object StripeRepo : AnkoLogger {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
-            .get(SubscribeApi.stripeRefresh(subsId, account.isTest))
+            .get(baseUrl(account.isTest) + "/subs/$subsId/refresh")
             .setUserId(account.id)
             .noCache()
             .endJsonText()
@@ -100,7 +128,7 @@ object StripeRepo : AnkoLogger {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
-            .post(SubscribeApi.stripeUpgrade(subsId, account.isTest))
+            .post(Endpoint.subsBase(account.isTest) + "/subs/$subsId/upgrade")
             .setUserId(account.id)
             .noCache()
             .sendJson(json.toJsonString(params))
@@ -117,7 +145,7 @@ object StripeRepo : AnkoLogger {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
-            .post(SubscribeApi.stripeCancel(subsId, account.isTest))
+            .post(Endpoint.subsBase(account.isTest) + "/subs/$subsId/cancel")
             .setUserId(account.id)
             .noCache()
             .sendJson()
@@ -134,7 +162,7 @@ object StripeRepo : AnkoLogger {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
-            .post(SubscribeApi.stripeReactivate(subsId, account.isTest))
+            .post(baseUrl(account.isTest) + "/subs/$subsId/reactivate")
             .setUserId(account.id)
             .noCache()
             .sendJson()
