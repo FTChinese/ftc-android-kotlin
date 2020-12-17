@@ -518,5 +518,6 @@
     <string name="original_price">原价</string>
     <string name="refresh_paywall">获取最新产品价格...</string>
     <string name="paywall_updated">数据已更新</string>
+    <string name="stripe_cancel">取消Stripe订阅</string>
 
 </resources>
