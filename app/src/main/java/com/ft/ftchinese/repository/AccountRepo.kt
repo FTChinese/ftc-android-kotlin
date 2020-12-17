@@ -104,7 +104,7 @@ object AccountRepo {
      * Asks the API to refresh current wechat user's access token and information.
      */
     fun refreshWxInfo(wxSession: WxSession): Boolean {
-        val (resp, _) = Fetch().put(SubscribeApi.WX_REFRESH)
+        val (resp, _) = Fetch().put(SubsApi.WX_REFRESH)
                 .noCache()
                 .setAppId()
                 .setTimeout(30)
