@@ -27,7 +27,6 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-
 /**
  * Paywall of products.
  */
@@ -56,22 +55,28 @@ class PaywallActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
+        // handle refreshing.
         binding.swipeRefresh.setOnRefreshListener(this)
 
+        // If premium permission is required, show the premium product on top.
         premiumFirst = intent.getBooleanExtra(EXTRA_PREMIUM_FIRST, false)
 
         cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
 
+        setupViewModel()
+        initUI()
+        setUpPromo(promotion)
+        loadData(false)
+
+        tracker = StatsTracker.getInstance(this)
+        tracker.displayPaywall()
+    }
+
+    private fun setupViewModel() {
         // Init viewmodels
         paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(cache))
             .get(PaywallViewModel::class.java)
-
-        // Setup network
-        connectionLiveData.observe(this, {
-            paywallViewModel.isNetworkAvailable.value = it
-        })
-        paywallViewModel.isNetworkAvailable.value = isConnected
 
         productViewModel = ViewModelProvider(this)
             .get(ProductViewModel::class.java)
@@ -79,10 +84,15 @@ class PaywallActivity : ScopedAppActivity(),
         checkoutViewModel = ViewModelProvider(this)
             .get(CheckOutViewModel::class.java)
 
+        // Setup network
+        connectionLiveData.observe(this, {
+            paywallViewModel.isNetworkAvailable.value = it
+        })
+        paywallViewModel.isNetworkAvailable.value = isConnected
 
         // When a price button in ProductFragment is clicked, the selected Plan
         // is passed.
-        productViewModel.selected.observe(this, Observer<Plan> {
+        productViewModel.selected.observe(this, Observer {
             val account = sessionManager.loadAccount()
 
             // If user is not logged in, start login.
@@ -103,41 +113,16 @@ class PaywallActivity : ScopedAppActivity(),
             )
         })
 
-
         /**
          * Load paywall from cache, and then from server.
          */
         paywallViewModel.paywallResult.observe(this, {
             onPaywallResult(it)
         })
-
-
-        initUI()
-
-        /**
-         * Show login button, or expiration message.
-         */
-        productViewModel.accountChanged.value = sessionManager.loadAccount()
-
-        /**
-         * Use the hard-coded promotion.
-         */
-        setUpPromo(promotion)
-
-        /**
-         * Fetch paywall from cache, then from server.
-         */
-        paywallViewModel.loadPaywall(false)
-
-
-        tracker = StatsTracker.getInstance(this)
-        tracker.displayPaywall()
-
     }
 
     private fun initUI() {
         binding.premiumFirst = premiumFirst
-
 
         if (premiumFirst) {
             info("Should show premium card on top")
@@ -159,12 +144,25 @@ class PaywallActivity : ScopedAppActivity(),
             // Customer service
             replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
         }
+
+        /**
+         * Show login button, or expiration message on the SubStatusFragment.
+         */
+        productViewModel.accountChanged.value = sessionManager.loadAccount()
+    }
+
+    private fun loadData(isRefreshing: Boolean) {
+        // Fetch paywall from cache, then from server.
+        paywallViewModel.loadPaywall(isRefreshing)
+        // Retrieve stripe prices in background.
+        paywallViewModel.refreshStripePrices(sessionManager.loadAccount())
     }
 
     /**
      * After the complete paywall data received,
      */
     private fun onPaywallResult(result: Result<Paywall>) {
+        // For manual refreshing, show a toast after completion.
         val isManual = binding.swipeRefresh.isRefreshing
 
         binding.swipeRefresh.isRefreshing = false
@@ -217,8 +215,7 @@ class PaywallActivity : ScopedAppActivity(),
 
     override fun onRefresh() {
         toast(R.string.refresh_paywall)
-
-        paywallViewModel.loadPaywall(true)
+        loadData(true)
     }
 
     // Upon payment succeeded, this activity should kill
