@@ -96,6 +96,7 @@ val defaultPlans = listOf(
  * use this to find out which plan a member is subscribed to.
  */
 object PlanStore {
+    const val cacheName = "ftc_plans.json"
     // Will be updated once paywall data is fetched from server or cache.
     var plans = defaultPlans
 
