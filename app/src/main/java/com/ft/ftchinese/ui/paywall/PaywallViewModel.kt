@@ -4,9 +4,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
-import com.ft.ftchinese.repository.Fetch
-import com.ft.ftchinese.repository.SubscribeApi
+import com.ft.ftchinese.repository.PaywallClient
+import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.util.json
 import com.ft.ftchinese.viewmodel.Result
@@ -26,68 +27,64 @@ class PaywallViewModel(
         MutableLiveData<Result<Paywall>>()
     }
 
+    val stripePrices: MutableLiveData<Result<List<StripePrice>>> by lazy {
+        MutableLiveData<Result<List<StripePrice>>>()
+    }
+
+    private suspend fun getCachedPaywall(): Paywall? {
+        return withContext(Dispatchers.IO) {
+            val data = cache.loadText(paywallFileName)
+
+            if (!data.isNullOrBlank()) {
+                try {
+                    json.parse<Paywall>(data)
+                } catch (e: Exception) {
+                    null
+                }
+            } else {
+                null
+            }
+        }
+    }
+
     fun loadPaywall(isRefreshing: Boolean) {
         viewModelScope.launch {
 
             // If not manually refreshing
             if (!isRefreshing) {
-                try {
-                    val pw = withContext(Dispatchers.IO) {
-                        val data = cache.loadText(paywallFileName)
-
-                        if (!data.isNullOrBlank()) {
-                            json.parse<Paywall>(data)
-                        } else {
-                            null
-                        }
+                val pw = getCachedPaywall()
+                if (pw != null) {
+                    paywallResult.value = Result.Success(pw)
+                    // Update the in-memory cache.
+                    PlanStore.plans = pw.products.flatMap {
+                        it.plans
                     }
-
-                    if (pw != null) {
-
-                        paywallResult.value = Result.Success(pw)
-                        // Update the in-memory cache.
-                        PlanStore.plans = pw.products.flatMap {
-                            it.plans
-                        }
-                    }
-                } catch (e: Exception) {
-                    info(e)
                 }
             }
 
+            // Always retrieve from api.
             if (isNetworkAvailable.value != true) {
-
                 paywallResult.value = Result.LocalizedError(R.string.prompt_no_network)
-
                 return@launch
             }
 
             try {
-                val (pw, data) = withContext(Dispatchers.IO) {
-
-                    val (_, data) = Fetch()
-                        .get(SubscribeApi.PAYWALL)
-                        .endJsonText()
-
-                    info("Fetch paywall data $data")
-
-                    if(!data.isNullOrBlank()) {
-                        Pair(json.parse<Paywall>(data), data)
-                    } else {
-                        null
-                    }
+                val paywall = withContext(Dispatchers.IO) {
+                    PaywallClient.retrieve()
                 }
-                        ?: return@launch
 
-                if (pw == null) {
+                if (paywall == null) {
                     paywallResult.value = Result.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
 
-                paywallResult.value = Result.Success(pw)
+                paywallResult.value = Result.Success(paywall.value)
+                PlanStore.plans = paywall.value.products.flatMap {
+                    it.plans
+                }
 
                 withContext(Dispatchers.IO) {
-                    cache.saveText(paywallFileName, data)
+                    cache.saveText(paywallFileName, paywall.raw)
                 }
 
             } catch (e: Exception) {
@@ -97,5 +94,79 @@ class PaywallViewModel(
         }
     }
 
-    // TODO: fetch stripe prices in background.
+    // Retrieve ftc pricing plans in background.
+    fun refreshFtcPrices() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val result = PaywallClient.listPrices() ?: return@launch
+                PlanStore.plans = result.value
+                cache.saveText(PlanStore.cacheName, result.raw)
+            } catch (e: Exception) {
+                info(e)
+            }
+        }
+    }
+
+    // Retrieve stripe prices in background and refresh cache.
+    fun refreshStripePrices(account: Account?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val result = StripeClient.listPrices(account) ?: return@launch
+                StripePriceStore.prices = result.value
+                cache.saveText(StripePriceStore.cacheName, result.raw)
+            } catch (e: Exception) {
+                info(e)
+            }
+        }
+    }
+
+    private suspend fun stripeCachedPrices(): List<StripePrice>? {
+        return withContext(Dispatchers.IO) {
+            val data = cache.loadText(StripePriceStore.cacheName)
+
+            if (data == null) {
+                null
+            } else {
+                try {
+                    json.parseArray(data)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        }
+    }
+
+    // Load stripe prices from cache, or from server is cached data not found,
+    // before show stripe payment page.
+    // This works as a backup in case stripe prices is not yet
+    // loaded into memory.
+    fun loadStripePrices(account: Account?) {
+        viewModelScope.launch {
+            val prices = stripeCachedPrices()
+            if (prices != null) {
+                stripePrices.value = Result.Success(prices)
+                return@launch
+            }
+
+            // Retrieve server data
+            try {
+                val result = withContext(Dispatchers.IO) {
+                    StripeClient.listPrices(account)
+                }
+
+                if (result == null) {
+                    stripePrices.value = Result.LocalizedError(R.string.api_server_error)
+                    return@launch
+                }
+
+                stripePrices.value = Result.Success(result.value)
+
+                withContext(Dispatchers.IO) {
+                    cache.saveText(StripePriceStore.cacheName, result.raw)
+                }
+            } catch (e: Exception) {
+                info(e)
+            }
+        }
+    }
 }
