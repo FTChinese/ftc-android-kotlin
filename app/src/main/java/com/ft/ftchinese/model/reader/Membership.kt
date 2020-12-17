@@ -42,21 +42,6 @@ data class Membership(
         }
 
     /**
-     * Find the corresponding plan for current membership.
-     */
-    fun getPlan(): Plan? {
-        if (tier == null) {
-            return null
-        }
-
-        if (cycle == null) {
-            return null
-        }
-
-        return PlanStore.find(tier, cycle)
-    }
-
-    /**
      * Checks whether the current membership is purchased
      * via alipay or wechat pay.
      */
@@ -172,9 +157,34 @@ data class Membership(
             return true
         }
 
-        return expireDate.isBefore(LocalDate.now()) && (autoRenew == false)
+        return expireDate.isBefore(LocalDate.now()) && !autoRenew
     }
 
+    fun canCancelStripe(): Boolean {
+        if (payMethod != PayMethod.STRIPE) {
+            return false
+        }
+
+        // As long as auto renew is on, we should allow cancel.
+        return autoRenew
+    }
+
+    fun canReactivateStripe(): Boolean {
+        if (payMethod != PayMethod.STRIPE) {
+            return false
+        }
+
+        // If auto renew if on, it's not eligible for reactivation.
+        if (autoRenew) {
+            return false
+        }
+
+        if (expireDate == null) {
+            return false
+        }
+        // If auto renew is turned off, it could only be reactivated before expiration date.
+        return expireDate.isAfter(LocalDate.now())
+    }
     /**
      * Calculate remaining days before expiration.
      * This is only applicable to Alipay or Wechat pay.
