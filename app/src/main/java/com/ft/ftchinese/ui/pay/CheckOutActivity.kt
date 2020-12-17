@@ -18,6 +18,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCheckOutBinding
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.service.VerifySubsWorker
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.store.PaymentManager
 import com.ft.ftchinese.store.SessionManager
@@ -25,6 +26,8 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.formatPrice
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.paywall.PaywallViewModel
+import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
@@ -49,6 +52,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private lateinit var checkOutViewModel: CheckOutViewModel
     private lateinit var accountViewModel: AccountViewModel
+    private lateinit var paywallViewModel: PaywallViewModel
 
     private lateinit var orderManager: OrderManager
     private lateinit var sessionManager: SessionManager
@@ -59,8 +63,10 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private lateinit var binding: ActivityCheckOutBinding
 
+    // Checkout information passed from calling activity.
     private var checkout: FtcCheckout? = null
 
+    // Payment method use selected.
     private var payMethod: PayMethod? = null
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -94,7 +100,6 @@ class CheckOutActivity : ScopedAppActivity(),
         // Log event: add card
         tracker.addCart(co.plan)
 
-
         // Attach price card
         supportFragmentManager.commit {
             replace(
@@ -104,13 +109,13 @@ class CheckOutActivity : ScopedAppActivity(),
                 )
             )
         }
+
+        setupViewModel()
         initUI()
-        setUp()
+
     }
 
     private fun initUI() {
-//        val account = sessionManager.loadAccount() ?: return
-
         // Show different titles
         when (checkout?.kind) {
             OrderKind.RENEW ->  supportActionBar?.setTitle(R.string.title_renewal)
@@ -148,20 +153,38 @@ class CheckOutActivity : ScopedAppActivity(),
         }
     }
 
-    private fun setUp() {
+    private fun setupViewModel() {
         checkOutViewModel = ViewModelProvider(this)
                 .get(CheckOutViewModel::class.java)
 
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
+        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(FileCache(this)))
+            .get(PaywallViewModel::class.java)
+
+        connectionLiveData.observe(this, {
+            checkOutViewModel.isNetworkAvailable.value = it
+            accountViewModel.isNetworkAvailable.value = it
+            paywallViewModel.isNetworkAvailable.value = it
+        })
+        isConnected.let {
+            checkOutViewModel.isNetworkAvailable.value = it
+            accountViewModel.isNetworkAvailable.value = it
+            paywallViewModel.isNetworkAvailable.value = it
+        }
+
         checkOutViewModel.wxPayIntentResult.observe(this, {
-            onWxOrderFetched(it)
+            onWxPayIntent(it)
         })
 
         checkOutViewModel.aliPayIntentResult.observe(this, {
-            onAliOrderFetch(it)
+            onAliPayIntent(it)
         })
+
+        paywallViewModel.stripePrices.observe(this) {
+            onStripePrices(it)
+        }
     }
 
     private fun onSelectPayMethod() {
@@ -185,14 +208,13 @@ class CheckOutActivity : ScopedAppActivity(),
             // Stripe支付 ¥258.00
             // 添加或选择银行卡
             // 设置Stripe支付
-            PayMethod.STRIPE -> when {
-                sessionManager.loadAccount()?.stripeId == null -> getString(R.string.stripe_init)
-
-                else -> getString(
-                        R.string.formatter_check_out,
-                        getString(R.string.pay_method_stripe),
-                        priceText)
-
+            PayMethod.STRIPE -> if (sessionManager.loadAccount()?.stripeId.isNullOrBlank()) {
+                getString(R.string.stripe_init)
+            } else {
+                getString(
+                    R.string.formatter_check_out,
+                    getString(R.string.pay_method_stripe),
+                    priceText)
             }
             else -> {
                 getString(R.string.pay_method_not_selected)
@@ -201,12 +223,6 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     private fun onPayButtonClicked() {
-        if (!isConnected) {
-            toast(R.string.prompt_no_network)
-
-            return
-        }
-
         val account = sessionManager.loadAccount() ?: return
         val plan = checkout?.plan ?: return
 
@@ -240,30 +256,60 @@ class CheckOutActivity : ScopedAppActivity(),
             }
 
             PayMethod.STRIPE -> {
-
+                // TODO: move to a separate method on membership.
                 if (account.membership.isActiveStripe() && !account.membership.expired()) {
                     toast(R.string.duplicate_purchase)
                     binding.inProgress = false
                     return
                 }
 
+                if (gotoStripe(plan)) {
+                    return
+                }
+
+                paywallViewModel.loadStripePrices(account)
+            }
+
+            else -> toast(R.string.pay_method_not_selected)
+        }
+    }
+
+    private fun gotoStripe(plan: Plan): Boolean {
+        val price = StripePriceStore.find(
+            tier = plan.tier,
+            cycle = plan.cycle,
+        )
+        if (price == null) {
+            toast("Stripe price not found!")
+            return false
+        }
+
+        StripeSubActivity.startForResult(
+            activity = this,
+            requestCode = RequestCode.PAYMENT,
+            price = price
+        )
+        binding.inProgress = false
+        return true
+    }
+
+    private fun onStripePrices(result: Result<List<StripePrice>>) {
+        when (result) {
+            is Result.LocalizedError -> {
+                toast(result.msgId)
+            }
+            is Result.Error -> {
+                result.exception.message?.let { toast(it) }
+            }
+            is Result.Success -> {
                 val plan = checkout?.plan ?: return
-                val price = StripePriceStore.find(
-                    tier = plan.tier,
-                    cycle = plan.cycle
-                ) ?: return
-                StripeSubActivity.startForResult(
-                        activity = this,
-                        requestCode = RequestCode.PAYMENT,
-                        price = price
-                )
-                binding.inProgress = false
+
+                gotoStripe(plan)
             }
         }
     }
 
-
-    private fun onAliOrderFetch(result: Result<AliPayIntent>) {
+    private fun onAliPayIntent(result: Result<AliPayIntent>) {
         binding.inProgress = false
         info(result)
 
@@ -358,7 +404,7 @@ class CheckOutActivity : ScopedAppActivity(),
         WorkManager.getInstance(this).enqueue(verifyRequest)
     }
 
-    private fun onWxOrderFetched(result: Result<WxPayIntent>) {
+    private fun onWxPayIntent(result: Result<WxPayIntent>) {
         binding.inProgress = false
 
         when (result) {
