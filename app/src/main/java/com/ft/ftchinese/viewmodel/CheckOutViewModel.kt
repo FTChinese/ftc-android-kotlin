@@ -7,7 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
-import com.ft.ftchinese.repository.StripeRepo
+import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.repository.ClientError
 import kotlinx.coroutines.Dispatchers
@@ -28,16 +28,12 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<AliPayIntent>>()
     }
 
-    val stripePriceResult: MutableLiveData<Result<StripePrice>> by lazy {
-        MutableLiveData<Result<StripePrice>>()
-    }
-
-    val stripeSubscribedResult: MutableLiveData<Result<StripeSubResult>> by lazy {
+    val stripeSubsResult: MutableLiveData<Result<StripeSubResult>> by lazy {
         MutableLiveData<Result<StripeSubResult>>()
     }
 
-    val upgradePreviewResult: MutableLiveData<Result<PaymentIntent>> by lazy {
-        MutableLiveData<Result<PaymentIntent>>()
+    val upgradePreviewResult: MutableLiveData<Result<Checkout>> by lazy {
+        MutableLiveData<Result<Checkout>>()
     }
 
     val freeUpgradeResult: MutableLiveData<Result<Boolean>> by lazy {
@@ -45,10 +41,15 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
     }
 
     fun createWxOrder(account: Account, plan: Plan) {
+        if (isNetworkAvailable.value == false) {
+            wxPayIntentResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val wxOrder = withContext(Dispatchers.IO) {
-                    SubRepo.wxPlaceOrder(account, plan)
+                    SubRepo.createWxOrder(account, plan)
                 }
 
                 if (wxOrder == null) {
@@ -70,10 +71,15 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
     }
 
     fun createAliOrder(account: Account, plan: Plan) {
+        if (isNetworkAvailable.value == false) {
+            aliPayIntentResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val aliOrder = withContext(Dispatchers.IO) {
-                    SubRepo.aliPlaceOrder(account, plan)
+                    SubRepo.createAliOrder(account, plan)
                 }
 
                 if (aliOrder == null) {
@@ -101,85 +107,69 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun getStripePlan(plan: Plan?) {
-        if (isNetworkAvailable.value == false) {
-            stripePriceResult.value = Result.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        if (plan == null) {
-            stripePriceResult.value = Result.LocalizedError(R.string.prompt_unknown_plan)
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val stripePlan = withContext(Dispatchers.IO) {
-                    StripeRepo.loadPlan(plan.getNamedKey())
-                }
-
-                if (stripePlan == null) {
-                    stripePriceResult.value = Result.LocalizedError(R.string.prompt_unknown_plan)
-                    return@launch
-                }
-
-                stripePriceResult.value = Result.Success(stripePlan)
-
-
-            } catch (e: Exception) {
-                stripePriceResult.value = parseException(e)
-            }
-        }
-    }
-
     fun createStripeSub(account: Account, params: StripeSubParams) {
+        if (isNetworkAvailable.value == false) {
+            stripeSubsResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val sub = withContext(Dispatchers.IO) {
-                    StripeRepo.createSubscription(account, params)
+                    StripeClient.createSubscription(account, params)
                 }
 
                 if (sub == null) {
-                    stripeSubscribedResult.value = Result.LocalizedError(R.string.error_unknown)
+                    stripeSubsResult.value = Result.LocalizedError(R.string.error_unknown)
                     return@launch
                 }
 
-                stripeSubscribedResult.value = Result.Success(sub)
+                stripeSubsResult.value = Result.Success(sub)
 
             } catch (e: ClientError) {
-                stripeSubscribedResult.value = if (e.type == "idempotency_error") {
+                stripeSubsResult.value = if (e.type == "idempotency_error") {
                     Result.Error(IdempotencyError())
                 } else {
                     parseApiError(e)
                 }
 
             } catch (e: Exception) {
-                stripeSubscribedResult.value = parseException(e)
+                stripeSubsResult.value = parseException(e)
             }
         }
     }
 
     fun upgradeStripeSub(account: Account, params: StripeSubParams) {
+        if (isNetworkAvailable.value == false) {
+            stripeSubsResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val sub = withContext(Dispatchers.IO) {
-                    StripeRepo.upgradeSub(account, params)
+                    StripeClient.upgradeSub(account, params)
                 }
 
                 if (sub == null) {
-                    stripeSubscribedResult.value = Result.LocalizedError(R.string.error_unknown)
+                    stripeSubsResult.value = Result.LocalizedError(R.string.error_unknown)
                     return@launch
                 }
 
-                stripeSubscribedResult.value = Result.Success(sub)
+                stripeSubsResult.value = Result.Success(sub)
 
             } catch (e: Exception) {
-                stripeSubscribedResult.value = parseException(e)
+                stripeSubsResult.value = parseException(e)
             }
         }
     }
 
     fun previewUpgrade(account: Account) {
+        if (isNetworkAvailable.value == false) {
+            upgradePreviewResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val up = withContext(Dispatchers.IO) {
@@ -209,9 +199,14 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
     }
 
     fun freeUpgrade(account: Account) {
+        if (isNetworkAvailable.value == false) {
+            freeUpgradeResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
-                val (ok, pi) = withContext(Dispatchers.IO) {
+                val (ok, checkout) = withContext(Dispatchers.IO) {
                     SubRepo.directUpgrade(account)
                 }
 
@@ -220,12 +215,12 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                     return@launch
                 }
 
-                if (pi == null) {
+                if (checkout == null) {
                     freeUpgradeResult.value = Result.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
 
-                freeUpgradeResult.value = Result.Error(FreeUpgradeDeniedError(pi))
+                freeUpgradeResult.value = Result.Error(FreeUpgradeDeniedError(checkout))
 
             } catch (e: ClientError) {
                 val msgId = when (e.statusCode) {
