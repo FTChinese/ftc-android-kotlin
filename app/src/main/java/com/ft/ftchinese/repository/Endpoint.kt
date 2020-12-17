@@ -1,5 +1,7 @@
 package com.ft.ftchinese.repository
 
+import com.ft.ftchinese.BuildConfig
+
 object NextApi {
     private val BASE = Config.readerApiBase
     val EMAIL_EXISTS = "$BASE/users/exists"
@@ -33,71 +35,51 @@ object ContentApi {
     val INTERACTIVE = "$BASE/interactive/contents"
 }
 
-object SubscribeApi {
-    private val BASE = Config.subsApiProdBase
+private const val devIP = "http://192.168.10.122"
 
-    val PAYWALL = "$BASE/paywall"
+object Endpoint {
+    val readerBase = if (BuildConfig.DEBUG) {
+        "$devIP:8000"
+    } else {
+        BuildConfig.API_READER_LIVE
+    }
+
+    val contentBase = if (BuildConfig.DEBUG) {
+        "$devIP:8100"
+    } else {
+        BuildConfig.API_CONTENT_LIVE
+    }
+
+    /**
+     * Base url for subscription api.
+     * @isTest indicates whether the current user is a test account.
+     * For endpoints that do not requires user being logged in,
+     * use the default value.
+     */
+    fun subsBase(isTest: Boolean = false) = if (isTest) {
+        if (BuildConfig.DEBUG) {
+            "$devIP:8200"
+        } else {
+            BuildConfig.API_SUBS_SANDBOX
+        }
+    } else {
+        if (BuildConfig.DEBUG) {
+            "$devIP:8200"
+        } else {
+            BuildConfig.API_SUBS_LIVE
+        }
+    }
+}
+
+object SubsApi {
+    private val BASE = Config.subsApiProdBase
 
     val WX_LOGIN = "$BASE/wx/oauth/login"
     val WX_REFRESH = "$BASE/wx/oauth/refresh"
 
-    val UPGRADE = "$BASE/upgrade/free"
-    val UPGRADE_PREVIEW = "$BASE/upgrade/balance"
-
     val STRIPE_PLAN = "$BASE/stripe/plans"
     val STRIPE_CUSTOMER = "$BASE/stripe/customers"
-    val STRIPE_SUB = "$BASE/stripe/subs"
 
-    private fun baseUrl(isTest: Boolean): String {
-        return if (isTest) {
-            Config.subsApiSandboxBase
-        } else {
-            Config.subsApiProdBase
-        }
-    }
-
-    fun aliOrderUrl(isTest: Boolean): String {
-        return "${baseUrl(isTest)}/alipay/app"
-    }
-
-    fun wxOrderUrl(isTest: Boolean): String {
-        return "${baseUrl(isTest)}/wxpay/app"
-    }
-
-    fun verifyPaymentUrl(orderId: String, isTest: Boolean): String {
-        return "${baseUrl(isTest)}/orders/${orderId}/verify-payment"
-    }
-
-    fun refreshIAP(origTxId: String, isTest: Boolean): String {
-        return "${baseUrl(isTest)}/apple/subs/${origTxId}"
-    }
-
-    fun stripeCustomer(isTest: Boolean): String {
-        return "${baseUrl(isTest)}/stripe/customers"
-    }
-
-    fun stripeSubBase(isTest: Boolean): String {
-        return "${baseUrl(isTest)}/stripe/subs"
-    }
-
-    fun stripeSub(id: String, isTest: Boolean): String {
-        return "${stripeSubBase(isTest)}/${id}"
-    }
-    fun stripeRefresh(id: String, isTest: Boolean): String {
-        return "${stripeSub(id, isTest)}/refresh"
-    }
-
-    fun stripeUpgrade(id: String, isTest: Boolean): String {
-        return "${stripeSub(id, isTest)}/upgrade"
-    }
-
-    fun stripeCancel(id: String, isTest: Boolean): String {
-        return "${stripeSub(id, isTest)}/cancel"
-    }
-
-    fun stripeReactivate(id: String, isTest: Boolean): String {
-        return "${stripeSub(id, isTest)}/reactivate"
-    }
 }
 
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
