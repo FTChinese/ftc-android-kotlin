@@ -11,7 +11,7 @@ import com.ft.ftchinese.model.subscription.Order
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.ClientError
-import com.ft.ftchinese.repository.StripeRepo
+import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.store.FileCache
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +52,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<StripeCustomer>>()
     }
 
-    val stripeSubsRefreshed: MutableLiveData<Result<StripeSubResult>> by lazy {
+    val stripeResult: MutableLiveData<Result<StripeSubResult>> by lazy {
         MutableLiveData<Result<StripeSubResult>>()
     }
 
@@ -67,6 +67,11 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     // Ask API to fetch user's latest wechat info and save
     // it to database.
     fun refreshWxInfo(wxSession: WxSession) {
+        if (isNetworkAvailable.value == false) {
+            wxRefreshResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
@@ -143,6 +148,12 @@ class AccountViewModel : ViewModel(), AnkoLogger {
             info("Wx avatar url empty")
             return
         }
+
+        if (isNetworkAvailable.value == false) {
+            avatarRetrieved.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val bytes = withContext(Dispatchers.IO) {
@@ -174,7 +185,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val customer = withContext(Dispatchers.IO) {
-                    StripeRepo.createCustomer(account)
+                    StripeClient.createCustomer(account)
                 }
 
                 if (customer == null) {
@@ -201,14 +212,19 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     }
 
     // Ask the latest stripe subscription data.
-    fun refreshStripeSub(account: Account) {
+    fun refreshStripe(account: Account) {
+        if (isNetworkAvailable.value == false) {
+            stripeResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val stripeSub = withContext(Dispatchers.IO) {
-                    StripeRepo.refreshSub(account)
+                    StripeClient.refreshSub(account)
                 }
 
-                stripeSubsRefreshed.value = if (stripeSub == null) {
+                stripeResult.value = if (stripeSub == null) {
                     Result.LocalizedError(R.string.stripe_refreshing_failed)
                 } else {
                     Result.Success(stripeSub)
@@ -216,7 +232,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
 
             } catch (e: ClientError) {
                 info(e)
-                stripeSubsRefreshed.value = if (e.statusCode == 404) {
+                stripeResult.value = if (e.statusCode == 404) {
                     Result.LocalizedError(R.string.loading_failed)
                 } else {
                     parseApiError(e)
@@ -224,12 +240,83 @@ class AccountViewModel : ViewModel(), AnkoLogger {
 
             } catch (e: Exception) {
                 info(e)
-                stripeSubsRefreshed.value = parseException(e)
+                stripeResult.value = parseException(e)
+            }
+        }
+    }
+
+    fun cancelStripe(account: Account) {
+        if (isNetworkAvailable.value == false) {
+            stripeResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val stripeSub = withContext(Dispatchers.IO) {
+                    StripeClient.cancelSub(account)
+                }
+
+                stripeResult.value = if (stripeSub == null) {
+                    Result.LocalizedError(R.string.stripe_refreshing_failed)
+                } else {
+                    Result.Success(stripeSub)
+                }
+
+            } catch (e: ClientError) {
+                info(e)
+                stripeResult.value = if (e.statusCode == 404) {
+                    Result.LocalizedError(R.string.loading_failed)
+                } else {
+                    parseApiError(e)
+                }
+
+            } catch (e: Exception) {
+                info(e)
+                stripeResult.value = parseException(e)
+            }
+        }
+    }
+
+    fun reactivateStripe(account: Account) {
+        if (isNetworkAvailable.value == false) {
+            stripeResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val stripeSub = withContext(Dispatchers.IO) {
+                    StripeClient.reactivateSub(account)
+                }
+
+                stripeResult.value = if (stripeSub == null) {
+                    Result.LocalizedError(R.string.stripe_refreshing_failed)
+                } else {
+                    Result.Success(stripeSub)
+                }
+
+            } catch (e: ClientError) {
+                info(e)
+                stripeResult.value = if (e.statusCode == 404) {
+                    Result.LocalizedError(R.string.loading_failed)
+                } else {
+                    parseApiError(e)
+                }
+
+            } catch (e: Exception) {
+                info(e)
+                stripeResult.value = parseException(e)
             }
         }
     }
 
     fun refreshIAPSub(account: Account) {
+        if (isNetworkAvailable.value == false) {
+            iapRefreshResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val iapSubs = withContext(Dispatchers.IO) {
@@ -265,10 +352,15 @@ class AccountViewModel : ViewModel(), AnkoLogger {
     }
 
     fun fetchOrders(account: Account) {
+        if (isNetworkAvailable.value == false) {
+            ordersResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val orders = withContext(Dispatchers.IO) {
-                    SubRepo.getOrders(account)
+                    SubRepo.listOrders(account)
                 }
 
                 ordersResult.value = Result.Success(orders)
