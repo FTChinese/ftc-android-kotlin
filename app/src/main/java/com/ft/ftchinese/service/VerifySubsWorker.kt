@@ -13,7 +13,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.repository.AccountRepo
-import com.ft.ftchinese.repository.StripeRepo
+import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.store.PaymentManager
 import com.ft.ftchinese.store.SessionManager
@@ -129,7 +129,7 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         }
 
         try {
-            val result = SubRepo.verifyPayment(account, pr.ftcOrderId) ?: return false
+            val result = SubRepo.verifyOrder(account, pr.ftcOrderId) ?: return false
             info(result)
 
             paymentManager.save(result.payment)
@@ -159,7 +159,7 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
 
     private fun refreshStripe(account: Account): Boolean {
         try {
-            StripeRepo.refreshSub(account) ?: return false
+            StripeClient.refreshSub(account) ?: return false
         } catch (e: Exception) {
             info(e)
             return false
