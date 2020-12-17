@@ -9,48 +9,7 @@ import org.jetbrains.anko.info
 
 object SubRepo : AnkoLogger {
 
-    fun previewUpgrade(account: Account): PaymentIntent? {
-
-        val (_, body) = Fetch()
-            .get(SubscribeApi.UPGRADE_PREVIEW)
-            .addHeaders(account.headers())
-            .setTimeout(30)
-            .noCache()
-            .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<PaymentIntent>(body)
-        }
-    }
-
-    fun directUpgrade(account: Account): Pair<Boolean, PaymentIntent?> {
-
-        val (resp, body) = Fetch()
-            .put(SubscribeApi.UPGRADE)
-            .addHeaders(account.headers())
-            .noCache()
-            .setClient()
-            .endJsonText()
-
-        return when (resp.code) {
-            204 -> Pair(true, null)
-            200 -> if (body != null) {
-                try {
-                    Pair(true, json.parse<PaymentIntent>(body))
-                } catch (e: Exception) {
-                    info(e)
-                    Pair(false, null)
-                }
-            } else {
-                Pair(false, null)
-            }
-            else -> Pair(false, null)
-        }
-    }
-
-    fun getOrders(account: Account): List<Order> {
+    fun listOrders(account: Account): List<Order> {
 
         val (_, body) = Fetch()
             .get(NextApi.ORDERS)
@@ -65,13 +24,25 @@ object SubRepo : AnkoLogger {
         } ?: listOf()
     }
 
-    fun wxPlaceOrder(account: Account, plan: Plan): WxPayIntent? {
+    fun verifyOrder(account: Account, orderId: String):  VerificationResult? {
+        val (_, body) = Fetch()
+            .post(Endpoint.subsBase(account.isTest) + "/orders/$orderId/verify-payment")
+            .noCache()
+            .sendJson()
+            .endJsonText()
 
-        // If current account is a testing one, always send request to sandbox.
-        val isTest = account.isTest
+        info("Raw verification response $body")
+        return if (body == null) {
+            null
+        } else {
+            json.parse<VerificationResult>(body)
+        }
+    }
+
+    fun createWxOrder(account: Account, plan: Plan): WxPayIntent? {
 
         val (_, body) = Fetch()
-            .post("${SubscribeApi.wxOrderUrl(isTest)}/${plan.tier}/${plan.cycle}")
+            .post(Endpoint.subsBase(account.isTest) + "/wxpay/app")
             .addHeaders(account.headers())
             .setTimeout(30)
             .noCache()
@@ -92,14 +63,10 @@ object SubRepo : AnkoLogger {
         }
     }
 
-    fun aliPlaceOrder(account: Account, plan: Plan): AliPayIntent? {
-
-        val isTest = account.isTest
-
-        info("Is test pay $isTest")
+    fun createAliOrder(account: Account, plan: Plan): AliPayIntent? {
 
         val (_, body) = Fetch()
-            .post("${SubscribeApi.aliOrderUrl(isTest)}/${plan.tier}/${plan.cycle}")
+            .post(Endpoint.subsBase(account.isTest) + "/alipay/app")
             .setTimeout(30)
             .addHeaders(account.headers())
             .noCache()
@@ -119,28 +86,53 @@ object SubRepo : AnkoLogger {
         }
     }
 
-    fun verifyPayment(account: Account, orderId: String):  VerificationResult? {
+    fun previewUpgrade(account: Account): Checkout? {
+
         val (_, body) = Fetch()
-            .post(SubscribeApi.verifyPaymentUrl(orderId, account.isTest))
+            .get(Endpoint.subsBase(account.isTest) + "/upgrade/balance")
+            .addHeaders(account.headers())
+            .setTimeout(30)
             .noCache()
-            .sendJson()
             .endJsonText()
 
-        info("Raw verification response $body")
         return if (body == null) {
             null
         } else {
-            json.parse<VerificationResult>(body)
+            json.parse<Checkout>(body)
+        }
+    }
+
+    fun directUpgrade(account: Account): Pair<Boolean, Checkout?> {
+
+        val (resp, body) = Fetch()
+            .put(Endpoint.subsBase(account.isTest) + "/upgrade/free")
+            .addHeaders(account.headers())
+            .noCache()
+            .setClient()
+            .endJsonText()
+
+        return when (resp.code) {
+            204 -> Pair(true, null)
+            200 -> if (body != null) {
+                try {
+                    Pair(false, json.parse<Checkout>(body))
+                } catch (e: Exception) {
+                    info(e)
+                    Pair(false, null)
+                }
+            } else {
+                Pair(false, null)
+            }
+            else -> Pair(false, null)
         }
     }
 
     fun refreshIAP(account: Account): IAPSubs? {
-        if (account.membership.appleSubsId == null) {
-            return null
-        }
+
+        val origTxId = account.membership.appleSubsId ?: throw Exception("Not an Apple subscription")
 
         val (_, body) = Fetch()
-            .patch(SubscribeApi.refreshIAP(account.membership.appleSubsId, account.isTest))
+            .patch(Endpoint.subsBase(account.isTest) + "/apple/subs/$origTxId")
             .noCache()
             .endJsonText()
 
