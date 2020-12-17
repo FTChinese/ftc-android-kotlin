@@ -2,19 +2,15 @@ package com.ft.ftchinese.ui.pay
 
 import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpgradePreviewBinding
+import com.ft.ftchinese.model.subscription.Checkout
 import com.ft.ftchinese.model.subscription.OrderKind
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.model.subscription.PaymentIntent
-import com.ft.ftchinese.model.subscription.Plan
-import com.ft.ftchinese.ui.base.formatPrice
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.CheckOutViewModel
@@ -25,7 +21,7 @@ import org.jetbrains.anko.toast
 import org.jetbrains.anko.yesButton
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class UpgradePreviewActivity : AppCompatActivity() {
+class UpgradePreviewActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var checkoutViewModel: CheckOutViewModel
@@ -34,8 +30,7 @@ class UpgradePreviewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_upgrade_preview)
-//        setContentView(R.layout.activity_upgrade_preview)
-        binding.preview = UIUpgradePreview()
+        binding.preview = UpgradePreview()
 
         setSupportActionBar(binding.toolbar.toolbar)
         supportActionBar?.apply {
@@ -45,86 +40,51 @@ class UpgradePreviewActivity : AppCompatActivity() {
 
         sessionManager = SessionManager.getInstance(this)
 
-        checkoutViewModel = ViewModelProvider(this)
-                .get(CheckOutViewModel::class.java)
 
-        checkoutViewModel.upgradePreviewResult.observe(this, Observer {
-            onPreviewFetched(it)
-        })
-
-        checkoutViewModel.freeUpgradeResult.observe(this, Observer {
-            onUpgradedForFree(it)
-        })
-
+        setupViewModel()
         initUI(null)
-
-        if (!isConnected) {
-            toast(R.string.prompt_no_network)
-            return
-        }
-        val account = sessionManager.loadAccount() ?: return
-
-        showProgress(true)
-        binding.btnConfirmUpgrade.isEnabled = false
-
-        toast(R.string.query_balance)
-        checkoutViewModel.previewUpgrade(account)
+        loadData()
     }
 
-    private fun initUI(paymentIntent: PaymentIntent?) {
+    private fun setupViewModel() {
+        checkoutViewModel = ViewModelProvider(this)
+            .get(CheckOutViewModel::class.java)
 
-        if (paymentIntent == null) {
+        connectionLiveData.observe(this) {
+            checkoutViewModel.isNetworkAvailable.value = it
+        }
+        isConnected.let {
+            checkoutViewModel.isNetworkAvailable.value = it
+        }
+
+        checkoutViewModel.upgradePreviewResult.observe(this) {
+            onPreviewFetched(it)
+        }
+
+        checkoutViewModel.freeUpgradeResult.observe(this) {
+            onUpgradedForFree(it)
+        }
+    }
+
+    private fun initUI(co: Checkout?) {
+        binding.btnConfirmUpgrade.isEnabled = false
+
+        if (co == null) {
             return
         }
 
-        val uiData = UIUpgradePreview(
-               amount =  formatPrice(
-                       paymentIntent.currency,
-                       paymentIntent.amount),
-
-                price = getString(
-                        R.string.premium_price,
-                        formatPrice(
-                                paymentIntent.plan.currency,
-                                paymentIntent.plan.price
-                        )
-                ),
-                balance = getString(
-                        R.string.account_balance,
-                        formatPrice(
-                                paymentIntent.currency,
-                                paymentIntent.wallet.balance
-                        )
-                ),
-                conversion = if (paymentIntent.isPayRequired()) {
-                    "升级首先使用当前余额抵扣，不足部分需要另行支付"
-                } else {
-                    getString(
-                            R.string.balance_conversion,
-                            paymentIntent.cycleCount,
-                            paymentIntent.extraDays
-                    )
-                },
-                confirmUpgrade = if (paymentIntent.isPayRequired()) {
-                    getString(R.string.confirm_upgrade)
-                } else {
-                    getString(R.string.direct_upgrade)
-                }
-
-        )
-        binding.preview = uiData
+        binding.preview = upgradePreviewUI(this, co)
         binding.btnConfirmUpgrade.isEnabled = true
 
         binding.btnConfirmUpgrade.setOnClickListener {
 
-            if (paymentIntent.isPayRequired()) {
-
+            if (!co.isFree) {
                 CheckOutActivity.startForResult(
                         activity = this,
                         requestCode = RequestCode.PAYMENT,
                         checkout = FtcCheckout(
                             kind = OrderKind.UPGRADE,
-                            plan = paymentIntent.plan
+                            plan = co.upgradePlan()
                         )
                 )
                 finish()
@@ -132,22 +92,25 @@ class UpgradePreviewActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            if (!isConnected) {
-                toast(R.string.prompt_no_network)
-
-                return@setOnClickListener
-            }
-
             val account = sessionManager.loadAccount() ?: return@setOnClickListener
 
-            showProgress(true)
+            binding.progress = true
             binding.btnConfirmUpgrade.isEnabled = false
             checkoutViewModel.freeUpgrade(account)
         }
     }
 
-    private fun onPreviewFetched(result: Result<PaymentIntent>) {
-        showProgress(false)
+    private fun loadData() {
+        val account = sessionManager.loadAccount() ?: return
+
+        binding.progress = true
+        toast(R.string.query_balance)
+
+        checkoutViewModel.previewUpgrade(account)
+    }
+
+    private fun onPreviewFetched(result: Result<Checkout>) {
+        binding.progress = false
 
         when (result) {
             is Result.LocalizedError -> {
@@ -173,7 +136,7 @@ class UpgradePreviewActivity : AppCompatActivity() {
     }
 
     private fun onUpgradedForFree(result: Result<Boolean>) {
-        showProgress(false)
+        binding.progress = false
 
         when (result) {
             is Result.LocalizedError -> {
@@ -185,7 +148,7 @@ class UpgradePreviewActivity : AppCompatActivity() {
 
                 if (result.exception is FreeUpgradeDeniedError) {
                     toast("无法直接升级")
-                    initUI(result.exception.paymentIntent)
+                    initUI(result.exception.checkout)
                     return
                 }
 
@@ -218,14 +181,6 @@ class UpgradePreviewActivity : AppCompatActivity() {
     private fun done() {
         setResult(Activity.RESULT_OK)
         finish()
-    }
-
-    private fun showProgress(show: Boolean) {
-        if (show) {
-            binding.progress.progressBar.visibility = View.VISIBLE
-        } else {
-            binding.progress.progressBar.visibility = View.GONE
-        }
     }
 
     companion object {

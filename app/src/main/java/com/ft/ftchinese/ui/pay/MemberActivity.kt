@@ -15,13 +15,12 @@ import com.ft.ftchinese.databinding.ActivityMemberBinding
 import com.ft.ftchinese.model.order.StripeSubResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.paywall.CustomerServiceFragment
-import com.ft.ftchinese.ui.paywall.PaywallActivity
-import com.ft.ftchinese.ui.paywall.UpgradeActivity
+import com.ft.ftchinese.ui.paywall.*
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
@@ -36,6 +35,7 @@ class MemberActivity : ScopedAppActivity(),
 
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
+    private lateinit var paywallViewModel: PaywallViewModel
     private lateinit var binding: ActivityMemberBinding
 
     private fun stopRefresh() {
@@ -54,14 +54,34 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         binding.swipeRefresh.setOnRefreshListener(this)
-
         sessionManager = SessionManager.getInstance(this)
+
+        setupViewModel()
+        initUI()
+        loadData()
+    }
+
+    private fun setupViewModel() {
         accountViewModel = ViewModelProvider(this)
-                .get(AccountViewModel::class.java)
+            .get(AccountViewModel::class.java)
 
+        paywallViewModel = ViewModelProvider(
+            this,
+            PaywallViewModelFactory(FileCache(this)),
+        )
+            .get(PaywallViewModel::class.java)
 
-        accountViewModel.stripeSubsRefreshed.observe(this) {
-            onStripeSubRefreshed(it)
+        connectionLiveData.observe(this) {
+            accountViewModel.isNetworkAvailable.value = it
+            paywallViewModel.isNetworkAvailable.value = it
+        }
+        isConnected.let {
+            accountViewModel.isNetworkAvailable.value = it
+            paywallViewModel.isNetworkAvailable.value = it
+        }
+
+        accountViewModel.stripeResult.observe(this) {
+            onStripeRefreshed(it)
         }
 
         accountViewModel.iapRefreshResult.observe(this) {
@@ -71,34 +91,31 @@ class MemberActivity : ScopedAppActivity(),
         accountViewModel.accountRefreshed.observe(this) {
             onAccountRefreshed(it)
         }
+    }
 
-        initUI()
-
-        supportFragmentManager.commit {
-            replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
-        }
+    private fun loadData() {
+        paywallViewModel.refreshFtcPrices()
+        paywallViewModel.refreshStripePrices(sessionManager.loadAccount())
     }
 
     private fun initUI() {
 
         val account = sessionManager.loadAccount() ?: return
-
         val member = account.membership
-
-        info(member)
 
         binding.member = buildMemberStatus(this, member)
 
-        info(buildMemberStatus(this, member))
-
+        // If membership is expired,open paywall page.
         binding.subscribeBtn.setOnClickListener {
             PaywallActivity.start(this)
             it.isEnabled = false
         }
 
+        // Renewal is only applicable to Wxpay/Alipay
         binding.renewBtn.setOnClickListener {
-
-            val plan = member.getPlan() ?: return@setOnClickListener
+            val tier = member.tier ?: return@setOnClickListener
+            val cycle = member.cycle ?: return@setOnClickListener
+            val plan = PlanStore.find(tier, cycle) ?: return@setOnClickListener
             // Tracking
             PaywallTracker.fromRenew()
 
@@ -114,27 +131,59 @@ class MemberActivity : ScopedAppActivity(),
             it.isEnabled = false
         }
 
+        // Upgrade is application to Stripe, Alipay, or Wxpay.
         binding.upgradeBtn.setOnClickListener {
             if (member.isAliOrWxPay()) {
 
                 UpgradeActivity.startForResult(this, RequestCode.PAYMENT)
 
             } else if (member.payMethod == PayMethod.STRIPE) {
-                val price = StripePriceStore
-                    .find(Tier.PREMIUM, Cycle.YEAR)
-                    ?: return@setOnClickListener
+                // Find out the stripe price used for upgrade.
+                // Similar to clicking CheckoutActivity's pay button when stripe is selected.
+                if (gotoStripe()) {
+                    return@setOnClickListener
+                }
 
-                StripeSubActivity.startForResult(
-                    activity = this,
-                    requestCode = RequestCode.PAYMENT,
-                    price = price
-                )
+                // A fallback if stripe prices not cached on device.
+                binding.inProgress = true
+                toast("Loading stripe prices...")
+                paywallViewModel.loadStripePrices(account)
             }
 
             it.isEnabled = false
         }
+
+        binding.reactivateStripeBtn.setOnClickListener {
+             accountViewModel.reactivateStripe(account)
+        }
+
+        supportFragmentManager.commit {
+            replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
+        }
+
+        invalidateOptionsMenu()
     }
 
+    private fun gotoStripe(): Boolean {
+        val price = StripePriceStore.find(
+            tier = Tier.PREMIUM,
+            cycle = Cycle.YEAR,
+        )
+
+        if (price == null) {
+            toast("Stripe price not found!")
+            return false
+        }
+
+        StripeSubActivity.startForResult(
+            activity = this,
+            requestCode = RequestCode.PAYMENT,
+            price = price
+        )
+
+        binding.inProgress = false
+        return true
+    }
     /**
      * Refresh account.
      * Use different API endpoints depending on the login method.
@@ -162,16 +211,17 @@ class MemberActivity : ScopedAppActivity(),
             }
             PayMethod.STRIPE -> {
                 toast(R.string.refreshing_stripe_sub)
-                accountViewModel.refreshStripeSub(account)
+                accountViewModel.refreshStripe(account)
             }
             PayMethod.APPLE -> {
                 toast(R.string.refresh_iap_sub)
                 accountViewModel.refreshIAPSub(account)
             }
+            else -> toast("Current payment method unknown!")
         }
     }
 
-    private fun onStripeSubRefreshed(result: Result<StripeSubResult>) {
+    private fun onStripeRefreshed(result: Result<StripeSubResult>) {
         stopRefresh()
 
         when (result) {
@@ -184,6 +234,7 @@ class MemberActivity : ScopedAppActivity(),
             is Result.Success -> {
                 toast("Stripe subscription refreshed!")
                 sessionManager.saveMembership(result.data.membership)
+                initUI()
             }
         }
     }
@@ -265,15 +316,23 @@ class MemberActivity : ScopedAppActivity(),
 
     // Create menus
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val m = sessionManager.loadAccount()?.membership
 
         menuInflater.inflate(R.menu.activity_member_menu, menu)
-
+        menu?.findItem(R.id.action_cancel_stripe)?.isVisible = m?.canCancelStripe() ?: false
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_orders -> {
             MyOrdersActivity.start(this)
+            true
+        }
+        R.id.action_cancel_stripe -> {
+            sessionManager.loadAccount()?.let {
+                accountViewModel.cancelStripe(it)
+            }
+
             true
         }
         else -> super.onOptionsItemSelected(item)

@@ -12,6 +12,7 @@ data class MemberStatus(
     val tier: String,
     val expiration: String, // Expiration time
     val autoRenewal: String?,
+    val reactivateStripeBtn: Boolean,
     val payMethod: String?, // For Stripe or Apple IAP
     val renewalBtn: Boolean, // Show renewal btn for Alipay, Wechat
     val upgradeBtn: Boolean, // Show upgrade btn for Alipay, Wechat and Stripe standard edition.
@@ -27,6 +28,7 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
             tier = ctx.getString(R.string.tier_vip),
             expiration = m.localizeExpireDate(),
             autoRenewal = null,
+            reactivateStripeBtn = false,
             payMethod = null,
             renewalBtn = false,
             upgradeBtn = false,
@@ -38,7 +40,6 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
     val autoRenewal = when (m.autoRenew) {
         true -> ctx.getString(R.string.auto_renew_on)
         false -> ctx.getString(R.string.auto_renew_off)
-        null -> null
     }
 
     return when (m.payMethod) {
@@ -56,6 +57,7 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
                 tier = ctx.getString(m.tierStringRes),
                 expiration = m.localizeExpireDate(),
                 autoRenewal = null,
+                reactivateStripeBtn = false,
                 payMethod = null,
                 renewalBtn = m.canRenewViaAliWx(),
                 upgradeBtn = m.canUpgrade(),
@@ -80,6 +82,7 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
                 tier = ctx.getString(m.tierStringRes),
                 expiration = m.localizeExpireDate(),
                 autoRenewal = autoRenewal,
+                reactivateStripeBtn = m.canReactivateStripe(),
                 payMethod = ctx.getString(R.string.subs_brand_stripe),
                 renewalBtn = false,
                 upgradeBtn = !isExpired && m.tier == Tier.STANDARD,
@@ -99,6 +102,7 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
                 tier = ctx.getString(m.tierStringRes),
                 expiration = m.localizeExpireDate(),
                 autoRenewal = autoRenewal,
+                reactivateStripeBtn = false,
                 payMethod = ctx.getString(R.string.subs_brand_apple),
                 renewalBtn = false,
                 upgradeBtn = false,
@@ -118,6 +122,7 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
                 tier = ctx.getString(m.tierStringRes),
                 expiration = m.localizeExpireDate(),
                 autoRenewal = null,
+                reactivateStripeBtn = false,
                 payMethod = ctx.getString(R.string.subs_brand_b2b),
                 renewalBtn = false,
                 upgradeBtn = false,
@@ -131,6 +136,7 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
             tier = ctx.getString(m.tierStringRes),
             expiration = m.localizeExpireDate(),
             autoRenewal = null,
+            reactivateStripeBtn = false,
             payMethod = null,
             renewalBtn = false,
             upgradeBtn = false,

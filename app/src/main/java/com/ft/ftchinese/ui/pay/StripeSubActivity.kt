@@ -87,12 +87,12 @@ class StripeSubActivity : ScopedAppActivity(),
         })
 
         // Upon subscription created.
-        checkOutViewModel.stripeSubscribedResult.observe(this, {
+        checkOutViewModel.stripeSubsResult.observe(this, {
             onSubsResult(it)
         })
 
         // Upon Stripe subscription retrieved.
-        accountViewModel.stripeSubsRefreshed.observe(this, {
+        accountViewModel.stripeResult.observe(this, {
             onSubRefreshed(it)
         })
 
@@ -591,7 +591,7 @@ class StripeSubActivity : ScopedAppActivity(),
         binding.inProgress = true
         toast(R.string.query_stripe_subscription)
 
-        accountViewModel.refreshStripeSub(account)
+        accountViewModel.refreshStripe(account)
     }
 
 
