@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
@@ -12,7 +11,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCustomerBinding
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.repository.Fetch
-import com.ft.ftchinese.repository.SubscribeApi
+import com.ft.ftchinese.repository.SubsApi
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
@@ -227,7 +226,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         launch {
             try {
                 val (_, body) = withContext(Dispatchers.IO) {
-                    Fetch().post("${SubscribeApi.STRIPE_CUSTOMER}/${account.stripeId}/default_payment_method")
+                    Fetch().post("${SubsApi.STRIPE_CUSTOMER}/${account.stripeId}/default_payment_method")
                             .setUserId(account.id)
                             .noCache()
                             .sendJson(Klaxon().toJsonString(mapOf(
