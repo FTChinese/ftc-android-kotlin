@@ -1,13 +1,11 @@
 package com.ft.ftchinese.repository
 
-import android.util.Log
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.jetbrains.anko.AnkoLogger
 import java.io.IOException
@@ -292,3 +290,10 @@ class Fetch : AnkoLogger {
     }
 }
 
+/**
+ * [JSONResult] contains the parsed json and its raw string.
+ */
+data class JSONResult<T>(
+    val value: T,
+    val raw: String,
+)
