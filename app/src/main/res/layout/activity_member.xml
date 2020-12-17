@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
 
     <data>
         <import type="android.view.View"/>
@@ -8,6 +10,10 @@
         <variable
             name="member"
             type="com.ft.ftchinese.ui.pay.MemberStatus" />
+
+        <variable
+            name="inProgress"
+            type="Boolean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -136,6 +142,18 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/renew_btn" />
 
+                <com.google.android.material.button.MaterialButton
+                    style="@style/AppButton.TextButton"
+                    android:id="@+id/reactivate_stripe_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Reactivate Subscription"
+                    android:visibility="@{member.reactivateStripeBtn ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/upgrade_btn"
+                    />
+
                 <FrameLayout
                     android:id="@+id/frag_customer_service"
                     android:layout_width="match_parent"
@@ -147,7 +165,8 @@
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-        <include layout="@layout/progress_bar"/>
+        <include layout="@layout/progress_indicator_circular"
+            bind:inProgress="@{inProgress}"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
