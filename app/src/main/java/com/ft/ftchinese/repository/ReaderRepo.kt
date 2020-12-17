@@ -92,7 +92,7 @@ object ReaderRepo : AnkoLogger {
      * info or refresh account data.
      */
     fun wxLogin(code: String): WxSession? {
-        val (_, body) = Fetch().post(SubscribeApi.WX_LOGIN)
+        val (_, body) = Fetch().post(SubsApi.WX_LOGIN)
                 .setClient()
                 .setAppId()
                 .noCache()
