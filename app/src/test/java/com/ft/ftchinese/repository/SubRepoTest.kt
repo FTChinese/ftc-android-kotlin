@@ -27,14 +27,14 @@ class SubRepoTest {
 
     @Test
     fun createAliOrder() {
-        val order = SubRepo.aliPlaceOrder(account, PlanStore.find(Tier.STANDARD, Cycle.YEAR)!!)
+        val order = SubRepo.createAliOrder(account, PlanStore.find(Tier.STANDARD, Cycle.YEAR)!!)
 
         println(order)
     }
 
     @Test
     fun verifyPayment() {
-        val vr = SubRepo.verifyPayment(account, "FT42E4DCD44F0D06FE")
+        val vr = SubRepo.verifyOrder(account, "FT42E4DCD44F0D06FE")
 
         assertNotNull(vr)
 
