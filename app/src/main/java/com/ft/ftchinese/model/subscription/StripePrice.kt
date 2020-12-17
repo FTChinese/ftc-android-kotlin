@@ -28,6 +28,8 @@ data class StripePrice(
 }
 
 object StripePriceStore {
+    const val cacheName = "stripe_prices.json"
+
     var prices = listOf<StripePrice>()
 
     fun find(tier: Tier, cycle: Cycle): StripePrice? {
