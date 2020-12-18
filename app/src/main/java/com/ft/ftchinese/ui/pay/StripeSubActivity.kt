@@ -63,15 +63,48 @@ class StripeSubActivity : ScopedAppActivity(),
         }
 
         isTest = intent.getBooleanExtra(EXTRA_UI_TEST, false)
+        // Stripe price passed from previous activity.
+        checkout = intent.getParcelableExtra<StripeCheckout>(EXTRA_STRIPE_Checkout)
+
+        sessionManager = SessionManager.getInstance(this)
 
         // Initialize Stripe.
         PaymentConfiguration.init(this, BuildConfig.STRIPE_KEY)
+        stripe = Stripe(
+            this,
+            PaymentConfiguration
+                .getInstance(this)
+                .publishableKey
+        )
 
+        setupViewModel()
+
+        initUI()
+        initCustomerSession()
+
+        // Creation payment session
+        paymentSession = PaymentSession(
+            this,
+            PaymentSessionConfig.Builder()
+                .setShippingInfoRequired(false)
+                .setShippingMethodsRequired(false)
+                .setShouldShowGooglePay(false)
+                .build()
+        )
+
+        // Attached PaymentSessionListener
+        paymentSession.init(createPaymentSessionListener())
+
+        // When shall this be enabled?
+        binding.btnSubscribe.isEnabled = true
+    }
+
+    private fun setupViewModel() {
         checkOutViewModel = ViewModelProvider(this)
-                .get(CheckOutViewModel::class.java)
+            .get(CheckOutViewModel::class.java)
 
         accountViewModel = ViewModelProvider(this)
-                .get(AccountViewModel::class.java)
+            .get(AccountViewModel::class.java)
 
         // Monitoring network status.
         connectionLiveData.observe(this, {
@@ -95,40 +128,6 @@ class StripeSubActivity : ScopedAppActivity(),
         accountViewModel.stripeResult.observe(this, {
             onSubRefreshed(it)
         })
-
-        // Generate idempotency key.
-        idempotency = Idempotency.getInstance(this)
-
-        // Stripe price passed from previous activity.
-        checkout = intent.getParcelableExtra<StripeCheckout>(EXTRA_STRIPE_Checkout)
-
-        sessionManager = SessionManager.getInstance(this)
-
-        // Initialize stripe.
-        stripe = Stripe(
-            this,
-            PaymentConfiguration
-                .getInstance(this)
-                .publishableKey
-        )
-
-        initUI()
-        setup()
-
-        // Creation payment session
-        paymentSession = PaymentSession(
-            this,
-            PaymentSessionConfig.Builder()
-                .setShippingInfoRequired(false)
-                .setShippingMethodsRequired(false)
-                .setShouldShowGooglePay(false)
-                .build()
-        )
-
-        // Attached PaymentSessionListener
-        paymentSession.init(createPaymentSessionListener())
-
-        binding.btnSubscribe.isEnabled = true
     }
 
     private fun initUI() {
@@ -178,7 +177,10 @@ class StripeSubActivity : ScopedAppActivity(),
         }
     }
 
-    private fun setup() {
+    private fun initCustomerSession() {
+        // Generate idempotency key.
+        idempotency = Idempotency.getInstance(this)
+
         val account = sessionManager.loadAccount() ?: return
 
         // Ensure user is a stripe customer before proceeding.
@@ -194,7 +196,7 @@ class StripeSubActivity : ScopedAppActivity(),
         setupCustomerSession()
     }
 
-    // Upon stripe customer created.
+    // If current user is not a stripe customer, create it and then call setupCustomerSession.
     private fun onStripeCustomer(result: Result<StripeCustomer>) {
         when (result) {
             is Result.Success -> {
