@@ -90,7 +90,29 @@ var androidUserInfo = ${json.toJsonString(account)};
 
         ctx["{story-language-class}"] = lang
 
-        ctx["{Top-Banner}"] = ""
+        ctx["{Top-Banner}"] = """
+            <div class="o-ads" data-o-ads-name="banner1"
+            data-o-ads-center="true"
+            data-o-ads-formats-default="false"
+            data-o-ads-formats-small="FtcMobileBanner"
+            data-o-ads-formats-medium="false"
+            data-o-ads-formats-large="FtcLeaderboard"
+            data-o-ads-formats-extra="FtcLeaderboard"
+            data-o-ads-targeting="cnpos=top1;">
+            </div>
+        """.trimIndent()
+
+        ctx["{Bottom-Banner}"] = """
+            <div class="o-ads" data-o-ads-name="banner2"
+            data-o-ads-center="true"
+            data-o-ads-formats-default="false"
+            data-o-ads-formats-small="FtcMobileBanner"
+            data-o-ads-formats-medium="false"
+            data-o-ads-formats-large="FtcBanner"
+            data-o-ads-formats-extra="FtcBanner"
+            data-o-ads-targeting="cnpos=top2;">
+            </div>
+        """.trimIndent()
 
         // Follow button
         ctx["{story-theme}"] = story.htmlForTheme(sponsorTitle)
@@ -106,8 +128,7 @@ var androidUserInfo = ${json.toJsonString(account)};
         ctx["{story-byline}"] = story.byline
         ctx["{story-body}"] = body
 
-        // todo
-        ctx["{Bottom-Banner}"] = ""
+
 
         ctx["{comments-order}"] = teaser.getCommentsOrder()
 
