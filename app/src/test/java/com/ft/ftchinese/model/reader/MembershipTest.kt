@@ -11,24 +11,6 @@ import org.threeten.bp.LocalDate
 import org.threeten.bp.Month
 import org.threeten.bp.temporal.ChronoUnit
 
-data class TestType(
-    @KTier
-    val tier: Tier? = null,
-    @KCycle
-    val cycle: Cycle? = null,
-    @KDate
-    val expireDate: LocalDate? = null,
-    @KPayMethod
-    val payMethod: PayMethod? = null,
-    val stripeSubsId: String? = null,
-    val autoRenew: Boolean = false,
-    @KStripeSubStatus
-    val status: StripeSubStatus? = null,
-    val appleSubsId: String? = null,
-    val b2bLicenceId: String? = null,
-    val vip: Boolean = false
-)
-
 class MembershipTest {
 
     private val jsonData = """
@@ -376,11 +358,8 @@ class MembershipTest {
     }
 
     @Test
-    fun parseJSON() {
-
-        val m = json.parse<TestType>(jsonData)
-
-        println(m)
+    fun canUpgrade() {
+        val ok = mStandard.canUpgrade()
+        assert(ok)
     }
-
 }
