@@ -1,7 +1,6 @@
 package com.ft.ftchinese.ui.pay
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
@@ -13,9 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityStripeSubBinding
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.subscription.OrderKind
-import com.ft.ftchinese.model.subscription.PaymentIntent
 import com.ft.ftchinese.model.subscription.StripeCustomer
-import com.ft.ftchinese.model.subscription.StripePrice
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
@@ -27,8 +24,7 @@ import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
-private const val EXTRA_UI_TEST = "extra_ui_test"
-private const val EXTRA_STRIPE_Checkout = "extra_stripe_checkout"
+private const val EXTRA_STRIPE_CHECKOUT = "extra_stripe_checkout"
 
 /**
  * See https://stripe.com/docs/mobile/android/basic
@@ -49,8 +45,6 @@ class StripeSubActivity : ScopedAppActivity(),
 
     private var paymentMethod: PaymentMethod? = null
 
-    private var isTest = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -62,9 +56,8 @@ class StripeSubActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
-        isTest = intent.getBooleanExtra(EXTRA_UI_TEST, false)
         // Stripe price passed from previous activity.
-        checkout = intent.getParcelableExtra<StripeCheckout>(EXTRA_STRIPE_Checkout)
+        checkout = intent.getParcelableExtra(EXTRA_STRIPE_CHECKOUT)
 
         sessionManager = SessionManager.getInstance(this)
 
@@ -78,7 +71,6 @@ class StripeSubActivity : ScopedAppActivity(),
         )
 
         setupViewModel()
-
         initUI()
         initCustomerSession()
 
@@ -94,9 +86,6 @@ class StripeSubActivity : ScopedAppActivity(),
 
         // Attached PaymentSessionListener
         paymentSession.init(createPaymentSessionListener())
-
-        // When shall this be enabled?
-        binding.btnSubscribe.isEnabled = true
     }
 
     private fun setupViewModel() {
@@ -123,14 +112,13 @@ class StripeSubActivity : ScopedAppActivity(),
         checkOutViewModel.stripeSubsResult.observe(this, {
             onSubsResult(it)
         })
-
-        // Upon Stripe subscription retrieved.
-        accountViewModel.stripeResult.observe(this, {
-            onSubRefreshed(it)
-        })
     }
 
     private fun initUI() {
+        // Clickable only after user selected payment method.
+//        binding.btnSubscribe.isEnabled = false
+        binding.inProgress = true
+        binding.enableInput = false
 
         // Change button text for upgrade.
         if (checkout?.kind == OrderKind.UPGRADE) {
@@ -166,18 +154,10 @@ class StripeSubActivity : ScopedAppActivity(),
             }
             startSubscribing()
         }
-
-        // Testing UI.
-        if (isTest) {
-            binding.rvStripeSub.apply {
-                setHasFixedSize(true)
-                layoutManager = LinearLayoutManager(this@StripeSubActivity)
-                adapter = SingleLineAdapter(buildRows(null))
-            }
-        }
     }
 
     private fun initCustomerSession() {
+        info("Initialize customer session...")
         // Generate idempotency key.
         idempotency = Idempotency.getInstance(this)
 
@@ -221,6 +201,7 @@ class StripeSubActivity : ScopedAppActivity(),
     // and uses that key to manage retrieving and updating the Customer’s payment methods on your behalf.
     // https://stripe.com/docs/mobile/android/basic#set-up-customer-session
     private fun setupCustomerSession() {
+        info("Setup customer session")
         if (!isConnected) {
             toast(R.string.prompt_no_network)
             return
@@ -243,7 +224,6 @@ class StripeSubActivity : ScopedAppActivity(),
         }
 
         toast(R.string.retrieve_customer)
-        binding.inProgress = true
 
         CustomerSession
             .getInstance()
@@ -254,8 +234,10 @@ class StripeSubActivity : ScopedAppActivity(),
     private fun createCustomerRetrievalListener(): CustomerSession.CustomerRetrievalListener {
         return object : CustomerSession.CustomerRetrievalListener {
             override fun onCustomerRetrieved(customer: Customer) {
-                binding.inProgress = false
-                binding.enableInput = true
+                info("Customer retrieved.")
+
+//                binding.inProgress = false
+//                binding.enableInput = true
             }
 
             override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
@@ -273,6 +255,9 @@ class StripeSubActivity : ScopedAppActivity(),
         return object : PaymentSession.PaymentSessionListener {
             override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
                 binding.inProgress = isCommunicating
+                if (!isCommunicating) {
+                    binding.tvPaymentMethod.isEnabled = true
+                }
             }
 
             override fun onError(errorCode: Int, errorMessage: String) {
@@ -283,10 +268,11 @@ class StripeSubActivity : ScopedAppActivity(),
                 info(data)
 
                 if (data.paymentMethod != null) {
+                    binding.enableInput = true
+
                     paymentMethod = data.paymentMethod
 
                     val card = data.paymentMethod?.card
-
                     binding.tvPaymentMethod.text = getString(R.string.payment_source, card?.brand, card?.last4)
 
                     return
@@ -424,7 +410,6 @@ class StripeSubActivity : ScopedAppActivity(),
 //        })
     }
 
-
     private fun startSubscribing() {
         val co = checkout ?: return
         val account = sessionManager.loadAccount() ?: return
@@ -448,11 +433,12 @@ class StripeSubActivity : ScopedAppActivity(),
                 toast(R.string.creating_subscription)
 
                 checkOutViewModel.createStripeSub(account, StripeSubParams(
-                        tier = co.price.tier,
-                        cycle = co.price.cycle,
-                        customer = account.stripeId,
-                        defaultPaymentMethod = pm.id,
-                        idempotency = idempotency.retrieveKey()
+                    tier = co.price.tier,
+                    cycle = co.price.cycle,
+                    priceId = co.price.id,
+                    customer = account.stripeId,
+                    defaultPaymentMethod = pm.id,
+                    idempotency = idempotency.retrieveKey()
                 ))
             }
             OrderKind.UPGRADE -> {
@@ -460,11 +446,12 @@ class StripeSubActivity : ScopedAppActivity(),
                 idempotency.clear()
 
                 checkOutViewModel.upgradeStripeSub(account, StripeSubParams(
-                        tier = co.price.tier,
-                        cycle = co.price.cycle,
-                        customer = account.stripeId,
-                        defaultPaymentMethod = pm.id,
-                        idempotency = idempotency.retrieveKey()
+                    tier = co.price.tier,
+                    cycle = co.price.cycle,
+                    priceId = co.price.id,
+                    customer = account.stripeId,
+                    defaultPaymentMethod = pm.id,
+                    idempotency = idempotency.retrieveKey()
                 ))
             }
             else -> {
@@ -485,19 +472,11 @@ class StripeSubActivity : ScopedAppActivity(),
             is Result.LocalizedError -> {
                 idempotency.clear()
                 binding.enableInput = true
-
-                alert(Appcompat,
-                        result.msgId,
-                        R.string.title_error
-                ) {
-                    positiveButton(R.string.action_ok) {
-                        it.dismiss()
-                    }
-                }.show()
+                alertError(result.msgId)
             }
             is Result.Error -> {
-
                 idempotency.clear()
+                binding.enableInput = true
                 /**
                  * For this type of error, we should clear idempotency key.
                  * {"status":400,
@@ -512,109 +491,110 @@ class StripeSubActivity : ScopedAppActivity(),
                 }
 
                 result.exception.message?.let {
-                    alert(Appcompat, it, getString(R.string.title_error)) {
-                        positiveButton(R.string.action_ok) {
-                            it.dismiss()
-                        }
-                    }.show()
+                    alertErrMsg(it)
                 }
-
-                binding.enableInput = true
                 return
             }
             is Result.Success -> {
 
                 info("Subscription result: ${result.data}")
 
+                // If no further action required.
                 if (!result.data.payment.requiresAction) {
+                    onSubsDone(result.data)
                     toast(R.string.subs_success)
-                    retrieveSubscription()
-
                     return
                 }
 
+                // Payment intent client secret should present.
                 if (result.data.payment.paymentIntentClientSecret == null) {
                     binding.enableInput = true
                     idempotency.clear()
-
-                    alert(
-                            Appcompat,
-                            "Subscription failed. Please retry or change you payment card",
-                            "Failed"
-                    ) {
-                        positiveButton(R.string.action_ok) {
-                            it.dismiss()
-                        }
-                        negativeButton(R.string.action_cancel) {
-                            it.dismiss()
-                        }
-                    }.show()
-
+                    alertMissingClientSecret()
                     return
                 }
 
-                // Ask user to perform authentication.
-                // This authentication is usually required only for
-                // the first time user uses a new card.
-                // If user subscribed with the same card the second time,
-                // like upgrading, authentication won't be required.
-                alert(
-                        Appcompat,
-                        R.string.stripe_requires_action,
-                        R.string.title_requires_action
-                ) {
-                    positiveButton(R.string.action_ok) {
-                        it.dismiss()
-                        binding.inProgress = true
-
-                        result.data.payment.paymentIntentClientSecret?.let { it1 ->
-                            stripe.handleNextActionForPayment(
-                                this@StripeSubActivity,
-                                it1
-                            )
-                        }
-                    }
-
-                    isCancelable = false
-
-                    negativeButton(R.string.action_cancel) {
-                        // When user clicked cancel button, clear
-                        // idempotency key.
-                        idempotency.clear()
-                        it.dismiss()
-                    }
-                }.show()
+                alertAuthenticate(result.data.payment.paymentIntentClientSecret)
             }
         }
     }
 
-    private fun retrieveSubscription() {
-        val account = sessionManager.loadAccount() ?: return
-        binding.inProgress = true
-        toast(R.string.query_stripe_subscription)
-
-        accountViewModel.refreshStripe(account)
+    private fun alertError(msgId: Int) {
+        alert(Appcompat,
+            msgId,
+            R.string.title_error
+        ) {
+            positiveButton(R.string.action_ok) {
+                it.dismiss()
+            }
+        }.show()
     }
 
+    private fun alertErrMsg(msg: String) {
+        alert(Appcompat, msg, getString(R.string.title_error)) {
+            positiveButton(R.string.action_ok) {
+                it.dismiss()
+            }
+        }.show()
+    }
 
-    private fun onSubRefreshed(result: Result<StripeSubResult>) {
-        when (result) {
-            is Result.LocalizedError -> {
-                toast(result.msgId)
+    private fun alertMissingClientSecret() {
+        alert(
+            Appcompat,
+            "Subscription failed. Please retry or change you payment card",
+            "Failed"
+        ) {
+            positiveButton(R.string.action_ok) {
+                it.dismiss()
             }
-            is Result.Error -> {
-                result.exception.message?.let { toast(it) }
+            negativeButton(R.string.action_cancel) {
+                it.dismiss()
             }
-            is Result.Success -> {
-                binding.rvStripeSub.apply {
-                    setHasFixedSize(true)
-                    layoutManager = LinearLayoutManager(this@StripeSubActivity)
-                    adapter = SingleLineAdapter(buildRows(result.data.subs))
-                }
+        }.show()
+    }
 
-                sessionManager.saveMembership(result.data.membership)
+    // Ask user to perform authentication.
+    // This authentication is usually required only for
+    // the first time user uses a new card.
+    // If user subscribed with the same card the second time,
+    // like upgrading, authentication won't be required.
+    private fun alertAuthenticate(secret: String) {
+        alert(
+            Appcompat,
+            R.string.stripe_requires_action,
+            R.string.title_requires_action
+        ) {
+            positiveButton(R.string.action_ok) {
+                it.dismiss()
+                binding.inProgress = true
+
+                stripe.handleNextActionForPayment(
+                    this@StripeSubActivity,
+                    secret
+                )
             }
+
+            isCancelable = false
+
+            negativeButton(R.string.action_cancel) {
+                // When user clicked cancel button, clear
+                // idempotency key.
+                idempotency.clear()
+                it.dismiss()
+            }
+        }.show()
+    }
+
+    private fun onSubsDone(result: StripeSubResult) {
+        binding.rvStripeSub.apply {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(this@StripeSubActivity)
+            adapter = SingleLineAdapter(buildRows(result.subs))
         }
+
+        sessionManager.saveMembership(result.membership)
+
+        showDoneBtn()
     }
 
     private fun buildRows(sub: StripeSubs?): Array<String> {
@@ -637,16 +617,23 @@ class StripeSubActivity : ScopedAppActivity(),
                            checkout?.price?.cycle
                        )
                ),
-                getString(R.string.outcome_payment_status, sub.status.toString()),
+                getString(
+                    R.string.outcome_payment_status,
+                    if (sub.status != null) {
+                        getString(sub.status.stringRes)
+                    } else {
+                        sub.status.toString()
+                    }
+                ),
                 getString(
                         R.string.order_period,
-                        sub.currentPeriodStart?.format(DateTimeFormatter.ISO_LOCAL_DATE),
-                        sub.currentPeriodEnd?.format(DateTimeFormatter.ISO_LOCAL_DATE)
+                    sub.currentPeriodStart.format(DateTimeFormatter.ISO_LOCAL_DATE),
+                    sub.currentPeriodEnd.format(DateTimeFormatter.ISO_LOCAL_DATE)
                 )
         )
     }
 
-    private fun showDone() {
+    private fun showDoneBtn() {
         binding.btnSubscribe.isEnabled = true
 
         binding.btnSubscribe.text = getString(R.string.action_done)
@@ -660,23 +647,13 @@ class StripeSubActivity : ScopedAppActivity(),
     companion object {
 
         @JvmStatic
-        fun startForResult(activity: Activity, requestCode: Int, price: StripePrice) {
+        fun startForResult(activity: Activity, requestCode: Int, co: StripeCheckout) {
             activity.startActivityForResult(
                     Intent(activity, StripeSubActivity::class.java).apply {
-                        putExtra(EXTRA_STRIPE_Checkout, price)
+                        putExtra(EXTRA_STRIPE_CHECKOUT, co)
                     },
                     requestCode
             )
-        }
-
-        @JvmStatic
-        fun startTest(context: Context, pi: PaymentIntent?) {
-            val intent = Intent(context, StripeSubActivity::class.java).apply {
-                putExtra(EXTRA_UI_TEST, true)
-                putExtra(EXTRA_FTC_CHECKOUT, pi)
-            }
-
-            context.startActivity(intent)
         }
     }
 }

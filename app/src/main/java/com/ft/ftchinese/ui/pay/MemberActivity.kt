@@ -83,7 +83,7 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         accountViewModel.stripeResult.observe(this) {
-            onStripeRefreshed(it)
+            onStripeResult(it)
         }
 
         accountViewModel.iapRefreshResult.observe(this) {
@@ -106,6 +106,7 @@ class MemberActivity : ScopedAppActivity(),
         val member = account.membership
 
         binding.member = buildMemberStatus(this, member)
+        info(member.canUpgrade())
 
         // If membership is expired,open paywall page.
         binding.subscribeBtn.setOnClickListener {
@@ -156,7 +157,9 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         binding.reactivateStripeBtn.setOnClickListener {
-             accountViewModel.reactivateStripe(account)
+            binding.inProgress = true
+            toast(R.string.stripe_refreshing)
+            accountViewModel.reactivateStripe(account)
         }
 
         supportFragmentManager.commit {
@@ -180,7 +183,10 @@ class MemberActivity : ScopedAppActivity(),
         StripeSubActivity.startForResult(
             activity = this,
             requestCode = RequestCode.PAYMENT,
-            price = price
+            co = StripeCheckout(
+                kind = OrderKind.UPGRADE,
+                price = price,
+            ),
         )
 
         binding.inProgress = false
@@ -191,12 +197,6 @@ class MemberActivity : ScopedAppActivity(),
      * Use different API endpoints depending on the login method.
      */
     override fun onRefresh() {
-        if (!isConnected) {
-            stopRefresh()
-
-            toast(R.string.prompt_no_network)
-            return
-        }
 
         val account = sessionManager.loadAccount()
 
@@ -212,19 +212,20 @@ class MemberActivity : ScopedAppActivity(),
                 accountViewModel.refresh(account)
             }
             PayMethod.STRIPE -> {
-                toast(R.string.refreshing_stripe_sub)
+                toast(R.string.stripe_refreshing)
                 accountViewModel.refreshStripe(account)
             }
             PayMethod.APPLE -> {
-                toast(R.string.refresh_iap_sub)
+                toast(R.string.iap_refreshing)
                 accountViewModel.refreshIAPSub(account)
             }
             else -> toast("Current payment method unknown!")
         }
     }
 
-    private fun onStripeRefreshed(result: Result<StripeSubResult>) {
+    private fun onStripeResult(result: Result<StripeSubResult>) {
         stopRefresh()
+        binding.inProgress = false
 
         when (result) {
             is Result.LocalizedError -> {
@@ -234,7 +235,7 @@ class MemberActivity : ScopedAppActivity(),
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
-                toast("Stripe subscription refreshed!")
+                toast(R.string.stripe_refresh_success)
                 sessionManager.saveMembership(result.data.membership)
                 initUI()
             }
@@ -250,7 +251,7 @@ class MemberActivity : ScopedAppActivity(),
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
-                toast("Apple IAP subscription updated!")
+                toast(R.string.iap_refresh_success)
             }
         }
 
@@ -332,17 +333,17 @@ class MemberActivity : ScopedAppActivity(),
         }
         R.id.action_cancel_stripe -> {
 
-            alert(Appcompat, "", "") {
-                positiveButton("Yes") {
+            alert(Appcompat, "该操作将关闭Stripe自动续订，当前订阅在到期前依然有效。在订阅到期前，您随时可以重新打开自动续订。", "取消订阅") {
+                positiveButton("确认关闭") {
                     binding.inProgress = true
                     sessionManager.loadAccount()?.let {
                         accountViewModel.cancelStripe(it)
                     }
                 }
-                negativeButton("Cancel") {
+                negativeButton("再考虑一下") {
                     it.dismiss()
                 }
-            }
+            }.show()
 
             true
         }

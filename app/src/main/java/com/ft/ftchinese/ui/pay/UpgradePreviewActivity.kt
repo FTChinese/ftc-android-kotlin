@@ -40,7 +40,6 @@ class UpgradePreviewActivity : ScopedAppActivity() {
 
         sessionManager = SessionManager.getInstance(this)
 
-
         setupViewModel()
         initUI(null)
         loadData()
