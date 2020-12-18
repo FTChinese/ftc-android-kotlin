@@ -180,9 +180,9 @@ class WebContentFragment : ScopedFragment(),
             onOpenGraphEvaluated(it)
         })
 
-        wvViewModel.pageFinished.observe(viewLifecycleOwner, {
-            articleViewModel.inProgress.value = !it
-        })
+//        wvViewModel.pageFinished.observe(viewLifecycleOwner, {
+//            articleViewModel.inProgress.value = !it
+//        })
 
         webView?.apply {
 
@@ -225,6 +225,8 @@ class WebContentFragment : ScopedFragment(),
         val article = teaser?.toStarredArticle() ?: return
 
         articleViewModel.webLoaded(article)
+        // Tell parent to hide progress bar
+        articleViewModel.inProgress.value = false
     }
 
     @JavascriptInterface
