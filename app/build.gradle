@@ -244,8 +244,6 @@ dependencies {
     testImplementation "androidx.arch.core:core-testing:2.1.0"
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
     androidTestImplementation "androidx.work:work-testing:$work_version"
-    // UI Tests
-    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.0.0-alpha08'
 }
 
 apply plugin: 'com.google.gms.google-services'
