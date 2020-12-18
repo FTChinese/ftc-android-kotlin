@@ -21,7 +21,7 @@ data class Plan(
         val cycle: Cycle,
         val description: String? = null,
         val currency: String = "cny", // Not from API
-        val discount: Discount
+        val discount: Discount = Discount()
 ) : Parcelable {
 
     fun payableAmount(): Double {
@@ -96,7 +96,6 @@ val defaultPlans = listOf(
  * use this to find out which plan a member is subscribed to.
  */
 object PlanStore {
-    const val cacheName = "ftc_plans.json"
     // Will be updated once paywall data is fetched from server or cache.
     var plans = defaultPlans
 
