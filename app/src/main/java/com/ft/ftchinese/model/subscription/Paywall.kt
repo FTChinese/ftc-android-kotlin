@@ -69,4 +69,3 @@ val promotion = Promo(
     endUtc = ZonedDateTime.parse("2020-11-11T16:00:00Z")
 )
 
-const val paywallFileName = "paywall.json"
