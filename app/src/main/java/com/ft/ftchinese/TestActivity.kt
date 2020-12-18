@@ -204,11 +204,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         info("External storage directory: ${Environment.getExternalStorageDirectory()}")
         info("External Download directory: ${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}")
 
-//        val i = PollService.newIntent(this)
-//        startService(i)
-
-//        PollService.setServiceAlarm(this, true)
-
         registerReceiver(onDownloadComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         registerReceiver(onDownloadClicked, IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED))
@@ -350,6 +345,10 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             supportFragmentManager.commit {
                 add(android.R.id.content, PrivacyFragment.newInstance())
             }
+        }
+
+        binding.btnLatestOrder.setOnClickListener {
+            LatestOrderActivity.start(this)
         }
 
         binding.btnDeclineService.setOnClickListener {
@@ -661,19 +660,12 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
     override fun onStop() {
         super.onStop()
-        unregisterReceiver(onShowNotification)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(onDownloadComplete)
         unregisterReceiver(onDownloadClicked)
-    }
-
-    private val onShowNotification = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            toast("Got a broadcast: ${intent?.action}")
-        }
     }
 
     private fun onBottomMenuItemClicked(item: MenuItem) {
