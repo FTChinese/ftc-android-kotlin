@@ -3,7 +3,7 @@ package com.ft.ftchinese.repository
 import com.ft.ftchinese.BuildConfig
 
 object NextApi {
-    private val BASE = Config.readerApiBase
+    private val BASE = Endpoint.readerBase
     val EMAIL_EXISTS = "$BASE/users/exists"
     val LOGIN = "$BASE/users/login"
     val SIGN_UP = "$BASE/users/signup"
@@ -29,13 +29,14 @@ object NextApi {
 }
 
 object ContentApi {
-    private val BASE = Config.contentApiBase
+    private val BASE = Endpoint.contentBase
 
     val STORY = "$BASE/stories"
     val INTERACTIVE = "$BASE/interactive/contents"
 }
 
-private const val devIP = "http://192.168.10.122"
+//private const val devIP = "http://192.168.10.122"
+private const val devIP = "http://10.0.0.5"
 
 object Endpoint {
     val readerBase = if (BuildConfig.DEBUG) {
@@ -72,7 +73,7 @@ object Endpoint {
 }
 
 object SubsApi {
-    private val BASE = Config.subsApiProdBase
+    private val BASE = Endpoint.subsBase(false)
 
     val WX_LOGIN = "$BASE/wx/oauth/login"
     val WX_REFRESH = "$BASE/wx/oauth/refresh"
