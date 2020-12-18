@@ -40,9 +40,9 @@
             app:layout_constraintTop_toBottomOf="@id/product_in_cart"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:drawableEnd="@drawable/ic_keyboard_arrow_right_gray_24dp"
             android:background="@color/colorBlack5"
-            android:text="@string/select_or_add_card" />
+            android:text="@string/select_or_add_card"
+            app:drawableEndCompat="@drawable/ic_keyboard_arrow_right_gray_24dp" />
 
         <TextView
             android:id="@+id/price_footnote"
