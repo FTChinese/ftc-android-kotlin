@@ -112,7 +112,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
         setupViewModel()
         initUI()
-
+        info("CheckOutActivity created")
     }
 
     private fun initUI() {
@@ -193,6 +193,8 @@ class CheckOutActivity : ScopedAppActivity(),
                 price = checkout?.plan?.payableAmount()
         )
 
+        info("Payment method selected $payMethod")
+
         binding.payButtonText = when(payMethod) {
             // 支付宝支付 ¥258.00
             PayMethod.ALIPAY -> getString(
@@ -233,7 +235,6 @@ class CheckOutActivity : ScopedAppActivity(),
         }
 
         tracker.checkOut(plan, pm)
-
         binding.inProgress = true
 
         when (pm) {
@@ -263,10 +264,12 @@ class CheckOutActivity : ScopedAppActivity(),
                     return
                 }
 
-                if (gotoStripe(plan)) {
+                if (gotoStripe()) {
                     return
                 }
 
+                // Retrieve stripe prices if not loaded yet.
+                binding.inProgress = true
                 paywallViewModel.loadStripePrices(account)
             }
 
@@ -274,26 +277,34 @@ class CheckOutActivity : ScopedAppActivity(),
         }
     }
 
-    private fun gotoStripe(plan: Plan): Boolean {
+    private fun gotoStripe(): Boolean {
+        val co = checkout ?: return false
+
         val price = StripePriceStore.find(
-            tier = plan.tier,
-            cycle = plan.cycle,
+            tier = co.plan.tier,
+            cycle = co.plan.cycle,
         )
         if (price == null) {
-            toast("Stripe price not found!")
+            toast("Retrieving Stripe prices...")
             return false
         }
 
+        info("Start stripe subscription activity...")
+        info(price)
         StripeSubActivity.startForResult(
             activity = this,
             requestCode = RequestCode.PAYMENT,
-            price = price
+            co = StripeCheckout(
+                kind = co.kind,
+                price = price,
+            ),
         )
-        binding.inProgress = false
+
         return true
     }
 
     private fun onStripePrices(result: Result<List<StripePrice>>) {
+        binding.inProgress = false
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
@@ -302,9 +313,8 @@ class CheckOutActivity : ScopedAppActivity(),
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
-                val plan = checkout?.plan ?: return
-
-                gotoStripe(plan)
+                StripePriceStore.prices = result.data
+                gotoStripe()
             }
         }
     }
