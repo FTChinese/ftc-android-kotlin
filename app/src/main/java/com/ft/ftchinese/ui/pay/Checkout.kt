@@ -103,9 +103,9 @@ fun upgradePreviewUI(ctx: Context, co: Checkout): UpgradePreview {
             )
         },
         confirmUpgrade = if (co.isFree) {
-            ctx.getString(R.string.confirm_upgrade)
-        } else {
             ctx.getString(R.string.direct_upgrade)
+        } else {
+            ctx.getString(R.string.confirm_upgrade)
         }
     )
 }
