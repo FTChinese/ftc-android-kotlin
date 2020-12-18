@@ -8,6 +8,12 @@ import org.jetbrains.anko.info
 import java.io.File
 import java.io.FileInputStream
 
+object CacheFileNames {
+    const val stripePrices = "subs_stripe_prices.json"
+    const val ftcPrices = "subs_ftc_prices.json"
+    const val paywall = "subs_paywall.json"
+}
+
 val templateCache: MutableMap<String, String> = HashMap()
 
 class FileCache (private val context: Context) : AnkoLogger {

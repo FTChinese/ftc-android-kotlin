@@ -8,6 +8,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
+import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.util.json
 import com.ft.ftchinese.viewmodel.Result
@@ -33,7 +34,7 @@ class PaywallViewModel(
 
     private suspend fun getCachedPaywall(): Paywall? {
         return withContext(Dispatchers.IO) {
-            val data = cache.loadText(paywallFileName)
+            val data = cache.loadText(CacheFileNames.paywall)
 
             if (!data.isNullOrBlank()) {
                 try {
@@ -84,7 +85,7 @@ class PaywallViewModel(
                 }
 
                 withContext(Dispatchers.IO) {
-                    cache.saveText(paywallFileName, paywall.raw)
+                    cache.saveText(CacheFileNames.paywall, paywall.raw)
                 }
 
             } catch (e: Exception) {
@@ -100,7 +101,7 @@ class PaywallViewModel(
             try {
                 val result = PaywallClient.listPrices() ?: return@launch
                 PlanStore.plans = result.value
-                cache.saveText(PlanStore.cacheName, result.raw)
+                cache.saveText(CacheFileNames.ftcPrices, result.raw)
             } catch (e: Exception) {
                 info(e)
             }
@@ -108,12 +109,14 @@ class PaywallViewModel(
     }
 
     // Retrieve stripe prices in background and refresh cache.
+    // It will be executed whenever user opened MemberActivity or PaywallActivity.
     fun refreshStripePrices(account: Account?) {
+        info("Retrieving stripe prices...")
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val result = StripeClient.listPrices(account) ?: return@launch
                 StripePriceStore.prices = result.value
-                cache.saveText(StripePriceStore.cacheName, result.raw)
+                cache.saveText(CacheFileNames.stripePrices, result.raw)
             } catch (e: Exception) {
                 info(e)
             }
@@ -122,7 +125,7 @@ class PaywallViewModel(
 
     private suspend fun stripeCachedPrices(): List<StripePrice>? {
         return withContext(Dispatchers.IO) {
-            val data = cache.loadText(StripePriceStore.cacheName)
+            val data = cache.loadText(CacheFileNames.stripePrices)
 
             if (data == null) {
                 null
@@ -162,10 +165,12 @@ class PaywallViewModel(
                 stripePrices.value = Result.Success(result.value)
 
                 withContext(Dispatchers.IO) {
-                    cache.saveText(StripePriceStore.cacheName, result.raw)
+                    cache.saveText(CacheFileNames.stripePrices, result.raw)
                 }
-            } catch (e: Exception) {
+            }
+            catch (e: Exception) {
                 info(e)
+                stripePrices.value = parseException(e)
             }
         }
     }
