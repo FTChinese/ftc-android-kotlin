@@ -16,6 +16,7 @@ data class Charge(
     val amount: Double,
     val currency: String = "cny"
 )
+
 data class Checkout(
     @KOrderUsage
     val kind: OrderKind,
