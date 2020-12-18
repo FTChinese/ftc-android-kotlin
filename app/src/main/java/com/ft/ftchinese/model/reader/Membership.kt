@@ -115,7 +115,7 @@ data class Membership(
      * upgrade.
      */
     fun canUpgrade(): Boolean {
-        if (!isAliOrWxPay() || !isStripe()) {
+        if (!arrayOf(PayMethod.ALIPAY, PayMethod.STRIPE, PayMethod.WXPAY).contains(payMethod)) {
             return false
         }
 
