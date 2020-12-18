@@ -109,9 +109,10 @@ object StripeClient : AnkoLogger {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
-            .get(baseUrl(account.isTest) + "/subs/$subsId/refresh")
+            .post(baseUrl(account.isTest) + "/subs/$subsId/refresh")
             .setUserId(account.id)
             .noCache()
+            .sendJson()
             .endJsonText()
 
         info(body)
@@ -145,7 +146,7 @@ object StripeClient : AnkoLogger {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
-            .post(Endpoint.subsBase(account.isTest) + "/subs/$subsId/cancel")
+            .post(baseUrl(account.isTest) + "/subs/$subsId/cancel")
             .setUserId(account.id)
             .noCache()
             .sendJson()
