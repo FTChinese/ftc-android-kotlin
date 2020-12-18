@@ -120,6 +120,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Service Acceptance" />
+
+                <Button
+                    android:id="@+id/btn_latest_order"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Latest Order Activity" />
+
                 <Button
                     android:id="@+id/btn_start_download"
                     android:layout_width="match_parent"
