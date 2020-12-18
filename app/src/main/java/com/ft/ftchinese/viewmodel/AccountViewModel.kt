@@ -225,7 +225,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                 }
 
                 stripeResult.value = if (stripeSub == null) {
-                    Result.LocalizedError(R.string.stripe_refreshing_failed)
+                    Result.LocalizedError(R.string.stripe_refresh_failed)
                 } else {
                     Result.Success(stripeSub)
                 }
@@ -258,7 +258,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                 }
 
                 stripeResult.value = if (stripeSub == null) {
-                    Result.LocalizedError(R.string.stripe_refreshing_failed)
+                    Result.LocalizedError(R.string.stripe_refresh_failed)
                 } else {
                     Result.Success(stripeSub)
                 }
@@ -291,7 +291,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
                 }
 
                 stripeResult.value = if (stripeSub == null) {
-                    Result.LocalizedError(R.string.stripe_refreshing_failed)
+                    Result.LocalizedError(R.string.stripe_refresh_failed)
                 } else {
                     Result.Success(stripeSub)
                 }
