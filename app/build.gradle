@@ -52,8 +52,8 @@ android {
         applicationId "com.ft.ftchinese"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 50
-        versionName "3.5.4"
+        versionCode 51
+        versionName "3.6.0"
 
         setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
