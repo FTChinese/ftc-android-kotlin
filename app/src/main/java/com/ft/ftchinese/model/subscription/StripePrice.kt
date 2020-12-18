@@ -18,18 +18,16 @@ data class StripePrice(
     val nickname: String? = null,
     val productId: String,
     val unitAmount: Int,
-    val amount: Int, // Deprecated
-    val interval: String // Deprecated
 ) : Parcelable {
 
     fun humanAmount(): Double {
-        return (amount / 100).toDouble()
+        return (unitAmount / 100).toDouble()
     }
 }
 
+// In-memory cache of stripe prices. The data is also persisted to cache file.
+// See FileCache.kt for cached file name
 object StripePriceStore {
-    const val cacheName = "stripe_prices.json"
-
     var prices = listOf<StripePrice>()
 
     fun find(tier: Tier, cycle: Cycle): StripePrice? {
