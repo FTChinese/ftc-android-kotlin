@@ -25,6 +25,8 @@ import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
@@ -329,8 +331,17 @@ class MemberActivity : ScopedAppActivity(),
             true
         }
         R.id.action_cancel_stripe -> {
-            sessionManager.loadAccount()?.let {
-                accountViewModel.cancelStripe(it)
+
+            alert(Appcompat, "", "") {
+                positiveButton("Yes") {
+                    binding.inProgress = true
+                    sessionManager.loadAccount()?.let {
+                        accountViewModel.cancelStripe(it)
+                    }
+                }
+                negativeButton("Cancel") {
+                    it.dismiss()
+                }
             }
 
             true
