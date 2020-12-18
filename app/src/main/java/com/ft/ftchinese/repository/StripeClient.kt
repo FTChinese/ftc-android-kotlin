@@ -22,7 +22,7 @@ object StripeClient : AnkoLogger {
         val isTest = account?.isTest ?: false
 
         val (_, body) = Fetch()
-            .get(baseUrl(isTest) + "/stripe/prices")
+            .get(baseUrl(isTest) + "/prices")
             .noCache()
             .endJsonText()
 
