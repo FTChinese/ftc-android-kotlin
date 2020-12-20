@@ -28,11 +28,9 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.TestActivity
 import com.ft.ftchinese.databinding.ActivityMainBinding
 import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
-import com.ft.ftchinese.model.order.StripeSubStatus
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.model.splash.SplashScreenManager
-import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.repository.TabPages
 import com.ft.ftchinese.service.AudioDownloadService
 import com.ft.ftchinese.service.LatestReleaseWorker
@@ -160,8 +158,6 @@ class MainActivity : ScopedAppActivity(),
         // For testing
         binding.drawerNav.menu
                 .setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
-
-        checkStripeStatus()
 
         setupSplashScreen()
 
@@ -476,44 +472,6 @@ class MainActivity : ScopedAppActivity(),
             logout()
             WxExpireDialogFragment().show(supportFragmentManager, "WxExpireDialog")
         }
-    }
-
-    private fun checkStripeStatus() {
-        val account = sessionManager.loadAccount() ?: return
-
-        if (account.membership.payMethod != PayMethod.STRIPE) {
-            return
-        }
-
-        if (account.membership.status != StripeSubStatus.Incomplete) {
-            return
-        }
-
-        if (!isConnected) {
-            return
-        }
-
-        accountViewModel.stripeResult.observe(this, Observer {
-            if (it !is Result.Success) {
-                return@Observer
-            }
-
-            if (!isConnected) {
-                return@Observer
-            }
-
-            accountViewModel.refresh(account)
-        })
-
-        accountViewModel.accountRefreshed.observe(this, {
-
-
-            if (it is Result.Success) {
-                sessionManager.saveAccount(it.data)
-            }
-        })
-
-        accountViewModel.refreshStripe(account)
     }
 
     override fun onStart() {
