@@ -18,3 +18,7 @@ data class StripeCustomer(
     val email: String,
     val liveMode: Boolean = true
 )
+
+data class StripeSetupIntent(
+    val clientSecret: String
+)
