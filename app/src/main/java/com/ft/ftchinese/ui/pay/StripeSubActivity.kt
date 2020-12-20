@@ -14,6 +14,7 @@ import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.subscription.OrderKind
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.viewmodel.*
@@ -35,8 +36,10 @@ class StripeSubActivity : ScopedAppActivity(),
 
     private lateinit var binding: ActivityStripeSubBinding
     private lateinit var sessionManager: SessionManager
+    private lateinit var fileCache: FileCache
     private lateinit var checkOutViewModel: CheckOutViewModel
     private lateinit var accountViewModel: AccountViewModel
+    private lateinit var customerViewModel: CustomerViewModel
     private lateinit var idempotency: Idempotency
     private var checkout: StripeCheckout? = null
 
@@ -60,6 +63,7 @@ class StripeSubActivity : ScopedAppActivity(),
         checkout = intent.getParcelableExtra(EXTRA_STRIPE_CHECKOUT)
 
         sessionManager = SessionManager.getInstance(this)
+        fileCache = FileCache(this)
 
         // Initialize Stripe.
         PaymentConfiguration.init(this, BuildConfig.STRIPE_KEY)
@@ -85,7 +89,7 @@ class StripeSubActivity : ScopedAppActivity(),
         )
 
         // Attached PaymentSessionListener
-        paymentSession.init(createPaymentSessionListener())
+        paymentSession.init(paymentSessionListener)
     }
 
     private fun setupViewModel() {
@@ -95,16 +99,26 @@ class StripeSubActivity : ScopedAppActivity(),
         accountViewModel = ViewModelProvider(this)
             .get(AccountViewModel::class.java)
 
+        customerViewModel = ViewModelProvider(
+            this,
+            CustomerViewModelFactory(fileCache)
+        )
+            .get(CustomerViewModel::class.java)
+
         // Monitoring network status.
         connectionLiveData.observe(this, {
             checkOutViewModel.isNetworkAvailable.value = it
             accountViewModel.isNetworkAvailable.value = it
+            customerViewModel.isNetworkAvailable.value = it
         })
-        checkOutViewModel.isNetworkAvailable.value = isConnected
-        checkOutViewModel.isNetworkAvailable.value = isConnected
+        isConnected.let {
+            checkOutViewModel.isNetworkAvailable.value = it
+            accountViewModel.isNetworkAvailable.value = it
+            customerViewModel.isNetworkAvailable.value = it
+        }
 
         // Upon Stripe customer created.
-        accountViewModel.customerResult.observe(this, {
+        customerViewModel.customerCreated.observe(this, {
             onStripeCustomer(it)
         })
 
@@ -141,10 +155,7 @@ class StripeSubActivity : ScopedAppActivity(),
             }
         }
 
-        // TODO: ensure this is clickable only after payment session initialized.
         binding.tvPaymentMethod.setOnClickListener {
-//            PaymentMethodsActivityStarter(this)
-//                    .startForResult(RequestCode.SELECT_SOURCE)
             paymentSession.presentPaymentMethodSelection()
         }
 
@@ -168,7 +179,7 @@ class StripeSubActivity : ScopedAppActivity(),
             binding.inProgress = true
             binding.enableInput = false
             toast(R.string.stripe_init)
-            accountViewModel.createCustomer(account)
+            customerViewModel.create(account)
             return
         }
 
@@ -209,6 +220,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
         val account = sessionManager.loadAccount() ?: return
 
+        // Try to initialize customer session.
         try {
             CustomerSession.getInstance()
             info("CustomerSession already instantiated")
@@ -235,9 +247,10 @@ class StripeSubActivity : ScopedAppActivity(),
         return object : CustomerSession.CustomerRetrievalListener {
             override fun onCustomerRetrieved(customer: Customer) {
                 info("Customer retrieved.")
-
-//                binding.inProgress = false
-//                binding.enableInput = true
+                // We can get the default source from customer.
+                // However the card converted from it seems
+                // different from payment method's card.
+                // It might not be useful to take it as user's default payment method.
             }
 
             override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
@@ -251,36 +264,42 @@ class StripeSubActivity : ScopedAppActivity(),
         }
     }
 
-    private fun createPaymentSessionListener(): PaymentSession.PaymentSessionListener {
-        return object : PaymentSession.PaymentSessionListener {
-            override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
-                binding.inProgress = isCommunicating
-                if (!isCommunicating) {
-                    binding.tvPaymentMethod.isEnabled = true
-                }
+    private var paymentSessionListener = object : PaymentSession.PaymentSessionListener {
+        override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
+            binding.inProgress = isCommunicating
+            if (!isCommunicating) {
+                binding.tvPaymentMethod.isEnabled = true
             }
+        }
 
-            override fun onError(errorCode: Int, errorMessage: String) {
-                toast(errorMessage)
-            }
+        override fun onError(errorCode: Int, errorMessage: String) {
+            toast(errorMessage)
+        }
 
-            override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
-                info(data)
+        // If use changed payment method.
+        override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
+            info(data)
 
-                if (data.paymentMethod != null) {
-                    binding.enableInput = true
+            val pm = data.paymentMethod ?: return
+            // For later use.
+            paymentMethod = pm
+            binding.enableInput = true
 
-                    paymentMethod = data.paymentMethod
-
-                    val card = data.paymentMethod?.card
-                    binding.tvPaymentMethod.text = getString(R.string.payment_source, card?.brand, card?.last4)
-
-                    return
+            when {
+                pm.card != null -> pm.card?.let {
+                    setCardText(it)
                 }
             }
         }
     }
 
+    private fun setCardText(card: PaymentMethod.Card) {
+        binding.tvPaymentMethod.text = getString(
+            R.string.card_brand_last4,
+            card.brand.displayName,
+            card.last4
+        )
+    }
 
     /**
      * Handle select payment method or authentication.
@@ -456,7 +475,7 @@ class StripeSubActivity : ScopedAppActivity(),
             }
             else -> {
                 binding.inProgress = false
-                binding.enableInput = true
+                binding.enableInput = false
                 toast("Unknown subscription type")
             }
         }
