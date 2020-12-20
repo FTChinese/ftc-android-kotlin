@@ -83,15 +83,31 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         accountViewModel.stripeResult.observe(this) {
-            onStripeResult(it)
+            onStripeRefreshed(it)
         }
 
         accountViewModel.iapRefreshResult.observe(this) {
-            onIAPRefresh(it)
+            onIAPRefreshed(it)
         }
 
         accountViewModel.accountRefreshed.observe(this) {
             onAccountRefreshed(it)
+        }
+
+        paywallViewModel.stripePrices.observe(this) { result ->
+            binding.inProgress = false
+
+            when (result) {
+                is Result.LocalizedError -> {
+                    toast(result.msgId)
+                }
+                is Result.Error -> {
+                    result.exception.message?.let { toast(it) }
+                }
+                is Result.Success -> {
+                    gotoStripe()
+                }
+            }
         }
     }
 
@@ -217,13 +233,13 @@ class MemberActivity : ScopedAppActivity(),
             }
             PayMethod.APPLE -> {
                 toast(R.string.iap_refreshing)
-                accountViewModel.refreshIAPSub(account)
+                accountViewModel.refreshIAP(account)
             }
             else -> toast("Current payment method unknown!")
         }
     }
 
-    private fun onStripeResult(result: Result<StripeSubResult>) {
+    private fun onStripeRefreshed(result: Result<StripeSubResult>) {
         stopRefresh()
         binding.inProgress = false
 
@@ -242,7 +258,7 @@ class MemberActivity : ScopedAppActivity(),
         }
     }
 
-    private fun onIAPRefresh(result: Result<IAPSubs>) {
+    private fun onIAPRefreshed(result: Result<IAPSubs>) {
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
