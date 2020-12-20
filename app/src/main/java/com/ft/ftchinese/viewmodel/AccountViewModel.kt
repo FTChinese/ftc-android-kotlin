@@ -48,10 +48,6 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<WxRefreshState>>()
     }
 
-    val customerResult: MutableLiveData<Result<StripeCustomer>> by lazy {
-        MutableLiveData<Result<StripeCustomer>>()
-    }
-
     val stripeResult: MutableLiveData<Result<StripeSubResult>> by lazy {
         MutableLiveData<Result<StripeSubResult>>()
     }
@@ -176,41 +172,6 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun createCustomer(account: Account) {
-        if (isNetworkAvailable.value == false) {
-            customerResult.value = Result.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val customer = withContext(Dispatchers.IO) {
-                    StripeClient.createCustomer(account)
-                }
-
-                if (customer == null) {
-
-                    customerResult.value = Result.LocalizedError(R.string.stripe_customer_not_created)
-                    return@launch
-                }
-
-                customerResult.value = Result.Success(customer)
-
-            } catch (e: ClientError) {
-
-                customerResult.value = if (e.statusCode == 404) {
-                    Result.LocalizedError(R.string.stripe_customer_not_found)
-                } else {
-                     parseApiError(e)
-                }
-            } catch (e: Exception) {
-
-                customerResult.value = parseException(e)
-            }
-
-        }
-    }
-
     // Ask the latest stripe subscription data.
     fun refreshStripe(account: Account) {
         if (isNetworkAvailable.value == false) {
@@ -311,7 +272,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun refreshIAPSub(account: Account) {
+    fun refreshIAP(account: Account) {
         if (isNetworkAvailable.value == false) {
             iapRefreshResult.value = Result.LocalizedError(R.string.prompt_no_network)
             return
