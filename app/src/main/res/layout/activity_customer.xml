@@ -6,12 +6,20 @@
     xmlns:bind="http://schemas.android.com/apk/res-auto">
 
     <data>
+        <import type="android.view.View"/>
         <variable
             name="inProgress"
             type="Boolean" />
 
         <variable
-            name="enableInput"
+            name="enablePicker"
+            type="Boolean" />
+
+        <variable
+            name="enableDefaultBtn"
+            type="Boolean" />
+        <variable
+            name="showDefaultIcon"
             type="Boolean" />
 
         <variable
@@ -30,37 +38,59 @@
 
         <com.google.android.material.card.MaterialCardView
             style="@style/AppCard"
-            android:id="@+id/default_bank_card"
+            android:id="@+id/bank_card_picker"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:enabled="@{enableInput}"
+            android:enabled="@{enablePicker}"
             app:cardBackgroundColor="@color/colorWhite"
             app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/card_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_height="match_parent"
+                android:layout_margin="16dp">
+
                 <TextView
+                    android:id="@+id/tv_card_brand"
                     style="@style/OrigamiText.ProductHeading3"
-                    android:id="@+id/card_brand"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:text="@{card.brand}"/>
+                    android:text="@{card.brand}"
+                    app:layout_constraintBottom_toTopOf="@id/tv_card_number"
+                    app:layout_constraintEnd_toStartOf="@id/default_mark"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintHorizontal_chainStyle="spread_inside"
+                    app:layout_constraintStart_toStartOf="@id/card_container"
+                    app:layout_constraintTop_toTopOf="@id/card_container" />
+
+                <TextView
+                    style="@style/OrigamiText.Body2.Light"
+                    android:id="@+id/default_mark"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Default"
+                    android:visibility="@{showDefaultIcon ? View.VISIBLE : View.GONE}"
+                    app:layout_constraintBaseline_toBaselineOf="@id/tv_card_brand"
+                    app:layout_constraintStart_toEndOf="@id/tv_card_brand"
+                    app:layout_constraintEnd_toEndOf="@id/card_container" />
 
                 <TextView
                     style="@style/OrigamiText.Body1"
-                    android:id="@+id/card_number"
-                    android:layout_width="match_parent"
+                    android:id="@+id/tv_card_number"
+                    app:layout_constraintTop_toBottomOf="@id/tv_card_brand"
+                    app:layout_constraintBottom_toBottomOf="@id/card_container"
+                    app:layout_constraintStart_toStartOf="@id/tv_card_brand"
+                    app:layout_constraintEnd_toEndOf="@id/card_container"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@{card.number}"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <Button
             style="@style/AppButton.OutlinedButton"
@@ -68,8 +98,8 @@
             android:layout_margin="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:enabled="@{enableInput}"
-            app:layout_constraintTop_toBottomOf="@id/default_bank_card"
+            android:enabled="@{enableDefaultBtn}"
+            app:layout_constraintTop_toBottomOf="@id/bank_card_picker"
             android:text="@string/set_default_payment_method"/>
 
         <include layout="@layout/progress_indicator_circular"
