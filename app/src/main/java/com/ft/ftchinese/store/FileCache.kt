@@ -12,6 +12,7 @@ object CacheFileNames {
     const val stripePrices = "subs_stripe_prices.json"
     const val ftcPrices = "subs_ftc_prices.json"
     const val paywall = "subs_paywall.json"
+    const val stripeCustomer = "account_stripe_customer.json"
 }
 
 val templateCache: MutableMap<String, String> = HashMap()
