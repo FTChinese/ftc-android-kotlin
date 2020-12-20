@@ -167,14 +167,14 @@
     <string name="stripe_cancel">取消Stripe订阅</string>
     <string name="retrieve_customer">查询Stripe账号&#8230;</string>
     <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
-    <string name="payment_source">%1$s (尾号%2$s)</string>
+    <string name="card_brand_last4">%1$s (尾号%2$s)</string>
+    <string name="bank_card_number">**** **** **** %1$s</string>
     <string name="stripe_in_pounds">* 使用Stripe订阅FT中文网会员以英镑计价</string>
     <string name="select_or_add_card">选择或添加银行卡</string>
     <string name="stripe_init">设置Stripe支付</string>
     <string name="default_bank_brand">我的银行卡</string>
     <string name="add_or_select_payment_method">点击添加银行卡或选择默认支付方式</string>
     <string name="set_default_payment_method">设为默认支付方式</string>
-    <string name="bank_card_number">**** **** **** %1$s</string>
     <string name="stripe_customer_not_found">Stripe用户不存在，请检查账号或者重新登录</string>
 
     <string name="stripe_authentication_failed">Stripe支付验证似乎失败了</string>

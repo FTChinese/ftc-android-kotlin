@@ -138,7 +138,7 @@
     <string name="pay_brand_stripe">Stripe</string>
     <string name="pay_method_stripe">Stripe支付</string>
     <string name="stripe_customer_not_created">創建Stripe使用者失敗，請重试！</string>
-    <string name="payment_source">%1$s (尾号%2$s)</string>
+    <string name="card_brand_last4">%1$s (尾号%2$s)</string>
 
     <!-- Stripe payment -->
     <string name="stripe_in_pounds">* 使用Stripe訂閱FT中文網會員以英镑计价</string>
