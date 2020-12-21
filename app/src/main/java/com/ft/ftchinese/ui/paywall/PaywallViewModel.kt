@@ -111,12 +111,13 @@ class PaywallViewModel(
     // Retrieve stripe prices in background and refresh cache.
     // It will be executed whenever user opened MemberActivity or PaywallActivity.
     fun refreshStripePrices(account: Account?) {
-        info("Retrieving stripe prices...")
+        info("Retrieving stripe prices in background...")
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val result = StripeClient.listPrices(account) ?: return@launch
                 StripePriceStore.prices = result.value
                 cache.saveText(CacheFileNames.stripePrices, result.raw)
+                info("Stripe prices cached...")
             } catch (e: Exception) {
                 info(e)
             }
@@ -124,15 +125,18 @@ class PaywallViewModel(
     }
 
     private suspend fun stripeCachedPrices(): List<StripePrice>? {
+        info("Loading stripe prices from cache...")
         return withContext(Dispatchers.IO) {
             val data = cache.loadText(CacheFileNames.stripePrices)
 
             if (data == null) {
+                info("Stripe prices not found in cache")
                 null
             } else {
                 try {
                     json.parseArray(data)
                 } catch (e: Exception) {
+                    info(e)
                     null
                 }
             }
@@ -144,6 +148,7 @@ class PaywallViewModel(
     // This works as a backup in case stripe prices is not yet
     // loaded into memory.
     fun loadStripePrices(account: Account?) {
+        info("Loading stripe prices...")
         viewModelScope.launch {
             val prices = stripeCachedPrices()
             if (prices != null) {
@@ -153,10 +158,12 @@ class PaywallViewModel(
 
             // Retrieve server data
             try {
+                info("Retrieving stripe prices from server")
                 val result = withContext(Dispatchers.IO) {
                     StripeClient.listPrices(account)
                 }
 
+                info("Stripe prices retrieval failed")
                 if (result == null) {
                     stripePrices.value = Result.LocalizedError(R.string.api_server_error)
                     return@launch
@@ -166,6 +173,7 @@ class PaywallViewModel(
 
                 withContext(Dispatchers.IO) {
                     cache.saveText(CacheFileNames.stripePrices, result.raw)
+                    info("Cached stripe prices")
                 }
             }
             catch (e: Exception) {
