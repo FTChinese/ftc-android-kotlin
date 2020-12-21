@@ -7,7 +7,7 @@ class StripeClientTest {
 
     @Test
     fun listPrices() {
-        val result = StripeClient.listPrices(null)
+        val result = StripeClient.listPrices()
 
         assertNotNull(result)
 
