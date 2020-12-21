@@ -1,6 +1,6 @@
 package com.ft.ftchinese.model.subscription
 
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 import org.junit.Assert.*
 import org.junit.Test
 

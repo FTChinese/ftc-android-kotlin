@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.order
 
 import com.ft.ftchinese.model.subscription.AliPayIntent
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 import org.junit.Test
 
 private val orderData = """

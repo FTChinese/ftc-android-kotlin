@@ -36,7 +36,7 @@ object ContentApi {
 }
 
 //private const val devIP = "http://192.168.10.122"
-private const val devIP = "http://10.0.0.5"
+private const val devIP = "http://192.168.10.136"
 
 object Endpoint {
     val readerBase = if (BuildConfig.DEBUG) {

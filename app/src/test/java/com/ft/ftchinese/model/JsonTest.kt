@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 import org.junit.Test
 
 class JsonTest {
