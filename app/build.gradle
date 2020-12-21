@@ -97,7 +97,8 @@ android {
         release {
             // Adds the "release" signing configuration to the release build type.
             signingConfig signingConfigs.release
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable false
             buildConfigField "String", "STRIPE_KEY", props.getProperty("stripe.live")
