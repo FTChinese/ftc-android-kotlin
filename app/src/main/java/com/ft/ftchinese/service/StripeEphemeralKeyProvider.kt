@@ -19,7 +19,7 @@ class StripeEphemeralKeyProvider(
 
         info("API version: $apiVersion")
 
-        job = GlobalScope.launch {
+        job = GlobalScope.launch(Dispatchers.Main) {
             try {
                 val rawKey = withContext(Dispatchers.IO) {
                     StripeClient.createEphemeralKey(account, apiVersion)
@@ -51,10 +51,23 @@ class StripeEphemeralKeyProvider(
                 keyUpdateListener.onKeyUpdateFailure(200, "Empty raw key")
 
             } catch (e: ClientError) {
-                keyUpdateListener.onKeyUpdateFailure(e.statusCode, e.message)
+                // ClientError(
+                // message=No such customer: 'cus_abc',
+                // error=null,
+                // statusCode=400,
+                // code=resource_missing,
+                // param=customer,
+                // type=invalid_request_error)
+                info(e)
+                if (e.code == "resource_missing" && e.param == "customer") {
+                    keyUpdateListener.onKeyUpdateFailure(e.statusCode, "Error: Stripe customer not found!")
+                } else {
+                    keyUpdateListener.onKeyUpdateFailure(e.statusCode, e.message)
+                }
 
             } catch (e: Exception) {
-                keyUpdateListener.onKeyUpdateFailure(500, e.localizedMessage)
+                info(e)
+                keyUpdateListener.onKeyUpdateFailure(500, e.localizedMessage ?: "")
             }
         }
     }

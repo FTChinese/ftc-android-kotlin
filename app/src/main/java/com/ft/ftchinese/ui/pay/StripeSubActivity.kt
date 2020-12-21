@@ -131,8 +131,7 @@ class StripeSubActivity : ScopedAppActivity(),
     private fun initUI() {
         // Clickable only after user selected payment method.
 //        binding.btnSubscribe.isEnabled = false
-        binding.inProgress = true
-        binding.enableInput = false
+        uiStateProgress(true)
 
         // Change button text for upgrade.
         if (checkout?.kind == OrderKind.UPGRADE) {
@@ -239,41 +238,33 @@ class StripeSubActivity : ScopedAppActivity(),
 
         CustomerSession
             .getInstance()
-            .retrieveCurrentCustomer(createCustomerRetrievalListener())
+            .retrieveCurrentCustomer(customerRetrievalListener)
     }
 
-    // Stripe SDK retrieved customer data.
-    private fun createCustomerRetrievalListener(): CustomerSession.CustomerRetrievalListener {
-        return object : CustomerSession.CustomerRetrievalListener {
-            override fun onCustomerRetrieved(customer: Customer) {
-                info("Customer retrieved.")
-                // We can get the default source from customer.
-                // However the card converted from it seems
-                // different from payment method's card.
-                // It might not be useful to take it as user's default payment method.
-            }
+    private val customerRetrievalListener = object : CustomerSession.CustomerRetrievalListener {
+        override fun onCustomerRetrieved(customer: Customer) {
+            info("Customer retrieved.")
+        }
 
-            override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
-                info("customer retrieval error: $errorMessage")
+        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
+            info("customer retrieval error: $errorMessage")
+            info(stripeError)
 
-                runOnUiThread {
-                    toast(errorMessage)
-                    binding.inProgress = false
-                }
+            runOnUiThread {
+                toast(errorMessage)
+                uiStateStripeError()
             }
         }
     }
 
     private var paymentSessionListener = object : PaymentSession.PaymentSessionListener {
         override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
-            binding.inProgress = isCommunicating
-            if (!isCommunicating) {
-                binding.tvPaymentMethod.isEnabled = true
-            }
+            uiStateProgress(isCommunicating)
         }
 
         override fun onError(errorCode: Int, errorMessage: String) {
             toast(errorMessage)
+            uiStateStripeError()
         }
 
         // If use changed payment method.
@@ -283,7 +274,7 @@ class StripeSubActivity : ScopedAppActivity(),
             val pm = data.paymentMethod ?: return
             // For later use.
             paymentMethod = pm
-            binding.enableInput = true
+            uiStateProgress(false)
 
             when {
                 pm.card != null -> pm.card?.let {
@@ -291,6 +282,23 @@ class StripeSubActivity : ScopedAppActivity(),
                 }
             }
         }
+    }
+
+
+    private fun uiStateStripeError() {
+        binding.inProgress = false
+        binding.enableInput = false
+    }
+
+    private fun uiStateProgress(yes: Boolean) {
+        binding.inProgress = yes
+        binding.enableInput = !yes
+    }
+
+    private fun uiStateDone() {
+        binding.inProgress = false
+        binding.tvPaymentMethod.isEnabled = false
+        binding.btnSubscribe.isEnabled = false
     }
 
     private fun setCardText(card: PaymentMethod.Card) {
@@ -317,116 +325,6 @@ class StripeSubActivity : ScopedAppActivity(),
             paymentSession.handlePaymentData(requestCode, resultCode, data)
             return
         }
-
-//        if (requestCode == RequestCode.SELECT_SOURCE && resultCode == Activity.RESULT_OK) {
-//            val paymentMethod = data?.getParcelableExtra<PaymentMethod>(PaymentMethodsActivity.EXTRA_SELECTED_PAYMENT) ?: return
-//
-//            val card = paymentMethod.card
-//
-//            binding.tvPaymentMethod.text = getString(R.string.payment_source, card?.brand, card?.last4)
-//
-//            this.paymentMethod = paymentMethod
-//
-//            info("Payment method: $paymentMethod")
-//
-//            return
-//        }
-
-        // Handle credit card authentication.
-//        stripe.onPaymentResult(requestCode, data, object : ApiResultCallback<PaymentIntentResult> {
-//            override fun onSuccess(result: PaymentIntentResult) {
-//
-//                info("PaymentIntentResult status: ${result.status}")
-//
-//                binding.inProgress = false
-//                when (result.intent.status) {
-//
-//                    StripeIntent.Status.RequiresPaymentMethod -> {
-//                        val clientSecret = result.intent.clientSecret
-//
-//                        if ( clientSecret != null) {
-//                            alert(Appcompat,
-//                                R.string.stripe_authentication_failed,
-//                                R.string.title_error
-//                            ) {
-//                                positiveButton(R.string.action_retry) {
-//                                    stripe.authenticatePayment(this@StripeSubActivity, clientSecret)
-//                                }
-//
-//                                isCancelable = false
-//
-//                                negativeButton(R.string.action_cancel) {
-//                                    it.dismiss()
-//                                    idempotency.clear()
-//                                }
-//                            }.show()
-//                        } else {
-//                            alert(
-//                                R.string.stripe_unable_to_authenticate,
-//                                R.string.title_error
-//                            ){
-//                                positiveButton(R.string.action_ok) {
-//                                    it.dismiss()
-//                                }
-//                            }.show()
-//
-//                            idempotency.clear()
-//                            binding.enableInput = true
-//                        }
-//                    }
-//
-//                    StripeIntent.Status.RequiresCapture -> {
-//                        idempotency.clear()
-//                        binding.enableInput = true
-//                    }
-//                    StripeIntent.Status.Succeeded -> {
-//                        // {
-//                        // capture_method=automatic,
-//                        // amount=3000,
-//                        // livemode=false,
-//                        // payment_method_types=[card],
-//                        // canceled_at=0,
-//                        // created=1564563512,
-//                        // description=Payment for invoice FE124B15-0001,
-//                        // confirmation_method=automatic,
-//                        // currency=gbp,
-//                        // id=pi_1F2DdkBzTK0hABgJbOv77sxu,
-//                        // client_secret=pi_1F2DdkBzTK0hABgJbOv77sxu_secret_7x5sHuRlNzRkvfNnqCGJADgbW,
-//                        // object=payment_intent,
-//                        // status=succeeded}
-//                        info("${result.intent.toMap()}")
-//
-//                        retrieveSubscription()
-//                    }
-//
-//                    else -> {
-//
-//                        idempotency.clear()
-//                        binding.enableInput = true
-//
-//                        alert(
-//                            getString(R.string.outcome_payment_status, result.intent.status),
-//                            getString(R.string.title_error)
-//                        ) {
-//                            positiveButton(R.string.action_ok) {
-//                                it.dismiss()
-//                            }
-//                        }.show()
-//                    }
-//                }
-//            }
-//
-//            override fun onError(e: java.lang.Exception) {
-//                alert(e.message.toString(), getString(R.string.title_error)) {
-//                    positiveButton(R.string.action_ok) {
-//                        it.dismiss()
-//                    }
-//                }
-//
-//                idempotency.clear()
-//                binding.enableInput = true
-//            }
-//        })
     }
 
     private fun startSubscribing() {
@@ -444,8 +342,7 @@ class StripeSubActivity : ScopedAppActivity(),
             return
         }
 
-        binding.inProgress = true
-        binding.enableInput = false
+        uiStateProgress(true)
 
         when (co.kind) {
             OrderKind.CREATE -> {
@@ -474,8 +371,7 @@ class StripeSubActivity : ScopedAppActivity(),
                 ))
             }
             else -> {
-                binding.inProgress = false
-                binding.enableInput = false
+                uiStateProgress(false)
                 toast("Unknown subscription type")
             }
         }
@@ -492,10 +388,11 @@ class StripeSubActivity : ScopedAppActivity(),
                 idempotency.clear()
                 binding.enableInput = true
                 alertError(result.msgId)
+                uiStateProgress(false)
             }
             is Result.Error -> {
                 idempotency.clear()
-                binding.enableInput = true
+                uiStateProgress(false)
                 /**
                  * For this type of error, we should clear idempotency key.
                  * {"status":400,
@@ -515,7 +412,7 @@ class StripeSubActivity : ScopedAppActivity(),
                 return
             }
             is Result.Success -> {
-
+                uiStateDone()
                 info("Subscription result: ${result.data}")
 
                 // If no further action required.
