@@ -41,7 +41,7 @@
 -keep interface com.beust.klaxon.** { *; }
 -keep class kotlin.Metadata { *; }
 
-#data models
+# data models
 -keep class com.ft.ftchinese.model.** { *;}
 
 # okhttp
