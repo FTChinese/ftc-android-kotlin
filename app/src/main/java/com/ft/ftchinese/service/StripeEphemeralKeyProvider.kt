@@ -42,7 +42,6 @@ class StripeEphemeralKeyProvider(
                 //  "secret": "ek_test_***aq5O"
                 //}
                 // The key lasts 1 hour.
-                info("rawKey: $rawKey")
 
                 if (rawKey != null) {
                     keyUpdateListener.onKeyUpdate(rawKey)
