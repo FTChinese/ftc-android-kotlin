@@ -7,7 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.repository.Fetch
+import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.store.FileCache
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

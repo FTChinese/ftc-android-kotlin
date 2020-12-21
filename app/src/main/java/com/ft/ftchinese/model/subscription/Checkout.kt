@@ -1,6 +1,6 @@
 package com.ft.ftchinese.model.subscription
 
-import com.ft.ftchinese.util.KOrderUsage
+import com.ft.ftchinese.model.fetch.KOrderUsage
 
 data class CheckedItem(
     val plan: Plan,

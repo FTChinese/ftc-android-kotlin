@@ -2,8 +2,8 @@ package com.ft.ftchinese.model.splash
 
 import android.content.Context
 import androidx.core.content.edit
-import com.ft.ftchinese.util.formatLocalDate
-import com.ft.ftchinese.util.parseLocalDate
+import com.ft.ftchinese.model.fetch.formatLocalDate
+import com.ft.ftchinese.model.fetch.parseLocalDate
 import org.jetbrains.anko.AnkoLogger
 import org.threeten.bp.LocalDate
 

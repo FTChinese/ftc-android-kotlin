@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.subscription
 
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.util.KPayMethod
+import com.ft.ftchinese.model.fetch.KPayMethod
 
 val paymentSuccessStates = arrayOf("TRADE_SUCCESS", "SUCCESS")
 

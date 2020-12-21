@@ -10,7 +10,7 @@ import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers

@@ -7,7 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.repository.LinkRepo
-import com.ft.ftchinese.repository.ClientError
+import com.ft.ftchinese.model.fetch.ClientError
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

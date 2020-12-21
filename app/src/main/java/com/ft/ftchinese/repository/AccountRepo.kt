@@ -1,11 +1,12 @@
 package com.ft.ftchinese.repository
 
 import com.beust.klaxon.Klaxon
+import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Passwords
 import com.ft.ftchinese.model.reader.WxSession
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 
 object AccountRepo {
     private fun loadFtcAccount(ftcId: String): Account? {

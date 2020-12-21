@@ -13,8 +13,8 @@ import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.settings.UpdateAppActivity
-import com.ft.ftchinese.util.formatISODateTime
-import com.ft.ftchinese.util.parseISODateTime
+import com.ft.ftchinese.model.fetch.formatISODateTime
+import com.ft.ftchinese.model.fetch.parseISODateTime
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.threeten.bp.ZonedDateTime

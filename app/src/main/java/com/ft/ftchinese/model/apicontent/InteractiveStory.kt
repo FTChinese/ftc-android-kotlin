@@ -1,6 +1,6 @@
 package com.ft.ftchinese.model.apicontent
 
-import com.ft.ftchinese.util.KDateTime
+import com.ft.ftchinese.model.fetch.KDateTime
 import org.threeten.bp.ZonedDateTime
 
 data class Timeline(

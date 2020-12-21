@@ -1,8 +1,9 @@
-package com.ft.ftchinese.repository
+package com.ft.ftchinese.model.fetch
 
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
+import com.ft.ftchinese.repository.Config
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull

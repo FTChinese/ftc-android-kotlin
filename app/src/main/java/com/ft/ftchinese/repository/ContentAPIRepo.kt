@@ -2,6 +2,7 @@ package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.fetch.Fetch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 

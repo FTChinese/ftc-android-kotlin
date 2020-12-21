@@ -1,4 +1,4 @@
-package com.ft.ftchinese.util
+package com.ft.ftchinese.model.fetch
 
 import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue

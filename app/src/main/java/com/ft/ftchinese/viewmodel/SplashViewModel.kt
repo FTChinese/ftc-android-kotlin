@@ -10,7 +10,7 @@ import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.model.splash.SPLASH_SCHEDULE_FILE
 import com.ft.ftchinese.model.splash.Schedule
 import com.ft.ftchinese.model.splash.ScreenAd
-import com.ft.ftchinese.repository.Fetch
+import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.repository.LAUNCH_SCHEDULE_URL
 import com.ft.ftchinese.store.FileCache
 import kotlinx.coroutines.Dispatchers

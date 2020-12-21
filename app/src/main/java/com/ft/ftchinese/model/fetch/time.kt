@@ -1,4 +1,4 @@
-package com.ft.ftchinese.util
+package com.ft.ftchinese.model.fetch
 
 import org.threeten.bp.DateTimeException
 import org.threeten.bp.LocalDate

@@ -1,13 +1,15 @@
 package com.ft.ftchinese.repository
 
 import com.beust.klaxon.Klaxon
+import com.ft.ftchinese.model.fetch.Fetch
+import com.ft.ftchinese.model.fetch.JSONResult
 import com.ft.ftchinese.model.order.StripeSubParams
 import com.ft.ftchinese.model.order.StripeSubResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.model.subscription.StripePrice
 import com.ft.ftchinese.model.subscription.StripeSetupIntent
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 

@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model
 
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.util.KDateTime
+import com.ft.ftchinese.model.fetch.KDateTime
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 

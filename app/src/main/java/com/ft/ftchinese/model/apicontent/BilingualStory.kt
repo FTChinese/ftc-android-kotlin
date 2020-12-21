@@ -1,8 +1,8 @@
 package com.ft.ftchinese.model.apicontent
 
 import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.util.KDateTime
-import com.ft.ftchinese.util.KTier
+import com.ft.ftchinese.model.fetch.KDateTime
+import com.ft.ftchinese.model.fetch.KTier
 import org.threeten.bp.ZonedDateTime
 
 data class Related (

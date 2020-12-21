@@ -9,9 +9,9 @@ import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.ui.base.ShareItem
-import com.ft.ftchinese.repository.Fetch
+import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

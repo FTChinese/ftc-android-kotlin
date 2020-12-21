@@ -8,9 +8,8 @@ import com.ft.ftchinese.model.order.StripeSubResult
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.subscription.IAPSubs
 import com.ft.ftchinese.model.subscription.Order
-import com.ft.ftchinese.model.subscription.StripeCustomer
 import com.ft.ftchinese.repository.AccountRepo
-import com.ft.ftchinese.repository.ClientError
+import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.store.FileCache

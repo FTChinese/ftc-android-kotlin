@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.util.formatSQLDateTime
+import com.ft.ftchinese.model.fetch.formatSQLDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

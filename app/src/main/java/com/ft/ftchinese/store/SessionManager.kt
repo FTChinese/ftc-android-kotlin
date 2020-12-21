@@ -7,10 +7,10 @@ import com.ft.ftchinese.model.subscription.PayMethod
 import com.ft.ftchinese.model.order.StripeSubStatus
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.util.formatISODateTime
-import com.ft.ftchinese.util.formatLocalDate
-import com.ft.ftchinese.util.parseISODateTime
-import com.ft.ftchinese.util.parseLocalDate
+import com.ft.ftchinese.model.fetch.formatISODateTime
+import com.ft.ftchinese.model.fetch.formatLocalDate
+import com.ft.ftchinese.model.fetch.parseISODateTime
+import com.ft.ftchinese.model.fetch.parseLocalDate
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 

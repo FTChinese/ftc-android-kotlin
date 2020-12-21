@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
-import com.ft.ftchinese.util.KLoginMethod
+import com.ft.ftchinese.model.fetch.KLoginMethod
 import kotlinx.parcelize.Parcelize
 
 /**

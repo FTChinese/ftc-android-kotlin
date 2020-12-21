@@ -1,7 +1,8 @@
 package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.model.AppRelease
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.Fetch
+import com.ft.ftchinese.model.fetch.json
 import org.jetbrains.anko.AnkoLogger
 
 object ReleaseRepo : AnkoLogger {

@@ -29,7 +29,7 @@ import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.WVViewModel
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.viewmodel.ArticleViewModel
 import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel

@@ -3,10 +3,10 @@ package com.ft.ftchinese.model.order
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscription.Cycle
 import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.util.KCycle
-import com.ft.ftchinese.util.KDateTime
-import com.ft.ftchinese.util.KStripeSubStatus
-import com.ft.ftchinese.util.KTier
+import com.ft.ftchinese.model.fetch.KCycle
+import com.ft.ftchinese.model.fetch.KDateTime
+import com.ft.ftchinese.model.fetch.KStripeSubStatus
+import com.ft.ftchinese.model.fetch.KTier
 import org.threeten.bp.ZonedDateTime
 
 data class StripePaymentResult(

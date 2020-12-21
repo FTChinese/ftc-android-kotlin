@@ -1,8 +1,9 @@
 package com.ft.ftchinese.repository
 
+import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 

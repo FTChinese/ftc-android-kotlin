@@ -6,7 +6,7 @@ import com.beust.klaxon.Json
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.HOST_FTC
-import com.ft.ftchinese.util.KArticleType
+import com.ft.ftchinese.model.fetch.KArticleType
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.jetbrains.anko.AnkoLogger

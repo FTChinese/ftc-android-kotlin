@@ -1,7 +1,7 @@
 package com.ft.ftchinese.viewmodel
 
 import com.ft.ftchinese.R
-import com.ft.ftchinese.repository.ClientError
+import com.ft.ftchinese.model.fetch.ClientError
 
 fun parseApiError(e: ClientError): Result<Nothing> {
     return when (e.statusCode) {

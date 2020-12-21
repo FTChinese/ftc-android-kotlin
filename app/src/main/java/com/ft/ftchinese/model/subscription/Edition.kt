@@ -1,8 +1,8 @@
 package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
-import com.ft.ftchinese.util.KCycle
-import com.ft.ftchinese.util.KTier
+import com.ft.ftchinese.model.fetch.KCycle
+import com.ft.ftchinese.model.fetch.KTier
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

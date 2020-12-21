@@ -15,7 +15,7 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.formatPrice
 import com.ft.ftchinese.ui.base.getTierCycleText
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.util.formatISODateTime
+import com.ft.ftchinese.model.fetch.formatISODateTime
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import org.jetbrains.anko.AnkoLogger

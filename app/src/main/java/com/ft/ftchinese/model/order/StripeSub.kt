@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.order
 
-import com.ft.ftchinese.util.KDateTime
-import com.ft.ftchinese.util.KStripeSubStatus
+import com.ft.ftchinese.model.fetch.KDateTime
+import com.ft.ftchinese.model.fetch.KStripeSubStatus
 import org.threeten.bp.ZonedDateTime
 
 /**

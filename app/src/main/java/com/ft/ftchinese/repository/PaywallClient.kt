@@ -1,8 +1,10 @@
 package com.ft.ftchinese.repository
 
+import com.ft.ftchinese.model.fetch.Fetch
+import com.ft.ftchinese.model.fetch.JSONResult
 import com.ft.ftchinese.model.subscription.Paywall
 import com.ft.ftchinese.model.subscription.Plan
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 
 object PaywallClient {
     // Paywall data does not distinguish test or live account.

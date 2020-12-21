@@ -4,10 +4,10 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.ft.ftchinese.model.subscription.*
-import com.ft.ftchinese.util.formatISODateTime
-import com.ft.ftchinese.util.formatLocalDate
-import com.ft.ftchinese.util.parseISODateTime
-import com.ft.ftchinese.util.parseLocalDate
+import com.ft.ftchinese.model.fetch.formatISODateTime
+import com.ft.ftchinese.model.fetch.formatLocalDate
+import com.ft.ftchinese.model.fetch.parseISODateTime
+import com.ft.ftchinese.model.fetch.parseLocalDate
 
 private const val PREF_FILE_NAME = "subscription"
 private const val PREF_ORDER_ID = "order_id"

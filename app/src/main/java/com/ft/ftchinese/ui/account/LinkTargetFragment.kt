@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentLinkTargetBinding
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.util.formatLocalDate
+import com.ft.ftchinese.model.fetch.formatLocalDate
 import org.jetbrains.anko.AnkoLogger
 
 /**

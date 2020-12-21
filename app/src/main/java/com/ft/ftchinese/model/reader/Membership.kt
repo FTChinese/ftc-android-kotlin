@@ -2,10 +2,10 @@ package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.fetch.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.subscription.*
 
-import com.ft.ftchinese.util.*
 import kotlinx.parcelize.Parcelize
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter

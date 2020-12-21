@@ -1,6 +1,6 @@
 package com.ft.ftchinese.model.splash
 
-import com.ft.ftchinese.util.KDate
+import com.ft.ftchinese.model.fetch.KDate
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.jetbrains.anko.AnkoLogger

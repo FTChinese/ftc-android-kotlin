@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.subscription
 
-import com.ft.ftchinese.util.KCycle
-import com.ft.ftchinese.util.KTier
+import com.ft.ftchinese.model.fetch.KCycle
+import com.ft.ftchinese.model.fetch.KTier
 
 data class IAPSubs(
     val originalTransactionId: String,

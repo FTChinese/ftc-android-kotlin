@@ -4,7 +4,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.tracking.AdParser
 import com.ft.ftchinese.tracking.AdPosition
 import com.ft.ftchinese.tracking.JSCodes
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 

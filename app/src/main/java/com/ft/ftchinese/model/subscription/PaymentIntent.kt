@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
-import com.ft.ftchinese.util.KOrderUsage
+import com.ft.ftchinese.model.fetch.KOrderUsage
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

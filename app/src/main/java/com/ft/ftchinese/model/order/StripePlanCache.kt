@@ -3,7 +3,7 @@ package com.ft.ftchinese.model.order
 import android.content.Context
 import androidx.core.content.edit
 import com.ft.ftchinese.model.subscription.StripePrice
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 
 private const val PREF_FILE_NAME = "stripe_plans"
 

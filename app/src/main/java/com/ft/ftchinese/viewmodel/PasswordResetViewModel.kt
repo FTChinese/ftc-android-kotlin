@@ -7,7 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.PasswordResetter
 import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.model.reader.PwResetVerifier
-import com.ft.ftchinese.repository.ClientError
+import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.repository.ReaderRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -35,6 +35,15 @@
     volatile <fields>;
 }
 
+# Klaxon
+-keep public class kotlin.reflect.jvm.internal.impl.** { public *; }
+-keep class com.beust.klaxon.** { *; }
+-keep interface com.beust.klaxon.** { *; }
+-keep class kotlin.Metadata { *; }
+
+#data models
+-keep class com.ft.ftchinese.model.** { *;}
+
 # okhttp
 -dontwarn okhttp3.**
 -dontwarn okio.**

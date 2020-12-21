@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.util.formatSQLDateTime
+import com.ft.ftchinese.model.fetch.formatSQLDateTime
 import org.threeten.bp.LocalDateTime
 import java.util.*
 

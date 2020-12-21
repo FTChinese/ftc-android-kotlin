@@ -9,10 +9,10 @@ import com.ft.ftchinese.model.apicontent.InteractiveStory
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.repository.ClientError
+import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.repository.ContentAPIRepo
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.util.json
+import com.ft.ftchinese.model.fetch.json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

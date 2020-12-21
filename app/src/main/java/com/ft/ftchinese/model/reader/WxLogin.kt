@@ -1,5 +1,6 @@
 package com.ft.ftchinese.model.reader
 
+import com.ft.ftchinese.model.fetch.KDateTime
 import com.ft.ftchinese.util.*
 import org.threeten.bp.DateTimeException
 import org.threeten.bp.ZonedDateTime
