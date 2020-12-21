@@ -110,11 +110,11 @@ class PaywallViewModel(
 
     // Retrieve stripe prices in background and refresh cache.
     // It will be executed whenever user opened MemberActivity or PaywallActivity.
-    fun refreshStripePrices(account: Account?) {
+    fun refreshStripePrices() {
         info("Retrieving stripe prices in background...")
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val result = StripeClient.listPrices(account) ?: return@launch
+                val result = StripeClient.listPrices() ?: return@launch
                 StripePriceStore.prices = result.value
                 cache.saveText(CacheFileNames.stripePrices, result.raw)
                 info("Stripe prices cached...")
@@ -147,7 +147,7 @@ class PaywallViewModel(
     // before show stripe payment page.
     // This works as a backup in case stripe prices is not yet
     // loaded into memory.
-    fun loadStripePrices(account: Account?) {
+    fun loadStripePrices() {
         info("Loading stripe prices...")
         viewModelScope.launch {
             val prices = stripeCachedPrices()
@@ -160,7 +160,7 @@ class PaywallViewModel(
             try {
                 info("Retrieving stripe prices from server")
                 val result = withContext(Dispatchers.IO) {
-                    StripeClient.listPrices(account)
+                    StripeClient.listPrices()
                 }
 
                 info("Stripe prices retrieval failed")

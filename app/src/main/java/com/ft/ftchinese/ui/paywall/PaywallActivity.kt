@@ -155,7 +155,7 @@ class PaywallActivity : ScopedAppActivity(),
         // Fetch paywall from cache, then from server.
         paywallViewModel.loadPaywall(isRefreshing)
         // Retrieve stripe prices in background.
-        paywallViewModel.refreshStripePrices(sessionManager.loadAccount())
+        paywallViewModel.refreshStripePrices()
     }
 
     /**

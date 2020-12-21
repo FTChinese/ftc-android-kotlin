@@ -270,7 +270,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
                 // Retrieve stripe prices if not loaded yet.
                 binding.inProgress = true
-                paywallViewModel.loadStripePrices(account)
+                paywallViewModel.loadStripePrices()
             }
 
             else -> toast(R.string.pay_method_not_selected)

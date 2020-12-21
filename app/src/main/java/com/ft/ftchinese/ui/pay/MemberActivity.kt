@@ -113,7 +113,7 @@ class MemberActivity : ScopedAppActivity(),
 
     private fun loadData() {
         paywallViewModel.refreshFtcPrices()
-        paywallViewModel.refreshStripePrices(sessionManager.loadAccount())
+        paywallViewModel.refreshStripePrices()
     }
 
     private fun initUI() {
@@ -166,7 +166,7 @@ class MemberActivity : ScopedAppActivity(),
                 // A fallback if stripe prices not cached on device.
                 binding.inProgress = true
                 toast("Loading stripe prices...")
-                paywallViewModel.loadStripePrices(account)
+                paywallViewModel.loadStripePrices()
             }
 
             it.isEnabled = false
