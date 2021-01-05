@@ -2,9 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/menu_item_toggle_polling"
-        android:title="Start Polling"
-        app:showAsAction="never"/>
 
     <item android:id="@+id/menu_test_wechat_expired"
         android:title="Show Wechat Expired"
@@ -22,10 +19,6 @@
         android:title="Show Wechat Pay Result"
         app:showAsAction="never"/>
 
-    <item android:id="@+id/menu_latest_order"
-        android:title="Show Latest Order"
-        app:showAsAction="never"/>
-
     <item android:id="@+id/menu_wx_oauth"
         android:title="Show Wechat OAuth Progress"
         app:showAsAction="never"/>
@@ -38,7 +31,7 @@
         android:title="Clear Idempotency"
         app:showAsAction="never"/>
 
-    <item android:id="@+id/menu_stripe_subscripiton"
+    <item android:id="@+id/menu_stripe_subscription"
         android:title="Stripe Subscribed"
         app:showAsAction="never"/>
 </menu>

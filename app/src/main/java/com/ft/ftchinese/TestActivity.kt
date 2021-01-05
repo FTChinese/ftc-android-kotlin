@@ -1,21 +1,15 @@
 package com.ft.ftchinese
 
 import android.app.*
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.view.Menu
 import android.view.MenuItem
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
-import androidx.core.content.FileProvider
-import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,7 +19,6 @@ import androidx.work.WorkRequest
 import com.ft.ftchinese.databinding.ActivityTestBinding
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.subscription.*
@@ -36,6 +29,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
 import com.ft.ftchinese.ui.article.*
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.launch.PrivacyFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.LatestOrderActivity
@@ -50,7 +44,6 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
-import java.io.File
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class TestActivity : ScopedAppActivity(), AnkoLogger {
@@ -186,7 +179,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         orderManger = OrderManager.getInstance(this)
         workManager = WorkManager.getInstance(this)
 
-        binding.singleTask.setOnClickListener {
+        binding.oneTimeWorkManager.setOnClickListener {
             val request = OneTimeWorkRequestBuilder<VerifySubsWorker>().build()
             workManager.enqueue(request)
         }
@@ -195,37 +188,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             .build()
 
         WorkManager.getInstance(this).enqueue(uploadWorkRequest)
-
-        info("Internal directory of this app: $filesDir")
-        info("Internal directory for this app's temporary cache files: $cacheDir")
-        info("External files dir: ${getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)}")
-
-        info("isExternalStorageWritable: ${isExternalStorageWritable()}")
-        info("External storage directory: ${Environment.getExternalStorageDirectory()}")
-        info("External Download directory: ${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)}")
-
-        registerReceiver(onDownloadComplete, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
-
-        registerReceiver(onDownloadClicked, IntentFilter(DownloadManager.ACTION_NOTIFICATION_CLICKED))
-
-        binding.btnStartDownload.setOnClickListener {
-            it.isEnabled = false
-            toast("Start downloading")
-            binding.inProgress = true
-            download()
-        }
-
-        binding.btnFindDownload.setOnClickListener {
-            getDownloadedUri()
-        }
-
-        binding.btnDownloadStatus.setOnClickListener {
-            getDownloadStatus()
-        }
-
-        binding.btnInstallApk.setOnClickListener {
-            install()
-        }
 
         binding.createChannel.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -314,6 +276,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                     }
         }
 
+        // Setup bottom bar menu
         binding.bottomBar.replaceMenu(R.menu.activity_test_menu)
         binding.bottomBar.setOnMenuItemClickListener {
             onBottomMenuItemClicked(it)
@@ -351,11 +314,10 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             LatestOrderActivity.start(this)
         }
 
-        binding.btnDeclineService.setOnClickListener {
+        binding.clearServiceAccepted.setOnClickListener {
             ServiceAcceptance.getInstance(this).clear()
         }
 
-        binding.progressButtonText = "Test Button with Progress Bar"
         binding.btnProgress.button.setOnClickListener {
             binding.inProgress = true
         }
@@ -432,248 +394,9 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         return resultCode == ConnectionResult.SUCCESS
     }
 
-    private val onDownloadClicked = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            info("intent: $intent")
-
-            val downloadId = loadDownloadId()
-            if (downloadId < 0) {
-                return
-            }
-
-            val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-
-            info("Notification clicked $id")
-
-            if (downloadId == id) {
-                install()
-            }
-        }
-    }
-
-    private val onDownloadComplete = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val downloadId = loadDownloadId()
-            if (downloadId < 0) {
-                return
-            }
-
-            val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-
-            if (downloadId == id) {
-                binding.btnStartDownload.isEnabled = true
-                binding.inProgress = false
-
-                alert(Appcompat,"Download complete. Install now?", "Install") {
-                    positiveButton("Install") {
-                        it.dismiss()
-
-                        install()
-                    }
-
-                    negativeButton("Later") {
-                        it.dismiss()
-                    }
-                }.show()
-
-            }
-        }
-    }
-
-    /**
-     * @see https://stackoverflow.com/questions/39996491/open-downloaded-file-on-android-n-using-fileprovider
-     * The path you passed to File must ba a connonical file
-     * path with the `file://` part.
-     */
-    private fun install() {
-        val localUri = getDownloadedUri()
-        if (localUri == null) {
-            toast("Downloaded file not found")
-            return
-        }
-
-        info("Raw file path $localUri")
-
-        val filePath = localUri.path
-        info("File path: $filePath")
-
-        if (filePath == null) {
-            toast("Download file uri cannot be parsed")
-            return
-        }
-
-        val downloadedFile = File(filePath)
-
-        info("Downloaded file: $downloadedFile")
-
-        try {
-
-            startInstall(downloadedFile)
-
-        } catch (e: Exception) {
-            alert(Appcompat, "${e.message}", "Installation Failed") {
-                positiveButton("Re-try") {
-                    it.dismiss()
-                    startInstall(downloadedFile)
-                }
-                positiveButton("Cancel") {
-
-                    it.dismiss()
-                }
-            }.show()
-        }
-    }
-
-    private fun startInstall(file: File) {
-        val contentUri = FileProvider.getUriForFile(this, "com.ftchinese.fileprovider", file)
-
-        info("file $contentUri")
-
-        // Do not use ACTION_VIEW you found on most
-        // stack overflow answers. It's too old.
-        // Nor should you use ACTION_INSTALL_PACKAGE.
-        val intent = Intent(Intent.ACTION_INSTALL_PACKAGE).apply {
-            setDataAndType(contentUri, "application/vnd.android.package-archive")
-            // The permission must be added, otherwise you
-            // will get error parsing package.
-            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
-            putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME, applicationInfo.packageName)
-        }
-
-        startActivity(intent)
-    }
-
-    private fun download() {
-        val parsedUri = Uri.parse("https://creatives.ftacademy.cn/minio/android/ftchinese-v3.0.0-ftc-release.apk")
-
-        val fileName = parsedUri.lastPathSegment
-
-        val req = DownloadManager.Request(parsedUri)
-                .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI)
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-                .setTitle("FT中文网${parsedUri.lastPathSegment}")
-                .setMimeType("application/vnd.android.package-archive")
-
-        val dm: DownloadManager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        val id = dm.enqueue(req)
-
-        info("Download id: $id")
-
-        saveDownloadId(id)
-    }
-
-    /**
-     * Find the downloaded file.
-     */
-    private fun getDownloadedUri(): Uri? {
-        val id = loadDownloadId()
-        if (id < 0) {
-            toast("Download id $id not found")
-            return null
-        }
-
-        val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-
-        val query = DownloadManager.Query().setFilterById(id)
-        val c = dm.query(query) ?: return null
-
-        if (!c.moveToFirst()) {
-            c.close()
-            return null
-        }
-
-
-        return try {
-            val localUri = c.getString(c.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI))
-            info("Downloaded file $localUri")
-            c.close()
-
-            return Uri.parse(localUri)
-        } catch (e: Exception) {
-            null
-        } finally {
-            c.close()
-        }
-    }
-
-    private fun getDownloadStatus() {
-
-        val id = loadDownloadId()
-        if (id < 0) {
-            return
-        }
-
-        val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-
-        val query = DownloadManager.Query().setFilterById(id)
-
-        val c = dm.query(query) ?: return
-
-        if (!c.moveToFirst()) {
-            return
-        }
-
-
-
-        val status = try {
-            c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))
-        } catch (e: Exception) {
-            null
-        } finally {
-            c.close()
-        } ?: return
-
-        when (status) {
-            DownloadManager.STATUS_PENDING -> {
-                toast("Pending")
-            }
-            DownloadManager.STATUS_PAUSED -> {
-                toast("Paused")
-            }
-            DownloadManager.STATUS_RUNNING -> {
-                toast("Running")
-            }
-            DownloadManager.STATUS_SUCCESSFUL -> {
-                toast("Successful")
-            }
-            DownloadManager.STATUS_FAILED -> {
-                toast("Failed")
-            }
-        }
-    }
-
-    private fun saveDownloadId(id: Long) {
-        getSharedPreferences(PREF_FILE_DOWNLOAD, Context.MODE_PRIVATE).edit {
-            putLong(PREF_DOWNLOAD_ID, id)
-        }
-    }
-
-    private fun loadDownloadId(): Long {
-        return getSharedPreferences(PREF_FILE_DOWNLOAD, Context.MODE_PRIVATE).getLong(PREF_DOWNLOAD_ID, -1)
-    }
-
-    private fun isExternalStorageWritable(): Boolean {
-        return Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
-    }
-
-    override fun onStop() {
-        super.onStop()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterReceiver(onDownloadComplete)
-        unregisterReceiver(onDownloadClicked)
-    }
 
     private fun onBottomMenuItemClicked(item: MenuItem) {
         when (item.itemId) {
-            R.id.menu_item_toggle_polling -> {
-                invalidateOptionsMenu()
-
-            }
             R.id.menu_test_wechat_expired -> {
                 WxExpireDialogFragment().show(supportFragmentManager, "WxExpiredDialog")
             }
@@ -709,9 +432,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                 ))
                 WXPayEntryActivity.start(this)
             }
-            R.id.menu_latest_order -> {
-                LatestOrderActivity.start(this)
-            }
             R.id.menu_wx_oauth -> {
                 WXEntryActivity.start(this)
             }
@@ -744,7 +464,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                 Idempotency.getInstance(this).clear()
                 toast("Cleared")
             }
-            R.id.menu_stripe_subscripiton -> {
+            R.id.menu_stripe_subscription -> {
 
 //                StripeSubActivity.startTest(this, findPlan(Tier.STANDARD, Cycle.YEAR))
             }
@@ -755,12 +475,10 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         super.onCreateOptionsMenu(menu)
         menuInflater.inflate(R.menu.article_top_bar, menu)
 
-//        menu?.findItem(R.id.menu_item_toggle_polling)
-//                ?.title = if (PollService.isServiceAlarmOn(this)) "Stop polling" else "Start polling"
-
         return true
     }
 
+    // Show system share.
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.menu_share -> {
@@ -777,9 +495,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     companion object {
-        private const val PREF_FILE_DOWNLOAD = "app_download"
-        private const val PREF_DOWNLOAD_ID = "download_id"
-
         @JvmStatic
         fun start(context: Context) {
             context.startActivity(Intent(context, TestActivity::class.java))

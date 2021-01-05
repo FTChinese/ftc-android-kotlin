@@ -10,9 +10,7 @@
         <variable
             name="inProgress"
             type="Boolean" />
-        <variable
-            name="progressButtonText"
-            type="String" />
+
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -84,33 +82,7 @@
                     android:textAllCaps="false"/>
 
                 <Button
-                    android:id="@+id/single_task"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Single Task"/>
-
-                <Button
-                    android:id="@+id/periodic_task"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Periodic Task"/>
-
-                <Button
-                    android:id="@+id/recurring_task"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Recurring Task"/>
-
-                <Button
-                    android:id="@+id/constraint_task"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Constraint Task"/>
-
-
-
-                <Button
-                    android:id="@+id/btn_decline_service"
+                    android:id="@+id/clear_service_accepted"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Clear Service Acceptance"/>
@@ -122,38 +94,16 @@
                     android:text="Service Acceptance" />
 
                 <Button
+                    android:id="@+id/one_time_work_manager"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="One Time Work Manager"/>
+                <Button
                     android:id="@+id/btn_latest_order"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Latest Order Activity" />
 
-                <Button
-                    android:id="@+id/btn_start_download"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Start Download"
-                    android:textAllCaps="false" />
-
-                <Button
-                    android:id="@+id/btn_find_download"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Find Download"
-                    android:textAllCaps="false" />
-
-                <Button
-                    android:id="@+id/btn_install_apk"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Install APK"
-                    android:textAllCaps="false" />
-
-                <Button
-                    android:id="@+id/btn_download_status"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Download Status"
-                    android:textAllCaps="false" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/create_channel"
@@ -207,7 +157,7 @@
                 <include android:id="@+id/btn_progress"
                     layout="@layout/button_progress"
                     bind:inProgress="@{inProgress}"
-                    bind:btnText="@{progressButtonText}"/>
+                    bind:btnText="Test"/>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_html"
