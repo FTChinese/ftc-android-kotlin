@@ -14,6 +14,8 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
+private const val EXTRA_CHANNEL_SOURCE = "extra_channel_source"
+
 /**
  * This is used to show a channel page, which consists of a list of article teaser.
  * It is similar to [MainActivity] except that it does not wrap a TabLayout.
@@ -35,7 +37,7 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
             setDisplayShowTitleEnabled(false)
         }
 
-        val channelSource = intent.getParcelableExtra<ChannelSource>(EXTRA_PAGE_META)
+        val channelSource = intent.getParcelableExtra<ChannelSource>(EXTRA_CHANNEL_SOURCE)
         if (channelSource == null) {
             toast(R.string.loading_failed)
             return
@@ -61,7 +63,6 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
      * Launch this activity with intent
      */
     companion object {
-        private const val EXTRA_PAGE_META = "extra_list_page_metadata"
 
         @JvmStatic
         fun newIntent(context: Context?, teaser: ChannelSource): Intent {
@@ -69,7 +70,7 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
                     context,
                     ChannelActivity::class.java
             ).apply {
-                putExtra(EXTRA_PAGE_META, teaser)
+                putExtra(EXTRA_CHANNEL_SOURCE, teaser)
             }
         }
 
@@ -79,7 +80,7 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
         @JvmStatic
         fun start(context: Context?, page: ChannelSource) {
             val intent = Intent(context, ChannelActivity::class.java).apply {
-                putExtra(EXTRA_PAGE_META, page)
+                putExtra(EXTRA_CHANNEL_SOURCE, page)
             }
 
             context?.startActivity(intent)
@@ -88,7 +89,7 @@ class ChannelActivity : AppCompatActivity(), AnkoLogger {
         @JvmStatic
         fun startWithParentStack(context: Context, page: ChannelSource) {
             val intent = Intent(context, ChannelActivity::class.java).apply {
-                putExtra(EXTRA_PAGE_META, page)
+                putExtra(EXTRA_CHANNEL_SOURCE, page)
             }
 
             TaskStackBuilder
