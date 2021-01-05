@@ -6,12 +6,11 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.fetch.Fetch
+import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.ui.base.ShareItem
-import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.model.fetch.json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,8 +38,6 @@ class ArticleViewModel(
         MutableLiveData<Result<Story>>()
     }
 
-    val shareItem = MutableLiveData<ShareItem>()
-
     // Tell host activity that content is loaded.
     // Host could then log view event.
     fun webLoaded(data: StarredArticle) {
@@ -57,7 +54,7 @@ class ArticleViewModel(
         info("Cache story file: $cacheName")
 
         viewModelScope.launch {
-            if (!cacheName.isBlank() && !bustCache) {
+            if (cacheName.isNotBlank() && !bustCache) {
                 try {
                     val data = withContext(Dispatchers.IO) {
                         cache.loadText(cacheName)
@@ -129,9 +126,5 @@ class ArticleViewModel(
                 storyResult.value = parseException(e)
             }
         }
-    }
-
-    fun share(item: ShareItem) {
-        shareItem.value = item
     }
 }

@@ -26,7 +26,10 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.ShareItem
+import com.ft.ftchinese.ui.share.SocialApp
+import com.ft.ftchinese.ui.share.SocialAppId
+import com.ft.ftchinese.ui.share.SocialShareFragment
+import com.ft.ftchinese.ui.share.SocialShareViewModel
 import com.ft.ftchinese.viewmodel.ArticleViewModel
 import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
@@ -64,6 +67,8 @@ class ArticleActivity : ScopedAppActivity(),
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var readViewModel: ReadArticleViewModel
     private lateinit var starViewModel: StarArticleViewModel
+    private lateinit var shareViewModel: SocialShareViewModel
+
     private lateinit var binding: ActivityArticleBinding
 
     private var shareFragment: SocialShareFragment? = null
@@ -115,14 +120,23 @@ class ArticleActivity : ScopedAppActivity(),
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
         followingManager = FollowingManager.getInstance(this)
 
-        articleViewModel = ViewModelProvider(this, ArticleViewModelFactory(cache, sessionManager.loadAccount()))
-                .get(ArticleViewModel::class.java)
+        articleViewModel = ViewModelProvider(
+            this,
+            ArticleViewModelFactory(
+                cache,
+                sessionManager.loadAccount()
+            )
+        )
+            .get(ArticleViewModel::class.java)
 
         readViewModel = ViewModelProvider(this)
-                .get(ReadArticleViewModel::class.java)
+            .get(ReadArticleViewModel::class.java)
 
         starViewModel = ViewModelProvider(this)
-                .get(StarArticleViewModel::class.java)
+            .get(StarArticleViewModel::class.java)
+
+        shareViewModel = ViewModelProvider(this)
+            .get(SocialShareViewModel::class.java)
 
         // Show/Hide progress indicator which should be controlled by child fragment.
         articleViewModel.inProgress.observe(this, {
@@ -131,7 +145,6 @@ class ArticleActivity : ScopedAppActivity(),
 
         // Observe whether the article is bilingual.
         articleViewModel.bilingual.observe(this, {
-            info("Observer found content is bilingual: $it")
             binding.isBilingual = it
 
             // Only set event on language switcher when the article is bilingual.
@@ -160,10 +173,12 @@ class ArticleActivity : ScopedAppActivity(),
             binding.isStarring = isStarring
         })
 
-        articleViewModel.shareItem.observe(this, {
+        // Handle social share.
+        shareViewModel.appSelected.observe(this) {
             onClickShareIcon(it)
-        })
+        }
 
+        // Handle favorite action.
         binding.fabBookmark.setOnClickListener {
             isStarring = !isStarring
 
@@ -266,40 +281,19 @@ class ArticleActivity : ScopedAppActivity(),
         }
     }
 
-    private fun onClickShareIcon(item: ShareItem) {
+    private fun onClickShareIcon(app: SocialApp
+    ) {
         shareFragment?.dismiss()
         shareFragment = null
 
-        when (item) {
-            ShareItem.WECHAT_FRIEND,
-            ShareItem.WECHAT_MOMENTS -> {
-
-                val webpage = WXWebpageObject()
-                webpage.webpageUrl = article?.webUrl
-
-                val msg = WXMediaMessage(webpage)
-                msg.title = article?.title
-                msg.description = article?.standfirst
-
-                val bmp = BitmapFactory.decodeResource(resources, R.drawable.ic_splash)
-                val thumbBmp = Bitmap.createScaledBitmap(bmp, 150, 150, true)
-                bmp.recycle()
-                msg.thumbData = bmpToByteArray(thumbBmp, true)
-
-                val req = SendMessageToWX.Req()
-                req.transaction = System.currentTimeMillis().toString()
-                req.message = msg
-                req.scene = if (item == ShareItem.WECHAT_FRIEND)
-                    SendMessageToWX.Req.WXSceneSession
-                else
-                    SendMessageToWX.Req.WXSceneTimeline
-
-                wxApi.sendReq(req)
-
+        when (app.id) {
+            SocialAppId.WECHAT_FRIEND,
+            SocialAppId.WECHAT_MOMENTS -> {
+                wxApi.sendReq(createWechatShareRequest(app.id))
                 statsTracker.sharedToWx(article)
             }
 
-            ShareItem.OPEN_IN_BROWSER -> {
+            SocialAppId.OPEN_IN_BROWSER -> {
                 try {
                     val webpage = Uri.parse(article?.webUrl)
                     val intent = Intent(Intent.ACTION_VIEW, webpage)
@@ -311,7 +305,7 @@ class ArticleActivity : ScopedAppActivity(),
                 }
             }
 
-            ShareItem.MORE_OPTIONS -> {
+            SocialAppId.MORE_OPTIONS -> {
                 val shareString = getString(R.string.share_template, article?.title, article?.webUrl)
 
                 val sendIntent = Intent().apply {
@@ -325,6 +319,30 @@ class ArticleActivity : ScopedAppActivity(),
                 )
             }
         }
+    }
+
+    private fun createWechatShareRequest(appId:  SocialAppId): SendMessageToWX.Req {
+        val webpage = WXWebpageObject()
+        webpage.webpageUrl = article?.webUrl
+
+        val msg = WXMediaMessage(webpage)
+        msg.title = article?.title
+        msg.description = article?.standfirst
+
+        val bmp = BitmapFactory.decodeResource(resources, R.drawable.ic_splash)
+        val thumbBmp = Bitmap.createScaledBitmap(bmp, 150, 150, true)
+        bmp.recycle()
+        msg.thumbData = bmpToByteArray(thumbBmp, true)
+
+        val req = SendMessageToWX.Req()
+        req.transaction = System.currentTimeMillis().toString()
+        req.message = msg
+        req.scene = if (appId == SocialAppId.WECHAT_FRIEND)
+            SendMessageToWX.Req.WXSceneSession
+        else
+            SendMessageToWX.Req.WXSceneTimeline
+
+        return req
     }
 
     companion object {
