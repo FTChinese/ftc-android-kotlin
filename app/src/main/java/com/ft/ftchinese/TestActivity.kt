@@ -33,6 +33,7 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.launch.PrivacyFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.LatestOrderActivity
+import com.ft.ftchinese.ui.share.SocialShareFragment
 import com.ft.ftchinese.wxapi.WXEntryActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import com.google.android.gms.common.ConnectionResult
@@ -304,6 +305,10 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             sessionManager.saveAccount(stripeUser)
         }
 
+        binding.bottomDialog.setOnClickListener {
+            SocialShareFragment().show(supportFragmentManager, "TestBottomDialog")
+        }
+
         binding.btnService.setOnClickListener {
             supportFragmentManager.commit {
                 add(android.R.id.content, PrivacyFragment.newInstance())
@@ -316,10 +321,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
         binding.clearServiceAccepted.setOnClickListener {
             ServiceAcceptance.getInstance(this).clear()
-        }
-
-        binding.btnProgress.button.setOnClickListener {
-            binding.inProgress = true
         }
 
         val layout = LinearLayoutManager(this)
