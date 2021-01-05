@@ -99,6 +99,7 @@ class ChannelFragment : ScopedFragment(),
         start = Date().time / 1000
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
 
@@ -108,13 +109,6 @@ class ChannelFragment : ScopedFragment(),
                 R.layout.fragment_channel,
                 container,
                 false)
-
-        return binding.root
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
         // Setup swipe refresh listener
         binding.swipeRefresh.setOnRefreshListener(this)
@@ -136,44 +130,14 @@ class ChannelFragment : ScopedFragment(),
 
             false
         }
+
+        return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache, sessionManager.loadAccount()))
-            .get(ChannelViewModel::class.java)
-
-        wvViewModel = ViewModelProvider(this).get(WVViewModel::class.java)
-
-        connectionLiveData.observe(viewLifecycleOwner, {
-            channelViewModel.isNetworkAvailable.value = it
-        })
-        channelViewModel.isNetworkAvailable.value = context?.isConnected
-
-
-        // Whe the HTML is fetched from server.
-        channelViewModel.contentResult.observe(viewLifecycleOwner, {
-            onContentLoaded(it)
-        })
-
-        // Handle web view should override url loading.
-        wvViewModel.urlChannelSelected.observe(viewLifecycleOwner, {
-            onUrlChannelClicked(it)
-        })
-
-        // If web view signaled that loading a url is finished.
-        wvViewModel.pageFinished.observe(viewLifecycleOwner, {
-            // If finished loading, stop progress.
-            if (it) {
-                binding.inProgress = false
-                binding.swipeRefresh.isRefreshing = false
-            }
-        })
-
-        wvViewModel.pagingBtnClicked.observe(viewLifecycleOwner, {
-            onPagination(it)
-        })
+        setupViewModel()
 
         binding.webView.apply {
 
@@ -191,6 +155,46 @@ class ChannelFragment : ScopedFragment(),
         }
 
         initLoading()
+    }
+
+    private fun setupViewModel() {
+        channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache, sessionManager.loadAccount()))
+            .get(ChannelViewModel::class.java)
+
+        wvViewModel = ViewModelProvider(this).get(WVViewModel::class.java)
+
+        // Network status.
+        connectionLiveData.observe(viewLifecycleOwner, {
+            channelViewModel.isNetworkAvailable.value = it
+        })
+        channelViewModel.isNetworkAvailable.value = context?.isConnected
+
+
+        // Whe the HTML is fetched from server.
+        channelViewModel.contentResult.observe(viewLifecycleOwner, {
+            onContentLoaded(it)
+        })
+
+        /**
+         * If user clicked on a link inside webview
+         * and the link point to another channel page, open the [ChannelActivity]
+         */
+        wvViewModel.urlChannelSelected.observe(viewLifecycleOwner, {
+            onUrlChannelClicked(it)
+        })
+
+        // If web view signaled that loading a url is finished.
+        wvViewModel.pageFinished.observe(viewLifecycleOwner, {
+            // If finished loading, stop progress.
+            if (it) {
+                binding.inProgress = false
+                binding.swipeRefresh.isRefreshing = false
+            }
+        })
+
+        wvViewModel.pagingBtnClicked.observe(viewLifecycleOwner, {
+            onPagination(it)
+        })
     }
 
     // Handle loading text into web view.
@@ -449,6 +453,7 @@ class ChannelFragment : ScopedFragment(),
     private fun onUrlChannelClicked(clicked: ChannelSource) {
         val current = channelSource
 
+        // Some channel page have top-level permissions.
         if (current?.permission == null) {
             ChannelActivity.start(context, clicked)
             return
