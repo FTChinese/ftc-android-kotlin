@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.base
+package com.ft.ftchinese.ui.lists
 
 import android.view.LayoutInflater
 import android.view.View
@@ -118,9 +118,9 @@ class AccountAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(), AnkoLogg
 }
 
 data class AccountRow(
-        val id: AccountRowType,
-        val primary: String,
-        val secondary: String
+    val id: AccountRowType,
+    val primary: String,
+    val secondary: String
 )
 
 enum class AccountRowType {
