@@ -407,7 +407,7 @@
     <string name="pref_check_new_version">檢查新版本</string>
     <string name="current_version">當前版本 %1$s</string>
     <string name="checking_latest_release">正在查找最新版…</string>
-    <string name="found_new_release">发现新版本</string>
+    <string name="found_new_release">发现新版本 %1$s</string>
     <string name="already_latest_release">已經是最新版了</string>
     <string name="no_new_release">没有找到新版本</string>
     <string name="release_not_found">未找到发布信息</string>
