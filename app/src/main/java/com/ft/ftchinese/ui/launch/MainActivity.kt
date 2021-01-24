@@ -20,7 +20,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.ft.ftchinese.BuildConfig
@@ -41,6 +40,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.about.AboutActivity
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isActiveNetworkWifi
@@ -97,8 +97,6 @@ class MainActivity : ScopedAppActivity(),
     private lateinit var wxApi: IWXAPI
     private lateinit var workManager: WorkManager
 
-    private var privacyFragment: PrivacyFragment? = null
-
     private lateinit var statsTracker: StatsTracker
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -139,7 +137,6 @@ class MainActivity : ScopedAppActivity(),
         binding.tabLayout.addOnTabSelectedListener(this)
 
         setupBottomNav()
-
         setupDrawer()
 
         // If avatar is downloaded from network.
@@ -167,32 +164,20 @@ class MainActivity : ScopedAppActivity(),
             DownloadService.startForeground(this, AudioDownloadService::class.java)
         }
 
+        showTermsAndConditions()
+        setupWorker()
+    }
+
+    private fun showTermsAndConditions() {
+        info("Service accepted ${acceptance.isAccepted()}")
         // Service acceptance
         if (!acceptance.isAccepted()) {
-            val frag = PrivacyFragment.newInstance()
-
+            val frag = AcceptServiceDialogFragment()
             supportFragmentManager.commit {
                 add(android.R.id.content, frag)
+                addToBackStack(null)
             }
-
-            privacyFragment = frag
         }
-
-        // If user clicked Accept button.
-        accountViewModel.serviceAccepted.observe(this, Observer {
-            if (!it) {
-                return@Observer
-            }
-            acceptance.accepted()
-
-            val frag = privacyFragment ?: return@Observer
-
-            supportFragmentManager.commit {
-                remove(frag)
-            }
-        })
-
-        setupWorker()
     }
 
     private fun createNotificationChannel() {
@@ -326,10 +311,8 @@ class MainActivity : ScopedAppActivity(),
                 R.id.action_my_subs -> MemberActivity.start(this)
                 R.id.action_feedback -> feedbackEmail()
                 R.id.action_settings -> SettingsActivity.start(this)
-
-                R.id.action_test -> {
-                    TestActivity.start(this)
-                }
+                R.id.action_about -> AboutActivity.start(this)
+                R.id.action_test -> TestActivity.start(this)
             }
 
             binding.drawerLayout.closeDrawer(GravityCompat.START)
