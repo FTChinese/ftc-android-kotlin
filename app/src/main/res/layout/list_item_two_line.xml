@@ -2,13 +2,6 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <data>
-        <import type="android.view.View"/>
-        <variable
-            name="item"
-            type="com.ft.ftchinese.ui.base.ListItem" />
-    </data>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -23,6 +16,7 @@
             android:paddingEnd="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:srcCompat="@drawable/ic_done_gray_24dp"/>
 
         <TextView
@@ -34,8 +28,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@id/iv_icon"
             app:layout_constraintEnd_toEndOf="parent"
-            android:visibility="@{item.primaryText == null ? View.GONE : View.VISIBLE}"
-            android:text="@{item.primaryText}"/>
+            android:text="Primary Text"/>
 
         <TextView
             android:id="@+id/tv_secondary"
@@ -45,9 +38,7 @@
             app:layout_constraintTop_toBottomOf="@id/tv_primary"
             app:layout_constraintStart_toEndOf="@id/iv_icon"
             app:layout_constraintEnd_toEndOf="parent"
-
-            android:visibility="@{item.secondaryText == null ? View.GONE : View.VISIBLE}"
-            android:text="@{item.secondaryText}"/>
+            android:text="Secondary Text"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
