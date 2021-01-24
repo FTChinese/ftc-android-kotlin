@@ -29,10 +29,6 @@ class AccountViewModel : ViewModel(), AnkoLogger {
 
     val isNetworkAvailable = MutableLiveData<Boolean>()
 
-    val serviceAccepted: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>()
-    }
-
     val uiType = MutableLiveData<LoginMethod>()
 
     val accountRefreshed: MutableLiveData<Result<Account>> by lazy {
