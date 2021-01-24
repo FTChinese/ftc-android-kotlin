@@ -28,7 +28,6 @@ class WxExpireDialogFragment : DialogFragment(), AnkoLogger {
         wxApi = WXAPIFactory.createWXAPI(context, BuildConfig.WX_SUBS_APPID)
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
