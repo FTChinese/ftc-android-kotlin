@@ -210,12 +210,7 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
                     return
                 } else {
                     binding.hasNewVersion = true
-                }
-
-                // Since the fragment is also observing the release result, you should only
-                // add it here if the release is new. Otherwise it will just show whatever it got.
-                supportFragmentManager.commit {
-                    replace(R.id.release_detail, ReleaseLogFragment.newInstance())
+                    binding.versionName = getString(R.string.found_new_release, release?.versionName)
                 }
 
                 // Button to start download.
