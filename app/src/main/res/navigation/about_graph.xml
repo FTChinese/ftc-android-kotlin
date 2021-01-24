@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/about_graph"
+    app:startDestination="@id/aboutListFragment">
+    <fragment
+        android:id="@+id/aboutListFragment"
+        android:name="com.ft.ftchinese.ui.about.AboutListFragment"
+        android:label="fragment_about_list"
+        tools:layout="@layout/fragment_about_list" >
+        <action
+            android:id="@+id/action_aboutListFragment_to_legalDetailsFragment"
+            app:destination="@id/legalDetailsFragment"
+            app:popUpTo="@id/aboutListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/legalDetailsFragment"
+        android:name="com.ft.ftchinese.ui.about.LegalDetailsFragment"
+        android:label="LegalDetailsFragment" >
+        <argument
+            android:name="index"
+            app:argType="integer" />
+    </fragment>
+</navigation>
