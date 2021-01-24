@@ -179,6 +179,9 @@
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/action_settings"
             android:parentActivityName=".ui.launch.MainActivity" />
+        <activity android:name=".ui.about.AboutActivity"
+            android:label="@string/title_about_us"
+            android:parentActivityName=".ui.launch.MainActivity"/>
         <activity
             android:name=".ui.settings.FCMActivity"
             android:label="@string/fcm_setting_title"
