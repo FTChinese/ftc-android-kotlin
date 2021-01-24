@@ -231,7 +231,7 @@ dependencies {
     implementation 'org.threeten:threetenbp:1.4.0'
     implementation 'org.apache.commons:commons-math3:3.6.1'
 
-
+    implementation "io.noties.markwon:core:4.6.1"
     //    Test
     testImplementation 'junit:junit:4.13'
     testImplementation 'com.github.javafaker:javafaker:1.0.1'
