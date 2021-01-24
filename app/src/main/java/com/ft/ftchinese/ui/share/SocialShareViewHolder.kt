@@ -22,7 +22,7 @@ class SocialShareViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         fun create(parent: ViewGroup): SocialShareViewHolder {
             return SocialShareViewHolder(LayoutInflater
                 .from(parent.context)
-                .inflate(R.layout.share_item, parent, false))
+                .inflate(R.layout.list_item_figure, parent, false))
         }
     }
 }
