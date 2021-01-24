@@ -30,7 +30,7 @@ import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
 import com.ft.ftchinese.ui.article.*
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.launch.PrivacyFragment
+import com.ft.ftchinese.ui.about.LegalDetailsFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.pay.LatestOrderActivity
 import com.ft.ftchinese.ui.share.SocialShareFragment
@@ -311,7 +311,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
         binding.btnService.setOnClickListener {
             supportFragmentManager.commit {
-                add(android.R.id.content, PrivacyFragment.newInstance())
+                add(android.R.id.content, LegalDetailsFragment.newInstance())
             }
         }
 
