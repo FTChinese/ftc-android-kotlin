@@ -48,56 +48,27 @@ data class Plan(
 }
 
 /**
- * Default pricing plans.
- */
-val defaultPlans = listOf(
-    Plan(
-        id = "plan_ICMPPM0UXcpZ",
-        productId = "prod_IxN4111S1TIP",
-        price = 258.0,
-        tier = Tier.STANDARD,
-        cycle = Cycle.YEAR,
-        description = "Standard Yearly Plan",
-        discount = Discount(
-            id = "dsc_UQKuPqxAZvmR",
-            priceOff = 40.0,
-            startUtc = ZonedDateTime.parse("2020-11-09T04:00:00Z"),
-            endUtc = ZonedDateTime.parse("2020-11-11T16:00:00Z")
-        )
-    ),
-    Plan(
-        id = "plan_drbwQ2gTmtOK",
-        productId = "prod_IxN4111S1TIP",
-        price = 28.0,
-        tier = Tier.STANDARD,
-        cycle = Cycle.MONTH,
-        description = "Standard Monthly Plan",
-        discount = Discount()
-    ),
-    Plan(
-        id = "plan_d6KVqcmEBqjv",
-        productId = "prod_hNUYgnJR62Zt",
-        price =  1998.0,
-        tier = Tier.PREMIUM,
-        cycle = Cycle.YEAR,
-        description = "Premium Yearly Plan",
-        discount = Discount(
-            id = "dsc_cqgp9zBTwSnY",
-            priceOff = 300.0,
-            startUtc = ZonedDateTime.parse("2020-11-09T04:00:00Z"),
-            endUtc = ZonedDateTime.parse("2020-11-11T16:00:00Z")
-        )
-    )
-)
-
-/**
  * PlanStore works as a in-memory cache of all plans.
  * This is kept for backward compatibility and many activities
  * use this to find out which plan a member is subscribed to.
  */
 object PlanStore {
     // Will be updated once paywall data is fetched from server or cache.
-    var plans = defaultPlans
+    private var plans = defaultPaywall.products.flatMap { it.plans }
+
+    // Update plans from a list of products.
+    // Used when paywall data is retrieved
+    fun updateFromProduct(products: List<Product>) {
+        plans = products.flatMap { it.plans }
+    }
+
+    fun set(plans: List<Plan>) {
+        this.plans = plans
+    }
+
+    fun get(): List<Plan> {
+        return plans
+    }
 
     /**
      * Use to find out what plan an existing member is subscribed to,

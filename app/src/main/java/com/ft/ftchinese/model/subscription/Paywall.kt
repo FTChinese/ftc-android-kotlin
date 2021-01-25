@@ -56,16 +56,71 @@ data class Paywall(
 )
 
 /**
- * A hard-coded promotion.
+ * A hard-coded paywall data used when server is not available.
  */
-val promotion = Promo(
-    id = "promo_wa3UWuiYKEgm",
-    heading = "FT中文网会员订阅",
-    subHeading = "双11限时85折，还送财经词汇！",
-    coverUrl = "http://www.ftacademy.cn/subscription.jpg",
-    content = "前1000名标准会员送价值69元的《英国\u003c金融时报\u003e财经词汇》简装版，高端会员送价值199元的精装版。\n未来365天，在原汁原味英文+资深团队译文中，取得语言能力的进步。在国际视野与多元言论里，让你站在高海拔的地方俯瞰世界，深入思考！",
-    terms = "活动截止：2020年11月11日24点（北京时间）\n现有会员（含升级/续订）、实体订阅卡、企业机构会员和Stripe支付会员均不参加本次活动\n赠品配送地址仅限中国大陆，海外及港澳台地区订户可请大陆好友代收\n本次活动的最终解释权归FT中文网所有",
-    startUtc = ZonedDateTime.parse("2020-11-09T04:00:00Z"),
-    endUtc = ZonedDateTime.parse("2020-11-11T16:00:00Z")
+val defaultPaywall = Paywall(
+    banner = Banner(
+        id = 1,
+        heading = "FT中文网会员订阅服务",
+        subHeading = "欢迎您！",
+        coverUrl = "http://www.ftacademy.cn/subscription.jpg",
+        content = "希望全球视野的FT中文网，能够带您站在高海拔的地方俯瞰世界，引发您的思考，从不同的角度看到不一样的事物，见他人之未见！",
+    ),
+    promo = Promo(
+        id = null,
+        heading = null,
+        subHeading = null,
+        coverUrl = null,
+        content = null,
+        terms = null,
+        startUtc = null,
+        endUtc = null
+    ),
+    products = listOf(
+        Product(
+            id = "prod_9xrJdHFq0wmq",
+            tier = Tier.STANDARD,
+            heading = "标准会员",
+            description = "专享订阅内容每日仅需0.72元(或按月订阅每日0.93元)\n精选深度分析\n中英双语内容\n金融英语速读训练\n英语原声电台\n无限浏览2日前所有历史文章（近9万篇）",
+            smallPrint = null,
+            plans = listOf(
+                Plan(
+                    id = "plan_CvvaJr9jyGYt",
+                    productId = "prod_9xrJdHFq0wmq",
+                    price = 258.0,
+                    tier = Tier.STANDARD,
+                    cycle = Cycle.YEAR,
+                    description = "Standard Yearly Plan",
+                    discount = Discount()
+                ),
+                Plan(
+                    id = "plan_8laAatSmDeGd",
+                    productId = "prod_9xrJdHFq0wmq",
+                    price = 28.0,
+                    tier = Tier.STANDARD,
+                    cycle = Cycle.MONTH,
+                    description = "Standard Monthly Plan",
+                    discount = Discount()
+                ),
+            )
+        ),
+        Product(
+            id = "prod_zSgOTS6DWLmu",
+            tier = Tier.PREMIUM,
+            heading = "高端会员",
+            description = "专享订阅内容每日仅需5.5元\n享受“标准会员”所有权益\n编辑精选，总编/各版块主编每周五为您推荐本周必读资讯，分享他们的思考与观点\nFT商学院高端专享\nFT中文网2021年度论坛门票2张",
+            smallPrint = "注：所有活动门票不可折算现金、不能转让、不含差旅与食宿",
+            plans = listOf(
+                Plan(
+                    id = "plan_rLIy6LJYW8LV",
+                    productId = "prod_zSgOTS6DWLmu",
+                    price =  1998.0,
+                    tier = Tier.PREMIUM,
+                    cycle = Cycle.YEAR,
+                    description = "Premium Yearly Plan",
+                    discount = Discount()
+                )
+            )
+        ),
+    ),
 )
-
