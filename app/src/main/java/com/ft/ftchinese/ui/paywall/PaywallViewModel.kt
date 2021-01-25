@@ -4,13 +4,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +31,9 @@ class PaywallViewModel(
         MutableLiveData<Result<List<StripePrice>>>()
     }
 
+    // The cached file are versioned therefore whenever a user
+    // updates the app, the files retrieves by previous versions
+    // will be ignored.
     private suspend fun getCachedPaywall(): Paywall? {
         return withContext(Dispatchers.IO) {
             val data = cache.loadText(CacheFileNames.paywall)
@@ -48,6 +50,7 @@ class PaywallViewModel(
         }
     }
 
+    // Load paywall data from cache and then from server.
     fun loadPaywall(isRefreshing: Boolean) {
         viewModelScope.launch {
 
@@ -57,9 +60,7 @@ class PaywallViewModel(
                 if (pw != null) {
                     paywallResult.value = Result.Success(pw)
                     // Update the in-memory cache.
-                    PlanStore.plans = pw.products.flatMap {
-                        it.plans
-                    }
+                    PlanStore.updateFromProduct(pw.products)
                 }
             }
 
@@ -80,9 +81,7 @@ class PaywallViewModel(
                 }
 
                 paywallResult.value = Result.Success(paywall.value)
-                PlanStore.plans = paywall.value.products.flatMap {
-                    it.plans
-                }
+                PlanStore.updateFromProduct(paywall.value.products)
 
                 withContext(Dispatchers.IO) {
                     cache.saveText(CacheFileNames.paywall, paywall.raw)
@@ -100,7 +99,7 @@ class PaywallViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val result = PaywallClient.listPrices() ?: return@launch
-                PlanStore.plans = result.value
+                PlanStore.set(result.value)
                 cache.saveText(CacheFileNames.ftcPrices, result.raw)
             } catch (e: Exception) {
                 info(e)
