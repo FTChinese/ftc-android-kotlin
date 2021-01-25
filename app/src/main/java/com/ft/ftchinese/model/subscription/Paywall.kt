@@ -91,7 +91,12 @@ val defaultPaywall = Paywall(
                     tier = Tier.STANDARD,
                     cycle = Cycle.YEAR,
                     description = "Standard Yearly Plan",
-                    discount = Discount()
+                    discount = Discount(
+                        id = "dsc_GWefTkSAqT2m",
+                        priceOff = 40.0,
+                        startUtc = ZonedDateTime.parse("2021-02-01T04:00:00Z"),
+                        endUtc =  ZonedDateTime.parse("2021-02-07T16:00:00Z"),
+                    )
                 ),
                 Plan(
                     id = "plan_8laAatSmDeGd",
@@ -118,7 +123,12 @@ val defaultPaywall = Paywall(
                     tier = Tier.PREMIUM,
                     cycle = Cycle.YEAR,
                     description = "Premium Yearly Plan",
-                    discount = Discount()
+                    discount = Discount(
+                        id = "dsc_a1Vp92cfFAih",
+                        priceOff =  300.0,
+                        startUtc = ZonedDateTime.parse("2021-02-01T04:00:00Z"),
+                        endUtc =  ZonedDateTime.parse("2021-02-07T16:00:00Z"),
+                    )
                 )
             )
         ),
