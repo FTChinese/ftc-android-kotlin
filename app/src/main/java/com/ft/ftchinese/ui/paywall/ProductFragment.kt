@@ -7,13 +7,13 @@ import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentProductBinding
-import com.ft.ftchinese.model.subscription.Cycle
-import com.ft.ftchinese.model.subscription.Plan
-import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.model.subscription.defaultPlans
+import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import org.jetbrains.anko.AnkoLogger
 
 /**
@@ -26,6 +26,7 @@ class ProductFragment : ScopedFragment(),
 
     private lateinit var viewModel: ProductViewModel
     private lateinit var binding: FragmentProductBinding
+    private val listAdapter = ListAdapter(listOf())
 
     /**
      * The tier of current product.
@@ -46,8 +47,15 @@ class ProductFragment : ScopedFragment(),
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_product, container, false)
+
+        binding.productDescription.apply {
+            layoutManager = LinearLayoutManager(context).apply {
+                orientation = LinearLayoutManager.VERTICAL
+            }
+            adapter = listAdapter
+        }
 
         return binding.root
     }
@@ -84,16 +92,15 @@ class ProductFragment : ScopedFragment(),
 
         /**
          * The data for product UI is retrieve from embedded string resources so that there won't be any lag when drawing UI.
-         * We don't use data from since it won't change frequently and the content actually does not matter much.
-         */
-        initProduct()
-        //
-        /**
          * Initially we use the hard-coded pricing plans.
          * Then we'll load paywall data from cache,
          * then fetch latest data from server.
          */
-        initPrice(defaultPlans.filter { it.tier == tier })
+        defaultPaywall.products
+            .find{ it.tier == tier }
+            ?.let {
+                initUI(it)
+            }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -114,40 +121,33 @@ class ProductFragment : ScopedFragment(),
             products.find {
                 it.tier == tier
             }?.let {
-                initPrice(it.plans)
+                initUI(it)
             }
 
         })
     }
 
-    private fun initProduct() {
-        val tier = tier ?: return
+    private fun initUI(product: Product) {
+        binding.product = product
 
-        binding.product =  UIProduct(
-            heading = getString(tier.stringRes),
-            description =resources
-                    .getStringArray(tier.productDescRes)
-                    .joinToString("\n"),
-            smallPrint = if (tier == Tier.PREMIUM) {
-                getString(R.string.premium_small_print)
-            } else {
-                null
+        product.description
+            ?.split("\n")
+            ?.let {
+                listAdapter.setData(it)
             }
-        )
+
+        product.plans.forEach { plan ->
+
+            this.plans[plan.cycle] = plan
+
+            when (plan.cycle) {
+                Cycle.YEAR -> binding.yearPrice = buildPrice(plan)
+                Cycle.MONTH -> binding.monthPrice = buildPrice(plan)
+            }
+        }
     }
 
-    private fun initPrice(plans: List<Plan>) {
-        plans.forEach { plan ->
-
-                this.plans[plan.cycle] = plan
-
-                when (plan.cycle) {
-                    Cycle.YEAR -> binding.yearPrice = buildPrice(plan)
-                    Cycle.MONTH -> binding.monthPrice = buildPrice(plan)
-                }
-            }
-    }
-
+    // Format price text.
     private fun buildPrice(plan: Plan): Price {
 
         val cycleStr = getString(plan.cycle.stringRes)
@@ -178,6 +178,27 @@ class ProductFragment : ScopedFragment(),
     override fun onResume() {
         super.onResume()
         binding.buttonEnabled = true
+    }
+
+    // List adapter for product description.
+    inner class ListAdapter(private var contents: List<String>) : RecyclerView.Adapter<SingleLineItemViewHolder>() {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SingleLineItemViewHolder {
+            return SingleLineItemViewHolder.create(parent)
+        }
+
+        override fun onBindViewHolder(holder: SingleLineItemViewHolder, position: Int) {
+            holder.icon.setImageResource(R.drawable.ic_done_gray_24dp)
+            holder.disclosure.visibility = View.GONE
+            holder.text.text = contents[position]
+        }
+
+        override fun getItemCount() = contents.size
+
+        fun setData(lines: List<String>) {
+            contents = lines
+            notifyDataSetChanged()
+        }
     }
 
     companion object {

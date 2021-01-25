@@ -10,7 +10,7 @@
             type="Boolean" />
         <variable
             name="product"
-            type="com.ft.ftchinese.ui.paywall.UIProduct" />
+            type="com.ft.ftchinese.model.subscription.Product" />
         <variable
             name="yearPrice"
             type="com.ft.ftchinese.ui.paywall.Price" />
@@ -43,6 +43,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toTopOf="@id/pre_discount_price"/>
 
+            <!-- Show yearly plan's original price if discount exists. Monthly plan does not have one since it never has discount. -->
             <TextView
                 android:id="@+id/pre_discount_price"
                 android:layout_width="0dp"
@@ -79,17 +80,15 @@
                 app:layout_constraintTop_toBottomOf="@+id/yearly_price_btn"
                 app:layout_constraintStart_toStartOf="@id/product_heading_tv"
                 app:layout_constraintEnd_toEndOf="@id/product_heading_tv"
-                app:layout_constraintBottom_toTopOf="@id/product_benefits_tv"/>
+                app:layout_constraintBottom_toTopOf="@id/product_description"/>
 
-            <TextView
-                style="@style/OrigamiText.Body1"
-                android:id="@+id/product_benefits_tv"
-                android:layout_width="0dp"
+            <!-- Show a list of text describing this product. -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/product_description"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
-                android:lineSpacingExtra="8sp"
-                android:text="@{product.description}"
                 app:layout_constraintStart_toStartOf="@id/product_heading_tv"
                 app:layout_constraintEnd_toEndOf="@id/product_heading_tv"
                 app:layout_constraintTop_toBottomOf="@id/monthly_price_btn"
@@ -104,7 +103,7 @@
                 android:visibility="@{product.smallPrint == null ? View.GONE : View.VISIBLE}"
                 app:layout_constraintStart_toStartOf="@id/product_heading_tv"
                 app:layout_constraintEnd_toEndOf="@id/product_heading_tv"
-                app:layout_constraintTop_toBottomOf="@id/product_benefits_tv"
+                app:layout_constraintTop_toBottomOf="@id/product_description"
                 app:layout_constraintBottom_toBottomOf="parent"/>
 
 
