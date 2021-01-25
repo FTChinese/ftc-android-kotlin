@@ -30,7 +30,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@id/list_item_icon"
         app:layout_constraintEnd_toStartOf="@id/list_item_disclosure"
-        android:maxLines="1"
         android:text="Placeholder"/>
 
     <androidx.appcompat.widget.AppCompatImageView
