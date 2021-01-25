@@ -1,6 +1,7 @@
 package com.ft.ftchinese.store
 
 import android.content.Context
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.jakewharton.byteunits.BinaryByteUnit
 import org.jetbrains.anko.AnkoLogger
@@ -9,10 +10,10 @@ import java.io.File
 import java.io.FileInputStream
 
 object CacheFileNames {
-    const val stripePrices = "subs_stripe_prices.json"
-    const val ftcPrices = "subs_ftc_prices.json"
-    const val paywall = "subs_paywall.json"
-    const val stripeCustomer = "account_stripe_customer.json"
+    const val stripePrices = "subs_stripe_prices.${BuildConfig.VERSION_CODE}.json"
+    const val ftcPrices = "subs_ftc_prices.${BuildConfig.VERSION_CODE}.json"
+    const val paywall = "subs_paywall.${BuildConfig.VERSION_CODE}.json"
+    const val stripeCustomer = "account_stripe_customer.${BuildConfig.VERSION_CODE}.json"
 }
 
 val templateCache: MutableMap<String, String> = HashMap()
@@ -145,19 +146,6 @@ class FileCache (private val context: Context) : AnkoLogger {
 
     fun readSearchTemplate(): String {
         return readRaw("search.html", R.raw.search)
-    }
-
-    fun readPrivacy(): String? {
-        return try {
-            context.resources
-                .openRawResource(R.raw.service)
-                .bufferedReader()
-                .use {
-                    it.readText()
-                }
-        } catch (e: Exception) {
-            null
-        }
     }
 }
 
