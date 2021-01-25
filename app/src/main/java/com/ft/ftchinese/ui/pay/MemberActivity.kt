@@ -111,6 +111,7 @@ class MemberActivity : ScopedAppActivity(),
         }
     }
 
+    // Every time this page is opened, retrieve latest prices from server.
     private fun loadData() {
         paywallViewModel.refreshFtcPrices()
         paywallViewModel.refreshStripePrices()
