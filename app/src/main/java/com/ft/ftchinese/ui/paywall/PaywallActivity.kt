@@ -66,7 +66,7 @@ class PaywallActivity : ScopedAppActivity(),
 
         setupViewModel()
         initUI()
-        setUpPromo(promotion)
+        setUpPromo(defaultPaywall.promo)
         loadData(false)
 
         tracker = StatsTracker.getInstance(this)
@@ -151,6 +151,7 @@ class PaywallActivity : ScopedAppActivity(),
         productViewModel.accountChanged.value = sessionManager.loadAccount()
     }
 
+    // Load pricing data.
     private fun loadData(isRefreshing: Boolean) {
         // Fetch paywall from cache, then from server.
         paywallViewModel.loadPaywall(isRefreshing)
