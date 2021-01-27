@@ -39,15 +39,16 @@
             android:id="@+id/action_settings"
             android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/action_settings"/>
+
+        <item
+            android:id="@+id/action_about"
+            android:icon="@drawable/ic_info_black_24dp"
+            android:title="@string/title_about_us" />
     </group>
 
     <group
         android:id="@+id/drawer_group3"
         android:checkableBehavior="single">
-        <item
-            android:id="@+id/action_about"
-            android:icon="@drawable/ic_info_black_24dp"
-            android:title="@string/title_about_us" />
 
         <item
             android:id="@+id/action_test"

@@ -318,12 +318,12 @@ data class Membership(
             return true
         }
 
-        if (status?.isInvalid() == true) {
+        // expired and not auto renew.
+        if (expired()) {
             return true
         }
 
-        // expired and not auto renew.
-        if (expired()) {
+        if (status?.isInvalid() == true) {
             return true
         }
 

@@ -152,10 +152,6 @@ class MainActivity : ScopedAppActivity(),
 
         checkWxSession()
 
-        // For testing
-        binding.drawerNav.menu
-                .setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
-
         setupSplashScreen()
 
         try {
@@ -287,6 +283,10 @@ class MainActivity : ScopedAppActivity(),
                 false)
 
         binding.drawerNav.addHeaderView(navHeaderBinding.root)
+
+        // For testing
+        binding.drawerNav.menu
+            .setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
 
         val toggle = ActionBarDrawerToggle(
                 this,
