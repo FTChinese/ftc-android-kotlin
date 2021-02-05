@@ -32,7 +32,7 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.ui.pay.handlePermissionDenial
+import com.ft.ftchinese.ui.paywall.handlePermissionDenial
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.viewmodel.ChannelViewModel
 import com.ft.ftchinese.viewmodel.ChannelViewModelFactory
