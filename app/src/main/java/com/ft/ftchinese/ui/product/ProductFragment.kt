@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.paywall
+package com.ft.ftchinese.ui.product
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -26,35 +26,47 @@ class ProductFragment : ScopedFragment(),
 
     private lateinit var viewModel: ProductViewModel
     private lateinit var binding: FragmentProductBinding
-    private val listAdapter = ListAdapter(listOf())
+    private val descListAdapter = DescListAdapter(listOf())
+    private val priceListAdapter = PriceListAdapter()
 
     /**
-     * The tier of current product.
+     * Current product and its plans.
      */
-    private var tier: Tier? = null
+    private var product: Product? = null
 
     /**
      * The pricing plans for current product is stored as a map so that
      * when use clicked we can find out which price is clicked and tells
      * host activity what to do next.
      */
-    private val plans = mutableMapOf<Cycle, Plan>()
+//    private val plans = mutableMapOf<Cycle, Plan>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        tier = arguments?.getParcelable(ARG_TIER)
+        val tier = arguments?.getParcelable<Tier>(ARG_TIER)
+
+        // Find the product this fragment is using.
+        product = defaultPaywall.products.find { tier == it.tier }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_product, container, false)
 
-        binding.productDescription.apply {
+        binding.rvProdDesc.apply {
             layoutManager = LinearLayoutManager(context).apply {
                 orientation = LinearLayoutManager.VERTICAL
             }
-            adapter = listAdapter
+            adapter = descListAdapter
+        }
+
+        binding.rvProdPrice.apply {
+            layoutManager = LinearLayoutManager(context)
+                .apply {
+                    orientation = LinearLayoutManager.VERTICAL
+                }
+            adapter = priceListAdapter
         }
 
         return binding.root
@@ -63,44 +75,22 @@ class ProductFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        /**
-         * When user clicked the price button, find the corresponding Plan
-         * and send it to view model so that parent activity could start
-         * CheckoutActivity with the selcted Plan.
-         */
-        binding.yearlyPriceBtn.setOnClickListener {
-            val plan = plans[Cycle.YEAR]
+        initUI()
+    }
 
-            viewModel.selected.value = plan
+    private fun initUI() {
+        binding.product = product
 
-            /**
-             * Disable all buttons.
-             */
-            viewModel.inputEnabled.value = false
-        }
-
-        binding.monthlyPriceBtn.setOnClickListener {
-            val plan = plans[Cycle.MONTH]
-
-            viewModel.selected.value = plan
-
-            /**
-             * Once this button clicked, all price buttons should be disabled.
-             */
-            viewModel.inputEnabled.value = false
-        }
-
-        /**
-         * The data for product UI is retrieve from embedded string resources so that there won't be any lag when drawing UI.
-         * Initially we use the hard-coded pricing plans.
-         * Then we'll load paywall data from cache,
-         * then fetch latest data from server.
-         */
-        defaultPaywall.products
-            .find{ it.tier == tier }
+        // Update data of list adapter.
+        product?.description
+            ?.split("\n")
             ?.let {
-                initUI(it)
+                descListAdapter.setData(it)
             }
+
+        product?.plans?.let {
+            priceListAdapter.setData(it)
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -112,39 +102,24 @@ class ProductFragment : ScopedFragment(),
         } ?: throw Exception("Invalid Exception")
 
         // Enable or disable button
-        viewModel.inputEnabled.observe(viewLifecycleOwner, {
-            binding.buttonEnabled = it
-        })
+        viewModel.inputEnabled.observe(viewLifecycleOwner) {
+            priceListAdapter.enabledBtn(it)
+        }
 
-        // Observing products
-        viewModel.productsReceived.observe(viewLifecycleOwner, { products ->
-            products.find {
-                it.tier == tier
-            }?.let {
-                initUI(it)
-            }
-
-        })
-    }
-
-    private fun initUI(product: Product) {
-        binding.product = product
-
-        product.description
-            ?.split("\n")
-            ?.let {
-                listAdapter.setData(it)
-            }
-
-        product.plans.forEach { plan ->
-
-            this.plans[plan.cycle] = plan
-
-            when (plan.cycle) {
-                Cycle.YEAR -> binding.yearPrice = buildPrice(plan)
-                Cycle.MONTH -> binding.monthPrice = buildPrice(plan)
+        // Products received from server
+        viewModel.productsReceived.observe(viewLifecycleOwner) { products ->
+            product = products.find {
+                it.tier == product?.tier
             }
         }
+    }
+
+    // Buttons are disabled upon click to prevent loading
+    // new activity multiple times.
+    // When the fragment is resumed, enable those buttons.
+    override fun onResume() {
+        super.onResume()
+        priceListAdapter.enabledBtn(true)
     }
 
     // Format price text.
@@ -167,21 +142,67 @@ class ProductFragment : ScopedFragment(),
                 )
             } else {
                 null
-            }
-
+            },
         )
     }
 
-    // Buttons are disabled upon click to prevent loading
-    // new activity multiple times.
-    // When the fragment is resumed, enable those buttons.
-    override fun onResume() {
-        super.onResume()
-        binding.buttonEnabled = true
+    inner class PriceListAdapter : RecyclerView.Adapter<PriceItemViewHolder>() {
+
+        private var plans = listOf<Plan>()
+        private var btnEnabled = true
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PriceItemViewHolder {
+            return PriceItemViewHolder.create(parent)
+        }
+
+        override fun onBindViewHolder(holder: PriceItemViewHolder, position: Int) {
+            val plan = plans[position]
+
+            val price = buildPrice(plan)
+
+            if (price.originalPrice != null) {
+                holder.text.text = price.originalPrice
+            } else {
+                holder.text.visibility = View.GONE
+            }
+
+            when (plan.cycle) {
+                Cycle.YEAR -> {
+                    holder.outlineButton.visibility = View.GONE
+                    holder.primaryButton.text = price.amount
+                    holder.primaryButton.isEnabled = btnEnabled
+                    holder.primaryButton.setOnClickListener {
+                        viewModel.inputEnabled.value = false
+                        viewModel.planSelected.value = plan
+                    }
+                }
+                Cycle.MONTH -> {
+                    holder.primaryButton.visibility = View.GONE
+                    holder.outlineButton.text = price.amount
+                    holder.outlineButton.isEnabled = btnEnabled
+                    holder.outlineButton.setOnClickListener {
+                        viewModel.inputEnabled.value = false
+                        viewModel.planSelected.value = plan
+                    }
+                }
+            }
+        }
+
+        override fun getItemCount() = plans.size
+
+        fun setData(plans: List<Plan>) {
+            this.plans = plans
+            notifyDataSetChanged()
+        }
+
+        fun enabledBtn(enable: Boolean) {
+            btnEnabled = enable
+            notifyDataSetChanged()
+        }
     }
 
     // List adapter for product description.
-    inner class ListAdapter(private var contents: List<String>) : RecyclerView.Adapter<SingleLineItemViewHolder>() {
+    inner class DescListAdapter(private var contents: List<String>) : RecyclerView.Adapter<SingleLineItemViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SingleLineItemViewHolder {
             return SingleLineItemViewHolder.create(parent)
