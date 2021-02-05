@@ -30,7 +30,9 @@ data class Membership(
     val status: StripeSubStatus? = null,
     val appleSubsId: String? = null,
     val b2bLicenceId: String? = null,
-    val vip: Boolean = false
+    val standardAddOn: Int = 0,
+    val premiumAddOn: Int = 0,
+    val vip: Boolean = false,
 ) : Parcelable {
 
     val tierStringRes: Int
@@ -45,7 +47,7 @@ data class Membership(
      * Checks whether the current membership is purchased
      * via alipay or wechat pay.
      */
-    fun isAliOrWxPay(): Boolean {
+    private fun isAliOrWxPay(): Boolean {
         // For backward compatibility with legacy db format.
         if (tier != null && payMethod == null) {
             return true
@@ -53,14 +55,6 @@ data class Membership(
 
         // The first condition is used for backward compatibility.
         return payMethod == PayMethod.ALIPAY || payMethod == PayMethod.WXPAY
-    }
-
-    fun isIAP(): Boolean {
-        return payMethod == PayMethod.APPLE && appleSubsId != null
-    }
-
-    fun isB2B(): Boolean {
-        return  payMethod == PayMethod.B2B && b2bLicenceId != null
     }
 
     fun isStripe(): Boolean {
@@ -92,14 +86,9 @@ data class Membership(
      * This should only be available if current membership
      * is purchased via ali or wx.
      */
-    fun canRenewViaAliWx(): Boolean {
+    fun withinAliWxRenewalPeriod(): Boolean {
         if (expireDate == null) {
-            return false
-        }
-
-        // For non-ali or wx pay,
-        if (!isAliOrWxPay()) {
-            return false
+            return true
         }
 
         val today = LocalDate.now()
@@ -107,7 +96,6 @@ data class Membership(
 
         return expireDate.isBefore(threeYearsLater) && expireDate.isAfter(today)
     }
-
     /**
      * Determine if we should show upgrade button.
      * Only when membership is not expired yet, and created via
@@ -131,14 +119,6 @@ data class Membership(
     }
 
     /**
-     * Determine whether we should allow Stripe and Apple user to
-     * buy addon via Alipay or Wechat.
-     */
-    fun canPurchaseAddOn(): Boolean {
-        return isStripe() || isIAP()
-    }
-
-    /**
      * Checks whether membership expired.
      * For stripe and apple iap, if expire date is past and
      * autoRenew is true, take it as not expired.
@@ -158,6 +138,120 @@ data class Membership(
         }
 
         return expireDate.isBefore(LocalDate.now()) && !autoRenew
+    }
+
+    /**
+     * Calculate remaining days before expiration.
+     * This is only applicable to Alipay or Wechat pay.
+     * You should check whether the subscription is stripe and in invalid state before checking this.
+     * For invalid stripe, it is meaningless to calculate reaming days.
+     */
+    fun remainingDays(): Long? {
+        if (expireDate == null) {
+            return null
+        }
+
+        if (!isAliOrWxPay()) {
+            return null
+        }
+
+        return LocalDate.now().until(expireDate, ChronoUnit.DAYS)
+    }
+
+    fun nextSteps(): NextSteps {
+        if (vip) {
+            return NextSteps(
+                subsKinds = listOf(),
+            )
+        }
+
+        if (expired()) {
+            return NextSteps(
+                subsKinds = listOf(SubsKind.Create)
+            )
+        }
+
+        when (payMethod) {
+            PayMethod.ALIPAY, PayMethod.WXPAY -> {
+                when (tier) {
+                    Tier.STANDARD -> {
+                        return NextSteps(
+                            subsKinds = listOf(SubsKind.Renew, SubsKind.UpgradeToPrm)
+                        )
+                    }
+                    Tier.PREMIUM -> {
+                        return NextSteps(
+                            subsKinds = listOf(SubsKind.Renew, SubsKind.StdAddOn),
+                            message = "您目前还可以购买标准会员补充包，将在当前高端会员到期后启用"
+                        )
+                    }
+                }
+            }
+            PayMethod.STRIPE -> {
+                when (tier) {
+                    Tier.STANDARD -> {
+                        when (cycle) {
+                            Cycle.MONTH -> {
+                                return NextSteps(
+                                    subsKinds = listOf(
+                                        SubsKind.SwitchToYear,
+                                        SubsKind.UpgradeToPrm,
+                                        SubsKind.StdAddOn),
+                                    message = "Stripe订阅可以使用一次性支付方式购买标准版补充包，将在自动续订关闭并到期后启用",
+                                )
+                            }
+                            Cycle.YEAR -> {
+                                return NextSteps(
+                                    subsKinds = listOf(
+                                        SubsKind.UpgradeToPrm,
+                                        SubsKind.StdAddOn),
+                                    message = "Stripe订阅标准会员可以使用一次性支付方式购买同版本补充包，将在自动续订关闭并到期后启用",
+                                )
+                            }
+                        }
+                    }
+                    Tier.PREMIUM -> {
+                        return NextSteps(
+                            subsKinds = listOf(
+                                SubsKind.StdAddOn,
+                                SubsKind.PremAddOn,
+                            ),
+                            message = "Stripe订阅高端会员可以使用一次性支付方式购买标准版或高端版补充包，将在自动续订关闭并到期后优先启用高端版，之后启用标准版",
+                        )
+                    }
+                }
+            }
+            PayMethod.APPLE -> {
+                when (tier) {
+                    Tier.STANDARD -> {
+                        return NextSteps(
+                            subsKinds = listOf(
+                                SubsKind.StdAddOn,
+                            ),
+                            message = "苹果应用内订阅的标准会员可以使用一次性支付方式购买标准版补充包，将在自动续订关闭并到期后启用。\n如果您需要升级到高端会员，请在苹果设备上的FT中文网App内操作。"
+                        )
+                    }
+                    Tier.PREMIUM -> {
+                        return NextSteps(
+                            subsKinds = listOf(
+                                SubsKind.StdAddOn,
+                                SubsKind.PremAddOn,
+                            )
+                        )
+                    }
+                }
+            }
+            PayMethod.B2B -> {
+                return NextSteps(
+                    subsKinds = listOf(),
+                    message = "企业版订阅表更请联系您所属机构的管理人员"
+                )
+            }
+        }
+
+        return NextSteps(
+            subsKinds = listOf(),
+        )
     }
 
     fun canCancelStripe(): Boolean {
@@ -184,23 +278,6 @@ data class Membership(
         }
         // If auto renew is turned off, it could only be reactivated before expiration date.
         return expireDate.isAfter(LocalDate.now())
-    }
-    /**
-     * Calculate remaining days before expiration.
-     * This is only applicable to Alipay or Wechat pay.
-     * You should check whether the subscription is stripe and in invalid state before checking this.
-     * For invalid stripe, it is meaningless to calculate reaming days.
-     */
-    fun remainingDays(): Long? {
-        if (expireDate == null) {
-            return null
-        }
-
-        if (!isAliOrWxPay()) {
-            return null
-        }
-
-        return LocalDate.now().until(expireDate, ChronoUnit.DAYS)
     }
 
     fun localizeExpireDate(): String {
@@ -241,14 +318,6 @@ data class Membership(
             )
         }
 
-        // Inactive stripe.
-//        if (payMethod == PayMethod.STRIPE && status != StripeSubStatus.Active) {
-//            return Pair(
-//                    Permission.FREE.id,
-//                    MemberStatus.InactiveStripe
-//            )
-//        }
-
         // Expired.
         if (expired()) {
             return Pair(
@@ -274,39 +343,6 @@ data class Membership(
         }
 
         return Pair(Permission.FREE.id, null)
-    }
-
-    // Determine how user is using CheckOutActivity.
-    fun orderKind(plan: Plan?): OrderKind? {
-        if (plan == null) {
-            return null
-        }
-
-        if (vip) {
-            return null
-        }
-
-        if (tier == null) {
-            return OrderKind.CREATE
-        }
-
-        if (expired()) {
-            return OrderKind.CREATE
-        }
-
-        if (status?.isInvalid() == true) {
-            return OrderKind.CREATE
-        }
-
-        if (tier == plan.tier) {
-            return OrderKind.RENEW
-        }
-
-        if (tier == Tier.STANDARD && plan.tier == Tier.PREMIUM) {
-            return OrderKind.UPGRADE
-        }
-
-        return null
     }
 
     /**
