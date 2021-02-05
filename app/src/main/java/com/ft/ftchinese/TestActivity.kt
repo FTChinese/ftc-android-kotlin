@@ -32,7 +32,7 @@ import com.ft.ftchinese.ui.article.*
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.about.LegalDetailsFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
-import com.ft.ftchinese.ui.pay.LatestOrderActivity
+import com.ft.ftchinese.ui.checkout.LatestOrderActivity
 import com.ft.ftchinese.ui.share.SocialShareFragment
 import com.ft.ftchinese.wxapi.WXEntryActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
