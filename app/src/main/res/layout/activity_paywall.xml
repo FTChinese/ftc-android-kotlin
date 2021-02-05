@@ -9,8 +9,11 @@
             name="premiumFirst"
             type="Boolean" />
         <variable
-            name="promo"
-            type="com.ft.ftchinese.ui.paywall.PromoUI" />
+            name="hasPromo"
+            type="Boolean" />
+        <variable
+            name="promoTerms"
+            type="android.text.Spanned" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -33,95 +36,66 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:orientation="vertical">
 
                     <!-- Account and membership status -->
                     <FrameLayout
                         android:id="@+id/subs_status"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginBottom="16dp"
-                        app:layout_constraintStart_toStartOf="@id/product_top"
-                        app:layout_constraintEnd_toEndOf="@id/product_top"
-                        app:layout_constraintTop_toTopOf="parent"/>
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
 
                     <!-- Promotion box -->
                     <FrameLayout
                         android:id="@+id/frag_promo_box"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
                         android:layout_marginBottom="16dp"
-                        android:visibility="@{promo == null ? View.GONE : View.VISIBLE}"
-                        app:layout_constraintTop_toBottomOf="@id/subs_status"
-                        app:layout_constraintStart_toStartOf="@id/product_top"
-                        app:layout_constraintEnd_toEndOf="@id/product_top"
-                        app:layout_constraintBottom_toTopOf="@id/premium_guide"/>
+                        android:visibility="@{hasPromo ? View.VISIBLE : View.GONE}" />
 
                     <!-- Require premium to read. -->
                     <TextView
                         android:id="@+id/premium_guide"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/premium_only"
-                        android:layout_marginTop="16dp"
-                        android:visibility="@{premiumFirst ? View.VISIBLE : View.GONE}"
-                        app:layout_constraintEnd_toEndOf="@id/product_top"
-                        app:layout_constraintStart_toStartOf="@id/product_top"
-                        app:layout_constraintTop_toBottomOf="@id/frag_promo_box"
-                        app:layout_constraintBottom_toTopOf="@id/product_top"/>
+                        android:layout_marginBottom="16dp"
+                        android:visibility="@{premiumFirst ? View.VISIBLE : View.GONE}" />
 
                     <!--  First product card  -->
                     <FrameLayout
                         android:id="@+id/product_top"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginEnd="16dp"
-                        android:layout_marginTop="16dp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/premium_guide"
-                        app:layout_constraintBottom_toTopOf="@id/product_bottom"/>
+                        android:layout_marginBottom="16dp" />
 
                     <!--  Second product card -->
                     <FrameLayout
                         android:id="@+id/product_bottom"
-                        android:layout_width="0dp"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        app:layout_constraintStart_toStartOf="@id/product_top"
-                        app:layout_constraintEnd_toEndOf="@id/product_top"
-                        app:layout_constraintTop_toBottomOf="@+id/product_top"
-                        app:layout_constraintBottom_toTopOf="@id/promo_terms"/>
+                        android:layout_marginBottom="16dp" />
 
                     <!-- Promo terms and conditions -->
                     <TextView
-                        android:id="@+id/promo_terms"
-                        android:layout_width="0dp"
+                        android:id="@+id/tv_promo_terms"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@{promo.terms}"
-                        android:visibility="@{promo.terms == null ? View.GONE : View.VISIBLE}"
-                        app:layout_constraintTop_toBottomOf="@id/product_bottom"
-                        app:layout_constraintBottom_toTopOf="@id/frag_customer_service"
-                        app:layout_constraintStart_toStartOf="@id/product_top"
-                        app:layout_constraintEnd_toEndOf="@id/product_top"/>
+                        android:layout_marginBottom="16dp"
+                        android:text="@{promoTerms}"
+                        android:visibility="@{promoTerms == null ? View.GONE : View.VISIBLE}" />
 
                     <!-- Customer service-->
                     <FrameLayout
+                        android:layout_marginBottom="16dp"
                         android:id="@+id/frag_customer_service"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        app:layout_constraintTop_toBottomOf="@id/product_bottom"
-                        app:layout_constraintStart_toStartOf="@id/product_top"
-                        app:layout_constraintEnd_toEndOf="@id/product_top"
-                        app:layout_constraintBottom_toBottomOf="parent"/>
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                </LinearLayout>
 
 
             </androidx.core.widget.NestedScrollView>

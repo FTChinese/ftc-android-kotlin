@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
         <import type="android.view.View"/>
@@ -13,102 +12,52 @@
             type="com.ft.ftchinese.model.subscription.Product" />
         <variable
             name="yearPrice"
-            type="com.ft.ftchinese.ui.paywall.Price" />
+            type="com.ft.ftchinese.ui.product.Price" />
         <variable
             name="monthPrice"
-            type="com.ft.ftchinese.ui.paywall.Price" />
+            type="com.ft.ftchinese.ui.product.Price" />
     </data>
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/product_heading_tv"
                 style="@style/OrigamiText.ProductHeading1.Center"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
                 android:text="@{product.heading}"
-                android:background="@drawable/bottom_border_teal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toTopOf="@id/pre_discount_price"/>
+                android:background="@drawable/bottom_border_teal" />
 
-            <!-- Show yearly plan's original price if discount exists. Monthly plan does not have one since it never has discount. -->
-            <TextView
-                android:id="@+id/pre_discount_price"
-                android:layout_width="0dp"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_prod_price"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{yearPrice.originalPrice}"
-                android:textAlignment="center"
-                android:visibility="@{yearPrice.originalPrice == null ? View.GONE : View.VISIBLE}"
-                app:layout_constraintEnd_toEndOf="@+id/product_heading_tv"
-                app:layout_constraintStart_toStartOf="@id/product_heading_tv"
-                app:layout_constraintTop_toBottomOf="@id/product_heading_tv"
-                app:layout_constraintBottom_toTopOf="@id/yearly_price_btn"/>
-
-            <Button
-                android:id="@+id/yearly_price_btn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="@{yearPrice.amount}"
-                android:enabled="@{buttonEnabled}"
-                app:layout_constraintTop_toBottomOf="@id/pre_discount_price"
-                app:layout_constraintStart_toStartOf="@id/product_heading_tv"
-                app:layout_constraintEnd_toEndOf="@id/product_heading_tv"
-                app:layout_constraintBottom_toTopOf="@id/monthly_price_btn"/>
-
-
-            <Button
-                android:id="@+id/monthly_price_btn"
-                style="@style/AppButton.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@{monthPrice.amount}"
-                android:enabled="@{buttonEnabled}"
-                android:visibility="@{monthPrice == null ? View.GONE : View.VISIBLE}"
-                app:layout_constraintTop_toBottomOf="@+id/yearly_price_btn"
-                app:layout_constraintStart_toStartOf="@id/product_heading_tv"
-                app:layout_constraintEnd_toEndOf="@id/product_heading_tv"
-                app:layout_constraintBottom_toTopOf="@id/product_description"/>
+                android:layout_marginTop="16dp"/>
 
             <!-- Show a list of text describing this product. -->
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/product_description"
+                android:id="@+id/rv_prod_desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                app:layout_constraintStart_toStartOf="@id/product_heading_tv"
-                app:layout_constraintEnd_toEndOf="@id/product_heading_tv"
-                app:layout_constraintTop_toBottomOf="@id/monthly_price_btn"
-                app:layout_constraintBottom_toTopOf="@id/product_small_print"/>
+                android:layout_marginTop="16dp" />
 
             <TextView
                 android:id="@+id/product_small_print"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginTop="16dp"
                 android:text="@{product.smallPrint}"
-                android:visibility="@{product.smallPrint == null ? View.GONE : View.VISIBLE}"
-                app:layout_constraintStart_toStartOf="@id/product_heading_tv"
-                app:layout_constraintEnd_toEndOf="@id/product_heading_tv"
-                app:layout_constraintTop_toBottomOf="@id/product_description"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+                android:visibility="@{product.smallPrint == null ? View.GONE : View.VISIBLE}" />
 
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
 
 </layout>

@@ -5,9 +5,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="android.view.View"/>
         <variable
-            name="product"
-            type="com.ft.ftchinese.ui.pay.CartItem" />
+            name="cart"
+            type="com.ft.ftchinese.ui.checkout.Cart" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -23,28 +24,59 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingBottom="16dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="center">
 
             <TextView
-                android:id="@+id/tv_product_price"
+                style="@style/OrigamiText.ProductHeading1.Center"
+                android:id="@+id/tv_plan_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text='@{product.price ?? ""}'
+                android:text="@{cart.planName}"
                 android:textAlignment="center"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
                 android:textColor="@color/colorBlack"
                 android:textSize="36sp"
                 android:textStyle="bold" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:visibility="@{cart.payable == null ? View.GONE : View.VISIBLE}">
+
+                <TextView
+                    style="@style/OrigamiText.Body1.Center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:text="@{cart.payable.currencySymbol}"/>
+                <TextView
+                    style="@style/OrigamiText.ProductHeading1.Center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:text="@{cart.payable.amount}"/>
+                <TextView
+                    style="@style/OrigamiText.Body1.Center"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:text="@{cart.payable.cycle}"/>
+
+            </LinearLayout>
+
             <TextView
                 style="@style/OrigamiText.Body1.Center"
-                android:id="@+id/tv_product_name"
+                android:id="@+id/tv_original_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                android:text='@{product.name ?? ""}'
+                android:visibility="@{cart.originalPrice == null ? View.GONE : View.VISIBLE}"
+                android:text='@{cart.originalPrice}'
                 android:textSize="18sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>

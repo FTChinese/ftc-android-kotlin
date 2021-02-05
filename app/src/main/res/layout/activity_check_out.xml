@@ -8,8 +8,8 @@
     <data>
         <import type="android.view.View"/>
         <variable
-            name="permitStripePay"
-            type="Boolean" />
+            name="intent"
+            type="com.ft.ftchinese.ui.checkout.CheckoutIntent" />
         <variable
             name="payButtonText"
             type="String" />
@@ -63,7 +63,8 @@
                         android:drawableEnd="@drawable/btn_radio"
                         android:drawablePadding="20dp"
                         android:text="@string/pay_brand_ali"
-                        android:textSize="18sp"/>
+                        android:textSize="18sp"
+                        android:enabled="@{intent.permitAliPay}"/>
 
                     <RadioButton
                         android:id="@+id/wxpay_btn"
@@ -76,7 +77,8 @@
                         android:drawableEnd="@drawable/btn_radio"
                         android:drawablePadding="20dp"
                         android:text="@string/pay_brand_wechat"
-                        android:textSize="18sp"/>
+                        android:textSize="18sp"
+                        android:enabled="@{intent.permitWxPay}"/>
 
                     <!-- NOTE: the transparent background added here
                      is just a hack. It seems when setting button to null, there is a round button flasing in the background when you clicked a radio button. -->
@@ -87,7 +89,7 @@
                         android:paddingTop="16dp"
                         android:paddingBottom="8dp"
                         android:button="@null"
-                        android:enabled="@{permitStripePay}"
+                        android:enabled="@{intent.permitStripe}"
                         android:drawableStart="@drawable/stripe"
                         android:drawableEnd="@drawable/btn_radio"
                         android:drawablePadding="20dp"
@@ -100,7 +102,7 @@
                     android:id="@+id/stripe_footnote"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:visibility="@{permitStripePay ? View.VISIBLE : View.GONE}"
+                    android:text="Notice"
                     android:layout_margin="16dp" />
 
             </LinearLayout>
