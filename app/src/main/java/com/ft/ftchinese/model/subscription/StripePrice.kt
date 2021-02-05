@@ -20,6 +20,9 @@ data class StripePrice(
     val unitAmount: Int,
 ) : Parcelable {
 
+    val edition: Edition
+        get() = Edition(tier, cycle)
+
     fun humanAmount(): Double {
         return (unitAmount / 100).toDouble()
     }
@@ -29,6 +32,10 @@ data class StripePrice(
 // See FileCache.kt for cached file name
 object StripePriceStore {
     var prices = listOf<StripePrice>()
+
+    fun findById(id: String): StripePrice? {
+        return prices.find { it.id == id }
+    }
 
     fun find(tier: Tier, cycle: Cycle): StripePrice? {
         return prices.find {
