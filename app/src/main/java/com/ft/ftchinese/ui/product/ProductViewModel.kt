@@ -1,10 +1,11 @@
-package com.ft.ftchinese.ui.paywall
+package com.ft.ftchinese.ui.product
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.Product
+import com.ft.ftchinese.model.subscription.Promo
 import org.jetbrains.anko.AnkoLogger
 
 /**
@@ -13,7 +14,7 @@ import org.jetbrains.anko.AnkoLogger
  */
 class ProductViewModel : ViewModel(), AnkoLogger {
 
-    val selected: MutableLiveData<Plan> by lazy {
+    val planSelected: MutableLiveData<Plan> by lazy {
         MutableLiveData<Plan>()
     }
 
@@ -31,7 +32,7 @@ class ProductViewModel : ViewModel(), AnkoLogger {
     }
 
     // When the host activity retrieved paywall data, convert the promo field to PromoUI
-    val promoCreated: MutableLiveData<PromoUI> by lazy {
-        MutableLiveData<PromoUI>()
+    val promoCreated: MutableLiveData<Promo> by lazy {
+        MutableLiveData<Promo>()
     }
 }
