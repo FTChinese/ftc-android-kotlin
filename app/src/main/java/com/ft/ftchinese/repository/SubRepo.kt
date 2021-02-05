@@ -87,47 +87,6 @@ object SubRepo : AnkoLogger {
         }
     }
 
-    fun previewUpgrade(account: Account): Checkout? {
-
-        val (_, body) = Fetch()
-            .get(Endpoint.subsBase(account.isTest) + "/upgrade/balance")
-            .addHeaders(account.headers())
-            .setTimeout(30)
-            .noCache()
-            .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<Checkout>(body)
-        }
-    }
-
-    fun directUpgrade(account: Account): Pair<Boolean, Checkout?> {
-
-        val (resp, body) = Fetch()
-            .put(Endpoint.subsBase(account.isTest) + "/upgrade/free")
-            .addHeaders(account.headers())
-            .noCache()
-            .setClient()
-            .endJsonText()
-
-        return when (resp.code) {
-            204 -> Pair(true, null)
-            200 -> if (body != null) {
-                try {
-                    Pair(false, json.parse<Checkout>(body))
-                } catch (e: Exception) {
-                    info(e)
-                    Pair(false, null)
-                }
-            } else {
-                Pair(false, null)
-            }
-            else -> Pair(false, null)
-        }
-    }
-
     fun refreshIAP(account: Account): IAPSubs? {
 
         val origTxId = account.membership.appleSubsId ?: throw Exception("Not an Apple subscription")
