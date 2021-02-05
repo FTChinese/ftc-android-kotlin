@@ -116,7 +116,7 @@
             android:parentActivityName=".ui.account.AccountActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.pay.MemberActivity"
+            android:name=".ui.member.MemberActivity"
             android:label="@string/title_my_subs"
             android:parentActivityName=".ui.launch.MainActivity" />
         <activity
@@ -124,14 +124,14 @@
             android:label="@string/title_subscription"
             android:parentActivityName=".ui.launch.MainActivity" />
         <activity
-            android:name=".ui.pay.CheckOutActivity"
+            android:name=".ui.checkout.CheckOutActivity"
             android:label="@string/title_checkout"
             android:parentActivityName=".ui.paywall.PaywallActivity" />
         <activity
-            android:name=".ui.pay.StripeSubActivity"
+            android:name=".ui.checkout.StripeSubActivity"
             android:label="@string/pay_method_stripe"
             android:launchMode="singleTask"
-            android:parentActivityName=".ui.pay.CheckOutActivity">
+            android:parentActivityName=".ui.checkout.CheckOutActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -144,17 +144,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.pay.MyOrdersActivity"
+            android:name=".ui.member.MyOrdersActivity"
             android:label="@string/title_my_orders"
-            android:parentActivityName=".ui.pay.MemberActivity" />
-        <activity
-            android:name=".ui.paywall.UpgradeActivity"
-            android:label="@string/title_upgrade"
-            android:parentActivityName=".ui.pay.MemberActivity" />
-        <activity
-            android:name=".ui.pay.UpgradePreviewActivity"
-            android:label="@string/title_upgrade_preview"
-            android:parentActivityName=".ui.pay.MemberActivity" />
+            android:parentActivityName=".ui.member.MemberActivity" />
         <activity
             android:name=".wxapi.WXPayEntryActivity"
             android:exported="true"
@@ -173,7 +165,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.pay.LatestOrderActivity"
+            android:name=".ui.checkout.LatestOrderActivity"
             android:label="@string/title_latest_order" />
         <activity
             android:name=".ui.settings.SettingsActivity"
