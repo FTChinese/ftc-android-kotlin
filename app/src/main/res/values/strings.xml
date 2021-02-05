@@ -48,7 +48,6 @@
     <string name="title_checkout">支付</string>
     <string name="title_renewal">会员续订</string>
     <string name="title_upgrade">会员升级</string>
-    <string name="title_upgrade_preview">升级预览</string>
     <string name="title_wxpay">微信支付 </string>
     <string name="title_wx_account">微信账号</string>
     <string name="title_link_email">绑定邮箱账号</string>
@@ -205,10 +204,8 @@
     <string name="order_cannot_be_created">无法创建订单，请稍后再试</string>
     <string name="payment_done">支付成功</string>
     <string name="api_already_premium">您已经是高端会员了</string>
-    <string name="api_member_not_found">没有查询到您的会员状态</string>
     <string name="duplicate_purchase">您已经是会员了，请勿重复购买</string>
     <string name="subs_success">订阅成功！</string>
-    <string name="balance_query_failed">查询不到账户余额，请稍后再试</string>
     <string name="wxpay_not_supported">您的设备不支持微信支付</string>
 
     <string name="wxpay_query_order">查询支付状态&#8230;</string>
@@ -223,9 +220,6 @@
     <string name="wxpay_pending">正在支付</string>
     <string name="wxpay_failed">支付失败</string>
     <string name="wxpay_cancelled">支付已取消</string>
-    <string name="upgrade_guide">如果您计划升级为高端会员，系统将首先使用当前账号的余额抵扣定价，不足部分需要您另行支付。</string>
-    <string name="query_balance">查询余额&#8230;</string>
-    <string name="upgrade_to_read">您点击了仅限高端会员阅读的文章。您目前是标准会员，升级为高端会员可以继续阅读</string>
     <string name="premium_only">您点击了仅供高端会员阅读的文章，购买高端会员后可以继续阅读</string>
     <string name="balance_conversion">余额可以兑换高级会员%1$d年%2$d天，无需额外支付</string>
     <string name="confirm_upgrade">去支付</string>

@@ -38,7 +38,6 @@
     <string name="title_checkout">支付</string>
     <string name="title_renewal">會員續訂</string>
     <string name="title_upgrade">會員升级</string>
-    <string name="title_upgrade_preview">升级预览</string>
     <string name="title_wxpay">微信支付 </string>
     <string name="title_wx_account">微信帳號</string>
     <string name="title_link_email">绑定信箱帳號</string>
@@ -172,11 +171,9 @@
     <string name="order_cannot_be_created">無法創建訂單，請稍後再試</string>
     <string name="payment_done">支付成功</string>
     <string name="api_already_premium">您已經是會員会员了</string>
-    <string name="api_member_not_found">没有查詢到您的會員状态</string>
     <string name="duplicate_purchase">您已經是會員了，請勿重複購買</string>
 
     <string name="subs_success">訂閱成功！</string>
-    <string name="balance_query_failed">查詢不到账户余额，請稍後再試</string>
     <string name="wxpay_not_supported">您的設備不支持微信支付</string>
     <string name="wxpay_query_order">查詢支付状态…</string>
     <string name="order_not_found">沒有查詢到訂單，請稍後刷新</string>
@@ -190,9 +187,6 @@
     <string name="wxpay_pending">正在支付</string>
     <string name="wxpay_failed">支付失敗</string>
     <string name="wxpay_cancelled">支付已取消</string>
-    <string name="upgrade_guide">如果您计划升级为高端會員，系统将首先使用當前帳號的余额抵扣定价，不足部分需要您另行支付。</string>
-    <string name="query_balance">查詢余额…</string>
-    <string name="upgrade_to_read">您點擊了仅限高端會員閱讀的文章。您目前是標準會員，升级为閱讀會員可以閱读</string>
 
     <!-- Upgrade to premium -->
     <string name="premium_only">您點擊了仅供高端會員阅读的文章，購買高端會員後可以继续閱讀</string>
