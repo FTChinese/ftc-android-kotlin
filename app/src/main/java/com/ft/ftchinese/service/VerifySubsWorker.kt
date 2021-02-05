@@ -17,7 +17,7 @@ import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.store.PaymentManager
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.pay.MemberActivity
+import com.ft.ftchinese.ui.member.MemberActivity
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
