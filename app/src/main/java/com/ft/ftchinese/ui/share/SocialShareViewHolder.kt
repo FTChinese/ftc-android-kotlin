@@ -13,11 +13,6 @@ class SocialShareViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val icon: ImageView = view.findViewById(R.id.share_icon_view)
     val text: TextView = view.findViewById(R.id.share_text_view)
 
-    fun bind(app: SocialApp) {
-        icon.setImageResource(app.icon)
-        text.text = app.name
-    }
-
     companion object {
         fun create(parent: ViewGroup): SocialShareViewHolder {
             return SocialShareViewHolder(LayoutInflater

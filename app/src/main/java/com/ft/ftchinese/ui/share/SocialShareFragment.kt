@@ -48,7 +48,7 @@ class SocialShareFragment :
 
     }
 
-    inner class SocialShareAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    inner class SocialShareAdapter : RecyclerView.Adapter<SocialShareViewHolder>() {
 
         private val socialApps = arrayOf(
             SocialApp(
@@ -73,16 +73,15 @@ class SocialShareFragment :
             )
         )
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SocialShareViewHolder {
             return SocialShareViewHolder.create(parent)
         }
 
-        override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: SocialShareViewHolder, position: Int) {
             val app = socialApps[position]
 
-            if (holder is SocialShareViewHolder) {
-                holder.bind(app)
-            }
+            holder.icon.setImageResource(app.icon)
+            holder.text.text = app.name
 
             holder.itemView.setOnClickListener {
                 viewModel.select(app)
