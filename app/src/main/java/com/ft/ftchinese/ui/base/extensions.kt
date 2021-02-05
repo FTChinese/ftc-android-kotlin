@@ -61,15 +61,6 @@ fun Activity.isActiveNetworkWifi(): Boolean {
  * 标准会员/月
  * 高级会员/年
  */
-fun Activity.getTierCycleText(tier: Tier?, cycle: Cycle?): String? {
-
-    if (tier == null || cycle == null) {
-        return null
-    }
-
-    return getString(R.string.formatter_tier_cycle, getString(tier.stringRes), getString(cycle.stringRes))
-}
-
 fun formatTierCycle(ctx: Context, tier: Tier?, cycle: Cycle?): String {
     if (tier == null || cycle == null) {
         return ""
@@ -79,18 +70,6 @@ fun formatTierCycle(ctx: Context, tier: Tier?, cycle: Cycle?): String {
         R.string.formatter_tier_cycle,
         ctx.getString(tier.stringRes),
         ctx.getString(cycle.stringRes)
-    )
-}
-
-fun Activity.formatPrice(currency: String?, price: Double?): String {
-    if (currency == null || price == null) {
-        return ""
-    }
-
-    return getString(
-            R.string.formatter_price,
-            getCurrencySymbol(currency),
-            price
     )
 }
 
