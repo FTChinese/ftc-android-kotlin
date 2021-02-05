@@ -13,6 +13,7 @@ import com.ft.ftchinese.databinding.FragmentSubsStatusBinding
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscription.Tier
 import com.ft.ftchinese.ui.login.LoginActivity
+import com.ft.ftchinese.ui.product.ProductViewModel
 
 
 /**

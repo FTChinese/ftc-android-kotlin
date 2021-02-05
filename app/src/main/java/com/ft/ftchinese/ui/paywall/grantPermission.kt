@@ -1,10 +1,11 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.paywall
 
 import android.app.Activity
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.MemberStatus
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.ui.login.LoginActivity
+import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import org.jetbrains.anko.toast
 

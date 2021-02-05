@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentPromoBoxBinding
+import com.ft.ftchinese.ui.product.ProductViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -25,7 +26,7 @@ class PromoBoxFragment : Fragment(), AnkoLogger {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_promo_box, container, false)
 

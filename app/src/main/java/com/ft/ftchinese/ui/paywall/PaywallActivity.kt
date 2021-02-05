@@ -17,12 +17,14 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.checkout.CheckOutActivity
 import com.ft.ftchinese.ui.login.LoginActivity
-import com.ft.ftchinese.ui.pay.CheckOutActivity
-import com.ft.ftchinese.ui.pay.FtcCheckout
+import com.ft.ftchinese.ui.product.ProductFragment
+import com.ft.ftchinese.ui.product.ProductViewModel
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.viewmodel.CheckOutViewModel
+import com.ft.ftchinese.ui.checkout.CheckOutViewModel
 import com.ft.ftchinese.viewmodel.Result
+import io.noties.markwon.Markwon
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
@@ -42,6 +44,7 @@ class PaywallActivity : ScopedAppActivity(),
     private lateinit var productViewModel: ProductViewModel
     private lateinit var paywallViewModel: PaywallViewModel
     private lateinit var binding: ActivityPaywallBinding
+    private lateinit var markwon: Markwon
 
     private var premiumFirst: Boolean = false
 
@@ -63,6 +66,7 @@ class PaywallActivity : ScopedAppActivity(),
 
         cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
+        markwon = Markwon.create(this)
 
         setupViewModel()
         initUI()
@@ -90,9 +94,11 @@ class PaywallActivity : ScopedAppActivity(),
         })
         paywallViewModel.isNetworkAvailable.value = isConnected
 
-        // When a price button in ProductFragment is clicked, the selected Plan
-        // is passed.
-        productViewModel.selected.observe(this, Observer {
+        /**
+         * When a price button in ProductFragment is clicked,
+         * the selected Plan is passed.
+         */
+        productViewModel.planSelected.observe(this, Observer {
             val account = sessionManager.loadAccount()
 
             // If user is not logged in, start login.
@@ -101,15 +107,10 @@ class PaywallActivity : ScopedAppActivity(),
                 return@Observer
             }
 
-            val orderKind = account.membership.orderKind(it) ?: return@Observer
-            // If user logged in, go to CheckOutActivity.
             CheckOutActivity.startForResult(
                 activity = this,
                 requestCode = RequestCode.PAYMENT,
-                checkout = FtcCheckout(
-                    kind = orderKind,
-                    plan = it
-                )
+                planId = it.id
             )
         })
 
@@ -195,23 +196,18 @@ class PaywallActivity : ScopedAppActivity(),
     // Convert Promo to PromoUI if it is valid.
     private fun setUpPromo(p: Promo) {
         if (!p.isValid()) {
+            binding.hasPromo = false
             return
         }
 
-        val promoUI =  PromoUI(
-            heading = p.heading ?: "",
-            subHeading = p.subHeading,
-            terms = if (p.terms != null) {
-                "● " + p.terms
-                    .split("\n")
-                    .joinToString("\n● ")
-            } else {
-                null
-            }
-        )
+        binding.hasPromo = true
 
-        binding.promo = promoUI
-        productViewModel.promoCreated.value = promoUI
+        binding.promoTerms = if (p.terms != null) {
+            markwon.toMarkdown(p.terms)
+        } else {
+            null
+        }
+        productViewModel.promoCreated.value = p
     }
 
     override fun onRefresh() {
