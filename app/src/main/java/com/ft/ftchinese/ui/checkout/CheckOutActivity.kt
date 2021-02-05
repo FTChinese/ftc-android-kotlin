@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.checkout
 
 import android.Manifest
 import android.app.Activity
@@ -30,7 +30,6 @@ import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.viewmodel.CheckOutViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
@@ -45,6 +44,7 @@ import org.jetbrains.anko.toast
 
 const val EXTRA_FTC_PLAN = "extra_ftc_plan"
 const val EXTRA_FTC_CHECKOUT = "extra_ftc_checkout"
+const val EXTRA_PLAN_ID = "extra_plan_id"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CheckOutActivity : ScopedAppActivity(),
@@ -53,6 +53,7 @@ class CheckOutActivity : ScopedAppActivity(),
     private lateinit var checkOutViewModel: CheckOutViewModel
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var paywallViewModel: PaywallViewModel
+    private lateinit var cartViewModel: CartItemViewModel
 
     private lateinit var orderManager: OrderManager
     private lateinit var sessionManager: SessionManager
@@ -63,11 +64,10 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private lateinit var binding: ActivityCheckOutBinding
 
-    // Checkout information passed from calling activity.
-    private var checkout: FtcCheckout? = null
-
     // Payment method use selected.
     private var payMethod: PayMethod? = null
+
+    private var plan: Plan? = null
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -86,9 +86,7 @@ class CheckOutActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
-
-        val co = intent.getParcelableExtra<FtcCheckout>(EXTRA_FTC_CHECKOUT) ?: return
-        this.checkout = co
+        val planId = intent.getStringExtra(EXTRA_PLAN_ID) ?: return
 
         sessionManager = SessionManager.getInstance(this)
         paymentManager = PaymentManager.getInstance(this)
@@ -98,38 +96,75 @@ class CheckOutActivity : ScopedAppActivity(),
 
         tracker = StatsTracker.getInstance(this)
         // Log event: add card
-        tracker.addCart(co.plan)
-
-        // Attach price card
-        supportFragmentManager.commit {
-            replace(
-                R.id.product_in_cart,
-                CartItemFragment.newInstance(
-                    ftcCartItem(this@CheckOutActivity, co.plan)
-                )
-            )
+        plan?.let {
+            tracker.addCart(it)
         }
+
+        plan = PlanStore.findById(planId)
 
         setupViewModel()
         initUI()
         info("CheckOutActivity created")
     }
 
-    private fun initUI() {
-        // Show different titles
-        when (checkout?.kind) {
-            OrderKind.RENEW ->  supportActionBar?.setTitle(R.string.title_renewal)
-            OrderKind.UPGRADE -> supportActionBar?.setTitle(R.string.title_upgrade)
-            else -> {}
+    private fun setupViewModel() {
+        checkOutViewModel = ViewModelProvider(this)
+            .get(CheckOutViewModel::class.java)
+
+        accountViewModel = ViewModelProvider(this)
+            .get(AccountViewModel::class.java)
+
+        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(FileCache(this)))
+            .get(PaywallViewModel::class.java)
+
+        cartViewModel = ViewModelProvider(this).get(CartItemViewModel::class.java)
+
+        connectionLiveData.observe(this, {
+            checkOutViewModel.isNetworkAvailable.value = it
+            accountViewModel.isNetworkAvailable.value = it
+            paywallViewModel.isNetworkAvailable.value = it
+        })
+        isConnected.let {
+            checkOutViewModel.isNetworkAvailable.value = it
+            accountViewModel.isNetworkAvailable.value = it
+            paywallViewModel.isNetworkAvailable.value = it
         }
 
-        // All payment methods are open to new members or expired members;
-        // Wechat-only user cannot use stripe.
-        // For non-expired user to renew (only applicable to
-        // wechat pay and alipay), stripe should be disabled.
-        binding.permitStripePay = sessionManager.loadAccount()?.permitStripe() ?: true
-        binding.stripeFootnote.text = resources.getStringArray(R.array.stripe_footnotes)
-                .joinToString("\n")
+        checkOutViewModel.wxPayIntentResult.observe(this) {
+            onWxPayIntent(it)
+        }
+
+        checkOutViewModel.aliPayIntentResult.observe(this) {
+            onAliPayIntent(it)
+        }
+
+        paywallViewModel.stripePrices.observe(this) {
+            onStripePrices(it)
+        }
+    }
+
+    private fun initUI() {
+        val plan = plan ?: return
+        val m = sessionManager.loadAccount()?.membership ?: return
+
+        // Attach cart fragment
+        supportFragmentManager.commit {
+            replace(
+                R.id.product_in_cart,
+                CartItemFragment.newInstance()
+            )
+        }
+
+        val checkoutIntent = buildCheckoutIntent(m, plan.edition)
+
+        // Show title
+        checkoutIntent.orderKind?.let {
+            supportActionBar?.setTitle(getOrderKindText(this, it))
+        }
+
+        binding.intent = checkoutIntent
+
+        cartViewModel.cartCreated.value = buildFtcCart(this, plan)
 
         requestPermission()
 
@@ -153,44 +188,11 @@ class CheckOutActivity : ScopedAppActivity(),
         }
     }
 
-    private fun setupViewModel() {
-        checkOutViewModel = ViewModelProvider(this)
-                .get(CheckOutViewModel::class.java)
-
-        accountViewModel = ViewModelProvider(this)
-                .get(AccountViewModel::class.java)
-
-        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(FileCache(this)))
-            .get(PaywallViewModel::class.java)
-
-        connectionLiveData.observe(this, {
-            checkOutViewModel.isNetworkAvailable.value = it
-            accountViewModel.isNetworkAvailable.value = it
-            paywallViewModel.isNetworkAvailable.value = it
-        })
-        isConnected.let {
-            checkOutViewModel.isNetworkAvailable.value = it
-            accountViewModel.isNetworkAvailable.value = it
-            paywallViewModel.isNetworkAvailable.value = it
-        }
-
-        checkOutViewModel.wxPayIntentResult.observe(this, {
-            onWxPayIntent(it)
-        })
-
-        checkOutViewModel.aliPayIntentResult.observe(this, {
-            onAliPayIntent(it)
-        })
-
-        paywallViewModel.stripePrices.observe(this) {
-            onStripePrices(it)
-        }
-    }
-
     private fun onSelectPayMethod() {
         val priceText = formatPrice(
-                currency = checkout?.plan?.currency,
-                price = checkout?.plan?.payableAmount()
+                ctx = this,
+                currency = plan?.currency,
+                price = plan?.payableAmount()
         )
 
         info("Payment method selected $payMethod")
@@ -226,7 +228,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private fun onPayButtonClicked() {
         val account = sessionManager.loadAccount() ?: return
-        val plan = checkout?.plan ?: return
+        val plan = plan ?: return
 
         val pm = payMethod
         if (pm == null) {
@@ -277,27 +279,23 @@ class CheckOutActivity : ScopedAppActivity(),
         }
     }
 
+    // Open stripe activity if stripe price for current plan is found.
+    // Return false if price not found and the caller should
+    // start retrieving prices from server.
     private fun gotoStripe(): Boolean {
-        val co = checkout ?: return false
+        val plan = plan ?: return false
 
         val price = StripePriceStore.find(
-            tier = co.plan.tier,
-            cycle = co.plan.cycle,
-        )
-        if (price == null) {
-            toast("Retrieving Stripe prices...")
-            return false
-        }
+            tier = plan.tier,
+            cycle = plan.cycle,
+        ) ?: return false
 
         info("Start stripe subscription activity...")
         info(price)
         StripeSubActivity.startForResult(
             activity = this,
             requestCode = RequestCode.PAYMENT,
-            co = StripeCheckout(
-                kind = co.kind,
-                price = price,
-            ),
+            priceId = price.id,
         )
 
         return true
@@ -326,11 +324,11 @@ class CheckOutActivity : ScopedAppActivity(),
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
-                tracker.buyFail(checkout?.plan)
+                tracker.buyFail(plan)
             }
             is Result.Error -> {
                 result.exception.message?.let { toast(it) }
-                tracker.buyFail(checkout?.plan)
+                tracker.buyFail(plan)
             }
             is Result.Success -> {
                 binding.payBtn.isEnabled = false
@@ -341,7 +339,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private fun launchAliPay(aliPayIntent: AliPayIntent) {
 
-        val plan = checkout?.plan ?: return
+        val plan = plan ?: return
 
         orderManager.save(aliPayIntent.order)
 
@@ -420,11 +418,11 @@ class CheckOutActivity : ScopedAppActivity(),
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
-                tracker.buyFail(checkout?.plan)
+                tracker.buyFail(plan)
             }
             is Result.Error -> {
                 result.exception.message?.let { toast(it) }
-                tracker.buyFail(checkout?.plan)
+                tracker.buyFail(plan)
             }
             is Result.Success -> {
                 binding.payBtn.isEnabled = false
@@ -514,11 +512,11 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     companion object {
-
+        
         @JvmStatic
-        fun startForResult(activity: Activity?, requestCode: Int, checkout: FtcCheckout) {
-            val intent = Intent(activity, CheckOutActivity::class.java).apply {
-                putExtra(EXTRA_FTC_CHECKOUT, checkout)
+        fun startForResult(activity: Activity?, requestCode: Int, planId: String) {
+            val intent = Intent(activity, CheckOutActivity::class.java).apply { 
+                putExtra(EXTRA_PLAN_ID, planId)
             }
 
             activity?.startActivityForResult(intent, requestCode)

@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.checkout
 
 import android.app.Activity
 import android.content.Intent
@@ -11,12 +11,14 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityStripeSubBinding
 import com.ft.ftchinese.model.order.*
-import com.ft.ftchinese.model.subscription.OrderKind
-import com.ft.ftchinese.model.subscription.StripeCustomer
+import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
+import com.ft.ftchinese.ui.member.MemberActivity
+import com.ft.ftchinese.ui.paywall.PaywallViewModel
+import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.viewmodel.*
 import com.stripe.android.*
 import com.stripe.android.model.*
@@ -25,7 +27,7 @@ import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
-private const val EXTRA_STRIPE_CHECKOUT = "extra_stripe_checkout"
+private const val EXTRA_STRIPE_PRICE_ID = "extra_stripe_price_id"
 
 /**
  * See https://stripe.com/docs/mobile/android/basic
@@ -37,15 +39,19 @@ class StripeSubActivity : ScopedAppActivity(),
     private lateinit var binding: ActivityStripeSubBinding
     private lateinit var sessionManager: SessionManager
     private lateinit var fileCache: FileCache
+
+    private lateinit var customerViewModel: CustomerViewModel
     private lateinit var checkOutViewModel: CheckOutViewModel
     private lateinit var accountViewModel: AccountViewModel
-    private lateinit var customerViewModel: CustomerViewModel
-    private lateinit var idempotency: Idempotency
-    private var checkout: StripeCheckout? = null
+    private lateinit var paywallViewModel: PaywallViewModel
+    private lateinit var cartViewModel: CartItemViewModel
 
     private lateinit var stripe: Stripe
     private lateinit var paymentSession: PaymentSession
+    private lateinit var idempotency: Idempotency
 
+    private var price: StripePrice? = null
+    private var checkoutIntent: CheckoutIntent? = null
     private var paymentMethod: PaymentMethod? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,9 +64,6 @@ class StripeSubActivity : ScopedAppActivity(),
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
         }
-
-        // Stripe price passed from previous activity.
-        checkout = intent.getParcelableExtra(EXTRA_STRIPE_CHECKOUT)
 
         sessionManager = SessionManager.getInstance(this)
         fileCache = FileCache(this)
@@ -75,7 +78,18 @@ class StripeSubActivity : ScopedAppActivity(),
         )
 
         setupViewModel()
+
+        val priceId = intent.getStringExtra(EXTRA_STRIPE_PRICE_ID) ?: return
+
+        price = StripePriceStore.findById(priceId)
+        // Retrieve stripe prices in case not found on device
+        if (price == null) {
+            uiStateProgress(true)
+            paywallViewModel.loadStripePrices()
+        }
+
         initUI()
+
         initCustomerSession()
 
         // Creation payment session
@@ -105,63 +119,80 @@ class StripeSubActivity : ScopedAppActivity(),
         )
             .get(CustomerViewModel::class.java)
 
+        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))
+            .get(PaywallViewModel::class.java)
+
+        cartViewModel = ViewModelProvider(this)
+            .get(CartItemViewModel::class.java)
+
         // Monitoring network status.
         connectionLiveData.observe(this, {
             checkOutViewModel.isNetworkAvailable.value = it
             accountViewModel.isNetworkAvailable.value = it
             customerViewModel.isNetworkAvailable.value = it
+            paywallViewModel.isNetworkAvailable.value = it
         })
         isConnected.let {
             checkOutViewModel.isNetworkAvailable.value = it
             accountViewModel.isNetworkAvailable.value = it
             customerViewModel.isNetworkAvailable.value = it
+            paywallViewModel.isNetworkAvailable.value = it
         }
 
         // Upon Stripe customer created.
-        customerViewModel.customerCreated.observe(this, {
+        customerViewModel.customerCreated.observe(this)  {
             onStripeCustomer(it)
-        })
+        }
 
         // Upon subscription created.
-        checkOutViewModel.stripeSubsResult.observe(this, {
+        checkOutViewModel.stripeSubsResult.observe(this) {
             onSubsResult(it)
-        })
+        }
+
+        paywallViewModel.stripePrices.observe(this) { result ->
+            uiStateProgress(false)
+            when (result) {
+                is Result.LocalizedError -> {
+                    toast(result.msgId)
+                }
+                is Result.Error -> {
+                    result.exception.message?.let { toast(it) }
+                }
+                is Result.Success -> {
+                    StripePriceStore.prices = result.data
+                    initUI()
+                }
+            }
+        }
     }
 
     private fun initUI() {
-        // Clickable only after user selected payment method.
-//        binding.btnSubscribe.isEnabled = false
         uiStateProgress(true)
 
-        // Change button text for upgrade.
-        if (checkout?.kind == OrderKind.UPGRADE) {
-            binding.btnSubscribe.text = getString(R.string.title_upgrade)
+        val p = price ?: return
+        val m = sessionManager.loadAccount()?.membership ?: return
+
+        supportFragmentManager.commit {
+            replace(
+                R.id.product_in_cart,
+                CartItemFragment.newInstance()
+            )
         }
 
-        val co = checkout
-        if (co != null) {
-            // Show item in cart
-            supportFragmentManager.commit {
-                replace(
-                    R.id.product_in_cart,
-                    CartItemFragment.newInstance(
-                        stripeCartItem(
-                            applicationContext,
-                            co.price
-                        )
-                    )
-                )
-            }
+        val intent = buildCheckoutIntent(m, p.edition)
+        this.checkoutIntent = intent
+
+        intent.orderKind?.let {
+            supportActionBar?.setTitle(getOrderKindText(this, it))
         }
+
+        cartViewModel.cartCreated.value = buildStripeCart(this, p)
 
         binding.tvPaymentMethod.setOnClickListener {
             paymentSession.presentPaymentMethodSelection()
         }
 
         binding.btnSubscribe.setOnClickListener {
-            if (checkout?.kind == null) {
-                return@setOnClickListener
-            }
             startSubscribing()
         }
     }
@@ -328,8 +359,9 @@ class StripeSubActivity : ScopedAppActivity(),
     }
 
     private fun startSubscribing() {
-        val co = checkout ?: return
         val account = sessionManager.loadAccount() ?: return
+        val p = price ?: return
+        val intent = checkoutIntent ?: return
 
         if (account.stripeId == null) {
             toast("You are not a stripe customer yet")
@@ -344,14 +376,14 @@ class StripeSubActivity : ScopedAppActivity(),
 
         uiStateProgress(true)
 
-        when (co.kind) {
+        when (intent.orderKind) {
             OrderKind.CREATE -> {
                 toast(R.string.creating_subscription)
 
                 checkOutViewModel.createStripeSub(account, StripeSubParams(
-                    tier = co.price.tier,
-                    cycle = co.price.cycle,
-                    priceId = co.price.id,
+                    tier = p.tier,
+                    cycle = p.cycle,
+                    priceId = p.id,
                     customer = account.stripeId,
                     defaultPaymentMethod = pm.id,
                     idempotency = idempotency.retrieveKey()
@@ -362,9 +394,9 @@ class StripeSubActivity : ScopedAppActivity(),
                 idempotency.clear()
 
                 checkOutViewModel.upgradeStripeSub(account, StripeSubParams(
-                    tier = co.price.tier,
-                    cycle = co.price.cycle,
-                    priceId = co.price.id,
+                    tier = p.tier,
+                    cycle = p.cycle,
+                    priceId = p.id,
                     customer = account.stripeId,
                     defaultPaymentMethod = pm.id,
                     idempotency = idempotency.retrieveKey()
@@ -528,9 +560,10 @@ class StripeSubActivity : ScopedAppActivity(),
         return arrayOf(
                getString(
                        R.string.order_subscribed_plan,
-                       getTierCycleText(
-                           checkout?.price?.tier,
-                           checkout?.price?.cycle
+                       formatTierCycle(
+                           this,
+                           price?.tier,
+                           price?.cycle
                        )
                ),
                 getString(
@@ -563,13 +596,14 @@ class StripeSubActivity : ScopedAppActivity(),
     companion object {
 
         @JvmStatic
-        fun startForResult(activity: Activity, requestCode: Int, co: StripeCheckout) {
+        fun startForResult(activity: Activity, requestCode: Int, priceId: String) {
             activity.startActivityForResult(
-                    Intent(activity, StripeSubActivity::class.java).apply {
-                        putExtra(EXTRA_STRIPE_CHECKOUT, co)
-                    },
-                    requestCode
+                Intent(activity, StripeSubActivity::class.java).apply {
+                    putExtra(EXTRA_STRIPE_PRICE_ID, priceId)
+                },
+                requestCode
             )
         }
     }
 }
+

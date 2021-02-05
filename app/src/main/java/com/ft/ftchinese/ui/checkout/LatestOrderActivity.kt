@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.checkout
 
 import android.content.Context
 import android.content.Intent
@@ -8,9 +8,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityLatestOrderBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.getTierCycleText
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.model.subscription.Order
+import com.ft.ftchinese.ui.base.formatTierCycle
+import com.ft.ftchinese.ui.member.MemberActivity
+import com.ft.ftchinese.ui.member.OrderAdapter
+import com.ft.ftchinese.ui.member.OrderRow
 import org.threeten.bp.format.DateTimeFormatter
 
 /**
@@ -49,7 +52,7 @@ class LatestOrderActivity : ScopedAppActivity() {
 
     private fun buildRows(order: Order): List<OrderRow> {
         return listOf(order).map {
-            val tierCycle = getTierCycleText(it.tier, it.cycle)
+            val tierCycle = formatTierCycle(this, it.tier, it.cycle)
 
             val payMethod = getString(it.payMethod.stringRes)
 

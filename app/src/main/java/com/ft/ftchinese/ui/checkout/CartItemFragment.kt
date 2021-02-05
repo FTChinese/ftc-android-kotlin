@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.checkout
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -6,10 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentCartItemBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.viewmodel.CheckOutViewModel
 
 const val ARG_CART_ITEM = "arg_cart_item"
 
@@ -19,14 +19,8 @@ const val ARG_CART_ITEM = "arg_cart_item"
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CartItemFragment : ScopedFragment() {
 
-    private var cartItem: CartItem? = null
     private lateinit var binding: FragmentCartItemBinding
-    private lateinit var checkOutViewModel: CheckOutViewModel
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        cartItem = arguments?.getParcelable(ARG_CART_ITEM)
-    }
+    private lateinit var cartViewModel: CartItemViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,6 +35,11 @@ class CartItemFragment : ScopedFragment() {
             false
         )
 
+        binding.cart = Cart(
+            planName = "",
+            originalPrice = "",
+            payable = null
+        )
         return binding.root
     }
 
@@ -48,22 +47,12 @@ class CartItemFragment : ScopedFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-//        checkOutViewModel = activity?.run {
-//            ViewModelProvider(this).get(CheckOutViewModel::class.java)
-//        } ?: throw Exception("Invalid Exception")
-//
-//        checkOutViewModel.stripePriceResult.observe(viewLifecycleOwner, Observer {
-//            if (it !is Result.Success) {
-//                return@Observer
-//            }
-//
-//            paymentIntent = paymentIntent?.withStripePlan(it.data)?.also { paymentIntent ->
-//                binding.product = buildProduct(paymentIntent)
-//            }
-//        })
-//
-        cartItem?.let {
-            binding.product = it
+        cartViewModel = activity?.run {
+            ViewModelProvider(this).get(CartItemViewModel::class.java)
+        } ?: throw Exception("Invalid Exception")
+
+        cartViewModel.cartCreated.observe(viewLifecycleOwner) {
+            binding.cart = it
         }
     }
 
@@ -71,8 +60,6 @@ class CartItemFragment : ScopedFragment() {
     companion object {
 
         @JvmStatic
-        fun newInstance(cartItem: CartItem) = CartItemFragment().apply {
-            arguments = bundleOf(ARG_CART_ITEM to cartItem)
-        }
+        fun newInstance() = CartItemFragment()
     }
 }
