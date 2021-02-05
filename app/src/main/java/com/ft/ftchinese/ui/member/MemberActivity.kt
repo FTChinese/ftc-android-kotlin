@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.member
 
 import android.app.Activity
 import android.content.Context
@@ -20,6 +20,8 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.checkout.CheckOutActivity
+import com.ft.ftchinese.ui.checkout.StripeSubActivity
 import com.ft.ftchinese.ui.paywall.*
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
@@ -123,7 +125,7 @@ class MemberActivity : ScopedAppActivity(),
         val member = account.membership
 
         binding.member = buildMemberStatus(this, member)
-        info(member.canUpgrade())
+        binding.next = member.nextSteps()
 
         // If membership is expired,open paywall page.
         binding.subscribeBtn.setOnClickListener {
@@ -140,34 +142,41 @@ class MemberActivity : ScopedAppActivity(),
             PaywallTracker.fromRenew()
 
             CheckOutActivity.startForResult(
-                    activity = this,
-                    requestCode = RequestCode.PAYMENT,
-                    checkout = FtcCheckout(
-                        kind = OrderKind.RENEW,
-                        plan = plan
-                    )
+                activity = this,
+                requestCode = RequestCode.PAYMENT,
+                planId = plan.id,
             )
 
             it.isEnabled = false
         }
 
-        // Upgrade is application to Stripe, Alipay, or Wxpay.
+        // Upgrade is applicable to Stripe, Alipay, or Wxpay.
         binding.upgradeBtn.setOnClickListener {
-            if (member.isAliOrWxPay()) {
+            when (member.payMethod) {
+                PayMethod.STRIPE -> {
+                    if (gotoStripe()) {
+                        return@setOnClickListener
+                    }
 
-                UpgradeActivity.startForResult(this, RequestCode.PAYMENT)
-
-            } else if (member.payMethod == PayMethod.STRIPE) {
-                // Find out the stripe price used for upgrade.
-                // Similar to clicking CheckoutActivity's pay button when stripe is selected.
-                if (gotoStripe()) {
-                    return@setOnClickListener
+                    // A fallback if stripe prices not cached on device.
+                    binding.inProgress = true
+                    toast("Loading stripe prices...")
+                    paywallViewModel.loadStripePrices()
                 }
+                PayMethod.APPLE -> {
+                     toast("苹果内购升级需要在iOS设备上操作")
+                }
+                PayMethod.B2B -> {
+                    toast("企业订阅升级请联系您所属的机构")
+                }
+                else -> {
+                    if (gotoCheckout()) {
+                        return@setOnClickListener
+                    }
 
-                // A fallback if stripe prices not cached on device.
-                binding.inProgress = true
-                toast("Loading stripe prices...")
-                paywallViewModel.loadStripePrices()
+                    binding.inProgress = true
+                    paywallViewModel.loadPaywall(true)
+                }
             }
 
             it.isEnabled = false
@@ -190,25 +199,31 @@ class MemberActivity : ScopedAppActivity(),
         val price = StripePriceStore.find(
             tier = Tier.PREMIUM,
             cycle = Cycle.YEAR,
-        )
-
-        if (price == null) {
-            toast("Stripe price not found!")
-            return false
-        }
+        ) ?: return false
 
         StripeSubActivity.startForResult(
             activity = this,
             requestCode = RequestCode.PAYMENT,
-            co = StripeCheckout(
-                kind = OrderKind.UPGRADE,
-                price = price,
-            ),
+            priceId = price.id,
         )
 
         binding.inProgress = false
         return true
     }
+
+    private fun gotoCheckout(): Boolean {
+        val plan = PlanStore.find(Tier.PREMIUM, Cycle.YEAR) ?: return false
+
+        CheckOutActivity.startForResult(
+            activity = this,
+            requestCode = RequestCode.PAYMENT,
+            planId = plan.id,
+        )
+
+        binding.inProgress = false
+        return true
+    }
+
     /**
      * Refresh account.
      * Use different API endpoints depending on the login method.

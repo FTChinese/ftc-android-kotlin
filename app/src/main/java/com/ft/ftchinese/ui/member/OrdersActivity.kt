@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.member
 
 import android.content.Context
 import android.content.Intent
@@ -11,11 +11,8 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMyOrdersBinding
 import com.ft.ftchinese.model.subscription.Order
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.formatPrice
-import com.ft.ftchinese.ui.base.getTierCycleText
-import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.model.fetch.formatISODateTime
+import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import org.jetbrains.anko.AnkoLogger
@@ -89,11 +86,11 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
     private fun buildRows(orders: List<Order>): List<OrderRow> {
 
         return orders.map {
-            val tierCycle = getTierCycleText(it.tier, it.cycle)
+            val tierCycle = formatTierCycle(this, it.tier, it.cycle)
 
             val payMethod = getString(it.payMethod.stringRes)
 
-            val price = formatPrice(it.currency, it.amount)
+            val price = formatPrice(this, it.currency, it.amount)
 
             OrderRow(
                     orderId = getString(R.string.order_id, it.id),

@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.member
 
 import android.view.LayoutInflater
 import android.view.View

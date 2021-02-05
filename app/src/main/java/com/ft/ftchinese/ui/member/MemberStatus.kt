@@ -1,11 +1,9 @@
-package com.ft.ftchinese.ui.pay
+package com.ft.ftchinese.ui.member
 
 import android.content.Context
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscription.PayMethod
-import com.ft.ftchinese.model.subscription.Tier
-
 
 data class MemberStatus(
     val reminder: String?, // Remind upon expiration
@@ -14,12 +12,7 @@ data class MemberStatus(
     val autoRenewal: String?,
     val reactivateStripeBtn: Boolean,
     val payMethod: String?, // For Stripe or Apple IAP
-    val renewalBtn: Boolean, // Show renewal btn for Alipay, Wechat
-    val upgradeBtn: Boolean, // Show upgrade btn for Alipay, Wechat and Stripe standard edition.
-    val addOnBtn: Boolean, // Purchase addon membership period.
-    val reSubscribeBtn: Boolean, // Show resubscribe btn for expired.
 )
-
 
 fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
     if (m.vip) {
@@ -30,10 +23,6 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
             autoRenewal = null,
             reactivateStripeBtn = false,
             payMethod = null,
-            renewalBtn = false,
-            upgradeBtn = false,
-            addOnBtn = false,
-            reSubscribeBtn = false
         )
     }
 
@@ -59,10 +48,6 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
                 autoRenewal = null,
                 reactivateStripeBtn = false,
                 payMethod = null,
-                renewalBtn = m.canRenewViaAliWx(),
-                upgradeBtn = m.canUpgrade(),
-                addOnBtn = false,
-                reSubscribeBtn = m.expired()
             )
         }
         PayMethod.STRIPE -> {
@@ -84,10 +69,6 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
                 autoRenewal = autoRenewal,
                 reactivateStripeBtn = m.canReactivateStripe(),
                 payMethod = ctx.getString(R.string.subs_brand_stripe),
-                renewalBtn = false,
-                upgradeBtn = !isExpired && m.tier == Tier.STANDARD,
-                addOnBtn = false,
-                reSubscribeBtn = isExpired
             )
         }
         PayMethod.APPLE -> {
@@ -104,10 +85,6 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
                 autoRenewal = autoRenewal,
                 reactivateStripeBtn = false,
                 payMethod = ctx.getString(R.string.subs_brand_apple),
-                renewalBtn = false,
-                upgradeBtn = false,
-                addOnBtn = false,
-                reSubscribeBtn = isExpired
             )
         }
         PayMethod.B2B -> {
@@ -124,10 +101,6 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
                 autoRenewal = null,
                 reactivateStripeBtn = false,
                 payMethod = ctx.getString(R.string.subs_brand_b2b),
-                renewalBtn = false,
-                upgradeBtn = false,
-                addOnBtn = false,
-                reSubscribeBtn = isExpired
             )
         }
         // VIP
@@ -138,10 +111,6 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
             autoRenewal = null,
             reactivateStripeBtn = false,
             payMethod = null,
-            renewalBtn = false,
-            upgradeBtn = false,
-            addOnBtn = false,
-            reSubscribeBtn = false
         )
     }
 }
