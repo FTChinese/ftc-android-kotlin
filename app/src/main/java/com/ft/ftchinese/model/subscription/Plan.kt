@@ -1,11 +1,10 @@
 package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
-import com.ft.ftchinese.tracking.GAAction
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KTier
+import com.ft.ftchinese.tracking.GAAction
 import kotlinx.parcelize.Parcelize
-import org.threeten.bp.ZonedDateTime
 
 /**
  * A plan for a product.
@@ -23,6 +22,9 @@ data class Plan(
         val currency: String = "cny", // Not from API
         val discount: Discount = Discount()
 ) : Parcelable {
+
+    val edition: Edition
+        get() = Edition(tier, cycle)
 
     fun payableAmount(): Double {
         if (!discount.isValid()) {
@@ -68,6 +70,10 @@ object PlanStore {
 
     fun get(): List<Plan> {
         return plans
+    }
+
+    fun findById(id: String): Plan? {
+        return plans.find { it.id == id }
     }
 
     /**
