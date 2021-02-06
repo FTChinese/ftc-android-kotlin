@@ -4,14 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentCartItemBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
-
-const val ARG_CART_ITEM = "arg_cart_item"
 
 /**
  * Used to show the an overview of the item user purchased.
@@ -36,9 +33,9 @@ class CartItemFragment : ScopedFragment() {
         )
 
         binding.cart = Cart(
-            planName = "",
-            originalPrice = "",
-            payable = null
+            productName = "",
+            payablePrice = null,
+            originalPrice = null,
         )
         return binding.root
     }
