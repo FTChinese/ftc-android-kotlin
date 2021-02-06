@@ -11,15 +11,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentProductBinding
+import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.formatter.formatPriceCycle
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import org.jetbrains.anko.AnkoLogger
 
-/**
- * Show a card of product.
- * Hosted inside [PaywallActivity] or [UpgradeActivity].
- */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ProductFragment : ScopedFragment(),
         AnkoLogger {
@@ -122,30 +121,6 @@ class ProductFragment : ScopedFragment(),
         priceListAdapter.enabledBtn(true)
     }
 
-    // Format price text.
-    private fun buildPrice(plan: Plan): Price {
-
-        val cycleStr = getString(plan.cycle.stringRes)
-
-        return Price(
-            amount = getString(
-                R.string.formatter_price_cycle,
-                plan.payableAmount(),
-                cycleStr
-            ),
-
-            originalPrice = if (plan.discount.isValid()) {
-                getString(R.string.original_price) + getString(
-                    R.string.formatter_price_cycle,
-                    plan.price,
-                    cycleStr
-                )
-            } else {
-                null
-            },
-        )
-    }
-
     inner class PriceListAdapter : RecyclerView.Adapter<PriceItemViewHolder>() {
 
         private var plans = listOf<Plan>()
@@ -158,10 +133,10 @@ class ProductFragment : ScopedFragment(),
         override fun onBindViewHolder(holder: PriceItemViewHolder, position: Int) {
             val plan = plans[position]
 
-            val price = buildPrice(plan)
+            val price = buildPlanPrice(requireContext(), plan)
 
-            if (price.originalPrice != null) {
-                holder.text.text = price.originalPrice
+            if (price.original != null) {
+                holder.text.text = price.original
             } else {
                 holder.text.visibility = View.GONE
             }
@@ -169,7 +144,7 @@ class ProductFragment : ScopedFragment(),
             when (plan.cycle) {
                 Cycle.YEAR -> {
                     holder.outlineButton.visibility = View.GONE
-                    holder.primaryButton.text = price.amount
+                    holder.primaryButton.text = price.payable
                     holder.primaryButton.isEnabled = btnEnabled
                     holder.primaryButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
@@ -178,7 +153,7 @@ class ProductFragment : ScopedFragment(),
                 }
                 Cycle.MONTH -> {
                     holder.primaryButton.visibility = View.GONE
-                    holder.outlineButton.text = price.amount
+                    holder.outlineButton.text = price.payable
                     holder.outlineButton.isEnabled = btnEnabled
                     holder.outlineButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
