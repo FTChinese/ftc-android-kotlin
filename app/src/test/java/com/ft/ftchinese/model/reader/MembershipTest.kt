@@ -1,10 +1,9 @@
 package com.ft.ftchinese.model.reader
 
-import com.ft.ftchinese.model.subscription.Cycle
-import com.ft.ftchinese.model.subscription.PayMethod
+import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.order.StripeSubStatus
-import com.ft.ftchinese.model.subscription.Tier
-import com.ft.ftchinese.util.*
+import com.ft.ftchinese.model.enums.Tier
 import org.junit.Assert.*
 import org.junit.Test
 import org.threeten.bp.LocalDate

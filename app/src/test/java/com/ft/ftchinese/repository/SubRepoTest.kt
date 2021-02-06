@@ -4,9 +4,9 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
-import com.ft.ftchinese.model.subscription.Cycle
+import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.subscription.PlanStore
-import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.model.enums.Tier
 import org.junit.Assert.*
 import org.junit.Test
 

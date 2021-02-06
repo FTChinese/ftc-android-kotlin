@@ -1,6 +1,6 @@
 package com.ft.ftchinese.model
 
-import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.model.enums.Tier
 import org.junit.Test
 
 class TierTest {
