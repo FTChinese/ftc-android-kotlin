@@ -10,12 +10,6 @@
         <variable
             name="product"
             type="com.ft.ftchinese.model.subscription.Product" />
-        <variable
-            name="yearPrice"
-            type="com.ft.ftchinese.ui.product.Price" />
-        <variable
-            name="monthPrice"
-            type="com.ft.ftchinese.ui.product.Price" />
     </data>
 
     <androidx.cardview.widget.CardView
