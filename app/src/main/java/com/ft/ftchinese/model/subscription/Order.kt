@@ -1,7 +1,12 @@
 package com.ft.ftchinese.model.subscription
 
+import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.OrderKind
+import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.*
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.ui.Price
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.temporal.ChronoUnit
@@ -61,6 +66,13 @@ data class Order(
     @KDate
     var endDate: LocalDate? = null
 ) {
+
+    val priceParams: Price
+        get() = Price(
+            currency = currency,
+            amount = amount,
+            cycle = cycle,
+        )
 
     fun isConfirmed(): Boolean {
         return confirmedAt != null

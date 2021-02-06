@@ -1,6 +1,9 @@
 package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
+import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KTier
 import com.ft.ftchinese.tracking.GAAction
@@ -11,20 +14,34 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class Plan(
-        val id: String,
-        val productId: String,
-        val price: Double,
-        @KTier
-        val tier: Tier,
-        @KCycle
-        val cycle: Cycle,
-        val description: String? = null,
-        val currency: String = "cny", // Not from API
-        val discount: Discount = Discount()
+    val id: String,
+    val productId: String,
+    val price: Double,
+    @KTier
+    val tier: Tier,
+    @KCycle
+    val cycle: Cycle,
+    val description: String? = null,
+    val currency: String = "cny", // Not from API
+    val discount: Discount = Discount()
 ) : Parcelable {
 
     val edition: Edition
         get() = Edition(tier, cycle)
+
+    fun checkoutItem(): CheckoutItem {
+        if (!discount.isValid()) {
+            return CheckoutItem(
+                plan = this,
+                discount = null,
+            )
+        }
+
+        return CheckoutItem(
+            plan = this,
+            discount = discount,
+        )
+    }
 
     fun payableAmount(): Double {
         if (!discount.isValid()) {

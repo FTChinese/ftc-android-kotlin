@@ -1,5 +1,7 @@
 package com.ft.ftchinese.model.subscription
 
+import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KDateTime
 import com.ft.ftchinese.model.fetch.KTier
 import org.threeten.bp.ZonedDateTime
@@ -9,13 +11,13 @@ import org.threeten.bp.ZonedDateTime
  * By default the data is hard-coded in string resources.
  */
 data class Product(
-    val id: String,
-    @KTier
+        val id: String,
+        @KTier
     val tier: Tier,
-    val heading: String,
-    val description: String?,
-    val smallPrint: String?,
-    val plans: List<Plan>
+        val heading: String,
+        val description: String?,
+        val smallPrint: String?,
+        val plans: List<Plan>
 )
 
 data class Banner(

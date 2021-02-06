@@ -1,5 +1,6 @@
 package com.ft.ftchinese.model.subscription
 
+import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.fetch.KPayMethod
 

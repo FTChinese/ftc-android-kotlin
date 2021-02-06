@@ -4,7 +4,7 @@ import android.text.format.DateFormat
 import com.beust.klaxon.Json
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.tracking.*
 import org.jetbrains.anko.AnkoLogger
 import java.util.*

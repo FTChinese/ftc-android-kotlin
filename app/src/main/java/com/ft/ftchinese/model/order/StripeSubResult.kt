@@ -1,8 +1,8 @@
 package com.ft.ftchinese.model.order
 
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.subscription.Cycle
-import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KDateTime
 import com.ft.ftchinese.model.fetch.KStripeSubStatus
