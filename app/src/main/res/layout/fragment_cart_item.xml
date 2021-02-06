@@ -28,56 +28,51 @@
             android:gravity="center">
 
             <TextView
-                style="@style/OrigamiText.ProductHeading1.Center"
+                style="@style/OrigamiText.ProductHeading2.Center"
                 android:id="@+id/tv_plan_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{cart.planName}"
+                android:text="@{cart.productName}"
                 android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textColor="@color/colorBlack"
-                android:textSize="36sp"
-                android:textStyle="bold" />
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_horizontal"
-                android:visibility="@{cart.payable == null ? View.GONE : View.VISIBLE}">
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="@{cart.payablePrice == null ? View.GONE : View.VISIBLE}">
 
                 <TextView
-                    style="@style/OrigamiText.Body1.Center"
+                    style="@style/OrigamiText.Body1.Light.Center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:text="@{cart.payable.currencySymbol}"/>
+                    android:text="@{cart.payablePrice.currencySymbol}"/>
                 <TextView
                     style="@style/OrigamiText.ProductHeading1.Center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:text="@{cart.payable.amount}"/>
+                    android:text="@{cart.payablePrice.amount}"/>
                 <TextView
-                    style="@style/OrigamiText.Body1.Center"
+                    style="@style/OrigamiText.Body1.Light.Center"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:text="@{cart.payable.cycle}"/>
+                    android:text="@{cart.payablePrice.cycle}"/>
 
             </LinearLayout>
 
             <TextView
-                style="@style/OrigamiText.Body1.Center"
                 android:id="@+id/tv_original_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
                 android:visibility="@{cart.originalPrice == null ? View.GONE : View.VISIBLE}"
-                android:text='@{cart.originalPrice}'
-                android:textSize="18sp" />
+                android:text="@{cart.originalPrice}"
+                android:textAlignment="center"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 </layout>
