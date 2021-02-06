@@ -1,5 +1,6 @@
 package com.ft.ftchinese.repository
 
+import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*

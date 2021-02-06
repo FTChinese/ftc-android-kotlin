@@ -7,7 +7,7 @@ import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.model.enums.Tier
 import java.lang.Exception
 
 const val HOST_FTC = "www.ftchinese.com"
