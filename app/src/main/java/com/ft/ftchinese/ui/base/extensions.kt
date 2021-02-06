@@ -7,21 +7,9 @@ import android.net.NetworkInfo
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.EditText
-import com.ft.ftchinese.R
-import com.ft.ftchinese.model.subscription.Cycle
-import com.ft.ftchinese.model.subscription.Tier
 
 val Context.isConnected: Boolean
     get() = (getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager)?.activeNetworkInfo?.isConnected == true
-
-fun getCurrencySymbol(currency: String): String {
-    return when (currency) {
-        "cny" -> "¥"
-        "usd" -> "$"
-        "gbp" -> "£"
-        else -> currency.toUpperCase()
-    }
-}
 
 fun Activity.getActiveNetworkInfo(): NetworkInfo? {
     return try {
@@ -53,36 +41,6 @@ fun Activity.isActiveNetworkWifi(): Boolean {
         ConnectivityManager.TYPE_WIFI -> true
         else -> false
     }
-}
-
-/**
- * Generate human readable membership type.
- * 标准会员/年
- * 标准会员/月
- * 高级会员/年
- */
-fun formatTierCycle(ctx: Context, tier: Tier?, cycle: Cycle?): String {
-    if (tier == null || cycle == null) {
-        return ""
-    }
-
-    return ctx.getString(
-        R.string.formatter_tier_cycle,
-        ctx.getString(tier.stringRes),
-        ctx.getString(cycle.stringRes)
-    )
-}
-
-fun formatPrice(ctx: Context, currency: String?, price: Double?): String {
-    if (currency == null || price == null) {
-        return ""
-    }
-
-    return ctx.getString(
-        R.string.formatter_price,
-        getCurrencySymbol(currency),
-        price
-    )
 }
 
 // Using API 28. Unfortunately it also requires that you must increase min supported api.
