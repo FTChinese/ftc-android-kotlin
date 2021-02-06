@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.subscription
+package com.ft.ftchinese.model.enums
 
 import com.ft.ftchinese.R
 

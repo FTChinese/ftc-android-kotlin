@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.subscription
+package com.ft.ftchinese.model.enums
 
 import android.os.Parcelable
 import com.ft.ftchinese.R
