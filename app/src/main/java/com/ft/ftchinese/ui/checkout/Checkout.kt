@@ -1,13 +1,21 @@
 package com.ft.ftchinese.ui.checkout
 
 import android.content.Context
-import android.os.Parcelable
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.StrikethroughSpan
+import android.text.style.TextAppearanceSpan
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.enums.OrderKind
+import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.subscription.*
-import com.ft.ftchinese.ui.base.formatPrice
-import com.ft.ftchinese.ui.base.getCurrencySymbol
-import kotlinx.parcelize.Parcelize
+import com.ft.ftchinese.model.subscription.Plan
+import com.ft.ftchinese.model.subscription.StripePrice
+import com.ft.ftchinese.ui.formatter.formatPriceCycle
+import com.ft.ftchinese.ui.formatter.getCurrencySymbol
 
 data class CheckoutIntent(
     val orderKind: OrderKind?,
@@ -50,7 +58,7 @@ fun buildCheckoutIntent(m: Membership, e: Edition): CheckoutIntent {
                // Ali/Wx member can renew via Ali/Wx, or Stripe with remaining days put to reserved state.
                return CheckoutIntent(
                    orderKind = OrderKind.RENEW,
-                   payMethods = listOf(PayMethod.ALIPAY, PayMethod.STRIPE),
+                   payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
                    warning = "您当前会员通过支付宝/微信购买，如果选择Stripe订阅，请阅读下方注意事项"
                )
            }
@@ -128,45 +136,52 @@ data class Payable(
 )
 
 data class Cart(
-    val planName: String,
-    val originalPrice: String?,
-    val payable: Payable?,
+    val productName: String,
+    val payablePrice: Payable?,
+    val originalPrice: Spannable?,
 )
 
+/**
+ * Use spannable to style text.
+ * See https://developer.android.com/reference/android/text/style/StrikethroughSpan
+ */
 fun buildFtcCart(ctx: Context, plan: Plan): Cart {
 
-    val hasDiscount = plan.discount.isValid()
+    val item = plan.checkoutItem()
+
+    SpannableString("$258/Year").apply {
+        setSpan(TextAppearanceSpan(ctx, android.R.style.TextAppearance_Small), 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        setSpan(TextAppearanceSpan(ctx, android.R.style.TextAppearance_Small), length-2, length-1, Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+    }
 
     return Cart(
-        planName = ctx.getString(plan.tier.stringRes),
-        originalPrice = if (hasDiscount) {
-            formatPrice(
-                ctx = ctx,
-                currency = plan.currency,
-                price = plan.price
-            )
-        } else null,
-        payable = Payable(
+        productName = ctx.getString(plan.tier.stringRes),
+        payablePrice = Payable(
             currencySymbol = getCurrencySymbol(plan.currency),
-            amount = if (hasDiscount) {
-                "${plan.price - (plan.discount.priceOff ?: 0.0)}"
-            } else {
-                "${plan.price}"
-            },
-            cycle = ctx.getString(plan.cycle.stringRes)
-        )
+            amount = "${item.payablePriceParams.amount}",
+            cycle = "/${ctx.getString(plan.cycle.stringRes)}"
+        ),
+        originalPrice = if (item.discount != null) {
+            SpannableString(
+                ctx.getString(R.string.original_price) + formatPriceCycle(
+                    ctx = ctx,
+                    price = item.originalPriceParams)
+            ).apply {
+                setSpan(StrikethroughSpan(), 0, length-1, Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+            }
+        } else null,
     )
 }
 
 fun buildStripeCart(ctx: Context, price: StripePrice): Cart {
     return Cart(
-        planName = ctx.getString(price.tier.stringRes),
-        originalPrice = null,
-        payable = Payable(
+        productName = ctx.getString(price.tier.stringRes),
+        payablePrice = Payable(
             currencySymbol = getCurrencySymbol(price.currency),
             amount = "${price.unitAmount}",
             cycle = ctx.getString(price.cycle.stringRes)
-        )
+        ),
+        originalPrice = null,
     )
 }
 
