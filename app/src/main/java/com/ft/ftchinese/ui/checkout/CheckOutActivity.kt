@@ -16,6 +16,7 @@ import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCheckOutBinding
+import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.FileCache
@@ -24,7 +25,7 @@ import com.ft.ftchinese.store.PaymentManager
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.formatPrice
+import com.ft.ftchinese.ui.formatter.formatPrice
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
@@ -42,8 +43,6 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-const val EXTRA_FTC_PLAN = "extra_ftc_plan"
-const val EXTRA_FTC_CHECKOUT = "extra_ftc_checkout"
 const val EXTRA_PLAN_ID = "extra_plan_id"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -189,11 +188,9 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     private fun onSelectPayMethod() {
-        val priceText = formatPrice(
-                ctx = this,
-                currency = plan?.currency,
-                price = plan?.payableAmount()
-        )
+        val priceText = plan?.checkoutItem()?.let {
+            formatPrice(this, it.payablePriceParams)
+        }
 
         info("Payment method selected $payMethod")
 

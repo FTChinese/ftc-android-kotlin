@@ -10,7 +10,7 @@ import com.ft.ftchinese.databinding.ActivityLatestOrderBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.model.subscription.Order
-import com.ft.ftchinese.ui.base.formatTierCycle
+import com.ft.ftchinese.ui.formatter.formatTierCycle
 import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.member.OrderAdapter
 import com.ft.ftchinese.ui.member.OrderRow
