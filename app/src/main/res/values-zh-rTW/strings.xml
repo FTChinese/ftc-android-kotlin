@@ -59,14 +59,6 @@
     <string name="action_ok">确认</string>
     <string name="action_retry">重试</string>
 
-    <!-- Paywall -->
-    <string name="premium_small_print">注：所有活動門票不可折算現金、不能轉讓、不含差旅與食宿</string>
-
-    <string name="formatter_price_year">¥%1$,.2f/年</string>
-
-    <string name="formatter_price_month">¥%1$,.2f/月</string>
-
-
     <!-- Example: ¥1,998.00/年 -->
     <string name="formatter_tier_cycle">%1$s/%2$s</string>
     <string name="formatter_price">%1$s%2$,.2f</string>

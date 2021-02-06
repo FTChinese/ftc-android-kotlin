@@ -73,24 +73,19 @@
     <string name="btn_start_subscription">订阅</string>
     <string name="refresh_paywall">获取最新产品价格…</string>
     <string name="paywall_updated">数据已更新</string>
-    <!-- Example: ¥1,998.00/年 -->
-    <string name="formatter_price_year">¥%1$,.2f/年</string>
-    <string name="formatter_price_month">¥%1$,.2f/月</string>
-    <string name="formatter_price_cycle" translatable="false">¥%1$,.2f/%2$s</string>
+    <!-- Example: ¥1,998/年 -->
+    <string name="formatter_price_cycle" translatable="false">%1$s%2$,.0f/%3$s</string>
+    <!-- Example: ¥1,998.00 -->
+    <string name="formatter_price">%1$s%2$,.0f</string>
+    <!-- Example: 支付宝支付 ¥1,998.00-->
+    <string name="formatter_check_out">%1$s %2$s</string>
     <string name="original_price">原价</string>
 
     <!-- Example: 标准会员/年-->
     <string name="formatter_tier_cycle">%1$s/%2$s</string>
-    <!-- Example: ¥1,998.00 -->
-    <string name="formatter_price">%1$s%2$,.2f</string>
-
-    <!-- Example: 支付宝支付 ¥1,998.00-->
-    <string name="formatter_check_out">%1$s %2$s</string>
 
     <string name="cycle_year">年</string>
     <string name="cycle_month">月</string>
-
-    <string name="premium_small_print">注：所有活动门票不可折算现金、不能转让、不含差旅与食宿</string>
 
     <string name="vip_no_expiration">无限期</string>
 
