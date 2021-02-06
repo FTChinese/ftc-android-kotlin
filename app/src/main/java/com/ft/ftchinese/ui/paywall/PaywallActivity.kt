@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityPaywallBinding
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager

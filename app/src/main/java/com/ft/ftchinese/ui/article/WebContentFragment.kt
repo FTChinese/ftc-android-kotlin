@@ -18,7 +18,7 @@ import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.reader.denyPermission
-import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.ChromeClient

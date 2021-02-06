@@ -12,6 +12,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMemberBinding
+import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.order.StripeSubResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*

@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.member
 import android.content.Context
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.subscription.PayMethod
+import com.ft.ftchinese.model.enums.PayMethod
 
 data class MemberStatus(
     val reminder: String?, // Remind upon expiration

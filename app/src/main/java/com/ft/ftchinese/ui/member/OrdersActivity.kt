@@ -4,15 +4,17 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMyOrdersBinding
+import com.ft.ftchinese.model.fetch.formatISODateTime
 import com.ft.ftchinese.model.subscription.Order
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.model.fetch.formatISODateTime
-import com.ft.ftchinese.ui.base.*
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.formatter.formatPrice
+import com.ft.ftchinese.ui.formatter.formatTierCycle
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import org.jetbrains.anko.AnkoLogger
@@ -50,9 +52,9 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
         viewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
 
-        viewModel.ordersResult.observe(this, Observer {
+        viewModel.ordersResult.observe(this) {
             onOrdersFetch(it)
-        })
+        }
 
         if (!isConnected) {
 
@@ -90,7 +92,7 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
 
             val payMethod = getString(it.payMethod.stringRes)
 
-            val price = formatPrice(this, it.currency, it.amount)
+            val price = formatPrice(this, it.priceParams)
 
             OrderRow(
                     orderId = getString(R.string.order_id, it.id),

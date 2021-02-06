@@ -13,7 +13,7 @@ import androidx.annotation.RequiresApi
 import androidx.browser.customtabs.CustomTabsIntent
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.*
-import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.GAAction
