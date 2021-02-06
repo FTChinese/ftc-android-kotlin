@@ -6,7 +6,7 @@ import androidx.core.os.bundleOf
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.subscription.PayMethod
+import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.splash.ScreenAd
 import com.google.android.gms.analytics.GoogleAnalytics

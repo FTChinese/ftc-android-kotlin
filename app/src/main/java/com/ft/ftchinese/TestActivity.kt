@@ -19,6 +19,10 @@ import androidx.work.WorkRequest
 import com.ft.ftchinese.databinding.ActivityTestBinding
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.OrderKind
+import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.subscription.*

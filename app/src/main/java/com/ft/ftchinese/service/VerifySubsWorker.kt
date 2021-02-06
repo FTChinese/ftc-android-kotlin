@@ -11,7 +11,7 @@ import androidx.work.WorkerParameters
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.subscription.PayMethod
+import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
