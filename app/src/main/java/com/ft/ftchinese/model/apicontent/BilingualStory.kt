@@ -1,23 +1,23 @@
 package com.ft.ftchinese.model.apicontent
 
-import com.ft.ftchinese.model.subscription.Tier
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KDateTime
 import com.ft.ftchinese.model.fetch.KTier
 import org.threeten.bp.ZonedDateTime
 
 data class Related (
-    val id: String,
-    val type: String,
-    @KDateTime
+        val id: String,
+        val type: String,
+        @KDateTime
     val createdAt: ZonedDateTime? = null,
 
-    @KDateTime
+        @KDateTime
     val updatedAt: ZonedDateTime? = null,
 
-    @KTier
+        @KTier
     val tier: Tier? = null,
 
-    val title: String
+        val title: String
 )
 
 data class BilingualStory(
