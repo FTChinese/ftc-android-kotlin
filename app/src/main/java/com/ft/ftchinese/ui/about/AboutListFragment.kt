@@ -6,12 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.legal.legalDocs
-import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
+import com.ft.ftchinese.ui.lists.TwoLineItemViewHolder
 
 class AboutListFragment : Fragment() {
 
@@ -25,25 +24,21 @@ class AboutListFragment : Fragment() {
             layoutManager = LinearLayoutManager(context).apply {
                 orientation = LinearLayoutManager.VERTICAL
             }
-            addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             adapter = ListAdapter()
         }
         return view
     }
 
-    inner class ListAdapter : RecyclerView.Adapter<SingleLineItemViewHolder>() {
+    inner class ListAdapter : RecyclerView.Adapter<TwoLineItemViewHolder>() {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SingleLineItemViewHolder {
-            return SingleLineItemViewHolder.create(parent).apply {
-                setPadding(
-                    resources.getDimension(R.dimen.space_medium).toInt(),
-                )
-            }
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TwoLineItemViewHolder {
+            return TwoLineItemViewHolder.create(parent)
         }
 
-        override fun onBindViewHolder(holder: SingleLineItemViewHolder, position: Int) {
-            holder.icon.visibility = View.GONE
-            holder.text.text = legalDocs[position].title
+        override fun onBindViewHolder(holder: TwoLineItemViewHolder, position: Int) {
+            holder.setLeadingIcon(null)
+            holder.setPrimaryText(legalDocs[position].title)
+            holder.setSecondaryText(null)
 
             holder.itemView.setOnClickListener {
                 val action = AboutListFragmentDirections
