@@ -4,7 +4,7 @@ import android.content.Context
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.ui.Price
+import com.ft.ftchinese.model.ui.PriceParams
 import java.util.*
 
 fun getCurrencySymbol(currency: String): String {
@@ -36,7 +36,7 @@ fun formatTierCycle(ctx: Context, tier: Tier?, cycle: Cycle?): String {
     )
 }
 
-fun formatPrice(ctx: Context, price: Price): String {
+fun formatPrice(ctx: Context, price: PriceParams): String {
     return ctx.getString(
         R.string.formatter_price,
         getCurrencySymbol(price.currency),
@@ -47,7 +47,7 @@ fun formatPrice(ctx: Context, price: Price): String {
 /**
  * Produce a string like ¥1,998/年
  */
-fun formatPriceCycle(ctx: Context, price: Price): String {
+fun formatPriceCycle(ctx: Context, price: PriceParams): String {
     return ctx.getString(
         R.string.formatter_price_cycle,
         getCurrencySymbol(price.currency),
