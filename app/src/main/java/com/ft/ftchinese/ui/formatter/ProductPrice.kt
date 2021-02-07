@@ -4,15 +4,15 @@ import android.content.Context
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.subscription.Plan
 
-data class PlanPrice(
+data class ProductPrice(
     val payable: String,         // The actually charged amount
     val original: String?, // The original price if discount exists.
 )
 
-fun buildFtcPrice(ctx: Context, plan: Plan): PlanPrice {
+fun buildFtcPrice(ctx: Context, plan: Plan): ProductPrice {
     val item = plan.checkoutItem()
 
-    return PlanPrice(
+    return ProductPrice(
         payable = formatPriceCycle(
             ctx = ctx,
             price = item.originalPriceParams),
