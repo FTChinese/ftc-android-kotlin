@@ -66,6 +66,7 @@ class CheckOutActivity : ScopedAppActivity(),
     // Payment method use selected.
     private var payMethod: PayMethod? = null
 
+    // TODO: use CheckoutItem.
     private var plan: Plan? = null
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -163,7 +164,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
         binding.intent = checkoutIntent
 
-        cartViewModel.cartCreated.value = buildFtcCart(this, plan)
+        cartViewModel.cartCreated.value = buildFtcCart(this, plan.checkoutItem)
 
         requestPermission()
 
@@ -188,7 +189,7 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     private fun onSelectPayMethod() {
-        val priceText = plan?.checkoutItem()?.let {
+        val priceText = plan?.checkoutItem?.let {
             formatPrice(this, it.payablePriceParams)
         }
 
