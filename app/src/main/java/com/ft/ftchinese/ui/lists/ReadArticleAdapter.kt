@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.base
+package com.ft.ftchinese.ui.lists
 
 import android.view.LayoutInflater
 import android.view.View
