@@ -15,8 +15,7 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.formatter.buildPlanPrice
-import com.ft.ftchinese.ui.formatter.formatPriceCycle
+import com.ft.ftchinese.ui.formatter.buildFtcPrice
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import org.jetbrains.anko.AnkoLogger
 
@@ -127,7 +126,7 @@ class ProductFragment : ScopedFragment(),
         override fun onBindViewHolder(holder: PriceItemViewHolder, position: Int) {
             val plan = plans[position]
 
-            val price = buildPlanPrice(requireContext(), plan)
+            val price = buildFtcPrice(requireContext(), plan)
 
             if (price.original != null) {
                 holder.text.text = price.original

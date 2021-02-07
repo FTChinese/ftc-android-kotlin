@@ -3,14 +3,13 @@ package com.ft.ftchinese.ui.formatter
 import android.content.Context
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.subscription.Plan
-import com.ft.ftchinese.ui.formatter.formatPriceCycle
 
 data class PlanPrice(
     val payable: String,         // The actually charged amount
     val original: String?, // The original price if discount exists.
 )
 
-fun buildPlanPrice(ctx: Context, plan: Plan): PlanPrice {
+fun buildFtcPrice(ctx: Context, plan: Plan): PlanPrice {
     val item = plan.checkoutItem()
 
     return PlanPrice(
