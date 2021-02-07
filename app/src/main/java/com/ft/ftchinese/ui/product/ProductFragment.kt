@@ -60,7 +60,7 @@ class ProductFragment : ScopedFragment(),
                 orientation = LinearLayoutManager.VERTICAL
             }
             addItemDecoration(MarginItemDecoration(
-                topBottom = resources.getDimension(R.dimen.space_small).toInt(),
+                topBottom = resources.getDimension(R.dimen.space_8).toInt(),
                 leftRight = 0
             ))
             adapter = descListAdapter
