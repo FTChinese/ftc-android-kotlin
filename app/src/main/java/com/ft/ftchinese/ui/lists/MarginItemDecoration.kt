@@ -5,6 +5,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 
 /**
+ * Add margins to recycler view item.
  * See https://medium.com/mobile-app-development-publication/right-way-of-setting-margin-on-recycler-views-cell-319da259b641
  */
 class MarginItemDecoration(
