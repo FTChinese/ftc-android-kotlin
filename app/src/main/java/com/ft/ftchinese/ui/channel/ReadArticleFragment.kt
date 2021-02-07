@@ -10,8 +10,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
-import com.ft.ftchinese.ui.base.ReadArticleAdapter
+import com.ft.ftchinese.ui.lists.ReadArticleAdapter
 import org.jetbrains.anko.AnkoLogger
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -41,6 +42,7 @@ class ReadArticleFragment : ScopedFragment(),
         view.findViewById<RecyclerView>(R.id.recycler_view)?.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = viewAdapter
+            addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.space_8).toInt()))
         }
     }
 

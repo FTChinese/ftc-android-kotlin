@@ -10,8 +10,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.viewmodel.StarArticleViewModel
-import com.ft.ftchinese.ui.base.StarredArticleAdapter
+import com.ft.ftchinese.ui.lists.StarredArticleAdapter
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -51,6 +52,7 @@ class StarredArticleFragment : ScopedFragment(),
         rv?.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = viewAdapter
+            addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.space_8).toInt()))
         }
 
         info("onCreateView")
