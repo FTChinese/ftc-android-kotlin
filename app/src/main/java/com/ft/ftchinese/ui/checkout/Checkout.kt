@@ -4,7 +4,7 @@ import android.content.Context
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
-import android.text.style.StrikethroughSpan
+import android.text.style.RelativeSizeSpan
 import android.text.style.TextAppearanceSpan
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Edition
@@ -12,10 +12,10 @@ import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.subscription.Plan
+import com.ft.ftchinese.model.subscription.CheckoutItem
 import com.ft.ftchinese.model.subscription.StripePrice
-import com.ft.ftchinese.ui.formatter.formatPriceCycle
-import com.ft.ftchinese.ui.formatter.getCurrencySymbol
+import com.ft.ftchinese.ui.formatter.buildFtcPrice
+import com.ft.ftchinese.ui.formatter.buildStripePrice
 
 data class CheckoutIntent(
     val orderKind: OrderKind?,
@@ -129,59 +129,38 @@ fun buildCheckoutIntent(m: Membership, e: Edition): CheckoutIntent {
     )
 }
 
-data class Payable(
-    val currencySymbol: String,
-    val amount: String,
-    val cycle: String
-)
-
 data class Cart(
     val productName: String,
-    val payablePrice: Payable?,
+    val payablePrice: Spannable?,
     val originalPrice: Spannable?,
 )
 
-/**
- * Use spannable to style text.
- * See https://developer.android.com/reference/android/text/style/StrikethroughSpan
- */
-fun buildFtcCart(ctx: Context, plan: Plan): Cart {
 
-    val item = plan.checkoutItem()
+fun buildFtcCart(ctx: Context, item: CheckoutItem): Cart {
 
     SpannableString("$258/Year").apply {
         setSpan(TextAppearanceSpan(ctx, android.R.style.TextAppearance_Small), 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
         setSpan(TextAppearanceSpan(ctx, android.R.style.TextAppearance_Small), length-2, length-1, Spanned.SPAN_INCLUSIVE_INCLUSIVE)
     }
 
+    val price = buildFtcPrice(ctx, item)
+
     return Cart(
-        productName = ctx.getString(plan.tier.stringRes),
-        payablePrice = Payable(
-            currencySymbol = getCurrencySymbol(plan.currency),
-            amount = "${item.payablePriceParams.amount}",
-            cycle = "/${ctx.getString(plan.cycle.stringRes)}"
-        ),
-        originalPrice = if (item.discount != null) {
-            SpannableString(
-                ctx.getString(R.string.original_price) + formatPriceCycle(
-                    ctx = ctx,
-                    price = item.originalPriceParams)
-            ).apply {
-                setSpan(StrikethroughSpan(), 0, length-1, Spanned.SPAN_INCLUSIVE_INCLUSIVE)
-            }
-        } else null,
+        productName = ctx.getString(item.plan.tier.stringRes),
+        payablePrice = SpannableString(price.payable).apply {
+            setSpan(RelativeSizeSpan(2f), 1, length-2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        },
+        originalPrice = price.original,
     )
 }
 
-fun buildStripeCart(ctx: Context, price: StripePrice): Cart {
+fun buildStripeCart(ctx: Context, sp: StripePrice): Cart {
+    val price = buildStripePrice(ctx, sp.priceParams)
+
     return Cart(
-        productName = ctx.getString(price.tier.stringRes),
-        payablePrice = Payable(
-            currencySymbol = getCurrencySymbol(price.currency),
-            amount = "${price.unitAmount}",
-            cycle = ctx.getString(price.cycle.stringRes)
-        ),
-        originalPrice = null,
+        productName = ctx.getString(sp.tier.stringRes),
+        payablePrice = SpannableString(price.payable),
+        originalPrice = price.original,
     )
 }
 
@@ -189,7 +168,7 @@ fun getOrderKindText(ctx: Context, kind: OrderKind): String {
     val strRes = when (kind) {
         OrderKind.RENEW -> R.string.title_renewal
         OrderKind.UPGRADE -> R.string.title_upgrade
-        else -> R.string.title_checkout
+        else -> R.string.title_new_subs
     }
 
     return ctx.getString(strRes)
