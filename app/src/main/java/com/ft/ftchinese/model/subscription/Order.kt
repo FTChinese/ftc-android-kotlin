@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.*
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.ui.Price
+import com.ft.ftchinese.model.ui.PriceParams
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.temporal.ChronoUnit
@@ -67,11 +67,12 @@ data class Order(
     var endDate: LocalDate? = null
 ) {
 
-    val priceParams: Price
-        get() = Price(
+    val priceParams: PriceParams
+        get() = PriceParams(
             currency = currency,
             amount = amount,
             cycle = cycle,
+            tier = tier,
         )
 
     fun isConfirmed(): Boolean {

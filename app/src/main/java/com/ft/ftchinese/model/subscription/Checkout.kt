@@ -2,26 +2,28 @@ package com.ft.ftchinese.model.subscription
 
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.fetch.KOrderUsage
-import com.ft.ftchinese.model.ui.Price
+import com.ft.ftchinese.model.ui.PriceParams
 
 data class CheckoutItem(
     val plan: Plan,
     val discount: Discount? = null, // A discount attached to the Plan but only valid for current moment.
 ) {
     // Parameters to build the original price.
-    val originalPriceParams: Price
-        get() = Price(
+    val originalPriceParams: PriceParams
+        get() = PriceParams(
             currency = plan.currency,
             amount = plan.price,
             cycle = plan.cycle,
+            tier = plan.tier,
         )
 
-    // Parameters to build paywable price after deducting discount.
-    val payablePriceParams: Price
-        get() = Price(
+    // Parameters to build payable price after deducting discount.
+    val payablePriceParams: PriceParams
+        get() = PriceParams(
             currency = plan.currency,
             amount = plan.price - (discount?.priceOff ?: 0.0),
             cycle = plan.cycle,
+            tier = plan.tier
         )
 }
 

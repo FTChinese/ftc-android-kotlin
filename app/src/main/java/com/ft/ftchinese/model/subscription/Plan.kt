@@ -29,19 +29,13 @@ data class Plan(
     val edition: Edition
         get() = Edition(tier, cycle)
 
-    fun checkoutItem(): CheckoutItem {
-        if (!discount.isValid()) {
-            return CheckoutItem(
-                plan = this,
-                discount = null,
-            )
-        }
-
-        return CheckoutItem(
+    val checkoutItem: CheckoutItem
+        get() = CheckoutItem(
             plan = this,
-            discount = discount,
+            discount = if (discount.isValid()) {
+                discount
+            } else null
         )
-    }
 
     fun payableAmount(): Double {
         if (!discount.isValid()) {
