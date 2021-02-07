@@ -8,15 +8,14 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentFtcAccountBinding
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.ui.lists.AccountAdapter
-import com.ft.ftchinese.ui.lists.AccountRow
-import com.ft.ftchinese.ui.lists.AccountRowType
+import com.ft.ftchinese.ui.lists.TwoLineItemViewHolder
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import org.jetbrains.anko.AnkoLogger
@@ -30,7 +29,7 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var binding: FragmentFtcAccountBinding
 
-    private var viewAdapter: AccountAdapter? = null
+    private var listAdapter: ListAdapter = ListAdapter()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -48,12 +47,10 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
 
         val layout = LinearLayoutManager(context)
 
-        viewAdapter = AccountAdapter()
-
         binding.accountListRv.apply {
             setHasFixedSize(true)
             layoutManager = layout
-            adapter = viewAdapter
+            adapter = listAdapter
         }
 
         updateUI()
@@ -61,65 +58,55 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
 
     override fun onResume() {
         super.onResume()
-
-        if (viewAdapter == null) {
-            viewAdapter = AccountAdapter()
-            binding.accountListRv.adapter = viewAdapter
-        } else {
-            updateUI()
-        }
+        updateUI()
     }
 
     private fun updateUI() {
-        viewAdapter?.apply {
-            setItems(buildRows())
-            notifyDataSetChanged()
-        }
+        listAdapter.setData(buildRows())
     }
 
     private fun buildRows(): List<AccountRow> {
         val account = sessionManager.loadAccount() ?: return listOf()
 
-
         return listOf(
-                AccountRow(
-                        id = AccountRowType.EMAIL,
+            AccountRow(
+                id = AccountRowType.EMAIL,
 
-                        primary = if (account.isVerified) getString(R.string.label_email) else getString(R.string.email_not_verified),
-                        secondary = if (account.email.isNotBlank()) {
-                            account.email
-                        } else {
-                            getString(R.string.default_not_set)
-                        }
-                ),
-                AccountRow(
-                        id = AccountRowType.USER_NAME,
-                        primary = getString(R.string.label_user_name),
-                        secondary = if (account.userName.isNullOrBlank()) {
-                            getString(R.string.default_not_set)
-                        } else {
-                            account.userName
-                        }
-                ),
-                AccountRow(
-                        id = AccountRowType.PASSWORD,
-                        primary = getString(R.string.label_password),
-                        secondary = "********"
-                ),
-                AccountRow(
-                        id = AccountRowType.STRIPE,
-                        primary = "Stripe钱包",
-                        secondary = "添加银行卡或设置默认支付方式"
-                ),
-                AccountRow(
-                        id = AccountRowType.WECHAT,
-                        primary = getString(R.string.label_wechat),
-                        secondary = if (account.isLinked) {
-                            getString(R.string.action_bound_account)
-                        } else {
-                            getString(R.string.action_bind_account)
-                        }
-                )
+                primary = if (account.isVerified) getString(R.string.label_email) else getString(R.string.email_not_verified),
+                secondary = if (account.email.isNotBlank()) {
+                    account.email
+                } else {
+                    getString(R.string.default_not_set)
+                }
+            ),
+            AccountRow(
+                id = AccountRowType.USER_NAME,
+                primary = getString(R.string.label_user_name),
+                secondary = if (account.userName.isNullOrBlank()) {
+                    getString(R.string.default_not_set)
+                } else {
+                    account.userName
+                }
+            ),
+            AccountRow(
+                id = AccountRowType.PASSWORD,
+                primary = getString(R.string.label_password),
+                secondary = "********"
+            ),
+            AccountRow(
+                id = AccountRowType.STRIPE,
+                primary = "Stripe钱包",
+                secondary = "添加银行卡或设置默认支付方式"
+            ),
+            AccountRow(
+                id = AccountRowType.WECHAT,
+                primary = getString(R.string.label_wechat),
+                secondary = if (account.isLinked) {
+                    getString(R.string.action_bound_account)
+                } else {
+                    getString(R.string.action_bind_account)
+                }
+            )
         )
     }
 
@@ -178,6 +165,39 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
                 }
                 updateUI()
             }
+        }
+    }
+
+    inner class ListAdapter : RecyclerView.Adapter<TwoLineItemViewHolder>() {
+        private var rows = listOf<AccountRow>()
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TwoLineItemViewHolder {
+            return TwoLineItemViewHolder.create(parent)
+        }
+
+        override fun onBindViewHolder(holder: TwoLineItemViewHolder, position: Int) {
+            val item = rows[position]
+
+            holder.setLeadingIcon(null)
+            holder.setPrimaryText(item.primary)
+            holder.setSecondaryText(item.secondary)
+
+            holder.itemView.setOnClickListener {
+                when (item.id) {
+                    AccountRowType.EMAIL,
+                    AccountRowType.PASSWORD,
+                    AccountRowType.USER_NAME -> UpdateActivity.start(requireContext(), item.id)
+                    AccountRowType.STRIPE -> CustomerActivity.start(context)
+                    AccountRowType.WECHAT -> WxInfoActivity.start(requireContext())
+                }
+            }
+        }
+
+        override fun getItemCount() = rows.size
+
+        fun setData(items: List<AccountRow>) {
+            this.rows = items
+            notifyDataSetChanged()
         }
     }
 
