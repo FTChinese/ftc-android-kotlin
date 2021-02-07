@@ -13,6 +13,18 @@ class SingleLineItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val text: TextView = view.findViewById(R.id.list_item_text)
     val disclosure: ImageView = view.findViewById(R.id.list_item_disclosure)
 
+    fun setPadding(space: Int) {
+        itemView.setPadding(space, space, space, space)
+    }
+
+    fun setPadding(leftRight: Int, topBottom: Int) {
+        itemView.setPadding(leftRight, topBottom, leftRight, topBottom)
+    }
+
+    fun setPadding(left: Int, top: Int, right: Int, bottom: Int) {
+        itemView.setPadding(left, top, right, bottom)
+    }
+
     companion object {
         fun create(parent: ViewGroup): SingleLineItemViewHolder {
             return SingleLineItemViewHolder(LayoutInflater
