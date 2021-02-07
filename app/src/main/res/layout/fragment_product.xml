@@ -24,7 +24,7 @@
 
             <TextView
                 android:id="@+id/product_heading_tv"
-                style="@style/OrigamiText.ProductHeading1.Center"
+                style="@style/OrigamiText.Heading1.Center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@{product.heading}"
