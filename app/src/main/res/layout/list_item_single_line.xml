@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="?attr/selectableItemBackground"
-    android:minHeight="?attr/minTouchTargetSize">
+    android:background="?attr/selectableItemBackground">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/list_item_icon"
