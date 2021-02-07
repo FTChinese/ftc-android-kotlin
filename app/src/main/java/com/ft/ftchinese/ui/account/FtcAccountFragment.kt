@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
@@ -39,7 +38,7 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_ftc_account, container, false)
         return binding.root
     }
@@ -132,9 +131,9 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
                     .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        accountViewModel.accountRefreshed.observe(viewLifecycleOwner, Observer {
+        accountViewModel.accountRefreshed.observe(viewLifecycleOwner) {
             onAccountRefreshed(it)
-        })
+        }
 
         binding.swipeRefresh.setOnRefreshListener {
             if (context?.isConnected != true) {
