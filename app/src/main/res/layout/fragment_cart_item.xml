@@ -28,43 +28,17 @@
             android:gravity="center">
 
             <TextView
-                style="@style/OrigamiText.ProductHeading2.Center"
+                style="@style/OrigamiText.Body1.Light.Center"
                 android:id="@+id/tv_plan_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{cart.productName}"
-                android:textAlignment="center"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"/>
+                android:text="@{cart.productName}" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                style="@style/OrigamiText.Body1.Center"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:visibility="@{cart.payablePrice == null ? View.GONE : View.VISIBLE}">
-
-                <TextView
-                    style="@style/OrigamiText.Body1.Light.Center"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:text="@{cart.payablePrice.currencySymbol}"/>
-                <TextView
-                    style="@style/OrigamiText.ProductHeading1.Center"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:text="@{cart.payablePrice.amount}"/>
-                <TextView
-                    style="@style/OrigamiText.Body1.Light.Center"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:text="@{cart.payablePrice.cycle}"/>
-
-            </LinearLayout>
+                android:text="@{cart.payablePrice}"/>
 
             <TextView
                 android:id="@+id/tv_original_price"
