@@ -16,6 +16,7 @@ import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.formatter.buildFtcPrice
+import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import org.jetbrains.anko.AnkoLogger
 
@@ -46,19 +47,23 @@ class ProductFragment : ScopedFragment(),
                               savedInstanceState: Bundle?): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_product, container, false)
 
-        binding.rvProdDesc.apply {
-            layoutManager = LinearLayoutManager(context).apply {
-                orientation = LinearLayoutManager.VERTICAL
-            }
-            adapter = descListAdapter
-        }
-
         binding.rvProdPrice.apply {
             layoutManager = LinearLayoutManager(context)
                 .apply {
                     orientation = LinearLayoutManager.VERTICAL
                 }
             adapter = priceListAdapter
+        }
+
+        binding.rvProdDesc.apply {
+            layoutManager = LinearLayoutManager(context).apply {
+                orientation = LinearLayoutManager.VERTICAL
+            }
+            addItemDecoration(MarginItemDecoration(
+                topBottom = resources.getDimension(R.dimen.space_small).toInt(),
+                leftRight = 0
+            ))
+            adapter = descListAdapter
         }
 
         return binding.root
@@ -126,7 +131,7 @@ class ProductFragment : ScopedFragment(),
         override fun onBindViewHolder(holder: PriceItemViewHolder, position: Int) {
             val plan = plans[position]
 
-            val price = buildFtcPrice(requireContext(), plan)
+            val price = buildFtcPrice(requireContext(), plan.checkoutItem)
 
             if (price.original != null) {
                 holder.text.text = price.original
