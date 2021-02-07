@@ -108,20 +108,27 @@
 
 
     <!-- 34sp text as product heading -->
-    <style name="OrigamiText.ProductHeading1" parent="TextAppearance.MaterialComponents.Headline4"/>
-    <style name="OrigamiText.ProductHeading1.Center">
+    <style name="OrigamiText.Heading1" parent="TextAppearance.MaterialComponents.Headline4"/>
+    <style name="OrigamiText.Heading1.Center">
         <item name="android:textAlignment">center</item>
     </style>
 
     <!-- 24 sp text as product heading -->
-    <style name="OrigamiText.ProductHeading2" parent="TextAppearance.MaterialComponents.Headline5"/>
-    <style name="OrigamiText.ProductHeading2.Center">
+    <style name="OrigamiText.Heading2" parent="TextAppearance.MaterialComponents.Headline5"/>
+    <style name="OrigamiText.Heading2.Light">
+        <item name="android:textColor">@color/colorBlack60</item>
+    </style>
+    <style name="OrigamiText.Heading2.Center">
         <item name="android:textAlignment">center</item>
     </style>
 
+
     <!-- 20 sp text as product heading -->
-    <style name="OrigamiText.ProductHeading3" parent="TextAppearance.MaterialComponents.Headline6"/>
-    <style name="OrigamiText.ProductHeading3.Center">
+    <style name="OrigamiText.Heading3" parent="TextAppearance.MaterialComponents.Headline6"/>
+    <style name="OrigamiText.Heading3.Light">
+        <item name="android:textColor">@color/colorBlack60</item>
+    </style>
+    <style name="OrigamiText.Heading3.Center">
         <item name="android:textAlignment">center</item>
     </style>
 

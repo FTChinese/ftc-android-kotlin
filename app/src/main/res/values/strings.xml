@@ -45,7 +45,7 @@
     <string name="title_change_email">修改登录邮箱</string>
     <string name="title_change_username">修改用户名</string>
     <string name="title_about_us">关于我们</string>
-    <string name="title_checkout">支付</string>
+    <string name="title_new_subs">订阅</string>
     <string name="title_renewal">会员续订</string>
     <string name="title_upgrade">会员升级</string>
     <string name="title_wxpay">微信支付 </string>

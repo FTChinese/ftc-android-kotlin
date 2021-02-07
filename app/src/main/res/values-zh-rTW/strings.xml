@@ -35,7 +35,6 @@
     <string name="title_change_email">修改登入信箱</string>
     <string name="title_change_username">修改使用者名稱</string>
     <string name="title_about_us">關於我們</string>
-    <string name="title_checkout">支付</string>
     <string name="title_renewal">會員續訂</string>
     <string name="title_upgrade">會員升级</string>
     <string name="title_wxpay">微信支付 </string>
@@ -506,5 +505,6 @@
     <string name="stripe_cancel">取消Stripe订阅</string>
     <string name="stripe_refresh_success">Stripe订阅已更新</string>
     <string name="iap_refresh_success">App Store订阅以已更新</string>
+    <string name="title_new_subs">订阅</string>
 
 </resources>
