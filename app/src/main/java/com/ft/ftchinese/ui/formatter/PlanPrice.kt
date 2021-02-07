@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.product
+package com.ft.ftchinese.ui.formatter
 
 import android.content.Context
 import com.ft.ftchinese.R

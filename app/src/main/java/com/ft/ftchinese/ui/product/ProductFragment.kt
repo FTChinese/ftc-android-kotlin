@@ -15,6 +15,7 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.formatter.buildPlanPrice
 import com.ft.ftchinese.ui.formatter.formatPriceCycle
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import org.jetbrains.anko.AnkoLogger
@@ -32,13 +33,6 @@ class ProductFragment : ScopedFragment(),
      * Current product and its plans.
      */
     private var product: Product? = null
-
-    /**
-     * The pricing plans for current product is stored as a map so that
-     * when use clicked we can find out which price is clicked and tells
-     * host activity what to do next.
-     */
-//    private val plans = mutableMapOf<Cycle, Plan>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
