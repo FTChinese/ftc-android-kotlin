@@ -54,7 +54,7 @@
 
                 <TextView
                     android:id="@+id/tv_card_brand"
-                    style="@style/OrigamiText.ProductHeading3"
+                    style="@style/OrigamiText.Heading3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"

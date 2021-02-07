@@ -23,7 +23,7 @@
 
         <TextView
             android:id="@+id/heading_tv"
-            style="@style/OrigamiText.ProductHeading2.Center"
+            style="@style/OrigamiText.Heading2.Center"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"

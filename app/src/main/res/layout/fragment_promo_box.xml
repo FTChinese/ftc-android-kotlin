@@ -17,7 +17,7 @@
         android:background="@color/colorBlack90">
 
         <TextView
-            style="@style/OrigamiText.ProductHeading2.Center"
+            style="@style/OrigamiText.Heading2.Center"
             android:id="@+id/promo_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -30,7 +30,7 @@
             app:layout_constraintBottom_toTopOf="@id/promo_subheading"/>
 
         <TextView
-            style="@style/OrigamiText.ProductHeading3.Center"
+            style="@style/OrigamiText.Heading3.Center"
             android:id="@+id/promo_subheading"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

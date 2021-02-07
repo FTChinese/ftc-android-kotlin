@@ -31,7 +31,7 @@
                 android:layout_height="wrap_content">
 
                 <TextView
-                    style="@style/OrigamiText.ProductHeading3.Center"
+                    style="@style/OrigamiText.Heading3.Center"
                     android:id="@+id/heading_tv"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

@@ -21,7 +21,7 @@
             layout="@layout/simple_toolbar" />
 
         <TextView
-            style="@style/OrigamiText.ProductHeading3.Center"
+            style="@style/OrigamiText.Heading3.Center"
             android:id="@+id/unlink_guide"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

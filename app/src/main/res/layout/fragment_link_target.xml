@@ -30,7 +30,7 @@
                 app:layout_constraintBottom_toTopOf="@id/tv_link_member_tier"/>
 
             <TextView
-                style="@style/OrigamiText.ProductHeading2.Center"
+                style="@style/OrigamiText.Heading2.Center"
                 android:id="@+id/tv_link_member_tier"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

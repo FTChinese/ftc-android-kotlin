@@ -39,7 +39,7 @@
             <TextView
                 android:id="@+id/wx_nickname"
                 android:text="@{account.wechat.nickname}"
-                style="@style/OrigamiText.ProductHeading3.Center"
+                style="@style/OrigamiText.Heading3.Center"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"

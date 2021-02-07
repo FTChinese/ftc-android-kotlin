@@ -2,5 +2,5 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:textAppearance="@style/OrigamiText.ProductHeading2"
+    android:textAppearance="@style/OrigamiText.Heading2"
     android:padding="16dp"/>
