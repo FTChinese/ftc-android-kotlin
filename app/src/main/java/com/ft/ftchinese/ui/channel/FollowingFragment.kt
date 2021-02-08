@@ -5,12 +5,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.content.Following
+import com.ft.ftchinese.model.content.FollowingManager
+import com.ft.ftchinese.model.content.buildFollowChannel
+import com.ft.ftchinese.ui.lists.CardItemViewHolder
 import org.jetbrains.anko.AnkoLogger
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -56,30 +58,22 @@ class FollowingFragment : Fragment(), AnkoLogger {
         fun newInstance() = FollowingFragment()
     }
 
-    inner class ViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
-        val primaryText: TextView = itemView.findViewById(R.id.primary_text_view)
-        val secondaryText: TextView = itemView.findViewById(R.id.secondary_text_view)
-    }
-
-    inner class Adapter(var mFollows: List<Following>) : androidx.recyclerview.widget.RecyclerView.Adapter<ViewHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+    inner class Adapter(var mFollows: List<Following>) : RecyclerView.Adapter<CardItemViewHolder>() {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardItemViewHolder {
             val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.card_primary_secondary, parent, false)
-            return ViewHolder(view)
+                    .inflate(R.layout.list_item_card, parent, false)
+            return CardItemViewHolder.create(parent)
         }
 
-        override fun getItemCount(): Int {
-            return mFollows.size
-        }
+        override fun getItemCount() = mFollows.size
 
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: CardItemViewHolder, position: Int) {
             val item = mFollows[position]
 
-            holder.primaryText.text = item.tag
-            holder.secondaryText.visibility = View.GONE
+            holder.setPrimaryText(item.tag)
+            holder.setSecondaryText(null)
 
             holder.itemView.setOnClickListener {
-
                 ChannelActivity.start(context, buildFollowChannel(item))
             }
         }
