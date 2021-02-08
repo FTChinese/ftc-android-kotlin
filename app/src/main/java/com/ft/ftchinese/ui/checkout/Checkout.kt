@@ -5,7 +5,6 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
-import android.text.style.TextAppearanceSpan
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.enums.OrderKind
