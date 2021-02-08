@@ -40,6 +40,52 @@ fun buildCheckoutIntent(m: Membership, e: Edition): CheckoutIntent {
         )
     }
 
+    when (m.payMethod) {
+        PayMethod.ALIPAY, PayMethod.WXPAY -> {
+            // Renewal
+            if (m.tier == e.tier) {
+                // For alipay and wxpay, allow user to renew if
+                // remaining days not exceeding 3 years.
+                if (!m.withinAliWxRenewalPeriod()) {
+                    return CheckoutIntent(
+                        orderKind = OrderKind.RENEW,
+                        payMethods = listOf(),
+                        warning = "剩余时间超出允许的最长续订期限",
+                    )
+                }
+                // Ali/Wx member can renew via Ali/Wx, or Stripe with remaining days put to reserved state.
+                return CheckoutIntent(
+                    orderKind = OrderKind.RENEW,
+                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
+                    warning = "您当前会员通过支付宝/微信购买，如果选择Stripe订阅，当前会员的剩余时间将留待Stripe订阅失效后继续使用启用。"
+                )
+            }
+
+            // Current membership's tier differs from the selected one.
+            // This is an Upgrade action if standard user selected premium product.
+            if (e.tier == Tier.PREMIUM) {
+                return CheckoutIntent(
+                    orderKind = OrderKind.UPGRADE,
+                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
+                    warning = "升级高端会员即可启用，标准版的剩余时间将在高端版失效后继续使用。",
+                )
+            }
+
+            // A premium user selected standard product. The purchase should be treated as AddOn.
+            return CheckoutIntent(
+                orderKind = OrderKind.ADD_ON,
+                payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
+                warning = "您当前是高端会员，可以使用支付宝/微信购买标准版，将在高端版失效后启用。",
+            )
+        }
+        PayMethod.STRIPE -> {
+
+        }
+        PayMethod.APPLE -> {
+
+        }
+    }
+
     // Renewal
     if (m.tier == e.tier) {
        when (m.payMethod) {
