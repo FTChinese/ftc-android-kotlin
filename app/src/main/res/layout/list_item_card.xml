@@ -10,10 +10,10 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="@dimen/space_16">
 
         <TextView
-            android:id="@+id/primary_text_view"
+            android:id="@+id/card_primary_tv"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Title"
@@ -23,7 +23,7 @@
             card_view:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/secondary_text_view"
+            android:id="@+id/card_secondary_tv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -31,9 +31,9 @@
             android:text="Body"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             card_view:layout_constraintBottom_toBottomOf="parent"
-            card_view:layout_constraintEnd_toEndOf="@+id/primary_text_view"
-            card_view:layout_constraintStart_toStartOf="@+id/primary_text_view"
-            card_view:layout_constraintTop_toBottomOf="@+id/primary_text_view" />
+            card_view:layout_constraintEnd_toEndOf="@+id/card_primary_tv"
+            card_view:layout_constraintStart_toStartOf="@+id/card_primary_tv"
+            card_view:layout_constraintTop_toBottomOf="@+id/card_primary_tv" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
