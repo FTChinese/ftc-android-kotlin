@@ -182,9 +182,12 @@ class ProductFragment : ScopedFragment(),
         }
 
         override fun onBindViewHolder(holder: SingleLineItemViewHolder, position: Int) {
-            holder.icon.setImageResource(R.drawable.ic_done_gray_24dp)
-            holder.disclosure.visibility = View.GONE
-            holder.text.text = contents[position]
+            holder.setTrailingIcon(null)
+            holder.setText(contents[position])
+            holder.setPadding(
+                topBottom = resources.getDimension(R.dimen.space_8).toInt(),
+                leftRight = 0
+            )
         }
 
         override fun getItemCount() = contents.size
