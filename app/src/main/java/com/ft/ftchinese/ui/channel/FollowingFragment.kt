@@ -13,19 +13,20 @@ import com.ft.ftchinese.model.content.Following
 import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.buildFollowChannel
 import com.ft.ftchinese.ui.lists.CardItemViewHolder
+import com.ft.ftchinese.ui.lists.MarginGridDecoration
 import org.jetbrains.anko.AnkoLogger
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class FollowingFragment : Fragment(), AnkoLogger {
 
-    private var adapter: Adapter? = null
+    private lateinit var viewAdapter: Adapter
     private lateinit var followingManager: FollowingManager
-    private var rv: RecyclerView? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
         followingManager = FollowingManager.getInstance(context)
+        viewAdapter = Adapter(listOf())
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -36,21 +37,14 @@ class FollowingFragment : Fragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        rv = view.findViewById(R.id.recycler_view)
-        rv?.layoutManager = GridLayoutManager(context, 3)
-        updateUI()
-    }
-
-    private fun updateUI() {
-        val follows = followingManager.load()
-
-        if (adapter == null) {
-            adapter = Adapter(follows)
-            rv?.adapter = adapter
-        } else {
-            adapter?.setFollows(follows)
-            adapter?.notifyDataSetChanged()
+        view.findViewById<RecyclerView>(R.id.recycler_view)?.apply {
+            layoutManager = GridLayoutManager(context, 2)
+            adapter = viewAdapter
+            addItemDecoration(MarginGridDecoration(resources.getDimension(R.dimen.space_16).toInt(), 2))
         }
+
+        val follows = followingManager.load()
+        viewAdapter.setData(follows)
     }
 
     companion object {
@@ -60,8 +54,6 @@ class FollowingFragment : Fragment(), AnkoLogger {
 
     inner class Adapter(var mFollows: List<Following>) : RecyclerView.Adapter<CardItemViewHolder>() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardItemViewHolder {
-            val view = LayoutInflater.from(parent.context)
-                    .inflate(R.layout.list_item_card, parent, false)
             return CardItemViewHolder.create(parent)
         }
 
@@ -78,8 +70,9 @@ class FollowingFragment : Fragment(), AnkoLogger {
             }
         }
 
-        fun setFollows(items: List<Following>) {
+        fun setData(items: List<Following>) {
             mFollows = items
+            notifyDataSetChanged()
         }
     }
 }
