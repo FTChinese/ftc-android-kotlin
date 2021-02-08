@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.legal.legalDocs
-import com.ft.ftchinese.ui.lists.TwoLineItemViewHolder
+import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 
 class AboutListFragment : Fragment() {
 
@@ -29,16 +29,15 @@ class AboutListFragment : Fragment() {
         return view
     }
 
-    inner class ListAdapter : RecyclerView.Adapter<TwoLineItemViewHolder>() {
+    inner class ListAdapter : RecyclerView.Adapter<SingleLineItemViewHolder>() {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TwoLineItemViewHolder {
-            return TwoLineItemViewHolder.create(parent)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SingleLineItemViewHolder {
+            return SingleLineItemViewHolder.create(parent)
         }
 
-        override fun onBindViewHolder(holder: TwoLineItemViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: SingleLineItemViewHolder, position: Int) {
             holder.setLeadingIcon(null)
-            holder.setPrimaryText(legalDocs[position].title)
-            holder.setSecondaryText(null)
+            holder.setText(legalDocs[position].title)
 
             holder.itemView.setOnClickListener {
                 val action = AboutListFragmentDirections
