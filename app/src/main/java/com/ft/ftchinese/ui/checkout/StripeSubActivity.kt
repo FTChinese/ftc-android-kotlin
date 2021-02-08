@@ -3,10 +3,12 @@ package com.ft.ftchinese.ui.checkout
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityStripeSubBinding
@@ -18,7 +20,7 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.formatter.formatTierCycle
-import com.ft.ftchinese.ui.lists.SingleLineAdapter
+import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
@@ -540,7 +542,7 @@ class StripeSubActivity : ScopedAppActivity(),
         binding.rvStripeSub.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@StripeSubActivity)
-            adapter = SingleLineAdapter(buildRows(result.subs))
+            adapter = ListAdapter(buildRows(result.subs))
         }
 
         sessionManager.saveMembership(result.membership)
@@ -548,9 +550,9 @@ class StripeSubActivity : ScopedAppActivity(),
         showDoneBtn()
     }
 
-    private fun buildRows(sub: StripeSubs?): Array<String> {
+    private fun buildRows(sub: StripeSubs?): List<String> {
         if (sub == null) {
-            return arrayOf(
+            return listOf(
                     getString(R.string.order_subscribed_plan),
                     getString(R.string.outcome_payment_status),
                     getString(
@@ -560,7 +562,7 @@ class StripeSubActivity : ScopedAppActivity(),
                     )
             )
         }
-        return arrayOf(
+        return listOf(
                getString(
                        R.string.order_subscribed_plan,
                        formatTierCycle(
@@ -594,6 +596,23 @@ class StripeSubActivity : ScopedAppActivity(),
             MemberActivity.start(this)
             finish()
         }
+    }
+
+    inner class ListAdapter(private val rows: List<String>) : RecyclerView.Adapter<SingleLineItemViewHolder>() {
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int
+        ): SingleLineItemViewHolder {
+            return SingleLineItemViewHolder.create(parent)
+        }
+
+        override fun onBindViewHolder(holder: SingleLineItemViewHolder, position: Int) {
+            holder.setLeadingIcon(null)
+            holder.setTrailingIcon(null)
+            holder.setText(rows[position])
+        }
+
+        override fun getItemCount() = rows.size
     }
 
     companion object {
