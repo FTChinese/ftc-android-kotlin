@@ -71,18 +71,64 @@ fun buildCheckoutIntent(m: Membership, e: Edition): CheckoutIntent {
                 )
             }
 
-            // A premium user selected standard product. The purchase should be treated as AddOn.
-            return CheckoutIntent(
-                orderKind = OrderKind.ADD_ON,
-                payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
-                warning = "您当前是高端会员，可以使用支付宝/微信购买标准版，将在高端版失效后启用。",
-            )
+            // A premium could buy standard as AddOns.
+            if (e.tier == Tier.STANDARD) {
+                return CheckoutIntent(
+                    orderKind = OrderKind.ADD_ON,
+                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
+                    warning = "您可以使用一次性购买方式购买标准版订阅期限，在高端版结束后启用。"
+                )
+            }
         }
         PayMethod.STRIPE -> {
+            if (m.tier == e.tier) {
+                // Renewal is not allowed for the same subscription plan.
+                // However, they can purchase AddOn
+                if (m.cycle == e.cycle) {
+                    return CheckoutIntent(
+                        orderKind = OrderKind.ADD_ON,
+                        payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
+                        warning = "您当前使用了Stripe自动续订，不需要再次订阅。不过您可以通过支付宝/微信购买会员期限，在Stripe订阅失效后启用。",
+                    )
+                }
+                // Same product but different billing cycles.
+                // All payment methods are allowed. However, they have different meanings.
+                // If user chooses to use Alipay/Wechat, they are purchasing AddOns;
+                // otherwise they intends to change billing cycles.
+                return CheckoutIntent(
+                    orderKind = OrderKind.UPGRADE, // It should be switch or add on.
+                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
+                    warning = "选择支付宝微信可以购买额外会员期限，在Stripe订阅到期后启用；或选择Stripe更改自动扣款周期。自动订阅建议您订阅年度版更划算。"
+                )
+            }
 
+            // Upgrade
+            if (e.tier == Tier.PREMIUM) {
+                return CheckoutIntent(
+                    orderKind = OrderKind.UPGRADE,
+                    payMethods = listOf(PayMethod.STRIPE),
+                    warning = "Stripe订阅升级高端版会自动调整您的扣款额度",
+                )
+            }
+
+            // Premium could buy standard for AddOns
+            if (e.tier == Tier.STANDARD) {
+                return CheckoutIntent(
+                    orderKind = OrderKind.ADD_ON,
+                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
+                    warning = "选择支付宝/微信购买额外会员期限，在自动订阅结束后启用"
+                )
+            }
         }
         PayMethod.APPLE -> {
 
+        }
+        PayMethod.B2B -> {
+            return CheckoutIntent(
+                orderKind = OrderKind.RENEW,
+                payMethods = listOf(),
+                warning = "您目前使用的是企业订阅授权，延长订阅期限请联系您所属机构的管理人员"
+            )
         }
     }
 
