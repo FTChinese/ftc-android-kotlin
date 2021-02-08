@@ -4,19 +4,17 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
-import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityFcmBinding
-import com.ft.ftchinese.ui.lists.SingleLineItem
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -164,10 +162,8 @@ class FCMActivity : AppCompatActivity(), AnkoLogger {
 
         override fun onBindViewHolder(holder: SingleLineItemViewHolder, position: Int) {
             val item = items[position]
-            holder.disclosure.visibility = View.GONE
-            if (item.icon != null) {
-                holder.icon.setImageResource(item.icon)
-            }
+            holder.setLeadingIcon(item.icon)
+            holder.setTrailingIcon(null)
             holder.text.text = item.text
         }
 

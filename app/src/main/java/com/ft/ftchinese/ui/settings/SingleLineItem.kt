@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.lists
+package com.ft.ftchinese.ui.settings
 
 data class SingleLineItem(
     val icon: Int? = null,
