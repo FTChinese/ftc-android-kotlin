@@ -36,6 +36,7 @@ class MarginItemDecoration(
         state: RecyclerView.State
     ) {
         with(outRect) {
+            // Handle first row.
             if (parent.getChildAdapterPosition(view) == 0) {
                 top = marginTop
             }
