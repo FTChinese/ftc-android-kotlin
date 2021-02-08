@@ -138,11 +138,6 @@ data class Cart(
 
 fun buildFtcCart(ctx: Context, item: CheckoutItem): Cart {
 
-    SpannableString("$258/Year").apply {
-        setSpan(TextAppearanceSpan(ctx, android.R.style.TextAppearance_Small), 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
-        setSpan(TextAppearanceSpan(ctx, android.R.style.TextAppearance_Small), length-2, length-1, Spanned.SPAN_INCLUSIVE_INCLUSIVE)
-    }
-
     val price = buildFtcPrice(ctx, item)
 
     return Cart(
