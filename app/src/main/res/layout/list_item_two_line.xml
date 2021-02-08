@@ -24,7 +24,7 @@
 
     <TextView
         android:id="@+id/list_item_primary_text"
-        style="@style/OrigamiText.Body1"
+        style="@style/OrigamiText.Body2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
@@ -35,7 +35,6 @@
 
     <TextView
         android:id="@+id/list_item_secondary_text"
-        style="@style/OrigamiText.Body2.Light"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_4"
