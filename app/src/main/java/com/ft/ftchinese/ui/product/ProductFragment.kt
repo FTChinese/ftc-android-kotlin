@@ -1,9 +1,13 @@
 package com.ft.ftchinese.ui.product
 
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -183,11 +187,15 @@ class ProductFragment : ScopedFragment(),
 
         override fun onBindViewHolder(holder: SingleLineItemViewHolder, position: Int) {
             holder.setTrailingIcon(null)
-            holder.setText(contents[position])
-            holder.setPadding(
-                topBottom = resources.getDimension(R.dimen.space_8).toInt(),
-                leftRight = 0
-            )
+            holder.setText(SpannableString(contents[position]).apply {
+                setSpan(
+                    ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.colorBlack60)),
+                    0,
+                    length,
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE,
+                )
+            })
+            holder.setPadding(0)
         }
 
         override fun getItemCount() = contents.size
