@@ -382,7 +382,7 @@ class StripeSubActivity : ScopedAppActivity(),
         uiStateProgress(true)
 
         when (intent.orderKind) {
-            OrderKind.CREATE -> {
+            OrderKind.Create -> {
                 toast(R.string.creating_subscription)
 
                 checkOutViewModel.createStripeSub(account, StripeSubParams(
@@ -394,7 +394,7 @@ class StripeSubActivity : ScopedAppActivity(),
                     idempotency = idempotency.retrieveKey()
                 ))
             }
-            OrderKind.UPGRADE -> {
+            OrderKind.Upgrade -> {
                 toast(R.string.upgrading_subscription)
                 idempotency.clear()
 

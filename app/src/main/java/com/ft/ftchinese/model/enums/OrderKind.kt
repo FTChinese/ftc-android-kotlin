@@ -5,10 +5,11 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 enum class OrderKind(val code: String) : Parcelable {
-    CREATE("create"),
-    RENEW("renew"),
-    UPGRADE("upgrade"),
-    ADD_ON("add_on");
+    Create("create"),
+    Renew("renew"),
+    Upgrade("upgrade"),
+    AddOn("add_on"),
+    SwitchCycle("switch_cycle"); // Not from server. Use only locally for Stripe.
 
     override fun toString(): String {
         return code

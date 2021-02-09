@@ -431,7 +431,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                         cycleCount = 1,
                         extraDays = 1,
                         amount = 1998.00,
-                        usageType = OrderKind.CREATE,
+                        usageType = OrderKind.Create,
                         payMethod = PayMethod.WXPAY,
                         createdAt = ZonedDateTime.now()
                 ))
