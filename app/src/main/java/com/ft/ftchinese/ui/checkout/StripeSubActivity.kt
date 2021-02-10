@@ -13,13 +13,14 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityStripeSubBinding
 import com.ft.ftchinese.model.enums.OrderKind
+import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.ui.formatter.formatTierCycle
+import com.ft.ftchinese.ui.formatter.formatEdition
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
@@ -45,7 +46,6 @@ class StripeSubActivity : ScopedAppActivity(),
     private lateinit var sessionManager: SessionManager
     private lateinit var fileCache: FileCache
 
-    private lateinit var customerViewModel: CustomerViewModel
     private lateinit var checkOutViewModel: CheckOutViewModel
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var paywallViewModel: PaywallViewModel
@@ -95,7 +95,10 @@ class StripeSubActivity : ScopedAppActivity(),
 
         initUI()
 
-        initCustomerSession()
+        info("Initialize customer session...")
+        // Generate idempotency key.
+        idempotency = Idempotency.getInstance(this)
+        setupCustomerSession()
 
         // Creation payment session
         paymentSession = PaymentSession(
@@ -118,12 +121,6 @@ class StripeSubActivity : ScopedAppActivity(),
         accountViewModel = ViewModelProvider(this)
             .get(AccountViewModel::class.java)
 
-        customerViewModel = ViewModelProvider(
-            this,
-            CustomerViewModelFactory(fileCache)
-        )
-            .get(CustomerViewModel::class.java)
-
         paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))
             .get(PaywallViewModel::class.java)
 
@@ -134,19 +131,12 @@ class StripeSubActivity : ScopedAppActivity(),
         connectionLiveData.observe(this, {
             checkOutViewModel.isNetworkAvailable.value = it
             accountViewModel.isNetworkAvailable.value = it
-            customerViewModel.isNetworkAvailable.value = it
             paywallViewModel.isNetworkAvailable.value = it
         })
         isConnected.let {
             checkOutViewModel.isNetworkAvailable.value = it
             accountViewModel.isNetworkAvailable.value = it
-            customerViewModel.isNetworkAvailable.value = it
             paywallViewModel.isNetworkAvailable.value = it
-        }
-
-        // Upon Stripe customer created.
-        customerViewModel.customerCreated.observe(this)  {
-            onStripeCustomer(it)
         }
 
         // Upon subscription created.
@@ -184,12 +174,8 @@ class StripeSubActivity : ScopedAppActivity(),
             )
         }
 
-        val intent = buildCheckoutIntent(m, p.edition)
-        this.checkoutIntent = intent
-
-        intent.orderKind?.let {
-            supportActionBar?.setTitle(getOrderKindText(this, it))
-        }
+        val intents = buildCheckoutIntents(m, p.edition)
+        checkoutIntent = intents.findIntent(PayMethod.STRIPE)
 
         cartViewModel.cartCreated.value = buildStripeCart(this, p)
 
@@ -199,47 +185,6 @@ class StripeSubActivity : ScopedAppActivity(),
 
         binding.btnSubscribe.setOnClickListener {
             startSubscribing()
-        }
-    }
-
-    private fun initCustomerSession() {
-        info("Initialize customer session...")
-        // Generate idempotency key.
-        idempotency = Idempotency.getInstance(this)
-
-        val account = sessionManager.loadAccount() ?: return
-
-        // Ensure user is a stripe customer before proceeding.
-        if (account.stripeId == null) {
-            binding.inProgress = true
-            binding.enableInput = false
-            toast(R.string.stripe_init)
-            customerViewModel.create(account)
-            return
-        }
-
-        // If user is already a stripe customer, setup customer session.
-        setupCustomerSession()
-    }
-
-    // If current user is not a stripe customer, create it and then call setupCustomerSession.
-    private fun onStripeCustomer(result: Result<StripeCustomer>) {
-        when (result) {
-            is Result.Success -> {
-                sessionManager.saveStripeId(result.data.id)
-
-                // After customer created, setup customer session.
-                setupCustomerSession()
-            }
-
-            is Result.LocalizedError -> {
-                binding.inProgress = false
-                toast(result.msgId)
-            }
-            is Result.Error -> {
-                binding.inProgress = false
-                result.exception.message?.let { toast(it) }
-            }
         }
     }
 
@@ -375,7 +320,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
         val pm = paymentMethod
         if (pm == null) {
-            toast(R.string.pay_method_not_selected)
+            toast(R.string.toast_no_pay_method)
             return
         }
 
@@ -562,15 +507,19 @@ class StripeSubActivity : ScopedAppActivity(),
                     )
             )
         }
+
+        val edition = price?.let {
+            getString(
+                R.string.order_subscribed_plan,
+                formatEdition(
+                    this,
+                    it.edition,
+                )
+            )
+        }
+
         return listOf(
-               getString(
-                       R.string.order_subscribed_plan,
-                       formatTierCycle(
-                           this,
-                           price?.tier,
-                           price?.cycle
-                       )
-               ),
+               edition ?: "",
                 getString(
                     R.string.outcome_payment_status,
                     if (sub.status != null) {
