@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.formatter
 import android.content.Context
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.ui.PriceParams
 import java.util.*
@@ -30,9 +31,17 @@ fun formatTierCycle(ctx: Context, tier: Tier?, cycle: Cycle?): String {
     }
 
     return ctx.getString(
-        R.string.formatter_tier_cycle,
+        R.string.formatter_edition,
         ctx.getString(tier.stringRes),
         ctx.getString(cycle.stringRes)
+    )
+}
+
+fun formatEdition(ctx: Context, e: Edition): String {
+    return ctx.getString(
+        R.string.formatter_edition,
+        ctx.getString(e.tier.stringRes),
+        ctx.getString(e.cycle.stringRes)
     )
 }
 
