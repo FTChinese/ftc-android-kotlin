@@ -24,6 +24,11 @@ class CustomerViewModel(
 
     val isNetworkAvailable = MutableLiveData<Boolean>()
 
+    // Used by dialog to pass which button is clicked.
+    val creatingCustomer: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
+
     val customerCreated: MutableLiveData<Result<StripeCustomer>> by lazy {
         MutableLiveData<Result<StripeCustomer>>()
     }
