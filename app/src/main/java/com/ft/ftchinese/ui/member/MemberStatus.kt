@@ -68,7 +68,7 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
                 expiration = m.localizeExpireDate(),
                 autoRenewal = autoRenewal,
                 reactivateStripeBtn = m.canReactivateStripe(),
-                payMethod = ctx.getString(R.string.subs_brand_stripe),
+                payMethod = ctx.getString(R.string.pay_method_stripe),
             )
         }
         PayMethod.APPLE -> {
@@ -84,7 +84,7 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
                 expiration = m.localizeExpireDate(),
                 autoRenewal = autoRenewal,
                 reactivateStripeBtn = false,
-                payMethod = ctx.getString(R.string.subs_brand_apple),
+                payMethod = ctx.getString(R.string.pay_brand_apple),
             )
         }
         PayMethod.B2B -> {
@@ -100,7 +100,7 @@ fun buildMemberStatus(ctx: Context, m: Membership): MemberStatus {
                 expiration = m.localizeExpireDate(),
                 autoRenewal = null,
                 reactivateStripeBtn = false,
-                payMethod = ctx.getString(R.string.subs_brand_b2b),
+                payMethod = ctx.getString(R.string.pay_brand_b2b),
             )
         }
         // VIP
