@@ -50,21 +50,27 @@
                     android:id="@+id/btn_free_user"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Free Edition"
+                    android:text="Free User"
+                    android:textAllCaps="false" />
+                <Button
+                    android:id="@+id/btn_wxonly_user"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Wx-only User"
                     android:textAllCaps="false" />
 
                 <Button
                     android:id="@+id/btn_standard_user"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Standard Edition"
+                    android:text="Standard User"
                     android:textAllCaps="false" />
 
                 <Button
                     android:id="@+id/btn_premium_user"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Premium Edition"
+                    android:text="Premium User"
                     android:textAllCaps="false" />
 
                 <Button
@@ -75,10 +81,37 @@
                     android:textAllCaps="false"/>
 
                 <Button
-                    android:id="@+id/btn_stripe_user"
+                    android:id="@+id/btn_stripe_std_year"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Stripe User"
+                    android:text="Stripe Standared Month"
+                    android:textAllCaps="false"/>
+
+                <Button
+                    android:id="@+id/btn_stripe_std_month"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Stripe Standared Month"
+                    android:textAllCaps="false"/>
+
+                <Button
+                    android:id="@+id/btn_stripe_premium"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Stripe Premium"
+                    android:textAllCaps="false"/>
+
+                <Button
+                    android:id="@+id/btn_iap_standard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="IAP Standard"
+                    android:textAllCaps="false"/>
+                <Button
+                    android:id="@+id/btn_iap_premium"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="IAP Premium"
                     android:textAllCaps="false"/>
 
                 <Button
@@ -132,27 +165,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="FCM Subscribe a Topic"
-                    android:textAllCaps="false" />
-
-                <Button
-                    android:id="@+id/check_google_api"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Check Google API"
-                    android:textAllCaps="false" />
-
-                <Button
-                    android:id="@+id/btn_log_token"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="FCM Log Token"
-                    android:textAllCaps="false" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/download_google_play"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Download Google Play service"
                     android:textAllCaps="false" />
 
                 <Button
