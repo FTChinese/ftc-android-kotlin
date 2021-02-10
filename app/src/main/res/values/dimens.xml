@@ -10,4 +10,6 @@
     <dimen name="space_8">8dp</dimen>
     <dimen name="space_4">4dp</dimen>
     <dimen name="space_zero">0dp</dimen>
+    <dimen name="font_size_18">18sp</dimen>
+    <dimen name="font_size_16">16sp</dimen>
 </resources>
