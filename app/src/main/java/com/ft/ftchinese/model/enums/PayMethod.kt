@@ -14,8 +14,8 @@ enum class PayMethod(val symbol: String) {
             ALIPAY -> R.string.pay_method_ali
             WXPAY -> R.string.pay_method_wechat
             STRIPE -> R.string.pay_method_stripe
-            APPLE -> R.string.subs_brand_apple
-            B2B -> R.string.subs_brand_b2b
+            APPLE -> R.string.pay_brand_apple
+            B2B -> R.string.pay_brand_b2b
         }
 
     override fun toString(): String {
