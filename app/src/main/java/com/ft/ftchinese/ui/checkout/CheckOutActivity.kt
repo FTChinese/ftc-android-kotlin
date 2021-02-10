@@ -168,16 +168,6 @@ class CheckOutActivity : ScopedAppActivity(),
             }
         }
 
-        customerViewModel.creatingCustomer.observe(this) { yes ->
-            if (yes) {
-                sessionManager.loadAccount()?.let {
-                    customerViewModel.create(it)
-                    binding.inProgress = true
-                    // Next goes to `customerViewModel.customerCreated`
-                }
-            }
-        }
-
         customerViewModel.customerCreated.observe(this) { result ->
             binding.inProgress = false
 
@@ -293,6 +283,14 @@ class CheckOutActivity : ScopedAppActivity(),
                 }
                 if (account.stripeId.isNullOrBlank()) {
                     StripeCustomerDialogFragment()
+                        .onPositiveButtonClicked { dialog, _ ->
+                            binding.inProgress = true
+                            customerViewModel.create(account)
+                            dialog.dismiss()
+                        }
+                        .onNegativeButtonClicked { dialog, _ ->
+                            dialog.dismiss()
+                        }
                         .show(supportFragmentManager, "createStripeCustomer")
                     // After user clicked yes button in the dialog,
                     // it should goes to `customerViewModel.customerCreated`
