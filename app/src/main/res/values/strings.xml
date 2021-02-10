@@ -22,235 +22,21 @@
     <string name="exo_playing_channel_name">正在播放</string>
     <string name="exo_playing_channel_description">播放音频</string>
 
-    <!-- Bottom navigation tabs -->
     <string name="nav_news">最新</string>
     <string name="nav_english">每日英语</string>
     <string name="nav_ftacademy">FT商学院</string>
     <string name="nav_video">视•听</string>
     <string name="nav_myft">我的FT</string>
-
     <string name="news_editor_choice">编辑精选</string>
-
     <string name="titlebar_cn">中文</string>
     <string name="titlebar_en">英文</string>
     <string name="titlebar_bilingual">对照</string>
-
-    <!-- Titles on toolbar -->
     <string name="title_search">搜索 %1$s</string>
-    <string name="title_login">登录FT中文网</string>
-    <string name="title_sign_up">创建FT中文网账号</string>
-    <string name="title_login_signup">登录/注册</string>
-    <string name="title_activity_profile">我的资料</string>
-    <string name="title_change_password">修改密码</string>
-    <string name="title_change_email">修改登录邮箱</string>
-    <string name="title_change_username">修改用户名</string>
     <string name="title_about_us">关于我们</string>
-    <string name="title_new_subs">订阅</string>
-    <string name="title_renewal">会员续订</string>
-    <string name="title_upgrade">会员升级</string>
-    <string name="title_wxpay">微信支付 </string>
-    <string name="title_wx_account">微信账号</string>
-    <string name="title_link_email">绑定邮箱账号</string>
-    <string name="title_merge_accounts">合并账号</string>
-    <string name="title_unlink">解除绑定</string>
-    <string name="title_account">账号与安全</string>
-    <string name="title_subscription">会员订阅</string>
-    <string name="title_my_orders">我的订单</string>
-    <string name="title_my_subs">我的订阅</string>
-    <string name="title_wx_login">微信登录</string>
-    <string name="title_stripe_setting">Stripe设置</string>
-    <string name="title_latest_order">订单详情</string>
     <string name="title_error">错误</string>
-
-    <!-- Generic buttons -->
-    <string name="action_done">完成</string>
-    <string name="action_cancel">取消</string>
-    <string name="action_start">开始</string>
-    <string name="action_ok">确认</string>
-    <string name="action_retry">重试</string>
-
-    <!-- Paywall -->
-    <string name="btn_start_subscription">订阅</string>
-    <string name="refresh_paywall">获取最新产品价格…</string>
-    <string name="paywall_updated">数据已更新</string>
-    <!-- Example: ¥1,998/年 -->
-    <string name="formatter_price_cycle" translatable="false">%1$s%2$,.0f/%3$s</string>
-    <!-- Example: ¥1,998.00 -->
-    <string name="formatter_price">%1$s%2$,.0f</string>
-    <!-- Example: 支付宝支付 ¥1,998.00-->
-    <string name="formatter_check_out">%1$s %2$s</string>
-    <string name="original_price">原价</string>
-
-    <!-- Example: 标准会员/年-->
-    <string name="formatter_tier_cycle">%1$s/%2$s</string>
-
-    <string name="cycle_year">年</string>
-    <string name="cycle_month">月</string>
-
-    <string name="vip_no_expiration">无限期</string>
-
-    <string name="label_member_tier">会员类型</string>
-
-    <string name="membership_renew">续订</string>
-
-    <string name="membership_upgrade">升级为高端会员</string>
-
-    <string name="tier_free">尚未成为会员</string>
-    <string name="tier_standard">标准会员</string>
-    <string name="tier_premium">高端会员</string>
-    <string name="tier_vip">超级会员</string>
-
-    <string name="label_member_duration">会员期限</string>
-    <string name="label_price">支付金额</string>
-    <string name="label_ftc_account">FT中文网账号</string>
-    <string name="label_wx_account">微信账号</string>
-    <string name="paywall_title">购买会员服务，阅读FT独家内容</string>
-    <string name="paywall_login_prompt">已经订阅？登录</string>
-    <string name="swipe_member_info">下拉更新会员信息</string>
-    <string name="prompt_login_to_read">订阅会员登录后可以阅读</string>
-    <string name="prompt_member_only">仅限付费会员阅读</string>
-    <string name="prompt_premium_only">仅限高端会员阅读</string>
-    <string name="prompt_upgrade_premium">仅限高端会员阅读，请升级</string>
-
-    <!--  Prompt message for membership  -->
-    <string name="prompt_membership_expired">会员订阅已过期，请续订</string>
-    <string name="prompt_restricted_login">会员登入后可以阅读</string>
-    <string name="stripe_not_active">Stripe订阅状态异常</string>
-    <string name="member_status_invalid">订阅状态异常，请刷新或联系客服</string>
-    <string name="member_has_expired">会员已过期</string>
-    <string name="member_is_expiring">会员将于今天过期</string>
-    <string name="member_will_expire">会员还有 %1$d 天过期，请及时续订</string>
-    <string name="member_expired_on">您订阅的%1$s已经于%2$s日过期，继续阅读请续订</string>
-    <string name="sub_status_incomplete">等待支付</string>
-
-    <string name="sub_status_incomplete_expired">支付已过期</string>
-    <string name="sub_status_trialing">试用</string>
-    <string name="sub_status_past_due">自动续费失败</string>
-    <string name="sub_status_canceled">已取消</string>
-
-    <!--    Membership info-->
-    <string name="sub_status_unpaid">未支付</string>
-    <string name="sub_status_active">活跃</string>
-
-    <string name="auto_renew_on">自动续订已开启</string>
-    <string name="auto_renew_off">自动续订已关闭</string>
-    <string name="stripe_status_invalid">Stripe订阅状态异常: %1$s，请刷新或联系客服</string>
-    <string name="yes">是</string>
-    <string name="no">否</string>
-    <string name="heading_customer_service">联系客服</string>
-    <string name="customer_service_email">subscriber.service@ftchinese.com</string>
-
-    <string name="heading_pay_method">选择支付方式</string>
-    <string name="heading_become_member">购买FT会员</string>
-
-    <string name="subs_brand_b2b">企业订阅</string>
-    <string name="subs_brand_apple">苹果App内购</string>
-    <string name="subs_brand_stripe">Stripe订阅</string>
-
-    <string name="iap_guide">当前订阅来自苹果App内购。请在App Store中管理您的订阅。</string>
-
-    <string name="pay_brand_ali">支付宝</string>
-    <string name="pay_brand_wechat">微信支付</string>
-    <string name="pay_brand_stripe">Stripe</string>
-
-    <string name="pay_method_ali">支付宝支付</string>
-    <string name="pay_method_wechat">微信支付</string>
-
-    <!-- Stripe payment -->
-    <string name="pay_method_stripe">Stripe支付</string>
-    <string name="stripe_cancel">取消Stripe订阅</string>
-    <string name="retrieve_customer">查询Stripe账号&#8230;</string>
-    <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
-    <string name="card_brand_last4">%1$s (尾号%2$s)</string>
-    <string name="bank_card_number">**** **** **** %1$s</string>
-    <string name="stripe_in_pounds">* 使用Stripe订阅FT中文网会员以英镑计价</string>
-    <string name="select_or_add_card">选择或添加银行卡</string>
-    <string name="stripe_init">设置Stripe支付</string>
-    <string name="default_bank_brand">我的银行卡</string>
-    <string name="add_or_select_payment_method">点击添加银行卡或选择默认支付方式</string>
-    <string name="set_default_payment_method">设为默认支付方式</string>
-    <string name="stripe_customer_not_found">Stripe用户不存在，请检查账号或者重新登录</string>
-
-    <string name="stripe_authentication_failed">Stripe支付验证似乎失败了</string>
-    <string name="stripe_unable_to_authenticate">无法验证，请联系客服</string>
-
-    <string name="stripe_refreshing">更新Stripe订阅信息&#8230;</string>
-    <string name="stripe_refresh_success">Stripe订阅已更新</string>
-    <string name="stripe_refresh_failed">无法更新Stripe订阅信息</string>
-
-    <string name="title_requires_action">需要验证</string>
-    <string name="stripe_requires_action">Stripe支付尚未完成，您的发卡行需要进行安全验证，点击确认开始验证</string>
-    <string name="creating_subscription">创建订阅&#8230;</string>
-
-    <!-- IAP -->
-    <string name="iap_refreshing">正在访问App Store获取您的订阅数据</string>
-    <string name="iap_refresh_success">App Store订阅以已更新</string>
-    <string name="iap_refresh_failed">无法更新苹果内购的订阅</string>
-
-    <!-- Upgrade -->
-    <string name="upgrading_subscription">升级订阅&#8230;</string>
-    <string name="permission_alipay_denied">无法获取支付宝所需的权限, 请到系统设置开启</string>
-    <string name="permission_alipay_granted">已获取支付宝所需的权限</string>
-    <string name="pay_method_not_selected">请选择支付方式</string>
-    <string name="prompt_unknown_plan">请选择订阅方案</string>
-    <string name="check_out">支付</string>
-    <string name="request_order">创建订单&#8230;</string>
-
-    <string name="order_cannot_be_created">无法创建订单，请稍后再试</string>
-    <string name="payment_done">支付成功</string>
-    <string name="api_already_premium">您已经是高端会员了</string>
-    <string name="duplicate_purchase">您已经是会员了，请勿重复购买</string>
-    <string name="subs_success">订阅成功！</string>
-    <string name="wxpay_not_supported">您的设备不支持微信支付</string>
-
-    <string name="wxpay_query_order">查询支付状态&#8230;</string>
-    <string name="order_not_found">没有查询到订单，请稍后刷新</string>
-    <string name="order_cannot_be_queried">暂时无法查询订单状态，请稍后在"账号与安全"中下拉刷新</string>
-    <string name="wxpay_refund">转入退款</string>
-    <string name="wxpay_not_paid">未支付</string>
-
-    <!-- Wechat payment status -->
-    <string name="wxpay_closed">交易已关闭</string>
-    <string name="wxpay_revoked">已撤销</string>
-    <string name="wxpay_pending">正在支付</string>
-    <string name="wxpay_failed">支付失败</string>
-    <string name="wxpay_cancelled">支付已取消</string>
-    <string name="premium_only">您点击了仅供高端会员阅读的文章，购买高端会员后可以继续阅读</string>
-    <string name="balance_conversion">余额可以兑换高级会员%1$d年%2$d天，无需额外支付</string>
-    <string name="confirm_upgrade">去支付</string>
-
-    <!-- Upgrade to premium -->
-    <string name="direct_upgrade">无需支付，直接升级</string>
-    <string name="upgrade_payment">升级到高端会员还需支付"</string>
-    <string name="upgrade_formula">应付额 = 定价 - 账户余额</string>
-    <string name="premium_price">高端会员定价: %1$s</string>
-    <string name="account_balance">当前余额: %1$s</string>
-    <string name="upgrade_success">升级成功</string>
-    <string name="outcome_invoice_number">发票 %1$s</string>
-    <string name="outcome_period">订阅周期 %1$s</string>
-    <string name="outcome_sub_status">订阅状态 %1$s</string>
-    <string name="outcome_payment_status">支付状态 %1$s</string>
-    <string name="order_id">订单编号: %1$s</string>
-    <string name="order_subscribed_plan">订阅方案: %1$s</string>
-
-    <string name="order_price">支付金额: %1$s</string>
-    <string name="order_pay_method">支付方式: %1$s</string>
-    <string name="order_creation_time">创建时间: %1$s</string>
-    <string name="order_period">订阅周期: %1$s ~ %2$s</string>
-
-    <!-- List of orders -->
-    <string name="refreshing_data">更新数据&#8230;</string>
-    <string name="refreshing_account">更新账号数据&#8230;</string>
-    <string name="refreshing_wx_info">更新微信信息</string>
-    <string name="wait_while_refresh_wx">从微信更新信息耗时较长，请耐心等候</string>
-
-    <string name="wait_while_wx_login">获取微信数据耗时较长，请耐心等候，如果出现超时错误，请重试或选择较快的网络</string>
-    <string name="loading_failed">无法加载数据，请稍后再试</string>
     <string name="menu_share">分享</string>
     <string name="menu_audio">朗读</string>
     <string name="share_to">分享到</string>
-
-    <!-- Social share -->
     <string name="share_done">分享成功</string>
     <string name="alert_starred">已收藏</string>
     <string name="alert_unstarred">收藏已取消</string>
@@ -258,30 +44,40 @@
 
     <string name="alert_audio_downloaded">音频下载完成</string>
     <string name="download_start_error">无法启动下载</string>
+    <string name="myft_reading_history">阅读历史</string>
+    <string name="myft_starred_articles">收藏文章</string>
+    <string name="myft_following">关注</string>
+
+    <!--  Drawer  -->
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_not_logged_in">您尚未登录</string>
     <string name="nav_header_desc">导航栏头部</string>
     <string name="action_help">帮助</string>
     <string name="action_feedback">反馈</string>
-
-    <!-- Drawer -->
     <string name="action_logout">退出登录</string>
     <string name="action_settings">设置</string>
-    <string name="myft_reading_history">阅读历史</string>
-    <string name="myft_starred_articles">收藏文章</string>
-    <string name="myft_following">关注</string>
+
+    <!--  Account  -->
+    <string name="title_login">登录FT中文网</string>
+    <string name="title_sign_up">创建FT中文网账号</string>
+    <string name="title_login_signup">登录/注册</string>
+    <string name="title_activity_profile">我的资料</string>
+    <string name="title_change_password">修改密码</string>
+    <string name="title_change_email">修改登录邮箱</string>
+    <string name="title_change_username">修改用户名</string>
+    <string name="title_wx_account">微信账号</string>
+    <string name="title_link_email">绑定邮箱账号</string>
+    <string name="title_merge_accounts">合并账号</string>
+    <string name="title_unlink">解除绑定</string>
+    <string name="title_account">账号与安全</string>
+    <string name="title_wx_login">微信登录</string>
     <string name="formatter_wx_name">微信用户 %1$s</string>
     <string name="oauth_canceled">授权取消！</string>
     <string name="oauth_denied">授权被拒绝！</string>
-
-    <!-- Myft tabs -->
     <string name="oauth_state_missing">授权码缺失！</string>
     <string name="oauth_state_mismatch">授权状态码错误！</string>
     <string name="wx_session_expired">微信登录已过期，请重新登录。微信登录会定期失效，如果您以后不希望看到本提示，可以在侧边栏的\"账号与安全\"下绑定FT中文网账号。</string>
-
-
-    <!-- Wechat Account -->
     <string name="wx_refresh_token_expired">微信授权已过期，请重新授权后刷新账号数据。</string>
     <string name="wx_relogin">重新授权</string>
     <string name="action_wx_login">微信登录</string>
@@ -289,9 +85,7 @@
     <string name="action_bound_account">已绑定</string>
     <string name="action_bind_account">尚未绑定</string>
     <string name="greeting_wx_login">你好，%1$s！欢迎登录FT中文网。</string>
-    <string name="prompt_no_network">网络无连接，请检查网络设置</string>
     <string name="btn_login">登录</string>
-
     <string name="btn_sign_up">注册</string>
     <string name="title_forgot_password">找回密码</string>
     <string name="title_reset_password">重置密码</string>
@@ -309,8 +103,6 @@
     <string name="btn_save">保存</string>
     <string name="btn_next">下一步</string>
     <string name="btn_verify_password">验证密码</string>
-
-
     <!-- FTC account -->
     <string name="btn_link">绑定邮箱</string>
     <string name="btn_unlink">解除绑定</string>
@@ -348,8 +140,6 @@
     <string name="prompt_unlinked">账号已解除绑定</string>
     <string name="prompt_account_updated">账号已更新</string>
 
-
-    <string name="prompt_no_keyword">请输入关键字后搜索</string>
     <string name="instruct_password_letter">请输入您的登录FT中文网所用的电子邮箱，我们会向该邮箱发送邮件，帮您重置密码</string>
     <string name="instruct_verify_email">您的邮箱尚未验证，为保障您的账号安全，请及时验证邮箱。我们已经给您的登录邮箱发送了验证邮件，点击邮件中的链接即可。</string>
     <string name="instruct_letter_sent">请检查您的邮件，点击邮件中的“重置密码”链接，在所打开的网页中修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</string>
@@ -383,6 +173,181 @@
     <string name="error_too_long">过长</string>
     <string name="error_invalid_password">密码无效</string>
 
+    <!-- Generic buttons -->
+    <string name="action_done">完成</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_start">开始</string>
+    <string name="action_ok">确认</string>
+    <string name="action_retry">重试</string>
+    <string name="yes">是</string>
+    <string name="no">否</string>
+
+    <!--  Order  -->
+    <string name="title_my_orders">我的订单</string>
+    <string name="title_latest_order">订单详情</string>
+
+    <!-- Paywall -->
+    <string name="title_my_subs">我的订阅</string>
+    <string name="title_subscription">会员订阅</string>
+    <string name="refresh_paywall">获取最新产品价格…</string>
+    <string name="paywall_updated">数据已更新</string>
+    <!-- Example: ¥1,998/年 -->
+    <string name="formatter_price_cycle" translatable="false">%1$s%2$,.0f/%3$s</string>
+    <!-- Example: ¥1,998.00 -->
+    <string name="formatter_price">%1$s%2$,.0f</string>
+    <!-- Example: 支付宝支付 ¥1,998.00-->
+    <string name="formatter_check_out">%1$s %2$s</string>
+    <string name="original_price">原价</string>
+
+    <!-- Example: 标准会员/年-->
+    <string name="formatter_edition">%1$s/%2$s</string>
+
+    <string name="cycle_year">年</string>
+    <string name="cycle_month">月</string>
+
+    <string name="heading_customer_service">联系客服</string>
+    <string name="customer_service_email">subscriber.service@ftchinese.com</string>
+
+    <!--  Subscription  -->
+    <string name="order_kind_create">订阅</string>
+    <string name="order_kind_renew">续订</string>
+    <string name="order_kind_upgrade">升级</string>
+    <string name="order_kind_addon">购买订阅期限</string>
+    <string name="order_kind_switch_cycle">更改订阅周期</string>
+    <string name="pay_brand_ali">支付宝</string>
+    <string name="pay_brand_wechat">微信支付</string>
+    <string name="pay_brand_stripe">Stripe</string>
+    <string name="pay_brand_b2b">企业订阅</string>
+    <string name="pay_brand_apple">苹果App内购</string>
+    <string name="pay_method_ali">支付宝支付</string>
+    <string name="pay_method_wechat">微信支付</string>
+    <string name="pay_method_stripe">Stripe订阅</string>
+    <string name="check_out">支付</string>
+    <string name="toast_no_pay_method">请选择支付方式</string>
+    <string name="toast_creating_order">创建订单&#8230;</string>
+    <string name="toast_order_failed">无法创建订单，请稍后再试</string>
+    <string name="payment_done">支付成功</string>
+
+    <string name="upgrading_subscription">升级订阅&#8230;</string>
+    <string name="permission_alipay_denied">无法获取支付宝所需的权限, 请到系统设置开启</string>
+    <string name="permission_alipay_granted">已获取支付宝所需的权限</string>
+    <string name="duplicate_purchase">您已经是会员了，请勿重复购买</string>
+    <string name="subs_success">订阅成功！</string>
+    <string name="wxpay_not_supported">您的设备不支持微信支付</string>
+
+    <string name="wxpay_query_order">查询支付状态&#8230;</string>
+    <string name="order_not_found">没有查询到订单，请稍后刷新</string>
+    <string name="order_cannot_be_queried">暂时无法查询订单状态，请稍后在"账号与安全"中下拉刷新</string>
+    <string name="wxpay_refund">转入退款</string>
+    <string name="wxpay_not_paid">未支付</string>
+
+    <!-- Wechat payment status -->
+    <string name="wxpay_closed">交易已关闭</string>
+    <string name="wxpay_revoked">已撤销</string>
+    <string name="wxpay_pending">正在支付</string>
+    <string name="wxpay_failed">支付失败</string>
+    <string name="wxpay_cancelled">支付已取消</string>
+    <string name="premium_only">您点击了仅供高端会员阅读的文章，购买高端会员后可以继续阅读</string>
+    <string name="balance_conversion">余额可以兑换高级会员%1$d年%2$d天，无需额外支付</string>
+    <string name="confirm_upgrade">去支付</string>
+
+    <string name="outcome_payment_status">支付状态 %1$s</string>
+    <string name="order_id">订单编号: %1$s</string>
+    <string name="order_subscribed_plan">订阅方案: %1$s</string>
+
+    <string name="order_price">支付金额: %1$s</string>
+    <string name="order_pay_method">支付方式: %1$s</string>
+    <string name="order_creation_time">创建时间: %1$s</string>
+    <string name="order_period">订阅周期: %1$s ~ %2$s</string>
+
+    <!-- Stripe payment -->
+    <string name="title_stripe_setting">Stripe设置</string>
+    <string name="stripe_cancel">取消Stripe订阅</string>
+    <string name="retrieve_customer">查询Stripe账号&#8230;</string>
+    <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
+    <string name="card_brand_last4">%1$s (尾号%2$s)</string>
+    <string name="bank_card_number">**** **** **** %1$s</string>
+    <string name="stripe_in_pounds">* 使用Stripe订阅FT中文网会员以英镑计价</string>
+    <string name="select_or_add_card">选择或添加银行卡</string>
+    <string name="stripe_init">设置Stripe支付</string>
+    <string name="default_bank_brand">我的银行卡</string>
+    <string name="add_or_select_payment_method">点击添加银行卡或选择默认支付方式</string>
+    <string name="set_default_payment_method">设为默认支付方式</string>
+    <string name="stripe_customer_not_found">Stripe用户不存在，请检查账号或者重新登录</string>
+
+    <string name="stripe_authentication_failed">Stripe支付验证似乎失败了</string>
+    <string name="stripe_unable_to_authenticate">无法验证，请联系客服</string>
+
+    <string name="stripe_refreshing">更新Stripe订阅信息&#8230;</string>
+    <string name="stripe_refresh_success">Stripe订阅已更新</string>
+    <string name="stripe_refresh_failed">无法更新Stripe订阅信息</string>
+
+    <string name="title_requires_action">需要验证</string>
+    <string name="stripe_requires_action">Stripe支付尚未完成，您的发卡行需要进行安全验证，点击确认开始验证</string>
+    <string name="creating_subscription">创建订阅&#8230;</string>
+
+    <!--  Membership status  -->
+    <string name="vip_no_expiration">无限期</string>
+    <string name="label_member_tier">会员类型</string>
+    <string name="membership_renew">续订</string>
+    <string name="membership_upgrade">升级为高端会员</string>
+    <string name="tier_free">尚未成为会员</string>
+    <string name="tier_standard">标准会员</string>
+    <string name="tier_premium">高端会员</string>
+    <string name="tier_vip">超级会员</string>
+    <string name="label_member_duration">会员期限</string>
+    <string name="label_price">支付金额</string>
+    <string name="label_ftc_account">FT中文网账号</string>
+    <string name="label_wx_account">微信账号</string>
+    <string name="paywall_title">购买会员服务，阅读FT独家内容</string>
+    <string name="paywall_login_prompt">已经订阅？登录</string>
+    <string name="swipe_member_info">下拉更新会员信息</string>
+    <string name="prompt_login_to_read">订阅会员登录后可以阅读</string>
+    <string name="prompt_member_only">仅限付费会员阅读</string>
+    <string name="prompt_premium_only">仅限高端会员阅读</string>
+    <string name="prompt_upgrade_premium">仅限高端会员阅读，请升级</string>
+    <string name="iap_guide">当前订阅来自苹果App内购。请在App Store中管理您的订阅。</string>
+    <!--  Prompt message for membership  -->
+    <string name="prompt_membership_expired">会员订阅已过期，请续订</string>
+    <string name="prompt_restricted_login">会员登入后可以阅读</string>
+    <string name="stripe_not_active">Stripe订阅状态异常</string>
+    <string name="member_status_invalid">订阅状态异常，请刷新或联系客服</string>
+    <string name="member_has_expired">会员已过期</string>
+    <string name="member_is_expiring">会员将于今天过期</string>
+    <string name="member_will_expire">会员还有 %1$d 天过期，请及时续订</string>
+    <string name="member_expired_on">您订阅的%1$s已经于%2$s日过期，继续阅读请续订</string>
+
+    <string name="sub_status_incomplete">等待支付</string>
+    <string name="sub_status_incomplete_expired">支付已过期</string>
+    <string name="sub_status_trialing">试用</string>
+    <string name="sub_status_past_due">自动续费失败</string>
+    <string name="sub_status_canceled">已取消</string>
+    <string name="sub_status_unpaid">未支付</string>
+    <string name="sub_status_active">活跃</string>
+    <string name="stripe_status_invalid">Stripe订阅状态异常: %1$s，请刷新或联系客服</string>
+
+    <string name="auto_renew_on">自动续订已开启</string>
+    <string name="auto_renew_off">自动续订已关闭</string>
+
+    <!-- IAP -->
+    <string name="iap_refreshing">正在访问App Store获取您的订阅数据</string>
+    <string name="iap_refresh_success">App Store订阅以已更新</string>
+    <string name="iap_refresh_failed">无法更新苹果内购的订阅</string>
+
+    <!-- List of orders -->
+    <string name="refreshing_data">更新数据&#8230;</string>
+    <string name="refreshing_account">更新账号数据&#8230;</string>
+    <string name="refreshing_wx_info">更新微信信息</string>
+    <string name="wait_while_refresh_wx">从微信更新信息耗时较长，请耐心等候</string>
+
+    <string name="wait_while_wx_login">获取微信数据耗时较长，请耐心等候，如果出现超时错误，请重试或选择较快的网络</string>
+    <string name="loading_failed">无法加载数据，请稍后再试</string>
+
+    <string name="prompt_no_network">网络无连接，请检查网络设置</string>
+
+
+    <string name="prompt_no_keyword">请输入关键字后搜索</string>
+
     <!-- Error message -->
     <string name="error_mismatched_confirm_password">两次输入的新密码不一致</string>
     <string name="error_incorrect_password">密码错误</string>
@@ -393,7 +358,6 @@
     <string name="api_email_not_found">邮箱尚未注册</string>
     <string name="api_account_not_found">没有找到您的账号</string>
     <string name="api_bad_request">无效的请求</string>
-
 
     <!-- API error message -->
     <string name="api_too_many_request">请求过于频繁，请稍后再试</string>
@@ -469,24 +433,6 @@
     <string name="alert_audio_deleted">已删除下载的音频</string>
     <string name="api_password_code_not_found">您似乎使用了无效的验证码，请重新获取重置密码邮件</string>
 
-
-    <string-array name="standard_benefits">
-        <item>✔ 专享订阅内容每日仅需0.7元(或按月订阅每日0.9元)</item>
-        <item>✔ 精选深度分析</item>
-        <item>✔ 中英双语内容</item>
-        <item>✔ 金融英语速读训练</item>
-        <item>✔ 英语原声电台</item>
-        <item>✔ FT研究院专题报告（不含行业报告）</item>
-        <item>✔ 无限浏览7日前所有历史文章（近8万篇）</item>
-    </string-array>
-
-    <string-array name="premium_benefits">
-        <item>✔ 专享订阅内容每日仅需5.5元</item>
-        <item>✔ 享受“标准会员”所有权益</item>
-        <item>✔ 编辑精选，总编/各版块主编每周五为您推荐本周必读资讯，分享他们的思考与观点</item>
-        <item>✔ FT研究院专题报告和行业报告</item>
-        <item>✔ FT中文网2021年度论坛门票2张</item>
-    </string-array>
     <string-array name="stripe_footnotes">
         <item>* FT中文网的Stripe支付不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</item>
         <item>* 微信登录的用户需要绑定FT中文网账号后才可以使用Stripe订阅</item>
@@ -519,7 +465,6 @@
         <item>简体</item>
         <item>繁体</item>
     </string-array>
-    <!-- TODO: Remove or change this placeholder text -->
     <string-array name="settings_language_values">
         <item>sc</item>
         <item>tc</item>
