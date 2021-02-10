@@ -53,7 +53,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (wxOrder == null) {
-                    wxPayIntentResult.value = Result.LocalizedError(R.string.order_cannot_be_created)
+                    wxPayIntentResult.value = Result.LocalizedError(R.string.toast_order_failed)
                     return@launch
                 }
                 wxPayIntentResult.value = Result.Success(wxOrder)
@@ -83,7 +83,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (aliOrder == null) {
-                    aliPayIntentResult.value = Result.LocalizedError(R.string.order_cannot_be_created)
+                    aliPayIntentResult.value = Result.LocalizedError(R.string.toast_order_failed)
                     return@launch
                 }
                 aliPayIntentResult.value = Result.Success(aliOrder)
