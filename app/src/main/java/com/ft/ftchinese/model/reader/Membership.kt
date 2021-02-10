@@ -64,14 +64,6 @@ data class Membership(
         return payMethod == PayMethod.STRIPE && stripeSubsId != null
     }
 
-    /**
-     * Determine whether to display a warning message
-     * on membership info.
-     */
-    fun isActiveStripe(): Boolean {
-        return isStripe() && status == StripeSubStatus.Active
-    }
-
     fun isInvalidStripe(): Boolean {
         return isStripe() && status?.isInvalid() == true
     }
