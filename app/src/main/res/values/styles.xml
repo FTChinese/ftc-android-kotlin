@@ -134,7 +134,7 @@
 
     <!-- 18sp text body with variants -->
     <style name="OrigamiText.Body1" parent="TextAppearance.MaterialComponents.Body1">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">@dimen/font_size_18</item>
     </style>
     <style name="OrigamiText.Body1.Center">
         <item name="android:textAlignment">center</item>
@@ -148,7 +148,7 @@
 
     <!-- 16sp text with variants -->
     <style name="OrigamiText.Body2" parent="TextAppearance.MaterialComponents.Body2">
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">@dimen/font_size_16</item>
     </style>
 
     <style name="OrigamiText.Body2.Center">
