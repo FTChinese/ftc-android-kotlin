@@ -25,12 +25,13 @@ import com.ft.ftchinese.store.PaymentManager
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.formatter.formatPrice
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.viewmodel.CustomerViewModel
+import com.ft.ftchinese.viewmodel.CustomerViewModelFactory
 import com.ft.ftchinese.viewmodel.Result
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
@@ -51,8 +52,11 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private lateinit var checkOutViewModel: CheckOutViewModel
     private lateinit var accountViewModel: AccountViewModel
+    private lateinit var customerViewModel: CustomerViewModel
     private lateinit var paywallViewModel: PaywallViewModel
     private lateinit var cartViewModel: CartItemViewModel
+
+    private lateinit var fileCache: FileCache
 
     private lateinit var orderManager: OrderManager
     private lateinit var sessionManager: SessionManager
@@ -65,9 +69,10 @@ class CheckOutActivity : ScopedAppActivity(),
 
     // Payment method use selected.
     private var payMethod: PayMethod? = null
-
-    // TODO: use CheckoutItem.
+    // Plan chosen
     private var plan: Plan? = null
+    // How user want to pay?
+    private var checkoutIntents: CheckoutIntents? = null
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -95,16 +100,20 @@ class CheckOutActivity : ScopedAppActivity(),
         wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
 
         tracker = StatsTracker.getInstance(this)
-        // Log event: add card
-        plan?.let {
-            tracker.addCart(it)
-        }
 
-        plan = PlanStore.findById(planId)
+        val p = PlanStore.findById(planId) ?: return
+
+        sessionManager.loadAccount()?.let {
+            checkoutIntents = buildCheckoutIntents(it.membership, p.edition)
+        }
+        fileCache = FileCache(this)
+
+        plan = p
 
         setupViewModel()
         initUI()
-        info("CheckOutActivity created")
+
+        tracker.addCart(p)
     }
 
     private fun setupViewModel() {
@@ -114,7 +123,10 @@ class CheckOutActivity : ScopedAppActivity(),
         accountViewModel = ViewModelProvider(this)
             .get(AccountViewModel::class.java)
 
-        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(FileCache(this)))
+        customerViewModel = ViewModelProvider(this, CustomerViewModelFactory(fileCache))
+            .get(CustomerViewModel::class.java)
+
+        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))
             .get(PaywallViewModel::class.java)
 
         cartViewModel = ViewModelProvider(this).get(CartItemViewModel::class.java)
@@ -123,11 +135,13 @@ class CheckOutActivity : ScopedAppActivity(),
             checkOutViewModel.isNetworkAvailable.value = it
             accountViewModel.isNetworkAvailable.value = it
             paywallViewModel.isNetworkAvailable.value = it
+            customerViewModel.isNetworkAvailable.value = it
         })
         isConnected.let {
             checkOutViewModel.isNetworkAvailable.value = it
             accountViewModel.isNetworkAvailable.value = it
             paywallViewModel.isNetworkAvailable.value = it
+            customerViewModel.isNetworkAvailable.value = it
         }
 
         checkOutViewModel.wxPayIntentResult.observe(this) {
@@ -138,15 +152,58 @@ class CheckOutActivity : ScopedAppActivity(),
             onAliPayIntent(it)
         }
 
-        paywallViewModel.stripePrices.observe(this) {
-            onStripePrices(it)
+        paywallViewModel.stripePrices.observe(this) { result ->
+            binding.inProgress = false
+            when (result) {
+                is Result.LocalizedError -> {
+                    toast(result.msgId)
+                }
+                is Result.Error -> {
+                    result.exception.message?.let { toast(it) }
+                }
+                is Result.Success -> {
+                    StripePriceStore.prices = result.data
+                    gotoStripe()
+                }
+            }
+        }
+
+        customerViewModel.creatingCustomer.observe(this) { yes ->
+            if (yes) {
+                sessionManager.loadAccount()?.let {
+                    customerViewModel.create(it)
+                    binding.inProgress = true
+                    // Next goes to `customerViewModel.customerCreated`
+                }
+            }
+        }
+
+        customerViewModel.customerCreated.observe(this) { result ->
+            binding.inProgress = false
+
+            when (result) {
+               is Result.Success -> {
+                   sessionManager.saveStripeId(result.data.id)
+
+                   if (gotoStripe()) {
+                       return@observe
+                   }
+
+                   // Retrieve stripe prices if not loaded yet.
+                   binding.inProgress = true
+                   paywallViewModel.loadStripePrices()
+               }
+               is Result.LocalizedError -> {
+                   toast(result.msgId)
+               }
+                is Result.Error -> {
+                    result.exception.message?.let { toast(it)}
+                }
+           }
         }
     }
 
     private fun initUI() {
-        val plan = plan ?: return
-        val m = sessionManager.loadAccount()?.membership ?: return
-
         // Attach cart fragment
         supportFragmentManager.commit {
             replace(
@@ -155,32 +212,28 @@ class CheckOutActivity : ScopedAppActivity(),
             )
         }
 
-        val checkoutIntent = buildCheckoutIntent(m, plan.edition)
-
-        // Show title
-        checkoutIntent.orderKind?.let {
-            supportActionBar?.setTitle(getOrderKindText(this, it))
+        // Toolbar text
+        supportActionBar?.title = checkoutIntents?.orderKindsTitle(this)
+        binding.payButtonEnabled = payMethod != null
+        binding.intents = checkoutIntents
+        // Data for cart ui.
+        plan?.checkoutItem?.let {
+            cartViewModel.cartCreated.value = buildFtcCart(this, it)
         }
 
-        binding.intent = checkoutIntent
-
-        cartViewModel.cartCreated.value = buildFtcCart(this, plan.checkoutItem)
-
+        // Ask permission.
         requestPermission()
 
         binding.alipayBtn.setOnClickListener {
-            payMethod = PayMethod.ALIPAY
-            onSelectPayMethod()
+            onSelectPayMethod(PayMethod.ALIPAY)
         }
 
         binding.wxpayBtn.setOnClickListener {
-            payMethod = PayMethod.WXPAY
-            onSelectPayMethod()
+            onSelectPayMethod(PayMethod.WXPAY)
         }
 
         binding.stripeBtn.setOnClickListener {
-            payMethod = PayMethod.STRIPE
-            onSelectPayMethod()
+            onSelectPayMethod(PayMethod.STRIPE)
         }
 
         binding.payBtn.setOnClickListener {
@@ -188,39 +241,13 @@ class CheckOutActivity : ScopedAppActivity(),
         }
     }
 
-    private fun onSelectPayMethod() {
-        val priceText = plan?.checkoutItem?.let {
-            formatPrice(this, it.payablePriceParams)
-        }
+    // Handle UI changes upon user selected a payment method.
+    private fun onSelectPayMethod(method: PayMethod) {
+        payMethod = method
 
-        info("Payment method selected $payMethod")
-
-        binding.payButtonText = when(payMethod) {
-            // 支付宝支付 ¥258.00
-            PayMethod.ALIPAY -> getString(
-                    R.string.formatter_check_out,
-                    getString(R.string.pay_method_ali),
-                    priceText)
-            // 微信支付 ¥258.00
-            PayMethod.WXPAY -> getString(
-                    R.string.formatter_check_out,
-                    getString(R.string.pay_method_wechat),
-                    priceText)
-
-            // Stripe支付 ¥258.00
-            // 添加或选择银行卡
-            // 设置Stripe支付
-            PayMethod.STRIPE -> if (sessionManager.loadAccount()?.stripeId.isNullOrBlank()) {
-                getString(R.string.stripe_init)
-            } else {
-                getString(
-                    R.string.formatter_check_out,
-                    getString(R.string.pay_method_stripe),
-                    priceText)
-            }
-            else -> {
-                getString(R.string.pay_method_not_selected)
-            }
+        binding.payButtonEnabled = checkoutIntents?.paymentAllowed(method)
+        plan?.let {
+            binding.payButtonText = checkoutIntents?.payButtonText(this, method, it)
         }
     }
 
@@ -230,16 +257,15 @@ class CheckOutActivity : ScopedAppActivity(),
 
         val pm = payMethod
         if (pm == null) {
-            toast(R.string.pay_method_not_selected)
+            toast(R.string.toast_no_pay_method)
             return
         }
 
-        tracker.checkOut(plan, pm)
-        binding.inProgress = true
-
         when (pm) {
             PayMethod.ALIPAY -> {
-                toast(R.string.request_order)
+                toast(R.string.toast_creating_order)
+                tracker.checkOut(plan, pm)
+                binding.inProgress = true
                 checkOutViewModel.createAliOrder(account, plan)
             }
 
@@ -252,28 +278,36 @@ class CheckOutActivity : ScopedAppActivity(),
                     return
                 }
 
-                toast(R.string.request_order)
+                toast(R.string.toast_creating_order)
+                tracker.checkOut(plan, pm)
+                binding.inProgress = true
                 checkOutViewModel.createWxOrder(account, plan)
             }
 
             PayMethod.STRIPE -> {
-                // TODO: move to a separate method on membership.
-                if (account.membership.isActiveStripe() && !account.membership.expired()) {
-                    toast(R.string.duplicate_purchase)
-                    binding.inProgress = false
+                if (account.isWxOnly) {
+                    EmailRequiredDialogFragment()
+                        .show(supportFragmentManager, "linkEmail")
+                    // Next goes to `onActivityResult`.
+                    return
+                }
+                if (account.stripeId.isNullOrBlank()) {
+                    StripeCustomerDialogFragment()
+                        .show(supportFragmentManager, "createStripeCustomer")
+                    // After user clicked yes button in the dialog,
+                    // it should goes to `customerViewModel.customerCreated`
                     return
                 }
 
                 if (gotoStripe()) {
                     return
                 }
-
                 // Retrieve stripe prices if not loaded yet.
                 binding.inProgress = true
                 paywallViewModel.loadStripePrices()
             }
 
-            else -> toast(R.string.pay_method_not_selected)
+            else -> toast(R.string.toast_no_pay_method)
         }
     }
 
@@ -297,22 +331,6 @@ class CheckOutActivity : ScopedAppActivity(),
         )
 
         return true
-    }
-
-    private fun onStripePrices(result: Result<List<StripePrice>>) {
-        binding.inProgress = false
-        when (result) {
-            is Result.LocalizedError -> {
-                toast(result.msgId)
-            }
-            is Result.Error -> {
-                result.exception.message?.let { toast(it) }
-            }
-            is Result.Success -> {
-                StripePriceStore.prices = result.data
-                gotoStripe()
-            }
-        }
     }
 
     private fun onAliPayIntent(result: Result<AliPayIntent>) {
@@ -506,6 +524,20 @@ class CheckOutActivity : ScopedAppActivity(),
         if (requestCode == RequestCode.PAYMENT) {
             setResult(Activity.RESULT_OK)
             finish()
+            return
+        }
+        // If wx-only user linked to email account.
+        if (requestCode == RequestCode.LINK) {
+            val account = sessionManager.loadAccount() ?: return
+            // Chances are the the new email account might not be a Stripe customer yet.
+            if (!account.stripeId.isNullOrBlank()) {
+                return
+            }
+            customerViewModel.create(account)
+            toast("Creating Stripe customer...")
+            binding.inProgress = true
+            // Next goes to `customerViewModel.customerCreated`
+            return
         }
     }
 
