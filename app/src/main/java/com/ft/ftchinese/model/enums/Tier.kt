@@ -15,12 +15,6 @@ enum class Tier(val symbol: String) : Parcelable {
             PREMIUM -> R.string.tier_premium
         }
 
-    val productDescRes: Int
-        get() = when (this) {
-            STANDARD -> R.array.standard_benefits
-            PREMIUM -> R.array.premium_benefits
-        }
-
     override fun toString(): String {
         return symbol
     }
