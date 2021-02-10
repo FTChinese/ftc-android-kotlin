@@ -1,6 +1,8 @@
 package com.ft.ftchinese
 
-import android.app.*
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -23,30 +25,35 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.order.*
-import com.ft.ftchinese.model.reader.*
-import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.model.order.Idempotency
+import com.ft.ftchinese.model.order.StripeSubStatus
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.reader.Wechat
+import com.ft.ftchinese.model.subscription.Order
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.about.LegalDetailsFragment
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
-import com.ft.ftchinese.ui.article.*
+import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.article.EXTRA_ARTICLE_TEASER
+import com.ft.ftchinese.ui.article.LyricsAdapter
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.about.LegalDetailsFragment
-import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.checkout.LatestOrderActivity
+import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.share.SocialShareFragment
 import com.ft.ftchinese.wxapi.WXEntryActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.iid.FirebaseInstanceId
 import com.google.firebase.messaging.FirebaseMessaging
-import org.jetbrains.anko.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
+import org.jetbrains.anko.info
+import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
 
@@ -55,121 +62,8 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var binding: ActivityTestBinding
     private lateinit var orderManger: OrderManager
-    private var errorDialog: Dialog? = null
     private lateinit var sessionManager: SessionManager
     private lateinit var workManager: WorkManager
-
-    private val freeUser = Account(
-        id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-        unionId = null,
-        stripeId = null,
-        userName = "Free Edition",
-        email = "free@example.org",
-        isVerified = false,
-        avatarUrl = null,
-        loginMethod = LoginMethod.EMAIL,
-        wechat = Wechat(
-            nickname = null,
-            avatarUrl = null
-        ),
-        membership = Membership()
-    )
-
-    private val stdUser = Account(
-        id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-        unionId = null,
-        stripeId = null,
-        userName = "Standard Edition",
-        email = "standard@example.org",
-        isVerified = false,
-        avatarUrl = null,
-        loginMethod = LoginMethod.EMAIL,
-        wechat = Wechat(
-            nickname = null,
-            avatarUrl = null
-        ),
-        membership = Membership(
-            tier = Tier.STANDARD,
-            cycle = Cycle.YEAR,
-            expireDate = LocalDate.now().plusYears(1),
-            payMethod = PayMethod.ALIPAY,
-            autoRenew = false,
-            status = null,
-            vip = false
-        )
-    )
-
-    private val prmUser = Account(
-        id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-        unionId = null,
-        stripeId = null,
-        userName = "Premium Edition",
-        email = "premium@example.org",
-        isVerified = false,
-        avatarUrl = null,
-        loginMethod = LoginMethod.EMAIL,
-        wechat = Wechat(
-            nickname = null,
-            avatarUrl = null
-        ),
-        membership = Membership(
-            tier = Tier.PREMIUM,
-            cycle = Cycle.YEAR,
-            expireDate = LocalDate.now().plusYears(1),
-            payMethod = PayMethod.ALIPAY,
-            autoRenew = false,
-            status = null,
-            vip = false
-        )
-    )
-
-    private val vipUser = Account(
-        id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-        unionId = null,
-        stripeId = null,
-        userName = "Premium Edition",
-        email = "premium@example.org",
-        isVerified = false,
-        avatarUrl = null,
-        loginMethod = LoginMethod.EMAIL,
-        wechat = Wechat(
-            nickname = null,
-            avatarUrl = null
-        ),
-        membership = Membership(
-            tier = null,
-            cycle = null,
-            expireDate = null,
-            payMethod = null,
-            autoRenew = false,
-            status = null,
-            vip = true
-        )
-    )
-
-    private val stripeUser = Account(
-        id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-        unionId = null,
-        stripeId = "cus_abc",
-        userName = "Standard Edition",
-        email = "standard@example.org",
-        isVerified = false,
-        avatarUrl = null,
-        loginMethod = LoginMethod.EMAIL,
-        wechat = Wechat(
-            nickname = null,
-            avatarUrl = null
-        ),
-        membership = Membership(
-            tier = Tier.STANDARD,
-            cycle = Cycle.YEAR,
-            expireDate = LocalDate.now().plusYears(1),
-            payMethod = PayMethod.STRIPE,
-            autoRenew = true,
-            status = StripeSubStatus.Canceled,
-            vip = false
-        )
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -242,45 +136,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                     }
         }
 
-        // Retrieve registration token.
-        binding.btnLogToken.setOnClickListener {
-            FirebaseInstanceId
-                    .getInstance()
-                    .instanceId
-                    .addOnCompleteListener(OnCompleteListener {
-                        if (!it.isSuccessful) {
-                            info("getInstanceId failed", it.exception)
-                            alert(Appcompat, "Failed to get token due to: ${it.exception?.message}", "Failed").show()
-                            return@OnCompleteListener
-                        }
-
-                        val token = it.result?.token
-
-                        info("Token $token")
-                        alert(Appcompat, "Token retrieved: $token", "Success").show()
-                    })
-        }
-
-        binding.checkGoogleApi.setOnClickListener {
-            if (checkPlayServices()) {
-                alert(Appcompat, "Play service available").show()
-            } else {
-                alert(Appcompat, "Play service not available").show()
-            }
-        }
-
-        binding.downloadGooglePlay.setOnClickListener {
-            val googleApiAvailability = GoogleApiAvailability.getInstance()
-
-            googleApiAvailability.makeGooglePlayServicesAvailable(this)
-                    .addOnSuccessListener {
-                        toast("Success")
-                    }
-                    .addOnFailureListener {
-                        toast("Failed")
-                    }
-        }
-
         // Setup bottom bar menu
         binding.bottomBar.replaceMenu(R.menu.activity_test_menu)
         binding.bottomBar.setOnMenuItemClickListener {
@@ -290,23 +145,259 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         binding.btnFreeUser.setOnClickListener {
-            sessionManager.saveAccount(freeUser)
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+                unionId = null,
+                stripeId = null,
+                userName = "Free Edition",
+                email = "free@example.org",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.EMAIL,
+                wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+                ),
+                membership = Membership()
+            ))
+        }
+
+        binding.btnWxonlyUser.setOnClickListener {
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "",
+                unionId = "0lwxee2KvHdym1FPhj1HdgIN7nW1",
+                stripeId = null,
+                userName = "Wx-only User",
+                email = "",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.WECHAT,
+                wechat = Wechat(
+                    nickname = "Marvin4296",
+                    avatarUrl = "https://randomuser.me/api/portraits/thumb/men/10.jpg"
+                ),
+                membership = Membership()
+            ))
         }
 
         binding.btnStandardUser.setOnClickListener {
-            sessionManager.saveAccount(stdUser)
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+                unionId = null,
+                stripeId = null,
+                userName = "Standard Edition",
+                email = "standard@example.org",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.EMAIL,
+                wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+                ),
+                membership = Membership(
+                    tier = Tier.STANDARD,
+                    cycle = Cycle.YEAR,
+                    expireDate = LocalDate.now().plusYears(1),
+                    payMethod = PayMethod.ALIPAY,
+                    autoRenew = false,
+                    status = null,
+                    vip = false
+                )
+            ))
         }
 
         binding.btnPremiumUser.setOnClickListener {
-            sessionManager.saveAccount(prmUser)
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+                unionId = null,
+                stripeId = null,
+                userName = "Premium Edition",
+                email = "premium@example.org",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.EMAIL,
+                wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+                ),
+                membership = Membership(
+                    tier = Tier.PREMIUM,
+                    cycle = Cycle.YEAR,
+                    expireDate = LocalDate.now().plusYears(1),
+                    payMethod = PayMethod.ALIPAY,
+                    autoRenew = false,
+                    status = null,
+                    vip = false
+                )
+            ))
         }
 
         binding.btnVipUser.setOnClickListener {
-            sessionManager.saveAccount(vipUser)
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+                unionId = null,
+                stripeId = null,
+                userName = "Premium Edition",
+                email = "premium@example.org",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.EMAIL,
+                wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+                ),
+                membership = Membership(
+                    tier = null,
+                    cycle = null,
+                    expireDate = null,
+                    payMethod = null,
+                    autoRenew = false,
+                    status = null,
+                    vip = true
+                )
+            ))
         }
 
-        binding.btnStripeUser.setOnClickListener {
-            sessionManager.saveAccount(stripeUser)
+        binding.btnStripeStdYear.setOnClickListener {
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+                unionId = null,
+                stripeId = "cus_abc",
+                userName = "Standard Yearly Edition",
+                email = "standard@example.org",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.EMAIL,
+                wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+                ),
+                membership = Membership(
+                    tier = Tier.STANDARD,
+                    cycle = Cycle.YEAR,
+                    expireDate = LocalDate.now().plusYears(1),
+                    payMethod = PayMethod.STRIPE,
+                    autoRenew = true,
+                    status = StripeSubStatus.Canceled,
+                    vip = false
+                )
+            ))
+        }
+
+        binding.btnStripeStdMonth.setOnClickListener {
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+                unionId = null,
+                stripeId = "cus_abc",
+                userName = "Standard Edition",
+                email = "standard@example.org",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.EMAIL,
+                wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+                ),
+                membership = Membership(
+                    tier = Tier.STANDARD,
+                    cycle = Cycle.MONTH,
+                    expireDate = LocalDate.now().plusYears(1),
+                    payMethod = PayMethod.STRIPE,
+                    autoRenew = true,
+                    status = StripeSubStatus.Canceled,
+                    vip = false
+                )
+            ))
+        }
+
+        binding.btnStripePremium.setOnClickListener {
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+                unionId = null,
+                stripeId = "cus_abc",
+                userName = "Standard Edition",
+                email = "standard@example.org",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.EMAIL,
+                wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+                ),
+                membership = Membership(
+                    tier = Tier.PREMIUM,
+                    cycle = Cycle.YEAR,
+                    expireDate = LocalDate.now().plusYears(1),
+                    payMethod = PayMethod.STRIPE,
+                    autoRenew = true,
+                    status = StripeSubStatus.Canceled,
+                    vip = false
+                )
+            ))
+        }
+
+        binding.btnIapStandard.setOnClickListener {
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+                unionId = null,
+                stripeId = null,
+                userName = "IAP Standard",
+                email = "standard@example.org",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.EMAIL,
+                wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+                ),
+                membership = Membership(
+                    tier = Tier.STANDARD,
+                    cycle = Cycle.YEAR,
+                    expireDate = LocalDate.now().plusYears(1),
+                    payMethod = PayMethod.APPLE,
+                    autoRenew = true,
+                    status = null,
+                    appleSubsId = "1000000266289493",
+                    vip = false
+                )
+            ))
+        }
+
+        binding.btnIapPremium.setOnClickListener {
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+                unionId = null,
+                stripeId = null,
+                userName = "IAP Premium",
+                email = "prmeium@example.org",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.EMAIL,
+                wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+                ),
+                membership = Membership(
+                    tier = Tier.PREMIUM,
+                    cycle = Cycle.YEAR,
+                    expireDate = LocalDate.now().plusYears(1),
+                    payMethod = PayMethod.APPLE,
+                    autoRenew = true,
+                    status = null,
+                    appleSubsId = "1000000266289493",
+                    vip = false
+                )
+            ))
         }
 
         binding.bottomDialog.setOnClickListener {
@@ -378,27 +469,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             notify(1, builder.build())
         }
     }
-
-    private fun checkPlayServices(): Boolean {
-        val googleApiAvailability = GoogleApiAvailability.getInstance()
-        val resultCode = googleApiAvailability.isGooglePlayServicesAvailable(this)
-
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (googleApiAvailability.isUserResolvableError(resultCode)) {
-                if (errorDialog == null) {
-                    errorDialog = googleApiAvailability.getErrorDialog(this, resultCode, 2404)
-                    errorDialog?.setCancelable(false)
-                }
-
-                if (errorDialog?.isShowing == false) {
-                    errorDialog?.show()
-                }
-            }
-        }
-
-        return resultCode == ConnectionResult.SUCCESS
-    }
-
 
     private fun onBottomMenuItemClicked(item: MenuItem) {
         when (item.itemId) {
