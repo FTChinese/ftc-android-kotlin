@@ -118,7 +118,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="@string/btn_start_subscription"
+                    android:text="@string/order_kind_create"
                     android:visibility="@{next.canReSubscribe ? View.VISIBLE : View.GONE}"
                     android:enabled="@{!inProgress}"
                     app:layout_constraintStart_toStartOf="parent"
