@@ -12,15 +12,27 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscription.CheckoutItem
+import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.StripePrice
 import com.ft.ftchinese.ui.formatter.buildFtcPrice
 import com.ft.ftchinese.ui.formatter.buildStripePrice
+import com.ft.ftchinese.ui.formatter.formatPrice
 
 data class CheckoutIntent(
-    val orderKind: OrderKind?,
+    val orderKind: OrderKind,
     val payMethods: List<PayMethod>,
+)
+
+data class CheckoutIntents(
+    val intents: List<CheckoutIntent>,
     val warning: String,
 ) {
+    val payMethods: List<PayMethod>
+        get() = intents.flatMap { it.payMethods }
+
+    val orderKinds: List<OrderKind>
+        get() = intents.map { it.orderKind }
+
     val permitAliPay: Boolean
         get() = payMethods.contains(PayMethod.ALIPAY)
 
@@ -29,13 +41,82 @@ data class CheckoutIntent(
 
     val permitStripe: Boolean
         get() = payMethods.contains(PayMethod.STRIPE)
+
+    fun orderKindsTitle(ctx: Context) = orderKinds.joinToString("/") {
+        ctx.getString(it.stringRes)
+    }
+
+    fun paymentAllowed(method: PayMethod) = payMethods.contains(method)
+
+    /**
+     * Find the intent containing the specified payment method.
+     */
+    fun findIntent(method: PayMethod): CheckoutIntent? {
+        if (intents.isEmpty()) {
+            return null
+        }
+
+        if (intents.size == 1) {
+            return intents[0]
+        }
+
+        return intents.find { it.payMethods.contains(method) }
+    }
+
+    fun payButtonText(ctx: Context, payMethod: PayMethod, plan: Plan): String {
+        val intent = findIntent(payMethod) ?: return ctx.getString(R.string.check_out)
+
+        when (payMethod) {
+            PayMethod.ALIPAY, PayMethod.WXPAY -> {
+                // Ali/Wx pay button have two groups:
+                // CREATE/RENEW/UPGRADE: 支付宝支付 ¥258.00 or 微信支付 ¥258.00
+                // ADD_ON: 购买订阅期限
+                if (intent.orderKind == OrderKind.AddOn) {
+                    return ctx.getString(intent.orderKind.stringRes)
+                }
+
+                val priceText = formatPrice(ctx, plan.checkoutItem.payablePriceParams)
+                return ctx.getString(
+                    R.string.formatter_check_out,
+                    ctx.getString(payMethod.stringRes),
+                    priceText
+                )
+            }
+            // Stripe button has three groups:
+            // CREATE: Stripe订阅
+            // UPGRADE: Stripe订阅升级
+            // SwitchCycle: Stripe变更订阅周期
+            PayMethod.STRIPE -> {
+                when (intent.orderKind) {
+                    OrderKind.Create -> return ctx.getString(payMethod.stringRes)
+                    OrderKind.Upgrade -> return ctx.getString(payMethod.stringRes) + ctx.getString(intent.orderKind.stringRes) + ctx.getString(plan.tier.stringRes)
+                    OrderKind.SwitchCycle -> ctx.getString(R.string.pay_brand_stripe) + ctx.getString(intent.orderKind.stringRes)
+                }
+            }
+        }
+
+        return ctx.getString(R.string.check_out)
+    }
 }
 
-fun buildCheckoutIntent(m: Membership, e: Edition): CheckoutIntent {
+fun buildCheckoutIntents(m: Membership, e: Edition): CheckoutIntents {
     if (m.expired()) {
-        return CheckoutIntent(
-            orderKind = OrderKind.CREATE,
-            payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
+        return CheckoutIntents(
+            intents = listOf(CheckoutIntent(
+                orderKind = OrderKind.Create,
+                payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
+            )),
+            warning = "",
+        )
+    }
+
+    // Invalid stripe subscription is treated as not having a membership.
+    if (m.isInvalidStripe()) {
+        return CheckoutIntents(
+            intents = listOf(CheckoutIntent(
+                orderKind = OrderKind.Create,
+                payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
+            )),
             warning = "",
         )
     }
@@ -47,185 +128,148 @@ fun buildCheckoutIntent(m: Membership, e: Edition): CheckoutIntent {
                 // For alipay and wxpay, allow user to renew if
                 // remaining days not exceeding 3 years.
                 if (!m.withinAliWxRenewalPeriod()) {
-                    return CheckoutIntent(
-                        orderKind = OrderKind.RENEW,
-                        payMethods = listOf(),
+                    return CheckoutIntents(
+                        intents = listOf(CheckoutIntent(
+                            orderKind = OrderKind.Renew,
+                            payMethods = listOf()
+                        )),
                         warning = "剩余时间超出允许的最长续订期限",
                     )
                 }
                 // Ali/Wx member can renew via Ali/Wx, or Stripe with remaining days put to reserved state.
-                return CheckoutIntent(
-                    orderKind = OrderKind.RENEW,
-                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
-                    warning = "您当前会员通过支付宝/微信购买，如果选择Stripe订阅，当前会员的剩余时间将留待Stripe订阅失效后继续使用启用。"
+                return CheckoutIntents(
+                    intents = listOf(CheckoutIntent(
+                        orderKind = OrderKind.Renew,
+                        payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
+                    )),
+                    warning = "通过支付宝/微信购买累加一个订阅周期，或选择Stripe订阅，当前剩余订阅时间将留待Stripe订阅结束后继续使用。"
                 )
             }
 
             // Current membership's tier differs from the selected one.
-            // This is an Upgrade action if standard user selected premium product.
-            if (e.tier == Tier.PREMIUM) {
-                return CheckoutIntent(
-                    orderKind = OrderKind.UPGRADE,
-                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
-                    warning = "升级高端会员即可启用，标准版的剩余时间将在高端版失效后继续使用。",
-                )
-            }
-
-            // A premium could buy standard as AddOns.
-            if (e.tier == Tier.STANDARD) {
-                return CheckoutIntent(
-                    orderKind = OrderKind.ADD_ON,
-                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
-                    warning = "您可以使用一次性购买方式购买标准版订阅期限，在高端版结束后启用。"
-                )
+            // Allowed actions depends on what is being selected.
+            when (e.tier) {
+                // This is an Upgrade action if standard user selected premium product.
+                Tier.PREMIUM -> {
+                    return CheckoutIntents(
+                        intents = listOf(CheckoutIntent(
+                            orderKind = OrderKind.Upgrade,
+                            payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE)
+                        )),
+                        warning = "升级高端会员即刻启用，标准版的剩余时间将在高端版结束后继续使用。",
+                    )
+                }
+                // A premium could buy standard as AddOns.
+                Tier.STANDARD -> {
+                    return CheckoutIntents(
+                        intents = listOf(CheckoutIntent(
+                            orderKind = OrderKind.Upgrade,
+                            payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
+                        )),
+                        warning = "高端会员可使用支付宝/微信购买新的标准版订阅期限，在高端版结束后启用。"
+                    )
+                }
             }
         }
         PayMethod.STRIPE -> {
-            if (m.tier == e.tier) {
-                // Renewal is not allowed for the same subscription plan.
-                // However, they can purchase AddOn
-                if (m.cycle == e.cycle) {
-                    return CheckoutIntent(
-                        orderKind = OrderKind.ADD_ON,
-                        payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
-                        warning = "您当前使用了Stripe自动续订，不需要再次订阅。不过您可以通过支付宝/微信购买会员期限，在Stripe订阅失效后启用。",
+            // If user is a premium, whatever selected should be treated as AddOn.
+            when (m.tier) {
+                Tier.PREMIUM -> {
+                    return CheckoutIntents(
+                        intents = listOf(CheckoutIntent(
+                            orderKind = OrderKind.AddOn,
+                            payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
+                        )),
+                        warning = "自动续订可以使用支付宝/微信购买额外订阅期限，在订阅结束后启用。",
                     )
                 }
-                // Same product but different billing cycles.
-                // All payment methods are allowed. However, they have different meanings.
-                // If user chooses to use Alipay/Wechat, they are purchasing AddOns;
-                // otherwise they intends to change billing cycles.
-                return CheckoutIntent(
-                    orderKind = OrderKind.UPGRADE, // It should be switch or add on.
-                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
-                    warning = "选择支付宝微信可以购买额外会员期限，在Stripe订阅到期后启用；或选择Stripe更改自动扣款周期。自动订阅建议您订阅年度版更划算。"
-                )
-            }
+                Tier.STANDARD -> {
+                    // If selected premium, it's an upgrade and must use stripe.
+                    when (e.tier) {
+                        Tier.PREMIUM -> {
+                            return CheckoutIntents(
+                                intents = listOf(
+                                CheckoutIntent(
+                                    orderKind = OrderKind.Upgrade,
+                                    payMethods = listOf(PayMethod.STRIPE),
+                                )),
+                                warning = "Stripe订阅升级高端版会自动调整您的扣款额度",
+                            )
+                        }
+                        // Selected standard, the cycle might be different.
+                        Tier.STANDARD -> {
+                            // For same cycle, it could only be add-on
+                            if (m.cycle == e.cycle) {
+                                return CheckoutIntents(
+                                    intents = listOf(CheckoutIntent(
+                                        orderKind = OrderKind.AddOn,
+                                        payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
+                                    )),
+                                    warning = "自动续订可以使用支付宝/微信购买额外订阅期限，在订阅结束后启用。",
+                                )
+                            }
 
-            // Upgrade
-            if (e.tier == Tier.PREMIUM) {
-                return CheckoutIntent(
-                    orderKind = OrderKind.UPGRADE,
-                    payMethods = listOf(PayMethod.STRIPE),
-                    warning = "Stripe订阅升级高端版会自动调整您的扣款额度",
-                )
-            }
-
-            // Premium could buy standard for AddOns
-            if (e.tier == Tier.STANDARD) {
-                return CheckoutIntent(
-                    orderKind = OrderKind.ADD_ON,
-                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
-                    warning = "选择支付宝/微信购买额外会员期限，在自动订阅结束后启用"
-                )
+                            // Same tier but different cycle.
+                            // For Ali/Wx, it's add-on; for Stripe, it's switching cycle.
+                            return CheckoutIntents(
+                                intents = listOf(
+                                    CheckoutIntent(
+                                        orderKind = OrderKind.AddOn,
+                                        payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
+                                    ),
+                                    CheckoutIntent(
+                                        orderKind = OrderKind.SwitchCycle,
+                                        payMethods = listOf(PayMethod.STRIPE)
+                                    )
+                                ),
+                                warning = "选择支付宝微信购买额外会员期限将在Stripe订阅到期后启用；或选择Stripe更改自动扣款周期。自动订阅建议您订阅年度版更划算。"
+                            )
+                        }
+                    }
+                }
             }
         }
         PayMethod.APPLE -> {
-
+            if (m.tier == Tier.STANDARD && e.tier == Tier.PREMIUM) {
+                return CheckoutIntents(
+                    intents = listOf(CheckoutIntent(
+                        orderKind = OrderKind.Upgrade,
+                        payMethods = listOf(),
+                    )),
+                    warning = "苹果内购的标准会员升级高端会员需要在您的苹果设备上，使用原有苹果账号登录后，在FT中文网APP内操作"
+                )
+            }
+            // All other options are add-ons
+            return CheckoutIntents(
+                intents = listOf(CheckoutIntent(
+                    orderKind = OrderKind.AddOn,
+                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
+                )),
+                warning = "自动续订可以使用支付宝/微信购买额外订阅期限，在订阅结束后启用。",
+            )
         }
         PayMethod.B2B -> {
-            return CheckoutIntent(
-                orderKind = OrderKind.RENEW,
-                payMethods = listOf(),
-                warning = "您目前使用的是企业订阅授权，延长订阅期限请联系您所属机构的管理人员"
+            return CheckoutIntents(
+                intents = listOf(),
+                warning = "您目前使用的是企业订阅授权，续订或升级请联系您所属机构的管理人员"
             )
         }
     }
 
-    // Renewal
-    if (m.tier == e.tier) {
-       when (m.payMethod) {
-           // For alipay and wxpay, allow user to renew if
-           // remaining days not exceeding 3 years.
-           PayMethod.ALIPAY, PayMethod.WXPAY -> {
-               // Remaining days exceed 3 years
-               if (!m.withinAliWxRenewalPeriod()) {
-                   return CheckoutIntent(
-                       orderKind = OrderKind.RENEW,
-                       payMethods = listOf(),
-                       warning = "剩余时间超出允许的最长续订期限",
-                   )
-               }
-               // Ali/Wx member can renew via Ali/Wx, or Stripe with remaining days put to reserved state.
-               return CheckoutIntent(
-                   orderKind = OrderKind.RENEW,
-                   payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
-                   warning = "您当前会员通过支付宝/微信购买，如果选择Stripe订阅，请阅读下方注意事项"
-               )
-           }
-           // For stripe, apple, b2b, the purchase is treated as addon.
-           PayMethod.STRIPE, PayMethod.APPLE -> {
-               return CheckoutIntent(
-                   orderKind = OrderKind.ADD_ON,
-                   payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
-                   warning = "Stripe/苹果订阅会员请阅读下方注意事项"
-               )
-           }
-           PayMethod.B2B -> {
-               return CheckoutIntent(
-                   orderKind = OrderKind.RENEW,
-                   payMethods = listOf(),
-                   warning = "您目前使用的是企业订阅授权，延长订阅期限请联系您所属机构的管理人员"
-               )
-           }
-       }
-    }
-
-    // Upgrade
-    if (e.tier == Tier.PREMIUM) {
-        when (m.payMethod) {
-            // For ali/Wx purchased membership to upgrade,
-            // they can use ali, wx or stripe.
-            // current remaining days will be transferred to addon.
-            PayMethod.ALIPAY, PayMethod.WXPAY -> {
-                return CheckoutIntent(
-                    orderKind = OrderKind.UPGRADE,
-                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
-                    warning = "升级高端会员将即可启用，标准版的剩余时间将在高端版失效后继续使用",
-                )
-            }
-            // For Stripe
-            PayMethod.STRIPE -> {
-                return CheckoutIntent(
-                    orderKind = OrderKind.UPGRADE,
-                    payMethods = listOf(PayMethod.STRIPE),
-                    warning = "Stripe订阅升级高端版会自动调整您的扣款额度",
-                )
-            }
-            // If current membership is purchased via Apple,
-            // ask user to performing upgrade back on iOS devices.
-            PayMethod.APPLE -> {
-                return CheckoutIntent(
-                    orderKind = OrderKind.UPGRADE,
-                    payMethods = listOf(),
-                    warning = "苹果内购的订阅升级高端版需要在您的苹果设备上，使用您的原有苹果账号登录后，在FT中文网APP内操作",
-                )
-            }
-            // If current membership is granted by b2b,
-            // ask users to contact their org's admin
-            PayMethod.B2B -> {
-                return CheckoutIntent(
-                    orderKind = OrderKind.UPGRADE,
-                    payMethods = listOf(),
-                    warning = "您目前使用的是企业订阅授权，升级到高端会员请联系您所属机构管理人员"
-                )
-            }
-        }
-    }
-
-    return CheckoutIntent(
-        orderKind = null,
-        payMethods = listOf(),
-        warning = "仅支持新建订阅、续订和标准会员升级高会员，不支持其他操作。",
+    return CheckoutIntents(
+        intents = listOf(),
+        warning = "仅支持新建订阅、续订、标准会员升级和购买额外订阅期限，不支持其他操作。",
     )
 }
 
+/**
+ * Describes the UI in cart fragment.
+ */
 data class Cart(
     val productName: String,
     val payablePrice: Spannable?,
     val originalPrice: Spannable?,
 )
-
 
 fun buildFtcCart(ctx: Context, item: CheckoutItem): Cart {
 
@@ -249,14 +293,3 @@ fun buildStripeCart(ctx: Context, sp: StripePrice): Cart {
         originalPrice = price.original,
     )
 }
-
-fun getOrderKindText(ctx: Context, kind: OrderKind): String {
-    val strRes = when (kind) {
-        OrderKind.RENEW -> R.string.title_renewal
-        OrderKind.UPGRADE -> R.string.title_upgrade
-        else -> R.string.title_new_subs
-    }
-
-    return ctx.getString(strRes)
-}
-
