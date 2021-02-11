@@ -30,14 +30,6 @@ data class Plan(
     val edition: Edition
         get() = Edition(tier, cycle)
 
-    val checkoutItem: CheckoutItem
-        get() = CheckoutItem(
-            plan = this,
-            discount = if (discount.isValid()) {
-                discount
-            } else null
-        )
-
     val unifiedPrice: Price
         get() = Price(
             id = id,
