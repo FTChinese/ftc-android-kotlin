@@ -17,9 +17,11 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentProductBinding
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.model.subscription.Plan
+import com.ft.ftchinese.model.subscription.Product
+import com.ft.ftchinese.model.subscription.defaultPaywall
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.formatter.buildFtcPrice
+import com.ft.ftchinese.ui.formatter.buildPrice
 import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import org.jetbrains.anko.AnkoLogger
@@ -135,7 +137,7 @@ class ProductFragment : ScopedFragment(),
         override fun onBindViewHolder(holder: PriceItemViewHolder, position: Int) {
             val plan = plans[position]
 
-            val price = buildFtcPrice(requireContext(), plan.checkoutItem)
+            val price = buildPrice(requireContext(), plan.unifiedPrice)
 
             if (price.original != null) {
                 holder.text.text = price.original

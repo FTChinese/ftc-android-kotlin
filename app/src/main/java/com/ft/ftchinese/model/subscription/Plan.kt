@@ -3,6 +3,7 @@ package com.ft.ftchinese.model.subscription
 import android.os.Parcelable
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.enums.PriceSource
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KTier
@@ -37,6 +38,22 @@ data class Plan(
             } else null
         )
 
+    val unifiedPrice: Price
+        get() = Price(
+            id = id,
+            tier = tier,
+            cycle = cycle,
+            active = true,
+            currency = currency,
+            liveMode = true,
+            nickname = null,
+            productId = productId,
+            source = PriceSource.Ftc,
+            unitAmount = price,
+            promotionOffer = discount,
+        )
+
+    // Deprecated.
     fun payableAmount(): Double {
         if (!discount.isValid()) {
             return price

@@ -4,13 +4,10 @@ import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonValue
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.content.ArticleType
+import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.order.*
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.UnlinkAnchor
-import com.ft.ftchinese.model.enums.Cycle
-import com.ft.ftchinese.model.enums.OrderKind
-import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.enums.Tier
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZoneOffset
 import org.threeten.bp.ZonedDateTime
@@ -28,6 +25,9 @@ annotation class KTier
 
 @Target(AnnotationTarget.FIELD)
 annotation class KCycle
+
+@Target(AnnotationTarget.FIELD)
+annotation class KPriceSource
 
 @Target(AnnotationTarget.FIELD)
 annotation class KPayMethod
@@ -135,6 +135,26 @@ val cycleConverter = object : Converter {
     override fun toJson(value: Any): String {
         return if (value is Cycle) {
             """ "$value" """
+        } else {
+            """null"""
+        }
+    }
+}
+
+val priceSourceConverter = object : Converter {
+    override fun canConvert(cls: Class<*>): Boolean {
+        return cls == PriceSource::class.java
+    }
+
+    override fun fromJson(jv: JsonValue): Any? {
+        return PriceSource.fromString(jv.string)
+    }
+
+    override fun toJson(value: Any): String {
+        return if (value is PriceSource) {
+            """
+                "$value"
+            """.trimIndent().trim()
         } else {
             """null"""
         }
@@ -271,14 +291,15 @@ val articleTypeConverter = object : Converter {
 }
 
 val json = Klaxon()
-        .fieldConverter(KDate::class, dateConverter)
-        .fieldConverter(KDateTime::class, dateTimeConverter)
-        .fieldConverter(KTier::class, tierConverter)
-        .fieldConverter(KCycle::class, cycleConverter)
-        .fieldConverter(KOrderUsage::class, orderUsageConverter)
-        .fieldConverter(KPayMethod::class, payMethodConverter)
-        .fieldConverter(KLoginMethod::class, loginMethodConverter)
-        .fieldConverter(KUnlinkAnchor::class, unlinkAnchorConverter)
-        .fieldConverter(KStripeSubStatus::class, stripeSubStatusConverter)
-        .fieldConverter(KPaymentIntentStatus::class, paymentIntentStatusConverter)
-        .fieldConverter(KArticleType::class, articleTypeConverter)
+    .fieldConverter(KDate::class, dateConverter)
+    .fieldConverter(KDateTime::class, dateTimeConverter)
+    .fieldConverter(KTier::class, tierConverter)
+    .fieldConverter(KCycle::class, cycleConverter)
+    .fieldConverter(KOrderUsage::class, orderUsageConverter)
+    .fieldConverter(KPayMethod::class, payMethodConverter)
+    .fieldConverter(KLoginMethod::class, loginMethodConverter)
+    .fieldConverter(KUnlinkAnchor::class, unlinkAnchorConverter)
+    .fieldConverter(KStripeSubStatus::class, stripeSubStatusConverter)
+    .fieldConverter(KPaymentIntentStatus::class, paymentIntentStatusConverter)
+    .fieldConverter(KArticleType::class, articleTypeConverter)
+    .fieldConverter(KPriceSource::class, priceSourceConverter)

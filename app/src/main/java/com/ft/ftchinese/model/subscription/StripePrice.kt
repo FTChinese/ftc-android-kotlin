@@ -3,6 +3,7 @@ package com.ft.ftchinese.model.subscription
 import android.os.Parcelable
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.enums.PriceSource
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KTier
@@ -35,9 +36,19 @@ data class StripePrice(
             tier = tier
         )
 
-    fun humanAmount(): Double {
-        return (unitAmount / 100).toDouble()
-    }
+    val unifiedPrice: Price
+        get() = Price(
+            id = id,
+            tier = tier,
+            cycle = cycle,
+            active = active,
+            currency = currency,
+            liveMode = liveMode,
+            nickname = nickname,
+            productId = productId,
+            source = PriceSource.Stripe,
+            unitAmount = (unitAmount / 100).toDouble(),
+        )
 }
 
 // In-memory cache of stripe prices. The data is also persisted to cache file.

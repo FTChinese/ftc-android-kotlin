@@ -11,11 +11,9 @@ import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.subscription.CheckoutItem
 import com.ft.ftchinese.model.subscription.Plan
-import com.ft.ftchinese.model.subscription.StripePrice
-import com.ft.ftchinese.ui.formatter.buildFtcPrice
-import com.ft.ftchinese.ui.formatter.buildStripePrice
+import com.ft.ftchinese.model.subscription.Price
+import com.ft.ftchinese.ui.formatter.buildPrice
 import com.ft.ftchinese.ui.formatter.formatPrice
 
 data class CheckoutIntent(
@@ -75,7 +73,7 @@ data class CheckoutIntents(
                     return ctx.getString(intent.orderKind.stringRes)
                 }
 
-                val priceText = formatPrice(ctx, plan.checkoutItem.payablePriceParams)
+                val priceText = formatPrice(ctx, plan.unifiedPrice.payablePriceParams)
                 return ctx.getString(
                     R.string.formatter_check_out,
                     ctx.getString(payMethod.stringRes),
@@ -271,25 +269,14 @@ data class Cart(
     val originalPrice: Spannable?,
 )
 
-fun buildFtcCart(ctx: Context, item: CheckoutItem): Cart {
-
-    val price = buildFtcPrice(ctx, item)
-
+fun buildCart(ctx: Context, price: Price): Cart {
+    val p = buildPrice(ctx, price)
     return Cart(
-        productName = ctx.getString(item.plan.tier.stringRes),
-        payablePrice = SpannableString(price.payable).apply {
+        productName = ctx.getString(price.tier.stringRes),
+        payablePrice = SpannableString(p.payable).apply {
             setSpan(RelativeSizeSpan(2f), 1, length-2, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         },
-        originalPrice = price.original,
+        originalPrice = p.original,
     )
 }
 
-fun buildStripeCart(ctx: Context, sp: StripePrice): Cart {
-    val price = buildStripePrice(ctx, sp.priceParams)
-
-    return Cart(
-        productName = ctx.getString(sp.tier.stringRes),
-        payablePrice = SpannableString(price.payable),
-        originalPrice = price.original,
-    )
-}

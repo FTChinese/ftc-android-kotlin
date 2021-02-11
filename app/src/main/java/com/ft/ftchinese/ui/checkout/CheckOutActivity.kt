@@ -207,8 +207,8 @@ class CheckOutActivity : ScopedAppActivity(),
         binding.payButtonEnabled = payMethod != null
         binding.intents = checkoutIntents
         // Data for cart ui.
-        plan?.checkoutItem?.let {
-            cartViewModel.cartCreated.value = buildFtcCart(this, it)
+        plan?.unifiedPrice?.let {
+            cartViewModel.cartCreated.value = buildCart(this, it)
         }
 
         // Ask permission.

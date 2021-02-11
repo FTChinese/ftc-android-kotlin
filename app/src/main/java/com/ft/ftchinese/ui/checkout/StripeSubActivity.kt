@@ -177,7 +177,7 @@ class StripeSubActivity : ScopedAppActivity(),
         val intents = buildCheckoutIntents(m, p.edition)
         checkoutIntent = intents.findIntent(PayMethod.STRIPE)
 
-        cartViewModel.cartCreated.value = buildStripeCart(this, p)
+        cartViewModel.cartCreated.value = buildCart(this, p.unifiedPrice)
 
         binding.tvPaymentMethod.setOnClickListener {
             paymentSession.presentPaymentMethodSelection()
