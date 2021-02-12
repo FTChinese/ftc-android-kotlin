@@ -197,7 +197,7 @@
     <string name="formatter_price">%1$s%2$,.0f</string>
     <!-- Example: 支付宝支付 ¥1,998.00-->
     <string name="formatter_check_out">%1$s %2$s</string>
-    <string name="original_price">原价</string>
+    <string name="formatter_original_price">原价 %1$s</string>
 
     <!-- Example: 标准会员/年-->
     <string name="formatter_edition">%1$s/%2$s</string>
