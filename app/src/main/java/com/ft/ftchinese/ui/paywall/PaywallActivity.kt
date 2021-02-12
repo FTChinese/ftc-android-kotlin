@@ -99,7 +99,7 @@ class PaywallActivity : ScopedAppActivity(),
          * When a price button in ProductFragment is clicked,
          * the selected Plan is passed.
          */
-        productViewModel.planSelected.observe(this, Observer {
+        productViewModel.priceSelected.observe(this, Observer {
             val account = sessionManager.loadAccount()
 
             // If user is not logged in, start login.
