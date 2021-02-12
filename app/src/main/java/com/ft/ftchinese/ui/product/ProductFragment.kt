@@ -21,7 +21,7 @@ import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.Product
 import com.ft.ftchinese.model.subscription.defaultPaywall
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.formatter.buildPrice
+import com.ft.ftchinese.ui.formatter.PriceStringBuilder
 import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import org.jetbrains.anko.AnkoLogger
@@ -135,33 +135,44 @@ class ProductFragment : ScopedFragment(),
         }
 
         override fun onBindViewHolder(holder: PriceItemViewHolder, position: Int) {
-            val plan = plans[position]
+            val price = plans[position].unifiedPrice
 
-            val price = buildPrice(requireContext(), plan.unifiedPrice)
+            val hasPromo = price.promotionOffer.isValid()
 
-            if (price.original != null) {
-                holder.text.text = price.original
+            val payable = PriceStringBuilder.fromPrice(
+                price = price,
+                discount = if (hasPromo) {
+                    price.promotionOffer
+                } else null
+            ).build(requireContext())
+
+            if (hasPromo) {
+                holder.text.text = PriceStringBuilder
+                    .fromPrice(price)
+                    .withOriginal()
+                    .withStrikeThrough()
+                    .build(requireContext())
             } else {
                 holder.text.visibility = View.GONE
             }
 
-            when (plan.cycle) {
+            when (price.cycle) {
                 Cycle.YEAR -> {
                     holder.outlineButton.visibility = View.GONE
-                    holder.primaryButton.text = price.payable
+                    holder.primaryButton.text = payable
                     holder.primaryButton.isEnabled = btnEnabled
                     holder.primaryButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
-                        viewModel.planSelected.value = plan
+                        viewModel.priceSelected.value = price
                     }
                 }
                 Cycle.MONTH -> {
                     holder.primaryButton.visibility = View.GONE
-                    holder.outlineButton.text = price.payable
+                    holder.outlineButton.text = payable
                     holder.outlineButton.isEnabled = btnEnabled
                     holder.outlineButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
-                        viewModel.planSelected.value = plan
+                        viewModel.priceSelected.value = price
                     }
                 }
             }
