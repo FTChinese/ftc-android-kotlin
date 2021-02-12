@@ -8,13 +8,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMyOrdersBinding
-import com.ft.ftchinese.model.fetch.formatISODateTime
 import com.ft.ftchinese.model.subscription.Order
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.formatter.formatPrice
-import com.ft.ftchinese.ui.formatter.formatTierCycle
+import com.ft.ftchinese.ui.lists.OrderAdapter
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import org.jetbrains.anko.AnkoLogger
@@ -79,29 +77,9 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
                 result.exception.message?.let { toast(it) }
             }
             is Result.Success -> {
-                viewAdapter.setData(buildRows(result.data))
+                viewAdapter.setData(result.data)
                 viewAdapter.notifyDataSetChanged()
             }
-        }
-    }
-
-    private fun buildRows(orders: List<Order>): List<OrderRow> {
-
-        return orders.map {
-            val tierCycle = formatTierCycle(this, it.tier, it.cycle)
-
-            val payMethod = getString(it.payMethod.stringRes)
-
-            val price = formatPrice(this, it.priceParams)
-
-            OrderRow(
-                    orderId = getString(R.string.order_id, it.id),
-                    plan = getString(R.string.order_subscribed_plan, tierCycle),
-                    period = getString(R.string.order_period, it.startDate, it.endDate),
-                    price = getString(R.string.order_price, price),
-                    payMethod = getString(R.string.order_pay_method, payMethod),
-                    creationTime = getString(R.string.order_creation_time, formatISODateTime(it.createdAt))
-            )
         }
     }
 
