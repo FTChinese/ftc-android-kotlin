@@ -131,6 +131,9 @@
     <style name="OrigamiText.Heading3.Center">
         <item name="android:textAlignment">center</item>
     </style>
+    <style name="OrigamiText.Heading3.Light.Center">
+        <item name="android:textColor">@color/colorBlack60</item>
+    </style>
 
     <!-- 18sp text body with variants -->
     <style name="OrigamiText.Body1" parent="TextAppearance.MaterialComponents.Body1">
