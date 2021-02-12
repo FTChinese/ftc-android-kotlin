@@ -24,7 +24,7 @@ data class Plan(
     val cycle: Cycle,
     val description: String? = null,
     val currency: String = "cny", // Not from API
-    val discount: Discount = Discount()
+    val promotionOffer: Discount = Discount()
 ) : Parcelable {
 
     val edition: Edition
@@ -42,16 +42,16 @@ data class Plan(
             productId = productId,
             source = PriceSource.Ftc,
             unitAmount = price,
-            promotionOffer = discount,
+            promotionOffer = promotionOffer,
         )
 
     // Deprecated.
     fun payableAmount(): Double {
-        if (!discount.isValid()) {
+        if (!promotionOffer.isValid()) {
             return price
         }
 
-        return price - (discount.priceOff ?: 0.0)
+        return price - (promotionOffer.priceOff ?: 0.0)
     }
 
     fun getNamedKey(): String {
