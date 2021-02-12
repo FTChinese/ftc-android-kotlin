@@ -4,11 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentCartItemBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.formatter.getCurrencySymbol
+import org.jetbrains.anko.sdk27.coroutines.onItemSelectedListener
 
 /**
  * Used to show the an overview of the item user purchased.
@@ -32,14 +35,12 @@ class CartItemFragment : ScopedFragment() {
             false
         )
 
-        binding.cart = Cart(
+        binding.price = ProductPriceUI(
             productName = "",
-            payablePrice = null,
-            originalPrice = null,
         )
+        binding.hasDiscount = false
         return binding.root
     }
-
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -48,11 +49,35 @@ class CartItemFragment : ScopedFragment() {
             ViewModelProvider(this).get(CartItemViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
-        cartViewModel.cartCreated.observe(viewLifecycleOwner) {
-            binding.cart = it
+        cartViewModel.priceSelected.observe(viewLifecycleOwner) {
+            binding.price = ProductPriceUI.from(requireContext(), it)
+        }
+
+        cartViewModel.discountsFound.observe(viewLifecycleOwner) {
+            if (it.hasDiscount) {
+                binding.hasDiscount = true
+
+                val options = it.items.map { discount ->
+                    "限时促销 -${context?.getString(R.string.formatter_price, getCurrencySymbol(discount.currency), discount.priceOff)}"
+                }
+
+                ArrayAdapter(
+                    requireContext(),
+                    android.R.layout.simple_spinner_item,
+                    options
+                ).also { adapter ->
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    binding.discountSpinner.adapter = adapter
+                }
+            }
+        }
+
+        binding.discountSpinner.onItemSelectedListener {
+            onItemSelected { adapterView, view, pos, id ->
+                cartViewModel.discountChanged.value = pos
+            }
         }
     }
-
 
     companion object {
 

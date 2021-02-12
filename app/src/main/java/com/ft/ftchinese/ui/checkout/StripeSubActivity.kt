@@ -56,7 +56,7 @@ class StripeSubActivity : ScopedAppActivity(),
     private lateinit var idempotency: Idempotency
 
     private var price: StripePrice? = null
-    private var checkoutIntent: CheckoutIntent? = null
+    private var cart: Cart? = null
     private var paymentMethod: PaymentMethod? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -164,8 +164,6 @@ class StripeSubActivity : ScopedAppActivity(),
     private fun initUI() {
         uiStateProgress(true)
 
-        val p = price ?: return
-        val m = sessionManager.loadAccount()?.membership ?: return
 
         supportFragmentManager.commit {
             replace(
@@ -174,10 +172,11 @@ class StripeSubActivity : ScopedAppActivity(),
             )
         }
 
-        val intents = buildCheckoutIntents(m, p.edition)
-        checkoutIntent = intents.findIntent(PayMethod.STRIPE)
+        val p = price ?: return
+        val a = sessionManager.loadAccount() ?: return
+        cart = Cart(p.unifiedPrice, a.membership)
 
-        cartViewModel.cartCreated.value = buildCart(this, p.unifiedPrice)
+        cartViewModel.priceSelected.value = cart?.productPriceParams
 
         binding.tvPaymentMethod.setOnClickListener {
             paymentSession.presentPaymentMethodSelection()
@@ -311,7 +310,7 @@ class StripeSubActivity : ScopedAppActivity(),
     private fun startSubscribing() {
         val account = sessionManager.loadAccount() ?: return
         val p = price ?: return
-        val intent = checkoutIntent ?: return
+        val intent = cart?.checkoutIntents?.findIntent(PayMethod.STRIPE) ?: return
 
         if (account.stripeId == null) {
             toast("You are not a stripe customer yet")

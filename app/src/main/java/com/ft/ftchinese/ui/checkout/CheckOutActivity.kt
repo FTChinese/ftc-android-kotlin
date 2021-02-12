@@ -71,8 +71,7 @@ class CheckOutActivity : ScopedAppActivity(),
     private var payMethod: PayMethod? = null
     // Plan chosen
     private var plan: Plan? = null
-    // How user want to pay?
-    private var checkoutIntents: CheckoutIntents? = null
+    private var cart: Cart? = null
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -98,17 +97,14 @@ class CheckOutActivity : ScopedAppActivity(),
         orderManager = OrderManager.getInstance(this)
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
         wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
-
+        fileCache = FileCache(this)
         tracker = StatsTracker.getInstance(this)
 
         val p = PlanStore.findById(planId) ?: return
-
-        sessionManager.loadAccount()?.let {
-            checkoutIntents = buildCheckoutIntents(it.membership, p.edition)
-        }
-        fileCache = FileCache(this)
+        val a = sessionManager.loadAccount() ?: return
 
         plan = p
+        cart = Cart(p.unifiedPrice, a.membership)
 
         setupViewModel()
         initUI()
@@ -191,6 +187,10 @@ class CheckOutActivity : ScopedAppActivity(),
                 }
            }
         }
+
+        cartViewModel.discountChanged.observe(this) {
+            cart?.useDiscount(it)
+        }
     }
 
     private fun initUI() {
@@ -203,13 +203,13 @@ class CheckOutActivity : ScopedAppActivity(),
         }
 
         // Toolbar text
-        supportActionBar?.title = checkoutIntents?.orderKindsTitle(this)
+        supportActionBar?.title = cart?.formatToolbarTitle(this)
         binding.payButtonEnabled = payMethod != null
-        binding.intents = checkoutIntents
+        binding.intents = cart?.checkoutIntents
+
         // Data for cart ui.
-        plan?.unifiedPrice?.let {
-            cartViewModel.cartCreated.value = buildCart(this, it)
-        }
+        cartViewModel.priceSelected.value = cart?.productPriceParams
+        cartViewModel.discountsFound.value = cart?.discountSpinnerParams
 
         // Ask permission.
         requestPermission()
@@ -235,10 +235,8 @@ class CheckOutActivity : ScopedAppActivity(),
     private fun onSelectPayMethod(method: PayMethod) {
         payMethod = method
 
-        binding.payButtonEnabled = checkoutIntents?.paymentAllowed(method)
-        plan?.let {
-            binding.payButtonText = checkoutIntents?.payButtonText(this, method, it)
-        }
+        binding.payButtonEnabled = cart?.payMethodAllowed(method)
+        binding.payButtonText = cart?.payButtonParams(method)?.format(this)
     }
 
     private fun onPayButtonClicked() {
