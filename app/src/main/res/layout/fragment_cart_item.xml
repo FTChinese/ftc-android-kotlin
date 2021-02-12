@@ -7,46 +7,55 @@
     <data>
         <import type="android.view.View"/>
         <variable
-            name="cart"
-            type="com.ft.ftchinese.ui.checkout.Cart" />
+            name="price"
+            type="com.ft.ftchinese.ui.checkout.ProductPriceUI" />
+        <variable
+            name="hasDiscount"
+            type="Boolean" />
     </data>
 
     <androidx.cardview.widget.CardView
         tools:context=".ui.pay.CartItemFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/colorBlack5"
-        app:contentPadding="16dp"
-        app:cardElevation="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar">
+        app:contentPaddingTop="@dimen/space_32"
+        app:contentPaddingBottom="@dimen/space_32"
+        app:contentPaddingLeft="@dimen/space_16"
+        app:contentPaddingRight="@dimen/space_16"
+        android:layout_margin="@dimen/space_8">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="16dp"
             android:orientation="vertical"
             android:gravity="center">
 
             <TextView
-                style="@style/OrigamiText.Body1.Light.Center"
                 android:id="@+id/tv_plan_name"
+                style="@style/OrigamiText.Heading3.Center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{cart.productName}" />
+                android:text="@{price.productName}"
+                android:textAlignment="center" />
 
             <TextView
                 style="@style/OrigamiText.Body1.Center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@{cart.payablePrice}"/>
-
-            <TextView
-                android:id="@+id/tv_original_price"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="@{cart.originalPrice == null ? View.GONE : View.VISIBLE}"
-                android:text="@{cart.originalPrice}"
+                android:text="@{price.payable}"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="@{price.original == null ? View.GONE : View.VISIBLE}"
+                android:text="@{price.original}"
                 android:textAlignment="center"/>
+
+            <Spinner
+                android:id="@+id/discount_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="@{hasDiscount ? View.VISIBLE : View.GONE}"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 </layout>
