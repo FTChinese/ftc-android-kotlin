@@ -8,6 +8,7 @@ import org.threeten.bp.ZonedDateTime
 @Parcelize
 data class Discount(
     val id: String? = null,
+    val currency: String = "cny",
     val priceOff: Double? = null,
     val percent: Int? = null,
     @KDateTime
@@ -17,7 +18,7 @@ data class Discount(
     val description: String? = null
 ) : Parcelable {
 
-    // isValid checks whether a discount exists and whehter it is in valid period.
+    // isValid checks whether a discount exists and whether it is in valid period.
     fun isValid(): Boolean {
         if (priceOff == null || priceOff <= 0) {
             return false
