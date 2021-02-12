@@ -7,7 +7,6 @@ import com.ft.ftchinese.model.enums.PriceSource
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KTier
-import com.ft.ftchinese.model.ui.PriceParams
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -27,14 +26,6 @@ data class StripePrice(
 
     val edition: Edition
         get() = Edition(tier, cycle)
-
-    val priceParams: PriceParams
-        get() = PriceParams(
-            currency = currency,
-            amount = unitAmount / 100.0,
-            cycle = cycle,
-            tier = tier
-        )
 
     val unifiedPrice: Price
         get() = Price(

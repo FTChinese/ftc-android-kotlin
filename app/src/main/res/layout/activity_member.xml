@@ -8,10 +8,6 @@
         <import type="android.view.View"/>
 
         <variable
-            name="member"
-            type="com.ft.ftchinese.ui.member.MemberStatus" />
-
-        <variable
             name="next"
             type="com.ft.ftchinese.model.subscription.NextSteps" />
         <variable
@@ -51,66 +47,11 @@
                     app:layout_constraintStart_toStartOf="parent"
                     android:text="@string/swipe_member_info"/>
 
-                <TextView
-                    android:id="@+id/tv_member_tier"
-                    style="@style/OrigamiText.Heading1.Center"
-                    android:textStyle="bold"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintTop_toBottomOf="@id/swipe_tip"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    android:text="@{member.tier}"/>
-
-                <TextView
-                    android:id="@+id/tv_expire_date"
-                    style="@style/OrigamiText.Body1.Light.Center"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintTop_toBottomOf="@id/tv_member_tier"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    android:text="@{member.expiration}" />
-
-
-                <TextView
-                    android:id="@+id/tv_auto_renewal"
-                    style="@style/OrigamiText.Body1.Light.Center"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tv_expire_date"
-                    android:visibility="@{member.autoRenewal == null ? View.GONE : View.VISIBLE}"
-                    android:text="@{member.autoRenewal}"/>
-
-                <TextView
-                    android:id="@+id/tv_payment_method"
-                    style="@style/OrigamiText.Body1.Light.Center"
+                <FrameLayout
+                    android:id="@+id/subs_status_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintTop_toBottomOf="@id/tv_auto_renewal"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    android:visibility="@{member.payMethod == null ? View.GONE : View.VISIBLE}"
-                    android:text="@{member.payMethod}"/>
-
-                <TextView
-                    android:id="@+id/tv_reminder"
-                    style="@style/OrigamiText.Body2.Warning"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:layout_constraintTop_toBottomOf="@id/tv_payment_method"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    android:visibility="@{member.reminder == null ? View.GONE : View.VISIBLE}"
-                    android:text="@{member.reminder}"/>
-
+                    app:layout_constraintTop_toBottomOf="@id/swipe_tip"/>
                 <!--  Re-subscribe if expired -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/subscribe_btn"
@@ -122,7 +63,7 @@
                     android:enabled="@{!inProgress}"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tv_reminder"/>
+                    app:layout_constraintTop_toBottomOf="@id/subs_status_card"/>
 
                 <!--    Renew button  -->
                 <com.google.android.material.button.MaterialButton
@@ -173,28 +114,13 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_prm_addon"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="高端版补充包"
                     android:visibility="@{next.canPrmAddOn ? View.VISIBLE : View.GONE}"
                     android:enabled="@{!inProgress}"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintStart_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/btn_std_addon"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/reactivate_stripe_btn"
-                    style="@style/AppButton.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:enabled="@{!inProgress}"
-                    android:text="打开自动续订"
-                    android:textSize="14sp"
-                    android:visibility="@{member.reactivateStripeBtn ? View.VISIBLE : View.GONE}"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/btn_prm_addon" />
 
                 <FrameLayout
                     android:id="@+id/frag_customer_service"

@@ -2,6 +2,7 @@ package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.AutoRenewMoment
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
@@ -45,6 +46,17 @@ data class Membership(
                     .stringRes
             else -> R.string.tier_free
         }
+
+    val autoRenewMoment: AutoRenewMoment?
+        get() = if (autoRenew && expireDate != null && cycle != null) {
+            AutoRenewMoment(
+                cycle = cycle,
+                month = if (cycle == Cycle.YEAR) {
+                    expireDate.monthValue
+                } else null,
+                date = expireDate.dayOfMonth
+            )
+        } else null
 
     /**
      * Checks whether the current membership is purchased
@@ -275,6 +287,8 @@ data class Membership(
         return expireDate.isAfter(LocalDate.now())
     }
 
+    // For auto renewal only show month or date.
+    // Use getMonthValue() and getDayOfMonth() with a formatter string.
     fun localizeExpireDate(): String {
         if (vip) {
             return "无限期"

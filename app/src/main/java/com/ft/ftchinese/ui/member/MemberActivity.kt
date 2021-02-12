@@ -43,6 +43,7 @@ class MemberActivity : ScopedAppActivity(),
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var paywallViewModel: PaywallViewModel
+    private lateinit var subsStatusViewModel: SubsStatusViewModel
     private lateinit var binding: ActivityMemberBinding
 
     private fun stopRefresh() {
@@ -77,6 +78,9 @@ class MemberActivity : ScopedAppActivity(),
             PaywallViewModelFactory(FileCache(this)),
         )
             .get(PaywallViewModel::class.java)
+
+        subsStatusViewModel = ViewModelProvider(this)
+            .get(SubsStatusViewModel::class.java)
 
         connectionLiveData.observe(this) {
             accountViewModel.isNetworkAvailable.value = it
@@ -114,6 +118,14 @@ class MemberActivity : ScopedAppActivity(),
                 }
             }
         }
+
+        subsStatusViewModel.autoRenewWanted.observe(this) {
+            binding.inProgress = true
+            toast(R.string.stripe_refreshing)
+            sessionManager.loadAccount()?.let {
+                accountViewModel.reactivateStripe(it)
+            }
+        }
     }
 
     // Every time this page is opened, retrieve latest prices from server.
@@ -127,7 +139,13 @@ class MemberActivity : ScopedAppActivity(),
         val account = sessionManager.loadAccount() ?: return
         val member = account.membership
 
-        binding.member = buildMemberStatus(this, member)
+        supportFragmentManager.commit {
+            replace(R.id.subs_status_card, MySubsFragment.newInstance())
+            replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
+        }
+
+        subsStatusViewModel.statusChanged.value = member
+
         binding.next = member.nextSteps()
 
         // If membership is expired,open paywall page.
@@ -183,16 +201,6 @@ class MemberActivity : ScopedAppActivity(),
             }
 
             it.isEnabled = false
-        }
-
-        binding.reactivateStripeBtn.setOnClickListener {
-            binding.inProgress = true
-            toast(R.string.stripe_refreshing)
-            accountViewModel.reactivateStripe(account)
-        }
-
-        supportFragmentManager.commit {
-            replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
         }
 
         invalidateOptionsMenu()

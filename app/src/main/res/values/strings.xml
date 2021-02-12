@@ -201,7 +201,8 @@
 
     <!-- Example: 标准会员/年-->
     <string name="formatter_edition">%1$s/%2$s</string>
-
+    <string name="formatter_month_date">%1$d月%2$d日</string>
+    <string name="formatter_date">%1$d日</string>
     <string name="cycle_year">年</string>
     <string name="cycle_month">月</string>
 
@@ -469,5 +470,7 @@
         <item>sc</item>
         <item>tc</item>
     </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
