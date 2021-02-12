@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.product
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.subscription.Plan
+import com.ft.ftchinese.model.subscription.Price
 import com.ft.ftchinese.model.subscription.Product
 import com.ft.ftchinese.model.subscription.Promo
 import org.jetbrains.anko.AnkoLogger
@@ -14,8 +14,8 @@ import org.jetbrains.anko.AnkoLogger
  */
 class ProductViewModel : ViewModel(), AnkoLogger {
 
-    val planSelected: MutableLiveData<Plan> by lazy {
-        MutableLiveData<Plan>()
+    val priceSelected: MutableLiveData<Price> by lazy {
+        MutableLiveData<Price>()
     }
 
     val inputEnabled: MutableLiveData<Boolean> by lazy {
