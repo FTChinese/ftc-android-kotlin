@@ -6,9 +6,7 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.*
-import com.ft.ftchinese.model.order.*
-import com.ft.ftchinese.model.subscription.*
-
+import com.ft.ftchinese.model.order.StripeSubStatus
 import kotlinx.parcelize.Parcelize
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
@@ -164,102 +162,6 @@ data class Membership(
         return LocalDate.now().until(expireDate, ChronoUnit.DAYS)
     }
 
-    fun nextSteps(): NextSteps {
-        if (vip) {
-            return NextSteps(
-                subsKinds = listOf(),
-            )
-        }
-
-        if (expired()) {
-            return NextSteps(
-                subsKinds = listOf(SubsKind.Create)
-            )
-        }
-
-        when (payMethod) {
-            PayMethod.ALIPAY, PayMethod.WXPAY -> {
-                when (tier) {
-                    Tier.STANDARD -> {
-                        return NextSteps(
-                            subsKinds = listOf(SubsKind.Renew, SubsKind.UpgradeToPrm)
-                        )
-                    }
-                    Tier.PREMIUM -> {
-                        return NextSteps(
-                            subsKinds = listOf(SubsKind.Renew, SubsKind.StdAddOn),
-                            message = "您目前还可以购买标准会员补充包，将在当前高端会员到期后启用"
-                        )
-                    }
-                }
-            }
-            PayMethod.STRIPE -> {
-                when (tier) {
-                    Tier.STANDARD -> {
-                        when (cycle) {
-                            Cycle.MONTH -> {
-                                return NextSteps(
-                                    subsKinds = listOf(
-                                        SubsKind.SwitchToYear,
-                                        SubsKind.UpgradeToPrm,
-                                        SubsKind.StdAddOn),
-                                    message = "Stripe订阅可以使用一次性支付方式购买标准版补充包，将在自动续订关闭并到期后启用",
-                                )
-                            }
-                            Cycle.YEAR -> {
-                                return NextSteps(
-                                    subsKinds = listOf(
-                                        SubsKind.UpgradeToPrm,
-                                        SubsKind.StdAddOn),
-                                    message = "Stripe订阅标准会员可以使用一次性支付方式购买同版本补充包，将在自动续订关闭并到期后启用",
-                                )
-                            }
-                        }
-                    }
-                    Tier.PREMIUM -> {
-                        return NextSteps(
-                            subsKinds = listOf(
-                                SubsKind.StdAddOn,
-                                SubsKind.PremAddOn,
-                            ),
-                            message = "Stripe订阅高端会员可以使用一次性支付方式购买标准版或高端版补充包，将在自动续订关闭并到期后优先启用高端版，之后启用标准版",
-                        )
-                    }
-                }
-            }
-            PayMethod.APPLE -> {
-                when (tier) {
-                    Tier.STANDARD -> {
-                        return NextSteps(
-                            subsKinds = listOf(
-                                SubsKind.StdAddOn,
-                            ),
-                            message = "苹果应用内订阅的标准会员可以使用一次性支付方式购买标准版补充包，将在自动续订关闭并到期后启用。\n如果您需要升级到高端会员，请在苹果设备上的FT中文网App内操作。"
-                        )
-                    }
-                    Tier.PREMIUM -> {
-                        return NextSteps(
-                            subsKinds = listOf(
-                                SubsKind.StdAddOn,
-                                SubsKind.PremAddOn,
-                            )
-                        )
-                    }
-                }
-            }
-            PayMethod.B2B -> {
-                return NextSteps(
-                    subsKinds = listOf(),
-                    message = "企业版订阅表更请联系您所属机构的管理人员"
-                )
-            }
-        }
-
-        return NextSteps(
-            subsKinds = listOf(),
-        )
-    }
-
     fun canCancelStripe(): Boolean {
         if (payMethod != PayMethod.STRIPE) {
             return false
@@ -267,23 +169,6 @@ data class Membership(
 
         // As long as auto renew is on, we should allow cancel.
         return autoRenew
-    }
-
-    fun canReactivateStripe(): Boolean {
-        if (payMethod != PayMethod.STRIPE) {
-            return false
-        }
-
-        // If auto renew if on, it's not eligible for reactivation.
-        if (autoRenew) {
-            return false
-        }
-
-        if (expireDate == null) {
-            return false
-        }
-        // If auto renew is turned off, it could only be reactivated before expiration date.
-        return expireDate.isAfter(LocalDate.now())
     }
 
     // For auto renewal only show month or date.
