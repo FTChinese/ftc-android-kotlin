@@ -5,11 +5,12 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscription.Discount
 import com.ft.ftchinese.model.subscription.Price
+import org.jetbrains.anko.AnkoLogger
 
 class Cart(
     val price: Price,
     val member: Membership,
-) {
+) : AnkoLogger {
     private var discounts = mutableListOf<Discount>()
     private var discountIndex: Int = -1
     private var intents: CheckoutIntents
@@ -87,7 +88,7 @@ class Cart(
     fun payButtonParams(method: PayMethod): PayButtonParams? {
         return intents.findIntent(method)?.let {
             PayButtonParams(
-                payMethod = method,
+                selectedPayMethod = method,
                 orderKind = it.orderKind,
                 price = price,
                 discount = selectedDiscount,

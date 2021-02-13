@@ -97,7 +97,7 @@ data class CheckoutIntents(
                                 orderKind = OrderKind.Renew,
                                 payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
                             )),
-                            warning = "通过支付宝/微信购买累加一个订阅周期，或选择Stripe订阅，当前剩余订阅时间将留待Stripe订阅结束后继续使用。"
+                            warning = "选择支付宝/微信购买累加一个订阅周期；\n选择Stripe订阅，当前剩余订阅时间将留待Stripe订阅结束后继续使用。"
                         )
                     }
 
@@ -106,6 +106,7 @@ data class CheckoutIntents(
                     when (e.tier) {
                         // This is an Upgrade action if standard user selected premium product.
                         Tier.PREMIUM -> {
+                            // For stripe this is switching payment method.
                             return CheckoutIntents(
                                 intents = listOf(CheckoutIntent(
                                     orderKind = OrderKind.Upgrade,
@@ -118,7 +119,7 @@ data class CheckoutIntents(
                         Tier.STANDARD -> {
                             return CheckoutIntents(
                                 intents = listOf(CheckoutIntent(
-                                    orderKind = OrderKind.Upgrade,
+                                    orderKind = OrderKind.AddOn,
                                     payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
                                 )),
                                 warning = "高端会员可使用支付宝/微信购买新的标准版订阅期限，在高端版结束后启用。"
@@ -135,12 +136,14 @@ data class CheckoutIntents(
                                     orderKind = OrderKind.AddOn,
                                     payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
                                 )),
-                                warning = "自动续订可以使用支付宝/微信购买额外订阅期限，在订阅结束后启用。",
+                                warning = "当前订阅**高端会员/年**来自Stripe自动续订，为保障您的权益，仅可使用支付宝/微信一次性购买订阅期限，在Stripe订阅结束后启用。",
                             )
                         }
+                        // Currently subscribed to standard edition.
                         Tier.STANDARD -> {
-                            // If selected premium, it's an upgrade and must use stripe.
                             when (e.tier) {
+                                // If selected premium, this is upgrade.
+                                // It could use Stripe for upgrade.
                                 Tier.PREMIUM -> {
                                     return CheckoutIntents(
                                         intents = listOf(
@@ -148,10 +151,10 @@ data class CheckoutIntents(
                                                 orderKind = OrderKind.Upgrade,
                                                 payMethods = listOf(PayMethod.STRIPE),
                                             )),
-                                        warning = "Stripe订阅升级高端版会自动调整您的扣款额度",
+                                        warning = "当前订阅标准会员来自Stripe自动续订，升级高端会员后Stripe将自动调整您的扣款额度",
                                     )
                                 }
-                                // Selected standard, the cycle might be different.
+                                // If selected standard...
                                 Tier.STANDARD -> {
                                     // For same cycle, it could only be add-on
                                     if (m.cycle == e.cycle) {
@@ -160,24 +163,25 @@ data class CheckoutIntents(
                                                 orderKind = OrderKind.AddOn,
                                                 payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
                                             )),
-                                            warning = "自动续订可以使用支付宝/微信购买额外订阅期限，在订阅结束后启用。",
+                                            warning = "当前订阅标准版会员来自Stripe续订，同一产品仅可以使用支付宝/微信购买额外订阅期限，在订阅结束后启用。",
                                         )
                                     }
 
                                     // Same tier but different cycle.
-                                    // For Ali/Wx, it's add-on; for Stripe, it's switching cycle.
                                     return CheckoutIntents(
                                         intents = listOf(
+                                            // For Ali/Wx, it's add-on
                                             CheckoutIntent(
                                                 orderKind = OrderKind.AddOn,
-                                                payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
+                                                payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
                                             ),
+                                            // for Stripe, it's switching cycle.
                                             CheckoutIntent(
                                                 orderKind = OrderKind.SwitchCycle,
                                                 payMethods = listOf(PayMethod.STRIPE)
                                             )
                                         ),
-                                        warning = "选择支付宝微信购买额外会员期限将在Stripe订阅到期后启用；或选择Stripe更改自动扣款周期。自动订阅建议您订阅年度版更划算。"
+                                        warning = "选择支付宝微信购买额外会员期限将在Stripe订阅到期后启用。\n选择Stripe更改自动扣款周期。\n自动订阅建议您订阅年度版更划算。"
                                     )
                                 }
                             }
