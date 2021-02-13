@@ -284,7 +284,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                     expireDate = LocalDate.now().plusYears(1),
                     payMethod = PayMethod.STRIPE,
                     autoRenew = true,
-                    status = StripeSubStatus.Canceled,
+                    status = StripeSubStatus.Active,
                     vip = false
                 )
             ))
@@ -311,7 +311,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                     expireDate = LocalDate.now().plusYears(1),
                     payMethod = PayMethod.STRIPE,
                     autoRenew = true,
-                    status = StripeSubStatus.Canceled,
+                    status = StripeSubStatus.Active,
                     vip = false
                 )
             ))
@@ -338,7 +338,34 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                     expireDate = LocalDate.now().plusYears(1),
                     payMethod = PayMethod.STRIPE,
                     autoRenew = true,
-                    status = StripeSubStatus.Canceled,
+                    status = StripeSubStatus.Active,
+                    vip = false
+                )
+            ))
+        }
+
+        binding.btnStripeAutoRenewOff.setOnClickListener {
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+                unionId = null,
+                stripeId = "cus_abc",
+                userName = "Auto Renew Off",
+                email = "standard@example.org",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.EMAIL,
+                wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+                ),
+                membership = Membership(
+                    tier = Tier.PREMIUM,
+                    cycle = Cycle.YEAR,
+                    expireDate = LocalDate.now().plusYears(1),
+                    payMethod = PayMethod.STRIPE,
+                    autoRenew = false,
+                    status = StripeSubStatus.Active,
                     vip = false
                 )
             ))
@@ -393,6 +420,34 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                     expireDate = LocalDate.now().plusYears(1),
                     payMethod = PayMethod.APPLE,
                     autoRenew = true,
+                    status = null,
+                    appleSubsId = "1000000266289493",
+                    vip = false
+                )
+            ))
+        }
+
+        binding.btnIapAutoRenewOff.setOnClickListener {
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+                unionId = null,
+                stripeId = null,
+                userName = "IAP Premium",
+                email = "prmeium@example.org",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.EMAIL,
+                wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+                ),
+                membership = Membership(
+                    tier = Tier.PREMIUM,
+                    cycle = Cycle.YEAR,
+                    expireDate = LocalDate.now().plusYears(1),
+                    payMethod = PayMethod.APPLE,
+                    autoRenew = false,
                     status = null,
                     appleSubsId = "1000000266289493",
                     vip = false
