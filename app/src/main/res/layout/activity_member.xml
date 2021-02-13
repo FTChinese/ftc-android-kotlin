@@ -29,26 +29,39 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:paddingStart="@dimen/space_16"
+                android:paddingEnd="@dimen/space_16">
+
+                <TextView
+                    android:id="@+id/swipe_tip"
+                    android:textAlignment="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_8"
+                    android:layout_marginBottom="@dimen/space_16"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/subs_status_card"
+                    android:text="@string/swipe_member_info"/>
 
                 <FrameLayout
                     android:id="@+id/subs_status_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/space_16"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                    app:layout_constraintTop_toTopOf="@id/swipe_tip"
+                    app:layout_constraintBottom_toTopOf="@id/subs_update"/>
 
                 <Button
                     android:id="@+id/subs_update"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/space_16"
                     app:layout_constraintTop_toBottomOf="@id/subs_status_card"
-                    android:text="购买或更改自动续订"/>
+                    android:text="购买订阅或更改自动续订"/>
 
                 <FrameLayout
                     android:id="@+id/frag_customer_service"
-                    android:layout_margin="@dimen/space_16"
+                    android:layout_marginTop="@dimen/space_16"
+                    android:layout_marginBottom="@dimen/space_16"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_constraintBottom_toBottomOf="parent"/>

@@ -15,35 +15,25 @@ data class AutoRenewStatus(
 data class SubsStatus(
     val reminder: String? = null,
     val productName: String,
-    val expirationDate: String?, // Only exists for non-auto renewal.
-    val brandName: String?, // Only exists for subscription mode.
-    val autoRenewStatus: AutoRenewStatus?
+    val details: List<Pair<String, String>>,
+    val reactivateStripe: Boolean = false,
 ) {
-    val autoRenewOn: Boolean
-        get() = autoRenewStatus != null && autoRenewStatus.on
-
-    val autoRenewOff: Boolean
-        get() = autoRenewStatus != null && !autoRenewStatus.on
-
-    val canReactivate: Boolean
-        get() = autoRenewOff && autoRenewStatus?.activate == true
-
     companion object {
         @JvmStatic
         fun newInstance(ctx: Context, m: Membership): SubsStatus {
             if (m.vip) {
                 return SubsStatus(
                     productName = ctx.getString(R.string.tier_vip),
-                    expirationDate = ctx.getString(R.string.vip_no_expiration),
-                    brandName = null,
-                    autoRenewStatus = null,
+                    details = listOf(
+                        Pair(ctx.getString(R.string.label_expiration_date), ctx.getString(R.string.vip_no_expiration))
+                    ),
                 )
             }
 
             val name = ctx.getString(m.tierStringRes)
-            when (m.payMethod) {
+            return when (m.payMethod) {
                 PayMethod.ALIPAY, PayMethod.WXPAY -> {
-                    return SubsStatus(
+                    SubsStatus(
                         reminder = m.remainingDays().let {
                             when {
                                 it == null -> null
@@ -54,81 +44,58 @@ data class SubsStatus(
                             }
                         },
                         productName = name,
-                        expirationDate = m.localizeExpireDate(),
-                        brandName = null,
-                        autoRenewStatus = null
+                        details = listOf(
+                            Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate())
+                        ),
                     )
                 }
                 PayMethod.STRIPE, PayMethod.APPLE -> {
                     val brand = ctx.getString(m.payMethod.stringRes)
+                    val expired = m.expired()
+                    val reminder =  when {
+                        expired -> ctx.getString(R.string.member_has_expired)
+                        m.isInvalidStripe() -> ctx.getString(R.string.member_status_invalid)
+                        else -> null
+                    }
                     // Cancelled and expired
-                    if (m.expired()) {
-                        return SubsStatus(
-                            reminder = ctx.getString(R.string.member_has_expired),
-                            productName = name,
-                            expirationDate = m.localizeExpireDate(),
-                            brandName = brand,
-                            autoRenewStatus = AutoRenewStatus(
-                                date = null,
-                                on = m.autoRenew,
-                                activate = false,
-                            )
-                        )
-                    }
-
-                    val reminder =  if (m.isInvalidStripe()) {
-                        ctx.getString(R.string.member_status_invalid)
-                    } else {
-                        null
-                    }
-                    // Cancelled but not expired
                     if (!m.autoRenew) {
-                        return SubsStatus(
+                        SubsStatus(
                             reminder = reminder,
                             productName = name,
-                            expirationDate = m.localizeExpireDate(),
-                            brandName = brand,
-                            autoRenewStatus = AutoRenewStatus(
-                                date = null,
-                                on = m.autoRenew,
-                                activate = m.payMethod == PayMethod.STRIPE,
-                            )
+                            details = listOf(
+                                Pair(ctx.getString(R.string.label_subs_source), brand),
+                                Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate()),
+                                Pair(ctx.getString(R.string.label_auto_renew), ctx.getString(R.string.auto_renew_off)),
+                            ),
+                            reactivateStripe = m.payMethod == PayMethod.STRIPE && !expired
+                        )
+                    } else {
+                        SubsStatus(
+                            reminder = reminder,
+                            productName = name,
+                            details = listOf(
+                                Pair(ctx.getString(R.string.label_subs_source), brand),
+                                Pair("自动续订", m.autoRenewMoment?.let {
+                                    formatAutoRenewDate(ctx, it)
+                                } ?: ""),
+                            ),
                         )
                     }
-                    // Not cancelled, not expired
-                    return SubsStatus(
-                        reminder = reminder,
-                        productName = name,
-                        expirationDate = null,
-                        brandName = brand,
-                        autoRenewStatus = AutoRenewStatus(
-                            date = m.autoRenewMoment?.let {
-                                formatAutoRenewDate(ctx, it)
-                            },
-                            on = m.autoRenew,
-                            activate = false,
-                        )
-                    )
                 }
-                PayMethod.B2B -> {
-                    return SubsStatus(
-                        productName = name,
-                        expirationDate = m.localizeExpireDate(),
-                        brandName = ctx.getString(R.string.pay_brand_b2b),
-                        autoRenewStatus = null,
-                    )
-                }
+                PayMethod.B2B -> SubsStatus(
+                    reminder = "企业订阅续订或升级请联系所属机构的管理人员",
+                    productName = name,
+                    details = listOf(
+                        Pair(ctx.getString(R.string.label_subs_source), ctx.getString(R.string.pay_brand_b2b)),
+                        Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate())
+                    ),
+                )
+                else -> SubsStatus(
+                    reminder = "Unknown Subscription Source",
+                    productName = name,
+                    details = listOf(),
+                )
             }
-
-            return SubsStatus(
-                reminder = "Unknown subscription status",
-                productName = name,
-                expirationDate = m.localizeExpireDate(),
-                brandName = m.payMethod?.let {
-                    ctx.getString(it.stringRes)
-                },
-                autoRenewStatus = null,
-            )
         }
     }
 }
