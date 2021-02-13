@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.member
+package com.ft.ftchinese.ui.order
 
 import android.content.Context
 import android.content.Intent
@@ -12,7 +12,6 @@ import com.ft.ftchinese.model.subscription.Order
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.lists.OrderAdapter
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import org.jetbrains.anko.AnkoLogger

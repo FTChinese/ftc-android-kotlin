@@ -26,6 +26,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.order.LatestOrderActivity
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.util.RequestCode

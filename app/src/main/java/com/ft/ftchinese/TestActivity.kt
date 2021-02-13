@@ -43,7 +43,7 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.EXTRA_ARTICLE_TEASER
 import com.ft.ftchinese.ui.article.LyricsAdapter
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.checkout.LatestOrderActivity
+import com.ft.ftchinese.ui.order.LatestOrderActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.share.SocialShareFragment
 import com.ft.ftchinese.wxapi.WXEntryActivity

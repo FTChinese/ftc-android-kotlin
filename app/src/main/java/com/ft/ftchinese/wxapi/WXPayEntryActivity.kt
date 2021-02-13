@@ -17,7 +17,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.checkout.LatestOrderActivity
+import com.ft.ftchinese.ui.order.LatestOrderActivity
 import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel

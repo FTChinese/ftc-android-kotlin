@@ -2,7 +2,7 @@ package com.ft.ftchinese.ui.member
 
 import android.content.Context
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.AutoRenewMoment
+import com.ft.ftchinese.model.reader.AutoRenewMoment
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.reader.Membership
 

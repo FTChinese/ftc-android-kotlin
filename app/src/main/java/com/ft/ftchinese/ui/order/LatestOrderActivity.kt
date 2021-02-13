@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.checkout
+package com.ft.ftchinese.ui.order
 
 import android.content.Context
 import android.content.Intent
@@ -9,7 +9,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityLatestOrderBinding
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.lists.OrderAdapter
 import com.ft.ftchinese.ui.member.MemberActivity
 
 /**
