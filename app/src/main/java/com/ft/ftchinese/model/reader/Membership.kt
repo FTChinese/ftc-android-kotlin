@@ -2,7 +2,6 @@ package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.AutoRenewMoment
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier

@@ -149,7 +149,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.member.MyOrdersActivity"
+            android:name=".ui.order.MyOrdersActivity"
             android:label="@string/title_my_orders"
             android:parentActivityName=".ui.member.MemberActivity" />
         <activity
@@ -170,7 +170,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.checkout.LatestOrderActivity"
+            android:name=".ui.order.LatestOrderActivity"
             android:label="@string/title_latest_order" />
         <activity
             android:name=".ui.settings.SettingsActivity"
