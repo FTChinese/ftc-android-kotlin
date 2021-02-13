@@ -6,9 +6,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMemberBinding
@@ -20,11 +23,12 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.checkout.CheckOutActivity
 import com.ft.ftchinese.ui.checkout.StripeSubActivity
+import com.ft.ftchinese.ui.lists.CardItemViewHolder
+import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.ui.order.MyOrdersActivity
 import com.ft.ftchinese.ui.paywall.*
 import com.ft.ftchinese.util.RequestCode
@@ -145,64 +149,11 @@ class MemberActivity : ScopedAppActivity(),
             replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
         }
 
-        subsStatusViewModel.statusChanged.value = member
-
-        binding.next = member.nextSteps()
-
-        // If membership is expired,open paywall page.
-        binding.subscribeBtn.setOnClickListener {
+        binding.subsUpdate.setOnClickListener {
             PaywallActivity.start(this)
-            it.isEnabled = false
         }
 
-        // Renewal is only applicable to Wxpay/Alipay
-        binding.renewBtn.setOnClickListener {
-            val tier = member.tier ?: return@setOnClickListener
-            val cycle = member.cycle ?: return@setOnClickListener
-            val plan = PlanStore.find(tier, cycle) ?: return@setOnClickListener
-            // Tracking
-            PaywallTracker.fromRenew()
-
-            CheckOutActivity.startForResult(
-                activity = this,
-                requestCode = RequestCode.PAYMENT,
-                planId = plan.id,
-            )
-
-            it.isEnabled = false
-        }
-
-        // Upgrade is applicable to Stripe, Alipay, or Wxpay.
-        binding.upgradeBtn.setOnClickListener {
-            when (member.payMethod) {
-                PayMethod.STRIPE -> {
-                    if (gotoStripe()) {
-                        return@setOnClickListener
-                    }
-
-                    // A fallback if stripe prices not cached on device.
-                    binding.inProgress = true
-                    toast("Loading stripe prices...")
-                    paywallViewModel.loadStripePrices()
-                }
-                PayMethod.APPLE -> {
-                     toast("苹果内购升级需要在iOS设备上操作")
-                }
-                PayMethod.B2B -> {
-                    toast("企业订阅升级请联系您所属的机构")
-                }
-                else -> {
-                    if (gotoCheckout()) {
-                        return@setOnClickListener
-                    }
-
-                    binding.inProgress = true
-                    paywallViewModel.loadPaywall(true)
-                }
-            }
-
-            it.isEnabled = false
-        }
+        subsStatusViewModel.statusChanged.value = member
 
         invalidateOptionsMenu()
     }
@@ -217,19 +168,6 @@ class MemberActivity : ScopedAppActivity(),
             activity = this,
             requestCode = RequestCode.PAYMENT,
             priceId = price.id,
-        )
-
-        binding.inProgress = false
-        return true
-    }
-
-    private fun gotoCheckout(): Boolean {
-        val plan = PlanStore.find(Tier.PREMIUM, Cycle.YEAR) ?: return false
-
-        CheckOutActivity.startForResult(
-            activity = this,
-            requestCode = RequestCode.PAYMENT,
-            planId = plan.id,
         )
 
         binding.inProgress = false
@@ -331,10 +269,6 @@ class MemberActivity : ScopedAppActivity(),
 
     override fun onResume() {
         super.onResume()
-        binding.subscribeBtn.isEnabled = true
-        binding.renewBtn.isEnabled = true
-        binding.upgradeBtn.isEnabled = true
-
         initUI()
     }
 
