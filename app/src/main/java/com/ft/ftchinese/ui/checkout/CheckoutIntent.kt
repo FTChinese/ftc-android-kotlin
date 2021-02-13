@@ -1,6 +1,5 @@
 package com.ft.ftchinese.ui.checkout
 
-import android.content.Context
 import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
@@ -49,6 +48,13 @@ data class CheckoutIntents(
     companion object {
         @JvmStatic
         fun newInstance(m: Membership, e: Edition): CheckoutIntents {
+            if (m.vip) {
+                return CheckoutIntents(
+                    intents = listOf(),
+                    warning = "VIP无需订阅"
+                )
+            }
+
             if (m.expired()) {
                 return CheckoutIntents(
                     intents = listOf(CheckoutIntent(
