@@ -290,13 +290,11 @@
     <!--  Membership status  -->
     <string name="vip_no_expiration">無限期</string>
     <string name="label_member_tier">會員類型</string>
-    <string name="membership_renew">續訂</string>
-    <string name="membership_upgrade">升级为高端會員</string>
     <string name="tier_free">尚未成為會員</string>
     <string name="tier_standard">標準會員</string>
     <string name="tier_premium">高端會員</string>
     <string name="tier_vip">超級會員</string>
-    <string name="label_member_duration">會員期限</string>
+    <string name="label_expiration_date">期限</string>
     <string name="label_price">支付金額</string>
     <string name="label_ftc_account">FT中文網帳號</string>
     <string name="label_wx_account">微信帳號</string>
@@ -327,8 +325,7 @@
     <string name="sub_status_active">活躍</string>
     <string name="stripe_status_invalid">Stripe訂閱狀態異常: %1$s，請刷新或聯繫客服</string>
 
-    <string name="auto_renew_on">自動續訂已開啓</string>
-    <string name="auto_renew_off">自动續訂已關閉</string>
+    <string name="label_auto_renew">自動續訂</string>
 
     <!-- IAP -->
     <string name="iap_refreshing">正在访问App Store獲取您的訂閱資料</string>

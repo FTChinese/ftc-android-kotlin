@@ -265,6 +265,7 @@
     <!-- Stripe payment -->
     <string name="title_stripe_setting">Stripe设置</string>
     <string name="stripe_cancel">取消Stripe订阅</string>
+    <string name="reactivate_auto_renew">打开自动续订</string>
     <string name="retrieve_customer">查询Stripe账号&#8230;</string>
     <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
     <string name="card_brand_last4">%1$s (尾号%2$s)</string>
@@ -291,13 +292,14 @@
     <!--  Membership status  -->
     <string name="vip_no_expiration">无限期</string>
     <string name="label_member_tier">会员类型</string>
-    <string name="membership_renew">续订</string>
-    <string name="membership_upgrade">升级为高端会员</string>
+    <string name="label_subs_source">订阅方式</string>
+    <string name="label_auto_renew">自动续订</string>
+    <string name="auto_renew_off">已关闭</string>
     <string name="tier_free">尚未成为会员</string>
     <string name="tier_standard">标准会员</string>
     <string name="tier_premium">高端会员</string>
     <string name="tier_vip">超级会员</string>
-    <string name="label_member_duration">会员期限</string>
+    <string name="label_expiration_date">期限</string>
     <string name="label_price">支付金额</string>
     <string name="label_ftc_account">FT中文网账号</string>
     <string name="label_wx_account">微信账号</string>
@@ -327,9 +329,6 @@
     <string name="sub_status_unpaid">未支付</string>
     <string name="sub_status_active">活跃</string>
     <string name="stripe_status_invalid">Stripe订阅状态异常: %1$s，请刷新或联系客服</string>
-
-    <string name="auto_renew_on">自动续订已开启</string>
-    <string name="auto_renew_off">自动续订已关闭</string>
 
     <!-- IAP -->
     <string name="iap_refreshing">正在访问App Store获取您的订阅数据</string>
