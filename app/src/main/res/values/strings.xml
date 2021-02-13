@@ -223,6 +223,7 @@
     <string name="pay_method_ali">支付宝支付</string>
     <string name="pay_method_wechat">微信支付</string>
     <string name="pay_method_stripe">Stripe订阅</string>
+    <string name="switch_to_stripe">转为Stripe订阅</string>
     <string name="check_out">支付</string>
     <string name="toast_no_pay_method">请选择支付方式</string>
     <string name="toast_creating_order">创建订单&#8230;</string>

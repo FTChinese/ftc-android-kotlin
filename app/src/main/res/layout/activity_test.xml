@@ -84,7 +84,7 @@
                     android:id="@+id/btn_stripe_std_year"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Stripe Standared Month"
+                    android:text="Stripe Standared Year"
                     android:textAllCaps="false"/>
 
                 <Button
@@ -99,6 +99,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Stripe Premium"
+                    android:textAllCaps="false"/>
+
+                <Button
+                    android:id="@+id/btn_stripe_auto_renew_off"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Stripe Auto Renew User"
                     android:textAllCaps="false"/>
 
                 <Button

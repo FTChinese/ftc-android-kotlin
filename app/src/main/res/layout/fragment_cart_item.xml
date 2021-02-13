@@ -21,8 +21,7 @@
         app:contentPaddingTop="@dimen/space_32"
         app:contentPaddingBottom="@dimen/space_32"
         app:contentPaddingLeft="@dimen/space_16"
-        app:contentPaddingRight="@dimen/space_16"
-        android:layout_margin="@dimen/space_8">
+        app:contentPaddingRight="@dimen/space_16">
 
         <LinearLayout
             android:layout_width="match_parent"
