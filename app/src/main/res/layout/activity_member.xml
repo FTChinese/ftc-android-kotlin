@@ -8,9 +8,6 @@
         <import type="android.view.View"/>
 
         <variable
-            name="next"
-            type="com.ft.ftchinese.model.subscription.NextSteps" />
-        <variable
             name="inProgress"
             type="Boolean" />
     </data>
@@ -32,98 +29,26 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingTop="8dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingBottom="16dp">
-
-                <TextView
-                    android:id="@+id/swipe_tip"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    android:text="@string/swipe_member_info"/>
+                android:layout_height="match_parent">
 
                 <FrameLayout
                     android:id="@+id/subs_status_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:layout_constraintTop_toBottomOf="@id/swipe_tip"/>
-                <!--  Re-subscribe if expired -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/subscribe_btn"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/order_kind_create"
-                    android:visibility="@{next.canReSubscribe ? View.VISIBLE : View.GONE}"
-                    android:enabled="@{!inProgress}"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/subs_status_card"/>
+                    android:layout_margin="@dimen/space_16"
+                    app:layout_constraintTop_toTopOf="parent"/>
 
-                <!--    Renew button  -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/renew_btn"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/membership_renew"
-                    android:visibility="@{next.canRenew ? View.VISIBLE : View.GONE}"
-                    android:enabled="@{!inProgress}"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/subscribe_btn"/>
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_switch_year"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="转为年度订阅"
-                    android:visibility="@{next.canSwitchCycle ? View.VISIBLE : View.GONE}"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/renew_btn"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/upgrade_btn"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/membership_upgrade"
-                    android:visibility="@{next.canUpgradePrm ? View.VISIBLE : View.GONE}"
-                    android:enabled="@{!inProgress}"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/btn_switch_year" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_std_addon"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="标准版补充包"
-                    android:visibility="@{next.canStdAddOn ? View.VISIBLE : View.GONE}"
-                    android:enabled="@{!inProgress}"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintStart_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/upgrade_btn"/>
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_prm_addon"
+                <Button
+                    android:id="@+id/subs_update"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="高端版补充包"
-                    android:visibility="@{next.canPrmAddOn ? View.VISIBLE : View.GONE}"
-                    android:enabled="@{!inProgress}"
-                    app:layout_constraintTop_toBottomOf="@id/btn_std_addon"/>
+                    android:layout_margin="@dimen/space_16"
+                    app:layout_constraintTop_toBottomOf="@id/subs_status_card"
+                    android:text="购买或更改自动续订"/>
 
                 <FrameLayout
                     android:id="@+id/frag_customer_service"
+                    android:layout_margin="@dimen/space_16"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_constraintBottom_toBottomOf="parent"/>
