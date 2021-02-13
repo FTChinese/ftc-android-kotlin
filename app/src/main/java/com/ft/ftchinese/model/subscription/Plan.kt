@@ -76,7 +76,7 @@ data class Plan(
  */
 object PlanStore {
     // Will be updated once paywall data is fetched from server or cache.
-    private var plans = defaultPaywall.products.flatMap { it.plans }
+    var plans = defaultPaywall.products.flatMap { it.plans }
 
     // Update plans from a list of products.
     // Used when paywall data is retrieved
@@ -94,6 +94,12 @@ object PlanStore {
 
     fun findById(id: String): Plan? {
         return plans.find { it.id == id }
+    }
+
+    fun findByEdition(e: Edition): Plan? {
+        return plans.find {
+            it.tier == e.tier && it.cycle == e.cycle
+        }
     }
 
     /**
