@@ -38,10 +38,6 @@ data class CheckoutIntents(
             return null
         }
 
-        if (intents.size == 1) {
-            return intents[0]
-        }
-
         return intents.find { it.payMethods.contains(method) }
     }
 
