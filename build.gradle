@@ -9,9 +9,9 @@ buildscript {
     ext.nav_version = "2.3.2"
 
     repositories {
-        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
-        jcenter()
-        google()
+        maven{ url 'https://maven.aliyun.com/repository/central'}
+        maven{ url 'https://maven.aliyun.com/repository/public'}
+        maven{ url 'https://maven.aliyun.com/repository/google'}
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.0-alpha07'
@@ -32,10 +32,9 @@ allprojects {
         flatDir {
             dirs 'libs'
         }
-        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/'}
-        jcenter()
-        mavenCentral()
-        google()
+        maven{ url 'https://maven.aliyun.com/repository/central'}
+        maven{ url 'https://maven.aliyun.com/repository/public'}
+        maven{ url 'https://maven.aliyun.com/repository/google'}
     }
 }
 
