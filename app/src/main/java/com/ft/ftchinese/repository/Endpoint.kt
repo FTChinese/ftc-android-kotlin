@@ -58,13 +58,13 @@ object Endpoint {
      */
     fun subsBase(isTest: Boolean = false) = if (isTest) {
         if (BuildConfig.DEBUG) {
-            "$devIP:8200"
+            "$devIP:8202"
         } else {
             BuildConfig.API_SUBS_SANDBOX
         }
     } else {
         if (BuildConfig.DEBUG) {
-            "$devIP:8200"
+            "$devIP:8202"
         } else {
             BuildConfig.API_SUBS_LIVE
         }
@@ -76,9 +76,6 @@ object SubsApi {
 
     val WX_LOGIN = "$BASE/wx/oauth/login"
     val WX_REFRESH = "$BASE/wx/oauth/refresh"
-
-    val STRIPE_PLAN = "$BASE/stripe/plans"
-    val STRIPE_CUSTOMER = "$BASE/stripe/customers"
 
 }
 
