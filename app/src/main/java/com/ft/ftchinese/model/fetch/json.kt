@@ -30,6 +30,9 @@ annotation class KCycle
 annotation class KPriceSource
 
 @Target(AnnotationTarget.FIELD)
+annotation class KCarryOverSource
+
+@Target(AnnotationTarget.FIELD)
 annotation class KPayMethod
 
 @Target(AnnotationTarget.FIELD)
@@ -152,6 +155,26 @@ val priceSourceConverter = object : Converter {
 
     override fun toJson(value: Any): String {
         return if (value is PriceSource) {
+            """
+                "$value"
+            """.trimIndent().trim()
+        } else {
+            """null"""
+        }
+    }
+}
+
+val carryOverSourceConverter = object : Converter {
+    override fun canConvert(cls: Class<*>): Boolean {
+        return cls == CarryOverSource::class.java
+    }
+
+    override fun fromJson(jv: JsonValue): Any? {
+        return CarryOverSource.fromString(jv.string)
+    }
+
+    override fun toJson(value: Any): String {
+        return if (value is CarryOverSource) {
             """
                 "$value"
             """.trimIndent().trim()
@@ -303,3 +326,4 @@ val json = Klaxon()
     .fieldConverter(KPaymentIntentStatus::class, paymentIntentStatusConverter)
     .fieldConverter(KArticleType::class, articleTypeConverter)
     .fieldConverter(KPriceSource::class, priceSourceConverter)
+    .fieldConverter(KCarryOverSource::class, carryOverSourceConverter)
