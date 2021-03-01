@@ -8,8 +8,8 @@ import android.text.style.RelativeSizeSpan
 import android.text.style.StrikethroughSpan
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Cycle
-import com.ft.ftchinese.model.subscription.Discount
-import com.ft.ftchinese.model.subscription.Price
+import com.ft.ftchinese.model.price.Discount
+import com.ft.ftchinese.model.price.Price
 
 /**
  * Produces string like:

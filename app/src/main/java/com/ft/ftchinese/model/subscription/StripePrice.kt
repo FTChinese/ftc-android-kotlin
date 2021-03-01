@@ -2,11 +2,12 @@ package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
 import com.ft.ftchinese.model.enums.Cycle
-import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.price.Edition
 import com.ft.ftchinese.model.enums.PriceSource
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KTier
+import com.ft.ftchinese.model.price.Price
 import kotlinx.parcelize.Parcelize
 
 @Parcelize

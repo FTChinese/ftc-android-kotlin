@@ -4,6 +4,7 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KDateTime
 import com.ft.ftchinese.model.fetch.KTier
+import com.ft.ftchinese.model.price.Discount
 import org.threeten.bp.ZonedDateTime
 
 /**

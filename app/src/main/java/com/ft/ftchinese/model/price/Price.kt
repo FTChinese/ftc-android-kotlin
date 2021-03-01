@@ -1,7 +1,6 @@
-package com.ft.ftchinese.model.subscription
+package com.ft.ftchinese.model.price
 
 import com.ft.ftchinese.model.enums.Cycle
-import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.enums.PriceSource
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle

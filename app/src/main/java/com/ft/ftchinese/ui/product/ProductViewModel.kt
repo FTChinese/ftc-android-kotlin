@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.product
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.subscription.Price
+import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.subscription.Product
 import com.ft.ftchinese.model.subscription.Promo
 import org.jetbrains.anko.AnkoLogger

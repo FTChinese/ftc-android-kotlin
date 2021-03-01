@@ -1,6 +1,6 @@
 package com.ft.ftchinese.ui.checkout
 
-import com.ft.ftchinese.model.subscription.Discount
+import com.ft.ftchinese.model.price.Discount
 
 data class DiscountSpinnerParams(
     val items: List<Discount> = listOf(),

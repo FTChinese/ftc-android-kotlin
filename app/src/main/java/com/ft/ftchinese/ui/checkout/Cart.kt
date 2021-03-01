@@ -3,8 +3,8 @@ package com.ft.ftchinese.ui.checkout
 import android.content.Context
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.subscription.Discount
-import com.ft.ftchinese.model.subscription.Price
+import com.ft.ftchinese.model.price.Discount
+import com.ft.ftchinese.model.price.Price
 import org.jetbrains.anko.AnkoLogger
 
 class Cart(

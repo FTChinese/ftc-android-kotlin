@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model.subscription
 
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.price.Discount
 import org.junit.Test
 
 

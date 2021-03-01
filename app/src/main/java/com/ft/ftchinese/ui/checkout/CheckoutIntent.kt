@@ -1,6 +1,6 @@
 package com.ft.ftchinese.ui.checkout
 
-import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.price.Edition
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier

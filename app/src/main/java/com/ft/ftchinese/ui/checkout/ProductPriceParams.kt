@@ -3,8 +3,8 @@ package com.ft.ftchinese.ui.checkout
 import android.content.Context
 import android.text.Spannable
 import android.text.SpannableString
-import com.ft.ftchinese.model.subscription.Discount
-import com.ft.ftchinese.model.subscription.Price
+import com.ft.ftchinese.model.price.Discount
+import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.ui.formatter.PriceStringBuilder
 
 data class ProductPriceParams(

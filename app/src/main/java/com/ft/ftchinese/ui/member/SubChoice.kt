@@ -1,8 +1,9 @@
 package com.ft.ftchinese.ui.member
 
 import com.ft.ftchinese.model.enums.OrderKind
-import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.price.Discount
+import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscription.*
 

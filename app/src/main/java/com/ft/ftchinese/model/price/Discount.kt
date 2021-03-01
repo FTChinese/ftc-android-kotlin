@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.subscription
+package com.ft.ftchinese.model.price
 
 import android.os.Parcelable
 import com.ft.ftchinese.model.fetch.KDateTime

@@ -4,8 +4,8 @@ import android.content.Context
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.subscription.Discount
-import com.ft.ftchinese.model.subscription.Price
+import com.ft.ftchinese.model.price.Discount
+import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.ui.formatter.PriceStringBuilder
 import org.jetbrains.anko.AnkoLogger
 

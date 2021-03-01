@@ -2,11 +2,13 @@ package com.ft.ftchinese.model.subscription
 
 import android.os.Parcelable
 import com.ft.ftchinese.model.enums.Cycle
-import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.price.Edition
 import com.ft.ftchinese.model.enums.PriceSource
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KTier
+import com.ft.ftchinese.model.price.Discount
+import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.tracking.GAAction
 import kotlinx.parcelize.Parcelize
 
@@ -14,6 +16,7 @@ import kotlinx.parcelize.Parcelize
  * A plan for a product.
  */
 @Parcelize
+@Deprecated(message = "Deprecated since 4.0")
 data class Plan(
     val id: String,
     val productId: String,

@@ -2,6 +2,7 @@ package com.ft.ftchinese.model.subscription
 
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
+import com.ft.ftchinese.model.price.Edition
 import com.ft.ftchinese.model.reader.Membership
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime

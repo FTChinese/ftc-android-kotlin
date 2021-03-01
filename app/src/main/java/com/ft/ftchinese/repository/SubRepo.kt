@@ -1,6 +1,6 @@
 package com.ft.ftchinese.repository
 
-import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.price.Edition
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
@@ -50,10 +50,12 @@ object SubRepo : AnkoLogger {
             .noCache()
             .setClient()
             .setAppId() // Deprecated
-            .sendJson(json.toJsonString(Edition(
+            .sendJson(json.toJsonString(
+                Edition(
                 tier = plan.tier,
                 cycle = plan.cycle
-            )))
+            )
+            ))
             .endJsonText()
 
         info("Wx order: $body")
@@ -73,10 +75,12 @@ object SubRepo : AnkoLogger {
             .addHeaders(account.headers())
             .noCache()
             .setClient()
-            .sendJson(json.toJsonString(Edition(
+            .sendJson(json.toJsonString(
+                Edition(
                 tier = plan.tier,
                 cycle = plan.cycle
-            )))
+            )
+            ))
             .endJsonText()
 
         return if (body == null) {

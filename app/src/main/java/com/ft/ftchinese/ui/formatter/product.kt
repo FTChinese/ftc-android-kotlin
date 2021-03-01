@@ -2,7 +2,7 @@ package com.ft.ftchinese.ui.formatter
 
 import android.content.Context
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.price.Edition
 import java.util.*
 
 fun getCurrencySymbol(currency: String): String {
