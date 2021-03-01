@@ -9,7 +9,7 @@ import androidx.work.*
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityWechatBinding
-import com.ft.ftchinese.model.subscription.PlanStore
+import com.ft.ftchinese.model.paywall.FtcPriceCache
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.store.PaymentManager
@@ -17,11 +17,11 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.order.LatestOrderActivity
+import com.ft.ftchinese.ui.checkout.CheckOutViewModel
 import com.ft.ftchinese.ui.member.MemberActivity
+import com.ft.ftchinese.ui.order.LatestOrderActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.checkout.CheckOutViewModel
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
@@ -150,7 +150,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                     val order = orderManager?.load()
 
                     if (order != null) {
-                        tracker?.buyFail(PlanStore.find(order.tier, order.cycle))
+                        tracker?.buyFail(FtcPriceCache.find(order.edition)?.checkoutItem)
                     }
                 }
                 // 用户取消
