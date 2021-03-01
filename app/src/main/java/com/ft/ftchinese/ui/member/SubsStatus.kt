@@ -6,15 +6,21 @@ import com.ft.ftchinese.model.reader.AutoRenewMoment
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.reader.Membership
 
-data class AutoRenewStatus(
-    val date: String?, // Only exists when auto renew is on
-    val on: Boolean,
-    val activate: Boolean // If auto renew is off, only stripe can be activated.
-)
-
+/**
+ * SubsStatus shows an overview of user's current membership.
+ */
 data class SubsStatus(
-    val reminder: String? = null,
-    val productName: String,
+    val reminder: String? = null, // Remind user action should be taken, e.g. renew, expired, etc..
+    val productName: String, // Which product user has been subscribed to.
+    // Show a list of two-column data:
+    // |订阅方式           苹果App内购|
+    // |自动续订           2月13日/年｜
+    // For monthly edition the the last line would be: 自动续订    13日/月
+    // For Stripe with auto renewal off, it looks like:
+    // | 订阅方式           Stripe订阅 ｜
+    // ｜期限              2022-03-01 ｜
+    // | 自动续订            已关闭    ｜
+    //                    打开自动续订
     val details: List<Pair<String, String>>,
     val reactivateStripe: Boolean = false,
 ) {
@@ -31,6 +37,15 @@ data class SubsStatus(
             }
 
             val name = ctx.getString(m.tierStringRes)
+            val addOns = mutableListOf<Pair<String, String>>().apply {
+                if (m.standardAddOn > 0) {
+                    add(Pair("标准版AddOn", "${m.standardAddOn}天"))
+                }
+                if (m.premiumAddOn > 0) {
+                    add(Pair("高端版AddOon", "${m.premiumAddOn}天"))
+                }
+            }
+
             return when (m.payMethod) {
                 PayMethod.ALIPAY, PayMethod.WXPAY -> {
                     SubsStatus(
@@ -44,9 +59,9 @@ data class SubsStatus(
                             }
                         },
                         productName = name,
-                        details = listOf(
-                            Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate())
-                        ),
+                        details = mutableListOf(Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate())).apply {
+                            addAll(addOns)
+                        },
                     )
                 }
                 PayMethod.STRIPE, PayMethod.APPLE -> {
@@ -62,38 +77,44 @@ data class SubsStatus(
                         SubsStatus(
                             reminder = reminder,
                             productName = name,
-                            details = listOf(
+                            details = mutableListOf(
                                 Pair(ctx.getString(R.string.label_subs_source), brand),
                                 Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate()),
                                 Pair(ctx.getString(R.string.label_auto_renew), ctx.getString(R.string.auto_renew_off)),
-                            ),
+                            ).apply {
+                                addAll(addOns)
+                            },
                             reactivateStripe = m.payMethod == PayMethod.STRIPE && !expired
                         )
                     } else {
                         SubsStatus(
                             reminder = reminder,
                             productName = name,
-                            details = listOf(
+                            details = mutableListOf(
                                 Pair(ctx.getString(R.string.label_subs_source), brand),
                                 Pair("自动续订", m.autoRenewMoment?.let {
                                     formatAutoRenewDate(ctx, it)
                                 } ?: ""),
-                            ),
+                            ).apply {
+                                addAll(addOns)
+                            },
                         )
                     }
                 }
                 PayMethod.B2B -> SubsStatus(
                     reminder = "企业订阅续订或升级请联系所属机构的管理人员",
                     productName = name,
-                    details = listOf(
+                    details = mutableListOf(
                         Pair(ctx.getString(R.string.label_subs_source), ctx.getString(R.string.pay_brand_b2b)),
                         Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate())
-                    ),
+                    ).apply {
+                        addAll(addOns)
+                    },
                 )
                 else -> SubsStatus(
                     reminder = "Unknown Subscription Source",
                     productName = name,
-                    details = listOf(),
+                    details = addOns,
                 )
             }
         }
