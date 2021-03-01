@@ -7,9 +7,9 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.order.StripeSubParams
 import com.ft.ftchinese.model.order.StripeSubResult
+import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.AliPayIntent
-import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.subscription.WxPayIntent
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
@@ -36,11 +36,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<StripeSubResult>>()
     }
 
-    val freeUpgradeResult: MutableLiveData<Result<Boolean>> by lazy {
-        MutableLiveData<Result<Boolean>>()
-    }
-
-    fun createWxOrder(account: Account, plan: Plan) {
+    fun createWxOrder(account: Account, price: Price) {
         if (isNetworkAvailable.value == false) {
             wxPayIntentResult.value = Result.LocalizedError(R.string.prompt_no_network)
             return
@@ -49,7 +45,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val wxOrder = withContext(Dispatchers.IO) {
-                    SubRepo.createWxOrder(account, plan)
+                    SubRepo.createWxOrder(account, price)
                 }
 
                 if (wxOrder == null) {
@@ -70,7 +66,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun createAliOrder(account: Account, plan: Plan) {
+    fun createAliOrder(account: Account, price: Price) {
         if (isNetworkAvailable.value == false) {
             aliPayIntentResult.value = Result.LocalizedError(R.string.prompt_no_network)
             return
@@ -79,7 +75,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val aliOrder = withContext(Dispatchers.IO) {
-                    SubRepo.createAliOrder(account, plan)
+                    SubRepo.createAliOrder(account, price)
                 }
 
                 if (aliOrder == null) {
