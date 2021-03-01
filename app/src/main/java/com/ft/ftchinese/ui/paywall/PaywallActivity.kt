@@ -12,6 +12,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityPaywallBinding
 import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.paywall.Paywall
+import com.ft.ftchinese.model.paywall.Promo
+import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager

@@ -5,6 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.paywall.FtcPriceCache
+import com.ft.ftchinese.model.paywall.Paywall
+import com.ft.ftchinese.model.paywall.StripePriceCache
+import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
@@ -27,8 +31,8 @@ class PaywallViewModel(
         MutableLiveData<Result<Paywall>>()
     }
 
-    val stripePrices: MutableLiveData<Result<List<StripePrice>>> by lazy {
-        MutableLiveData<Result<List<StripePrice>>>()
+    val stripePrices: MutableLiveData<Result<List<Price>>> by lazy {
+        MutableLiveData<Result<List<Price>>>()
     }
 
     // The cached file are versioned therefore whenever a user
@@ -60,7 +64,7 @@ class PaywallViewModel(
                 if (pw != null) {
                     paywallResult.value = Result.Success(pw)
                     // Update the in-memory cache.
-                    PlanStore.updateFromProduct(pw.products)
+                    FtcPriceCache.refresh(pw.products)
                 }
             }
 
@@ -81,7 +85,7 @@ class PaywallViewModel(
                 }
 
                 paywallResult.value = Result.Success(paywall.value)
-                PlanStore.updateFromProduct(paywall.value.products)
+                FtcPriceCache.refresh(paywall.value.products)
 
                 withContext(Dispatchers.IO) {
                     cache.saveText(CacheFileNames.paywall, paywall.raw)
@@ -99,7 +103,7 @@ class PaywallViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val result = PaywallClient.listPrices() ?: return@launch
-                PlanStore.set(result.value)
+                FtcPriceCache.prices = result.value
                 cache.saveText(CacheFileNames.ftcPrices, result.raw)
             } catch (e: Exception) {
                 info(e)
@@ -114,7 +118,7 @@ class PaywallViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val result = StripeClient.listPrices() ?: return@launch
-                StripePriceStore.prices = result.value
+                StripePriceCache.prices = result.value
                 cache.saveText(CacheFileNames.stripePrices, result.raw)
                 info("Stripe prices cached...")
             } catch (e: Exception) {
@@ -123,7 +127,7 @@ class PaywallViewModel(
         }
     }
 
-    private suspend fun stripeCachedPrices(): List<StripePrice>? {
+    private suspend fun stripeCachedPrices(): List<Price>? {
         info("Loading stripe prices from cache...")
         return withContext(Dispatchers.IO) {
             val data = cache.loadText(CacheFileNames.stripePrices)
