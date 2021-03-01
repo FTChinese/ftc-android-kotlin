@@ -7,7 +7,8 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.subscription.Plan
+import com.ft.ftchinese.model.price.CheckoutItem
+import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.splash.ScreenAd
 import com.google.android.gms.analytics.GoogleAnalytics
 import com.google.android.gms.analytics.HitBuilders
@@ -44,17 +45,17 @@ class StatsTracker private constructor(context: Context) {
                 .build())
     }
 
-    fun addCart(plan: Plan) {
+    fun addCart(price: Price) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle().apply {
-            putString(FirebaseAnalytics.Param.ITEM_ID, plan.getNamedKey())
-            putString(FirebaseAnalytics.Param.ITEM_NAME, plan.tier.toString())
-            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, plan.cycle.toString())
+            putString(FirebaseAnalytics.Param.ITEM_ID, price.namedKey)
+            putString(FirebaseAnalytics.Param.ITEM_NAME, price.tier.toString())
+            putString(FirebaseAnalytics.Param.ITEM_CATEGORY, price.cycle.toString())
             putLong(FirebaseAnalytics.Param.QUANTITY, 1)
         })
 
         tracker.send(HitBuilders.EventBuilder()
                 .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(plan.gaGAAction())
+                .setAction(price.gaAction)
                 .setLabel(PaywallTracker.from?.label)
                 .build())
     }
@@ -67,55 +68,55 @@ class StatsTracker private constructor(context: Context) {
         })
     }
 
-    fun checkOut(plan: Plan, payMethod: PayMethod) {
+    fun checkOut(item: CheckoutItem, payMethod: PayMethod) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
-            putDouble(FirebaseAnalytics.Param.VALUE, plan.payableAmount())
-            putString(FirebaseAnalytics.Param.CURRENCY, plan.currency)
+            putDouble(FirebaseAnalytics.Param.VALUE, item.payableAmount)
+            putString(FirebaseAnalytics.Param.CURRENCY, item.price.currency)
             putString(FirebaseAnalytics.Param.METHOD, payMethod.toString())
         })
     }
 
-    fun buySuccess(plan: Plan?, payMethod: PayMethod?) {
+    fun buySuccess(item: CheckoutItem?, payMethod: PayMethod?) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
-            putDouble(FirebaseAnalytics.Param.VALUE, plan?.payableAmount() ?: 0.0)
+            putDouble(FirebaseAnalytics.Param.VALUE, item?.payableAmount ?: 0.0)
             putString(FirebaseAnalytics.Param.METHOD, payMethod?.toString())
         })
 
 
         tracker.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(plan?.gaGAAction())
-                .setLabel(PaywallTracker.from?.label)
-                .build())
+            .setCategory(GACategory.SUBSCRIPTION)
+            .setAction(item?.price?.gaAction)
+            .setLabel(PaywallTracker.from?.label)
+            .build())
     }
 
-    fun buyFail(plan: Plan?) {
-        if (plan == null) {
+    fun buyFail(item: CheckoutItem?) {
+        if (item == null) {
             return
         }
 
         tracker.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(plan.gaGAAction())
-                .setLabel(PaywallTracker.from?.label)
-                .build())
+            .setCategory(GACategory.SUBSCRIPTION)
+            .setAction(item.price.gaAction)
+            .setLabel(PaywallTracker.from?.label)
+            .build())
     }
 
     fun launchAdSent(label: String) {
         tracker.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.LAUNCH_AD)
-                .setAction(GAAction.LAUNCH_AD_SENT)
-                .setLabel(label)
-                .build())
+            .setCategory(GACategory.LAUNCH_AD)
+            .setAction(GAAction.LAUNCH_AD_SENT)
+            .setLabel(label)
+            .build())
     }
 
     fun launchAdSuccess(label: String) {
         tracker.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.LAUNCH_AD)
-                .setAction(GAAction.LAUNCH_AD_SUCCESS)
-                .setLabel(label)
-                .build())
+            .setCategory(GACategory.LAUNCH_AD)
+            .setAction(GAAction.LAUNCH_AD_SUCCESS)
+            .setLabel(label)
+            .build())
     }
 
     fun launchAdFail(label:String) {
