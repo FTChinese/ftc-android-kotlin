@@ -5,6 +5,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.price.Price
+import com.ft.ftchinese.model.reader.Membership
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -98,6 +99,22 @@ object SubRepo : AnkoLogger {
             null
         } else {
             json.parse<IAPSubs>(body)
+        }
+    }
+
+    // Request api to add add-on to expiration date.
+    fun useAddOn(account: Account): Membership? {
+        val (_, body) = Fetch()
+            .post(Endpoint.subsBase(account.isTest) + "/addon")
+            .addHeaders(account.headers())
+            .noCache()
+            .sendJson()
+            .endJsonText()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<Membership>(body)
         }
     }
 }
