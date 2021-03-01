@@ -100,27 +100,6 @@ data class Membership(
 
         return expireDate.isBefore(threeYearsLater) && expireDate.isAfter(today)
     }
-    /**
-     * Determine if we should show upgrade button.
-     * Only when membership is not expired yet, and created via
-     * Alipay, Wechat, or Stripe, and standard edition should we allow
-     * upgrade.
-     */
-    fun canUpgrade(): Boolean {
-        if (!arrayOf(PayMethod.ALIPAY, PayMethod.STRIPE, PayMethod.WXPAY).contains(payMethod)) {
-            return false
-        }
-
-        if (expired()) {
-            return false
-        }
-
-        if (tier != Tier.STANDARD) {
-            return false
-        }
-
-        return true
-    }
 
     /**
      * Checks whether membership expired.
@@ -238,55 +217,5 @@ data class Membership(
         return Pair(Permission.FREE.id, null)
     }
 
-    /**
-     * Determines whether the stripe payment method should
-     * be visible.
-     */
-    fun permitStripe(): Boolean {
-        if (tier == null) {
-            return true
-        }
-
-        // expired and not auto renew.
-        if (expired()) {
-            return true
-        }
-
-        if (status?.isInvalid() == true) {
-            return true
-        }
-
-        return false
-    }
-
-    /**
-     * Compare local membership against remote.
-     */
-    fun useRemote(remote: Membership): Boolean {
-        if (expireDate == null && remote.expireDate == null) {
-            return false
-        }
-
-        if (remote.expireDate == null) {
-            return false
-        }
-
-        if (expireDate == null) {
-            return true
-        }
-
-        // Renewal
-        if (tier == remote.tier) {
-            return remote.expireDate.isAfter(expireDate)
-        }
-
-        // For upgrading we cannot compare the expire date.
-        if (tier == Tier.STANDARD && remote.tier
-         == Tier.PREMIUM) {
-            return true
-        }
-
-        return false
-    }
 }
 

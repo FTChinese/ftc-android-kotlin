@@ -355,10 +355,4 @@ class MembershipTest {
                 Permission.PREMIUM.grant(readerPermBits)
         )
     }
-
-    @Test
-    fun canUpgrade() {
-        val ok = mStandard.canUpgrade()
-        assert(ok)
-    }
 }

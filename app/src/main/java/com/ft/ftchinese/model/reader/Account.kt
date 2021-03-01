@@ -87,14 +87,6 @@ data class Account(
             return "用户名未设置"
         }
 
-    fun permitStripe(): Boolean {
-        if (isWxOnly) {
-            return false
-        }
-
-        return membership.permitStripe()
-    }
-
     fun headers(): Map<String, String> {
         val m = hashMapOf<String, String>()
 
