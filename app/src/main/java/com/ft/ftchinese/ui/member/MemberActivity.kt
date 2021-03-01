@@ -6,12 +6,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMemberBinding
@@ -19,18 +16,21 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.order.StripeSubResult
+import com.ft.ftchinese.model.paywall.StripePriceCache
+import com.ft.ftchinese.model.price.Edition
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.model.subscription.IAPSubs
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.checkout.CheckOutActivity
 import com.ft.ftchinese.ui.checkout.StripeSubActivity
-import com.ft.ftchinese.ui.lists.CardItemViewHolder
-import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.ui.order.MyOrdersActivity
-import com.ft.ftchinese.ui.paywall.*
+import com.ft.ftchinese.ui.paywall.CustomerServiceFragment
+import com.ft.ftchinese.ui.paywall.PaywallActivity
+import com.ft.ftchinese.ui.paywall.PaywallViewModel
+import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
@@ -159,10 +159,10 @@ class MemberActivity : ScopedAppActivity(),
     }
 
     private fun gotoStripe(): Boolean {
-        val price = StripePriceStore.find(
+        val price = StripePriceCache.find(Edition(
             tier = Tier.PREMIUM,
             cycle = Cycle.YEAR,
-        ) ?: return false
+        )) ?: return false
 
         StripeSubActivity.startForResult(
             activity = this,
