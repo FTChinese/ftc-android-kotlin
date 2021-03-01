@@ -2,9 +2,9 @@ package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.JSONResult
-import com.ft.ftchinese.model.subscription.Paywall
-import com.ft.ftchinese.model.subscription.Plan
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.paywall.Paywall
+import com.ft.ftchinese.model.price.Price
 
 object PaywallClient {
     // Paywall data does not distinguish test or live account.
@@ -27,7 +27,7 @@ object PaywallClient {
         }
     }
 
-    fun listPrices(): JSONResult<List<Plan>>? {
+    fun listPrices(): JSONResult<List<Price>>? {
         val (_, body) = Fetch()
             .get("$baseUrl/plans")
             .endJsonText()
@@ -36,7 +36,7 @@ object PaywallClient {
             return null
         }
 
-        val plans = json.parseArray<Plan>(body)
+        val plans = json.parseArray<Price>(body)
         return if (plans == null) {
             null
         } else {

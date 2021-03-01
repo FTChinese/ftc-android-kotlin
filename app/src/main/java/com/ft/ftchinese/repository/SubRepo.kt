@@ -1,13 +1,12 @@
 package com.ft.ftchinese.repository
 
-import com.ft.ftchinese.model.price.Edition
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.*
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.price.Price
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-
 
 object SubRepo : AnkoLogger {
 
@@ -41,7 +40,7 @@ object SubRepo : AnkoLogger {
         }
     }
 
-    fun createWxOrder(account: Account, plan: Plan): WxPayIntent? {
+    fun createWxOrder(account: Account, price: Price): WxPayIntent? {
 
         val (_, body) = Fetch()
             .post(Endpoint.subsBase(account.isTest) + "/wxpay/app")
@@ -51,10 +50,7 @@ object SubRepo : AnkoLogger {
             .setClient()
             .setAppId() // Deprecated
             .sendJson(json.toJsonString(
-                Edition(
-                tier = plan.tier,
-                cycle = plan.cycle
-            )
+                price.edition
             ))
             .endJsonText()
 
@@ -67,7 +63,7 @@ object SubRepo : AnkoLogger {
         }
     }
 
-    fun createAliOrder(account: Account, plan: Plan): AliPayIntent? {
+    fun createAliOrder(account: Account, price: Price): AliPayIntent? {
 
         val (_, body) = Fetch()
             .post(Endpoint.subsBase(account.isTest) + "/alipay/app")
@@ -76,10 +72,7 @@ object SubRepo : AnkoLogger {
             .noCache()
             .setClient()
             .sendJson(json.toJsonString(
-                Edition(
-                tier = plan.tier,
-                cycle = plan.cycle
-            )
+                price.edition
             ))
             .endJsonText()
 

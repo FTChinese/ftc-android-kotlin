@@ -4,13 +4,13 @@ import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.JSONResult
+import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.order.StripeSubParams
 import com.ft.ftchinese.model.order.StripeSubResult
+import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.subscription.StripeCustomer
-import com.ft.ftchinese.model.subscription.StripePrice
 import com.ft.ftchinese.model.subscription.StripeSetupIntent
-import com.ft.ftchinese.model.fetch.json
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -22,7 +22,7 @@ object StripeClient : AnkoLogger {
     // Retrieve a list of stripe prices.
     // If use is logged-in and it is a test account, use sandbox
     // api to get test prices; otherwise retrieve prices from live mode.
-    fun listPrices(): JSONResult<List<StripePrice>>? {
+    fun listPrices(): JSONResult<List<Price>>? {
 
         val (_, body) = Fetch()
             .get("$baseUrl/prices")
@@ -33,7 +33,7 @@ object StripeClient : AnkoLogger {
             return null
         }
 
-        val prices = json.parseArray<StripePrice>(body)
+        val prices = json.parseArray<Price>(body)
         return if (prices == null) {
             null
         } else {
@@ -131,20 +131,6 @@ object StripeClient : AnkoLogger {
             .endJsonText()
 
         return body
-    }
-
-    // Deprecated
-    fun loadPlan(id: String): StripePrice? {
-        val (_, body) = Fetch()
-            .get("$baseUrl/plans/$id")
-            .setUserId(id)
-            .endJsonText()
-
-        return if (body == null) {
-            return null
-        } else {
-            json.parse<StripePrice>(body)
-        }
     }
 
     fun createSubscription(account: Account, params: StripeSubParams): StripeSubResult? {
