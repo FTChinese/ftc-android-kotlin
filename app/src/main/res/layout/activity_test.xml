@@ -105,7 +105,14 @@
                     android:id="@+id/btn_stripe_auto_renew_off"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Stripe Auto Renew User"
+                    android:text="Stripe Auto Renew Off"
+                    android:textAllCaps="false"/>
+
+                <Button
+                    android:id="@+id/btn_stripe_with_addon"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Stripe Auto Renew Off with Add-on"
                     android:textAllCaps="false"/>
 
                 <Button

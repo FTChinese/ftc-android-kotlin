@@ -371,6 +371,35 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             ))
         }
 
+        binding.btnStripeWithAddon.setOnClickListener {
+            sessionManager.logout()
+            sessionManager.saveAccount(Account(
+                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
+                unionId = null,
+                stripeId = "cus_abc",
+                userName = "Add On",
+                email = "standard@example.org",
+                isVerified = false,
+                avatarUrl = null,
+                loginMethod = LoginMethod.EMAIL,
+                wechat = Wechat(
+                    nickname = null,
+                    avatarUrl = null
+                ),
+                membership = Membership(
+                    tier = Tier.PREMIUM,
+                    cycle = Cycle.YEAR,
+                    expireDate = LocalDate.now().plusMonths(-1),
+                    payMethod = PayMethod.STRIPE,
+                    autoRenew = false,
+                    status = StripeSubStatus.Canceled,
+                    vip = false,
+                    standardAddOn = 30,
+                    premiumAddOn = 366,
+                )
+            ))
+        }
+
         binding.btnIapStandard.setOnClickListener {
             sessionManager.logout()
             sessionManager.saveAccount(Account(
