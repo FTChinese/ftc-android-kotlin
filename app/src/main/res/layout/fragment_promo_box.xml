@@ -8,7 +8,7 @@
 
         <variable
             name="promo"
-            type="com.ft.ftchinese.model.subscription.Promo" />
+            type="com.ft.ftchinese.model.paywall.Promo" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

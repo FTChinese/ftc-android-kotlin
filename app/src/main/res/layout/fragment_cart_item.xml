@@ -8,7 +8,7 @@
         <import type="android.view.View"/>
         <variable
             name="price"
-            type="com.ft.ftchinese.ui.checkout.ProductPriceUI" />
+            type="com.ft.ftchinese.ui.checkout.CartItem" />
         <variable
             name="hasDiscount"
             type="Boolean" />

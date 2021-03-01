@@ -9,7 +9,7 @@
             type="Boolean" />
         <variable
             name="product"
-            type="com.ft.ftchinese.model.subscription.Product" />
+            type="com.ft.ftchinese.model.paywall.Product" />
     </data>
 
     <androidx.cardview.widget.CardView
