@@ -45,13 +45,5 @@ class StripePriceTest {
             }
         ]
     """.trimIndent()
-    @Test
-    fun parseJson() {
 
-        val prices = json.parseArray<StripePrice>(data)
-
-        assertNotNull(prices)
-
-        println(prices)
-    }
 }

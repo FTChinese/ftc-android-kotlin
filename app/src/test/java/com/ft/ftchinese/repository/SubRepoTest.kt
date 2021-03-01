@@ -1,13 +1,14 @@
 package com.ft.ftchinese.repository
 
+import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.paywall.FtcPriceCache
+import com.ft.ftchinese.model.price.Edition
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
-import com.ft.ftchinese.model.enums.Cycle
-import com.ft.ftchinese.model.subscription.PlanStore
-import com.ft.ftchinese.model.enums.Tier
-import org.junit.Assert.*
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 
 class SubRepoTest {
@@ -27,7 +28,7 @@ class SubRepoTest {
 
     @Test
     fun createAliOrder() {
-        val order = SubRepo.createAliOrder(account, PlanStore.find(Tier.STANDARD, Cycle.YEAR)!!)
+        val order = SubRepo.createAliOrder(account, FtcPriceCache.find(Edition(Tier.STANDARD, Cycle.YEAR))!!)
 
         println(order)
     }

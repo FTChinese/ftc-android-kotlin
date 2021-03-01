@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model.subscription
 
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.paywall.Product
 import org.junit.Assert.*
 import org.junit.Test
 
