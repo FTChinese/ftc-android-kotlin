@@ -17,9 +17,9 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentProductBinding
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.subscription.Plan
-import com.ft.ftchinese.model.subscription.Product
-import com.ft.ftchinese.model.subscription.defaultPaywall
+import com.ft.ftchinese.model.paywall.Product
+import com.ft.ftchinese.model.paywall.defaultPaywall
+import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.formatter.PriceStringBuilder
 import com.ft.ftchinese.ui.lists.MarginItemDecoration
@@ -91,7 +91,7 @@ class ProductFragment : ScopedFragment(),
                 descListAdapter.setData(it)
             }
 
-        product?.plans?.let {
+        product?.prices?.let {
             priceListAdapter.setData(it)
         }
     }
@@ -127,7 +127,7 @@ class ProductFragment : ScopedFragment(),
 
     inner class PriceListAdapter : RecyclerView.Adapter<PriceItemViewHolder>() {
 
-        private var plans = listOf<Plan>()
+        private var prices = listOf<Price>()
         private var btnEnabled = true
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PriceItemViewHolder {
@@ -135,7 +135,7 @@ class ProductFragment : ScopedFragment(),
         }
 
         override fun onBindViewHolder(holder: PriceItemViewHolder, position: Int) {
-            val price = plans[position].unifiedPrice
+            val price = prices[position]
 
             val hasPromo = price.promotionOffer.isValid()
 
@@ -178,10 +178,10 @@ class ProductFragment : ScopedFragment(),
             }
         }
 
-        override fun getItemCount() = plans.size
+        override fun getItemCount() = prices.size
 
-        fun setData(plans: List<Plan>) {
-            this.plans = plans
+        fun setData(plans: List<Price>) {
+            this.prices = plans
             notifyDataSetChanged()
         }
 
