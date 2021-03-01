@@ -11,7 +11,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentCartItemBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.formatter.getCurrencySymbol
-import org.jetbrains.anko.sdk27.coroutines.onItemSelectedListener
 
 /**
  * Used to show the an overview of the item user purchased.
@@ -35,7 +34,7 @@ class CartItemFragment : ScopedFragment() {
             false
         )
 
-        binding.price = ProductPriceUI(
+        binding.price = CartItem(
             productName = "",
         )
         binding.hasDiscount = false
@@ -49,8 +48,8 @@ class CartItemFragment : ScopedFragment() {
             ViewModelProvider(this).get(CartItemViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
-        cartViewModel.priceSelected.observe(viewLifecycleOwner) {
-            binding.price = ProductPriceUI.from(requireContext(), it)
+        cartViewModel.priceInCart.observe(viewLifecycleOwner) {
+            binding.price = CartItem.from(requireContext(), it)
         }
 
         cartViewModel.discountsFound.observe(viewLifecycleOwner) {
