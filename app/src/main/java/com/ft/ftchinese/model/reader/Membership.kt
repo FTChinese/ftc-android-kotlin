@@ -134,11 +134,11 @@ data class Membership(
             return null
         }
 
-        if (!isAliOrWxPay()) {
+        if (autoRenew) {
             return null
         }
 
-        return LocalDate.now().until(expireDate, ChronoUnit.DAYS)
+        return LocalDate.now().until(expireDate, ChronoUnit.DAYS) + premiumAddOn + standardAddOn
     }
 
     fun canCancelStripe(): Boolean {
@@ -163,6 +163,15 @@ data class Membership(
 
         return expireDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
     }
+
+    val hasAddOn: Boolean
+        get() = standardAddOn > 0 || premiumAddOn > 0
+
+    val hasStandardAddOn: Boolean
+        get() = standardAddOn > 0
+
+    val hasPremiumAddOn: Boolean
+        get() = premiumAddOn > 0
 
     /**
      * getPermission calculates a membership's (including
@@ -192,6 +201,21 @@ data class Membership(
 
         // Expired.
         if (expired()) {
+            // If add-on exists.
+            if (hasPremiumAddOn) {
+                return Pair(
+                    Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id,
+                    MemberStatus.ActivePremium,
+                )
+            }
+
+            if (hasStandardAddOn) {
+                return Pair(
+                    Permission.FREE.id or Permission.STANDARD.id,
+                    MemberStatus.ActiveStandard,
+                )
+            }
+
             return Pair(
                     Permission.FREE.id,
                     MemberStatus.Expired
