@@ -18,9 +18,6 @@ data class CheckoutIntents(
     val payMethods: List<PayMethod>
         get() = intents.flatMap { it.payMethods }
 
-    val orderKinds: List<OrderKind>
-        get() = intents.map { it.orderKind }
-
     val permitAliPay: Boolean
         get() = payMethods.contains(PayMethod.ALIPAY)
 
@@ -51,7 +48,7 @@ data class CheckoutIntents(
                 )
             }
 
-            if (m.autoRenewOffExpired) {
+            if (m.expired) {
                 return CheckoutIntents(
                     intents = listOf(CheckoutIntent(
                         orderKind = OrderKind.Create,
@@ -93,7 +90,7 @@ data class CheckoutIntents(
                                 orderKind = OrderKind.Renew,
                                 payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
                             )),
-                            warning = "选择支付宝/微信购买累加一个订阅周期；\n选择Stripe订阅，当前剩余订阅时间将留待Stripe订阅结束后继续使用。"
+                            warning = "* 选择支付宝/微信购买累加一个订阅周期。\n* 选择Stripe订阅，当前剩余订阅时间将在Stripe订阅结束后继续使用。"
                         )
                     }
 
@@ -108,17 +105,23 @@ data class CheckoutIntents(
                                     orderKind = OrderKind.Upgrade,
                                     payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE)
                                 )),
-                                warning = "升级高端会员即刻启用，标准版的剩余时间将在高端版结束后继续使用。",
+                                warning = "升级高端会员即刻启用，当前剩余时间将在高端版结束后继续使用。",
                             )
                         }
                         // A premium could buy standard as AddOns.
                         Tier.STANDARD -> {
                             return CheckoutIntents(
-                                intents = listOf(CheckoutIntent(
-                                    orderKind = OrderKind.AddOn,
-                                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
-                                )),
-                                warning = "高端会员可使用支付宝/微信购买新的标准版订阅期限，在高端版结束后启用。"
+                                intents = listOf(
+                                    CheckoutIntent(
+                                        orderKind = OrderKind.AddOn,
+                                        payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
+                                    ),
+                                    CheckoutIntent(
+                                        orderKind = OrderKind.Create,
+                                        payMethods = listOf(PayMethod.STRIPE)
+                                    )
+                                ),
+                                warning = "您当前是高端会员\n* 选择支付宝/微信将购买新的标准版订阅期限，在高端版结束后启用。\n* 选择Stripe将转为订阅模式，当前会员剩余时间在订阅取消后继续使用。"
                             )
                         }
                     }
@@ -132,7 +135,7 @@ data class CheckoutIntents(
                                     orderKind = OrderKind.AddOn,
                                     payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
                                 )),
-                                warning = "当前订阅**高端会员/年**来自Stripe自动续订，为保障您的权益，仅可使用支付宝/微信一次性购买订阅期限，在Stripe订阅结束后启用。",
+                                warning = "当前订阅**高端会员/年**来自Stripe自动续订，为保障您的权益，仅可使用支付宝/微信购买订阅期限，在Stripe订阅结束后启用。",
                             )
                         }
                         // Currently subscribed to standard edition.
@@ -159,7 +162,7 @@ data class CheckoutIntents(
                                                 orderKind = OrderKind.AddOn,
                                                 payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
                                             )),
-                                            warning = "当前订阅标准版会员来自Stripe续订，同一产品仅可以使用支付宝/微信购买额外订阅期限，在订阅结束后启用。",
+                                            warning = "当前标准会员来自Stripe订阅：\n* 选择支付宝/微信购买一次性订阅期限，在Stripe订阅结束后启用。\n* 为避免产生重复订阅同一产品，不能使用Stripe支付。",
                                         )
                                     }
 
@@ -177,7 +180,7 @@ data class CheckoutIntents(
                                                 payMethods = listOf(PayMethod.STRIPE)
                                             )
                                         ),
-                                        warning = "选择支付宝微信购买额外会员期限将在Stripe订阅到期后启用。\n选择Stripe更改自动扣款周期。\n自动订阅建议您订阅年度版更划算。"
+                                        warning = "当前标准会员来自Stripe订阅：\n* 选择支付宝/微信购买一次性订阅期限，在Stripe订阅结束后启用。\n* 选择Stripe支付更改自动扣款周期。\n自动订阅建议您订阅年度版更划算。"
                                     )
                                 }
                             }
@@ -191,7 +194,7 @@ data class CheckoutIntents(
                                 orderKind = OrderKind.Upgrade,
                                 payMethods = listOf(),
                             )),
-                            warning = "苹果内购的标准会员升级高端会员需要在您的苹果设备上，使用原有苹果账号登录后，在FT中文网APP内操作"
+                            warning = "当前标准会员会员来自苹果内购，升级高端会员需要在您的苹果设备上，使用原有苹果账号登录后，在FT中文网APP内操作"
                         )
                     }
                     // All other options are add-ons
@@ -200,7 +203,7 @@ data class CheckoutIntents(
                             orderKind = OrderKind.AddOn,
                             payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
                         )),
-                        warning = "自动续订可以使用支付宝/微信购买额外订阅期限，在订阅结束后启用。",
+                        warning = "当前标准会员会员来自苹果内购：\n* 选择支付宝/微信购买一次性订阅期限，在苹果订阅结束后启用。\n* 订阅模式不能再选择Stripe支付",
                     )
                 }
                 PayMethod.B2B -> {
