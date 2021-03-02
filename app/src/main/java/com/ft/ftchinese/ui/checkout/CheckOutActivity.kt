@@ -48,7 +48,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-const val EXTRA_PLAN_ID = "extra_plan_id"
+const val EXTRA_PRICE_ID = "extra_plan_id"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CheckOutActivity : ScopedAppActivity(),
@@ -94,7 +94,7 @@ class CheckOutActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
-        val planId = intent.getStringExtra(EXTRA_PLAN_ID) ?: return
+        val priceId = intent.getStringExtra(EXTRA_PRICE_ID) ?: return
 
         sessionManager = SessionManager.getInstance(this)
         paymentManager = PaymentManager.getInstance(this)
@@ -104,7 +104,7 @@ class CheckOutActivity : ScopedAppActivity(),
         fileCache = FileCache(this)
         tracker = StatsTracker.getInstance(this)
 
-        val p = FtcPriceCache.find(planId) ?: return
+        val p = FtcPriceCache.find(priceId) ?: return
         val a = sessionManager.loadAccount() ?: return
 
         price = p
@@ -541,9 +541,9 @@ class CheckOutActivity : ScopedAppActivity(),
     companion object {
         
         @JvmStatic
-        fun startForResult(activity: Activity?, requestCode: Int, planId: String) {
+        fun startForResult(activity: Activity?, requestCode: Int, priceId: String) {
             val intent = Intent(activity, CheckOutActivity::class.java).apply { 
-                putExtra(EXTRA_PLAN_ID, planId)
+                putExtra(EXTRA_PRICE_ID, priceId)
             }
 
             activity?.startActivityForResult(intent, requestCode)
