@@ -29,7 +29,7 @@ class SubsStatusFragment : Fragment() {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
+                              savedInstanceState: Bundle?): View {
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_subs_status, container, false)
 
@@ -73,7 +73,7 @@ class SubsStatusFragment : Fragment() {
             return null
         }
 
-        if (!m.expired()) {
+        if (!m.autoRenewOffExpired) {
             return null
         }
 
