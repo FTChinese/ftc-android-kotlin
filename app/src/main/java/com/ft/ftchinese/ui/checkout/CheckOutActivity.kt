@@ -206,8 +206,6 @@ class CheckOutActivity : ScopedAppActivity(),
             )
         }
 
-        // Toolbar text
-        supportActionBar?.title = checkoutCounter?.formatToolbarTitle(this)
         binding.payButtonEnabled = payMethod != null
         binding.intents = checkoutCounter?.checkoutIntents
 
