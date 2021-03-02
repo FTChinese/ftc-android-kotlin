@@ -71,10 +71,8 @@ class CartItemFragment : ScopedFragment() {
             }
         }
 
-        binding.discountSpinner.onItemSelectedListener {
-            onItemSelected { adapterView, view, pos, id ->
-                cartViewModel.discountChanged.value = pos
-            }
+        binding.discountSpinner.setOnItemClickListener { _, _, pos, _ ->
+            cartViewModel.discountChanged.value = pos
         }
     }
 
