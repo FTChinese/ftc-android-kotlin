@@ -58,9 +58,6 @@ class CheckoutCounter(
             null
         }
 
-    private val payableAmount: Double
-        get() = price.unitAmount - (selectedDiscount?.priceOff ?: 0.0)
-
     // By default we pre-select the discount with highest rate.
     private fun findMaxDiscount(): Int {
         if (discounts.size == 0) {
@@ -87,12 +84,6 @@ class CheckoutCounter(
     fun useDiscount(pos: Int) {
         if (pos > 0 && pos < discounts.size) {
             discountIndex = pos
-        }
-    }
-
-    fun formatToolbarTitle(ctx: Context): String {
-        return intents.orderKinds.joinToString("/") {
-            ctx.getString(it.stringRes)
         }
     }
 
