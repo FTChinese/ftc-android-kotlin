@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -71,9 +72,15 @@ class CartItemFragment : ScopedFragment() {
             }
         }
 
-        binding.discountSpinner.setOnItemClickListener { _, _, pos, _ ->
-            cartViewModel.discountChanged.value = pos
+        binding.discountSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, pos: Int, id: Long) {
+                cartViewModel.discountChanged.value = pos
+            }
+
+            override fun onNothingSelected(p0: AdapterView<*>?) {}
         }
+
+
     }
 
     companion object {
