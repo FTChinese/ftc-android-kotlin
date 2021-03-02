@@ -9,7 +9,7 @@
 
     <TextView
         android:id="@+id/two_col_leading"
-        style="@style/OrigamiText.Body2.Light"
+        style="@style/OrigamiText.Body2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/space_8"
@@ -20,7 +20,7 @@
         app:layout_constraintEnd_toStartOf="@id/two_col_trailing"
         android:text="Left"/>
     <TextView
-        style="@style/OrigamiText.Body2.Light"
+        style="@style/OrigamiText.Body2"
         android:id="@+id/two_col_trailing"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
