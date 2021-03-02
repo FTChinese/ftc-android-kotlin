@@ -1,5 +1,6 @@
 package com.ft.ftchinese.model.reader
 
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.order.StripeSubStatus
@@ -135,6 +136,18 @@ class MembershipTest {
             autoRenew = true,
             status = StripeSubStatus.IncompleteExpired,
             vip = false
+    )
+
+    private val stripeWithAddOn = Membership(
+        tier = Tier.STANDARD,
+        cycle = Cycle.YEAR,
+        expireDate = LocalDate.now().plusMonths(-1),
+        payMethod = PayMethod.STRIPE,
+        autoRenew = true,
+        status = StripeSubStatus.Canceled,
+        vip = false,
+        standardAddOn = 30,
+        premiumAddOn = 366
     )
 
     @Test fun remainingDays() {
@@ -354,5 +367,31 @@ class MembershipTest {
                 "Inactive stripe cannot read premium content",
                 Permission.PREMIUM.grant(readerPermBits)
         )
+    }
+
+    @Test fun addOn() {
+        val hasStdAddOn = stripeWithAddOn.hasStandardAddOn
+        val hasPrmAddOn = stripeWithAddOn.hasPremiumAddOn
+
+        assertTrue(hasStdAddOn)
+        assertTrue(hasPrmAddOn)
+
+        val addOns = mutableListOf<Pair<String, String>>().apply {
+            if (stripeWithAddOn.hasStandardAddOn) {
+                add(Pair("标准版AddOn", "${stripeWithAddOn.standardAddOn}天"))
+            }
+            if (stripeWithAddOn.hasPremiumAddOn) {
+                add(Pair("高端版AddOn", "${stripeWithAddOn.premiumAddOn}天"))
+            }
+        }
+
+        val details = mutableListOf(
+            Pair("订阅方式", "Stripe"),
+            Pair("期限", stripeWithAddOn.localizeExpireDate()),
+            Pair("自动续订", "已关闭"),
+        ).apply {
+            addAll(addOns)
+        }
+        println(details)
     }
 }
