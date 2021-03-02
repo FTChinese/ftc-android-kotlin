@@ -82,7 +82,7 @@ data class Order(
         val start = when {
             member.expireDate == null -> today
             usageType == OrderKind.Upgrade -> today
-            member.expired() -> today
+            member.autoRenewOffExpired -> today
             else -> member.expireDate
         }
 
