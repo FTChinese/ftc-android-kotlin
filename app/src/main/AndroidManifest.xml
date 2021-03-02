@@ -130,7 +130,7 @@
             android:parentActivityName=".ui.launch.MainActivity" />
         <activity
             android:name=".ui.checkout.CheckOutActivity"
-            android:label="@string/order_kind_create"
+            android:label="@string/check_out"
             android:parentActivityName=".ui.paywall.PaywallActivity" />
         <activity
             android:name=".ui.checkout.StripeSubActivity"
