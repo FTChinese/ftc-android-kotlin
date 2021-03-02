@@ -38,11 +38,12 @@ data class SubsStatus(
 
             val name = ctx.getString(m.tierStringRes)
             val addOns = mutableListOf<Pair<String, String>>().apply {
-                if (m.standardAddOn > 0) {
-                    add(Pair("标准版AddOn", "${m.standardAddOn}天"))
+                if (m.hasPremiumAddOn) {
+                    add(Pair("高端版AddOn", "${m.premiumAddOn}天"))
                 }
-                if (m.premiumAddOn > 0) {
-                    add(Pair("高端版AddOon", "${m.premiumAddOn}天"))
+
+                if (m.hasStandardAddOn) {
+                    add(Pair("标准版AddOn", "${m.standardAddOn}天"))
                 }
             }
 
@@ -68,7 +69,7 @@ data class SubsStatus(
                     val brand = ctx.getString(m.payMethod.stringRes)
                     val expired = m.expired()
                     val reminder =  when {
-                        expired -> ctx.getString(R.string.member_has_expired)
+                        expired && !m.hasStandardAddOn && !m.hasPremiumAddOn -> ctx.getString(R.string.member_has_expired)
                         m.isInvalidStripe() -> ctx.getString(R.string.member_status_invalid)
                         else -> null
                     }
