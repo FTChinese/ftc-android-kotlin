@@ -99,7 +99,7 @@ class LinkPreviewActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         // Both accounts have memberships and not expired yet.
-        if (!ftcAccount.membership.expired() && !wxAccount.membership.expired()) {
+        if (!ftcAccount.membership.autoRenewOffExpired && !wxAccount.membership.autoRenewOffExpired) {
             return getString(R.string.accounts_member_valid)
         }
 

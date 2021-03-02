@@ -51,7 +51,7 @@ data class CheckoutIntents(
                 )
             }
 
-            if (m.expired()) {
+            if (m.autoRenewOffExpired) {
                 return CheckoutIntents(
                     intents = listOf(CheckoutIntent(
                         orderKind = OrderKind.Create,
@@ -62,7 +62,7 @@ data class CheckoutIntents(
             }
 
             // Invalid stripe subscription is treated as not having a membership.
-            if (m.isInvalidStripe()) {
+            if (m.isInvalidStripe) {
                 return CheckoutIntents(
                     intents = listOf(CheckoutIntent(
                         orderKind = OrderKind.Create,
