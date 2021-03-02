@@ -161,6 +161,7 @@ class ProductFragment : ScopedFragment(),
                     holder.outlineButton.visibility = View.GONE
                     holder.primaryButton.text = payable
                     holder.primaryButton.isEnabled = btnEnabled
+
                     holder.primaryButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
                         viewModel.priceSelected.value = price
@@ -170,6 +171,7 @@ class ProductFragment : ScopedFragment(),
                     holder.primaryButton.visibility = View.GONE
                     holder.outlineButton.text = payable
                     holder.outlineButton.isEnabled = btnEnabled
+
                     holder.outlineButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
                         viewModel.priceSelected.value = price
