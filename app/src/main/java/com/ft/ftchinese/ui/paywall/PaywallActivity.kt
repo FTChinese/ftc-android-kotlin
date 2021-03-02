@@ -114,7 +114,7 @@ class PaywallActivity : ScopedAppActivity(),
             CheckOutActivity.startForResult(
                 activity = this,
                 requestCode = RequestCode.PAYMENT,
-                planId = it.id
+                priceId = it.id
             )
         })
 
