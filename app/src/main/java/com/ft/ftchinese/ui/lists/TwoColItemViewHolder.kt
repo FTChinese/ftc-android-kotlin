@@ -10,8 +10,8 @@ import org.jetbrains.anko.find
 
 class TwoColItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-    val leadingText: TextView = view.findViewById(R.id.two_col_leading)
-    val trailingText: TextView = view.find(R.id.two_col_trailing)
+    private val leadingText: TextView = view.findViewById(R.id.two_col_leading)
+    private val trailingText: TextView = view.find(R.id.two_col_trailing)
 
     fun setLeadingText(text: CharSequence) {
         leadingText.text = text
