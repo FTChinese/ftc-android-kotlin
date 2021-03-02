@@ -24,7 +24,8 @@ class MySubsFragment : Fragment(), AnkoLogger {
 
     private lateinit var binding: FragmentMySubsBinding
     private lateinit var viewModel: SubsStatusViewModel
-    private lateinit var listAdapter: ListAdapter
+    private lateinit var subsStatusAdapter: ListAdapter
+    private lateinit var addOnDetailAdapter: ListAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
@@ -40,7 +41,8 @@ class MySubsFragment : Fragment(), AnkoLogger {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        listAdapter = ListAdapter()
+        subsStatusAdapter = ListAdapter()
+        addOnDetailAdapter = ListAdapter()
 
         viewModel = activity?.run {
             ViewModelProvider(this).get(SubsStatusViewModel::class.java)
@@ -48,7 +50,12 @@ class MySubsFragment : Fragment(), AnkoLogger {
 
         binding.subsDetails.apply {
             layoutManager = LinearLayoutManager(context)
-            adapter = listAdapter
+            adapter = subsStatusAdapter
+        }
+
+        binding.addonDetails.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = addOnDetailAdapter
         }
 
         viewModel.statusChanged.observe(viewLifecycleOwner) {
@@ -58,7 +65,10 @@ class MySubsFragment : Fragment(), AnkoLogger {
             )
             info(status)
             binding.status = status
-            listAdapter.setData(status.details)
+
+            // Set data to recycler view.
+            subsStatusAdapter.setData(status.details)
+            addOnDetailAdapter.setData(status.addOns)
         }
 
         binding.reactivateStripe.setOnClickListener {
