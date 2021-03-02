@@ -84,8 +84,8 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
             putString(PREF_APPLE_SUBS_ID, member.appleSubsId)
             putString(PREF_B2B_LIC_ID, member.b2bLicenceId)
             putBoolean(PREF_IS_VIP, member.vip)
-            putInt(PREF_STD_ADDON, member.standardAddOn)
-            putInt(PREF_PRM_ADDON, member.premiumAddOn)
+            putLong(PREF_STD_ADDON, member.standardAddOn)
+            putLong(PREF_PRM_ADDON, member.premiumAddOn)
         }
     }
 
@@ -113,8 +113,8 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         val appleSubsId = sharedPreferences.getString(PREF_APPLE_SUBS_ID, null)
         val b2bLicenceId = sharedPreferences.getString(PREF_B2B_LIC_ID, null)
         val isVip = sharedPreferences.getBoolean(PREF_IS_VIP, false)
-        val stdAddOn = sharedPreferences.getInt(PREF_STD_ADDON, 0)
-        val prmAddOn = sharedPreferences.getInt(PREF_PRM_ADDON, 0)
+        val stdAddOn = sharedPreferences.getLong(PREF_STD_ADDON, 0)
+        val prmAddOn = sharedPreferences.getLong(PREF_PRM_ADDON, 0)
 
         val membership = Membership(
             tier = Tier.fromString(tier),
@@ -146,7 +146,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
                 avatarUrl = avatarUrl,
                 loginMethod = LoginMethod.fromString(loginMethod),
                 wechat = wechat,
-                membership = membership
+                membership = membership.normalize()
         )
     }
 
