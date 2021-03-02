@@ -36,6 +36,8 @@ private const val PREF_SUB_STATUS = "subscription_status"
 private const val PREF_APPLE_SUBS_ID = "apple_subs_id"
 private const val PREF_B2B_LIC_ID = "b2b_licence_id"
 private const val PREF_IS_VIP = "is_vip"
+private const val PREF_STD_ADDON = "std_addon"
+private const val PREF_PRM_ADDON = "prm_addon"
 
 private const val PREF_IS_LOGGED_IN = "is_logged_in"
 private const val PREF_LOGIN_METHOD = "login_method"
@@ -82,6 +84,8 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
             putString(PREF_APPLE_SUBS_ID, member.appleSubsId)
             putString(PREF_B2B_LIC_ID, member.b2bLicenceId)
             putBoolean(PREF_IS_VIP, member.vip)
+            putInt(PREF_STD_ADDON, member.standardAddOn)
+            putInt(PREF_PRM_ADDON, member.premiumAddOn)
         }
     }
 
@@ -109,6 +113,8 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         val appleSubsId = sharedPreferences.getString(PREF_APPLE_SUBS_ID, null)
         val b2bLicenceId = sharedPreferences.getString(PREF_B2B_LIC_ID, null)
         val isVip = sharedPreferences.getBoolean(PREF_IS_VIP, false)
+        val stdAddOn = sharedPreferences.getInt(PREF_STD_ADDON, 0)
+        val prmAddOn = sharedPreferences.getInt(PREF_PRM_ADDON, 0)
 
         val membership = Membership(
             tier = Tier.fromString(tier),
@@ -120,7 +126,9 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
             status = StripeSubStatus.fromString(status),
             appleSubsId = appleSubsId,
             b2bLicenceId = b2bLicenceId,
-            vip = isVip
+            vip = isVip,
+            standardAddOn = stdAddOn,
+            premiumAddOn = prmAddOn,
         )
 
         val wechat = Wechat(
