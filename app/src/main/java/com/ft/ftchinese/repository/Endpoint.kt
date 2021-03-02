@@ -35,7 +35,7 @@ object ContentApi {
     val INTERACTIVE = "$BASE/interactive/contents"
 }
 
-private const val devIP = "http://192.168.10.106"
+private const val devIP = "http://192.168.10.108"
 
 object Endpoint {
     val readerBase = if (BuildConfig.DEBUG) {
