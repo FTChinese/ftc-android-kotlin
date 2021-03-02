@@ -31,10 +31,98 @@ data class Membership(
     val status: StripeSubStatus? = null,
     val appleSubsId: String? = null,
     val b2bLicenceId: String? = null,
-    val standardAddOn: Int = 0,
-    val premiumAddOn: Int = 0,
+    val standardAddOn: Long = 0,
+    val premiumAddOn: Long = 0,
     val vip: Boolean = false,
 ) : Parcelable {
+
+    // Renew expiration date if auto-renewal subscription expired.
+    private fun renew(): Membership {
+        return Membership(
+            tier = tier,
+            cycle = cycle,
+            expireDate = when (cycle) {
+                Cycle.YEAR -> expireDate?.plusYears(1L)
+                Cycle.MONTH -> expireDate?.plusMonths(1L)
+                else -> expireDate
+            },
+            payMethod = payMethod,
+            stripeSubsId = stripeSubsId,
+            autoRenew = autoRenew,
+            status = status,
+            appleSubsId = appleSubsId,
+            b2bLicenceId = b2bLicenceId,
+            standardAddOn = standardAddOn,
+            premiumAddOn = premiumAddOn,
+            vip = vip
+        )
+    }
+
+    private fun useAddOn(): Membership {
+        return Membership(
+            tier = when {
+                hasPremiumAddOn -> Tier.PREMIUM
+                hasStandardAddOn -> Tier.STANDARD
+                else -> tier
+            },
+            cycle = cycle,
+            expireDate = when {
+                hasPremiumAddOn -> expireDate?.plusDays(standardAddOn)
+                hasStandardAddOn -> expireDate?.plusDays(premiumAddOn)
+                else -> expireDate
+            },
+            payMethod = PayMethod.ALIPAY, // WECHAT also works. It doesn't matter.
+            stripeSubsId = null,
+            autoRenew = false,
+            status = null,
+            appleSubsId = null,
+            b2bLicenceId = null,
+            standardAddOn = if (hasPremiumAddOn) standardAddOn else 0,
+            premiumAddOn = 0,
+            vip = vip
+        )
+    }
+
+    // Returns the final state of membership. The purpose of this
+    // is to make the expiration date continuous as much as possible
+    // so that when calculation permission or show it on ui,
+    // we could reduce the complexity of determining the final state
+    // of expiration time.
+    // After calling this method, you only need to check expireDate
+    // field.
+    fun normalize(): Membership {
+        if (vip) {
+            return this
+        }
+
+        if (autoRenew) {
+            if (!expired) {
+                return this
+            }
+
+            return renew()
+        }
+
+        if (hasAddOn) {
+            if (!expired) {
+                return this
+            }
+
+            return useAddOn()
+        }
+
+        return this
+    }
+
+    val addOns: List<Pair<Tier, Long>>
+        get() = mutableListOf<Pair<Tier, Long>>().apply {
+            if (hasPremiumAddOn) {
+                add(Pair(Tier.PREMIUM, premiumAddOn))
+            }
+            if (hasStandardAddOn) {
+                add(Pair(Tier.STANDARD, standardAddOn))
+            }
+        }
 
     val tierStringRes: Int
         get() = when {
@@ -55,27 +143,26 @@ data class Membership(
             )
         } else null
 
-    /**
-     * Checks whether the current membership is purchased
-     * via alipay or wechat pay.
-     */
-    private fun isAliOrWxPay(): Boolean {
-        // For backward compatibility with legacy db format.
-        if (tier != null && payMethod == null) {
-            return true
+    // Checks whether the current membership is purchased via alipay or wechat pay.
+    val isOneTimePurchase: Boolean
+        get() = if (tier != null && payMethod == null) {
+            true
+        } else {
+            payMethod == PayMethod.ALIPAY || payMethod == PayMethod.WXPAY
         }
 
-        // The first condition is used for backward compatibility.
-        return payMethod == PayMethod.ALIPAY || payMethod == PayMethod.WXPAY
-    }
+    val isStripe: Boolean
+        get() = payMethod == PayMethod.STRIPE && stripeSubsId != null
 
-    fun isStripe(): Boolean {
-        return payMethod == PayMethod.STRIPE && stripeSubsId != null
-    }
+    val isInvalidStripe: Boolean
+        get() = isStripe && status?.isInvalid() == true
 
-    fun isInvalidStripe(): Boolean {
-        return isStripe() && status?.isInvalid() == true
-    }
+    val canCancelStripe: Boolean
+        get() = if (payMethod != PayMethod.STRIPE) {
+            false
+        } else {
+            autoRenew
+        }
 
     /**
      * Determines whether the Renew button should be visible.
@@ -101,27 +188,31 @@ data class Membership(
         return expireDate.isBefore(threeYearsLater) && expireDate.isAfter(today)
     }
 
-    /**
-     * Checks whether membership expired.
-     * For stripe and apple iap, if expire date is past and
-     * autoRenew is true, take it as not expired.
-     * For stripe invalid status, take it as expired.
-     */
-    fun expired(): Boolean {
-        if (vip) {
-            return false
+    // Tests if the expiration date is before today.
+    // This does not take into account whether user is using auto renewal subscription.
+    val expired: Boolean
+        get() = when {
+            vip -> false
+            expireDate == null -> true
+            isInvalidStripe -> true
+            else -> expireDate.isBefore(LocalDate.now())
         }
 
-        if (expireDate == null) {
-            return true
-        }
+    val hasAddOn: Boolean
+        get() = standardAddOn > 0 || premiumAddOn > 0
 
-        if (isInvalidStripe()) {
-            return true
-        }
+    // Precedence when determining whether it is actually expired:
+    // 1. Auto Renew
+    // 2. Expiration Date
+    // 3. Has AddOns
+    val autoRenewOffExpired: Boolean
+        get() = !autoRenew && expired
 
-        return expireDate.isBefore(LocalDate.now()) && !autoRenew
-    }
+    val hasStandardAddOn: Boolean
+        get() = standardAddOn > 0
+
+    val hasPremiumAddOn: Boolean
+        get() = premiumAddOn > 0
 
     /**
      * Calculate remaining days before expiration.
@@ -141,14 +232,7 @@ data class Membership(
         return LocalDate.now().until(expireDate, ChronoUnit.DAYS) + premiumAddOn + standardAddOn
     }
 
-    fun canCancelStripe(): Boolean {
-        if (payMethod != PayMethod.STRIPE) {
-            return false
-        }
 
-        // As long as auto renew is on, we should allow cancel.
-        return autoRenew
-    }
 
     // For auto renewal only show month or date.
     // Use getMonthValue() and getDayOfMonth() with a formatter string.
@@ -164,14 +248,7 @@ data class Membership(
         return expireDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
     }
 
-    val hasAddOn: Boolean
-        get() = standardAddOn > 0 || premiumAddOn > 0
 
-    val hasStandardAddOn: Boolean
-        get() = standardAddOn > 0
-
-    val hasPremiumAddOn: Boolean
-        get() = premiumAddOn > 0
 
     /**
      * getPermission calculates a membership's (including
@@ -184,6 +261,7 @@ data class Membership(
      * membership status used to tell user what went wrong.
      */
     fun getPermission(): Pair<Int, MemberStatus?> {
+
         if (vip) {
             return Pair(
                     Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id,
@@ -200,21 +278,7 @@ data class Membership(
         }
 
         // Expired.
-        if (expired()) {
-            // If add-on exists.
-            if (hasPremiumAddOn) {
-                return Pair(
-                    Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id,
-                    MemberStatus.ActivePremium,
-                )
-            }
-
-            if (hasStandardAddOn) {
-                return Pair(
-                    Permission.FREE.id or Permission.STANDARD.id,
-                    MemberStatus.ActiveStandard,
-                )
-            }
+        if (expired) {
 
             return Pair(
                     Permission.FREE.id,
