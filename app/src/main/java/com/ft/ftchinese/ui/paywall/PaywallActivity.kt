@@ -187,6 +187,7 @@ class PaywallActivity : ScopedAppActivity(),
     private fun loadData(isRefreshing: Boolean) {
         // Fetch paywall from cache, then from server.
         paywallViewModel.loadPaywall(isRefreshing)
+        paywallViewModel.refreshStripePrices()
     }
 
     // Convert Promo to PromoUI if it is valid.
