@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
-import com.ft.ftchinese.model.order.StripeSubParams
-import com.ft.ftchinese.model.order.StripeSubResult
+import com.ft.ftchinese.model.stripesubs.SubParams
+import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.subscription.AliPayIntent
-import com.ft.ftchinese.model.subscription.WxPayIntent
+import com.ft.ftchinese.model.ftcsubs.AliPayIntent
+import com.ft.ftchinese.model.ftcsubs.WxPayIntent
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.viewmodel.*
@@ -32,8 +32,8 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<AliPayIntent>>()
     }
 
-    val stripeSubsResult: MutableLiveData<Result<StripeSubResult>> by lazy {
-        MutableLiveData<Result<StripeSubResult>>()
+    val stripeSubsResult: MutableLiveData<Result<StripeSubsResult>> by lazy {
+        MutableLiveData<Result<StripeSubsResult>>()
     }
 
     fun createWxOrder(account: Account, price: Price) {
@@ -103,7 +103,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun createStripeSub(account: Account, params: StripeSubParams) {
+    fun createStripeSub(account: Account, params: SubParams) {
         if (isNetworkAvailable.value == false) {
             stripeSubsResult.value = Result.LocalizedError(R.string.prompt_no_network)
             return
@@ -135,7 +135,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun upgradeStripeSub(account: Account, params: StripeSubParams) {
+    fun upgradeStripeSub(account: Account, params: SubParams) {
         if (isNetworkAvailable.value == false) {
             stripeSubsResult.value = Result.LocalizedError(R.string.prompt_no_network)
             return

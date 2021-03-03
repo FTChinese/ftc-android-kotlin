@@ -14,10 +14,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityStripeSubBinding
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.order.*
+import com.ft.ftchinese.model.stripesubs.*
 import com.ft.ftchinese.model.paywall.StripePriceCache
 import com.ft.ftchinese.model.price.Price
-import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
@@ -331,7 +331,7 @@ class StripeSubActivity : ScopedAppActivity(),
             OrderKind.Create -> {
                 toast(R.string.creating_subscription)
 
-                checkOutViewModel.createStripeSub(account, StripeSubParams(
+                checkOutViewModel.createStripeSub(account, SubParams(
                     tier = p.tier,
                     cycle = p.cycle,
                     priceId = p.id,
@@ -344,7 +344,7 @@ class StripeSubActivity : ScopedAppActivity(),
                 toast(R.string.upgrading_subscription)
                 idempotency.clear()
 
-                checkOutViewModel.upgradeStripeSub(account, StripeSubParams(
+                checkOutViewModel.upgradeStripeSub(account, SubParams(
                     tier = p.tier,
                     cycle = p.cycle,
                     priceId = p.id,
@@ -360,7 +360,7 @@ class StripeSubActivity : ScopedAppActivity(),
         }
     }
 
-    private fun onSubsResult(result: Result<StripeSubResult>) {
+    private fun onSubsResult(result: Result<StripeSubsResult>) {
 
         binding.inProgress = false
 
@@ -399,21 +399,21 @@ class StripeSubActivity : ScopedAppActivity(),
                 info("Subscription result: ${result.data}")
 
                 // If no further action required.
-                if (!result.data.payment.requiresAction) {
+                if (result.data.subs.paymentIntent?.requiresAction == false) {
                     onSubsDone(result.data)
                     toast(R.string.subs_success)
                     return
                 }
 
                 // Payment intent client secret should present.
-                if (result.data.payment.paymentIntentClientSecret == null) {
+                if (result.data.subs.paymentIntent?.clientSecret == null) {
                     binding.enableInput = true
                     idempotency.clear()
                     alertMissingClientSecret()
                     return
                 }
 
-                alertAuthenticate(result.data.payment.paymentIntentClientSecret)
+                alertAuthenticate(result.data.subs.paymentIntent.clientSecret)
             }
         }
     }
@@ -484,7 +484,7 @@ class StripeSubActivity : ScopedAppActivity(),
         }.show()
     }
 
-    private fun onSubsDone(result: StripeSubResult) {
+    private fun onSubsDone(result: StripeSubsResult) {
         binding.rvStripeSub.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(this@StripeSubActivity)
@@ -496,7 +496,7 @@ class StripeSubActivity : ScopedAppActivity(),
         showDoneBtn()
     }
 
-    private fun buildRows(sub: StripeSubs?): List<String> {
+    private fun buildRows(sub: Subscription?): List<String> {
         if (sub == null) {
             return listOf(
                     getString(R.string.order_subscribed_plan),

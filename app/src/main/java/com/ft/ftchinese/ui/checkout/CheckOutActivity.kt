@@ -20,7 +20,7 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.paywall.FtcPriceCache
 import com.ft.ftchinese.model.paywall.StripePriceCache
 import com.ft.ftchinese.model.price.Price
-import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.OrderManager
