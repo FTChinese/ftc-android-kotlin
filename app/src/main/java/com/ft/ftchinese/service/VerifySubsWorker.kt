@@ -9,10 +9,10 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.repository.AccountRepo
+import com.ft.ftchinese.repository.AppleClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.store.PaymentManager
@@ -46,22 +46,20 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
        when (account.membership.payMethod) {
             PayMethod.ALIPAY, PayMethod.WXPAY -> {
                 info("Verify ftc pay...")
-                verifyFtcPay(account)
+                return verifyFtcPay(account)
             }
             PayMethod.APPLE -> {
                 info("Refresh IAP...")
-                refreshIAP(account)
+                return refreshIAP(account)
             }
             PayMethod.STRIPE -> {
                 info("Refresh Stripe...")
-                refreshStripe(account)
+                return refreshStripe(account)
             }
            else -> {
                return Result.success()
            }
         }
-
-        return refreshAccount(account)
     }
 
     private fun checkExpiration(m: Membership) {
@@ -113,73 +111,63 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         }
     }
 
-    private fun verifyFtcPay(account: Account): Boolean {
+    private fun verifyFtcPay(account: Account): Result {
         val paymentManager = PaymentManager.getInstance(ctx)
         val pr = paymentManager.load()
 
         if (pr.isOrderPaid()) {
             info("Order already paid. Stop verification")
-            return true
+            return Result.success()
         }
 
         if (pr.ftcOrderId.isEmpty()) {
             info("Order id not found")
-            return true
+            return Result.success()
         }
 
         try {
-            val result = SubRepo.verifyOrder(account, pr.ftcOrderId) ?: return false
+            val result = SubRepo.verifyOrder(account, pr.ftcOrderId) ?: return Result.failure()
             info(result)
 
             paymentManager.save(result.payment)
 
             if (!result.payment.isOrderPaid()) {
-                return true
+                return Result.success()
             }
 
-        } catch (e: Exception) {
-            info(e)
-            return false
-        }
-
-        return true
-    }
-
-    private fun refreshIAP(account: Account): Boolean {
-        try {
-            SubRepo.refreshIAP(account) ?: return false
-        } catch (e: Exception) {
-            info(e)
-            return false
-        }
-
-        return true
-    }
-
-    private fun refreshStripe(account: Account): Boolean {
-        try {
-            StripeClient.refreshSub(account) ?: return false
-        } catch (e: Exception) {
-            info(e)
-            return false
-        }
-
-        return true
-    }
-
-    private fun refreshAccount(account: Account): Result {
-        try {
-            info("Refreshing account...")
-            val updatedAccount = AccountRepo.refresh(account) ?: return Result.retry()
-
-            if (updatedAccount.membership.expireDate?.isBefore(account.membership.expireDate) == false) {
-                SessionManager.getInstance(ctx).saveAccount(updatedAccount)
-            }
+            SessionManager.getInstance(ctx).saveMembership(result.membership)
 
             return Result.success()
         } catch (e: Exception) {
             info(e)
-            return Result.retry()
+            return Result.failure()
         }
     }
+
+    private fun refreshIAP(account: Account): Result {
+        try {
+            val result = AppleClient.refreshIAP(account) ?: return Result.failure()
+
+            SessionManager.getInstance(ctx).saveMembership(result.membership)
+
+            return Result.success()
+        } catch (e: Exception) {
+            info(e)
+            return Result.failure()
+        }
+    }
+
+    private fun refreshStripe(account: Account): Result {
+        try {
+            val result = StripeClient.refreshSub(account) ?: return Result.failure()
+
+            SessionManager.getInstance(ctx).saveMembership(result.membership)
+
+            return Result.success()
+        } catch (e: Exception) {
+            info(e)
+            return Result.failure()
+        }
+    }
+
 }
