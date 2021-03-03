@@ -48,7 +48,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-const val EXTRA_PRICE_ID = "extra_plan_id"
+const val EXTRA_PRICE_ID = "extra_price_id"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CheckOutActivity : ScopedAppActivity(),
@@ -94,7 +94,7 @@ class CheckOutActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
-        val priceId = intent.getStringExtra(EXTRA_PRICE_ID) ?: return
+        val priceId = intent.getStringExtra(EXTRA_PRICE_ID) ?: throw Exception("price id not passed in")
 
         sessionManager = SessionManager.getInstance(this)
         paymentManager = PaymentManager.getInstance(this)
@@ -104,7 +104,7 @@ class CheckOutActivity : ScopedAppActivity(),
         fileCache = FileCache(this)
         tracker = StatsTracker.getInstance(this)
 
-        val p = FtcPriceCache.find(priceId) ?: return
+        val p = FtcPriceCache.find(priceId) ?: throw Exception("Price not found from in-memory cache")
         val a = sessionManager.loadAccount() ?: return
 
         price = p
@@ -152,6 +152,7 @@ class CheckOutActivity : ScopedAppActivity(),
             onAliPayIntent(it)
         }
 
+        // Loading stripe prices before presenting stripe activity.
         paywallViewModel.stripePrices.observe(this) { result ->
             binding.inProgress = false
             when (result) {
