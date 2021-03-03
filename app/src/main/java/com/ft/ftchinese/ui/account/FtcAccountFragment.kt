@@ -91,7 +91,12 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
             AccountRow(
                 id = AccountRowType.PASSWORD,
                 primary = getString(R.string.label_password),
-                secondary = "********"
+                secondary = "********",
+            ),
+            AccountRow(
+              id = AccountRowType.Address,
+                primary = "地址",
+                secondary = "设置或更改地址",
             ),
             AccountRow(
                 id = AccountRowType.STRIPE,
@@ -184,11 +189,9 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
 
             holder.itemView.setOnClickListener {
                 when (item.id) {
-                    AccountRowType.EMAIL,
-                    AccountRowType.PASSWORD,
-                    AccountRowType.USER_NAME -> UpdateActivity.start(requireContext(), item.id)
                     AccountRowType.STRIPE -> CustomerActivity.start(context)
                     AccountRowType.WECHAT -> WxInfoActivity.start(requireContext())
+                    else -> UpdateActivity.start(requireContext(), item.id)
                 }
             }
         }

@@ -10,6 +10,7 @@ enum class AccountRowType {
     EMAIL,
     USER_NAME,
     PASSWORD,
+    Address,
     STRIPE,
     WECHAT
 }

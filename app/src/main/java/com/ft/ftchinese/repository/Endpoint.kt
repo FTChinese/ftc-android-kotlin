@@ -13,6 +13,7 @@ object NextApi {
     // Refresh account data.
     val ACCOUNT = "$BASE/user/account/v2"
     val PROFILE = "$BASE/user/profile"
+    val ADDRESS = "$BASE/user/address"
     val UPDATE_EMAIL = "$BASE/user/email"
     // Resend email verification letter
     val REQUEST_VERIFICATION = "$BASE/user/email/request-verification"

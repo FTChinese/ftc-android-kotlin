@@ -68,6 +68,10 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
                 supportActionBar?.setTitle(R.string.title_change_password)
                 fm.replace(R.id.double_frag_primary, UpdatePasswordFragment.newInstance())
             }
+            AccountRowType.Address -> {
+                supportActionBar?.setTitle("设置地址")
+                fm.replace(R.id.double_frag_primary, UpdateAddressFragment.newInstance())
+            }
         }
 
         fm.commit()

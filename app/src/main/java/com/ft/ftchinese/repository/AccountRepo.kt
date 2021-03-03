@@ -2,11 +2,8 @@ package com.ft.ftchinese.repository
 
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.fetch.Fetch
-import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.LoginMethod
-import com.ft.ftchinese.model.reader.Passwords
-import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.reader.*
 
 object AccountRepo {
     private fun loadFtcAccount(ftcId: String): Account? {
@@ -30,7 +27,7 @@ object AccountRepo {
      * If user logged in with email + password (and the the email is bound to this wechat),
      * WxSession never actually exists.
      */
-    private fun loadWxAccount(unionId: String): Account? {
+    fun loadWxAccount(unionId: String): Account? {
         val (_, body) = Fetch()
                 .get(NextApi.WX_ACCOUNT)
                 .setUnionId(unionId)
@@ -122,5 +119,28 @@ object AccountRepo {
         return Fetch()
                 .get(url)
                 .download()
+    }
+
+    fun loadAddress(ftcId: String): Address? {
+        val (_, body) = Fetch()
+            .get(NextApi.ADDRESS)
+            .setUserId(ftcId)
+            .noCache()
+            .endJsonText()
+
+        return if (body == null) {
+            return null
+        } else {
+            json.parse<Address>(body)
+        }
+    }
+
+    fun updateAddress(ftcId: String, address: Address) {
+        val (resp, _) = Fetch()
+            .patch(NextApi.ADDRESS)
+            .setUserId(ftcId)
+            .noCache()
+            .sendJson(json.toJsonString(address))
+            .endJsonText()
     }
 }

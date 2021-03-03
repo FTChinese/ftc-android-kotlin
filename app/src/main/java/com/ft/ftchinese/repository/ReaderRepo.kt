@@ -110,29 +110,6 @@ object ReaderRepo : AnkoLogger {
         }
     }
 
-    /**
-     * Fetch user account data after [wxLogin] succeeded.
-     * Account retrieved from here always has loginMethod set to `wechat`.
-     * Only used for initial login.
-     * DO NOT use this to refresh account data since WxSession only exists
-     * if user logged in via wechat OAuth.
-     * If user logged in with email + password (and the the email is bound to this wechat),
-     * WxSession never actually exists.
-     */
-    fun loadWxAccount(unionId: String): Account? {
-        val (_, body) = Fetch()
-                .get(NextApi.WX_ACCOUNT)
-                .setUnionId(unionId)
-                .noCache()
-                .endJsonText()
-
-        return if (body == null) {
-            return null
-        } else {
-            json.parse<Account>(body)
-        }
-    }
-
     fun engaged(dur: ReadingDuration): String? {
         info("Engagement length of ${dur.userId}: ${dur.startUnix} - ${dur.endUnix}")
 
@@ -140,4 +117,6 @@ object ReaderRepo : AnkoLogger {
             .sendJson(Klaxon().toJsonString(dur))
             .endPlainText()
     }
+
+
 }

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ui.account.UpdateAddressFragment">
+
+    <data>
+        <variable
+            name="inProgress"
+            type="Boolean" />
+
+        <variable
+            name="address"
+            type="com.ft.ftchinese.model.reader.Address" />
+
+    </data>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/space_16"
+        android:orientation="vertical">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_province"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="省/直辖市"
+                android:inputType="text"
+                android:maxLines="1"
+                android:enabled="@{!inProgress}"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_city"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="市"
+                android:inputType="text"
+                android:maxLines="1"
+                android:enabled="@{!inProgress}"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_district"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="区"
+                android:inputType="text"
+                android:maxLines="1"
+                android:enabled="@{!inProgress}"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_street"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="街道、门牌号"
+                android:inputType="text"
+                android:maxLines="1"
+                android:enabled="@{!inProgress}"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/input_postcode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="邮编"
+                android:inputType="text"
+                android:maxLines="1"
+                android:enabled="@{!inProgress}"/>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_16"
+            android:text="@string/btn_save"
+            android:enabled="@{!inProgress}"/>
+    </LinearLayout>
+
+</layout>

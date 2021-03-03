@@ -9,6 +9,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.repository.ReaderRepo
 import kotlinx.coroutines.Dispatchers
@@ -259,7 +260,7 @@ class LoginViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val account = withContext(Dispatchers.IO) {
-                    ReaderRepo.loadWxAccount(wxSession.unionId)
+                    AccountRepo.loadWxAccount(wxSession.unionId)
                 }
 
                 if (account == null) {
