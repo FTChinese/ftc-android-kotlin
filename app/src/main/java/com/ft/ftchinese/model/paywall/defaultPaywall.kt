@@ -45,7 +45,7 @@ val defaultPaywall = Paywall(
                     nickname = "Standard Yearly Plan",
                     productId = "prod_9xrJdHFq0wmq",
                     source = PriceSource.Ftc,
-                    unitAmount = 258.0,
+                    unitAmount = 298.0,
                     promotionOffer = Discount()
                 ),
                 Price(
