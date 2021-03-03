@@ -9,7 +9,7 @@ import com.ft.ftchinese.model.paywall.FtcPriceCache
 import com.ft.ftchinese.model.paywall.Paywall
 import com.ft.ftchinese.model.paywall.StripePriceCache
 import com.ft.ftchinese.model.price.Price
-import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames

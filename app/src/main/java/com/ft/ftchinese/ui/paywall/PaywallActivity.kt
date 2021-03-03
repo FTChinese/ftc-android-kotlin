@@ -15,7 +15,7 @@ import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.paywall.Paywall
 import com.ft.ftchinese.model.paywall.Promo
 import com.ft.ftchinese.model.paywall.defaultPaywall
-import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker

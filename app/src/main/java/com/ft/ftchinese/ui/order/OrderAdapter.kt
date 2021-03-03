@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.subscription.Order
+import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.ui.formatter.formatEdition
 import com.ft.ftchinese.ui.formatter.getCurrencySymbol
 import org.threeten.bp.format.DateTimeFormatter

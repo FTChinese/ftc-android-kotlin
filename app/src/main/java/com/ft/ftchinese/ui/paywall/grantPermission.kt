@@ -6,7 +6,6 @@ import com.ft.ftchinese.model.reader.MemberStatus
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.member.MemberActivity
-import com.ft.ftchinese.ui.paywall.PaywallActivity
 import org.jetbrains.anko.toast
 
 /**
@@ -41,7 +40,7 @@ fun Activity.handlePermissionDenial(reason: MemberStatus, contentPerm: Permissio
         }
         MemberStatus.ActiveStandard -> {
             toast(R.string.prompt_upgrade_premium)
-            MemberActivity.start(this)
+            PaywallActivity.start(this, premiumFirst = true)
         }
         // These two cases cannot happen.
         MemberStatus.ActivePremium,
