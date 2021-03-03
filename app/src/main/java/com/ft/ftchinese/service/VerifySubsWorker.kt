@@ -32,13 +32,18 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
 
         val account = SessionManager
             .getInstance(ctx)
-            .loadAccount()
+            .loadAccount(raw = true)
             ?: return Result.success()
 
+        // If add-on is being used, ask API to put it expiration date.
+        // In such case we know it has nothing to do with Stripe or IAP, and it is not actually expired.
+        if (account.membership.shouldUseAddOn) {
+            return migrateAddOn(account)
+        }
 
-        remindWillExpire(account.membership)
+        checkExpiration(account.membership)
 
-       val ok = when (account.membership.payMethod) {
+       when (account.membership.payMethod) {
             PayMethod.ALIPAY, PayMethod.WXPAY -> {
                 info("Verify ftc pay...")
                 verifyFtcPay(account)
@@ -52,31 +57,15 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
                 refreshStripe(account)
             }
            else -> {
-               true
+               return Result.success()
            }
         }
 
-        try {
-            info("Refreshing account...")
-            val updatedAccount = AccountRepo.refresh(account) ?: return Result.retry()
-
-            if (updatedAccount.membership.expireDate?.isBefore(account.membership.expireDate) == false) {
-                SessionManager.getInstance(ctx).saveAccount(updatedAccount)
-            }
-
-        } catch (e: Exception) {
-            return Result.retry()
-        }
-
-        return if (ok) {
-            Result.success()
-        } else {
-            Result.failure()
-        }
+        return refreshAccount(account)
     }
 
-    private fun remindWillExpire(m: Membership) {
-        if (m.autoRenew == true) {
+    private fun checkExpiration(m: Membership) {
+        if (m.autoRenew) {
             return
         }
 
@@ -113,10 +102,20 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         }
     }
 
+    private fun migrateAddOn(account: Account): Result {
+        try {
+            val m = SubRepo.useAddOn(account) ?: return Result.retry()
+            SessionManager.getInstance(ctx).saveMembership(m)
+            return Result.success()
+        } catch (e: Exception) {
+            info(e)
+            return Result.failure()
+        }
+    }
+
     private fun verifyFtcPay(account: Account): Boolean {
         val paymentManager = PaymentManager.getInstance(ctx)
         val pr = paymentManager.load()
-
 
         if (pr.isOrderPaid()) {
             info("Order already paid. Stop verification")
@@ -166,5 +165,21 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         }
 
         return true
+    }
+
+    private fun refreshAccount(account: Account): Result {
+        try {
+            info("Refreshing account...")
+            val updatedAccount = AccountRepo.refresh(account) ?: return Result.retry()
+
+            if (updatedAccount.membership.expireDate?.isBefore(account.membership.expireDate) == false) {
+                SessionManager.getInstance(ctx).saveAccount(updatedAccount)
+            }
+
+            return Result.success()
+        } catch (e: Exception) {
+            info(e)
+            return Result.retry()
+        }
     }
 }
