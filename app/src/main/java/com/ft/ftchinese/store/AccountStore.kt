@@ -2,7 +2,7 @@ package com.ft.ftchinese.store
 
 import android.content.Context
 import androidx.core.content.edit
-import com.ft.ftchinese.model.subscription.StripeCustomer
+import com.ft.ftchinese.model.stripesubs.StripeCustomer
 import com.ft.ftchinese.model.fetch.json
 
 private const val PREF_FILE_NAME = "com.ft.ftchinese.account"
