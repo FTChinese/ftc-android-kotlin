@@ -13,10 +13,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMemberBinding
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.order.StripeSubResult
+import com.ft.ftchinese.model.iapsubs.IAPSubsResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.subscription.IAPSubs
+import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
@@ -110,21 +110,15 @@ class MemberActivity : ScopedAppActivity(),
 
         // For Apple subscription, we will verify user's existing
         // receipt against App Store.
-        accountViewModel.iapRefreshResult.observe(this) { result: Result<IAPSubs> ->
+        accountViewModel.iapRefreshResult.observe(this) { result: Result<IAPSubsResult> ->
             when (result) {
                 is Result.LocalizedError -> toast(result.msgId)
                 is Result.Error -> result.exception.message?.let { toast(it) }
-                is Result.Success -> toast(R.string.iap_refresh_success)
+                is Result.Success -> {
+                    sessionManager.saveMembership(result.data.membership)
+                    toast(R.string.iap_refresh_success)
+                }
             }
-
-            val account = sessionManager.loadAccount()
-            if (account == null) {
-                stopRefresh()
-                return@observe
-            }
-
-            toast(R.string.refreshing_account)
-            accountViewModel.refresh(account)
         }
 
         // Reactivate a scheduled Stripe cancellation.
@@ -137,7 +131,7 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         // Result of refreshing Stripe, or canceling/reactivating subscription.
-        accountViewModel.stripeResult.observe(this) { result: Result<StripeSubResult> ->
+        accountViewModel.stripeResult.observe(this) { result: Result<StripeSubsResult> ->
             stopRefresh()
             binding.inProgress = false
 
