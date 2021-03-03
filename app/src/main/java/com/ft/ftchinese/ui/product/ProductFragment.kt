@@ -114,6 +114,9 @@ class ProductFragment : ScopedFragment(),
             product = products.find {
                 it.tier == product?.tier
             }
+
+            // Don't forget this step!
+            initUI()
         }
     }
 
