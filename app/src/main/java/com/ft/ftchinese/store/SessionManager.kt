@@ -89,20 +89,8 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         }
     }
 
-    fun loadAccount(): Account? {
-        val userId = sharedPreferences.getString(PREF_USER_ID, null) ?: return null
-        val unionId = sharedPreferences.getString(PREF_UNION_ID, null)
-        val stripeId = sharedPreferences.getString(PREF_STRIPE_CUS_ID, null)
-        val userName = sharedPreferences.getString(PREF_USER_NAME, null)
-        val email = sharedPreferences.getString(PREF_EMAIL, "") ?: ""
-        val isVerified = sharedPreferences.getBoolean(PREF_IS_VERIFIED, false)
-        val avatarUrl = sharedPreferences.getString(PREF_AVATAR_URL, null)
-
-        val loginMethod = sharedPreferences.getString(PREF_LOGIN_METHOD, null)
-
-        val wxNickname = sharedPreferences.getString(PREF_WX_NICKNAME, null)
-        val wxAvatar = sharedPreferences.getString(PREF_WX_AVATAR, null)
-
+    // Load the raw membership.
+    fun loadMembership(): Membership {
         val tier = sharedPreferences.getString(PREF_MEMBER_TIER, null)
         val cycle = sharedPreferences.getString(PREF_MEMBER_CYCLE, null)
         val expireDate = sharedPreferences.getString(PREF_MEMBER_EXPIRE, null)
@@ -116,7 +104,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         val stdAddOn = sharedPreferences.getLong(PREF_STD_ADDON, 0)
         val prmAddOn = sharedPreferences.getLong(PREF_PRM_ADDON, 0)
 
-        val membership = Membership(
+        return Membership(
             tier = Tier.fromString(tier),
             cycle = Cycle.fromString(cycle),
             expireDate = parseLocalDate(expireDate),
@@ -130,6 +118,23 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
             standardAddOn = stdAddOn,
             premiumAddOn = prmAddOn,
         )
+    }
+
+    // Load account. By default the membership is a normalized version.
+    // If you pass true to raw, the membership will be retrieve as is, without migrating addon or extending auto renew on the client side.
+    fun loadAccount(raw: Boolean = false): Account? {
+        val userId = sharedPreferences.getString(PREF_USER_ID, null) ?: return null
+        val unionId = sharedPreferences.getString(PREF_UNION_ID, null)
+        val stripeId = sharedPreferences.getString(PREF_STRIPE_CUS_ID, null)
+        val userName = sharedPreferences.getString(PREF_USER_NAME, null)
+        val email = sharedPreferences.getString(PREF_EMAIL, "") ?: ""
+        val isVerified = sharedPreferences.getBoolean(PREF_IS_VERIFIED, false)
+        val avatarUrl = sharedPreferences.getString(PREF_AVATAR_URL, null)
+
+        val loginMethod = sharedPreferences.getString(PREF_LOGIN_METHOD, null)
+
+        val wxNickname = sharedPreferences.getString(PREF_WX_NICKNAME, null)
+        val wxAvatar = sharedPreferences.getString(PREF_WX_AVATAR, null)
 
         val wechat = Wechat(
                 nickname = wxNickname,
@@ -146,7 +151,11 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
                 avatarUrl = avatarUrl,
                 loginMethod = LoginMethod.fromString(loginMethod),
                 wechat = wechat,
-                membership = membership.normalize()
+                membership = if (raw) {
+                    loadMembership()
+                } else {
+                    loadMembership().normalize()
+                }
         )
     }
 
