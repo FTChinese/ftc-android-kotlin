@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.order
+package com.ft.ftchinese.model.enums
 
 enum class PaymentIntentStatus(val symbol: String) {
     RequiresPaymentMethod("requires_payment_method"),
