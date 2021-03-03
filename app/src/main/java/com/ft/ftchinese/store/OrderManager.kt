@@ -7,7 +7,7 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.fetch.formatISODateTime
 import com.ft.ftchinese.model.fetch.formatLocalDate
 import com.ft.ftchinese.model.fetch.parseISODateTime
@@ -23,11 +23,8 @@ private const val PREF_PRICE = "price"
 private const val PREF_TIER = "tier"
 private const val PREF_CYCLE = "cycle"
 private const val PREF_AMOUNT = "amount"
-private const val PREF_CYCLE_COUNT = "cycle_count"
-private const val PREF_EXTRA_DAYS = "extra_days"
 private const val PREF_USAGE = "usage_type"
 private const val PREF_PAYMENT_METHOD = "pay_method"
-private const val PREF_BALANCE = "total_balance"
 private const val PREF_CREATED_AT = "create_at"
 private const val PREF_CONFIRMED_AT = "confirmed_at"
 private const val PREF_START_DATE = "start_date"
@@ -55,7 +52,7 @@ class OrderManager private constructor(context: Context) {
             putString(PREF_ORDER_ID, order.id)
             putString(PREF_FTC_ID, order.ftcId)
             putString(PREF_UNION_ID, order.unionId)
-            putString(PREF_PLAN_ID, order.planId)
+            putString(PREF_PLAN_ID, order.priceId)
             putString(PREF_DISCOUNT_ID, order.discountId)
             if( order.price != null) {
                 putDouble(PREF_PRICE, order.price)
@@ -63,13 +60,8 @@ class OrderManager private constructor(context: Context) {
             putString(PREF_TIER, order.tier.toString())
             putString(PREF_CYCLE, order.cycle.toString())
             putDouble(PREF_AMOUNT, order.amount)
-            putLong(PREF_CYCLE_COUNT, order.cycleCount)
-            putLong(PREF_EXTRA_DAYS, order.extraDays)
-            putString(PREF_USAGE, order.usageType.toString())
+            putString(PREF_USAGE, order.kind.toString())
             putString(PREF_PAYMENT_METHOD, order.payMethod.toString())
-            if (order.totalBalance != null) {
-                putDouble(PREF_BALANCE, order.totalBalance)
-            }
             putString(PREF_CREATED_AT, formatISODateTime(order.createdAt))
             putString(PREF_CONFIRMED_AT, formatISODateTime(order.confirmedAt))
             putString(PREF_START_DATE, formatLocalDate(order.startDate))
@@ -91,7 +83,6 @@ class OrderManager private constructor(context: Context) {
                 ?: return null
         val payMethod = PayMethod.fromString(sharedPreferences.getString(PREF_PAYMENT_METHOD, null))
             ?: return null
-        val balance = sharedPreferences.getDouble(PREF_BALANCE, 0.0)
         val createdAt = parseISODateTime(sharedPreferences.getString(PREF_CREATED_AT, null)) ?: return null
         val confirmed = parseISODateTime(sharedPreferences.getString(PREF_CONFIRMED_AT, null))
         val start = parseLocalDate(sharedPreferences.getString(PREF_START_DATE, null))
@@ -102,18 +93,15 @@ class OrderManager private constructor(context: Context) {
             id = orderId,
             ftcId= ftcId,
             unionId = unionId,
-            planId = planId,
+            priceId = planId,
             discountId = discountId,
             price = price,
             tier = tier,
             cycle = cycle,
             amount = amount,
-            cycleCount = sharedPreferences.getLong(PREF_CYCLE_COUNT, 1),
-            extraDays = sharedPreferences.getLong(PREF_EXTRA_DAYS, 0),
             payMethod = payMethod,
-            totalBalance = balance,
             createdAt = createdAt,
-            usageType = usageType,
+            kind = usageType,
             confirmedAt = confirmed,
             startDate = start,
             endDate = end
@@ -133,7 +121,7 @@ class OrderManager private constructor(context: Context) {
     }
 }
 
-private const val PREF_FILE_LAST_ORDER = "com.ft.ftchinese.last_paid_order"
+private const val PREF_FILE_PAYMENT_RESULT = "com.ft.ftchinese.last_paid_order"
 private const val PREF_PAYMENT_STATE = "payment_state"
 private const val PREF_PAYMENT_STATE_DESC = "payment_state_desc"
 private const val PREF_TOTAL_FEE = "total_fee"
@@ -141,9 +129,16 @@ private const val PREF_TX_ID = "tx_id"
 private const val PREF_PAID_AT = "paid_at"
 private const val PREF_PAY_METHOD = "pay_method"
 
+/**
+ * PaymentManager is used to save the last successful payment.
+ * This differs from OrderManager in that OrderManager always saves the last order user created,
+ * which might not be paid.
+ */
 class PaymentManager private constructor(ctx: Context) {
-    private val sharedPreferences = ctx.getSharedPreferences(PREF_FILE_LAST_ORDER, Context.MODE_PRIVATE)
+    private val sharedPreferences = ctx.getSharedPreferences(PREF_FILE_PAYMENT_RESULT, Context.MODE_PRIVATE)
 
+    // Upon successful payment, we save the order id so that later we know which order updated
+    // current membership and use it to perform verification.
     fun saveOrderId(id: String) {
         sharedPreferences.edit {
             clear()

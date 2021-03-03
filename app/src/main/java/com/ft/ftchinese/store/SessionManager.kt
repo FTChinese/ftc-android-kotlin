@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.core.content.edit
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.order.StripeSubStatus
+import com.ft.ftchinese.model.enums.StripeSubStatus
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.formatISODateTime
