@@ -64,7 +64,7 @@ class PaywallViewModel(
                 if (pw != null) {
                     paywallResult.value = Result.Success(pw)
                     // Update the in-memory cache.
-                    FtcPriceCache.refresh(pw.products)
+                    FtcPriceCache.update(pw.products)
                 }
             }
 
@@ -85,7 +85,7 @@ class PaywallViewModel(
                 }
 
                 paywallResult.value = Result.Success(paywall.value)
-                FtcPriceCache.refresh(paywall.value.products)
+                FtcPriceCache.update(paywall.value.products)
 
                 withContext(Dispatchers.IO) {
                     cache.saveText(CacheFileNames.paywall, paywall.raw)

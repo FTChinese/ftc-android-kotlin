@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.price.Price
 object FtcPriceCache {
     var prices = defaultPaywall.products.flatMap { it.prices }
 
-    fun refresh(products: List<Product>) {
+    fun update(products: List<Product>) {
         prices = products.flatMap { it.prices }
     }
 
