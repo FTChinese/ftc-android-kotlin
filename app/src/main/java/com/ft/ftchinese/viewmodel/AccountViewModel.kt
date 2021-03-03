@@ -4,12 +4,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.order.StripeSubResult
+import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.reader.*
-import com.ft.ftchinese.model.subscription.IAPSubs
-import com.ft.ftchinese.model.subscription.Order
+import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.iapsubs.IAPSubsResult
+import com.ft.ftchinese.repository.AppleClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.store.FileCache
@@ -47,12 +48,12 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<Membership>>()
     }
 
-    val stripeResult: MutableLiveData<Result<StripeSubResult>> by lazy {
-        MutableLiveData<Result<StripeSubResult>>()
+    val stripeResult: MutableLiveData<Result<StripeSubsResult>> by lazy {
+        MutableLiveData<Result<StripeSubsResult>>()
     }
 
-    val iapRefreshResult: MutableLiveData<Result<IAPSubs>> by lazy {
-        MutableLiveData<Result<IAPSubs>>()
+    val iapRefreshResult: MutableLiveData<Result<IAPSubsResult>> by lazy {
+        MutableLiveData<Result<IAPSubsResult>>()
     }
 
     val ordersResult: MutableLiveData<Result<List<Order>>> by lazy {
@@ -309,7 +310,7 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val iapSubs = withContext(Dispatchers.IO) {
-                    SubRepo.refreshIAP(account)
+                    AppleClient.refreshIAP(account)
                 }
 
                 iapRefreshResult.value = if (iapSubs == null) {
