@@ -19,7 +19,10 @@
             android:id="@+id/product_name_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:contentPadding="@dimen/space_16"
+            app:contentPaddingTop="@dimen/space_32"
+            app:contentPaddingBottom="@dimen/space_16"
+            app:contentPaddingLeft="@dimen/space_16"
+            app:contentPaddingRight="@dimen/space_16"
             app:layout_constraintTop_toTopOf="parent">
 
             <LinearLayout
@@ -35,7 +38,7 @@
                     android:fontFamily="serif"
                     android:text="@{status.productName}"
                     android:textAlignment="center"
-                    android:textColor="@color/colorBlack90" />
+                    android:textColor="@color/colorBlack"/>
 
                 <TextView
                     android:id="@+id/subs_reminder"
@@ -45,23 +48,14 @@
                     android:visibility="@{status.reminder == null ? View.GONE : View.VISIBLE}"
                     android:text="@{status.reminder}"/>
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/subs_details"
+                    android:layout_marginTop="@dimen/space_32"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintTop_toBottomOf="@id/subs_product_name"/>
+
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/subs_detail_card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_8"
-            app:contentPadding="@dimen/space_16"
-            app:layout_constraintTop_toBottomOf="@id/product_name_card">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/subs_details"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/subs_product_name"/>
-
         </androidx.cardview.widget.CardView>
 
         <Button
@@ -70,7 +64,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/subs_detail_card"
+            app:layout_constraintTop_toBottomOf="@id/product_name_card"
             android:visibility="@{status.reactivateStripe ? View.VISIBLE : View.GONE}"
             android:text="@string/reactivate_auto_renew"/>
 
