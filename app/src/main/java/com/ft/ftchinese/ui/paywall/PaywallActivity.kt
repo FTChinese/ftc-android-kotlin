@@ -103,6 +103,7 @@ class PaywallActivity : ScopedAppActivity(),
          * the selected Plan is passed.
          */
         productViewModel.priceSelected.observe(this, Observer {
+
             val account = sessionManager.loadAccount()
 
             // If user is not logged in, start login.
@@ -121,8 +122,34 @@ class PaywallActivity : ScopedAppActivity(),
         /**
          * Load paywall from cache, and then from server.
          */
-        paywallViewModel.paywallResult.observe(this, {
-            onPaywallResult(it)
+        paywallViewModel.paywallResult.observe(this, { result: Result<Paywall> ->
+            // For manual refreshing, show a toast after completion.
+            val isManual = binding.swipeRefresh.isRefreshing
+
+            binding.swipeRefresh.isRefreshing = false
+
+            when (result) {
+                is Result.LocalizedError -> {
+                    if (isManual) {
+                        toast(getString(result.msgId))
+                    }
+                }
+                is Result.Error -> {
+                    if (isManual) {
+                        result.exception.message?.let { toast(it) }
+                    }
+                }
+                is Result.Success -> {
+                    info("Paywall data ${result.data}")
+
+                    setUpPromo(result.data.promo)
+                    productViewModel.productsReceived.value = result.data.products
+
+                    if (isManual) {
+                        toast(R.string.paywall_updated)
+                    }
+                }
+            }
         })
     }
 
@@ -160,41 +187,6 @@ class PaywallActivity : ScopedAppActivity(),
     private fun loadData(isRefreshing: Boolean) {
         // Fetch paywall from cache, then from server.
         paywallViewModel.loadPaywall(isRefreshing)
-        // Retrieve stripe prices in background.
-        paywallViewModel.refreshStripePrices()
-    }
-
-    /**
-     * After the complete paywall data received,
-     */
-    private fun onPaywallResult(result: Result<Paywall>) {
-        // For manual refreshing, show a toast after completion.
-        val isManual = binding.swipeRefresh.isRefreshing
-
-        binding.swipeRefresh.isRefreshing = false
-
-        when (result) {
-            is Result.LocalizedError -> {
-                if (isManual) {
-                    toast(getString(result.msgId))
-                }
-
-            }
-            is Result.Error -> {
-                if (isManual) {
-                    result.exception.message?.let { toast(it) }
-                }
-            }
-            is Result.Success -> {
-
-                setUpPromo(result.data.promo)
-                productViewModel.productsReceived.value = result.data.products
-
-                if (isManual) {
-                    toast(R.string.paywall_updated)
-                }
-            }
-        }
     }
 
     // Convert Promo to PromoUI if it is valid.
