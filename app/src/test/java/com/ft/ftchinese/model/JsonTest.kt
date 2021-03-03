@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model
 
-import com.ft.ftchinese.model.subscription.Order
-import com.ft.ftchinese.model.subscription.PaymentResult
+import com.ft.ftchinese.model.ftcsubs.Order
+import com.ft.ftchinese.model.ftcsubs.PaymentResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership

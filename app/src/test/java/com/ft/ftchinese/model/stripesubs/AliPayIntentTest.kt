@@ -1,6 +1,6 @@
-package com.ft.ftchinese.model.order
+package com.ft.ftchinese.model.stripesubs
 
-import com.ft.ftchinese.model.subscription.AliPayIntent
+import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.fetch.json
 import org.junit.Test
 

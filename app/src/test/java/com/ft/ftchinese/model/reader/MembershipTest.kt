@@ -1,9 +1,8 @@
 package com.ft.ftchinese.model.reader
 
-import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.order.StripeSubStatus
+import com.ft.ftchinese.model.enums.StripeSubStatus
 import com.ft.ftchinese.model.enums.Tier
 import org.junit.Assert.*
 import org.junit.Test

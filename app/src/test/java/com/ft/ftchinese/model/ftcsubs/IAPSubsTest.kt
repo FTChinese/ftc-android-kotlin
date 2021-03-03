@@ -1,6 +1,7 @@
-package com.ft.ftchinese.model.subscription
+package com.ft.ftchinese.model.ftcsubs
 
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.iapsubs.Subscription
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -24,7 +25,7 @@ class IAPSubsTest {
 
     @Test
     fun parseSubs() {
-        val subs = json.parse<IAPSubs>(data)
+        val subs = json.parse<Subscription>(data)
         assertNotNull(subs)
         print(subs)
     }

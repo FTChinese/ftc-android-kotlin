@@ -1,8 +1,4 @@
-package com.ft.ftchinese.model.subscription
-
-import com.ft.ftchinese.model.fetch.json
-import org.junit.Assert.*
-import org.junit.Test
+package com.ft.ftchinese.model.ftcsubs
 
 class StripePriceTest {
     private val data = """

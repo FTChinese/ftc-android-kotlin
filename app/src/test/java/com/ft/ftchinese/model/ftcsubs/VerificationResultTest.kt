@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.subscription
+package com.ft.ftchinese.model.ftcsubs
 
 import com.ft.ftchinese.model.fetch.json
 import org.junit.Assert.*

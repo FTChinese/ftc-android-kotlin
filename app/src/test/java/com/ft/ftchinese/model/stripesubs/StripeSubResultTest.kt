@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.order
+package com.ft.ftchinese.model.stripesubs
 
 import com.ft.ftchinese.model.fetch.*
 import org.junit.Test
@@ -30,7 +30,7 @@ class StripeSubResultTest {
     """.trimIndent()
     @Test
     fun parseJONS() {
-        val result = json.parse<StripeSubs>(data)
+        val result = json.parse<Subscription>(data)
 
         println(result)
     }
