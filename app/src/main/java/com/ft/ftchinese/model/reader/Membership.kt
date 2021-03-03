@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.*
-import com.ft.ftchinese.model.order.StripeSubStatus
+import com.ft.ftchinese.model.enums.StripeSubStatus
 import kotlinx.parcelize.Parcelize
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
