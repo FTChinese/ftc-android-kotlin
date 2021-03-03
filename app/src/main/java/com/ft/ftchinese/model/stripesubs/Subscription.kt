@@ -1,7 +1,7 @@
-package com.ft.ftchinese.model.order
+package com.ft.ftchinese.model.stripesubs
 
-import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.StripeSubStatus
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KDateTime
@@ -9,12 +9,7 @@ import com.ft.ftchinese.model.fetch.KStripeSubStatus
 import com.ft.ftchinese.model.fetch.KTier
 import org.threeten.bp.ZonedDateTime
 
-data class StripePaymentResult(
-    val requiresAction: Boolean,
-    val paymentIntentClientSecret: String? = null
-)
-
-data class StripeSubs(
+data class Subscription(
     val id: String,
     @KTier
     val tier: Tier,
@@ -45,11 +40,6 @@ data class StripeSubs(
     val updatedUtc: ZonedDateTime? = null,
     @KStripeSubStatus
     val status: StripeSubStatus? = null,
-    val ftcUserId: String? = null
-)
-
-data class StripeSubResult(
-    val payment:  StripePaymentResult,
-    val subs: StripeSubs,
-    val membership: Membership
+    val ftcUserId: String? = null,
+    val paymentIntent: PaymentIntent? = null,
 )

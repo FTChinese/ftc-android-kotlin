@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.order
+package com.ft.ftchinese.model.stripesubs
 
 import android.content.Context
 import androidx.core.content.edit

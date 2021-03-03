@@ -1,11 +1,11 @@
-package com.ft.ftchinese.model.order
+package com.ft.ftchinese.model.stripesubs
 
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KTier
 
-data class StripeSubParams(
+data class SubParams(
     @KTier
         val tier: Tier,
     @KCycle
