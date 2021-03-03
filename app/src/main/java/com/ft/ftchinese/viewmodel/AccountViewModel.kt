@@ -43,6 +43,10 @@ class AccountViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<WxRefreshState>>()
     }
 
+    val addOnResult: MutableLiveData<Result<Membership>> by lazy {
+        MutableLiveData<Result<Membership>>()
+    }
+
     val stripeResult: MutableLiveData<Result<StripeSubResult>> by lazy {
         MutableLiveData<Result<StripeSubResult>>()
     }
@@ -163,6 +167,35 @@ class AccountViewModel : ViewModel(), AnkoLogger {
             } catch (e: Exception) {
 
                 avatarRetrieved.value = parseException(e)
+            }
+        }
+    }
+
+    fun migrateAddOn(account: Account) {
+        if (isNetworkAvailable.value == false) {
+            addOnResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val m = withContext(Dispatchers.IO) {
+                    SubRepo.useAddOn(account)
+                }
+
+                addOnResult.value = if (m == null) {
+                    Result.LocalizedError(R.string.loading_failed)
+                } else {
+                    Result.Success(m)
+                }
+            } catch (e: ClientError) {
+                addOnResult.value =  if (e.statusCode == 404) {
+                    Result.LocalizedError(R.string.loading_failed)
+                } else {
+                    parseApiError(e)
+                }
+            } catch (e: Exception) {
+                addOnResult.value = parseException(e)
             }
         }
     }
