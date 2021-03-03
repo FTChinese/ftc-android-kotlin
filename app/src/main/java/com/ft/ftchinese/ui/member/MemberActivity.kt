@@ -12,25 +12,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMemberBinding
-import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.order.StripeSubResult
-import com.ft.ftchinese.model.paywall.StripePriceCache
-import com.ft.ftchinese.model.price.Edition
 import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.subscription.IAPSubs
-import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.checkout.CheckOutActivity
-import com.ft.ftchinese.ui.checkout.StripeSubActivity
 import com.ft.ftchinese.ui.order.MyOrdersActivity
 import com.ft.ftchinese.ui.paywall.CustomerServiceFragment
 import com.ft.ftchinese.ui.paywall.PaywallActivity
-import com.ft.ftchinese.ui.paywall.PaywallViewModel
-import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
@@ -47,7 +40,6 @@ class MemberActivity : ScopedAppActivity(),
 
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
-    private lateinit var paywallViewModel: PaywallViewModel
     private lateinit var subsStatusViewModel: SubsStatusViewModel
     private lateinit var binding: ActivityMemberBinding
 
@@ -71,44 +63,82 @@ class MemberActivity : ScopedAppActivity(),
 
         setupViewModel()
         initUI()
-        loadData()
     }
 
     private fun setupViewModel() {
         accountViewModel = ViewModelProvider(this)
             .get(AccountViewModel::class.java)
 
-        paywallViewModel = ViewModelProvider(
-            this,
-            PaywallViewModelFactory(FileCache(this)),
-        )
-            .get(PaywallViewModel::class.java)
-
         subsStatusViewModel = ViewModelProvider(this)
             .get(SubsStatusViewModel::class.java)
 
         connectionLiveData.observe(this) {
             accountViewModel.isNetworkAvailable.value = it
-            paywallViewModel.isNetworkAvailable.value = it
         }
         isConnected.let {
             accountViewModel.isNetworkAvailable.value = it
-            paywallViewModel.isNetworkAvailable.value = it
         }
 
-        accountViewModel.stripeResult.observe(this) {
-            onStripeRefreshed(it)
+        // For one-time purchase refreshing, we will simply
+        // retrieve user account.
+        accountViewModel.accountRefreshed.observe(this) { result: Result<Account> ->
+            stopRefresh()
+
+            when (result) {
+                is Result.LocalizedError -> toast(result.msgId)
+                is Result.Error -> result.exception.message?.let { toast(it) }
+                is Result.Success -> {
+                    toast(R.string.prompt_updated)
+                    sessionManager.saveAccount(result.data)
+                    initUI()
+                }
+            }
         }
 
-        accountViewModel.iapRefreshResult.observe(this) {
-            onIAPRefreshed(it)
+        accountViewModel.addOnResult.observe(this) { result: Result<Membership> ->
+            stopRefresh()
+
+            when (result) {
+                is Result.LocalizedError -> toast(result.msgId)
+                is Result.Error -> result.exception.message?.let { toast(it) }
+                is Result.Success -> {
+                    toast(R.string.prompt_updated)
+                    sessionManager.saveMembership(result.data)
+                }
+            }
         }
 
-        accountViewModel.accountRefreshed.observe(this) {
-            onAccountRefreshed(it)
+        // For Apple subscription, we will verify user's existing
+        // receipt against App Store.
+        accountViewModel.iapRefreshResult.observe(this) { result: Result<IAPSubs> ->
+            when (result) {
+                is Result.LocalizedError -> toast(result.msgId)
+                is Result.Error -> result.exception.message?.let { toast(it) }
+                is Result.Success -> toast(R.string.iap_refresh_success)
+            }
+
+            val account = sessionManager.loadAccount()
+            if (account == null) {
+                stopRefresh()
+                return@observe
+            }
+
+            toast(R.string.refreshing_account)
+            accountViewModel.refresh(account)
         }
 
-        paywallViewModel.stripePrices.observe(this) { result ->
+        // Reactivate a scheduled Stripe cancellation.
+        subsStatusViewModel.autoRenewWanted.observe(this) {
+            binding.inProgress = true
+            toast(R.string.stripe_refreshing)
+            sessionManager.loadAccount()?.let {
+                accountViewModel.reactivateStripe(it)
+            }
+        }
+
+        // Result of refreshing Stripe, or canceling/reactivating subscription.
+        accountViewModel.stripeResult.observe(this) { result: Result<StripeSubResult> ->
+            stopRefresh()
             binding.inProgress = false
 
             when (result) {
@@ -119,24 +149,12 @@ class MemberActivity : ScopedAppActivity(),
                     result.exception.message?.let { toast(it) }
                 }
                 is Result.Success -> {
-                    gotoStripe()
+                    toast(R.string.stripe_refresh_success)
+                    sessionManager.saveMembership(result.data.membership)
+                    initUI()
                 }
             }
         }
-
-        subsStatusViewModel.autoRenewWanted.observe(this) {
-            binding.inProgress = true
-            toast(R.string.stripe_refreshing)
-            sessionManager.loadAccount()?.let {
-                accountViewModel.reactivateStripe(it)
-            }
-        }
-    }
-
-    // Every time this page is opened, retrieve latest prices from server.
-    private fun loadData() {
-        paywallViewModel.refreshFtcPrices()
-        paywallViewModel.refreshStripePrices()
     }
 
     private fun initUI() {
@@ -158,33 +176,22 @@ class MemberActivity : ScopedAppActivity(),
         invalidateOptionsMenu()
     }
 
-    private fun gotoStripe(): Boolean {
-        val price = StripePriceCache.find(Edition(
-            tier = Tier.PREMIUM,
-            cycle = Cycle.YEAR,
-        )) ?: return false
-
-        StripeSubActivity.startForResult(
-            activity = this,
-            requestCode = RequestCode.PAYMENT,
-            priceId = price.id,
-        )
-
-        binding.inProgress = false
-        return true
-    }
-
     /**
      * Refresh account.
      * Use different API endpoints depending on the login method.
      */
     override fun onRefresh() {
-
-        val account = sessionManager.loadAccount()
+        val account = sessionManager.loadAccount(raw = true)
 
         if (account == null) {
             stopRefresh()
             toast("Your account data not found!")
+            return
+        }
+
+        if (account.membership.autoRenewOffExpired && account.membership.hasAddOn) {
+            toast(R.string.refreshing_account)
+            accountViewModel.migrateAddOn(account)
             return
         }
 
@@ -202,68 +209,6 @@ class MemberActivity : ScopedAppActivity(),
                 accountViewModel.refreshIAP(account)
             }
             else -> toast("Current payment method unknown!")
-        }
-    }
-
-    private fun onStripeRefreshed(result: Result<StripeSubResult>) {
-        stopRefresh()
-        binding.inProgress = false
-
-        when (result) {
-            is Result.LocalizedError -> {
-                toast(result.msgId)
-            }
-            is Result.Error -> {
-                result.exception.message?.let { toast(it) }
-            }
-            is Result.Success -> {
-                toast(R.string.stripe_refresh_success)
-                sessionManager.saveMembership(result.data.membership)
-                initUI()
-            }
-        }
-    }
-
-    private fun onIAPRefreshed(result: Result<IAPSubs>) {
-        when (result) {
-            is Result.LocalizedError -> {
-                toast(result.msgId)
-            }
-            is Result.Error -> {
-                result.exception.message?.let { toast(it) }
-            }
-            is Result.Success -> {
-                toast(R.string.iap_refresh_success)
-            }
-        }
-
-        val account = sessionManager.loadAccount()
-        if (account == null) {
-            stopRefresh()
-            return
-        }
-
-        toast(R.string.refreshing_account)
-        accountViewModel.refresh(account)
-    }
-
-    private fun onAccountRefreshed(accountResult: Result<Account>) {
-        stopRefresh()
-
-        when (accountResult) {
-            is Result.LocalizedError -> {
-                toast(accountResult.msgId)
-            }
-            is Result.Error -> {
-                accountResult.exception.message?.let { toast(it) }
-            }
-            is Result.Success -> {
-                toast(R.string.prompt_updated)
-
-                sessionManager.saveAccount(accountResult.data)
-
-                initUI()
-            }
         }
     }
 
@@ -300,7 +245,7 @@ class MemberActivity : ScopedAppActivity(),
         val m = sessionManager.loadAccount()?.membership
 
         menuInflater.inflate(R.menu.activity_member_menu, menu)
-        menu?.findItem(R.id.action_cancel_stripe)?.isVisible = m?.canCancelStripe() ?: false
+        menu?.findItem(R.id.action_cancel_stripe)?.isVisible = m?.canCancelStripe ?: false
         return true
     }
 
