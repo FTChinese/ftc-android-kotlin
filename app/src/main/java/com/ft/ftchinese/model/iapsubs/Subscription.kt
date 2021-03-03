@@ -1,11 +1,11 @@
-package com.ft.ftchinese.model.subscription
+package com.ft.ftchinese.model.iapsubs
 
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KTier
 
-data class IAPSubs(
+data class Subscription(
     val originalTransactionId: String,
     val purchaseDateUtc: String?,
     val expiresDateUtc: String?,
