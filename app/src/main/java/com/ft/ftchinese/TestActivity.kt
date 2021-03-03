@@ -25,13 +25,13 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.order.Idempotency
-import com.ft.ftchinese.model.order.StripeSubStatus
+import com.ft.ftchinese.model.stripesubs.Idempotency
+import com.ft.ftchinese.model.enums.StripeSubStatus
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
-import com.ft.ftchinese.model.subscription.Order
+import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.store.ServiceAcceptance
@@ -582,10 +582,8 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                         id = "FTEFD5E11FDFA709E0",
                         tier = Tier.PREMIUM,
                         cycle = Cycle.YEAR,
-                        cycleCount = 1,
-                        extraDays = 1,
                         amount = 1998.00,
-                        usageType = OrderKind.Create,
+                        kind = OrderKind.Create,
                         payMethod = PayMethod.WXPAY,
                         createdAt = ZonedDateTime.now()
                 ))
