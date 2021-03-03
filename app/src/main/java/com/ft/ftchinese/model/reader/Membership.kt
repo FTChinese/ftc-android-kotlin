@@ -198,9 +198,6 @@ data class Membership(
             else -> expireDate.isBefore(LocalDate.now())
         }
 
-    val hasAddOn: Boolean
-        get() = standardAddOn > 0 || premiumAddOn > 0
-
     // Precedence when determining whether it is actually expired:
     // 1. Auto Renew
     // 2. Expiration Date
@@ -208,11 +205,20 @@ data class Membership(
     val autoRenewOffExpired: Boolean
         get() = !autoRenew && expired
 
+    val hasAddOn: Boolean
+        get() = standardAddOn > 0 || premiumAddOn > 0
+
     val hasStandardAddOn: Boolean
         get() = standardAddOn > 0
 
     val hasPremiumAddOn: Boolean
         get() = premiumAddOn > 0
+
+    // Tests whether subscription time has moved to add-ons.
+    // Usually you call this method without calling normalize method;
+    // otherwise it won't reflect user's actual membership state.
+    val shouldUseAddOn: Boolean
+        get() = !autoRenew && expired && hasAddOn
 
     /**
      * Calculate remaining days before expiration.
