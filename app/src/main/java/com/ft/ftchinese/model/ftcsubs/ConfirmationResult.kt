@@ -1,8 +1,6 @@
-package com.ft.ftchinese.model.subscription
+package com.ft.ftchinese.model.ftcsubs
 
 import com.ft.ftchinese.model.reader.Membership
-import org.threeten.bp.ZonedDateTime
-import org.threeten.bp.temporal.ChronoUnit
 
 data class ConfirmationResult (
         val order: Order,

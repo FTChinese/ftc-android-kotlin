@@ -1,10 +1,7 @@
-package com.ft.ftchinese.model.subscription
+package com.ft.ftchinese.model.ftcsubs
 
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.fetch.KPayMethod
-
-val paymentSuccessStates = arrayOf("TRADE_SUCCESS", "SUCCESS")
 
 /**
  * After WXPayEntryActivity received result 0, check against our server for the payment result.
@@ -21,12 +18,7 @@ data class PaymentResult(
     val payMethod: PayMethod? = null
 ) {
     fun isOrderPaid(): Boolean {
-        return paymentSuccessStates.contains(paymentState)
+        return arrayOf("TRADE_SUCCESS", "SUCCESS").contains(paymentState)
     }
 }
 
-data class VerificationResult(
-    val order: Order,
-    val payment: PaymentResult,
-    val membership: Membership
-)

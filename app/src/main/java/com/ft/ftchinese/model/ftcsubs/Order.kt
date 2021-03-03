@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.subscription
+package com.ft.ftchinese.model.ftcsubs
 
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
@@ -14,52 +14,27 @@ import org.threeten.bp.temporal.ChronoUnit
  */
 data class Order(
     val id: String,
-
     val ftcId: String? = null,
     val unionId: String? = null,
-    val planId: String? = null,
+    val priceId: String? = null,
     val discountId: String? = null,
     val price: Double? = null,
-
     @KTier
     val tier: Tier,
-
     @KCycle
     val cycle: Cycle,
-
-    // Charge
     var amount: Double, // Why this is var?
-
-    // Not included when getting order list.
-    val currency: String = "cny",
-
-    // Duration
-    // After supporting upgrading, the purchased membership
-    // duration might not be exactly one cycle.
-    // Not included when getting order list
-    val cycleCount: Long = 1,
-    // 1 day less than server side so that we could compare
-    // locally saved date against server data.
-    // Not included when getting order list.
-    val extraDays: Long = 0,
-
+    val currency: String = "cny", // Not included when getting order list.
     @KOrderUsage
-    val usageType: OrderKind,
-
+    val kind: OrderKind,
     @KPayMethod
     val payMethod: PayMethod,
-
-    val totalBalance: Double? = null,
-
     @KDateTime
     val createdAt: ZonedDateTime = ZonedDateTime.now(),
-
     @KDateTime
     var confirmedAt: ZonedDateTime? = null,
-
     @KDate
     var startDate: LocalDate? = null,
-
     @KDate
     var endDate: LocalDate? = null
 ) {
@@ -81,7 +56,7 @@ data class Order(
 
         val start = when {
             member.expireDate == null -> today
-            usageType == OrderKind.Upgrade -> today
+            kind == OrderKind.Upgrade -> today
             member.autoRenewOffExpired -> today
             else -> member.expireDate
         }
@@ -89,8 +64,8 @@ data class Order(
         confirmedAt = now
         startDate = start
         endDate = when (cycle) {
-            Cycle.YEAR -> start.plusYears(cycleCount).plusDays(extraDays)
-            Cycle.MONTH -> start.plusMonths(cycleCount).plusDays(extraDays)
+            Cycle.YEAR -> start.plusYears(1).plusDays(1)
+            Cycle.MONTH -> start.plusMonths(1).plusDays(1)
         }
 
 
