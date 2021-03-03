@@ -5,12 +5,12 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.JSONResult
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.order.StripeSubParams
-import com.ft.ftchinese.model.order.StripeSubResult
+import com.ft.ftchinese.model.stripesubs.SubParams
+import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.subscription.StripeCustomer
-import com.ft.ftchinese.model.subscription.StripeSetupIntent
+import com.ft.ftchinese.model.stripesubs.StripeCustomer
+import com.ft.ftchinese.model.stripesubs.StripeSetupIntent
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -133,7 +133,7 @@ object StripeClient : AnkoLogger {
         return body
     }
 
-    fun createSubscription(account: Account, params: StripeSubParams): StripeSubResult? {
+    fun createSubscription(account: Account, params: SubParams): StripeSubsResult? {
 
         val (_, body ) = Fetch()
             .post("$baseUrl/subs")
@@ -145,12 +145,12 @@ object StripeClient : AnkoLogger {
         return if (body == null) {
             null
         } else {
-            json.parse<StripeSubResult>(body)
+            json.parse<StripeSubsResult>(body)
         }
     }
 
     // Ask API to update user's Stripe subscription data.
-    fun refreshSub(account: Account): StripeSubResult? {
+    fun refreshSub(account: Account): StripeSubsResult? {
 
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
@@ -170,7 +170,7 @@ object StripeClient : AnkoLogger {
         }
     }
 
-    fun upgradeSub(account: Account, params: StripeSubParams): StripeSubResult? {
+    fun upgradeSub(account: Account, params: SubParams): StripeSubsResult? {
 
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
@@ -188,7 +188,7 @@ object StripeClient : AnkoLogger {
         }
     }
 
-    fun cancelSub(account: Account): StripeSubResult? {
+    fun cancelSub(account: Account): StripeSubsResult? {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
@@ -205,7 +205,7 @@ object StripeClient : AnkoLogger {
         }
     }
 
-    fun reactivateSub(account: Account): StripeSubResult? {
+    fun reactivateSub(account: Account): StripeSubsResult? {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
