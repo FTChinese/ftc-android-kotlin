@@ -2,8 +2,9 @@ package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.subscription.*
+import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.iapsubs.Subscription
 import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.reader.Membership
 import org.jetbrains.anko.AnkoLogger
@@ -83,22 +84,6 @@ object SubRepo : AnkoLogger {
         } else {
             info("Parse ali order response $body")
             json.parse<AliPayIntent>(body)
-        }
-    }
-
-    fun refreshIAP(account: Account): IAPSubs? {
-
-        val origTxId = account.membership.appleSubsId ?: throw Exception("Not an Apple subscription")
-
-        val (_, body) = Fetch()
-            .patch(Endpoint.subsBase(account.isTest) + "/apple/subs/$origTxId")
-            .noCache()
-            .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<IAPSubs>(body)
         }
     }
 
