@@ -93,11 +93,11 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
                 primary = getString(R.string.label_password),
                 secondary = "********",
             ),
-            AccountRow(
-              id = AccountRowType.Address,
-                primary = "地址",
-                secondary = "设置或更改地址",
-            ),
+//            AccountRow(
+//              id = AccountRowType.Address,
+//                primary = "地址",
+//                secondary = "设置或更改地址",
+//            ),
             AccountRow(
                 id = AccountRowType.STRIPE,
                 primary = "Stripe钱包",
