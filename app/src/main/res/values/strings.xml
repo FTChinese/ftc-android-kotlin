@@ -253,7 +253,7 @@
     <string name="balance_conversion">余额可以兑换高级会员%1$d年%2$d天，无需额外支付</string>
     <string name="confirm_upgrade">去支付</string>
 
-    <string name="outcome_payment_status">支付状态 %1$s</string>
+    <string name="outcome_payment_status">支付状态: %1$s</string>
     <string name="order_id">订单编号: %1$s</string>
     <string name="order_subscribed_plan">订阅方案: %1$s</string>
 
