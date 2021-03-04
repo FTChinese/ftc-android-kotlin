@@ -58,7 +58,7 @@ class CartItemFragment : ScopedFragment() {
             if (it.hasDiscount) {
                 binding.hasDiscount = true
 
-                val options = it.items.map { discount ->
+                val options = it.discounts.map { discount ->
                     "限时促销 -${context?.getString(R.string.formatter_price, getCurrencySymbol(discount.currency), discount.priceOff)}"
                 }
 
@@ -70,7 +70,7 @@ class CartItemFragment : ScopedFragment() {
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     binding.discountSpinner.adapter = adapter
                 }
-                binding.discountSpinner.setSelection(it.selectedIndex)
+                binding.discountSpinner.setSelection(it.spinnerIndex)
             }
         }
 
