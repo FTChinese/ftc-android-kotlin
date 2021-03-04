@@ -14,10 +14,9 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityStripeSubBinding
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.stripesubs.*
-import com.ft.ftchinese.model.paywall.StripePriceCache
-import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.ftcsubs.*
+import com.ft.ftchinese.model.paywall.StripePriceCache
+import com.ft.ftchinese.model.stripesubs.*
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
@@ -56,8 +55,6 @@ class StripeSubActivity : ScopedAppActivity(),
     private lateinit var paymentSession: PaymentSession
     private lateinit var idempotency: Idempotency
 
-    private var price: Price? = null
-    private var checkoutCounter: CheckoutCounter? = null
     private var paymentMethod: PaymentMethod? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,15 +82,6 @@ class StripeSubActivity : ScopedAppActivity(),
 
         setupViewModel()
 
-        val priceId = intent.getStringExtra(EXTRA_STRIPE_PRICE_ID) ?: return
-
-        price = StripePriceCache.find(priceId)
-        // Retrieve stripe prices in case not found on device
-        if (price == null) {
-            uiStateProgress(true)
-            paywallViewModel.loadStripePrices()
-        }
-
         initUI()
 
         info("Initialize customer session...")
@@ -113,6 +101,8 @@ class StripeSubActivity : ScopedAppActivity(),
 
         // Attached PaymentSessionListener
         paymentSession.init(paymentSessionListener)
+
+        uiStateProgress(true)
     }
 
     private fun setupViewModel() {
@@ -160,8 +150,6 @@ class StripeSubActivity : ScopedAppActivity(),
     }
 
     private fun initUI() {
-        uiStateProgress(true)
-
 
         supportFragmentManager.commit {
             replace(
@@ -170,11 +158,11 @@ class StripeSubActivity : ScopedAppActivity(),
             )
         }
 
-        val p = price ?: return
         val a = sessionManager.loadAccount() ?: return
-        checkoutCounter = CheckoutCounter(p, a.membership)
 
-        checkOutViewModel.checkoutItem.value = checkoutCounter?.checkoutItem
+        intent.getStringExtra(EXTRA_STRIPE_PRICE_ID)?.let { priceId: String ->
+            checkOutViewModel.initStripeCounter(priceId, a.membership)
+        }
 
         binding.tvPaymentMethod.setOnClickListener {
             paymentSession.presentPaymentMethodSelection()
@@ -307,8 +295,8 @@ class StripeSubActivity : ScopedAppActivity(),
 
     private fun startSubscribing() {
         val account = sessionManager.loadAccount() ?: return
-        val p = price ?: return
-        val intent = checkoutCounter?.checkoutIntents?.findIntent(PayMethod.STRIPE) ?: return
+        val p = checkOutViewModel.counter?.price ?: return
+        val intent = checkOutViewModel.counter?.checkoutIntents?.findIntent(PayMethod.STRIPE) ?: return
 
         if (account.stripeId == null) {
             toast("You are not a stripe customer yet")
@@ -505,7 +493,7 @@ class StripeSubActivity : ScopedAppActivity(),
             )
         }
 
-        val edition = price?.let {
+        val edition = checkOutViewModel.counter?.price?.let {
             getString(
                 R.string.order_subscribed_plan,
                 formatEdition(

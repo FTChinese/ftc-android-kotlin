@@ -5,13 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
-import com.ft.ftchinese.model.stripesubs.SubParams
-import com.ft.ftchinese.model.stripesubs.StripeSubsResult
-import com.ft.ftchinese.model.price.Price
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.ftcsubs.WxPayIntent
+import com.ft.ftchinese.model.paywall.FtcPriceCache
+import com.ft.ftchinese.model.paywall.StripePriceCache
 import com.ft.ftchinese.model.price.CheckoutItem
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.stripesubs.StripeSubsResult
+import com.ft.ftchinese.model.stripesubs.SubParams
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.viewmodel.*
@@ -25,6 +27,11 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
 
     val isNetworkAvailable = MutableLiveData<Boolean>()
 
+    private var _checkoutCounter: CheckoutCounter? = null
+
+    val counter: CheckoutCounter?
+        get() = _checkoutCounter
+
     val wxPayIntentResult: MutableLiveData<Result<WxPayIntent>> by lazy {
         MutableLiveData<Result<WxPayIntent>>()
     }
@@ -37,21 +44,50 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<StripeSubsResult>>()
     }
 
+    val counterResult: MutableLiveData<Result<CheckoutCounter>> by lazy {
+        MutableLiveData<Result<CheckoutCounter>>()
+    }
+
     val checkoutItem: MutableLiveData<CheckoutItem> by lazy {
         MutableLiveData<CheckoutItem>()
     }
 
-    val discountOptions: MutableLiveData<DiscountOptions> by lazy {
-        MutableLiveData<DiscountOptions>()
+    fun initFtcCounter(priceId: String, m: Membership) {
+        val price = FtcPriceCache.find(priceId)
+        if (price != null) {
+            val c = CheckoutCounter(price, m)
+            _checkoutCounter = c
+            counterResult.value = Result.Success(c)
+        } else {
+            counterResult.value = Result.Error(Exception("Price not found"))
+        }
     }
 
-    val discountChanged: MutableLiveData<Int> by lazy {
-        MutableLiveData<Int>()
+    fun initStripeCounter(priceId: String, m: Membership) {
+        val price = StripePriceCache.find(priceId)
+        if (price != null) {
+            val c = CheckoutCounter(price, m)
+            _checkoutCounter = c
+            counterResult.value = Result.Success(c)
+        } else {
+            counterResult.value = Result.Error(Exception("Price not found"))
+        }
     }
 
-    fun createWxOrder(account: Account, price: Price) {
+    fun changeDiscount(pos: Int) {
+        _checkoutCounter?.useDiscount(pos)
+        checkoutItem.value = _checkoutCounter?.checkoutItem
+    }
+
+    fun createWxOrder(account: Account) {
         if (isNetworkAvailable.value == false) {
             wxPayIntentResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
+        val price = counter?.price
+        if (price == null) {
+            wxPayIntentResult.value = Result.Error(Exception("Price not found"))
             return
         }
 
@@ -79,9 +115,15 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun createAliOrder(account: Account, price: Price) {
+    fun createAliOrder(account: Account) {
         if (isNetworkAvailable.value == false) {
             aliPayIntentResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
+        val price = counter?.price
+        if (price == null) {
+            aliPayIntentResult.value = Result.Error(Exception("Price not found"))
             return
         }
 

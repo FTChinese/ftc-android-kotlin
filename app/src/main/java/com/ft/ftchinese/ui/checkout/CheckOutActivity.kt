@@ -18,7 +18,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCheckOutBinding
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.ftcsubs.*
-import com.ft.ftchinese.model.paywall.FtcPriceCache
 import com.ft.ftchinese.model.paywall.StripePriceCache
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.FileCache
@@ -71,7 +70,6 @@ class CheckOutActivity : ScopedAppActivity(),
 
     // Payment method use selected.
     private var payMethod: PayMethod? = null
-    private var checkoutCounter: CheckoutCounter? = null
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -90,8 +88,6 @@ class CheckOutActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(true)
         }
 
-        val priceId = intent.getStringExtra(EXTRA_PRICE_ID) ?: throw Exception("price id not passed in")
-
         sessionManager = SessionManager.getInstance(this)
         paymentManager = PaymentManager.getInstance(this)
         orderManager = OrderManager.getInstance(this)
@@ -100,15 +96,10 @@ class CheckOutActivity : ScopedAppActivity(),
         fileCache = FileCache(this)
         tracker = StatsTracker.getInstance(this)
 
-        val p = FtcPriceCache.find(priceId) ?: throw Exception("Price not found from in-memory cache")
-        val a = sessionManager.loadAccount() ?: return
-
-        checkoutCounter = CheckoutCounter(p, a.membership)
-
         setupViewModel()
         initUI()
 
-        tracker.addCart(p)
+//        tracker.addCart(p)
     }
 
     private fun setupViewModel() {
@@ -185,11 +176,6 @@ class CheckOutActivity : ScopedAppActivity(),
                 }
            }
         }
-
-        checkOutViewModel.discountChanged.observe(this) {
-            checkoutCounter?.useDiscount(it)
-            checkOutViewModel.checkoutItem.value = checkoutCounter?.checkoutItem
-        }
     }
 
     private fun initUI() {
@@ -202,11 +188,17 @@ class CheckOutActivity : ScopedAppActivity(),
         }
 
         binding.payButtonEnabled = payMethod != null
-        binding.intents = checkoutCounter?.checkoutIntents
 
-        // Data for cart ui.
-        checkOutViewModel.checkoutItem.value = checkoutCounter?.checkoutItem
-        checkOutViewModel.discountOptions.value = checkoutCounter?.discountOptions
+        val a = sessionManager.loadAccount() ?: return
+
+        intent.getStringExtra(EXTRA_PRICE_ID)?.let { priceId: String ->
+            checkOutViewModel.initFtcCounter(priceId, a.membership)
+            binding.intents = checkOutViewModel.counter?.checkoutIntents
+
+            checkOutViewModel.counter?.price?.let {
+                tracker.addCart(it)
+            }
+        }
 
         // Ask permission.
         requestPermission()
@@ -232,13 +224,12 @@ class CheckOutActivity : ScopedAppActivity(),
     private fun onSelectPayMethod(method: PayMethod) {
         payMethod = method
 
-        binding.payButtonEnabled = checkoutCounter?.payMethodAllowed(method)
-        binding.payButtonText = checkoutCounter?.payButtonParams(method)?.format(this)
+        binding.payButtonEnabled = checkOutViewModel.counter?.payMethodAllowed(method)
+        binding.payButtonText = checkOutViewModel.counter?.payButtonParams(method)?.format(this)
     }
 
     private fun onPayButtonClicked() {
         val account = sessionManager.loadAccount() ?: return
-        val price = checkoutCounter?.price ?: return
 
         val pm = payMethod
         if (pm == null) {
@@ -249,9 +240,12 @@ class CheckOutActivity : ScopedAppActivity(),
         when (pm) {
             PayMethod.ALIPAY -> {
                 toast(R.string.toast_creating_order)
-                tracker.checkOut(price.checkoutItem, pm)
+                checkOutViewModel.counter?.price?.checkoutItem?.let {
+                    tracker.checkOut(it, pm)
+                }
+
                 binding.inProgress = true
-                checkOutViewModel.createAliOrder(account, price)
+                checkOutViewModel.createAliOrder(account)
             }
 
             PayMethod.WXPAY -> {
@@ -264,9 +258,11 @@ class CheckOutActivity : ScopedAppActivity(),
                 }
 
                 toast(R.string.toast_creating_order)
-                tracker.checkOut(price.checkoutItem, pm)
+                checkOutViewModel.counter?.price?.checkoutItem?.let {
+                    tracker.checkOut(it, pm)
+                }
                 binding.inProgress = true
-                checkOutViewModel.createWxOrder(account, price)
+                checkOutViewModel.createWxOrder(account)
             }
 
             PayMethod.STRIPE -> {
@@ -308,14 +304,13 @@ class CheckOutActivity : ScopedAppActivity(),
     // Return false if price not found and the caller should
     // start retrieving prices from server.
     private fun gotoStripe(): Boolean {
-        val plan = checkoutCounter?.price ?: return false
+        val plan = checkOutViewModel.counter?.price ?: return false
 
         val price = StripePriceCache
             .find(plan.edition)
             ?: return false
 
         info("Start stripe subscription activity...")
-        info(price)
         StripeSubActivity.startForResult(
             activity = this,
             requestCode = RequestCode.PAYMENT,
@@ -332,11 +327,11 @@ class CheckOutActivity : ScopedAppActivity(),
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
-                tracker.buyFail(checkoutCounter?.checkoutItem)
+                tracker.buyFail(checkOutViewModel.counter?.checkoutItem)
             }
             is Result.Error -> {
                 result.exception.message?.let { toast(it) }
-                tracker.buyFail(checkoutCounter?.checkoutItem)
+                tracker.buyFail(checkOutViewModel.counter?.checkoutItem)
             }
             is Result.Success -> {
                 binding.payBtn.isEnabled = false
@@ -372,12 +367,12 @@ class CheckOutActivity : ScopedAppActivity(),
                 toast(msg)
                 binding.payBtn.isEnabled = true
 
-                tracker.buyFail(checkoutCounter?.checkoutItem)
+                tracker.buyFail(checkOutViewModel.counter?.checkoutItem)
 
                 return@launch
             }
 
-            tracker.buySuccess(checkoutCounter?.checkoutItem, payMethod)
+            tracker.buySuccess(checkOutViewModel.counter?.checkoutItem, payMethod)
 
             confirmAliSubscription()
         }
@@ -424,11 +419,11 @@ class CheckOutActivity : ScopedAppActivity(),
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
-                tracker.buyFail(checkoutCounter?.checkoutItem)
+                tracker.buyFail(checkOutViewModel.counter?.checkoutItem)
             }
             is Result.Error -> {
                 result.exception.message?.let { toast(it) }
-                tracker.buyFail(checkoutCounter?.checkoutItem)
+                tracker.buyFail(checkOutViewModel.counter?.checkoutItem)
             }
             is Result.Success -> {
                 binding.payBtn.isEnabled = false
