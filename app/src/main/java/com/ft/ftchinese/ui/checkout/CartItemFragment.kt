@@ -20,7 +20,7 @@ import com.ft.ftchinese.ui.formatter.getCurrencySymbol
 class CartItemFragment : ScopedFragment() {
 
     private lateinit var binding: FragmentCartItemBinding
-    private lateinit var cartViewModel: CartItemViewModel
+    private lateinit var checkoutViewModel: CheckOutViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,7 +35,7 @@ class CartItemFragment : ScopedFragment() {
             false
         )
 
-        binding.price = CartItem(
+        binding.cartItem = CartItem(
             productName = "",
         )
         binding.hasDiscount = false
@@ -45,15 +45,16 @@ class CartItemFragment : ScopedFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        cartViewModel = activity?.run {
-            ViewModelProvider(this).get(CartItemViewModel::class.java)
-        } ?: throw Exception("Invalid Exception")
+        checkoutViewModel = activity?.run {
+            ViewModelProvider(this).get(CheckOutViewModel::class.java)
+        } ?: throw Exception("Invalid activity")
 
-        cartViewModel.priceInCart.observe(viewLifecycleOwner) {
-            binding.price = CartItem.from(requireContext(), it)
+
+        checkoutViewModel.checkoutItem.observe(viewLifecycleOwner) {
+            binding.cartItem = CartItem.from(requireContext(), it)
         }
 
-        cartViewModel.discountsFound.observe(viewLifecycleOwner) {
+        checkoutViewModel.discountOptions.observe(viewLifecycleOwner) {
             if (it.hasDiscount) {
                 binding.hasDiscount = true
 
@@ -69,12 +70,13 @@ class CartItemFragment : ScopedFragment() {
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                     binding.discountSpinner.adapter = adapter
                 }
+                binding.discountSpinner.setSelection(it.selectedIndex)
             }
         }
 
         binding.discountSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(adapterView: AdapterView<*>?, view: View?, pos: Int, id: Long) {
-                cartViewModel.discountChanged.value = pos
+                checkoutViewModel.discountChanged.value = pos
             }
 
             override fun onNothingSelected(p0: AdapterView<*>?) {}

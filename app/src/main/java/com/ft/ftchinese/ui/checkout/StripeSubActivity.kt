@@ -51,7 +51,6 @@ class StripeSubActivity : ScopedAppActivity(),
     private lateinit var checkOutViewModel: CheckOutViewModel
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var paywallViewModel: PaywallViewModel
-    private lateinit var cartViewModel: CartItemViewModel
 
     private lateinit var stripe: Stripe
     private lateinit var paymentSession: PaymentSession
@@ -126,9 +125,6 @@ class StripeSubActivity : ScopedAppActivity(),
         paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))
             .get(PaywallViewModel::class.java)
 
-        cartViewModel = ViewModelProvider(this)
-            .get(CartItemViewModel::class.java)
-
         // Monitoring network status.
         connectionLiveData.observe(this, {
             checkOutViewModel.isNetworkAvailable.value = it
@@ -178,7 +174,7 @@ class StripeSubActivity : ScopedAppActivity(),
         val a = sessionManager.loadAccount() ?: return
         checkoutCounter = CheckoutCounter(p, a.membership)
 
-        cartViewModel.priceInCart.value = checkoutCounter?.checkoutItem
+        checkOutViewModel.checkoutItem.value = checkoutCounter?.checkoutItem
 
         binding.tvPaymentMethod.setOnClickListener {
             paymentSession.presentPaymentMethodSelection()

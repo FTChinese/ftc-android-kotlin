@@ -11,6 +11,7 @@ import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.ftcsubs.WxPayIntent
+import com.ft.ftchinese.model.price.CheckoutItem
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.viewmodel.*
@@ -34,6 +35,18 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
 
     val stripeSubsResult: MutableLiveData<Result<StripeSubsResult>> by lazy {
         MutableLiveData<Result<StripeSubsResult>>()
+    }
+
+    val checkoutItem: MutableLiveData<CheckoutItem> by lazy {
+        MutableLiveData<CheckoutItem>()
+    }
+
+    val discountOptions: MutableLiveData<DiscountOptions> by lazy {
+        MutableLiveData<DiscountOptions>()
+    }
+
+    val discountChanged: MutableLiveData<Int> by lazy {
+        MutableLiveData<Int>()
     }
 
     fun createWxOrder(account: Account, price: Price) {

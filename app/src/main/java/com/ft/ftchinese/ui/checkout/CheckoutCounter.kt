@@ -1,11 +1,10 @@
 package com.ft.ftchinese.ui.checkout
 
-import android.content.Context
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.price.CheckoutItem
-import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.price.Discount
 import com.ft.ftchinese.model.price.Price
+import com.ft.ftchinese.model.reader.Membership
 import org.jetbrains.anko.AnkoLogger
 
 /**
@@ -42,8 +41,8 @@ class CheckoutCounter(
         )
 
     // Show a spinner UI so that user choose a valid discount.
-    val discountSpinnerParams: DiscountSpinnerParams
-        get() = DiscountSpinnerParams(
+    val discountOptions: DiscountOptions
+        get() = DiscountOptions(
             items = discounts,
             selectedIndex = discountIndex,
         )

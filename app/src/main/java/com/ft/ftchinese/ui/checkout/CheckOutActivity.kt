@@ -17,10 +17,9 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCheckOutBinding
 import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.paywall.FtcPriceCache
 import com.ft.ftchinese.model.paywall.StripePriceCache
-import com.ft.ftchinese.model.price.Price
-import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.OrderManager
@@ -58,7 +57,6 @@ class CheckOutActivity : ScopedAppActivity(),
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var customerViewModel: CustomerViewModel
     private lateinit var paywallViewModel: PaywallViewModel
-    private lateinit var cartViewModel: CartItemViewModel
 
     private lateinit var fileCache: FileCache
 
@@ -73,8 +71,6 @@ class CheckOutActivity : ScopedAppActivity(),
 
     // Payment method use selected.
     private var payMethod: PayMethod? = null
-    // Plan chosen
-    private var price: Price? = null
     private var checkoutCounter: CheckoutCounter? = null
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -107,7 +103,6 @@ class CheckOutActivity : ScopedAppActivity(),
         val p = FtcPriceCache.find(priceId) ?: throw Exception("Price not found from in-memory cache")
         val a = sessionManager.loadAccount() ?: return
 
-        price = p
         checkoutCounter = CheckoutCounter(p, a.membership)
 
         setupViewModel()
@@ -128,8 +123,6 @@ class CheckOutActivity : ScopedAppActivity(),
 
         paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))
             .get(PaywallViewModel::class.java)
-
-        cartViewModel = ViewModelProvider(this).get(CartItemViewModel::class.java)
 
         connectionLiveData.observe(this, {
             checkOutViewModel.isNetworkAvailable.value = it
@@ -193,8 +186,9 @@ class CheckOutActivity : ScopedAppActivity(),
            }
         }
 
-        cartViewModel.discountChanged.observe(this) {
+        checkOutViewModel.discountChanged.observe(this) {
             checkoutCounter?.useDiscount(it)
+            checkOutViewModel.checkoutItem.value = checkoutCounter?.checkoutItem
         }
     }
 
@@ -211,8 +205,8 @@ class CheckOutActivity : ScopedAppActivity(),
         binding.intents = checkoutCounter?.checkoutIntents
 
         // Data for cart ui.
-        cartViewModel.priceInCart.value = checkoutCounter?.checkoutItem
-        cartViewModel.discountsFound.value = checkoutCounter?.discountSpinnerParams
+        checkOutViewModel.checkoutItem.value = checkoutCounter?.checkoutItem
+        checkOutViewModel.discountOptions.value = checkoutCounter?.discountOptions
 
         // Ask permission.
         requestPermission()
@@ -244,7 +238,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private fun onPayButtonClicked() {
         val account = sessionManager.loadAccount() ?: return
-        val price = price ?: return
+        val price = checkoutCounter?.price ?: return
 
         val pm = payMethod
         if (pm == null) {
@@ -314,7 +308,7 @@ class CheckOutActivity : ScopedAppActivity(),
     // Return false if price not found and the caller should
     // start retrieving prices from server.
     private fun gotoStripe(): Boolean {
-        val plan = price ?: return false
+        val plan = checkoutCounter?.price ?: return false
 
         val price = StripePriceCache
             .find(plan.edition)

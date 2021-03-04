@@ -7,7 +7,7 @@
     <data>
         <import type="android.view.View"/>
         <variable
-            name="price"
+            name="cartItem"
             type="com.ft.ftchinese.ui.checkout.CartItem" />
         <variable
             name="hasDiscount"
@@ -41,13 +41,13 @@
                 style="@style/OrigamiText.Body1.Center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{price.payable}"/>
+                android:text="@{cartItem.payable}"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="@{price.original == null ? View.GONE : View.VISIBLE}"
-                android:text="@{price.original}"
+                android:visibility="@{cartItem.original == null ? View.GONE : View.VISIBLE}"
+                android:text="@{cartItem.original}"
                 android:textAlignment="center"/>
 
             <Spinner
