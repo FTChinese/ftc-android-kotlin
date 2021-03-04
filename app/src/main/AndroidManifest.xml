@@ -131,7 +131,8 @@
         <activity
             android:name=".ui.checkout.CheckOutActivity"
             android:label="@string/check_out"
-            android:parentActivityName=".ui.paywall.PaywallActivity" />
+            android:parentActivityName=".ui.paywall.PaywallActivity"
+            android:launchMode="singleTop"/>
         <activity
             android:name=".ui.checkout.StripeSubActivity"
             android:label="@string/pay_method_stripe"
