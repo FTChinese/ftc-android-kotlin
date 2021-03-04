@@ -34,7 +34,7 @@
                 style="@style/OrigamiText.Heading3.Center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{price.productName}"
+                android:text="@{cartItem.productName}"
                 android:textAlignment="center" />
 
             <TextView
