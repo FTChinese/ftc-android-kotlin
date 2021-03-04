@@ -102,28 +102,13 @@ object StripeClient : AnkoLogger {
         }
     }
 
-    fun createSetupIntent(account: Account): StripeSetupIntent? {
-        val (_, body) = Fetch()
-            .post("$baseUrl/setup-intents")
-            .setUserId(account.id)
-            .noCache()
-            .sendJson()
-            .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<StripeSetupIntent>(body)
-        }
-    }
-
     fun createEphemeralKey(account: Account, apiVersion: String): String? {
         if (account.stripeId == null) {
             return null
         }
 
         val (_, body) = Fetch()
-            .post("$baseUrl/customers/${account.stripeId}/ephemeral_keys")
+            .post("$baseUrl/customers/${account.stripeId}/ephemeral-keys")
             .setUserId(account.id)
             .query("api_version", apiVersion)
             .noCache()
