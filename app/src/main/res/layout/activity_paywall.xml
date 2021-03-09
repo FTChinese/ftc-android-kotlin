@@ -88,6 +88,12 @@
                         android:text="@{promoTerms}"
                         android:visibility="@{promoTerms == null ? View.GONE : View.VISIBLE}" />
 
+                    <TextView
+                        android:id="@+id/payment_guide"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/space_16"/>
+
                     <!-- Customer service-->
                     <FrameLayout
                         android:layout_marginBottom="16dp"

@@ -177,6 +177,7 @@ class PaywallActivity : ScopedAppActivity(),
             replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
         }
 
+        markwon.setParsedMarkdown(binding.paymentGuide, markwon.toMarkdown(paywallGuide))
         /**
          * Show login button, or expiration message on the SubStatusFragment.
          */
