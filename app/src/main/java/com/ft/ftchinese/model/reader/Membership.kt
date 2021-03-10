@@ -2,13 +2,12 @@ package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.enums.Cycle
-import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
-import com.ft.ftchinese.model.enums.StripeSubStatus
+import com.ft.ftchinese.model.invoice.Invoice
 import kotlinx.parcelize.Parcelize
 import org.threeten.bp.LocalDate
+import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.temporal.ChronoUnit
 
@@ -311,5 +310,37 @@ data class Membership(
         return Pair(Permission.FREE.id, null)
     }
 
+    fun carryOverInvoice(): Invoice? {
+        if (tier == null || cycle == null) {
+            return null
+        }
+
+        return Invoice(
+            id = "",
+            compoundId = "",
+            tier = tier,
+            cycle = cycle,
+            years = 0,
+            months = 0,
+            days = remainingDays()?.toInt() ?: 0,
+            addOnSource = AddOnSource.CarryOver,
+            appleTxId = null,
+            orderId = null,
+            orderKind = OrderKind.AddOn,
+            paidAmount = 0.0,
+            payMethod = payMethod,
+            priceId = null,
+            stripeSubsId = null,
+            createdUtc = ZonedDateTime.now(),
+            consumedUtc = null,
+            startUtc = null,
+            endUtc = null,
+            carriedOverUtc = null,
+        )
+    }
+
+    fun withInvoice(inv: Invoice): Membership {
+        return this
+    }
 }
 
