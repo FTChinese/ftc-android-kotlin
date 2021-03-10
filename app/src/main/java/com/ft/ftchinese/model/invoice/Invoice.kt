@@ -1,5 +1,6 @@
 package com.ft.ftchinese.model.invoice
 
+import com.ft.ftchinese.model.addon.AddOn
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
 import org.threeten.bp.ZonedDateTime
@@ -35,5 +36,21 @@ data class Invoice(
     fun withOrderId(id: String): Invoice {
         orderId = id
         return this
+    }
+
+    private val totalDays: Int
+        get() = years * 366 + months * 30 + days
+
+    fun toAddOn(): AddOn {
+        return when (cycle) {
+            Cycle.MONTH -> AddOn(
+                standardAddOn = totalDays,
+                premiumAddOn = 0,
+            )
+            Cycle.YEAR -> AddOn(
+                standardAddOn = 0,
+                premiumAddOn = totalDays,
+            )
+        }
     }
 }

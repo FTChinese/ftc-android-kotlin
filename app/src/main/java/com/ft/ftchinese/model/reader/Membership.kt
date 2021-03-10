@@ -2,6 +2,7 @@ package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.addon.AddOn
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
 import com.ft.ftchinese.model.invoice.Invoice
@@ -40,11 +41,9 @@ data class Membership(
         return Membership(
             tier = tier,
             cycle = cycle,
-            expireDate = when (cycle) {
-                Cycle.YEAR -> expireDate?.plusYears(1L)
-                Cycle.MONTH -> expireDate?.plusMonths(1L)
-                else -> expireDate
-            },
+            expireDate = cycle?.let {
+                expireDate?.plus(it.period)
+            } ?: expireDate,
             payMethod = payMethod,
             stripeSubsId = stripeSubsId,
             autoRenew = autoRenew,
@@ -79,6 +78,48 @@ data class Membership(
             standardAddOn = if (hasPremiumAddOn) standardAddOn else 0,
             premiumAddOn = 0,
             vip = vip
+        )
+    }
+
+    fun withInvoice(inv: Invoice?): Membership {
+        if (inv == null) {
+            return this
+        }
+
+        if (inv.orderKind == OrderKind.AddOn) {
+            return plusAddOn(inv.toAddOn())
+        }
+
+        return Membership(
+            tier = inv.tier,
+            cycle = inv.cycle,
+            expireDate = inv.endUtc?.toLocalDate(),
+            payMethod = inv.payMethod,
+            stripeSubsId = null,
+            autoRenew = false,
+            status = null,
+            appleSubsId = null,
+            b2bLicenceId = null,
+            standardAddOn = standardAddOn,
+            premiumAddOn = premiumAddOn,
+            vip = vip,
+        )
+    }
+
+    fun plusAddOn(addOn: AddOn): Membership {
+        return Membership(
+            tier = tier,
+            cycle = cycle,
+            expireDate = expireDate,
+            payMethod = payMethod,
+            stripeSubsId = null,
+            autoRenew = false,
+            status = null,
+            appleSubsId = null,
+            b2bLicenceId = null,
+            standardAddOn = standardAddOn + addOn.standardAddOn,
+            premiumAddOn = premiumAddOn + addOn.premiumAddOn,
+            vip = vip,
         )
     }
 
@@ -339,8 +380,6 @@ data class Membership(
         )
     }
 
-    fun withInvoice(inv: Invoice): Membership {
-        return this
-    }
+
 }
 

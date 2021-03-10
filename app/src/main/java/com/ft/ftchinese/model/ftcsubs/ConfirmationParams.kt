@@ -66,4 +66,15 @@ data class ConfirmationParams(
             null
         }
     }
+
+    fun buildResult() {
+        val inv = purchaseInvoice()
+        var newM = member?.withInvoice(inv)
+
+        newM = carryOverInvoice()?.let {
+            newM?.withInvoice(it)
+        }
+
+
+    }
 }
