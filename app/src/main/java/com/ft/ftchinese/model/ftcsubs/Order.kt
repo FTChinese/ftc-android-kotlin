@@ -25,7 +25,7 @@ data class Order(
     val cycle: Cycle,
     var amount: Double, // Why this is var?
     val currency: String = "cny", // Not included when getting order list.
-    @KOrderUsage
+    @KOrderKind
     val kind: OrderKind,
     @KPayMethod
     val payMethod: PayMethod,
