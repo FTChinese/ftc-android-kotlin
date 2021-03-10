@@ -384,6 +384,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
         val order = orderManager.load() ?: return
 
+        // TODO: confirmation here is not correct, and membership should not be updated this way.
         val (confirmedOrder, updatedMember) = order.confirm(member)
 
         orderManager.save(confirmedOrder)
@@ -391,19 +392,24 @@ class CheckOutActivity : ScopedAppActivity(),
 
         info("New membership: $updatedMember")
 
+        // Save this confirmed order id so that VerifySubsWorker knows
+        // which one to verify.
         paymentManager.saveOrderId(order.id)
 
         toast(R.string.subs_success)
 
+        // Show the order details.
         LatestOrderActivity.start(this)
         setResult(Activity.RESULT_OK)
 
+        // Schedule a worker to verify this order.
         verifyPayment()
 
         finish()
     }
 
     private fun verifyPayment() {
+        // Schedule VerifySubsWorker
         val verifyRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifySubsWorker>()
             .setConstraints(Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
