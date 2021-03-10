@@ -3,6 +3,8 @@ package com.ft.ftchinese.model.enums
 import android.os.Parcelable
 import com.ft.ftchinese.R
 import kotlinx.parcelize.Parcelize
+import org.threeten.bp.Period
+import org.threeten.bp.Year
 
 @Parcelize
 enum class Cycle(val symbol: String) : Parcelable {
@@ -13,6 +15,13 @@ enum class Cycle(val symbol: String) : Parcelable {
         get() = when (this) {
             MONTH -> R.string.cycle_month
             YEAR -> R.string.cycle_year
+        }
+
+    // The temporal amount to be added to existing membership.
+    val period: Period
+        get() = when (this) {
+            MONTH -> Period.of(0, 1, 1)
+            YEAR -> Period.of(1, 0, 1)
         }
 
     override fun toString(): String {
