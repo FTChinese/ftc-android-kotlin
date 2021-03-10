@@ -29,7 +29,7 @@ annotation class KCycle
 annotation class KPriceSource
 
 @Target(AnnotationTarget.FIELD)
-annotation class KCarryOverSource
+annotation class KAddOnSource
 
 @Target(AnnotationTarget.FIELD)
 annotation class KPayMethod
@@ -41,7 +41,7 @@ annotation class KLoginMethod
 annotation class KUnlinkAnchor
 
 @Target(AnnotationTarget.FIELD)
-annotation class KOrderUsage
+annotation class KOrderKind
 
 @Target(AnnotationTarget.FIELD)
 annotation class KStripeSubStatus
@@ -163,17 +163,17 @@ val priceSourceConverter = object : Converter {
     }
 }
 
-val carryOverSourceConverter = object : Converter {
+val addOnSourceConverter = object : Converter {
     override fun canConvert(cls: Class<*>): Boolean {
-        return cls == CarryOverSource::class.java
+        return cls == AddOnSource::class.java
     }
 
     override fun fromJson(jv: JsonValue): Any? {
-        return CarryOverSource.fromString(jv.string)
+        return AddOnSource.fromString(jv.string)
     }
 
     override fun toJson(value: Any): String {
-        return if (value is CarryOverSource) {
+        return if (value is AddOnSource) {
             """
                 "$value"
             """.trimIndent().trim()
@@ -183,7 +183,7 @@ val carryOverSourceConverter = object : Converter {
     }
 }
 
-val orderUsageConverter = object : Converter {
+val orderKindConverter = object : Converter {
     override fun canConvert(cls: Class<*>): Boolean {
         return cls == OrderKind::class.java
     }
@@ -317,7 +317,7 @@ val json = Klaxon()
     .fieldConverter(KDateTime::class, dateTimeConverter)
     .fieldConverter(KTier::class, tierConverter)
     .fieldConverter(KCycle::class, cycleConverter)
-    .fieldConverter(KOrderUsage::class, orderUsageConverter)
+    .fieldConverter(KOrderKind::class, orderKindConverter)
     .fieldConverter(KPayMethod::class, payMethodConverter)
     .fieldConverter(KLoginMethod::class, loginMethodConverter)
     .fieldConverter(KUnlinkAnchor::class, unlinkAnchorConverter)
@@ -325,4 +325,4 @@ val json = Klaxon()
     .fieldConverter(KPaymentIntentStatus::class, paymentIntentStatusConverter)
     .fieldConverter(KArticleType::class, articleTypeConverter)
     .fieldConverter(KPriceSource::class, priceSourceConverter)
-    .fieldConverter(KCarryOverSource::class, carryOverSourceConverter)
+    .fieldConverter(KAddOnSource::class, addOnSourceConverter)
