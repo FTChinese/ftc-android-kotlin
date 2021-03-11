@@ -155,12 +155,12 @@ object StripeClient : AnkoLogger {
         }
     }
 
-    fun upgradeSub(account: Account, params: SubParams): StripeSubsResult? {
+    fun updateSubs(account: Account, params: SubParams): StripeSubsResult? {
 
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
-            .post("$baseUrl/subs/$subsId/upgrade")
+            .post("$baseUrl/subs/$subsId")
             .setUserId(account.id)
             .noCache()
             .sendJson(json.toJsonString(params))
