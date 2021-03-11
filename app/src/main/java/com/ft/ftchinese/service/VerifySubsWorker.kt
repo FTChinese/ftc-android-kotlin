@@ -10,11 +10,13 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.ftcsubs.PaymentResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.repository.AppleClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
+import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.PaymentManager
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.member.MemberActivity
@@ -111,11 +113,34 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         }
     }
 
-    private fun verifyFtcPay(account: Account): Result {
-        val paymentManager = PaymentManager.getInstance(ctx)
-        val pr = paymentManager.load()
+    // Compatibility.
+    private fun loadPayResult(): PaymentResult? {
+        val invoiceStore = InvoiceStore.getInstance(ctx)
+        val pr = invoiceStore.loadPayResult()
 
-        if (pr.isOrderPaid()) {
+        if (pr != null) {
+            return pr
+        }
+
+        val orderId = PaymentManager.getInstance(ctx)
+            .loadOrderId() ?: return null
+
+        return PaymentResult(
+            paymentState = "",
+            paymentStateDesc = "",
+            totalFee = 0,
+            transactionId = "",
+            ftcOrderId = orderId,
+            paidAt = null,
+            payMethod = null,
+        )
+    }
+
+    private fun verifyFtcPay(account: Account): Result {
+
+        val pr = loadPayResult() ?: return Result.failure()
+
+        if (pr.isVerified()) {
             info("Order already paid. Stop verification")
             return Result.success()
         }
@@ -129,9 +154,9 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
             val result = SubRepo.verifyOrder(account, pr.ftcOrderId) ?: return Result.failure()
             info(result)
 
-            paymentManager.save(result.payment)
+            InvoiceStore.getInstance(ctx).savePayResult(result.payment)
 
-            if (!result.payment.isOrderPaid()) {
+            if (!result.payment.isVerified()) {
                 return Result.success()
             }
 
