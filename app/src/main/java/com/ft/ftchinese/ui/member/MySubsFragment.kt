@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentMySubsBinding
-import com.ft.ftchinese.ui.lists.TwoColItemViewHolder
+import com.ft.ftchinese.ui.lists.TwoEqualColViewHolder
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -76,14 +76,14 @@ class MySubsFragment : Fragment(), AnkoLogger {
         }
     }
 
-    inner class ListAdapter : RecyclerView.Adapter<TwoColItemViewHolder>() {
+    inner class ListAdapter : RecyclerView.Adapter<TwoEqualColViewHolder>() {
         private var rows: List<Pair<String, String>> = listOf()
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TwoColItemViewHolder {
-            return TwoColItemViewHolder.create(parent)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TwoEqualColViewHolder {
+            return TwoEqualColViewHolder.create(parent)
         }
 
-        override fun onBindViewHolder(holder: TwoColItemViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: TwoEqualColViewHolder, position: Int) {
             val pair = rows[position]
             holder.setLeadingText(pair.first)
             holder.setTrailingText(pair.second)
