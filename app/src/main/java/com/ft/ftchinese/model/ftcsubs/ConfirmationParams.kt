@@ -8,13 +8,13 @@ import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 
 data class ConfirmationParams(
-    val confirmedAt: ZonedDateTime,
     val order: Order,
-    val member: Membership?,
+    val member: Membership,
+    val confirmedAt: ZonedDateTime = ZonedDateTime.now(),
 ) {
-    fun purchaseInvoice(): Invoice {
+    private fun purchaseInvoice(): Invoice {
         val startDateTime = when (order.kind) {
-            OrderKind.Create, OrderKind.Renew -> if (member?.expireDate != null) {
+            OrderKind.Create, OrderKind.Renew -> if (member.expireDate != null) {
                 val expDateTime = member.expireDate.atStartOfDay(ZoneId.systemDefault())
                 if (expDateTime.isBefore(confirmedAt)) {
                     confirmedAt
@@ -59,22 +59,32 @@ data class ConfirmationParams(
         )
     }
 
-    fun carryOverInvoice(): Invoice? {
+    private fun carryOverInvoice(): Invoice? {
         return if (order.kind == OrderKind.Upgrade) {
-            return member?.carryOverInvoice()?.withOrderId(order.id)
+            return member.carryOverInvoice()?.withOrderId(order.id)
         } else {
             null
         }
     }
 
-    fun buildResult() {
-        val inv = purchaseInvoice()
-        var newM = member?.withInvoice(inv)
+    val invoices: Invoices
+        get() = Invoices(
+            purchased = purchaseInvoice(),
+            carriedOver = carryOverInvoice()
+        )
 
-        newM = carryOverInvoice()?.let {
-            newM?.withInvoice(it)
-        }
+    fun buildResult(): ConfirmationResult {
 
+        val inv = invoices
 
+        return ConfirmationResult(
+            order = order.confirmed(
+                at = confirmedAt,
+                start = inv.purchased.startUtc?.toLocalDate(),
+                end = inv.purchased.endUtc?.toLocalDate(),
+            ),
+            membership = inv.membership(member),
+            invoices = inv,
+        )
     }
 }
