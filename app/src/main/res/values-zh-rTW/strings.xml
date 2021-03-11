@@ -294,7 +294,7 @@
     <string name="tier_standard">標準會員</string>
     <string name="tier_premium">高端會員</string>
     <string name="tier_vip">超級會員</string>
-    <string name="label_expiration_date">期限</string>
+    <string name="label_expiration_date">到期時間</string>
     <string name="label_price">支付金額</string>
     <string name="label_ftc_account">FT中文網帳號</string>
     <string name="label_wx_account">微信帳號</string>
