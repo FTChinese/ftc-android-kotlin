@@ -141,9 +141,7 @@ open class WVClient(
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
         info("Error when requesting ${request?.url}")
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            info("Error code: ${error?.errorCode}, description: ${error?.description}")
-        }
+        info("Error code: ${error?.errorCode}, description: ${error?.description}")
     }
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
@@ -329,13 +327,17 @@ open class WVClient(
                 val lastPathSegment = uri.lastPathSegment ?: return true
 
                 // Prevent multiple entry point for a single item.
-                if (noAccess.containsKey(lastPathSegment)) {
-                    true
-                } else {
-                    info("Open a new channel. Path: ${uri.path}")
-                    viewModel?.urlChannelSelected?.value = buildChannelFromUri(uri)
-                    true
-                }
+//                if (noAccess.containsKey(lastPathSegment)) {
+//                    true
+//                } else {
+//                    info("Open a new channel. Path: ${uri.path}")
+//                    viewModel?.urlChannelSelected?.value = buildChannelFromUri(uri)
+//                    true
+//                }
+
+                info("Open a new channel. Path: ${uri.path}")
+                viewModel?.urlChannelSelected?.value = buildChannelFromUri(uri)
+                true
             }
 
             /**
