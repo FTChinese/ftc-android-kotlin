@@ -2,7 +2,7 @@ package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.addon.AddOn
+import com.ft.ftchinese.model.invoice.AddOn
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
 import com.ft.ftchinese.model.invoice.Invoice
@@ -56,7 +56,7 @@ data class Membership(
         )
     }
 
-    private fun useAddOn(): Membership {
+    private fun claimAddOn(): Membership {
         return Membership(
             tier = when {
                 hasPremiumAddOn -> Tier.PREMIUM
@@ -86,10 +86,13 @@ data class Membership(
             return this
         }
 
+        // If current membership comes from stripe, apple, or is a premium.
+        // Only change the add-on days.
         if (inv.orderKind == OrderKind.AddOn) {
             return plusAddOn(inv.toAddOn())
         }
 
+        // For order kind create, renew, and upgrade.
         return Membership(
             tier = inv.tier,
             cycle = inv.cycle,
@@ -106,17 +109,17 @@ data class Membership(
         )
     }
 
-    fun plusAddOn(addOn: AddOn): Membership {
+    private fun plusAddOn(addOn: AddOn): Membership {
         return Membership(
             tier = tier,
             cycle = cycle,
             expireDate = expireDate,
             payMethod = payMethod,
-            stripeSubsId = null,
-            autoRenew = false,
-            status = null,
-            appleSubsId = null,
-            b2bLicenceId = null,
+            stripeSubsId = stripeSubsId,
+            autoRenew = autoRenew,
+            status = status,
+            appleSubsId = appleSubsId,
+            b2bLicenceId = b2bLicenceId,
             standardAddOn = standardAddOn + addOn.standardAddOn,
             premiumAddOn = premiumAddOn + addOn.premiumAddOn,
             vip = vip,
@@ -148,7 +151,7 @@ data class Membership(
                 return this
             }
 
-            return useAddOn()
+            return claimAddOn()
         }
 
         return this
@@ -379,7 +382,5 @@ data class Membership(
             carriedOverUtc = null,
         )
     }
-
-
 }
 
