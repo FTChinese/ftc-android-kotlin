@@ -136,6 +136,18 @@
                     android:textAllCaps="false"/>
 
                 <Button
+                    android:id="@+id/btn_payment_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Show Payment Result"/>
+
+                <Button
+                    android:id="@+id/btn_upgrade_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Show Upgrade Result"/>
+
+                <Button
                     android:id="@+id/bottom_dialog"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
