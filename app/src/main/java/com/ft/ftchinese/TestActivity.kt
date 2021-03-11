@@ -21,18 +21,16 @@ import androidx.work.WorkRequest
 import com.ft.ftchinese.databinding.ActivityTestBinding
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.enums.Cycle
-import com.ft.ftchinese.model.enums.OrderKind
-import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.stripesubs.Idempotency
-import com.ft.ftchinese.model.enums.StripeSubStatus
+import com.ft.ftchinese.model.enums.*
+import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
+import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
-import com.ft.ftchinese.model.ftcsubs.Order
+import com.ft.ftchinese.model.stripesubs.Idempotency
 import com.ft.ftchinese.service.VerifySubsWorker
+import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
@@ -43,7 +41,7 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.EXTRA_ARTICLE_TEASER
 import com.ft.ftchinese.ui.article.LyricsAdapter
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.order.LatestOrderActivity
+import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.share.SocialShareFragment
 import com.ft.ftchinese.wxapi.WXEntryActivity
@@ -484,6 +482,65 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             ))
         }
 
+        binding.btnPaymentResult.setOnClickListener {
+            InvoiceStore.getInstance(this).saveInvoices(
+                ConfirmationParams(
+                    order = Order(
+                        id = "order-id",
+                        ftcId = "ftc-user-id",
+                        unionId = null,
+                        priceId = "price-id",
+                        discountId = null,
+                        price = 298.0,
+                        tier = Tier.STANDARD,
+                        cycle = Cycle.YEAR,
+                        amount = 298.0,
+                        kind = OrderKind.Create,
+                        payMethod = PayMethod.ALIPAY,
+                        createdAt = ZonedDateTime.now(),
+                        confirmedAt = null,
+                        startDate = null,
+                        endDate =  null
+                    ),
+                    member = Membership()
+                ).invoices
+            )
+
+            LatestInvoiceActivity.start(this)
+        }
+
+        binding.btnUpgradeResult.setOnClickListener {
+            InvoiceStore.getInstance(this).saveInvoices(
+                ConfirmationParams(
+                    order = Order(
+                        id = "order-id",
+                        ftcId = "ftc-user-id",
+                        unionId = null,
+                        priceId = "standard-price-id",
+                        discountId = null,
+                        price = 1998.0,
+                        tier = Tier.PREMIUM,
+                        cycle = Cycle.YEAR,
+                        amount = 1998.0,
+                        kind = OrderKind.Upgrade,
+                        payMethod = PayMethod.ALIPAY,
+                        createdAt = ZonedDateTime.now(),
+                        confirmedAt = null,
+                        startDate = null,
+                        endDate =  null
+                    ),
+                    member = Membership(
+                        tier = Tier.STANDARD,
+                        cycle = Cycle.YEAR,
+                        expireDate = LocalDate.now().plusMonths(1),
+                        payMethod = PayMethod.WXPAY,
+                    )
+                ).invoices
+            )
+
+            LatestInvoiceActivity.start(this)
+        }
+
         binding.bottomDialog.setOnClickListener {
             SocialShareFragment().show(supportFragmentManager, "TestBottomDialog")
         }
@@ -495,7 +552,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         binding.btnLatestOrder.setOnClickListener {
-            LatestOrderActivity.start(this)
+            LatestInvoiceActivity.start(this)
         }
 
         binding.clearServiceAccepted.setOnClickListener {
