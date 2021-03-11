@@ -9,17 +9,18 @@ import androidx.work.*
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityWechatBinding
+import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.paywall.FtcPriceCache
-import com.ft.ftchinese.service.VerifySubsWorker
+import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
+import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.OrderManager
-import com.ft.ftchinese.store.PaymentManager
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.CheckOutViewModel
+import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.member.MemberActivity
-import com.ft.ftchinese.ui.order.LatestOrderActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.tencent.mm.opensdk.constants.ConstantsAPI
@@ -47,6 +48,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     private var api: IWXAPI? = null
     private var sessionManager: SessionManager? = null
     private var orderManager: OrderManager? = null
+
     private var tracker: StatsTracker? = null
 //    private var isPaymentSuccess: Boolean = false
 
@@ -176,13 +178,14 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         // Confirm the order locally sand save it.
         val order = orderManager?.load() ?: return
 
-        val (confirmedOrder, updatedMember) = order.confirm(member)
+        val confirmed = ConfirmationParams(
+            order = order,
+            member = member,
+        ).buildResult()
 
-        orderManager?.save(confirmedOrder)
-        sessionManager?.saveMembership(updatedMember)
-
-        val paymentManager = PaymentManager.getInstance(this)
-        paymentManager.saveOrderId(order.id)
+        orderManager?.save(confirmed.order)
+        sessionManager?.saveMembership(confirmed.membership)
+        InvoiceStore.getInstance(this).saveInvoices(confirmed.invoices)
 
         // Start retrieving account data from server.
         binding.result = UIWx(
@@ -195,7 +198,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     }
 
     private fun verifyPayment() {
-        val verifyRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifySubsWorker>()
+        val verifyRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifyOneTimePurchaseWorker>()
             .setConstraints(Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build())
@@ -220,7 +223,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         }
 
         if (order.isConfirmed()) {
-            LatestOrderActivity.start(this)
+            LatestInvoiceActivity.start(this)
         } else {
             PaywallTracker.from = null
             PaywallActivity.start(this)

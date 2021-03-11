@@ -19,15 +19,11 @@ import com.ft.ftchinese.databinding.ActivityCheckOutBinding
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.paywall.StripePriceCache
-import com.ft.ftchinese.service.VerifySubsWorker
-import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.store.OrderManager
-import com.ft.ftchinese.store.PaymentManager
-import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
+import com.ft.ftchinese.store.*
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.order.LatestOrderActivity
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.util.RequestCode
@@ -61,7 +57,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private lateinit var orderManager: OrderManager
     private lateinit var sessionManager: SessionManager
-    private lateinit var paymentManager: PaymentManager
+    private lateinit var invoiceStore: InvoiceStore
 
     private lateinit var wxApi: IWXAPI
     private lateinit var tracker: StatsTracker
@@ -89,8 +85,9 @@ class CheckOutActivity : ScopedAppActivity(),
         }
 
         sessionManager = SessionManager.getInstance(this)
-        paymentManager = PaymentManager.getInstance(this)
         orderManager = OrderManager.getInstance(this)
+        invoiceStore = InvoiceStore.getInstance(this)
+
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
         wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
         fileCache = FileCache(this)
@@ -384,22 +381,20 @@ class CheckOutActivity : ScopedAppActivity(),
 
         val order = orderManager.load() ?: return
 
-        // TODO: confirmation here is not correct, and membership should not be updated this way.
-        val (confirmedOrder, updatedMember) = order.confirm(member)
+        val confirmed = ConfirmationParams(
+            order = order,
+            member = member
+        ).buildResult()
 
-        orderManager.save(confirmedOrder)
-        sessionManager.saveMembership(updatedMember)
-
-        info("New membership: $updatedMember")
-
-        // Save this confirmed order id so that VerifySubsWorker knows
-        // which one to verify.
-        paymentManager.saveOrderId(order.id)
+        orderManager.save(confirmed.order)
+        sessionManager.saveMembership(confirmed.membership)
+        invoiceStore.saveInvoices(confirmed.invoices)
+        info("New membership: ${confirmed.membership}")
 
         toast(R.string.subs_success)
 
         // Show the order details.
-        LatestOrderActivity.start(this)
+        LatestInvoiceActivity.start(this)
         setResult(Activity.RESULT_OK)
 
         // Schedule a worker to verify this order.
@@ -410,7 +405,7 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private fun verifyPayment() {
         // Schedule VerifySubsWorker
-        val verifyRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifySubsWorker>()
+        val verifyRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifyOneTimePurchaseWorker>()
             .setConstraints(Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build())
