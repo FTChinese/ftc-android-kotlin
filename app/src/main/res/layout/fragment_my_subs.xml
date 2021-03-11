@@ -19,7 +19,7 @@
             android:id="@+id/product_name_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:contentPaddingTop="@dimen/space_32"
+            app:contentPaddingTop="@dimen/space_16"
             app:contentPaddingBottom="@dimen/space_16"
             app:contentPaddingLeft="@dimen/space_16"
             app:contentPaddingRight="@dimen/space_16"
@@ -50,7 +50,7 @@
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/subs_details"
-                    android:layout_marginTop="@dimen/space_32"
+                    android:layout_marginTop="@dimen/space_16"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@id/subs_product_name"/>
@@ -82,6 +82,7 @@
                 android:orientation="vertical">
                 <TextView
                     android:id="@+id/addon_heading"
+                    android:textAlignment="center"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="订阅结束后默认使用以下部分"/>
