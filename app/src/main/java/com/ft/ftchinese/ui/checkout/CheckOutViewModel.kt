@@ -199,7 +199,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val sub = withContext(Dispatchers.IO) {
-                    StripeClient.upgradeSub(account, params)
+                    StripeClient.updateSubs(account, params)
                 }
 
                 if (sub == null) {
