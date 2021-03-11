@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See https://stackoverflow.com/questions/54072462/linear-layout-divide-not-equally-width -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingTop="@dimen/space_4"
+    android:paddingBottom="@dimen/space_4"
+    android:weightSum="2">
+
+    <TextView
+        android:id="@+id/equal_col_leading"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textAlignment="textEnd"
+        android:paddingStart="@dimen/space_4"
+        android:paddingEnd="@dimen/space_4"
+        android:layout_weight="1"/>
+
+    <TextView
+        android:id="@+id/equal_col_trailing"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/space_4"
+        android:paddingEnd="@dimen/space_4"
+        android:textAlignment="textStart"
+        android:layout_weight="1"/>
+</LinearLayout>
