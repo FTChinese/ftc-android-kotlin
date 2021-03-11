@@ -1,12 +1,13 @@
 package com.ft.ftchinese.model.ftcsubs
 
-import com.ft.ftchinese.model.enums.*
+import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.OrderKind
+import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.*
 import com.ft.ftchinese.model.price.Edition
-import com.ft.ftchinese.model.reader.Membership
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
-import org.threeten.bp.temporal.ChronoUnit
 
 /**
  * This is used to store subscription order locally,
@@ -49,59 +50,10 @@ data class Order(
         return confirmedAt != null
     }
 
-    fun confirm(member: Membership): ConfirmationResult {
-        val now = ZonedDateTime.now()
-            .truncatedTo(ChronoUnit.SECONDS)
-        val today = now.toLocalDate()
-
-        val start = when {
-            member.expireDate == null -> today
-            kind == OrderKind.Upgrade -> today
-            member.autoRenewOffExpired -> today
-            else -> member.expireDate
-        }
-
-        confirmedAt = now
+    fun confirmed(at: ZonedDateTime, start: LocalDate?, end: LocalDate?): Order {
+        confirmedAt = at
         startDate = start
-        endDate = when (cycle) {
-            Cycle.YEAR -> start.plusYears(1).plusDays(1)
-            Cycle.MONTH -> start.plusMonths(1).plusDays(1)
-        }
-
-
-        return ConfirmationResult(
-            order = this,
-            membership = Membership(
-                tier = tier,
-                cycle = cycle,
-                expireDate = endDate,
-                payMethod = payMethod,
-                autoRenew = false,
-                status = null,
-                vip = false
-            )
-        )
+        endDate = end
+        return this
     }
 }
-
-data class AliPayIntent(
-    val order: Order,
-    val param: String
-
-)
-
-data class WxPayParams(
-    val appId: String,
-    val partnerId: String,
-    val prepayId: String,
-    val timestamp: String,
-    val nonce: String,
-    val pkg: String,
-    val signature: String
-)
-
-// This is user's payment intent.
-data class WxPayIntent(
-    val order: Order,
-    val params: WxPayParams
-)
