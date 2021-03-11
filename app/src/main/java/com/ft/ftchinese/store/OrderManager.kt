@@ -121,71 +121,27 @@ class OrderManager private constructor(context: Context) {
     }
 }
 
-private const val PREF_FILE_PAYMENT_RESULT = "com.ft.ftchinese.last_paid_order"
-private const val PREF_PAYMENT_STATE = "payment_state"
-private const val PREF_PAYMENT_STATE_DESC = "payment_state_desc"
-private const val PREF_TOTAL_FEE = "total_fee"
-private const val PREF_TX_ID = "tx_id"
-private const val PREF_PAID_AT = "paid_at"
-private const val PREF_PAY_METHOD = "pay_method"
 
 /**
  * PaymentManager is used to save the last successful payment.
  * This differs from OrderManager in that OrderManager always saves the last order user created,
  * which might not be paid.
+ * @Deprecated
  */
 class PaymentManager private constructor(ctx: Context) {
     private val sharedPreferences = ctx.getSharedPreferences(PREF_FILE_PAYMENT_RESULT, Context.MODE_PRIVATE)
 
     // Upon successful payment, we save the order id so that later we know which order updated
     // current membership and use it to perform verification.
-    fun saveOrderId(id: String) {
-        sharedPreferences.edit {
-            clear()
-        }
 
-        sharedPreferences.edit {
-            putString(PREF_ORDER_ID, id)
-        }
-    }
-
-    fun save(pr: PaymentResult) {
-        sharedPreferences.edit {
-            clear()
-        }
-
-        sharedPreferences.edit {
-            putString(PREF_PAYMENT_STATE, pr.paymentState)
-            putString(PREF_PAYMENT_STATE_DESC, pr.paymentStateDesc)
-            putInt(PREF_TOTAL_FEE, pr.totalFee)
-            putString(PREF_TX_ID, pr.transactionId)
-            putString(PREF_ORDER_ID, pr.ftcOrderId)
-            putString(PREF_PAID_AT, pr.paidAt)
-            putString(PREF_PAY_METHOD, pr.payMethod.toString())
-        }
-    }
-
-    fun load(): PaymentResult {
-        val paymentState = sharedPreferences.getString(PREF_PAYMENT_STATE, "")
-        val paymentStateDesc = sharedPreferences.getString(PREF_PAYMENT_STATE_DESC, "")
-        val totalFee = sharedPreferences.getInt(PREF_TOTAL_FEE, 0)
-        val txId = sharedPreferences.getString(PREF_TX_ID, "")
-        val orderId = sharedPreferences.getString(PREF_ORDER_ID, "")
-        val paidAt = sharedPreferences.getString(PREF_PAID_AT, "")
-        val payMethod = sharedPreferences.getString(PREF_PAYMENT_METHOD, "")
-
-        return PaymentResult(
-            paymentState = paymentState ?: "",
-            paymentStateDesc = paymentStateDesc ?: "",
-            totalFee = totalFee,
-            transactionId = txId ?: "",
-            ftcOrderId = orderId ?: "",
-            paidAt = paidAt ?: "",
-            payMethod = PayMethod.fromString(payMethod)
-        )
+    // Kept for backward compatibility.
+    fun loadOrderId(): String? {
+        return sharedPreferences.getString(PREF_ORDER_ID, null)
     }
 
     companion object {
+        private const val PREF_FILE_PAYMENT_RESULT = "com.ft.ftchinese.last_paid_order"
+
         private var instance: PaymentManager? = null
 
         @Synchronized fun getInstance(ctx: Context): PaymentManager {
