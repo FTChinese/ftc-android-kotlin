@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.addon
+package com.ft.ftchinese.model.invoice
 
 import com.ft.ftchinese.model.enums.Tier
 

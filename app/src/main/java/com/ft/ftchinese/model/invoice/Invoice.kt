@@ -1,21 +1,26 @@
 package com.ft.ftchinese.model.invoice
 
-import com.ft.ftchinese.model.addon.AddOn
+import com.beust.klaxon.Json
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
+import com.ft.ftchinese.model.price.Edition
 import org.threeten.bp.ZonedDateTime
 
 data class Invoice(
     val id: String,
     val compoundId: String,
+    @KTier
     val tier: Tier,
+    @KCycle
     val cycle: Cycle,
-    val years: Int,
-    val months: Int,
-    val days: Int,
+    val years: Int = 0,
+    val months: Int = 0,
+    val days: Int = 0,
     @KAddOnSource
     val addOnSource: AddOnSource? = null,
     val appleTxId: String? = null,
+    @Json(ignored = true)
+    val currency: String = "cny",
     var orderId: String? = null,
     @KOrderKind
     val orderKind: OrderKind? = null,
@@ -28,26 +33,32 @@ data class Invoice(
     val createdUtc: ZonedDateTime? = null,
     @KDateTime
     val consumedUtc: ZonedDateTime? = null,
+    @KDateTime
     val startUtc: ZonedDateTime? = null,
+    @KDateTime
     val endUtc: ZonedDateTime? = null,
     @KDateTime
     val carriedOverUtc: ZonedDateTime? = null,
 ) {
+
+    val edition: Edition
+        get() = Edition(tier, cycle)
+
     fun withOrderId(id: String): Invoice {
         orderId = id
         return this
     }
 
-    private val totalDays: Int
-        get() = years * 366 + months * 30 + days
+    val totalDays: Int
+        get() = years * 366 + months * 31 + days
 
     fun toAddOn(): AddOn {
-        return when (cycle) {
-            Cycle.MONTH -> AddOn(
+        return when (tier) {
+            Tier.STANDARD -> AddOn(
                 standardAddOn = totalDays,
                 premiumAddOn = 0,
             )
-            Cycle.YEAR -> AddOn(
+            Tier.PREMIUM -> AddOn(
                 standardAddOn = 0,
                 premiumAddOn = totalDays,
             )
