@@ -184,7 +184,7 @@
 
     <!--  Order  -->
     <string name="title_my_orders">我的订单</string>
-    <string name="title_latest_order">订单详情</string>
+    <string name="title_latest_invoice">收据</string>
 
     <!-- Paywall -->
     <string name="title_my_subs">我的订阅</string>
