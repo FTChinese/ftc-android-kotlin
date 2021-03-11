@@ -78,17 +78,20 @@ data class CheckoutIntents(
                         if (!m.withinAliWxRenewalPeriod()) {
                             return CheckoutIntents(
                                 intents = listOf(CheckoutIntent(
-                                    orderKind = OrderKind.Renew,
-                                    payMethods = listOf()
+                                    orderKind = OrderKind.Create,
+                                    payMethods = listOf(PayMethod.STRIPE)
                                 )),
-                                warning = "剩余时间超出允许的最长续订期限",
+                                warning = "* 剩余时间超出允许的最长续订期限，无法继续使用支付宝/微信再次购买；\n可以转为Stripe订阅，当前剩余时间将在新订阅失效后在此启用。",
                             )
                         }
                         // Ali/Wx member can renew via Ali/Wx, or Stripe with remaining days put to reserved state.
                         return CheckoutIntents(
                             intents = listOf(CheckoutIntent(
                                 orderKind = OrderKind.Renew,
-                                payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE),
+                                payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY),
+                            ), CheckoutIntent(
+                                orderKind = OrderKind.Create,
+                                payMethods = listOf(PayMethod.STRIPE)
                             )),
                             warning = "* 选择支付宝/微信购买累加一个订阅周期。\n* 选择Stripe订阅，当前剩余订阅时间将在Stripe订阅结束后继续使用。"
                         )
@@ -103,9 +106,12 @@ data class CheckoutIntents(
                             return CheckoutIntents(
                                 intents = listOf(CheckoutIntent(
                                     orderKind = OrderKind.Upgrade,
-                                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY, PayMethod.STRIPE)
+                                    payMethods = listOf(PayMethod.ALIPAY, PayMethod.WXPAY)
+                                ), CheckoutIntent(
+                                    orderKind = OrderKind.Create,
+                                    payMethods = listOf(PayMethod.STRIPE)
                                 )),
-                                warning = "升级高端会员即刻启用，当前剩余时间将在高端版结束后继续使用。",
+                                warning = "* 使用支付宝/微信升级高端会员即刻启用，当前剩余时间将在高端版结束后继续使用；\n* 或转为Stripe订阅，当前剩余时间将在Stripe失效后重新启用",
                             )
                         }
                         // A premium could buy standard as AddOns.
