@@ -78,25 +78,11 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         checkoutViewModel = ViewModelProvider(this)
                 .get(CheckOutViewModel::class.java)
 
-//        checkoutViewModel.payResult.observe(this, {
-//            onPaymentVerified(it)
-//        })
-
-//        accountViewModel.accountRefreshed.observe(this, {
-//            onAccountRefreshed(it)
-//        })
-
         tracker = StatsTracker.getInstance(this)
 
         binding.doneButton.setOnClickListener {
             onClickDone()
         }
-
-//        if (intent.getBooleanExtra(EXTRA_UI_TEST, false)) {
-//            queryOrder()
-//
-//            return
-//        }
 
         api?.handleIntent(intent, this)
     }
@@ -145,7 +131,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
                     binding.result = UIWx(
                             heading = getString(R.string.wxpay_failed),
-                            body = "Error code: ${resp.errCode}",
+                            body = "Error code: ${resp.errStr}",
                             enableButton = true
                     )
 
