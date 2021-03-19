@@ -1,6 +1,7 @@
-package com.ft.ftchinese.viewmodel
+package com.ft.ftchinese.ui.validator
 
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.reader.Address
 
 object Validator {
     fun ensureEmail(email: String): Int? {
@@ -38,6 +39,22 @@ object Validator {
         }
 
         if (name.length > 256) {
+            return R.string.error_too_long
+        }
+
+        return null
+    }
+
+    fun ensureLength(s: String?, min: Int, max: Int): Int? {
+        if (s.isNullOrBlank()) {
+            return R.string.error_field_required
+        }
+
+        if (s.length < min ) {
+            return R.string.error_too_short
+        }
+
+        if (s.length > max) {
             return R.string.error_too_long
         }
 
