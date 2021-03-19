@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".ui.account.UpdateAddressFragment">
+    tools:context=".ui.address.UpdateAddressFragment">
 
     <data>
-        <variable
-            name="inProgress"
-            type="Boolean" />
-
         <variable
             name="address"
             type="com.ft.ftchinese.model.reader.Address" />
 
+        <variable
+            name="inputEnabled"
+            type="Boolean" />
+
+        <variable
+            name="btnEnabled"
+            type="Boolean" />
     </data>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -29,8 +33,9 @@
                 android:layout_height="wrap_content"
                 android:hint="省/直辖市"
                 android:inputType="text"
+                android:text="@{address.province}"
                 android:maxLines="1"
-                android:enabled="@{!inProgress}"/>
+                android:enabled="@{inputEnabled}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -44,8 +49,9 @@
                 android:layout_height="wrap_content"
                 android:hint="市"
                 android:inputType="text"
+                android:text="@{address.city}"
                 android:maxLines="1"
-                android:enabled="@{!inProgress}"/>
+                android:enabled="@{inputEnabled}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -57,10 +63,11 @@
                 android:id="@+id/input_district"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="区"
+                android:hint="区/县"
                 android:inputType="text"
+                android:text="@{address.district}"
                 android:maxLines="1"
-                android:enabled="@{!inProgress}"/>
+                android:enabled="@{inputEnabled}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -74,8 +81,9 @@
                 android:layout_height="wrap_content"
                 android:hint="街道、门牌号"
                 android:inputType="text"
+                android:text="@{address.street}"
                 android:maxLines="1"
-                android:enabled="@{!inProgress}"/>
+                android:enabled="@{inputEnabled}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -89,8 +97,9 @@
                 android:layout_height="wrap_content"
                 android:hint="邮编"
                 android:inputType="text"
+                android:text="@{address.postcode}"
                 android:maxLines="1"
-                android:enabled="@{!inProgress}"/>
+                android:enabled="@{inputEnabled}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -100,7 +109,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_16"
             android:text="@string/btn_save"
-            android:enabled="@{!inProgress}"/>
+            android:enabled="@{btnEnabled}"/>
     </LinearLayout>
 
 </layout>
