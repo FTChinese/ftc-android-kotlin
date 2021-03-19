@@ -12,6 +12,8 @@ import com.ft.ftchinese.databinding.ActivityFragmentDoubleBinding
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.address.AddressViewModel
+import com.ft.ftchinese.ui.address.UpdateAddressFragment
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.UpdateViewModel
@@ -24,6 +26,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var updateViewModel: UpdateViewModel
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var sessionManager: SessionManager
+    private lateinit var addressViewModel: AddressViewModel
 
     private lateinit var binding: ActivityFragmentDoubleBinding
 
@@ -42,6 +45,9 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
 
         updateViewModel = ViewModelProvider(this)
                 .get(UpdateViewModel::class.java)
+
+        addressViewModel = ViewModelProvider(this)
+            .get(AddressViewModel::class.java)
 
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
@@ -80,9 +86,13 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun setUp() {
-        updateViewModel.inProgress.observe(this, Observer<Boolean> {
+        updateViewModel.inProgress.observe(this, {
             binding.inProgress = it
         })
+
+        addressViewModel.inProgress.observe(this) {
+            binding.inProgress = it
+        }
 
         updateViewModel.updateResult.observe(this, Observer {
             onUpdated(it)

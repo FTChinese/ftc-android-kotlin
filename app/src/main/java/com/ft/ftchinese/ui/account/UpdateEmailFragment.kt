@@ -46,7 +46,7 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
         updateViewModel = activity?.run {
             ViewModelProvider(this)
                     .get(UpdateViewModel::class.java)
-        } ?: throw Exception("Invalid Exception")
+        } ?: throw Exception("Invalid Activity")
 
         // Validate form data.
         // Note this only works if user actually entered something.
