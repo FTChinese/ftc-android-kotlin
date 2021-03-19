@@ -171,6 +171,8 @@
 
     <string name="error_name_unchanged">不能与当前用户名相同</string>
     <string name="error_too_long">过长</string>
+    <string name="error_too_short">过短</string>
+    <string name="error_form_incomplete">表单未填写完整</string>
     <string name="error_invalid_password">密码无效</string>
 
     <!-- Generic buttons -->
@@ -443,11 +445,11 @@
         <item>男</item>
         <item>女</item>
     </string-array>
+
     <string-array name="profile_gender_values">
         <item>M</item>
         <item>F</item>
     </string-array>
-
     <string-array name="settings_font_entries">
         <item>最小</item>
         <item>较小</item>
@@ -466,11 +468,10 @@
         <item>简体</item>
         <item>繁体</item>
     </string-array>
+
     <string-array name="settings_language_values">
         <item>sc</item>
         <item>tc</item>
     </string-array>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

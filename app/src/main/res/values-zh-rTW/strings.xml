@@ -473,5 +473,7 @@
     <string name="reactivate_auto_renew">打開自動續訂</string>
     <string name="label_subs_source">訂閱方式</string>
     <string name="auto_renew_off">已關閉</string>
+    <string name="error_too_short">過短</string>
+    <string name="error_form_incomplete">表單未填寫完整</string>
 
 </resources>
