@@ -135,12 +135,14 @@ object AccountRepo {
         }
     }
 
-    fun updateAddress(ftcId: String, address: Address) {
+    fun updateAddress(ftcId: String, address: Address): Boolean {
         val (resp, _) = Fetch()
             .patch(NextApi.ADDRESS)
             .setUserId(ftcId)
             .noCache()
             .sendJson(json.toJsonString(address))
             .endJsonText()
+
+        return resp.code == 204
     }
 }
