@@ -2,25 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.ft.ftchinese">
-    <!--  See  https://developer.android.com/training/basics/intents/package-visibility -->
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.SENDTO"/>
-            <data android:mimeType="text/plain"/>
-        </intent>
-    </queries>
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- For ExoPlayer download service -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
+    <!-- See  https://developer.android.com/training/basics/intents/package-visibility -->
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -85,12 +67,14 @@
             android:label="@string/title_forgot_password"
             android:parentActivityName=".ui.login.LoginActivity"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".ui.login.VerifyResetCodeActivity"
+        <activity
+            android:name=".ui.login.VerifyResetCodeActivity"
             android:label="@string/title_forgot_password"
-            android:parentActivityName=".ui.login.ForgotPasswordActivity"/>
-        <activity android:name=".ui.login.ResetPasswordActivity"
+            android:parentActivityName=".ui.login.ForgotPasswordActivity" />
+        <activity
+            android:name=".ui.login.ResetPasswordActivity"
             android:label="@string/title_reset_password"
-            android:parentActivityName=".ui.login.VerifyResetCodeActivity"/>
+            android:parentActivityName=".ui.login.VerifyResetCodeActivity" />
         <activity
             android:name=".ui.account.AccountActivity"
             android:label="@string/title_account"
@@ -131,8 +115,8 @@
         <activity
             android:name=".ui.checkout.CheckOutActivity"
             android:label="@string/check_out"
-            android:parentActivityName=".ui.paywall.PaywallActivity"
-            android:launchMode="singleTop"/>
+            android:launchMode="singleTop"
+            android:parentActivityName=".ui.paywall.PaywallActivity" />
         <activity
             android:name=".ui.checkout.StripeSubActivity"
             android:label="@string/pay_method_stripe"
@@ -177,9 +161,10 @@
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/action_settings"
             android:parentActivityName=".ui.launch.MainActivity" />
-        <activity android:name=".ui.about.AboutActivity"
+        <activity
+            android:name=".ui.about.AboutActivity"
             android:label="@string/title_about_us"
-            android:parentActivityName=".ui.launch.MainActivity"/>
+            android:parentActivityName=".ui.launch.MainActivity" />
         <activity
             android:name=".ui.settings.FCMActivity"
             android:label="@string/fcm_setting_title"
@@ -229,5 +214,25 @@
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+
+            <data android:mimeType="text/plain" />
+        </intent>
+    </queries>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- For ExoPlayer download service -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
 </manifest>
