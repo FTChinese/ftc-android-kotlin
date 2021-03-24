@@ -4,10 +4,9 @@ import android.net.Uri
 import android.os.Parcelable
 import com.beust.klaxon.Json
 import com.ft.ftchinese.database.StarredArticle
+import com.ft.ftchinese.model.fetch.KArticleType
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.HOST_FTC
-import com.ft.ftchinese.model.fetch.KArticleType
-import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -72,50 +71,53 @@ data class ChannelList(
  */
 @Parcelize
 data class Teaser(
-        val id: String,
-        // For column type, you should start a ChannelActivity instead of  StoryActivity.
-        @KArticleType
-        val type: ArticleType, // story | premium | video | photonews | interactive | column
-        val subType: String? = null, // speedreading | radio
+    val id: String,
+    // For column type, you should start a ChannelActivity instead of  StoryActivity.
+    @KArticleType
+    val type: ArticleType, // story | premium | video | photonews | interactive | column
+    val subType: String? = null, // speedreading | radio
 
-        @Json(name = "headline")
-        var title: String,
+    @Json(name = "headline")
+    var title: String,
 
-        @Json(name = "eaudio")
-        val audioUrl: String? = null,
+    @Json(name = "eaudio")
+    val audioUrl: String? = null,
 
-        @Json(name = "shortlead")
-        val radioUrl: String? = null, // this is a webUrl of mp3 for subType radio.
+    @Json(name = "shortlead")
+    val radioUrl: String? = null, // this is a webUrl of mp3 for subType radio.
 
-        @Json(name = "timeStamp")
-        val publishedAt: String? = null, // "1536249600"
+    @Json(name = "timeStamp")
+    val publishedAt: String? = null, // "1536249600"
 
-        // "线下活动,企业公告,会员专享"
-        val tag: String = "",
+    // "线下活动,企业公告,会员专享"
+    val tag: String = "",
 
-        // What's the purpose of this one?
-        @Json(ignored = true)
-        var webUrl: String = "",
+    // What's the purpose of this one?
+    @Json(ignored = true)
+    var webUrl: String = "",
 
-        @Json(ignored = true)
-        var isWebpage: Boolean = false
+    @Json(ignored = true)
+    var isWebpage: Boolean = false,
+
+// These properties are not parsed from JSON.
+    // They are copy from ChannelMeta
+    @Json(ignored = true)
+    var channelTitle: String = "",
+    @Json(ignored = true)
+    var theme: String = "default",
+    @Json(ignored = true)
+    var adId: String = "",
+    @Json(ignored = true)
+    var adZone: String = "",
+    @Json(ignored = true)
+    var hideAd: Boolean = false,
+    @Json(ignored = true)
+    var langVariant: Language? = null,
+    @Json(ignored = true)
+    var channelPerm: Permission? = null,
 ) : Parcelable, AnkoLogger {
 
-    // These two properties are not parsed from JSON.
-    // They are copy from ChannelMeta
-    @IgnoredOnParcel
-    var channelTitle: String = ""
-    @IgnoredOnParcel
-    var theme: String = "default"
-    @IgnoredOnParcel
-    var adId: String = ""
-    @IgnoredOnParcel
-    var adZone: String = ""
-    @IgnoredOnParcel
-    var hideAd: Boolean = false
 
-    @IgnoredOnParcel
-    var langVariant: Language? = null
 
     fun hasRestfulAPI(): Boolean {
         return type == ArticleType.Story || type == ArticleType.Premium
@@ -164,14 +166,25 @@ data class Teaser(
         if (meta == null) {
             return this
         }
+
         channelTitle = meta.title
         theme = meta.theme
         adId = meta.adid
         adZone = meta.adZone
-        
+
         return this
     }
-    
+
+    // Pass permission from hosting channel.
+    fun withParentPerm(p: Permission?): Teaser {
+        return if (p == null) {
+            this
+        } else {
+            channelPerm = p
+            this
+        }
+    }
+
     fun toStarredArticle(): StarredArticle {
         return StarredArticle(
                 id = id,
@@ -219,6 +232,10 @@ data class Teaser(
 
 
     fun permission(): Permission {
+        val p = channelPerm
+        if (p != null) {
+            return p
+        }
 
         if (tag.contains("会员专享")) {
             return Permission.STANDARD
