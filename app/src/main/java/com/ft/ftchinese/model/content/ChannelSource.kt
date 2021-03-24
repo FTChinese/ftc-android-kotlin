@@ -3,7 +3,7 @@ package com.ft.ftchinese.model.content
 import android.net.Uri
 import android.os.Parcelable
 import com.ft.ftchinese.model.reader.Permission
-import kotlinx.android.parcel.IgnoredOnParcel
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.jetbrains.anko.AnkoLogger
 
@@ -27,6 +27,22 @@ data class ChannelSource (
     val permission: Permission? = null // A predefined permission that overrides individual Teaser's permission.
 
 ) : Parcelable, AnkoLogger {
+
+    fun withParentPerm(p: Permission?): ChannelSource {
+        if (p == null) {
+            return this
+        }
+
+        return ChannelSource(
+            title = title,
+            name = name,
+            contentPath = contentPath,
+            path = path,
+            query = query,
+            htmlType = htmlType,
+            permission = p
+        )
+    }
 
     @IgnoredOnParcel
     var shouldReload = false // Used on pagination. If user clicked the same pagination number, just refersh the content.
