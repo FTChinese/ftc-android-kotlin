@@ -38,12 +38,6 @@ class ArticleViewModel(
         MutableLiveData<Result<Story>>()
     }
 
-    // Tell host activity that content is loaded.
-    // Host could then log view event.
-    fun webLoaded(data: StarredArticle) {
-        articleLoaded.value = data
-    }
-
     // Host activity tells fragment to switch content.
     fun switchLang(lang: Language) {
         currentLang.value = lang
