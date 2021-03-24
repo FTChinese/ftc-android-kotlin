@@ -88,7 +88,7 @@ class StarredArticleFragment : ScopedFragment(),
                         }
                     }
                     else -> {
-                        ArticleActivity.start(holder.itemView.context, article.toChannelItem())
+                        ArticleActivity.start(holder.itemView.context, article.toTeaser())
                     }
                 }
             }
