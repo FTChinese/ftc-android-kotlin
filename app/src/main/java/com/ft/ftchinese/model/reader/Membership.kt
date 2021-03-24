@@ -297,8 +297,6 @@ data class Membership(
         return expireDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
     }
 
-
-
     /**
      * getPermission calculates a membership's (including
      * zero value) permission to access content.
@@ -309,7 +307,7 @@ data class Membership(
      * Returns an int representing the permission, and
      * membership status used to tell user what went wrong.
      */
-    fun getPermission(): Pair<Int, MemberStatus?> {
+    fun accessRights(): Pair<Int, MemberStatus> {
 
         if (vip) {
             return Pair(
@@ -335,23 +333,16 @@ data class Membership(
             )
         }
 
-        // Valid standard.
-        if (tier == Tier.STANDARD) {
-            return Pair(
-                    Permission.FREE.id or Permission.STANDARD.id,
-                    MemberStatus.ActiveStandard
+        return when (tier) {
+            Tier.STANDARD -> Pair(
+                Permission.FREE.id or Permission.STANDARD.id,
+                MemberStatus.ActiveStandard
+            )
+            Tier.PREMIUM -> Pair(
+                Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id,
+                MemberStatus.ActivePremium
             )
         }
-
-        // Valid premium.
-        if (tier == Tier.PREMIUM) {
-            return Pair(
-                    Permission.FREE.id or Permission.STANDARD.id or Permission.PREMIUM.id,
-                    MemberStatus.ActivePremium
-            )
-        }
-
-        return Pair(Permission.FREE.id, null)
     }
 
     fun carryOverInvoice(): Invoice? {
