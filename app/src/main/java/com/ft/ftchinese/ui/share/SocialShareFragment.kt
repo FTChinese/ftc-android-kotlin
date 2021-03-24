@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-
 /**
  * Popup for share menu.
  */
