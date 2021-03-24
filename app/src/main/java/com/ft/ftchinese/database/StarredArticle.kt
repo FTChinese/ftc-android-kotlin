@@ -67,7 +67,7 @@ data class StarredArticle(
         var isWebpage: Boolean = false
 ) {
 
-    fun toChannelItem(): Teaser {
+    fun toTeaser(): Teaser {
         return Teaser(
                 id = id,
                 type = ArticleType.fromString(type),
