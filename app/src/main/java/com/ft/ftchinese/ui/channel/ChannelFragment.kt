@@ -419,8 +419,6 @@ class ChannelFragment : ScopedFragment(),
             return
         }
 
-        info("Is channel require membership: $channelSource")
-
         ArticleActivity.start(activity, teaser)
     }
 
