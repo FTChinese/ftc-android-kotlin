@@ -1,4 +1,4 @@
-package com.ft.ftchinese.viewmodel
+package com.ft.ftchinese.ui.channel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -9,6 +9,8 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,7 +26,7 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
     }
 
     fun load(channelSource: ChannelSource, bustCache: Boolean) {
-        info("Loadding channel content from $channelSource")
+        info("Loading channel content from $channelSource")
 
        val cacheName = channelSource.fileName
 

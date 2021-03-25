@@ -20,22 +20,17 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentChannelBinding
 import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.denyPermission
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.SponsorManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.ui.paywall.handlePermissionDenial
-import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.viewmodel.ChannelViewModel
-import com.ft.ftchinese.viewmodel.ChannelViewModelFactory
 import com.ft.ftchinese.viewmodel.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -55,8 +50,8 @@ const val JS_INTERFACE_NAME = "Android"
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ChannelFragment : ScopedFragment(),
-        SwipeRefreshLayout.OnRefreshListener,
-        AnkoLogger {
+    SwipeRefreshLayout.OnRefreshListener,
+    AnkoLogger {
 
     /**
      * Meta data about current page: the tab's title, where to load data, etc.
@@ -134,26 +129,11 @@ class ChannelFragment : ScopedFragment(),
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         setupViewModel()
-
-        binding.webView.apply {
-
-            // Interact with JS.
-            // See Page/Layouts/Page/SuperDataViewController.swift#viewDidLoad() how iOS inject js to web view.
-            addJavascriptInterface(
-                this@ChannelFragment,
-                JS_INTERFACE_NAME
-            )
-
-            // Set WebViewClient to handle various links
-            webViewClient = WVClient(requireContext(), wvViewModel)
-
-            webChromeClient = ChromeClient()
-        }
-
+        setupUI()
         initLoading()
     }
 
@@ -161,14 +141,14 @@ class ChannelFragment : ScopedFragment(),
         channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache, sessionManager.loadAccount()))
             .get(ChannelViewModel::class.java)
 
-        wvViewModel = ViewModelProvider(this).get(WVViewModel::class.java)
+        wvViewModel = ViewModelProvider(this)
+            .get(WVViewModel::class.java)
 
         // Network status.
         connectionLiveData.observe(viewLifecycleOwner, {
             channelViewModel.isNetworkAvailable.value = it
         })
         channelViewModel.isNetworkAvailable.value = context?.isConnected
-
 
         // Whe the HTML is fetched from server.
         channelViewModel.contentResult.observe(viewLifecycleOwner, {
@@ -180,7 +160,7 @@ class ChannelFragment : ScopedFragment(),
          * and the link point to another channel page, open the [ChannelActivity]
          */
         wvViewModel.urlChannelSelected.observe(viewLifecycleOwner, {
-            onUrlChannelClicked(it)
+            ChannelActivity.start(context, it.withParentPerm(channelSource?.permission))
         })
 
         // If web view signaled that loading a url is finished.
@@ -195,6 +175,23 @@ class ChannelFragment : ScopedFragment(),
         wvViewModel.pagingBtnClicked.observe(viewLifecycleOwner, {
             onPagination(it)
         })
+    }
+
+    private fun setupUI() {
+        binding.webView.apply {
+
+            // Interact with JS.
+            // See Page/Layouts/Page/SuperDataViewController.swift#viewDidLoad() how iOS inject js to web view.
+            addJavascriptInterface(
+                this@ChannelFragment,
+                JS_INTERFACE_NAME
+            )
+
+            // Set WebViewClient to handle various links
+            webViewClient = WVClient(requireContext(), wvViewModel)
+
+            webChromeClient = ChromeClient()
+        }
     }
 
     // Handle loading text into web view.
@@ -236,9 +233,7 @@ class ChannelFragment : ScopedFragment(),
     }
 
     override fun onRefresh() {
-
         toast(R.string.refreshing_data)
-
         initLoading()
     }
 
@@ -295,12 +290,6 @@ class ChannelFragment : ScopedFragment(),
 
         binding.inProgress = false
         binding.swipeRefresh.isRefreshing = false
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-
-        info("onSaveInstanceState finished")
     }
 
     override fun onPause() {
@@ -408,10 +397,10 @@ class ChannelFragment : ScopedFragment(),
         }
 
         val teaser = articleList
-                ?.getOrNull(index)
-                ?: return
-        
-        teaser.withMeta(channelMeta)
+            ?.getOrNull(index)
+            ?.withMeta(channelMeta)
+            ?.withParentPerm(channelSource?.permission)
+            ?: return
 
         info("Select item: $teaser")
 
@@ -432,39 +421,7 @@ class ChannelFragment : ScopedFragment(),
 
         info("Is channel require membership: $channelSource")
 
-        PaywallTracker.fromArticle(teaser)
-
-        // Check whether this article requires permission.
-        val contentPerm = channelSource?.permission ?: teaser.permission()
-        info("Content permission: $contentPerm")
-
-        val denialReason = denyPermission(sessionManager.loadAccount(), contentPerm)
-        info("Denial reason: $denialReason")
-
-        if (denialReason == null) {
-            info("Open article of teaser: $teaser")
-            ArticleActivity.start(activity, teaser)
-            statsTracker.selectListItem(teaser)
-        } else {
-            activity?.handlePermissionDenial(denialReason, contentPerm)
-        }
-    }
-
-    private fun onUrlChannelClicked(clicked: ChannelSource) {
-        val current = channelSource
-
-        // Some channel page have top-level permissions.
-        if (current?.permission == null) {
-            ChannelActivity.start(context, clicked)
-            return
-        }
-
-        val denialReason = denyPermission(sessionManager.loadAccount(), current.permission)
-        if (denialReason == null) {
-            ChannelActivity.start(context, clicked)
-        } else {
-            activity?.handlePermissionDenial(denialReason, current.permission)
-        }
+        ArticleActivity.start(activity, teaser)
     }
 
     override fun onDestroy() {

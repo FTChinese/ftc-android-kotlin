@@ -18,14 +18,19 @@ import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.databinding.ActivityArticleBinding
 import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.Language
+import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.model.reader.denyPermission
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.WVViewModel
+import com.ft.ftchinese.ui.channel.PermissionDeniedFragment
 import com.ft.ftchinese.ui.share.SocialApp
 import com.ft.ftchinese.ui.share.SocialAppId
 import com.ft.ftchinese.ui.share.SocialShareFragment
@@ -68,6 +73,7 @@ class ArticleActivity : ScopedAppActivity(),
     private lateinit var readViewModel: ReadArticleViewModel
     private lateinit var starViewModel: StarArticleViewModel
     private lateinit var shareViewModel: SocialShareViewModel
+    private lateinit var wvViewModel: WVViewModel
 
     private lateinit var binding: ActivityArticleBinding
 
@@ -100,34 +106,29 @@ class ArticleActivity : ScopedAppActivity(),
             invalidateOptionsMenu()
         }
 
-        setup()
-
-        supportFragmentManager.commit {
-            if (teaser.hasRestfulAPI()) {
-                info("Render article using JSON")
-                replace(R.id.fragment_article, StoryFragment.newInstance(teaser))
-            } else {
-                info("Render article using web")
-                replace(R.id.fragment_article, WebContentFragment.newInstance(teaser))
-            }
-        }
-    }
-
-    private fun setup() {
         cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
         statsTracker = StatsTracker.getInstance(this)
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
         followingManager = FollowingManager.getInstance(this)
 
+        setupViewModel()
+        setupUI()
+
+        statsTracker.selectListItem(teaser)
+    }
+
+    private fun setupViewModel() {
         articleViewModel = ViewModelProvider(
             this,
             ArticleViewModelFactory(
                 cache,
                 sessionManager.loadAccount()
             )
-        )
-            .get(ArticleViewModel::class.java)
+        ).get(ArticleViewModel::class.java)
+
+        wvViewModel = ViewModelProvider(this)
+            .get(WVViewModel::class.java)
 
         readViewModel = ViewModelProvider(this)
             .get(ReadArticleViewModel::class.java)
@@ -153,7 +154,8 @@ class ArticleActivity : ScopedAppActivity(),
             }
         })
 
-        // StoryFragment send this message after content loaded.
+        // ArticleViewModel send this message after loading
+        // a story from API.
         articleViewModel.articleLoaded.observe(this, {
             article = it
 
@@ -166,6 +168,19 @@ class ArticleActivity : ScopedAppActivity(),
             statsTracker.storyViewed(it)
         })
 
+        wvViewModel.openGraphEvaluated.observe(this) {
+            val og = try {
+                json.parse<OpenGraphMeta>(it)
+            } catch (e: Exception) {
+                null
+            }
+
+            val starred = starredArticleFromOG(og)
+            articleViewModel.articleLoaded.value = starred
+
+            checkAccess(starred.permission())
+        }
+
         // Switch bookmark icon upon starViewModel.isStarring() finished.
         starViewModel.starred.observe(this, {
             // Updating bookmark icon.
@@ -177,7 +192,43 @@ class ArticleActivity : ScopedAppActivity(),
         shareViewModel.appSelected.observe(this) {
             onClickShareIcon(it)
         }
+    }
 
+    private fun starredArticleFromOG(og: OpenGraphMeta?): StarredArticle {
+
+        return StarredArticle(
+            id = if (teaser?.id.isNullOrBlank()) {
+                og?.extractId()
+            } else {
+                teaser?.id
+            } ?: "",
+            type = if (teaser?.type == null) {
+                og?.extractType()
+            } else {
+                teaser?.type?.toString()
+            } ?: "",
+            subType = teaser?.subType ?: "",
+            title = if (teaser?.title.isNullOrBlank()) {
+                og?.title
+            } else {
+                teaser?.title
+            } ?: "",
+            standfirst = og?.description ?: "",
+            keywords = teaser?.tag ?: og?.keywords ?: "",
+            imageUrl = og?.image ?: "",
+            audioUrl = teaser?.audioUrl ?: "",
+            radioUrl = teaser?.radioUrl ?: "",
+            webUrl = teaser?.getCanonicalUrl() ?: og?.url ?: "",
+            tier =  when {
+                og?.keywords?.contains("会员专享") == true -> Tier.STANDARD.toString()
+                og?.keywords?.contains("高端专享") == true -> Tier.PREMIUM.toString()
+                else -> ""
+            },
+            isWebpage = true
+        )
+    }
+
+    private fun setupUI() {
         // Handle favorite action.
         binding.fabBookmark.setOnClickListener {
             isStarring = !isStarring
@@ -186,21 +237,52 @@ class ArticleActivity : ScopedAppActivity(),
                 starViewModel.star(article)
 
                 Snackbar.make(
-                        it,
-                        R.string.alert_starred,
-                        Snackbar.LENGTH_SHORT
+                    it,
+                    R.string.alert_starred,
+                    Snackbar.LENGTH_SHORT
                 ).show()
             } else {
                 starViewModel.unstar(article)
 
                 Snackbar.make(
-                        it,
-                        R.string.alert_unstarred,
-                        Snackbar.LENGTH_SHORT
+                    it,
+                    R.string.alert_unstarred,
+                    Snackbar.LENGTH_SHORT
                 ).show()
             }
 
             binding.isStarring = isStarring
+        }
+
+        val t = teaser ?: return
+
+        supportFragmentManager.commit {
+            if (t.hasRestfulAPI()) {
+                info("Render article using JSON")
+                replace(R.id.fragment_article, StoryFragment
+                    .newInstance(t))
+            } else {
+                info("Render article using web")
+                replace(R.id.fragment_article, WebContentFragment
+                    .newInstance(t))
+            }
+        }
+
+        // Check access rights.
+        checkAccess(t.permission())
+    }
+
+    private fun checkAccess(contentPerm: Permission) {
+        val access = Access.of(
+            contentPerm = contentPerm,
+            who = sessionManager.loadAccount(),
+        )
+
+        if (!access.granted) {
+            PaywallTracker.fromArticle(teaser)
+
+            PermissionDeniedFragment(access)
+                .show(supportFragmentManager, "PermissionDeniedFragment")
         }
     }
 
@@ -211,39 +293,33 @@ class ArticleActivity : ScopedAppActivity(),
         }
 
         binding.langEnBtn.setOnClickListener {
-            val account = sessionManager.loadAccount()
-
-            val item = teaser ?: return@setOnClickListener
-
-            if (denyPermission(account, Permission.STANDARD) != null) {
-                disableLangSwitch()
-
-                item.langVariant = Language.ENGLISH
-
-                // Tracking
-                PaywallTracker.fromArticle(item)
-
-                return@setOnClickListener
-            }
-
-            articleViewModel.switchLang(Language.ENGLISH)
+            handleLangPermission(Language.ENGLISH)
         }
 
         binding.langBiBtn.setOnClickListener {
-            val account = sessionManager.loadAccount()
+            handleLangPermission(Language.BILINGUAL)
+        }
+    }
 
-            val item = teaser ?: return@setOnClickListener
+    private fun handleLangPermission(lang: Language) {
+        val account = sessionManager.loadAccount()
 
-            if (denyPermission(account, Permission.STANDARD) != null) {
-                disableLangSwitch()
+        val t = teaser ?: return
 
-                item.langVariant = Language.BILINGUAL
-                PaywallTracker.fromArticle(item)
+        val access = Access.ofEnglishArticle(account)
 
-                return@setOnClickListener
-            }
+        if (access.granted) {
+            articleViewModel.switchLang(lang)
+        } else {
+            // Tracking
+            PaywallTracker.fromArticle(t)
 
-            articleViewModel.switchLang(Language.BILINGUAL)
+            disableLangSwitch()
+            t.langVariant = lang
+            PermissionDeniedFragment(
+                denied = access,
+                cancellable = true,
+            ).show(supportFragmentManager, "PermissionDeniedFragment")
         }
     }
 

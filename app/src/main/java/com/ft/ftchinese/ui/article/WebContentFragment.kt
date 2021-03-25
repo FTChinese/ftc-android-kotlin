@@ -11,29 +11,20 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
-import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.content.FollowingManager
-import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.reader.denyPermission
-import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.ChromeClient
-import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.WVViewModel
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
-import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.viewmodel.ArticleViewModel
 import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
-import com.ft.ftchinese.viewmodel.ReadArticleViewModel
-import com.ft.ftchinese.viewmodel.StarArticleViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -45,8 +36,6 @@ class WebContentFragment : ScopedFragment(),
         AnkoLogger {
 
     private lateinit var articleViewModel: ArticleViewModel
-    private lateinit var starViewModel: StarArticleViewModel
-    private lateinit var readViewModel: ReadArticleViewModel
     private lateinit var wvViewModel: WVViewModel
 
     private lateinit var sessionManager: SessionManager
@@ -56,67 +45,6 @@ class WebContentFragment : ScopedFragment(),
     private var webView: WebView? = null
 
     private var teaser: Teaser? = null
-
-    private fun onOpenGraphEvaluated(result: String) {
-
-        val og = try {
-            json.parse<OpenGraphMeta>(result)
-        } catch (e: Exception) {
-            null
-        }
-
-        val article = mergeOpenGraph(og)
-
-        if (BuildConfig.DEBUG) {
-            info("Open graph evaluation result: $og")
-            info("Loaded article: $article")
-        }
-
-
-        val denialReason = denyPermission(sessionManager.loadAccount(), article.permission())
-        if (denialReason != null) {
-            PaywallTracker.fromArticle(article.toChannelItem())
-
-            activity?.finish()
-            return
-        }
-
-        articleViewModel.webLoaded(article)
-    }
-
-    private fun mergeOpenGraph(og: OpenGraphMeta?): StarredArticle {
-
-        return StarredArticle(
-                id = if (teaser?.id.isNullOrBlank()) {
-                    og?.extractId()
-                } else {
-                    teaser?.id
-                } ?: "",
-                type = if (teaser?.type == null) {
-                    og?.extractType()
-                } else {
-                    teaser?.type?.toString()
-                } ?: "",
-                subType = teaser?.subType ?: "",
-                title = if (teaser?.title.isNullOrBlank()) {
-                    og?.title
-                } else {
-                    teaser?.title
-                } ?: "",
-                standfirst = og?.description ?: "",
-                keywords = teaser?.tag ?: og?.keywords ?: "",
-                imageUrl = og?.image ?: "",
-                audioUrl = teaser?.audioUrl ?: "",
-                radioUrl = teaser?.radioUrl ?: "",
-                webUrl = teaser?.getCanonicalUrl() ?: og?.url ?: "",
-                tier =  when {
-                    og?.keywords?.contains("会员专享") == true -> Tier.STANDARD.toString()
-                    og?.keywords?.contains("高端专享") == true -> Tier.PREMIUM.toString()
-                    else -> ""
-                },
-                isWebpage = true
-        )
-    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -129,9 +57,24 @@ class WebContentFragment : ScopedFragment(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        teaser = arguments?.getParcelable<Teaser>(ARG_WEBPAGE_ARTICLE)
+        teaser = arguments?.getParcelable(ARG_WEBPAGE_ARTICLE)
 
         info("Web content source: $teaser")
+    }
+
+    private fun setupViewModel() {
+        articleViewModel = activity?.run {
+            ViewModelProvider(
+                this,
+                ArticleViewModelFactory(cache, sessionManager.loadAccount()))
+                .get(ArticleViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+
+        // WVClient share the save view model as this fragment,
+        // as well as hosting activity.
+        wvViewModel = activity?.run {
+            ViewModelProvider(this).get(WVViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
     }
 
     override fun onCreateView(
@@ -143,6 +86,13 @@ class WebContentFragment : ScopedFragment(),
     @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setupViewModel()
+        initUI()
+        load()
+    }
+
+    private fun initUI() {
         webView = activity?.findViewById(R.id.web_view)
 
         webView?.settings?.apply {
@@ -151,34 +101,6 @@ class WebContentFragment : ScopedFragment(),
             domStorageEnabled = true
             databaseEnabled = true
         }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        articleViewModel = activity?.run {
-            ViewModelProvider(
-                    this,
-                    ArticleViewModelFactory(cache, sessionManager.loadAccount()))
-                    .get(ArticleViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-
-        wvViewModel = activity?.run {
-            ViewModelProvider(this).get(WVViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-
-        starViewModel = activity?.run {
-            ViewModelProvider(this).get(StarArticleViewModel::class.java)
-        } ?: throw java.lang.Exception("Invalid Activity")
-
-        readViewModel = activity?.run {
-            ViewModelProvider(this).get(ReadArticleViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-
-
-        wvViewModel.openGraphEvaluated.observe(viewLifecycleOwner, {
-            onOpenGraphEvaluated(it)
-        })
 
 //        wvViewModel.pageFinished.observe(viewLifecycleOwner, {
 //            articleViewModel.inProgress.value = !it
@@ -202,8 +124,6 @@ class WebContentFragment : ScopedFragment(),
                 false
             }
         }
-
-        load()
     }
 
     private fun load() {
@@ -218,13 +138,12 @@ class WebContentFragment : ScopedFragment(),
         val url = Config.buildArticleSourceUrl(sessionManager.loadAccount(), t)
         info("Load content from: $url")
 
-
         webView?.loadUrl(url.toString())
 
         // Get the minimal information of an article.
         val article = teaser?.toStarredArticle() ?: return
 
-        articleViewModel.webLoaded(article)
+        articleViewModel.articleLoaded.value = article
         // Tell parent to hide progress bar
         articleViewModel.inProgress.value = false
     }

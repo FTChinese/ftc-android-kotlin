@@ -44,8 +44,6 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 import java.util.*
 
-private const val ARG_CHANNEL_ITEM = "arg_channel_item"
-
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class StoryFragment : ScopedFragment(),
         SwipeRefreshLayout.OnRefreshListener,
@@ -92,7 +90,7 @@ class StoryFragment : ScopedFragment(),
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_article, container, false)
         return binding.root
     }
@@ -102,44 +100,17 @@ class StoryFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.swipeRefresh.setOnRefreshListener(this)
-
-        binding.webView.settings.apply {
-            javaScriptEnabled = true
-            loadsImagesAutomatically = true
-            domStorageEnabled = true
-            databaseEnabled = true
-        }
-
-        val wvClient = WVClient(requireContext())
-
-        binding.webView.apply {
-            addJavascriptInterface(
-                    this@StoryFragment,
-                    JS_INTERFACE_NAME
-            )
-
-            webViewClient = wvClient
-            webChromeClient = WebChromeClient()
-
-            setOnKeyListener { _, keyCode, _ ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
-                    binding.webView.goBack()
-                    return@setOnKeyListener true
-                }
-                false
-            }
-        }
+        setupViewModel()
+        initUI()
+        initLoading()
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
+    private fun setupViewModel() {
         articleModel = activity?.run {
             ViewModelProvider(
-                    this,
-                    ArticleViewModelFactory(cache, sessionManager.loadAccount()))
-                    .get(ArticleViewModel::class.java)
+                this,
+                ArticleViewModelFactory(cache, sessionManager.loadAccount()))
+                .get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
         connectionLiveData.observe(viewLifecycleOwner, {
@@ -161,31 +132,37 @@ class StoryFragment : ScopedFragment(),
         articleModel.storyResult.observe(viewLifecycleOwner, {
             onStoryResult(it)
         })
-
-        initLoading()
     }
 
-    override fun onRefresh() {
+    private fun initUI() {
+        binding.swipeRefresh.setOnRefreshListener(this)
 
-        if (context?.isConnected != true) {
-            binding.swipeRefresh.isRefreshing = false
-            toast(R.string.prompt_no_network)
-            return
+        binding.webView.settings.apply {
+            javaScriptEnabled = true
+            loadsImagesAutomatically = true
+            domStorageEnabled = true
+            databaseEnabled = true
         }
 
-        val item = storyBrief
-        if (item == null) {
-            binding.swipeRefresh.isRefreshing = false
+        val wvClient = WVClient(requireContext())
 
-            return
+        binding.webView.apply {
+            addJavascriptInterface(
+                this@StoryFragment,
+                JS_INTERFACE_NAME
+            )
+
+            webViewClient = wvClient
+            webChromeClient = WebChromeClient()
+
+            setOnKeyListener { _, keyCode, _ ->
+                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
+                    binding.webView.goBack()
+                    return@setOnKeyListener true
+                }
+                false
+            }
         }
-
-        toast(R.string.refreshing_data)
-
-        articleModel.loadStory(
-            teaser = item,
-            bustCache = true
-        )
     }
 
     private fun initLoading() {
@@ -256,6 +233,29 @@ class StoryFragment : ScopedFragment(),
         }
     }
 
+    override fun onRefresh() {
+
+        if (context?.isConnected != true) {
+            binding.swipeRefresh.isRefreshing = false
+            toast(R.string.prompt_no_network)
+            return
+        }
+
+        val item = storyBrief
+        if (item == null) {
+            binding.swipeRefresh.isRefreshing = false
+
+            return
+        }
+
+        toast(R.string.refreshing_data)
+
+        articleModel.loadStory(
+            teaser = item,
+            bustCache = true
+        )
+    }
+
     override fun onDestroy() {
         super.onDestroy()
 
@@ -323,6 +323,9 @@ class StoryFragment : ScopedFragment(),
     }
 
     companion object {
+        private const val ARG_CHANNEL_ITEM = "arg_channel_item"
+
+        @JvmStatic
         fun newInstance(channelItem: Teaser) = StoryFragment().apply {
             arguments = bundleOf(
                     ARG_CHANNEL_ITEM to channelItem
