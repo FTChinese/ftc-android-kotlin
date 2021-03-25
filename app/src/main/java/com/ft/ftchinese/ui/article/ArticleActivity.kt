@@ -178,7 +178,11 @@ class ArticleActivity : ScopedAppActivity(),
             val starred = starredArticleFromOG(og)
             articleViewModel.articleLoaded.value = starred
 
-            checkAccess(starred.permission())
+            // Prevent showing bottom sheet dialog multiple times.
+            val teaserPerm = teaser?.permission()
+            if (teaserPerm == null || teaserPerm == Permission.FREE) {
+                checkAccess(starred.permission())
+            }
         }
 
         // Switch bookmark icon upon starViewModel.isStarring() finished.
@@ -269,6 +273,7 @@ class ArticleActivity : ScopedAppActivity(),
         }
 
         // Check access rights.
+        info("Checking access of teaser $teaser")
         checkAccess(t.permission())
     }
 
