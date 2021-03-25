@@ -157,7 +157,7 @@ class MembershipTest {
 
     @Test fun vip() {
 
-        val (readerPermBits, status) = mVip.getPermission()
+        val (readerPermBits, status) = mVip.accessRights()
 
         println("Member status $status")
 
@@ -180,7 +180,7 @@ class MembershipTest {
 
     @Test fun standard() {
 
-        val (readerPermBits, status) = mStandard.getPermission()
+        val (readerPermBits, status) = mStandard.accessRights()
 
         println("Member status $status")
 
@@ -202,7 +202,7 @@ class MembershipTest {
 
     @Test fun premium() {
 
-        val (readerPermBits, status) = mPremium.getPermission()
+        val (readerPermBits, status) = mPremium.accessRights()
 
 
         println("Member status $status")
@@ -225,7 +225,7 @@ class MembershipTest {
     @Test fun empty() {
         val m = Membership()
 
-        val (readerPermBits, status) = m.getPermission()
+        val (readerPermBits, status) = m.accessRights()
 
         println("Member status $status")
 
@@ -246,7 +246,7 @@ class MembershipTest {
 
     @Test fun standardExpired() {
 
-        val (readerPermBits, status) = mStandardExpired.getPermission()
+        val (readerPermBits, status) = mStandardExpired.accessRights()
 
         println("Member status $status")
 
@@ -268,7 +268,7 @@ class MembershipTest {
 
     @Test fun premiumExpired() {
 
-        val (readerPermBits, status) = mPremiumExpired.getPermission()
+        val (readerPermBits, status) = mPremiumExpired.accessRights()
 
         println("Member status $status")
 
@@ -290,7 +290,7 @@ class MembershipTest {
 
 
     @Test fun stripeStandard() {
-        val (readerPermBits, _) = mStandardStripe.getPermission()
+        val (readerPermBits, _) = mStandardStripe.accessRights()
 
         assertTrue(
                 "Active stripe standard can read free content",
@@ -310,7 +310,7 @@ class MembershipTest {
     }
 
     @Test fun stripePremium() {
-        val (readerPermBits, _) = mPremiumStripe.getPermission()
+        val (readerPermBits, _) = mPremiumStripe.accessRights()
 
         assertTrue(
                 "Active stripe premium can read free content",
@@ -330,7 +330,7 @@ class MembershipTest {
     }
 
     @Test fun stripeIncomplete() {
-        val (readerPermBits, _) = mStripeIncomplete.getPermission()
+        val (readerPermBits, _) = mStripeIncomplete.accessRights()
 
         assertTrue(
                 "Incomplete stripe can read free content",
@@ -351,7 +351,7 @@ class MembershipTest {
     }
 
     @Test fun stripeInactive() {
-        val (readerPermBits, _) = mStripeInactive.getPermission()
+        val (readerPermBits, _) = mStripeInactive.accessRights()
 
         assertTrue(
                 "Inactive stripe can read free content",
