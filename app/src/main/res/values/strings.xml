@@ -308,14 +308,19 @@
     <string name="paywall_title">购买会员服务，阅读FT独家内容</string>
     <string name="paywall_login_prompt">已经订阅？登录</string>
     <string name="swipe_member_info">下拉更新会员信息</string>
+
+    <string name="btn_subscribe_now">立即订阅</string>
+    <string name="btn_upgrade_now">立即升级</string>
     <string name="prompt_login_to_read">订阅会员登录后可以阅读</string>
-    <string name="prompt_member_only">仅限付费会员阅读</string>
-    <string name="prompt_premium_only">仅限高端会员阅读</string>
-    <string name="prompt_upgrade_premium">仅限高端会员阅读，请升级</string>
+    <string name="restricted_to_member">仅限会员阅读</string>
+    <string name="restricted_to_premium">仅限高端会员阅读</string>
+    <string name="current_is_standard">您目前是标准会员</string>
+
+    <string name="not_subscribed_yet">您还不是会员</string>
+    <string name="subscription_expired">会员订阅已过期</string>
+
     <string name="iap_guide">当前订阅来自苹果App内购。请在App Store中管理您的订阅。</string>
     <!--  Prompt message for membership  -->
-    <string name="prompt_membership_expired">会员订阅已过期，请续订</string>
-    <string name="prompt_restricted_login">会员登入后可以阅读</string>
     <string name="stripe_not_active">Stripe订阅状态异常</string>
     <string name="member_status_invalid">订阅状态异常，请刷新或联系客服</string>
     <string name="member_has_expired">会员已过期</string>
@@ -441,11 +446,11 @@
         <item>* 微信登录的用户需要绑定FT中文网账号后才可以使用Stripe订阅</item>
         <item>* 通过支付宝或者微信支付购买的会员、且会员尚未到期，无法使用Stripe订阅</item>
     </string-array>
+
     <string-array name="profile_gender_entries">
         <item>男</item>
         <item>女</item>
     </string-array>
-
     <string-array name="profile_gender_values">
         <item>M</item>
         <item>F</item>
@@ -464,11 +469,11 @@
         <item>l</item>
         <item>xl</item>
     </string-array>
+
     <string-array name="settings_language_entries">
         <item>简体</item>
         <item>繁体</item>
     </string-array>
-
     <string-array name="settings_language_values">
         <item>sc</item>
         <item>tc</item>
