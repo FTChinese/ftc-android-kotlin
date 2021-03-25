@@ -62,21 +62,6 @@ class WebContentFragment : ScopedFragment(),
         info("Web content source: $teaser")
     }
 
-    private fun setupViewModel() {
-        articleViewModel = activity?.run {
-            ViewModelProvider(
-                this,
-                ArticleViewModelFactory(cache, sessionManager.loadAccount()))
-                .get(ArticleViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-
-        // WVClient share the save view model as this fragment,
-        // as well as hosting activity.
-        wvViewModel = activity?.run {
-            ViewModelProvider(this).get(WVViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-    }
-
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
@@ -92,6 +77,25 @@ class WebContentFragment : ScopedFragment(),
         load()
     }
 
+    private fun setupViewModel() {
+        articleViewModel = activity?.run {
+            ViewModelProvider(
+                this,
+                ArticleViewModelFactory(cache, sessionManager.loadAccount()))
+                .get(ArticleViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+
+        // WVClient share the save view model as this fragment,
+        // as well as hosting activity.
+        wvViewModel = activity?.run {
+            ViewModelProvider(this).get(WVViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+
+        wvViewModel.pageFinished.observe(viewLifecycleOwner, {
+            articleViewModel.inProgress.value = !it
+        })
+    }
+
     private fun initUI() {
         webView = activity?.findViewById(R.id.web_view)
 
@@ -101,10 +105,6 @@ class WebContentFragment : ScopedFragment(),
             domStorageEnabled = true
             databaseEnabled = true
         }
-
-//        wvViewModel.pageFinished.observe(viewLifecycleOwner, {
-//            articleViewModel.inProgress.value = !it
-//        })
 
         webView?.apply {
 
