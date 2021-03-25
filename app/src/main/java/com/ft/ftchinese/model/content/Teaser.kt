@@ -290,12 +290,8 @@ data class Teaser(
     companion object {
 
         const val SUB_TYPE_RADIO = "radio"
-        const val SUB_TYPE_USER_COMMENT = ""
         const val SUB_TYPE_MBAGYM = "mbagym"
         const val SUB_TYPE_SPEED_READING = "speedreading"
-
-        const val SUB_TYPE_CORP = "corp"
-        const val SUB_TYPE_MARKETING = "marketing"
 
         const val HOME_AD_ZONE = "home"
         const val DEFAULT_STORY_AD_ZONE = "world"
