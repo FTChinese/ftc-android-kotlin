@@ -79,7 +79,6 @@ open class WVClient(
         info("WVViewModel $viewModel")
         viewModel?.pageFinished?.value = true
 
-
         view?.evaluateJavascript("""
             (function() {
             ${getPrivilegeCode()}
@@ -133,7 +132,6 @@ open class WVClient(
         """.trimIndent()) {
             info("JS evaluation result: $it")
             viewModel?.openGraphEvaluated?.value = it
-//            mListener?.onOpenGraphEvaluated(it)
         }
     }
 
