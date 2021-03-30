@@ -1,11 +1,13 @@
 package com.ft.ftchinese.model.price
 
 import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.OfferKind
 import com.ft.ftchinese.model.enums.PriceSource
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KPriceSource
 import com.ft.ftchinese.model.fetch.KTier
+import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.tracking.GAAction
 
 /**
@@ -26,7 +28,9 @@ data class Price(
     @KPriceSource
     val source: PriceSource,
     val unitAmount: Double,
+    @Deprecated(message = "Use offers array")
     val promotionOffer: Discount = Discount(),
+    val offers: List<Discount> = listOf(),
 ) {
 
     val edition: Edition
@@ -52,6 +56,7 @@ data class Price(
     // The WxPayEntryActivity is isolated from the rest of teh app.
     // When user enters that page, we've lost track of what user
     // has selected.
+    @Deprecated(message = "Use CheckoutItem.newInstance()")
     val checkoutItem: CheckoutItem
         get() = if (promotionOffer.isValid()) {
             CheckoutItem(
@@ -63,4 +68,23 @@ data class Price(
                 price = this,
             )
         }
+
+    fun applicableOffer(filters: List<OfferKind>): Discount? {
+        if (offers.isEmpty()) {
+            return null
+        }
+
+        val filtered = offers.filter {
+                it.isValid() && filters.contains(it.kind)
+            }
+            .sortedByDescending {
+                it.priceOff
+            }
+
+        if (filtered.isNullOrEmpty()) {
+            return null
+        }
+
+        return filtered[0]
+    }
 }
