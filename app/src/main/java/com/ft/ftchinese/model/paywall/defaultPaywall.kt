@@ -3,7 +3,6 @@ package com.ft.ftchinese.model.paywall
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PriceSource
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.price.Discount
 import com.ft.ftchinese.model.price.Price
 
 /**
@@ -46,7 +45,7 @@ val defaultPaywall = Paywall(
                     productId = "prod_9xrJdHFq0wmq",
                     source = PriceSource.Ftc,
                     unitAmount = 298.0,
-                    promotionOffer = Discount()
+                    offers = listOf(),
                 ),
                 Price(
                     id = "plan_8laAatSmDeGd",
@@ -58,8 +57,7 @@ val defaultPaywall = Paywall(
                     nickname = "Standard Monthly Plan",
                     productId = "prod_9xrJdHFq0wmq",
                     source = PriceSource.Ftc,
-                    unitAmount = 28.0,
-                    promotionOffer = Discount()
+                    unitAmount = 35.0,
                 ),
             )
         ),
@@ -81,7 +79,7 @@ val defaultPaywall = Paywall(
                     productId = "prod_zSgOTS6DWLmu",
                     source = PriceSource.Ftc,
                     unitAmount =  1998.0,
-                    promotionOffer = Discount(),
+                    offers = listOf(),
                 ),
             ),
         ),
