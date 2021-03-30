@@ -17,33 +17,19 @@ class CheckoutCounter(
     // Use might enjoy multiple discount at the same moment:
     // promotion offered by FTC, or reward for timely renewal.
 //    private val discounts = mutableListOf<Discount>()
-    val checkoutIntents: CheckoutIntents = CheckoutIntents.newInstance(member, price.edition)
-
-    val discountOptions: DiscountOptions = DiscountOptions(if (price.promotionOffer.isValid()) {
-        listOf(price.promotionOffer)
-    } else listOf())
-
+    val intents: CheckoutIntents = CheckoutIntents.newInstance(member, price.edition)
     // Get the selected price and optional discount.
-    val checkoutItem: CheckoutItem
-        get() = CheckoutItem(
-            price = price,
-            discount = discountOptions.discountSelected
-        )
+    val item = CheckoutItem.newInstance(price, member)
 
-    // Use the discount specified by user in case user manually changed the dropdown spinner.
-    fun useDiscount(pos: Int) {
-        discountOptions.changeDiscount(pos)
-    }
-
-    fun payMethodAllowed(method: PayMethod) = checkoutIntents.payMethods.contains(method)
+    fun payMethodAllowed(method: PayMethod) = intents.payMethods.contains(method)
 
     fun payButtonParams(method: PayMethod): PayButtonParams? {
-        return checkoutIntents.findIntent(method)?.let {
+        return intents.findIntent(method)?.let {
             PayButtonParams(
                 selectedPayMethod = method,
                 orderKind = it.orderKind,
                 price = price,
-                discount = discountOptions.discountSelected
+                discount = item.discount
             )
         }
     }
