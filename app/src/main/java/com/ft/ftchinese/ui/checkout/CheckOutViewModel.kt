@@ -9,7 +9,7 @@ import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.ftcsubs.WxPayIntent
 import com.ft.ftchinese.model.paywall.FtcPriceCache
 import com.ft.ftchinese.model.paywall.StripePriceCache
-import com.ft.ftchinese.model.price.CheckoutItem
+import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult

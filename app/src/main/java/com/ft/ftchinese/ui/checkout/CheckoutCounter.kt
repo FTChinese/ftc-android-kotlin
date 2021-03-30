@@ -1,7 +1,7 @@
 package com.ft.ftchinese.ui.checkout
 
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.price.CheckoutItem
+import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.reader.Membership
 import org.jetbrains.anko.AnkoLogger

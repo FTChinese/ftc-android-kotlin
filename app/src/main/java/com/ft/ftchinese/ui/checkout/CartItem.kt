@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.checkout
 import android.content.Context
 import android.text.Spannable
 import android.text.SpannableString
-import com.ft.ftchinese.model.price.CheckoutItem
+import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.ui.formatter.PriceStringBuilder
 
 /**
