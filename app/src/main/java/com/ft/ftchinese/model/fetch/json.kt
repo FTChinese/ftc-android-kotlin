@@ -44,6 +44,9 @@ annotation class KUnlinkAnchor
 annotation class KOrderKind
 
 @Target(AnnotationTarget.FIELD)
+annotation class KOfferKind
+
+@Target(AnnotationTarget.FIELD)
 annotation class KStripeSubStatus
 
 @Target(AnnotationTarget.FIELD)
@@ -203,6 +206,26 @@ val orderKindConverter = object : Converter {
     }
 }
 
+val offerKindConverter = object : Converter {
+    override fun canConvert(cls: Class<*>): Boolean {
+        return cls == OfferKind::class.java
+    }
+
+    override fun fromJson(jv: JsonValue): Any? {
+        return jv.string?.let {
+            OfferKind.fromString(it)
+        }
+    }
+
+    override fun toJson(value: Any): String {
+        return if (value is OfferKind) {
+            """ "$value" """
+        } else {
+            """null"""
+        }
+    }
+}
+
 val payMethodConverter = object : Converter {
     override fun canConvert(cls: Class<*>): Boolean {
         return cls == PayMethod::class.java
@@ -326,3 +349,4 @@ val json = Klaxon()
     .fieldConverter(KArticleType::class, articleTypeConverter)
     .fieldConverter(KPriceSource::class, priceSourceConverter)
     .fieldConverter(KAddOnSource::class, addOnSourceConverter)
+    .fieldConverter(KOfferKind::class, offerKindConverter)
