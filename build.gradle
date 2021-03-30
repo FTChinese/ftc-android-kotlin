@@ -14,12 +14,12 @@ buildscript {
         maven{ url 'https://maven.aliyun.com/repository/google'}
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.0-alpha10'
+        classpath 'com.android.tools.build:gradle:7.0.0-alpha11'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.google.gms:google-services:4.3.4'
+        classpath 'com.google.gms:google-services:4.3.5'
 
         // Check here for latest version: https://docs.fabric.io/android/changelog.html#fabric-gradle-plugin
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.4.1'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.5.2'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version"
