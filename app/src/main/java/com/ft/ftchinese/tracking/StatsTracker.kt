@@ -91,14 +91,14 @@ class StatsTracker private constructor(context: Context) {
             .build())
     }
 
-    fun buyFail(item: CheckoutItem?) {
-        if (item == null) {
+    fun buyFail(price: Price?) {
+        if (price == null) {
             return
         }
 
         tracker.send(HitBuilders.EventBuilder()
             .setCategory(GACategory.SUBSCRIPTION)
-            .setAction(item.price.gaAction)
+            .setAction(price?.gaAction)
             .setLabel(PaywallTracker.from?.label)
             .build())
     }

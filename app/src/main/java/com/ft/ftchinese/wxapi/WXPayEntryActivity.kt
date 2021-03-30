@@ -138,7 +138,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                     val order = orderManager?.load()
 
                     if (order != null) {
-                        tracker?.buyFail(FtcPriceCache.find(order.edition)?.checkoutItem)
+                        tracker?.buyFail(FtcPriceCache.find(order.edition))
                     }
                 }
                 // 用户取消
