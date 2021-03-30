@@ -9,7 +9,6 @@ import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.ftcsubs.WxPayIntent
 import com.ft.ftchinese.model.paywall.FtcPriceCache
 import com.ft.ftchinese.model.paywall.StripePriceCache
-import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
@@ -48,10 +47,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<CheckoutCounter>>()
     }
 
-    val checkoutItem: MutableLiveData<CheckoutItem> by lazy {
-        MutableLiveData<CheckoutItem>()
-    }
-
+    // Create CheckoutCounter instance and tell CartItemFragment to update ui.
     fun initFtcCounter(priceId: String, m: Membership) {
         val price = FtcPriceCache.find(priceId)
         if (price != null) {
@@ -72,11 +68,6 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         } else {
             counterResult.value = Result.Error(Exception("Price not found"))
         }
-    }
-
-    fun changeDiscount(pos: Int) {
-        _checkoutCounter?.useDiscount(pos)
-        checkoutItem.value = _checkoutCounter?.checkoutItem
     }
 
     fun createWxOrder(account: Account) {
