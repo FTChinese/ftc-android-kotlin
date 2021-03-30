@@ -296,7 +296,7 @@ class StripeSubActivity : ScopedAppActivity(),
     private fun startSubscribing() {
         val account = sessionManager.loadAccount() ?: return
         val p = checkOutViewModel.counter?.price ?: return
-        val intent = checkOutViewModel.counter?.checkoutIntents?.findIntent(PayMethod.STRIPE) ?: return
+        val intent = checkOutViewModel.counter?.intents?.findIntent(PayMethod.STRIPE) ?: return
 
         if (account.stripeId == null) {
             toast("You are not a stripe customer yet")
