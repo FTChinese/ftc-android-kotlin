@@ -207,6 +207,19 @@ data class Membership(
             autoRenew
         }
 
+    val offerKinds: List<OfferKind>
+        get() = when {
+            tier == null -> listOf(OfferKind.Promotion)
+            autoRenewOffExpired -> listOf(
+                OfferKind.Promotion,
+                OfferKind.WinBack,
+            )
+            else -> listOf(
+                OfferKind.Promotion,
+                OfferKind.Retention
+            )
+        }
+
     /**
      * Determines whether the Renew button should be visible.
      * This is only applicable to alipay or wechat pay.
