@@ -42,8 +42,6 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-const val EXTRA_PRICE_ID = "extra_price_id"
-
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class CheckOutActivity : ScopedAppActivity(),
         AnkoLogger {
@@ -176,7 +174,8 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     private fun initUI() {
-        // Attach cart fragment
+        // Attach cart fragment.
+        // The fragment uses view model to wait for a CheckoutCounter instance.
         supportFragmentManager.commit {
             replace(
                 R.id.product_in_cart,
@@ -188,9 +187,11 @@ class CheckOutActivity : ScopedAppActivity(),
 
         val a = sessionManager.loadAccount() ?: return
 
+        // Get the id of price user selected.
         intent.getStringExtra(EXTRA_PRICE_ID)?.let { priceId: String ->
+            // Create CheckoutCounter and tell CartItemFragment to update ui.
             checkOutViewModel.initFtcCounter(priceId, a.membership)
-            binding.intents = checkOutViewModel.counter?.checkoutIntents
+            binding.intents = checkOutViewModel.counter?.intents
 
             checkOutViewModel.counter?.price?.let {
                 tracker.addCart(it)
@@ -237,7 +238,7 @@ class CheckOutActivity : ScopedAppActivity(),
         when (pm) {
             PayMethod.ALIPAY -> {
                 toast(R.string.toast_creating_order)
-                checkOutViewModel.counter?.price?.checkoutItem?.let {
+                checkOutViewModel.counter?.item?.let {
                     tracker.checkOut(it, pm)
                 }
 
@@ -255,7 +256,7 @@ class CheckOutActivity : ScopedAppActivity(),
                 }
 
                 toast(R.string.toast_creating_order)
-                checkOutViewModel.counter?.price?.checkoutItem?.let {
+                checkOutViewModel.counter?.item?.let {
                     tracker.checkOut(it, pm)
                 }
                 binding.inProgress = true
@@ -324,11 +325,11 @@ class CheckOutActivity : ScopedAppActivity(),
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
-                tracker.buyFail(checkOutViewModel.counter?.checkoutItem)
+                tracker.buyFail(checkOutViewModel.counter?.price)
             }
             is Result.Error -> {
                 result.exception.message?.let { toast(it) }
-                tracker.buyFail(checkOutViewModel.counter?.checkoutItem)
+                tracker.buyFail(checkOutViewModel.counter?.price)
             }
             is Result.Success -> {
                 binding.payBtn.isEnabled = false
@@ -364,12 +365,12 @@ class CheckOutActivity : ScopedAppActivity(),
                 toast(msg)
                 binding.payBtn.isEnabled = true
 
-                tracker.buyFail(checkOutViewModel.counter?.checkoutItem)
+                tracker.buyFail(checkOutViewModel.counter?.price)
 
                 return@launch
             }
 
-            tracker.buySuccess(checkOutViewModel.counter?.checkoutItem, payMethod)
+            tracker.buySuccess(checkOutViewModel.counter?.item, payMethod)
 
             confirmAliSubscription()
         }
@@ -420,11 +421,11 @@ class CheckOutActivity : ScopedAppActivity(),
         when (result) {
             is Result.LocalizedError -> {
                 toast(result.msgId)
-                tracker.buyFail(checkOutViewModel.counter?.checkoutItem)
+                tracker.buyFail(checkOutViewModel.counter?.price)
             }
             is Result.Error -> {
                 result.exception.message?.let { toast(it) }
-                tracker.buyFail(checkOutViewModel.counter?.checkoutItem)
+                tracker.buyFail(checkOutViewModel.counter?.price)
             }
             is Result.Success -> {
                 binding.payBtn.isEnabled = false
@@ -528,7 +529,8 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     companion object {
-        
+        const val EXTRA_PRICE_ID = "extra_price_id"
+
         @JvmStatic
         fun startForResult(activity: Activity?, requestCode: Int, priceId: String) {
             val intent = Intent(activity, CheckOutActivity::class.java).apply { 
