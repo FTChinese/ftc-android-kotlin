@@ -1,4 +1,8 @@
-package com.ft.ftchinese.model.price
+package com.ft.ftchinese.model.ftcsubs
+
+import com.ft.ftchinese.model.price.Discount
+import com.ft.ftchinese.model.price.Price
+import com.ft.ftchinese.model.reader.Membership
 
 /**
  * CartItem is the item user put in shopping cart.
@@ -12,4 +16,14 @@ data class CheckoutItem(
 ) {
     val payableAmount: Double
         get() = price.unitAmount - (discount?.priceOff ?: 0.0)
+
+    companion object {
+        @JvmStatic
+        fun newInstance(price: Price, m: Membership): CheckoutItem {
+            return CheckoutItem(
+                price = price,
+                discount = price.applicableOffer(m.offerKinds)
+            )
+        }
+    }
 }
