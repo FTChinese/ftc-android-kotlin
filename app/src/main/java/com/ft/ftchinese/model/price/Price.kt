@@ -27,8 +27,6 @@ data class Price(
     @KPriceSource
     val source: PriceSource,
     val unitAmount: Double,
-    @Deprecated(message = "Use offers array")
-    val promotionOffer: Discount = Discount(),
     val offers: List<Discount> = listOf(),
 ) {
 
