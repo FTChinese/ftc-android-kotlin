@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.product
 
+import android.content.Context
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.Spanned
@@ -17,19 +18,22 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentProductBinding
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.model.paywall.Product
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.price.Price
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.formatter.PriceStringBuilder
 import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ProductFragment : ScopedFragment(),
         AnkoLogger {
 
+    private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: ProductViewModel
     private lateinit var binding: FragmentProductBinding
     private val descListAdapter = DescListAdapter(listOf())
@@ -38,15 +42,23 @@ class ProductFragment : ScopedFragment(),
     /**
      * Current product and its plans.
      */
-    private var product: Product? = null
+//    private var product: Product? = null
+    private lateinit var tier: Tier
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        sessionManager = SessionManager.getInstance(context)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val tier = arguments?.getParcelable<Tier>(ARG_TIER)
+        arguments?.getParcelable<Tier>(ARG_TIER)?.let {
+            tier = it
+        }
 
         // Find the product this fragment is using.
-        product = defaultPaywall.products.find { tier == it.tier }
+//        product = defaultPaywall.products.find { tier == it.tier }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -77,28 +89,10 @@ class ProductFragment : ScopedFragment(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        initUI()
+        setupViewModel()
     }
 
-    private fun initUI() {
-        binding.product = product
-
-        // Update data of list adapter.
-        product?.description
-            ?.split("\n")
-            ?.let {
-                descListAdapter.setData(it)
-            }
-
-        product?.prices?.let {
-            priceListAdapter.setData(it)
-        }
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
+    private fun setupViewModel() {
         // Init view model
         viewModel = activity?.run {
             ViewModelProvider(this).get(ProductViewModel::class.java)
@@ -111,12 +105,29 @@ class ProductFragment : ScopedFragment(),
 
         // Products received from server
         viewModel.productsReceived.observe(viewLifecycleOwner) { products ->
-            product = products.find {
-                it.tier == product?.tier
+            val product = products.find {
+                it.tier == tier
             }
 
             // Don't forget this step!
-            initUI()
+            initUI(product)
+        }
+
+        viewModel.productsReceived.value = defaultPaywall.products
+    }
+
+    private fun initUI(product: Product?) {
+        binding.product = product
+
+        // Update data of list adapter.
+        product?.description
+            ?.split("\n")
+            ?.let {
+                descListAdapter.setData(it)
+            }
+
+        product?.prices?.let {
+            priceListAdapter.setData(it)
         }
     }
 
@@ -140,41 +151,27 @@ class ProductFragment : ScopedFragment(),
         override fun onBindViewHolder(holder: PriceItemViewHolder, position: Int) {
             val price = prices[position]
 
-            val hasPromo = price.promotionOffer.isValid()
-
-            val payable = PriceStringBuilder.fromPrice(
+            val checkout = CheckoutItem.newInstance(
                 price = price,
-                discount = if (hasPromo) {
-                    price.promotionOffer
-                } else null
-            ).build(requireContext())
+                m = sessionManager.loadMembership().normalize(),
+            )
 
-            if (hasPromo) {
-                holder.text.text = PriceStringBuilder
-                    .fromPrice(price)
-                    .withOriginal()
-                    .withStrikeThrough()
-                    .build(requireContext())
-            } else {
-                holder.text.visibility = View.GONE
-            }
+            info("Offer description ${checkout.discount?.description}")
+
+            holder.setOfferDesc(checkout.discount?.description)
+
+            val priceText = formatPriceButton(requireContext(), checkout)
 
             when (price.cycle) {
                 Cycle.YEAR -> {
-                    holder.outlineButton.visibility = View.GONE
-                    holder.primaryButton.text = payable
-                    holder.primaryButton.isEnabled = btnEnabled
-
+                    holder.setPrimaryButton(priceText, btnEnabled)
                     holder.primaryButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
                         viewModel.priceSelected.value = price
                     }
                 }
                 Cycle.MONTH -> {
-                    holder.primaryButton.visibility = View.GONE
-                    holder.outlineButton.text = payable
-                    holder.outlineButton.isEnabled = btnEnabled
-
+                    holder.setSecondaryButton(priceText, btnEnabled)
                     holder.outlineButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
                         viewModel.priceSelected.value = price
