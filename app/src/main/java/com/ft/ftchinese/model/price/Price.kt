@@ -7,7 +7,6 @@ import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
 import com.ft.ftchinese.model.fetch.KPriceSource
 import com.ft.ftchinese.model.fetch.KTier
-import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.tracking.GAAction
 
 /**
@@ -49,24 +48,6 @@ data class Price(
                 Cycle.MONTH -> GAAction.BUY_STANDARD_MONTH
             }
             Tier.PREMIUM -> GAAction.BUY_PREMIUM
-        }
-
-    // Turn to CheckoutItem used only by WxPayEntryActivity.
-    // Usually you should use CheckoutCounter to calculate it.
-    // The WxPayEntryActivity is isolated from the rest of teh app.
-    // When user enters that page, we've lost track of what user
-    // has selected.
-    @Deprecated(message = "Use CheckoutItem.newInstance()")
-    val checkoutItem: CheckoutItem
-        get() = if (promotionOffer.isValid()) {
-            CheckoutItem(
-                price = this,
-                discount = promotionOffer,
-            )
-        } else {
-            CheckoutItem(
-                price = this,
-            )
         }
 
     fun applicableOffer(filters: List<OfferKind>): Discount? {
