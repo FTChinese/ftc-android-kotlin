@@ -20,7 +20,6 @@ data class ChannelSource (
         // If empty, do not cache it, nor should you try to
         // find cache.
     val name: String,  // Cache filename used by this tab
-    val contentPath: String, // Deprecated. Repaced by path and query.
     val path: String,
     val query: String,
     val htmlType: Int, // Flag used to tell whether the webUrl should be loaded directly
@@ -36,7 +35,6 @@ data class ChannelSource (
         return ChannelSource(
             title = title,
             name = name,
-            contentPath = contentPath,
             path = path,
             query = query,
             htmlType = htmlType,
@@ -81,7 +79,6 @@ data class ChannelSource (
         return ChannelSource(
             title = title,
             name = "${name}_$pageNumber",
-            contentPath = contentPath,
             path = path,
             query = qs,
             htmlType = htmlType
@@ -93,7 +90,6 @@ fun buildFollowChannel(follow: Following): ChannelSource {
     return ChannelSource(
         title = follow.tag,
         name = "${follow.type}_${follow.tag}",
-        contentPath = "/${follow.type}/${follow.tag}?bodyonly=yes&webviewftcapp",
         path = "/${follow.type}/${follow.tag}",
         query = "",
         htmlType = HTML_TYPE_FRAGMENT
@@ -104,7 +100,6 @@ fun buildColumnChannel(item: Teaser): ChannelSource {
     return ChannelSource(
         title = item.title,
         name = "${item.type}_${item.id}",
-        contentPath = "/${item.type}/${item.id}?bodyonly=yes&webview=ftcapp",
         path = "/${item.type}/${item.id}",
         query = "",
         htmlType = HTML_TYPE_FRAGMENT
@@ -115,7 +110,6 @@ fun buildTagOrArchiveChannel(uri: Uri): ChannelSource {
     return ChannelSource(
         title = uri.lastPathSegment ?: "",
         name = uri.pathSegments.joinToString("_"),
-        contentPath = "/${uri.path}?${uri.query}",
         path = uri.path ?: "",
         query = uri.query ?: "",
         htmlType = HTML_TYPE_FRAGMENT
@@ -197,7 +191,6 @@ fun buildChannelFromUri(uri: Uri): ChannelSource {
             ?: uri.pathSegments
                 .joinToString("_")
                 .removeSuffix(".html"),
-        contentPath = "/${uri.path}?${uri.query}",
         path = uri.path ?: "",
         query = uri.query ?: "",
         htmlType = HTML_TYPE_FRAGMENT,
@@ -231,7 +224,6 @@ fun buildMarketingChannel(uri: Uri): ChannelSource {
         ]
             ?: "",
         name = name,
-        contentPath = "/${uri.path}?${uri.query}",
         path = uri.path ?: "",
         query = uri.query ?: "",
         htmlType = HTML_TYPE_COMPLETE
