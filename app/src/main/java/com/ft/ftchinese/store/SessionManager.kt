@@ -20,6 +20,7 @@ private const val PREF_UNION_ID = "union_id"
 private const val PREF_STRIPE_CUS_ID = "stripe_id"
 private const val PREF_USER_NAME = "user_name"
 private const val PREF_EMAIL = "email"
+private const val PREF_MOBILE = "mobile"
 private const val PREF_IS_VERIFIED = "is_verified"
 private const val PREF_AVATAR_URL = "avatar_url"
 
@@ -59,6 +60,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
             putString(PREF_UNION_ID, account.unionId)
             putString(PREF_STRIPE_CUS_ID, account.stripeId)
             putString(PREF_USER_NAME, account.userName)
+            putString(PREF_MOBILE, account.mobile)
             putString(PREF_EMAIL, account.email)
             putBoolean(PREF_IS_VERIFIED, account.isVerified)
             putString(PREF_AVATAR_URL, account.avatarUrl)
@@ -127,6 +129,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         val unionId = sharedPreferences.getString(PREF_UNION_ID, null)
         val stripeId = sharedPreferences.getString(PREF_STRIPE_CUS_ID, null)
         val userName = sharedPreferences.getString(PREF_USER_NAME, null)
+        val mobile = sharedPreferences.getString(PREF_MOBILE, null)
         val email = sharedPreferences.getString(PREF_EMAIL, "") ?: ""
         val isVerified = sharedPreferences.getBoolean(PREF_IS_VERIFIED, false)
         val avatarUrl = sharedPreferences.getString(PREF_AVATAR_URL, null)
@@ -142,20 +145,21 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         )
 
         return Account(
-                id = userId,
-                unionId = unionId,
-                stripeId = stripeId,
-                userName = userName,
-                email = email,
-                isVerified = isVerified,
-                avatarUrl = avatarUrl,
-                loginMethod = LoginMethod.fromString(loginMethod),
-                wechat = wechat,
-                membership = if (raw) {
-                    loadMembership()
-                } else {
-                    loadMembership().normalize()
-                }
+            id = userId,
+            unionId = unionId,
+            stripeId = stripeId,
+            userName = userName,
+            mobile = mobile,
+            email = email,
+            isVerified = isVerified,
+            avatarUrl = avatarUrl,
+            loginMethod = LoginMethod.fromString(loginMethod),
+            wechat = wechat,
+            membership = if (raw) {
+                loadMembership()
+            } else {
+                loadMembership().normalize()
+            }
         )
     }
 
