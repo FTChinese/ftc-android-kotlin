@@ -8,7 +8,7 @@ plugins {
     id 'kotlin-kapt'
     id "kotlin-parcelize"
 }
-//apply plugin: 'io.fabric'
+
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: "androidx.navigation.safeargs.kotlin"
 
@@ -171,12 +171,14 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     // Firebase
-    implementation 'com.google.firebase:firebase-core:18.0.2'
-    implementation 'com.google.firebase:firebase-analytics:18.0.2'
+    // Import the Firebase BoM
+    implementation platform('com.google.firebase:firebase-bom:26.8.0')
+
     implementation 'com.google.firebase:firebase-iid:21.0.1'
-    implementation 'com.google.firebase:firebase-messaging:21.0.1'
+    implementation 'com.google.firebase:firebase-messaging-ktx'
     implementation 'com.google.android.gms:play-services-analytics:17.0.0'
-    implementation 'com.google.firebase:firebase-crashlytics:17.4.1'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx'
+    implementation 'com.google.firebase:firebase-analytics-ktx'
 
     // Payment
     implementation(name: 'alipaySdk-15.6.5-20190718211148', ext: 'aar')
@@ -266,4 +268,10 @@ task zip(type: Zip, group: "Archive", description: "Archives sources in a zip fi
 task copy(type: Copy, group: "Archive", description: "Copies sources to the dest directory") {
     from "build/ftc-android.config.zip"
     into "/Volumes/Zion/department/Tech/android-release"
+}
+
+tasks.whenTaskAdded {task ->
+    if(task.name.toLowerCase().contains("crashlytics")) {
+        task.enabled = false
+    }
 }

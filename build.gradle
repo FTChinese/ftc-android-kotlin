@@ -12,8 +12,8 @@ buildscript {
         mavenCentral()
         maven{ url 'https://maven.aliyun.com/repository/central'}
         maven{ url 'https://maven.aliyun.com/repository/public'}
-//        maven{ url 'https://maven.aliyun.com/repository/google'}
-        google()
+        maven{ url 'https://maven.aliyun.com/repository/google'}
+//        google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:4.2.0-beta03'
@@ -37,11 +37,17 @@ allprojects {
         mavenCentral()
         maven{ url 'https://maven.aliyun.com/repository/central'}
         maven{ url 'https://maven.aliyun.com/repository/public'}
-//        maven{ url 'https://maven.aliyun.com/repository/google'}
-        google()
+        maven{ url 'https://maven.aliyun.com/repository/google'}
+//        google()
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+tasks.whenTaskAdded {task ->
+    if(task.name.toLowerCase().contains("crashlytics")) {
+        task.enabled = false
+    }
 }
