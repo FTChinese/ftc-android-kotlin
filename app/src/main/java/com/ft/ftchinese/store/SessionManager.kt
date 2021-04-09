@@ -55,6 +55,8 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
     private val sharedPreferences = context.getSharedPreferences(SESSION_PREF_NAME, Context.MODE_PRIVATE)
 
     fun saveAccount(account: Account) {
+        AccountCache.save(account)
+
         sharedPreferences.edit {
             putString(PREF_USER_ID, account.id)
             putString(PREF_UNION_ID, account.unionId)
@@ -75,6 +77,8 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
     }
 
     fun saveMembership(member: Membership) {
+        AccountCache.updateMembership(member)
+
         sharedPreferences.edit {
             putString(PREF_MEMBER_TIER, member.tier?.toString())
             putString(PREF_MEMBER_CYCLE, member.cycle?.toString())
@@ -92,7 +96,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
     }
 
     // Load the raw membership.
-    fun loadMembership(): Membership {
+    private fun loadMembership(): Membership {
         val tier = sharedPreferences.getString(PREF_MEMBER_TIER, null)
         val cycle = sharedPreferences.getString(PREF_MEMBER_CYCLE, null)
         val expireDate = sharedPreferences.getString(PREF_MEMBER_EXPIRE, null)
@@ -125,6 +129,21 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
     // Load account. By default the membership is a normalized version.
     // If you pass true to raw, the membership will be retrieve as is, without migrating addon or extending auto renew on the client side.
     fun loadAccount(raw: Boolean = false): Account? {
+        if (raw) {
+            return retrieveAccount(raw = true)
+        }
+
+        AccountCache.get()?.let {
+            return it
+        }
+
+        val a = retrieveAccount(raw = false) ?: return null
+
+        AccountCache.save(a)
+        return a
+    }
+
+    private fun retrieveAccount(raw: Boolean = false): Account? {
         val userId = sharedPreferences.getString(PREF_USER_ID, null) ?: return null
         val unionId = sharedPreferences.getString(PREF_UNION_ID, null)
         val stripeId = sharedPreferences.getString(PREF_STRIPE_CUS_ID, null)
@@ -140,8 +159,8 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         val wxAvatar = sharedPreferences.getString(PREF_WX_AVATAR, null)
 
         val wechat = Wechat(
-                nickname = wxNickname,
-                avatarUrl = wxAvatar
+            nickname = wxNickname,
+            avatarUrl = wxAvatar
         )
 
         return Account(
@@ -164,6 +183,8 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
     }
 
     fun saveStripeId(id: String) {
+        AccountCache.updateStripeID(id)
+
         sharedPreferences.edit {
             putString(PREF_STRIPE_CUS_ID, id)
         }
