@@ -186,13 +186,14 @@ data class Membership(
             )
         } else null
 
-    // Checks whether the current membership is purchased via alipay or wechat pay.
-    val isOneTimePurchase: Boolean
-        get() = if (tier != null && payMethod == null) {
-            true
-        } else {
-            payMethod == PayMethod.ALIPAY || payMethod == PayMethod.WXPAY
-        }
+    // In case legacy purchase has payment method null.
+    val normalizedPayMethod: PayMethod?
+        get() = payMethod
+            ?: if (tier != null) {
+                PayMethod.ALIPAY
+            } else {
+                null
+            }
 
     val isStripe: Boolean
         get() = payMethod == PayMethod.STRIPE && stripeSubsId != null
