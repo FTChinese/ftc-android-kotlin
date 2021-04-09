@@ -58,7 +58,10 @@ object Validator {
      * 17+除9的任意数
      * 147
      */
-    fun isMainlandPhone(str: String): Boolean {
+    fun isMainlandPhone(str: String?): Boolean {
+        if (str == null) {
+            return false
+        }
         val regExp = "^((13[0-9])|(15[^4])|(18[0,2,3,5-9])|(17[0-8])|(147))\\d{8}$"
         val p: Pattern = Pattern.compile(regExp)
         val m = p.matcher(str)
