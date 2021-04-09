@@ -9,14 +9,16 @@ buildscript {
     ext.nav_version = "2.3.4"
 
     repositories {
-        mavenCentral()
+
         maven{ url 'https://maven.aliyun.com/repository/central'}
         maven{ url 'https://maven.aliyun.com/repository/public'}
         maven{ url 'https://maven.aliyun.com/repository/google'}
-//        google()
+
+        mavenCentral()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.0-beta03'
+        classpath 'com.android.tools.build:gradle:7.0.0-alpha14'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.gms:google-services:4.3.5'
 
@@ -34,11 +36,13 @@ allprojects {
         flatDir {
             dirs 'libs'
         }
-        mavenCentral()
+
         maven{ url 'https://maven.aliyun.com/repository/central'}
         maven{ url 'https://maven.aliyun.com/repository/public'}
         maven{ url 'https://maven.aliyun.com/repository/google'}
-//        google()
+
+        mavenCentral()
+        google()
     }
 }
 
