@@ -22,6 +22,7 @@ import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.model.paywall.Product
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.price.Price
+import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.lists.MarginItemDecoration
@@ -153,7 +154,7 @@ class ProductFragment : ScopedFragment(),
 
             val checkout = CheckoutItem.newInstance(
                 price = price,
-                m = sessionManager.loadMembership().normalize(),
+                m = sessionManager.loadAccount()?.membership ?: Membership(),
             )
 
             info("Offer description ${checkout.discount?.description}")
