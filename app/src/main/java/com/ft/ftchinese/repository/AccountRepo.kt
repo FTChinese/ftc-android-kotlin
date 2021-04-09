@@ -98,6 +98,10 @@ object AccountRepo {
         return resp.code == 204
     }
 
+    fun requestSMSCode() {
+
+    }
+
     /**
      * Asks the API to refresh current wechat user's access token and information.
      */
