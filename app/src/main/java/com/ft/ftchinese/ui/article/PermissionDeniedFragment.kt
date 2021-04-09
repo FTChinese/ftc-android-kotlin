@@ -1,6 +1,5 @@
-package com.ft.ftchinese.ui.channel
+package com.ft.ftchinese.ui.article
 
-import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,6 +11,7 @@ import com.ft.ftchinese.databinding.FragmentPermissionDeniedBinding
 import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.MemberStatus
 import com.ft.ftchinese.model.reader.Permission
+import com.ft.ftchinese.ui.channel.DenialReason
 import com.ft.ftchinese.ui.login.LoginActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment

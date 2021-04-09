@@ -30,7 +30,6 @@ import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.WVViewModel
-import com.ft.ftchinese.ui.channel.PermissionDeniedFragment
 import com.ft.ftchinese.ui.share.SocialApp
 import com.ft.ftchinese.ui.share.SocialAppId
 import com.ft.ftchinese.ui.share.SocialShareFragment
