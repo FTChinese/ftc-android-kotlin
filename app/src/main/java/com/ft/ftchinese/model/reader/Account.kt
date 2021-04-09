@@ -1,6 +1,8 @@
 package com.ft.ftchinese.model.reader
 
+import android.os.Parcelable
 import com.ft.ftchinese.model.fetch.KLoginMethod
+import kotlinx.parcelize.Parcelize
 
 /**
  * A user's essential data.
@@ -8,20 +10,79 @@ import com.ft.ftchinese.model.fetch.KLoginMethod
  * When user changes data like email, user userName, verified email, purchased subscription, the corresponding fields should be updated and saved to shared preferences.
  * Avoid modifying an instance when user's data changed so that everything is immutable.
  */
+@Parcelize
 data class Account(
-        val id: String,
-        val unionId: String? = null,
-        val stripeId: String? = null,
-        val userName: String? = null,
-        val email: String,
-        val mobile: String? = null,
-        val isVerified: Boolean = false,
-        val avatarUrl: String? = null,
-        @KLoginMethod
-        val loginMethod: LoginMethod? = null,
-        val wechat: Wechat,
-        val membership: Membership
-) {
+    override val id: String,
+    override val unionId: String? = null,
+    override val stripeId: String? = null,
+    override val userName: String? = null,
+    override val email: String,
+    override val mobile: String? = null,
+    override val isVerified: Boolean = false,
+    override val avatarUrl: String? = null,
+    @KLoginMethod
+    val loginMethod: LoginMethod? = null,
+    val wechat: Wechat,
+    val membership: Membership
+) : BaseAccount(
+    id = id,
+    unionId = unionId,
+    stripeId = stripeId,
+    email = email,
+    mobile = mobile,
+    userName = userName,
+    avatarUrl = avatarUrl,
+    isVerified = isVerified
+), Parcelable {
+
+    // Perform partial update.
+    fun withMembership(m: Membership): Account {
+        return Account(
+            id = id,
+            unionId = unionId,
+            stripeId = stripeId,
+            userName = userName,
+            email = email,
+            mobile = mobile,
+            isVerified = isVerified,
+            avatarUrl = avatarUrl,
+            loginMethod = loginMethod,
+            wechat = wechat,
+            membership = m
+        )
+    }
+
+    fun withCustomerID(cusID: String): Account {
+        return Account(
+            id = id,
+            unionId = unionId,
+            stripeId = cusID,
+            userName = userName,
+            email = email,
+            mobile = mobile,
+            isVerified = isVerified,
+            avatarUrl = avatarUrl,
+            loginMethod = loginMethod,
+            wechat = wechat,
+            membership = membership
+        )
+    }
+
+    fun withBaseAccount(b: BaseAccount): Account {
+        return Account(
+            id = b.id,
+            unionId = b.unionId,
+            stripeId = b.stripeId,
+            userName = b.userName,
+            email = b.email,
+            mobile = b.mobile,
+            isVerified = b.isVerified,
+            avatarUrl = b.avatarUrl,
+            loginMethod = loginMethod,
+            wechat = wechat,
+            membership = membership,
+        )
+    }
 
     val isTest: Boolean
         get() = email.endsWith(".test@ftchinese.com")
