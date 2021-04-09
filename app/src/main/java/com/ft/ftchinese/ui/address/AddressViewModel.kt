@@ -14,7 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 class AddressViewModel : ViewModel(), AnkoLogger {
 
@@ -110,8 +109,7 @@ class AddressViewModel : ViewModel(), AnkoLogger {
     }
 
     private fun ensureSavable() {
-        info("Current address: $previous")
-        info("Updated address: $updated")
+
         if (updated == previous) {
             formState.value = AddressFormState()
             return
