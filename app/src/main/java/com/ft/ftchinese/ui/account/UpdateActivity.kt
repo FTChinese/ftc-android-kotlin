@@ -5,15 +5,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityFragmentDoubleBinding
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.address.AddressViewModel
 import com.ft.ftchinese.ui.address.UpdateAddressFragment
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.mobile.UpdateMobileFragment
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.UpdateViewModel
@@ -75,8 +75,12 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
                 fm.replace(R.id.double_frag_primary, UpdatePasswordFragment.newInstance())
             }
             AccountRowType.Address -> {
-                supportActionBar?.setTitle("设置地址")
+                supportActionBar?.title = "设置地址"
                 fm.replace(R.id.double_frag_primary, UpdateAddressFragment.newInstance())
+            }
+            AccountRowType.MOBILE -> {
+                supportActionBar?.title = "关联手机号码"
+                fm.replace(R.id.double_frag_primary, UpdateMobileFragment.newInstance())
             }
         }
 
@@ -94,14 +98,14 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             binding.inProgress = it
         }
 
-        updateViewModel.updateResult.observe(this, Observer {
+        updateViewModel.updateResult.observe(this) {
             onUpdated(it)
-        })
+        }
 
         // Observing refreshed account.
-        accountViewModel.accountRefreshed.observe(this, Observer {
+        accountViewModel.accountRefreshed.observe(this) {
             onAccountRefreshed(it)
-        })
+        }
     }
 
     private fun onUpdated(result: Result<Boolean>) {

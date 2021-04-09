@@ -111,7 +111,12 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
                 } else {
                     getString(R.string.action_bind_account)
                 }
-            )
+            ),
+            AccountRow(
+                id = AccountRowType.MOBILE,
+                primary = "手机号",
+                secondary = account.mobile ?: getString(R.string.default_not_set)
+            ),
         )
     }
 

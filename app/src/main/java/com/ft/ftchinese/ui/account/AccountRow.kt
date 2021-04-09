@@ -8,6 +8,7 @@ data class AccountRow(
 
 enum class AccountRowType {
     EMAIL,
+    MOBILE,
     USER_NAME,
     PASSWORD,
     Address,
