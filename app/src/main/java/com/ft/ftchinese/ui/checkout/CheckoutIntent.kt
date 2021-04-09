@@ -69,7 +69,7 @@ data class CheckoutIntents(
                 )
             }
 
-            when (m.payMethod) {
+            when (m.normalizedPayMethod) {
                 PayMethod.ALIPAY, PayMethod.WXPAY -> {
                     // Renewal
                     if (m.tier == e.tier) {
@@ -222,7 +222,7 @@ data class CheckoutIntents(
 
             return CheckoutIntents(
                 intents = listOf(),
-                warning = "仅支持新建订阅、续订、标准会员升级和购买额外订阅期限，不支持其他操作。",
+                warning = "仅支持新建订阅、续订、标准会员升级和购买额外订阅期限，不支持其他操作。\n当前会员购买方式未知，因此无法确定您可以执行哪些操作，请联系客服完善您的数据",
             )
         }
     }
