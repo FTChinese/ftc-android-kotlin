@@ -12,12 +12,11 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentUpdateMobileBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.viewmodel.ProgressViewModel
 import com.ft.ftchinese.viewmodel.Result
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 /**
@@ -31,15 +30,11 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: FragmentUpdateMobileBinding
     private lateinit var viewModel: MobileViewModel
+    private lateinit var progressViewModel: ProgressViewModel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         sessionManager = SessionManager.getInstance(context)
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
     }
 
     override fun onCreateView(
@@ -49,7 +44,6 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
         super.onCreateView(inflater, container, savedInstanceState)
 
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_update_mobile, container, false)
-
         return binding.root
     }
 
@@ -60,22 +54,43 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
             ViewModelProvider(this).get(MobileViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
+        connectionLiveData.observe(viewLifecycleOwner) {
+            viewModel.isNetworkAvailable.value = it
+        }
+        context?.isConnected?.let {
+            viewModel.isNetworkAvailable.value = it
+        }
+
+        progressViewModel = activity?.run {
+            ViewModelProvider(this).get(ProgressViewModel::class.java)
+        } ?: throw Exception("Invalid activity")
+
         binding.viewModel = viewModel
+        binding.handler = this
+        // Set the binding's lifecycle (otherwise Live Data won't work properly)
+        binding.lifecycleOwner = viewLifecycleOwner
 
-
+        viewModel.counterLiveData.observe(viewLifecycleOwner) {
+            binding.requestCode.text = if (it == 0) {
+                getString(R.string.mobile_request_code)
+            } else {
+                getString(R.string.mobile_code_counter, it)
+            }
+        }
 
         viewModel.codeSent.observe(viewLifecycleOwner) {
+            progressViewModel.off()
             when (it) {
                 is Result.LocalizedError -> toast(it.msgId)
                 is Result.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is Result.Success -> {
-                    startCounting()
                     toast("验证码已发送")
                 }
             }
         }
 
         viewModel.mobileUpdated.observe(viewLifecycleOwner) {
+            progressViewModel.off()
             when (it) {
                 is Result.LocalizedError -> toast(it.msgId)
                 is Result.Error -> it.exception.message?.let { msg -> toast(msg) }
@@ -87,31 +102,20 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
                 }
             }
         }
+    }
 
-        binding.requestCode.onClick {
-
-            sessionManager.loadAccount()?.let {
-                viewModel.requestCode(it)
-            }
-        }
-
-        binding.btnSave.onClick {
-
+    fun onClickRequestCode(view: View) {
+        info("Request code button clicked")
+        progressViewModel.on()
+        sessionManager.loadAccount()?.let {
+            viewModel.requestCode(it)
         }
     }
 
-    private fun startCounting() {
-        binding.requestCode.isEnabled = false
-
-
-        launch(Dispatchers.Main) {
-            for (i in 60 downTo 1) {
-                binding.requestCode.text = "重新获取{$i}s"
-                delay(1000)
-            }
-
-            binding.requestCode.isEnabled = true
-            binding.requestCode.text = "获取验证码"
+    fun onSubmitForm(view: View) {
+        progressViewModel.on()
+        sessionManager.loadAccount()?.let {
+            viewModel.updateMobile(it)
         }
     }
 
