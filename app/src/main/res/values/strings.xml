@@ -342,6 +342,11 @@
     <string name="iap_refresh_success">App Store订阅以已更新</string>
     <string name="iap_refresh_failed">无法更新苹果内购的订阅</string>
 
+    <string name="mobile_phone">手机号</string>
+    <string name="phone_mainland_only">仅限中国大陆地区</string>
+    <string name="mobile_verification_code">验证码</string>
+    <string name="mobile_request_code">获取验证码</string>
+    <string name="mobile_code_counter">重新获取%1$ds</string>
     <!-- List of orders -->
     <string name="refreshing_data">更新数据&#8230;</string>
     <string name="refreshing_account">更新账号数据&#8230;</string>
