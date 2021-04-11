@@ -13,8 +13,12 @@ import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.parseException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 class MobileViewModel : ViewModel(), AnkoLogger {
 
@@ -26,6 +30,10 @@ class MobileViewModel : ViewModel(), AnkoLogger {
         addRule("请输入正确的手机号码") {
             !Validator.isMainlandPhone(it)
         }
+        addRule("") {
+            // If the input number is the the same as the current one.
+            AccountCache.get()?.mobile == it
+        }
     }
 
     val codeLiveData = MutableLiveData("")
@@ -33,34 +41,60 @@ class MobileViewModel : ViewModel(), AnkoLogger {
         addRule("请输入验证码") { it.isNullOrBlank()}
     }
 
-    val isFormValidMediator = MediatorLiveData<Boolean>()
+    // Used to toggle button enabled state only.
+    // Progress indicator is controlled by hosting activity.
+    val progressLiveData = MutableLiveData<Boolean>()
+
+    val counterLiveData = MutableLiveData<Int>()
+
+    private val formValidator = LiveDataValidatorResolver(listOf(mobileValidator, codeValidator))
+
+    val isCodeRequestEnabled = MediatorLiveData<Boolean>().apply {
+        addSource(mobileLiveData) {
+            value = enableCodeRequest()
+            info("isCodeRequestEnabled : mobileLiveData : $value")
+        }
+        addSource(progressLiveData) {
+            value = enableCodeRequest()
+            info("isCodeRequestEnabled : progressLiveData : $value")
+        }
+        addSource(counterLiveData) {
+            value = enableCodeRequest()
+            info("isCodeRequestEnabled : counterLiveData : $value")
+        }
+    }
+
+    val isFormEnabled = MediatorLiveData<Boolean>().apply {
+        addSource(mobileLiveData) {
+            value = enableForm()
+        }
+        addSource(codeLiveData) {
+            value = enableForm()
+        }
+        addSource(progressLiveData) {
+            value = enableForm()
+        }
+    }
 
     init {
-        isFormValidMediator.value = false
-        isFormValidMediator.addSource(mobileLiveData) {
-            validateForm()
-        }
-        isFormValidMediator.addSource(codeLiveData) {
-            validateForm()
-        }
+        progressLiveData.value = false
+        isFormEnabled.value = false
+        counterLiveData.value = 0
     }
 
-    fun validateForm() {
-        val validators = listOf(mobileValidator, codeValidator)
-        val validatorResolver = LiveDataValidatorResolver(validators)
-        isFormValidMediator.value = validatorResolver.isValid()
+    private fun enableCodeRequest(): Boolean {
+        if (counterLiveData.value != 0) {
+            return false
+        }
+        return progressLiveData.value == false && mobileValidator.isValid()
     }
 
-    private var mobile = ""
-    private var code = ""
-    private var prevState = MobileFormState()
+    private fun enableForm(): Boolean {
+        return progressLiveData.value == false && formValidator.isValid()
+    }
 
     val isNetworkAvailable: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
-    }
-
-    val formState: MutableLiveData<MobileFormState> by lazy {
-        MutableLiveData<MobileFormState>()
     }
 
     val codeSent: MutableLiveData<Result<Boolean>> by lazy {
@@ -71,50 +105,13 @@ class MobileViewModel : ViewModel(), AnkoLogger {
         MutableLiveData<Result<BaseAccount>>()
     }
 
-    fun validateMobile(m: String) {
-        if (m == AccountCache.get()?.mobile) {
-            return
+    private fun startCounting() {
+        viewModelScope.launch(Dispatchers.Main) {
+            for (i in 60 downTo 0) {
+                counterLiveData.value = i
+                delay(1000)
+            }
         }
-
-        mobile = m
-
-        if (!Validator.isMainlandPhone(m)) {
-            formState.value = MobileFormState(
-                errMsg = R.string.error_invalid_mobile,
-                errField = MobileFormField.Phone,
-                mobileValid = false,
-                codeValid = prevState.codeValid,
-            )
-
-            return
-        }
-
-        formState.value = MobileFormState(
-            errMsg = null,
-            errField = null,
-            mobileValid = true,
-            codeValid = prevState.codeValid,
-        )
-    }
-
-    fun validateCode(c: String) {
-        code = c
-        if (!Validator.validateCode(c)) {
-            formState.value = MobileFormState(
-                errMsg = R.string.error_invalid_code,
-                errField = MobileFormField.Code,
-                mobileValid = prevState.mobileValid,
-                codeValid = false,
-            )
-            return
-        }
-
-        formState.value = MobileFormState(
-            errMsg = null,
-            errField = null,
-            mobileValid = prevState.mobileValid,
-            codeValid = true,
-        )
     }
 
     fun requestCode(account: Account) {
@@ -123,12 +120,22 @@ class MobileViewModel : ViewModel(), AnkoLogger {
             return
         }
 
+        info("Requesting code for ${mobileLiveData.value}")
+        progressLiveData.value = true
+        startCounting()
+
         viewModelScope.launch {
             try {
-
+                withContext(Dispatchers.IO) {
+                    for (i in 0 until 10) {
+                        delay(1000)
+                    }
+                }
                 codeSent.value = Result.Success(true)
+                progressLiveData.value = false
             } catch (e: Exception) {
                 codeSent.value = parseException(e)
+                progressLiveData.value = false
             }
         }
     }
@@ -139,11 +146,30 @@ class MobileViewModel : ViewModel(), AnkoLogger {
             return
         }
 
+        progressLiveData.value = true
+        info("Mobile ${mobileLiveData.value}, code ${codeLiveData.value}")
+
         viewModelScope.launch {
             try {
-
+                withContext(Dispatchers.IO) {
+                    for (i in 0 until 10) {
+                        delay(1000)
+                    }
+                }
+                mobileUpdated.value = Result.Success(BaseAccount(
+                    id = "",
+                    unionId = null,
+                    stripeId = null,
+                    email = "",
+                    mobile = null,
+                    userName = null,
+                    avatarUrl = null,
+                    isVerified = false,
+                ))
+                progressLiveData.value = false
             } catch (e: Exception) {
                 mobileUpdated.value = parseException(e)
+                progressLiveData.value = false
             }
         }
     }
