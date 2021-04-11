@@ -10,13 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentUpdateAddressBinding
-import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.afterTextChanged
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.viewmodel.ProgressViewModel
 import com.ft.ftchinese.viewmodel.Result
-import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
 /**
@@ -25,9 +24,10 @@ import org.jetbrains.anko.support.v4.toast
  * create an instance of this fragment.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class UpdateAddressFragment : ScopedFragment() {
+class UpdateAddressFragment : ScopedFragment(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
+    private lateinit var progressViewModel: ProgressViewModel
     private lateinit var viewModel: AddressViewModel
     private lateinit var binding: FragmentUpdateAddressBinding
 
@@ -42,9 +42,6 @@ class UpdateAddressFragment : ScopedFragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_update_address, container, false)
-        binding.address = Address()
-        binding.inputEnabled = true
-        binding.btnEnabled = false
         // Inflate the layout for this fragment
         return binding.root
     }
@@ -57,6 +54,11 @@ class UpdateAddressFragment : ScopedFragment() {
                 .get(AddressViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
+        progressViewModel = activity?.run {
+            ViewModelProvider(this)
+                .get(ProgressViewModel::class.java)
+        } ?: throw Exception("Invalid activity")
+
         connectionLiveData.observe(viewLifecycleOwner) {
             viewModel.isNetworkAvailable.value = it
         }
@@ -64,97 +66,44 @@ class UpdateAddressFragment : ScopedFragment() {
             viewModel.isNetworkAvailable.value = it
         }
 
-        sessionManager.loadAccount()?.let {
-            viewModel.loadAddress(it)
-        }
+        binding.viewModel = viewModel
+        binding.handler = this
+        binding.lifecycleOwner = viewLifecycleOwner
 
         viewModel.addressRetrieved.observe(viewLifecycleOwner) {
-            binding.inputEnabled = true
-
+            progressViewModel.off()
             when (it) {
                 is Result.LocalizedError -> toast(it.msgId)
                 is Result.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is Result.Success -> {
-                    binding.address = it.data
                 }
-            }
-        }
-
-        viewModel.formState.observe(viewLifecycleOwner) {
-            when (it.status) {
-                FormStatus.Intact, FormStatus.Invalid -> {
-                    binding.btnEnabled = false
-                    val control = when (it.field) {
-                        AddressField.Province -> binding.inputProvince
-                        AddressField.City -> binding.inputCity
-                        AddressField.District -> binding.inputDistrict
-                        AddressField.Street -> binding.inputStreet
-                        AddressField.Postcode -> binding.inputPostcode
-                        else -> null
-                    }
-
-                    if (control == null) {
-                        it.error?.let { msg -> toast(msg) }
-                        return@observe
-                    }
-
-                    it.error?.let { msg ->
-                        control.apply {
-                            error = getString(msg)
-                            requestFocus()
-                        }
-                    }
-                }
-                FormStatus.Changed -> {
-                    binding.btnEnabled = true
-                }
-            }
-        }
-
-        binding.inputProvince.afterTextChanged {
-            viewModel.changeProvince(it)
-        }
-
-        binding.inputCity.afterTextChanged {
-            viewModel.changeCity(it)
-        }
-
-        binding.inputDistrict.afterTextChanged {
-            viewModel.changeDistrict(it)
-        }
-
-        binding.inputStreet.afterTextChanged {
-            viewModel.changeStreet(it)
-        }
-
-        binding.inputPostcode.afterTextChanged {
-            viewModel.changePostcode(it)
-        }
-
-        binding.btnSave.onClick {
-            sessionManager.loadAccount()?.let {
-                viewModel.inProgress.value = true
-                binding.inputEnabled = false
-                binding.btnEnabled = false
-
-                viewModel.updateAddress(it)
             }
         }
 
         viewModel.addressUpdated.observe(viewLifecycleOwner) {
-            viewModel.inProgress.value = false
+            progressViewModel.off()
             when (it) {
                 is Result.LocalizedError -> {
-                    binding.inputEnabled = true
-                    binding.btnEnabled = true
+                    toast(it.msgId)
                 }
                 is Result.Error -> {
                     it.exception.message?.let { msg -> toast(msg) }
-                    binding.inputEnabled = true
-                    binding.btnEnabled = true
                 }
                 is Result.Success -> toast(R.string.prompt_saved)
             }
+        }
+
+        sessionManager.loadAccount()?.let {
+            progressViewModel.on()
+            viewModel.loadAddress(it)
+        }
+    }
+
+    fun onSubmitForm(view: View) {
+        progressViewModel.on()
+        sessionManager.loadAccount()?.let {
+
+            viewModel.updateAddress(it)
         }
     }
 
@@ -165,7 +114,6 @@ class UpdateAddressFragment : ScopedFragment() {
          *UpdateAddressFragment.
          */
         @JvmStatic
-        fun newInstance() =
-            UpdateAddressFragment()
+        fun newInstance() = UpdateAddressFragment()
     }
 }

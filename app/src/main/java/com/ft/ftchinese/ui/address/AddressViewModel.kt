@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.address
 
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,137 +8,140 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.repository.AccountRepo
-import com.ft.ftchinese.ui.validator.Validator
+import com.ft.ftchinese.ui.validator.LiveDataValidator
+import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
 class AddressViewModel : ViewModel(), AnkoLogger {
-
-    val inProgress: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>()
-    }
-
-    private var previous = Address()
-    private var updated = Address()
-
     val isNetworkAvailable: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
 
-    val formState: MutableLiveData<AddressFormState> by lazy {
-        MutableLiveData<AddressFormState>()
-    }
-
-    fun changeProvince(p: String) {
-        val err = Validator.ensureLength(p, 0, 8)
-        if (err != null) {
-            formState.value = AddressFormState(
-                error = err,
-                field = AddressField.Province,
-                status = FormStatus.Invalid,
-            )
-            return
-        }
-
-        updated = updated.withProvince(p)
-        ensureSavable()
-    }
-
-    fun changeCity(c: String) {
-        // The longest one: 克孜勒苏柯尔克孜自治州
-        val err = Validator.ensureLength(c, 0, 16)
-        if (err != null) {
-            formState.value = AddressFormState(
-                error = err,
-                field = AddressField.City,
-                status = FormStatus.Invalid,
-            )
-            return
-        }
-
-        updated = updated.withCity(c)
-        ensureSavable()
-    }
-
-    fun changeDistrict(d: String) {
-        val err = Validator.ensureLength(d, 0, 16)
-        if (err != null) {
-            formState.value = AddressFormState(
-                error = err,
-                field = AddressField.District,
-                status = FormStatus.Invalid,
-            )
-            return
-        }
-
-        updated = updated.withDistrict(d)
-        ensureSavable()
-    }
-
-    fun changeStreet(s: String) {
-        val err = Validator.ensureLength(s, 0, 512)
-        if (err != null) {
-            formState.value = AddressFormState(
-                error = err,
-                field = AddressField.Street,
-                status = FormStatus.Invalid,
-            )
-            return
-        }
-
-        updated = updated.withStreet(s)
-        ensureSavable()
-    }
-
-    fun changePostcode(pc: String) {
-        val err = Validator.ensureLength(pc, 0, 16)
-        if (err != null) {
-            formState.value = AddressFormState(
-                error = err,
-                field = AddressField.Postcode,
-                status = FormStatus.Invalid,
-            )
-            return
-        }
-
-        updated = updated.withPostcode(pc)
-        ensureSavable()
-    }
-
-    private fun ensureSavable() {
-
-        if (updated == previous) {
-            formState.value = AddressFormState()
-            return
-        }
-
-        if (updated.province.isNullOrBlank() || updated.city.isNullOrBlank() || updated.district.isNullOrBlank() || updated.street.isNullOrBlank() || updated.postcode.isNullOrBlank()) {
-            formState.value = AddressFormState(
-                error = null,
-                field = null,
-                status = FormStatus.Invalid
-            )
-
-            return
-        }
-
-        formState.value = AddressFormState(
-            error = null,
-            field = null,
-            status = FormStatus.Changed,
+    private var current = Address()
+    private val updated: Address
+        get() = Address(
+            province = provinceLiveData.value,
+            city = cityLiveData.value,
+            district = districtLiveData.value,
+            street = streetLiveData.value,
+            postcode = postCodeLiveData.value
         )
+
+    val provinceLiveData = MutableLiveData("")
+    val provinceValidator = LiveDataValidator(provinceLiveData).apply {
+        addRule("") {
+            it.isNullOrBlank()
+        }
+        addRule("输入内容过长") {
+            it?.length?.let { len ->
+                len > 8
+            } ?: true
+        }
+    }
+
+    val cityLiveData = MutableLiveData("")
+    val cityValidator = LiveDataValidator(cityLiveData).apply {
+        addRule("") {
+            it.isNullOrBlank()
+        }
+        addRule("输入内容过长") {
+            it?.length?.let { len ->
+                len > 16
+            } ?: true
+        }
+    }
+
+    val districtLiveData = MutableLiveData("")
+    val districtValidator = LiveDataValidator(districtLiveData).apply {
+        addRule("") {
+            it.isNullOrBlank()
+        }
+        addRule("输入内容过长") {
+            it?.length?.let { len ->
+                len > 16
+            } ?: true
+        }
+    }
+
+    val streetLiveData = MutableLiveData("")
+    val streetValidator = LiveDataValidator(streetLiveData).apply {
+        addRule("") {
+            it.isNullOrBlank()
+        }
+        addRule("输入内容过长") {
+            it?.length?.let { len ->
+                len > 128
+            } ?: true
+        }
+    }
+
+    val postCodeLiveData = MutableLiveData("")
+    val postCodeValidator = LiveDataValidator(postCodeLiveData).apply {
+        addRule("") {
+            it.isNullOrBlank()
+        }
+        addRule("输入内容过长") {
+            it?.length?.let { len ->
+                len > 16
+            } ?: true
+        }
+    }
+
+    val progressLiveData = MutableLiveData<Boolean>()
+
+    private val formValidator = LiveDataValidatorResolver(listOf(
+        provinceValidator,
+        cityValidator,
+        districtValidator,
+        streetValidator,
+        postCodeValidator,
+    ))
+
+    val isFormValid = MediatorLiveData<Boolean>().apply {
+        addSource(provinceLiveData) {
+            value = enableForm()
+        }
+        addSource(cityLiveData) {
+            value = enableForm()
+        }
+        addSource(districtLiveData) {
+            value = enableForm()
+        }
+        addSource(streetLiveData) {
+            value = enableForm()
+        }
+        addSource(postCodeLiveData) {
+            value = enableForm()
+        }
+        addSource(progressLiveData) {
+            value = enableForm()
+        }
+    }
+
+    private fun enableForm(): Boolean {
+        info("should enable form")
+        if (progressLiveData.value == true) {
+            return false
+        }
+
+        info("Current address $current, updated address $updated")
+        return formValidator.isValid()
+    }
+
+    init {
+        progressLiveData.value = false
+        isFormValid.value = false
     }
 
     val addressRetrieved: MutableLiveData<Result<Address>> by lazy {
         MutableLiveData<Result<Address>>()
-    }
-
-    val addressUpdated: MutableLiveData<Result<Boolean>> by lazy {
-        MutableLiveData<Result<Boolean>>()
     }
 
     fun loadAddress(account: Account) {
@@ -146,26 +150,60 @@ class AddressViewModel : ViewModel(), AnkoLogger {
             return
         }
 
+        progressLiveData.value = true
+
         viewModelScope.launch {
             try {
                 val address = withContext(Dispatchers.IO) {
                     AccountRepo.loadAddress(account.id)
                 } ?: return@launch
 
-                previous = address
+                current = address
+
+                provinceLiveData.value = address.province
+                cityLiveData.value = address.city
+                districtLiveData.value = address.district
+                streetLiveData.value = address.street
+                postCodeLiveData.value = address.postcode
+
+                progressLiveData.value = false
 
                 addressRetrieved.value = Result.Success(address)
             } catch (e: Exception) {
                 addressRetrieved.value = parseException(e)
+
+                progressLiveData.value = false
             }
         }
     }
 
+    val addressUpdated: MutableLiveData<Result<Boolean>> by lazy {
+        MutableLiveData<Result<Boolean>>()
+    }
+
+    private fun hasChanged(): Boolean {
+        return current.province != provinceLiveData.value
+            || current.city != cityLiveData.value
+            || current.district != districtLiveData.value
+            || current.street != streetLiveData.value
+            || current.postcode != postCodeLiveData.value
+    }
+
     fun updateAddress(account: Account) {
-        if (isNetworkAvailable.value != true) {
-            addressRetrieved.value = Result.LocalizedError(R.string.prompt_no_network)
+        info("Start updating address $updated")
+
+        if (!hasChanged()) {
+            info("Address not changed.")
+            addressUpdated.value = Result.Success(true)
             return
         }
+
+        if (isNetworkAvailable.value != true) {
+            addressUpdated.value = Result.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
+        progressLiveData.value = true
 
         viewModelScope.launch {
             try {
@@ -174,8 +212,10 @@ class AddressViewModel : ViewModel(), AnkoLogger {
                 }
 
                 addressUpdated.value = Result.Success(ok)
+                progressLiveData.value = false
             } catch (e: Exception) {
                 addressUpdated.value = parseException(e)
+                progressLiveData.value = false
             }
         }
     }

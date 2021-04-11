@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".ui.address.UpdateAddressFragment">
+    tools:context=".ui.address.UpdateAddressFragment"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
         <variable
-            name="address"
-            type="com.ft.ftchinese.model.reader.Address" />
-
+            name="handler"
+            type="com.ft.ftchinese.ui.address.UpdateAddressFragment" />
         <variable
-            name="inputEnabled"
-            type="Boolean" />
-
-        <variable
-            name="btnEnabled"
-            type="Boolean" />
+            name="viewModel"
+            type="com.ft.ftchinese.ui.address.AddressViewModel" />
     </data>
 
     <LinearLayout
@@ -25,7 +21,8 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:error="@{viewModel.provinceValidator.error}">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_province"
@@ -33,15 +30,16 @@
                 android:layout_height="wrap_content"
                 android:hint="省/直辖市"
                 android:inputType="text"
-                android:text="@{address.province}"
+                android:text="@={viewModel.provinceLiveData}"
                 android:maxLines="1"
-                android:enabled="@{inputEnabled}"/>
+                android:enabled="@{!viewModel.progressLiveData}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:error="@{viewModel.cityValidator.error}">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_city"
@@ -49,15 +47,16 @@
                 android:layout_height="wrap_content"
                 android:hint="市"
                 android:inputType="text"
-                android:text="@{address.city}"
+                android:text="@={viewModel.cityLiveData}"
                 android:maxLines="1"
-                android:enabled="@{inputEnabled}"/>
+                android:enabled="@{!viewModel.progressLiveData}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:error="@{viewModel.districtValidator.error}">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_district"
@@ -65,15 +64,16 @@
                 android:layout_height="wrap_content"
                 android:hint="区/县"
                 android:inputType="text"
-                android:text="@{address.district}"
+                android:text="@={viewModel.districtLiveData}"
                 android:maxLines="1"
-                android:enabled="@{inputEnabled}"/>
+                android:enabled="@{!viewModel.progressLiveData}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:error="@{viewModel.streetValidator.error}">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_street"
@@ -81,15 +81,16 @@
                 android:layout_height="wrap_content"
                 android:hint="街道、门牌号"
                 android:inputType="text"
-                android:text="@{address.street}"
+                android:text="@={viewModel.streetLiveData}"
                 android:maxLines="1"
-                android:enabled="@{inputEnabled}"/>
+                android:enabled="@{!viewModel.progressLiveData}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            app:error="@{viewModel.postCodeValidator.error}">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_postcode"
@@ -97,9 +98,9 @@
                 android:layout_height="wrap_content"
                 android:hint="邮编"
                 android:inputType="text"
-                android:text="@{address.postcode}"
+                android:text="@={viewModel.postCodeLiveData}"
                 android:maxLines="1"
-                android:enabled="@{inputEnabled}"/>
+                android:enabled="@{!viewModel.progressLiveData}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -109,7 +110,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_16"
             android:text="@string/btn_save"
-            android:enabled="@{btnEnabled}"/>
+            android:onClick="@{handler::onSubmitForm}"
+            android:enabled="@{viewModel.isFormValid}"/>
     </LinearLayout>
 
 </layout>
