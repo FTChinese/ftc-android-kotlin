@@ -7,7 +7,7 @@ import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
-import com.ft.ftchinese.databinding.ActivityFragmentDoubleBinding
+import com.ft.ftchinese.databinding.ActivityUpdateAccountBinding
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.address.AddressViewModel
@@ -15,6 +15,7 @@ import com.ft.ftchinese.ui.address.UpdateAddressFragment
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.mobile.UpdateMobileFragment
 import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.viewmodel.ProgressViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.UpdateViewModel
 import org.jetbrains.anko.AnkoLogger
@@ -27,14 +28,13 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var sessionManager: SessionManager
     private lateinit var addressViewModel: AddressViewModel
+    private lateinit var progressViewModel: ProgressViewModel
 
-    private lateinit var binding: ActivityFragmentDoubleBinding
+    private lateinit var binding: ActivityUpdateAccountBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_fragment_double)
-
-        binding.inProgress = false
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_update_account)
 
         setSupportActionBar(binding.toolbar.toolbar)
 
@@ -42,6 +42,9 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
         }
+
+        progressViewModel = ViewModelProvider(this)
+            .get(ProgressViewModel::class.java)
 
         updateViewModel = ViewModelProvider(this)
                 .get(UpdateViewModel::class.java)
@@ -61,26 +64,26 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             AccountRowType.EMAIL -> {
                 supportActionBar?.setTitle(R.string.title_change_email)
                 if (sessionManager.loadAccount()?.isVerified == false) {
-                    fm.replace(R.id.double_frag_primary, RequestVerificationFragment.newInstance())
+                    fm.replace(R.id.update_frag_holder, RequestVerificationFragment.newInstance())
                 }
 
-                fm.replace(R.id.double_frag_secondary, UpdateEmailFragment.newInstance())
+                fm.replace(R.id.update_frag_holder, UpdateEmailFragment.newInstance())
             }
             AccountRowType.USER_NAME -> {
                 supportActionBar?.setTitle(R.string.title_change_username)
-                fm.replace(R.id.double_frag_primary, UpdateNameFragment.newInstance())
+                fm.replace(R.id.update_frag_holder, UpdateNameFragment.newInstance())
             }
             AccountRowType.PASSWORD -> {
                 supportActionBar?.setTitle(R.string.title_change_password)
-                fm.replace(R.id.double_frag_primary, UpdatePasswordFragment.newInstance())
+                fm.replace(R.id.update_frag_holder, UpdatePasswordFragment.newInstance())
             }
             AccountRowType.Address -> {
                 supportActionBar?.title = "设置地址"
-                fm.replace(R.id.double_frag_primary, UpdateAddressFragment.newInstance())
+                fm.replace(R.id.update_frag_holder, UpdateAddressFragment.newInstance())
             }
             AccountRowType.MOBILE -> {
                 supportActionBar?.title = "关联手机号码"
-                fm.replace(R.id.double_frag_primary, UpdateMobileFragment.newInstance())
+                fm.replace(R.id.update_frag_holder, UpdateMobileFragment.newInstance())
             }
         }
 
@@ -90,12 +93,16 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun setUp() {
-        updateViewModel.inProgress.observe(this, {
-            binding.inProgress = it
-        })
+//        updateViewModel.inProgress.observe(this, {
+//            binding.inProgress = it
+//        })
 
-        addressViewModel.inProgress.observe(this) {
-            binding.inProgress = it
+//        addressViewModel.inProgress.observe(this) {
+//            binding.inProgress = it
+//        }
+
+        progressViewModel.inProgress.observe(this) {
+            binding.progressing = it
         }
 
         updateViewModel.updateResult.observe(this) {
@@ -110,7 +117,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun onUpdated(result: Result<Boolean>) {
 //        showProgress(false)
-        binding.inProgress = false
+//        binding.inProgress = false
 
         when (result) {
             is Result.LocalizedError -> {
@@ -134,7 +141,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun onAccountRefreshed(result: Result<Account>) {
-        binding.inProgress = false
+//        binding.inProgress = false
 
         when (result) {
             is Result.LocalizedError -> {
