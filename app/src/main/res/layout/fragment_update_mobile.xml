@@ -16,50 +16,57 @@
         android:layout_height="match_parent"
         android:padding="@dimen/space_16">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/mobile_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:error="@{viewModel.mobileValidator.error}"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/mobile_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/mobile_phone"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:enabled="@{!viewModel.progressLiveData}"
-                android:text="@={viewModel.mobileLiveData}"/>
-
-        </com.google.android.material.textfield.TextInputLayout>
-
         <TextView
             android:id="@+id/warning_msg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/phone_mainland_only"
-            app:layout_constraintTop_toBottomOf="@id/mobile_container"/>
+            android:layout_marginBottom="@dimen/space_8"
+            app:layout_constraintBottom_toTopOf="@id/mobile_container"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/mobile_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:error="@{viewModel.mobileValidator.error}"
+            app:layout_constraintTop_toBottomOf="@id/warning_msg"
+            app:layout_constraintBottom_toTopOf="@id/code_container">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/mobile_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="@{!viewModel.progressLiveData}"
+                android:hint="@string/mobile_phone"
+                android:inputType="phone"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:text="@={viewModel.mobileLiveData}" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/code_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_16"
+            android:layout_marginTop="@dimen/space_8"
             app:error="@{viewModel.codeValidator.error}"
-            app:layout_constraintTop_toBottomOf="@id/warning_msg"
+            app:layout_constraintTop_toBottomOf="@id/mobile_container"
+            app:layout_constraintBottom_toTopOf="@id/btn_save"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@id/request_code"
             app:layout_constraintHorizontal_chainStyle="spread">
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/code_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:enabled="@{!viewModel.progressLiveData}"
                 android:hint="@string/mobile_verification_code"
+                android:inputType="number"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:enabled="@{!viewModel.progressLiveData}"
                 android:text="@={viewModel.codeLiveData}" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -85,10 +92,15 @@
             android:text="@string/btn_save"
             android:enabled="@{viewModel.isFormEnabled}"
             android:onClick="@{handler::onSubmitForm}"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/code_container"
             app:layout_constraintVertical_bias="1.0" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_8"
+            android:text="@string/feature_mobile_login"
+            app:layout_constraintTop_toBottomOf="@id/btn_save"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
 
