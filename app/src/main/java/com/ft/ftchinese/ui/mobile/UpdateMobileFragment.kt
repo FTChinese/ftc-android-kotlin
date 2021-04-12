@@ -96,9 +96,12 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
                 is Result.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is Result.Success -> {
                     toast(R.string.prompt_updated)
-                    sessionManager.loadAccount()?.withBaseAccount(it.data)?.let { account ->
-                        sessionManager.saveAccount(account)
-                    }
+                    sessionManager
+                        .loadAccount()
+                        ?.withBaseAccount(it.data)
+                        ?.let { account ->
+                            sessionManager.saveAccount(account)
+                        }
                 }
             }
         }
