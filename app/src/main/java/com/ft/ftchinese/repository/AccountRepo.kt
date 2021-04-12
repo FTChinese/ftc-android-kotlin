@@ -4,6 +4,8 @@ import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.*
+import com.ft.ftchinese.model.request.MobilePhoneParams
+import com.ft.ftchinese.model.request.SMSCodeParams
 
 object AccountRepo {
     private fun loadFtcAccount(ftcId: String): Account? {
@@ -98,8 +100,32 @@ object AccountRepo {
         return resp.code == 204
     }
 
-    fun requestSMSCode() {
+    fun requestSMSCode(account: Account, params: SMSCodeParams): Boolean {
+        val (resp, _) = Fetch()
+            .put("${Endpoint.subsBase(account.isTest)}/account/mobile/verification")
+            .noCache()
+            .setClient()
+            .setUserId(account.id)
+            .sendJson(params.toJsonString())
+            .endJsonText()
 
+        return resp.code == 204
+    }
+
+    fun updateMobile(account: Account, params: MobilePhoneParams): BaseAccount? {
+        val (_, body) = Fetch()
+            .patch("${Endpoint.subsBase(account.isTest)}/account/mobile")
+            .noCache()
+            .setClient()
+            .setUserId(account.id)
+            .sendJson(params.toJsonString())
+            .endJsonText()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<BaseAccount>(body)
+        }
     }
 
     /**
