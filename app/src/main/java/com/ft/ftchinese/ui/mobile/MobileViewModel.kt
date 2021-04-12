@@ -7,6 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.BaseAccount
+import com.ft.ftchinese.model.request.MobilePhoneParams
+import com.ft.ftchinese.model.request.SMSCodeParams
+import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
@@ -76,10 +79,22 @@ class MobileViewModel : ViewModel(), AnkoLogger {
         }
     }
 
+    private val smsCodeParams: SMSCodeParams
+        get() = SMSCodeParams(
+            mobile = mobileLiveData.value ?: "",
+        )
+
+    private val updateMobileParams: MobilePhoneParams
+        get() = MobilePhoneParams(
+            mobile = mobileLiveData.value ?: "",
+            code = codeLiveData.value ?: "",
+        )
+
     init {
         progressLiveData.value = false
         isFormEnabled.value = false
         counterLiveData.value = 0
+        mobileLiveData.value = AccountCache.get()?.mobile
     }
 
     private fun enableCodeRequest(): Boolean {
@@ -126,12 +141,19 @@ class MobileViewModel : ViewModel(), AnkoLogger {
 
         viewModelScope.launch {
             try {
-                withContext(Dispatchers.IO) {
-                    for (i in 0 until 10) {
-                        delay(1000)
-                    }
+                val ok = withContext(Dispatchers.IO) {
+//                    for (i in 0 until 10) {
+//                        delay(1000)
+//                    }
+                    AccountRepo.requestSMSCode(account, smsCodeParams)
                 }
-                codeSent.value = Result.Success(true)
+
+                if (ok) {
+                    codeSent.value = Result.Success(true)
+                } else {
+                    codeSent.value = Result.Error(Exception("Unknown error occurred!"))
+                }
+
                 progressLiveData.value = false
             } catch (e: Exception) {
                 codeSent.value = parseException(e)
@@ -151,21 +173,19 @@ class MobileViewModel : ViewModel(), AnkoLogger {
 
         viewModelScope.launch {
             try {
-                withContext(Dispatchers.IO) {
+                val baseAccount = withContext(Dispatchers.IO) {
                     for (i in 0 until 10) {
                         delay(1000)
                     }
+                    AccountRepo.updateMobile(account,updateMobileParams)
                 }
-                mobileUpdated.value = Result.Success(BaseAccount(
-                    id = "",
-                    unionId = null,
-                    stripeId = null,
-                    email = "",
-                    mobile = null,
-                    userName = null,
-                    avatarUrl = null,
-                    isVerified = false,
-                ))
+
+                if (baseAccount == null) {
+                    mobileUpdated.value = Result.LocalizedError(R.string.error_unknown)
+                } else {
+                    mobileUpdated.value = Result.Success(baseAccount)
+                }
+
                 progressLiveData.value = false
             } catch (e: Exception) {
                 mobileUpdated.value = parseException(e)
