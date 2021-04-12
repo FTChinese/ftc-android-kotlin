@@ -478,7 +478,8 @@
     <string name="current_is_standard">您目前是標準會員</string>
     <string name="not_subscribed_yet">你還不是會員</string>
     <string name="mobile_phone">手機號碼</string>
-    <string name="phone_mainland_only">僅限中國大陸地區</string>
+    <string name="phone_mainland_only">僅限中國大陸地區手機號碼</string>
+    <string name="feature_mobile_login">* 我們將在後續版本推出手機號碼登入功能</string>
     <string name="mobile_code_counter">重新獲取%1$ds</string>
     <string name="mobile_request_code">獲取驗證碼</string>
     <string name="mobile_verification_code">驗證碼</string>

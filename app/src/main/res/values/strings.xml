@@ -343,7 +343,8 @@
     <string name="iap_refresh_failed">无法更新苹果内购的订阅</string>
 
     <string name="mobile_phone">手机号</string>
-    <string name="phone_mainland_only">仅限中国大陆地区</string>
+    <string name="phone_mainland_only">仅限中国大陆地区手机号码</string>
+    <string name="feature_mobile_login">* 我们将在后续版本推出手机号码登录功能</string>
     <string name="mobile_verification_code">验证码</string>
     <string name="mobile_request_code">获取验证码</string>
     <string name="mobile_code_counter">重新获取%1$ds</string>
