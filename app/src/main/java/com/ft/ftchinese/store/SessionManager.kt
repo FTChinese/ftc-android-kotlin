@@ -263,6 +263,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
     }
 
     fun logout() {
+        AccountCache.clear()
         sharedPreferences.edit {
             clear()
         }

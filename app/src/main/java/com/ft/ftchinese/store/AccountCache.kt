@@ -19,4 +19,8 @@ object AccountCache {
     fun updateStripeID(cusID: String) {
         account = account?.withCustomerID(cusID)
     }
+
+    fun clear() {
+        account = null
+    }
 }
