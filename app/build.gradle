@@ -174,7 +174,7 @@ dependencies {
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:26.8.0')
 
-//    implementation 'com.google.firebase:firebase-iid:21.1.0'
+    implementation 'com.google.firebase:firebase-iid:21.0.1'
     implementation 'com.google.firebase:firebase-messaging-ktx'
     implementation 'com.google.android.gms:play-services-analytics:17.0.0'
     implementation 'com.google.firebase:firebase-crashlytics-ktx'
@@ -207,7 +207,7 @@ dependencies {
     implementation "androidx.browser:browser:1.3.0"
     implementation "androidx.preference:preference-ktx:1.1.1"
     implementation "androidx.legacy:legacy-support-v4:$support_version"
-    implementation "androidx.recyclerview:recyclerview:1.2.0"
+    implementation "androidx.recyclerview:recyclerview:1.1.0"
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "com.makeramen:roundedimageview:2.3.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
