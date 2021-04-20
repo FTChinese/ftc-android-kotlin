@@ -185,6 +185,7 @@ data class Teaser(
         }
     }
 
+    @Deprecated("Chnage to open graph")
     fun toStarredArticle(): StarredArticle {
         return StarredArticle(
                 id = id,

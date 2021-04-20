@@ -44,8 +44,8 @@ var androidUserInfo = ${json.toJsonString(account)};
         return this
     }
 
-    fun withStory(story: Story, teaser: Teaser): StoryBuilder {
-        val (shouldHideAd, sponsorTitle) = story.shouldHideAd(teaser)
+    fun withStory(story: Story): StoryBuilder {
+        val (shouldHideAd, sponsorTitle) = story.shouldHideAd(story.teaser)
 
         var body = ""
         var title = ""
@@ -77,7 +77,7 @@ var androidUserInfo = ${json.toJsonString(account)};
         ctx["{story-industry}"] = story.industry
         ctx["{story-main-topic}"] = ""
         ctx["{story-sub-topic}"] = ""
-        ctx["{comments-id}"] = teaser.getCommentsId()
+        ctx["{comments-id}"] = story.teaser?.getCommentsId() ?: ""
         // todo
         ctx["{{story-js-key}}"] = ""
         ctx["{{ad-pollyfill-js}}"] = ""
@@ -130,7 +130,7 @@ var androidUserInfo = ${json.toJsonString(account)};
 
 
 
-        ctx["{comments-order}"] = teaser.getCommentsOrder()
+        ctx["{comments-order}"] = story.teaser?.getCommentsOrder() ?: ""
 
         // side-container
         ctx["{Right-1}"] = ""
@@ -138,11 +138,11 @@ var androidUserInfo = ${json.toJsonString(account)};
         ctx["{related-stories}"] = story.htmlForRelatedStories()
         ctx["{related-topics}"] = story.htmlForRelatedTopics()
 
-        ctx["{ad-zone}"] = story.getAdZone(Teaser.HOME_AD_ZONE, Teaser.DEFAULT_STORY_AD_ZONE, teaser.adZone)
+        ctx["{ad-zone}"] = story.getAdZone(Teaser.HOME_AD_ZONE, Teaser.DEFAULT_STORY_AD_ZONE, story.teaser?.adZone ?: "")
 
         ctx["{ad-mpu}"] = if (shouldHideAd) "" else AdParser.getAdCode(AdPosition.MIDDLE_ONE)
 
-        ctx["{adchID}"] = story.pickAdchID(Teaser.HOME_AD_CH_ID, Teaser.DEFAULT_STORY_AD_CH_ID, teaser)
+        ctx["{adchID}"] = story.pickAdchID(Teaser.HOME_AD_CH_ID, Teaser.DEFAULT_STORY_AD_CH_ID)
 
         this.shouldHideAd = shouldHideAd
 

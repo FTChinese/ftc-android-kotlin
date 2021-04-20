@@ -68,7 +68,7 @@ class ReadArticleFragment : ScopedFragment(),
             holder.itemView.setOnClickListener {
                 ArticleActivity.start(
                     context,
-                    article.toChannelItem()
+                    article.toTeaser()
                 )
             }
         }

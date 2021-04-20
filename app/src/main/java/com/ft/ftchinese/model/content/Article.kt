@@ -2,9 +2,8 @@ package com.ft.ftchinese.model.content
 
 import android.text.format.DateFormat
 import com.beust.klaxon.Json
-import com.ft.ftchinese.database.StarredArticle
-import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.tracking.*
 import org.jetbrains.anko.AnkoLogger
 import java.util.*
@@ -33,88 +32,74 @@ data class RelatedStory(
 )
 
 class Story (
-        val id: String = "",
+    @Json(ignored = true)
+    var teaser: Teaser? = null,
 
-        @Json(name = "fileupdatetime")
-        val createdAt: String,
+    val id: String = "",
 
-        // Used as share's title
-        @Json(name = "cheadline")
-        val titleCN: String,
+    @Json(name = "fileupdatetime")
+    val createdAt: String,
 
-        @Json(name = "clongleadbody")
-        val standfirstCN: String,
+    // Used as share's title
+    @Json(name = "cheadline")
+    val titleCN: String,
 
-        @Json(name = "cbody")
-        val bodyCN: String,
+    @Json(name = "clongleadbody")
+    val standfirstCN: String,
 
-        @Json(name = "eheadline")
-        val titleEN: String = "",
+    @Json(name = "cbody")
+    val bodyCN: String,
 
-        @Json(name = "elongleadbody")
-        val standfirstEN: String = "",
+    @Json(name = "eheadline")
+    val titleEN: String = "",
 
-        @Json(name = "ebody")
-        val bodyEN: String = "",
+    @Json(name = "elongleadbody")
+    val standfirstEN: String = "",
 
-        @Json(name = "ebyline_description")
-        val orgEN: String = "",
+    @Json(name = "ebody")
+    val bodyEN: String = "",
 
-        @Json(name = "cbyline_description")
-        val orgCN: String,
+    @Json(name = "ebyline_description")
+    val orgEN: String = "",
 
-        @Json(name = "cauthor")
-        val authorCN: String,
+    @Json(name = "cbyline_description")
+    val orgCN: String,
 
-        @Json(name = "cbyline_status")
-        val locationCN: String,
+    @Json(name = "cauthor")
+    val authorCN: String,
 
-        @Json(name = "eauthor")
-        val authorEN: String = "",
+    @Json(name = "cbyline_status")
+    val locationCN: String,
 
-        @Json(name = "ebyline_status")
-        val locationEN: String = "",
+    @Json(name = "eauthor")
+    val authorEN: String = "",
 
-        val tag: String,
-        val genre: String,
-        val topic: String,
-        val industry: String,
-        val area: String,
+    @Json(name = "ebyline_status")
+    val locationEN: String = "",
 
-        // 0 - free
-        // 1 - standard
-        // 2 - premium
-        @Json(name = "accessright")
-        val accesibleBy: String,
+    val tag: String,
+    val genre: String,
+    val topic: String,
+    val industry: String,
+    val area: String,
 
-        @Json(name = "last_publish_time")
-        val publishedAt: String,
+    // 0 - free
+    // 1 - standard
+    // 2 - premium
+    @Json(name = "accessright")
+    val accesibleBy: String,
 
-        @Json(name = "story_pic")
-        val cover: StoryPic,
+    @Json(name = "last_publish_time")
+    val publishedAt: String,
 
-        @Json(name = "relative_story")
-        val relatedStory: List<RelatedStory>
+    @Json(name = "story_pic")
+    val cover: StoryPic,
+
+    @Json(name = "relative_story")
+    val relatedStory: List<RelatedStory>
 ) : AnkoLogger {
 
-    fun toStarredArticle(channelItem: Teaser?): StarredArticle {
-        return StarredArticle(
-                id = id,
-                type = channelItem?.type?.toString() ?: "",
-                subType = channelItem?.subType ?: "",
-                title = titleCN,
-                standfirst = standfirstCN,
-                keywords = keywords,
-                imageUrl = cover.smallbutton,
-                audioUrl = channelItem?.audioUrl ?: "",
-                radioUrl = channelItem?.radioUrl ?: "",
-                publishedAt = publishedAt,
-                tier = requireMemberTier()?.toString() ?: "",
-                webUrl = channelItem?.getCanonicalUrl() ?: ""
-        )
-    }
-
-    private fun requireMemberTier(): Tier? {
+    fun requireMemberTier(): Tier? {
         return when (accesibleBy) {
             "0" -> null
             "1" -> Tier.STANDARD
@@ -216,17 +201,17 @@ class Story (
         return ""
     }
 
-    fun pickAdchID(homepageId: String, fallbackId: String, teaser: Teaser): String {
+    fun pickAdchID(homepageId: String, fallbackId: String): String {
 
-        if (!keywords.isBlank()) {
+        if (keywords.isNotBlank()) {
             for (sponsor in SponsorManager.sponsors) {
                 if ((keywords.contains(sponsor.tag) || keywords.contains(sponsor.title)) && sponsor.adid.isNotEmpty()) {
                     return sponsor.adid
                 }
             }
 
-            if (teaser.adId != homepageId) {
-                return teaser.adId
+            if (teaser?.adId != homepageId) {
+                return teaser?.adId ?: ""
             }
 
             if (keywords.contains("lifestyle")) {
@@ -260,14 +245,18 @@ class Story (
             return "1200"
         }
 
-        if (teaser.adId.isNotEmpty()) {
+        if (teaser?.adId.isNullOrBlank()) {
             return fallbackId
         }
         return fallbackId
     }
 
     // Return shouldHideAd and sponsorTitle
-    fun shouldHideAd(teaser: Teaser): Pair<Boolean, String?> {
+    fun shouldHideAd(teaser: Teaser?): Pair<Boolean, String?> {
+        if (teaser == null) {
+            return Pair(false, null)
+        }
+
         if (teaser.hideAd) {
             return Pair(true, null)
         }

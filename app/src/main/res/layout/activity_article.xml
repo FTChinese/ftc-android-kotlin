@@ -12,12 +12,16 @@
             type="Boolean" />
 
         <variable
+            name="isStarring"
+            type="Boolean" />
+
+        <variable
             name="isBilingual"
             type="Boolean" />
 
         <variable
-            name="isStarring"
-            type="Boolean" />
+            name="handler"
+            type="com.ft.ftchinese.ui.article.ArticleActivity" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -54,7 +58,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:button="@null"
-                        android:text="@string/titlebar_cn" />
+                        android:text="@string/titlebar_cn"
+                        android:onClick="@{handler::onClickChinese}"/>
 
                     <RadioButton
                         android:id="@+id/lang_en_btn"
@@ -62,7 +67,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:button="@null"
-                        android:text="@string/titlebar_en" />
+                        android:text="@string/titlebar_en"
+                        android:onClick="@{handler::onClickEnglish}"/>
 
                     <RadioButton
                         android:id="@+id/lang_bi_btn"
@@ -70,7 +76,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:button="@null"
-                        android:text="@string/titlebar_bilingual" />
+                        android:text="@string/titlebar_bilingual"
+                        android:onClick="@{handler::onClickBilingual}"/>
                 </RadioGroup>
 
             </androidx.appcompat.widget.Toolbar>
@@ -91,7 +98,8 @@
             android:layout_margin="8dp"
             android:layout_gravity="bottom|end"
             app:fabSize="mini"
-            android:src="@{isStarring ? @drawable/ic_bookmark_black_24dp : @drawable/ic_bookmark_border_black_24dp}"/>
+            android:src="@{isStarring ? @drawable/ic_bookmark_black_24dp : @drawable/ic_bookmark_border_black_24dp}"
+            android:onClick="@{handler::onClickBookmark}"/>
 
         <androidx.core.widget.ContentLoadingProgressBar
             android:id="@+id/progress_bar"

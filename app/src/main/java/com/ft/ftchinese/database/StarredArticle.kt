@@ -3,6 +3,8 @@ package com.ft.ftchinese.database
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.ft.ftchinese.model.content.ArticleType
+import com.ft.ftchinese.model.content.OpenGraphMeta
+import com.ft.ftchinese.model.content.Story
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.model.enums.Tier
@@ -84,24 +86,20 @@ data class StarredArticle(
 
     fun toReadArticle(): ReadArticle {
         return ReadArticle(
-                id = id,
-                type = type,
-                subType = subType,
-                title = title,
-                standfirst = standfirst,
-                keywords = keywords,
-                imageUrl = imageUrl,
-                audioUrl = audioUrl,
-                radioUrl = radioUrl,
-                publishedAt = publishedAt,
-                readAt = formatSQLDateTime(LocalDateTime.now()),
-                tier = tier,
-                webUrl = webUrl
+            id = id,
+            type = type,
+            subType = subType,
+            title = title,
+            standfirst = standfirst,
+            keywords = keywords,
+            imageUrl = imageUrl,
+            audioUrl = audioUrl,
+            radioUrl = radioUrl,
+            publishedAt = publishedAt,
+            readAt = formatSQLDateTime(LocalDateTime.now()),
+            tier = tier,
+            webUrl = webUrl
         )
-    }
-
-    private fun requireMembership(): Boolean {
-        return (tier == Tier.STANDARD.toString()) || (tier == Tier.PREMIUM.toString())
     }
 
     fun permission(): Permission {
@@ -128,8 +126,58 @@ data class StarredArticle(
         return true
     }
 
-    fun isFree(): Boolean {
-        return !requireMembership() && !isSevenDaysOld()
+    companion object {
+        @JvmStatic
+        fun fromStory(story: Story): StarredArticle {
+            return StarredArticle(
+                id = story.id,
+                type = story.teaser?.type?.toString() ?: "",
+                subType = story.teaser?.subType ?: "",
+                title = story.titleCN,
+                standfirst = story.standfirstCN,
+                keywords = story.keywords,
+                imageUrl = story.cover.smallbutton,
+                audioUrl = story.teaser?.audioUrl ?: "",
+                radioUrl = story.teaser?.radioUrl ?: "",
+                publishedAt = story.publishedAt,
+                tier = story.requireMemberTier()?.toString() ?: "",
+                webUrl = story.teaser?.getCanonicalUrl() ?: ""
+            )
+        }
+
+        @JvmStatic
+        fun fromOpenGraph(og: OpenGraphMeta, teaser: Teaser?): StarredArticle {
+            return StarredArticle(
+                id = if (teaser?.id.isNullOrBlank()) {
+                    og.extractId()
+                } else {
+                    teaser?.id
+                } ?: "",
+                type = if (teaser?.type == null) {
+                    og.extractType()
+                } else {
+                    teaser.type.toString()
+                } ,
+                subType = teaser?.subType ?: "",
+                title = if (teaser?.title.isNullOrBlank()) {
+                    og.title
+                } else {
+                    teaser?.title
+                } ?: "",
+                standfirst = og.description,
+                keywords = teaser?.tag ?: og.keywords,
+                imageUrl = og.image,
+                audioUrl = teaser?.audioUrl ?: "",
+                radioUrl = teaser?.radioUrl ?: "",
+                webUrl = teaser?.getCanonicalUrl() ?: og.url,
+                tier =  when {
+                    og.keywords.contains("会员专享") -> Tier.STANDARD.toString()
+                    og.keywords.contains("高端专享") -> Tier.PREMIUM.toString()
+                    else -> ""
+                },
+                isWebpage = true
+            )
+        }
     }
 }
 

@@ -4,9 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.ft.ftchinese.model.content.ArticleType
+import com.ft.ftchinese.model.content.Story
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.enums.Tier
-import java.util.*
+import com.ft.ftchinese.model.fetch.formatSQLDateTime
+import org.threeten.bp.LocalDateTime
 
 @Entity(
         tableName = "reading_history",
@@ -15,87 +16,85 @@ import java.util.*
         ]
 )
 data class ReadArticle(
-        @PrimaryKey(autoGenerate = true)
-        val _id: Int = 0,
+    @PrimaryKey(autoGenerate = true)
+    val _id: Int = 0,
 
-        @ColumnInfo
-        val id: String,
+    @ColumnInfo
+    val id: String,
 
-        @ColumnInfo
-        val type: String,
+    @ColumnInfo
+    val type: String,
 
-        @ColumnInfo(name = "sub_type")
-        val subType: String,
+    @ColumnInfo(name = "sub_type")
+    val subType: String,
 
-        @ColumnInfo
-        val title: String,
+    @ColumnInfo
+    val title: String,
 
-        @ColumnInfo
-        val standfirst: String,
+    @ColumnInfo
+    val standfirst: String,
 
-        @ColumnInfo
-        val keywords: String = "",
+    @ColumnInfo
+    val keywords: String = "",
 
-        @ColumnInfo(name = "image_url")
-        val imageUrl: String = "",
+    @ColumnInfo(name = "image_url")
+    val imageUrl: String = "",
 
-        @ColumnInfo(name = "audio_url")
-        val audioUrl: String = "",
+    @ColumnInfo(name = "audio_url")
+    val audioUrl: String = "",
 
-        @ColumnInfo(name = "radio_url")
-        val radioUrl: String = "",
+    @ColumnInfo(name = "radio_url")
+    val radioUrl: String = "",
 
-        @ColumnInfo(name = "published_at")
-        val publishedAt: String,
+    @ColumnInfo(name = "published_at")
+    val publishedAt: String,
 
-        @ColumnInfo(name = "read_at")
-        val readAt: String = "",
+    @ColumnInfo(name = "read_at")
+    val readAt: String = "",
 
-        @ColumnInfo(name = "tier")
-        var tier: String = "", // "", standard, premium
+    @ColumnInfo(name = "tier")
+    var tier: String = "", // "", standard, premium
 
-        @ColumnInfo(name = "canonical_url")
-        var webUrl: String = "",
+    @ColumnInfo(name = "canonical_url")
+    var webUrl: String = "",
 
-        @ColumnInfo(name = "is_webpage")
-        var isWebpage: Boolean = false
+    @ColumnInfo(name = "is_webpage")
+    var isWebpage: Boolean = false
 ) {
 
-    fun toChannelItem(): Teaser {
+    fun toTeaser(): Teaser {
         return Teaser(
-                id = id,
-                type = ArticleType.fromString(type),
-                subType = subType,
-                title = title,
-                audioUrl = audioUrl,
-                radioUrl = radioUrl,
-                publishedAt = publishedAt,
-                tag = keywords,
-                webUrl = webUrl
+            id = id,
+            type = ArticleType.fromString(type),
+            subType = subType,
+            title = title,
+            audioUrl = audioUrl,
+            radioUrl = radioUrl,
+            publishedAt = publishedAt,
+            tag = keywords,
+            webUrl = webUrl
         )
     }
 
-    private fun requireMembership(): Boolean {
-        return (tier == Tier.STANDARD.toString()) || (tier == Tier.PREMIUM.toString())
-    }
-
-    private fun isSevenDaysOld(): Boolean {
-        if (publishedAt.isBlank()) {
-            return false
+    companion object {
+        @JvmStatic
+        fun fromStory(story: Story): ReadArticle {
+            return ReadArticle(
+                id = story.id,
+                type = story.teaser?.type?.toString() ?: "",
+                subType = story.teaser?.subType ?: "",
+                title = story.titleCN,
+                standfirst = story.standfirstCN,
+                keywords = story.keywords,
+                imageUrl = story.cover.smallbutton,
+                audioUrl = story.teaser?.audioUrl ?: "",
+                radioUrl = story.teaser?.radioUrl ?: "",
+                publishedAt = story.publishedAt,
+                readAt = formatSQLDateTime(LocalDateTime.now()),
+                tier = story.requireMemberTier()?.toString() ?: "",
+                webUrl = story.teaser?.getCanonicalUrl() ?: "",
+            )
         }
-
-        val sevenDaysLater = Date((publishedAt.toLong() + 7 * 24 * 60 * 60) * 1000)
-        val now = Date()
-
-        if (sevenDaysLater.after(now)) {
-            return false
-        }
-
-        return true
-    }
-
-    fun isFree(): Boolean {
-        return !requireMembership() && !isSevenDaysOld()
     }
 }
 

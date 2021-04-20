@@ -12,6 +12,7 @@ import android.webkit.WebView
 import androidx.core.os.bundleOf
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
+import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.repository.Config
@@ -79,7 +80,10 @@ class WebContentFragment : ScopedFragment(),
         articleViewModel = activity?.run {
             ViewModelProvider(
                 this,
-                ArticleViewModelFactory(cache, sessionManager.loadAccount())
+                ArticleViewModelFactory(
+                    cache,
+                    ArticleDb.getInstance(requireContext())
+                )
             )
                 .get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
@@ -142,15 +146,10 @@ class WebContentFragment : ScopedFragment(),
         // Get the minimal information of an article.
         val article = teaser?.toStarredArticle() ?: return
 
-        articleViewModel.articleLoaded.value = article
+        // TODO: delete this.
+//        articleViewModel.articleLoaded.value = article
         // Tell parent to hide progress bar
         articleViewModel.inProgress.value = false
-    }
-
-    @JavascriptInterface
-    fun onScrollTo(x: Int, y: Int) {
-        info("Position: $x, $y")
-        webView?.scrollTo(0, 0)
     }
 
     companion object {

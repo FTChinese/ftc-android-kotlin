@@ -8,19 +8,20 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.core.app.TaskStackBuilder
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.databinding.ActivityArticleBinding
 import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Permission
@@ -34,8 +35,6 @@ import com.ft.ftchinese.ui.share.SocialApp
 import com.ft.ftchinese.ui.share.SocialAppId
 import com.ft.ftchinese.ui.share.SocialShareFragment
 import com.ft.ftchinese.ui.share.SocialShareViewModel
-import com.ft.ftchinese.viewmodel.ReadArticleViewModel
-import com.ft.ftchinese.viewmodel.StarArticleViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
@@ -67,8 +66,6 @@ class ArticleActivity : ScopedAppActivity(),
 
     private lateinit var wxApi: IWXAPI
     private lateinit var articleViewModel: ArticleViewModel
-    private lateinit var readViewModel: ReadArticleViewModel
-    private lateinit var starViewModel: StarArticleViewModel
     private lateinit var shareViewModel: SocialShareViewModel
     private lateinit var wvViewModel: WVViewModel
 
@@ -79,14 +76,14 @@ class ArticleActivity : ScopedAppActivity(),
     private var teaser: Teaser? = null
 
     // The data used for share
+    @Deprecated("")
     private var article: StarredArticle? = null
-
-    private var isStarring = false
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_article)
+
+        binding.handler = this
 
         setSupportActionBar(binding.articleToolbar)
         supportActionBar?.apply {
@@ -120,18 +117,12 @@ class ArticleActivity : ScopedAppActivity(),
             this,
             ArticleViewModelFactory(
                 cache,
-                sessionManager.loadAccount()
+                ArticleDb.getInstance(this)
             )
         ).get(ArticleViewModel::class.java)
 
         wvViewModel = ViewModelProvider(this)
             .get(WVViewModel::class.java)
-
-        readViewModel = ViewModelProvider(this)
-            .get(ReadArticleViewModel::class.java)
-
-        starViewModel = ViewModelProvider(this)
-            .get(StarArticleViewModel::class.java)
 
         shareViewModel = ViewModelProvider(this)
             .get(SocialShareViewModel::class.java)
@@ -141,39 +132,32 @@ class ArticleActivity : ScopedAppActivity(),
             binding.inProgress = it
         })
 
-        // Observe whether the article is bilingual.
-        articleViewModel.bilingual.observe(this, {
-            binding.isBilingual = it
-
-            // Only set event on language switcher when the article is bilingual.
-            if (it) {
-                setupLangSwitcher()
+        // Show message after bookmark clicked.
+        articleViewModel.bookmarkState.observe(this) {
+            info("Bookmark state $it")
+            binding.isStarring = it.isStarring
+            if (it.message != null) {
+                Snackbar.make(
+                    binding.root,
+                    it.message,
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
-        })
+        }
 
-        // ArticleViewModel send this message after loading
-        // a story from API.
-        articleViewModel.articleLoaded.observe(this, {
-            article = it
-
-            // Check whether this article is bookmarked.
-            starViewModel.isStarring(it)
-
-            // Add this article to reading history.
-            readViewModel.addOne(it.toReadArticle())
-
-            statsTracker.storyViewed(it)
-        })
+        articleViewModel.isBilingual.observe(this) {
+            binding.isBilingual = it
+        }
 
         wvViewModel.openGraphEvaluated.observe(this) {
             val og = try {
                 json.parse<OpenGraphMeta>(it)
             } catch (e: Exception) {
                 null
-            }
+            } ?: return@observe
 
-            val starred = starredArticleFromOG(og)
-            articleViewModel.articleLoaded.value = starred
+            val starred = StarredArticle.fromOpenGraph(og, teaser)
+//            articleViewModel.articleLoaded.value = starred
 
             // Prevent showing bottom sheet dialog multiple times.
             val teaserPerm = teaser?.permission()
@@ -182,78 +166,13 @@ class ArticleActivity : ScopedAppActivity(),
             }
         }
 
-        // Switch bookmark icon upon starViewModel.isStarring() finished.
-        starViewModel.starred.observe(this, {
-            // Updating bookmark icon.
-            isStarring = it
-            binding.isStarring = isStarring
-        })
-
         // Handle social share.
         shareViewModel.appSelected.observe(this) {
             onClickShareIcon(it)
         }
     }
 
-    private fun starredArticleFromOG(og: OpenGraphMeta?): StarredArticle {
-
-        return StarredArticle(
-            id = if (teaser?.id.isNullOrBlank()) {
-                og?.extractId()
-            } else {
-                teaser?.id
-            } ?: "",
-            type = if (teaser?.type == null) {
-                og?.extractType()
-            } else {
-                teaser?.type?.toString()
-            } ?: "",
-            subType = teaser?.subType ?: "",
-            title = if (teaser?.title.isNullOrBlank()) {
-                og?.title
-            } else {
-                teaser?.title
-            } ?: "",
-            standfirst = og?.description ?: "",
-            keywords = teaser?.tag ?: og?.keywords ?: "",
-            imageUrl = og?.image ?: "",
-            audioUrl = teaser?.audioUrl ?: "",
-            radioUrl = teaser?.radioUrl ?: "",
-            webUrl = teaser?.getCanonicalUrl() ?: og?.url ?: "",
-            tier =  when {
-                og?.keywords?.contains("会员专享") == true -> Tier.STANDARD.toString()
-                og?.keywords?.contains("高端专享") == true -> Tier.PREMIUM.toString()
-                else -> ""
-            },
-            isWebpage = true
-        )
-    }
-
     private fun setupUI() {
-        // Handle favorite action.
-        binding.fabBookmark.setOnClickListener {
-            isStarring = !isStarring
-
-            if (isStarring) {
-                starViewModel.star(article)
-
-                Snackbar.make(
-                    it,
-                    R.string.alert_starred,
-                    Snackbar.LENGTH_SHORT
-                ).show()
-            } else {
-                starViewModel.unstar(article)
-
-                Snackbar.make(
-                    it,
-                    R.string.alert_unstarred,
-                    Snackbar.LENGTH_SHORT
-                ).show()
-            }
-
-            binding.isStarring = isStarring
-        }
 
         val t = teaser ?: return
 
@@ -288,21 +207,6 @@ class ArticleActivity : ScopedAppActivity(),
         }
     }
 
-    private fun setupLangSwitcher() {
-
-        binding.langCnBtn.setOnClickListener {
-            articleViewModel.switchLang(Language.CHINESE)
-        }
-
-        binding.langEnBtn.setOnClickListener {
-            handleLangPermission(Language.ENGLISH)
-        }
-
-        binding.langBiBtn.setOnClickListener {
-            handleLangPermission(Language.BILINGUAL)
-        }
-    }
-
     private fun handleLangPermission(lang: Language) {
         val account = sessionManager.loadAccount()
 
@@ -311,7 +215,7 @@ class ArticleActivity : ScopedAppActivity(),
         val access = Access.ofEnglishArticle(account)
 
         if (access.granted) {
-            articleViewModel.switchLang(lang)
+            articleViewModel.switchLang(lang, t)
         } else {
             // Tracking
             PaywallTracker.fromArticle(t)
@@ -329,6 +233,27 @@ class ArticleActivity : ScopedAppActivity(),
         binding.langCnBtn.isChecked = true
         binding.langEnBtn.isChecked = false
         binding.langBiBtn.isChecked = false
+    }
+
+    fun onClickChinese(view: View) {
+        info("Clicking chinese tab")
+        teaser?.let {
+            articleViewModel.switchLang(Language.CHINESE, it)
+        }
+    }
+
+    fun onClickEnglish(view: View) {
+        info("Clicking english tag")
+        handleLangPermission(Language.ENGLISH)
+    }
+
+    fun onClickBilingual(view: View) {
+        info("Clicking bilingual tag")
+        handleLangPermission(Language.BILINGUAL)
+    }
+
+    fun onClickBookmark(view: View) {
+        articleViewModel.bookmark()
     }
 
     /**

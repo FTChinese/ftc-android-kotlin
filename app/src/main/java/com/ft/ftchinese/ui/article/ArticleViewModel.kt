@@ -4,12 +4,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
+import com.ft.ftchinese.database.ArticleDb
+import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.parseException
@@ -20,29 +22,51 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
 class ArticleViewModel(
-        private val cache: FileCache,
-        private val account: Account?
+    private val cache: FileCache,
+    private val db: ArticleDb,
 ) : ViewModel(), AnkoLogger {
 
     val inProgress = MutableLiveData<Boolean>()
     val isNetworkAvailable = MutableLiveData<Boolean>()
 
-    // Notify ArticleActivity whether to display language
-    // switch button or not.
-    val bilingual = MutableLiveData<Boolean>()
+    // Usd on UI to determine whether the language switcher should be visible.
+    val isBilingual = MutableLiveData<Boolean>()
+    // Used on UI to determine which bookmark icon should be used.
+    val bookmarkState = MutableLiveData<BookmarkState>()
 
-    val currentLang = MutableLiveData<Language>()
+    private var languageSelected = Language.CHINESE
 
-    // Notify ArticleActivity the meta data for starring.
-    val articleLoaded = MutableLiveData<StarredArticle>()
-
-    val storyResult: MutableLiveData<Result<Story>> by lazy {
-        MutableLiveData<Result<Story>>()
+    val storyLoaded =  MutableLiveData<Story>()
+    val htmlResult: MutableLiveData<Result<String>> by lazy {
+        MutableLiveData<Result<String>>()
     }
 
     // Host activity tells fragment to switch content.
-    fun switchLang(lang: Language) {
-        currentLang.value = lang
+    fun switchLang(lang: Language, teaser: Teaser) {
+        languageSelected = lang
+        loadStory(teaser, false)
+    }
+
+    private suspend fun loaded(story: Story, fromCache: Boolean) {
+        storyLoaded.value = story
+        isBilingual.value = story.isBilingual
+
+        val isStarring = withContext(Dispatchers.IO) {
+            db.starredDao().exists(story.id, story.teaser?.type?.toString() ?: "")
+        }
+
+        bookmarkState.value = BookmarkState(
+            isStarring = isStarring,
+            message = null,
+        )
+
+        if (fromCache) {
+            return
+        }
+
+        withContext(Dispatchers.IO) {
+            db.readDao().insertOne(ReadArticle.fromStory(story))
+        }
     }
 
     fun loadStory(teaser: Teaser, bustCache: Boolean) {
@@ -63,12 +87,9 @@ class ArticleViewModel(
                     }
 
                     if (story != null) {
-                        storyResult.value = Result.Success(story)
-                        // Only set update articleLoaded for initial loading.
-                        articleLoaded.value = story.toStarredArticle(teaser)
+                        story.teaser = teaser
 
-                        // Notify whether this is bilingual content
-                        bilingual.value = story.isBilingual
+                        loaded(story, true)
                         return@launch
                     }
                 } catch (e: Exception) {
@@ -76,23 +97,27 @@ class ArticleViewModel(
                 }
             }
 
-            // Fetch data from server
-            val url = Config.buildArticleSourceUrl(account, teaser)
-            info("Loading json data from $url")
+            val remoteUrl = Config.buildArticleSourceUrl(
+                AccountCache.get(),
+                teaser
+            )
 
-            if (url == null) {
-                storyResult.value = Result.LocalizedError(R.string.api_empty_url)
+            // Fetch data from server
+            info("Loading json data from $remoteUrl")
+
+            if (remoteUrl == null) {
+                htmlResult.value = Result.LocalizedError(R.string.api_empty_url)
                 return@launch
             }
 
             if (isNetworkAvailable.value != true) {
-                storyResult.value = Result.LocalizedError(R.string.prompt_no_network)
+                htmlResult.value = Result.LocalizedError(R.string.prompt_no_network)
                 return@launch
             }
 
             try {
                 val data = withContext(Dispatchers.IO) {
-                    Fetch().get(url.toString()).endPlainText()
+                    Fetch().get(remoteUrl.toString()).endPlainText()
                 }
 
                 val story = if (data.isNullOrBlank()) {
@@ -102,25 +127,84 @@ class ArticleViewModel(
                 }
 
                 if (story == null) {
-                    storyResult.value = Result.LocalizedError(R.string.api_server_error)
+                    htmlResult.value = Result.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
 
-                storyResult.value = Result.Success(story)
+                story.teaser = teaser
+
+                loaded(story, false)
 
                 // Cache the downloaded data.
                 launch(Dispatchers.IO) {
                     cache.saveText(teaser.cacheNameJson(), data!!)
                 }
 
-                // Only update it for initial loading.
-                articleLoaded.value = story.toStarredArticle(teaser)
-                bilingual.value = story.isBilingual
-
             } catch (e: Exception) {
                 info(e)
-                storyResult.value = parseException(e)
+                htmlResult.value = parseException(e)
             }
+        }
+    }
+
+    fun compileHtml(tags: Map<String, String>) {
+        val story = storyLoaded.value ?: return
+
+        viewModelScope.launch {
+            val template = cache.readStoryTemplate()
+
+            if (template == null) {
+                info("Story template not found")
+                htmlResult.value = Result.LocalizedError(R.string.loading_failed)
+                return@launch
+            }
+
+            val html = withContext(Dispatchers.Default) {
+                StoryBuilder(template)
+                    .setLanguage(languageSelected)
+                    .withStory(story)
+                    .withFollows(tags)
+                    .withUserInfo(AccountCache.get())
+                    .render()
+            }
+
+            htmlResult.value = Result.Success(html)
+        }
+    }
+
+    fun bookmark() {
+        info("Bookmark story ${storyLoaded.value}")
+
+        val story = storyLoaded.value ?: return
+
+        val starContent = StarredArticle.fromStory(story)
+        if (starContent.id.isBlank() || starContent.type.isBlank()) {
+            return
+        }
+
+        val isStarring = bookmarkState.value?.isStarring ?: false
+
+        viewModelScope.launch {
+            val starred = withContext(Dispatchers.IO) {
+                // Unstar
+                if (isStarring) {
+                    db.starredDao().delete(starContent.id, starContent.type)
+                    false
+                } else {
+                    // Star
+                    db.starredDao().insertOne(starContent)
+                    true
+                }
+            }
+
+            bookmarkState.value = BookmarkState(
+                isStarring = starred,
+                message = if (starred) {
+                    R.string.alert_starred
+                } else {
+                    R.string.alert_unstarred
+                },
+            )
         }
     }
 }
