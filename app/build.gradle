@@ -170,6 +170,8 @@ dependencies {
     implementation "org.jetbrains.anko:anko:$anko_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
+    // See https://firebase.google.com/support/release-notes/android
+    // on how to install firebase as of 2021.04
     // Firebase
     // Import the Firebase BoM
     implementation platform('com.google.firebase:firebase-bom:27.0.0')
