@@ -34,8 +34,6 @@ import com.ft.ftchinese.ui.share.SocialApp
 import com.ft.ftchinese.ui.share.SocialAppId
 import com.ft.ftchinese.ui.share.SocialShareFragment
 import com.ft.ftchinese.ui.share.SocialShareViewModel
-import com.ft.ftchinese.viewmodel.ArticleViewModel
-import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
 import com.ft.ftchinese.viewmodel.StarArticleViewModel
 import com.google.android.material.snackbar.Snackbar

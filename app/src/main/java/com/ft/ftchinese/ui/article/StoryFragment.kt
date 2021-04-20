@@ -32,8 +32,6 @@ import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.viewmodel.ArticleViewModel
-import com.ft.ftchinese.viewmodel.ArticleViewModelFactory
 import com.ft.ftchinese.viewmodel.Result
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
@@ -109,7 +107,8 @@ class StoryFragment : ScopedFragment(),
         articleModel = activity?.run {
             ViewModelProvider(
                 this,
-                ArticleViewModelFactory(cache, sessionManager.loadAccount()))
+                ArticleViewModelFactory(cache, sessionManager.loadAccount())
+            )
                 .get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 

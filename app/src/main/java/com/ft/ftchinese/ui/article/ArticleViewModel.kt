@@ -1,4 +1,4 @@
-package com.ft.ftchinese.viewmodel
+package com.ft.ftchinese.ui.article
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,6 +11,8 @@ import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

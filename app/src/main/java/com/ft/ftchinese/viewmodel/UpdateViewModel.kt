@@ -5,10 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.Passwords
 import com.ft.ftchinese.repository.AccountRepo
-import com.ft.ftchinese.model.fetch.ClientError
-import com.ft.ftchinese.model.reader.Address
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -172,16 +171,6 @@ class UpdateViewModel : ViewModel() {
             }
 
         }
-    }
-
-    fun addressDataChanged(current: Address, updated: Address) {
-        if (current == updated) {
-            return
-        }
-
-        updateFormState.value = UpdateFormState(
-            isDataValid = true
-        )
     }
 
     fun requestVerification(userId: String) {
