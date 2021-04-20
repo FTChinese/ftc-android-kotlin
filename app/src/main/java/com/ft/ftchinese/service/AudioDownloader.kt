@@ -30,16 +30,16 @@ class AudioDownloader private constructor(context: Context): AnkoLogger {
         val downloadIndex = DefaultDownloadIndex(databaseProvider)
 
         val downloaderConstructorHelper = DownloaderConstructorHelper(
-                downloadCache,
-                buildHttpDataSourceFactory()
+            downloadCache,
+            buildHttpDataSourceFactory()
         )
 
         downloadManager = DownloadManager(
-                context,
-                downloadIndex,
-                DefaultDownloaderFactory(
-                        downloaderConstructorHelper
-                )
+            context,
+            downloadIndex,
+            DefaultDownloaderFactory(
+                downloaderConstructorHelper
+            )
         )
     }
 

@@ -18,11 +18,11 @@ private const val FOREGROUND_NOTIFICATION_ID = 1
 private var nextNotificationId = FOREGROUND_NOTIFICATION_ID + 1
 
 class AudioDownloadService : DownloadService(
-        FOREGROUND_NOTIFICATION_ID,
-        DEFAULT_FOREGROUND_NOTIFICATION_UPDATE_INTERVAL,
-        CHANNEL_ID,
-        R.string.exo_download_notification_channel_name,
-        R.string.exo_download_notification_channel_description
+    FOREGROUND_NOTIFICATION_ID,
+    DEFAULT_FOREGROUND_NOTIFICATION_UPDATE_INTERVAL,
+    CHANNEL_ID,
+    R.string.exo_download_notification_channel_name,
+    R.string.exo_download_notification_channel_description
 ) {
 
     private lateinit var notificationHelper: DownloadNotificationHelper
@@ -42,10 +42,10 @@ class AudioDownloadService : DownloadService(
 
     override fun getForegroundNotification(downloads: MutableList<Download>): Notification {
         return notificationHelper.buildProgressNotification(
-                R.drawable.ic_file_download_black_24dp,
-                null,
-                null,
-                downloads
+            R.drawable.ic_file_download_black_24dp,
+            null,
+            null,
+            downloads
         )
     }
 
@@ -62,23 +62,23 @@ class AudioDownloadService : DownloadService(
         val notification = when (download.state) {
             Download.STATE_COMPLETED -> {
                 notificationHelper.buildDownloadCompletedNotification(
-                        R.drawable.ic_done_black_24dp,
-                        null,
-                        Util.fromUtf8Bytes(download.request.data)
+                    R.drawable.ic_done_black_24dp,
+                    null,
+                    Util.fromUtf8Bytes(download.request.data)
                 )
             }
             Download.STATE_FAILED -> {
                 notificationHelper.buildDownloadFailedNotification(
-                        R.drawable.ic_warning_black_24dp,
-                        null,
-                        Util.fromUtf8Bytes(download.request.data)
+                    R.drawable.ic_warning_black_24dp,
+                    null,
+                    Util.fromUtf8Bytes(download.request.data)
                 )
             } else -> return
         }
 
         NotificationUtil.setNotification(
-                this,
-                nextNotificationId++,
-                notification)
+            this,
+            nextNotificationId++,
+            notification)
     }
 }
