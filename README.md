@@ -1,3 +1,7 @@
+## Problems with Android Studio
+
+* As of Android Studio Arctic Fox 2020.3.1 Canary 14, clicking app inspection will crash your app! You need to unplug your device and close kill Android Studio.
+
 ## Logo on ActionBar
 
 Reference: https://developer.android.com/training/multiscreen/screendensities
@@ -196,7 +200,7 @@ Mozilla/5.0 (Linux; Android 9; TA-1041) AppleWebKit/537.36 (KHTML, like Gecko) C
 
 It seems when you are using data binding layout, you cannot use `app:srcCompat` to set images. It won't compile. Use `android:src` instead.
 
-### Data biding with `include` tag
+### Data binding with `include` tag
 
 See:
 
