@@ -7,14 +7,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.webkit.JavascriptInterface
-import android.webkit.WebChromeClient
 import androidx.core.app.TaskStackBuilder
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.Data
@@ -36,16 +34,12 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.WVViewModel
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.share.SocialAppId
 import com.ft.ftchinese.ui.share.SocialShareFragment
 import com.ft.ftchinese.ui.share.SocialShareViewModel
-import com.ft.ftchinese.viewmodel.Result
 import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.messaging.FirebaseMessaging
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
 import com.tencent.mm.opensdk.modelmsg.WXWebpageObject
@@ -138,6 +132,9 @@ class ArticleActivity : ScopedAppActivity(),
         // Show/Hide progress indicator which should be controlled by child fragment.
         articleViewModel.inProgress.observe(this, {
             binding.inProgress = it
+            if (!it) {
+                binding.articleRefresh.isRefreshing = it
+            }
         })
 
         articleViewModel.accessChecked.observe(this) {
@@ -156,40 +153,6 @@ class ArticleActivity : ScopedAppActivity(),
         articleViewModel.storyLoaded.observe(this) {
             articleViewModel.compileHtml(followingManager.loadTemplateCtx())
             binding.isBilingual = it.isBilingual
-        }
-
-        articleViewModel.htmlResult.observe(this) { result ->
-
-            binding.inProgress = false
-            binding.articleRefresh.isRefreshing = false
-
-            when (result) {
-                is Result.LocalizedError -> {
-                    toast(result.msgId)
-                }
-                is Result.Error -> {
-                    result.exception.message?.let { toast(it) }
-                }
-                is Result.Success -> {
-
-                    binding.webView.loadDataWithBaseURL(
-                        Config.discoverServer(sessionManager.loadAccount()),
-                        result.data,
-                        "text/html",
-                        null,
-                        null)
-                }
-            }
-        }
-
-        articleViewModel.webUrlResult.observe(this) { result ->
-            articleViewModel.inProgress.value = false
-
-            when (result) {
-                is Result.LocalizedError -> toast(result.msgId)
-                is Result.Error -> result.exception.message?.let { toast(it) }
-                is Result.Success -> binding.webView.loadUrl(result.data)
-            }
         }
 
         // Handle social share.
@@ -292,63 +255,13 @@ class ArticleActivity : ScopedAppActivity(),
         )
         binding.inProgress = true
 
-        binding.webView.settings.apply {
-            javaScriptEnabled = true
-            loadsImagesAutomatically = true
-            domStorageEnabled = true
-            databaseEnabled = true
-        }
-
-        val wvClient = WVClient(this, if (t.hasJsAPI()) null else wvViewModel)
-
-        binding.webView.apply {
-            addJavascriptInterface(
-                this@ArticleActivity,
-                JS_INTERFACE_NAME
-            )
-
-            webViewClient = wvClient
-            webChromeClient = WebChromeClient()
-
-            setOnKeyListener { _, keyCode, _ ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
-                    binding.webView.goBack()
-                    return@setOnKeyListener true
-                }
-                false
-            }
+        supportFragmentManager.commit {
+            replace(R.id.content_container, WebViewFragment.newInstance())
         }
 
         // Check access rights.
         info("Checking access of teaser $teaser")
         articleViewModel.checkAccess(t.permission())
-    }
-
-    @JavascriptInterface
-    fun follow(message: String) {
-        info("Clicked follow: $message")
-
-        try {
-            val following = json.parse<Following>(message) ?: return
-
-            val isSubscribed = followingManager.save(following)
-
-            if (isSubscribed) {
-                FirebaseMessaging.getInstance()
-                    .subscribeToTopic(following.topic)
-                    .addOnCompleteListener { task ->
-                        info("Subscribing to topic ${following.topic} success: ${task.isSuccessful}")
-                    }
-            } else {
-                FirebaseMessaging.getInstance()
-                    .unsubscribeFromTopic(following.topic)
-                    .addOnCompleteListener { task ->
-                        info("Unsubscribing from topic ${following.topic} success: ${task.isSuccessful}")
-                    }
-            }
-        } catch (e: Exception) {
-            info(e)
-        }
     }
 
     private fun handleLangPermission(lang: Language) {
@@ -365,8 +278,9 @@ class ArticleActivity : ScopedAppActivity(),
             PaywallTracker.fromArticle(t)
 
             disableLangSwitch()
-            // TODO: Why this field?
+
             t.langVariant = lang
+
             PermissionDeniedFragment(
                 denied = access,
                 cancellable = true,
