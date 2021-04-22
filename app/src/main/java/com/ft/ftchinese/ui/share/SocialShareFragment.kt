@@ -36,15 +36,13 @@ class SocialShareFragment :
         return view
     }
 
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         viewModel = activity?.run {
             ViewModelProvider(this)
-                    .get(SocialShareViewModel::class.java)
+                .get(SocialShareViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
-
     }
 
     inner class SocialShareAdapter : RecyclerView.Adapter<SocialShareViewHolder>() {
@@ -84,6 +82,7 @@ class SocialShareFragment :
 
             holder.itemView.setOnClickListener {
                 viewModel.select(app)
+                dismiss()
             }
         }
 
