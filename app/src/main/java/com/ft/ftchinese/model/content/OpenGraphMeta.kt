@@ -37,12 +37,4 @@ data class OpenGraphMeta(
 
         return url
     }
-
-    fun normalizeUrl(): String {
-        if (url.startsWith("http")) {
-            return url
-        }
-
-        return "http://www.ftchinese.com$url"
-    }
 }
