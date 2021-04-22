@@ -101,7 +101,7 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
         downloader = AudioDownloader.getInstance(this)
 
         // Get data passed in.
-        teaser = intent.getParcelableExtra(EXTRA_ARTICLE_TEASER) ?: return
+        teaser = intent.getParcelableExtra(ArticleActivity.EXTRA_ARTICLE_TEASER) ?: return
 
         // Toolbar
         binding.toolbar.toolbar.title = teaser?.title
@@ -420,7 +420,7 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
         @JvmStatic
         fun newIntent(context: Context, teaser: Teaser?): Intent {
             return Intent(context, AudioPlayerActivity::class.java).apply {
-                putExtra(EXTRA_ARTICLE_TEASER, teaser)
+                putExtra(ArticleActivity.EXTRA_ARTICLE_TEASER, teaser)
             }
         }
 
@@ -428,7 +428,7 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
         fun start(context: Context, teaser: Teaser?) {
             context.startActivity(
                     Intent(context, AudioPlayerActivity::class.java).apply {
-                        putExtra(EXTRA_ARTICLE_TEASER, teaser)
+                        putExtra(ArticleActivity.EXTRA_ARTICLE_TEASER, teaser)
                     }
             )
         }

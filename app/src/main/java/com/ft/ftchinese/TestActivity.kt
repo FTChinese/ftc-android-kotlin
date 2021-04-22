@@ -38,7 +38,6 @@ import com.ft.ftchinese.ui.about.LegalDetailsFragment
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.account.UnlinkActivity
 import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.article.EXTRA_ARTICLE_TEASER
 import com.ft.ftchinese.ui.article.LyricsAdapter
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
@@ -582,7 +581,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun createNotification() {
         val intent = Intent(this, ArticleActivity::class.java).apply {
-            putExtra(EXTRA_ARTICLE_TEASER, Teaser(
+            putExtra(ArticleActivity.EXTRA_ARTICLE_TEASER, Teaser(
                     id = "001083331",
                     type = ArticleType.Story,
                     title = "波司登遭做空机构质疑 股价暴跌"

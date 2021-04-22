@@ -57,8 +57,6 @@ import org.jetbrains.anko.toast
 import java.io.ByteArrayOutputStream
 import java.util.*
 
-const val EXTRA_ARTICLE_TEASER = "extra_article_teaser"
-
 /**
  * NOTE: after trial and error, as of Android Studio RC1, data binding class cannot be
  * properly generated for CoordinatorLayout.
@@ -417,6 +415,11 @@ class ArticleActivity : ScopedAppActivity(),
         }
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        menu?.findItem(R.id.menu_audio)?.isVisible = true
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     /**
      * Setup share button and audio button.
      */
@@ -498,6 +501,8 @@ class ArticleActivity : ScopedAppActivity(),
     }
 
     companion object {
+
+        const val EXTRA_ARTICLE_TEASER = "extra_article_teaser"
 
         @JvmStatic
         fun newIntent(context: Context?, teaser: Teaser?): Intent {

@@ -20,7 +20,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.AudioPlayerActivity
-import com.ft.ftchinese.ui.article.EXTRA_ARTICLE_TEASER
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
@@ -163,7 +162,7 @@ class AudioService : LifecycleService(), AnkoLogger {
 
     @MainThread
     private fun handleIntent(intent: Intent?) {
-        intent?.getParcelableExtra<Teaser>(EXTRA_ARTICLE_TEASER)?.also { teaser ->
+        intent?.getParcelableExtra<Teaser>(ArticleActivity.EXTRA_ARTICLE_TEASER)?.also { teaser ->
             this.teaser = teaser
 
             teaser.audioUri()?.also {
@@ -233,7 +232,7 @@ class AudioService : LifecycleService(), AnkoLogger {
     companion object {
         fun newIntent(context: Context, teaser: Teaser? = null) = Intent(context, AudioService::class.java).apply {
             teaser?.let {
-                putExtra(EXTRA_ARTICLE_TEASER, teaser)
+                putExtra(ArticleActivity.EXTRA_ARTICLE_TEASER, teaser)
             }
         }
     }
