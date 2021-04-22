@@ -87,12 +87,14 @@ object Config {
         val builder = Uri.parse(discoverServer(account))
             .buildUpon()
 
+        // For story and premium, use jsapi.
         if (teaser.type == ArticleType.Story || teaser.type == ArticleType.Premium) {
             return builder
                 .path("/index.php/jsapi/get_story_more_info/${teaser.id}")
                 .build()
         }
 
+        // Otherwise use webpage.
         builder
             .appendPath("/${teaser.type}/${teaser.id}")
             .appendQueryParameter("webview", "ftcapp")
