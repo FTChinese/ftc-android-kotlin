@@ -55,7 +55,8 @@ class WebViewActivity : AppCompatActivity(), AnkoLogger {
     }
 
     companion object {
-        @JvmStatic fun start(context: Context?, url: String) {
+        @JvmStatic
+        fun start(context: Context?, url: String) {
             context?.startActivity(Intent(context, WebViewActivity::class.java).apply {
                 putExtra(EXTRA_WEB_URL, url)
             })
