@@ -31,6 +31,15 @@ data class RelatedStory(
         val publishedAt: String
 )
 
+data class AiAudio(
+    @Json(name = "ai_audio_e")
+    val aiAudioEn: String = "",
+    @Json(name = "ai_audio_c")
+    val aiAudioCn: String = "",
+    @Json(name = "interactive_id")
+    val interactiveId: String = "",
+)
+
 class Story (
     @Json(ignored = true)
     var teaser: Teaser? = null,
@@ -94,6 +103,9 @@ class Story (
 
     @Json(name = "story_pic")
     val cover: StoryPic,
+
+    @Json(name = "story_audio")
+    val aiAudios: AiAudio? = null,
 
     @Json(name = "relative_story")
     val relatedStory: List<RelatedStory>
