@@ -4,10 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.ft.ftchinese.model.content.ArticleType
+import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.model.content.Story
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.formatSQLDateTime
+import com.ft.ftchinese.model.reader.Permission
 import org.threeten.bp.LocalDateTime
+import java.util.*
 
 @Entity(
         tableName = "reading_history",
@@ -54,12 +58,6 @@ data class ReadArticle(
 
     @ColumnInfo(name = "tier")
     var tier: String = "", // "", standard, premium
-
-    @ColumnInfo(name = "canonical_url")
-    var webUrl: String = "",
-
-    @ColumnInfo(name = "is_webpage")
-    var isWebpage: Boolean = false
 ) {
 
     fun toTeaser(): Teaser {
@@ -72,8 +70,48 @@ data class ReadArticle(
             radioUrl = radioUrl,
             publishedAt = publishedAt,
             tag = keywords,
-            webUrl = webUrl
         )
+    }
+
+    fun toStarred(): StarredArticle {
+        return StarredArticle(
+            id = id,
+            type = type,
+            subType = subType,
+            title = title,
+            standfirst = standfirst,
+            keywords = keywords,
+            imageUrl = imageUrl,
+            audioUrl = audioUrl,
+            radioUrl = radioUrl,
+            publishedAt = publishedAt,
+            starredAt = formatSQLDateTime(LocalDateTime.now()),
+            tier = tier,
+        )
+    }
+
+    fun permission(): Permission {
+        return when {
+            tier == Tier.STANDARD.toString() -> Permission.STANDARD
+            tier == Tier.PREMIUM.toString() -> Permission.PREMIUM
+            isSevenDaysOld() -> Permission.STANDARD
+            else -> Permission.FREE
+        }
+    }
+
+    private fun isSevenDaysOld(): Boolean {
+        if (publishedAt.isBlank()) {
+            return false
+        }
+
+        val sevenDaysLater = Date((publishedAt.toLong() + 7 * 24 * 60 * 60) * 1000)
+        val now = Date()
+
+        if (sevenDaysLater.after(now)) {
+            return false
+        }
+
+        return true
     }
 
     companion object {
@@ -92,7 +130,43 @@ data class ReadArticle(
                 publishedAt = story.publishedAt,
                 readAt = formatSQLDateTime(LocalDateTime.now()),
                 tier = story.requireMemberTier()?.toString() ?: "",
-                webUrl = story.teaser?.getCanonicalUrl() ?: "",
+            )
+        }
+
+        /**
+         * When we need
+         */
+        @JvmStatic
+        fun fromOpenGraph(og: OpenGraphMeta, teaser: Teaser?): ReadArticle {
+            return ReadArticle(
+                id = if (teaser?.id.isNullOrBlank()) {
+                    og.extractId()
+                } else {
+                    teaser?.id
+                } ?: "",
+                type = if (teaser?.type == null) {
+                    og.extractType()
+                } else {
+                    teaser.type.toString()
+                } ,
+                subType = teaser?.subType ?: "",
+                title = if (teaser?.title.isNullOrBlank()) {
+                    og.title
+                } else {
+                    teaser?.title
+                } ?: "",
+                standfirst = og.description,
+                keywords = teaser?.tag ?: og.keywords,
+                imageUrl = og.image,
+                audioUrl = teaser?.audioUrl ?: "",
+                radioUrl = teaser?.radioUrl ?: "",
+                publishedAt = "",
+                tier =  when {
+                    og.keywords.contains("会员专享") -> Tier.STANDARD.toString()
+                    og.keywords.contains("高端专享") -> Tier.PREMIUM.toString()
+                    else -> ""
+                },
+                readAt = formatSQLDateTime(LocalDateTime.now()),
             )
         }
     }

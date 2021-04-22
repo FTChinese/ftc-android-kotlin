@@ -10,7 +10,7 @@ import androidx.room.RoomDatabase
             StarredArticle::class,
             ReadArticle::class
         ],
-        version = 8
+        version = 9
 )
 abstract class ArticleDb : RoomDatabase() {
     abstract fun starredDao(): StarredArticleDao
