@@ -29,7 +29,7 @@ private val followingTemplate: Map<String, String> = hashMapOf(
 data class Following(
         var type: String, // JS uses this value. Possible values: `tag`, `topic`, `industry`, `area`, `author`, `column`.
         var tag: String, // This is the string shown along with the FOLLOW button
-        var action: String // `follow` or `unfollow`. Used to determine if user if follow or unfollow something.
+        var action: String // `follow` or `unfollow`. Used to determine if user followed or unfollowed something.
 ) {
     val topic: String
         get() = URLEncoder.encode("${type}_$tag", "utf-8")
