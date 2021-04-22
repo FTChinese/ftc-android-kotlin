@@ -12,10 +12,9 @@ import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import androidx.browser.customtabs.CustomTabsIntent
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.tracking.GAAction
 import com.ft.ftchinese.tracking.GACategory
 import com.ft.ftchinese.tracking.PaywallSource
@@ -48,10 +47,8 @@ open class WVClient(
         private val viewModel: WVViewModel? = null
 ) : WebViewClient(), AnkoLogger {
 
-    private val sessionManager = SessionManager.getInstance(context)
-
     private fun getPrivilegeCode(): String {
-        val account = sessionManager.loadAccount()
+        val account = AccountCache.get()
 
         val prvl = when (account?.membership?.tier) {
             Tier.STANDARD -> """['premium']"""
@@ -299,7 +296,7 @@ open class WVClient(
                 // Links on home page under FT研究院
             TYPE_INTERACTIVE -> {
 
-                ArticleActivity.start(context, buildTeaserFromUri(uri))
+                ArticleActivity.start(context, teaserFromUri(uri))
                 true
             }
 
@@ -321,20 +318,7 @@ open class WVClient(
              */
             TYPE_CHANNEL -> {
                 info("Open a channel link: $uri")
-
-                val lastPathSegment = uri.lastPathSegment ?: return true
-
-                // Prevent multiple entry point for a single item.
-//                if (noAccess.containsKey(lastPathSegment)) {
-//                    true
-//                } else {
-//                    info("Open a new channel. Path: ${uri.path}")
-//                    viewModel?.urlChannelSelected?.value = buildChannelFromUri(uri)
-//                    true
-//                }
-
-                info("Open a new channel. Path: ${uri.path}")
-                viewModel?.urlChannelSelected?.value = buildChannelFromUri(uri)
+                viewModel?.urlChannelSelected?.value = channelFromUri(uri)
                 true
             }
 
@@ -346,7 +330,7 @@ open class WVClient(
             TYPE_M -> {
                 info("Loading marketing page")
 
-                viewModel?.urlChannelSelected?.value = buildMarketingChannel(uri)
+                viewModel?.urlChannelSelected?.value = marketingChannelFromUri(uri)
 
                 true
             }
@@ -358,7 +342,7 @@ open class WVClient(
             TYPE_TAG,
             TYPE_ARCHIVE -> {
                 info("Loading tag or archive")
-                viewModel?.urlChannelSelected?.value = buildTagOrArchiveChannel(uri)
+                viewModel?.urlChannelSelected?.value = tagOrArchiveChannel(uri)
                 true
             }
 
