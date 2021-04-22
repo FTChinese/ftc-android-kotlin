@@ -1,6 +1,5 @@
 package com.ft.ftchinese.model.content
 
-import android.net.Uri
 import android.os.Parcelable
 import com.ft.ftchinese.model.reader.Permission
 import kotlinx.parcelize.IgnoredOnParcel
@@ -84,36 +83,35 @@ data class ChannelSource (
             htmlType = htmlType
         )
     }
-}
 
-fun buildFollowChannel(follow: Following): ChannelSource {
-    return ChannelSource(
-        title = follow.tag,
-        name = "${follow.type}_${follow.tag}",
-        path = "/${follow.type}/${follow.tag}",
-        query = "",
-        htmlType = HTML_TYPE_FRAGMENT
-    )
-}
+    companion object {
+        @JvmStatic
+        fun ofFollowing(f: Following): ChannelSource {
+            return ChannelSource(
+                title = f.tag,
+                name = "${f.type}_${f.tag}",
+                path = "/${f.type}/${f.tag}",
+                query = "",
+                htmlType = HTML_TYPE_FRAGMENT
+            )
+        }
 
-fun buildColumnChannel(item: Teaser): ChannelSource {
-    return ChannelSource(
-        title = item.title,
-        name = "${item.type}_${item.id}",
-        path = "/${item.type}/${item.id}",
-        query = "",
-        htmlType = HTML_TYPE_FRAGMENT
-    )
-}
-
-fun buildTagOrArchiveChannel(uri: Uri): ChannelSource {
-    return ChannelSource(
-        title = uri.lastPathSegment ?: "",
-        name = uri.pathSegments.joinToString("_"),
-        path = uri.path ?: "",
-        query = uri.query ?: "",
-        htmlType = HTML_TYPE_FRAGMENT
-    )
+        /**
+         * Turns a Teaser to a Column.
+         * Used when a channel page contains a list of columns
+         * rather than articles.
+         */
+        @JvmStatic
+        fun fromTeaser(teaser: Teaser): ChannelSource {
+            return ChannelSource(
+                title = teaser.title,
+                name = "${teaser.type}_${teaser.id}",
+                path = "/${teaser.type}/${teaser.id}",
+                query = "",
+                htmlType = HTML_TYPE_FRAGMENT
+            )
+        }
+    }
 }
 
 /**
@@ -175,57 +173,3 @@ val noAccess = mapOf(
     "weekly.html" to "热门文章"
 )
 
-/**
- * Handle urls like:
- * /channel/editorchoice-issue.html?issue=EditorChoice-20181105
- * Those links appears on under page with links like:
- * /channel/editorchoice.html
- */
-fun buildChannelFromUri(uri: Uri): ChannelSource {
-    val isEditorChoice = uri.lastPathSegment == "editorchoice-issue.html"
-    val issueName = uri.getQueryParameter("issue")
-
-    return ChannelSource(
-        title = pathToTitle[uri.lastPathSegment] ?: "",
-        name = issueName
-            ?: uri.pathSegments
-                .joinToString("_")
-                .removeSuffix(".html"),
-        path = uri.path ?: "",
-        query = uri.query ?: "",
-        htmlType = HTML_TYPE_FRAGMENT,
-        permission = if (isEditorChoice) Permission.PREMIUM else null
-    )
-}
-
-/**
- * Turn url path like
- * /m/marketing/intelligence.html or
- * /m/corp/preview.html?pageid=huawei2018
- * to ChannelSource.
- */
-fun buildMarketingChannel(uri: Uri): ChannelSource {
-
-    val pageId = uri.getQueryParameter("pageid")
-
-    val name = uri.pathSegments
-        .joinToString("_")
-        .removeSuffix(".html") + if (pageId != null) {
-        "_$pageId"
-    } else {
-        ""
-    }
-
-    return ChannelSource(
-        title = pathToTitle[
-            pageId
-            ?: uri.lastPathSegment
-            ?: ""
-        ]
-            ?: "",
-        name = name,
-        path = uri.path ?: "",
-        query = uri.query ?: "",
-        htmlType = HTML_TYPE_COMPLETE
-    )
-}
