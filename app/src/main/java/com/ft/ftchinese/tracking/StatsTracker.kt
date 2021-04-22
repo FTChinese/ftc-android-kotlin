@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import androidx.core.os.bundleOf
 import com.ft.ftchinese.R
-import com.ft.ftchinese.database.StarredArticle
+import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.ftcsubs.CheckoutItem
@@ -98,7 +98,7 @@ class StatsTracker private constructor(context: Context) {
 
         tracker.send(HitBuilders.EventBuilder()
             .setCategory(GACategory.SUBSCRIPTION)
-            .setAction(price?.gaAction)
+            .setAction(price.gaAction)
             .setLabel(PaywallTracker.from?.label)
             .build())
     }
@@ -180,21 +180,15 @@ class StatsTracker private constructor(context: Context) {
         })
     }
 
-    fun storyViewed(article: StarredArticle?) {
-        if (article == null) {
-            return
-        }
+    fun storyViewed(a: ReadArticle) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM, bundleOf(
-                FirebaseAnalytics.Param.ITEM_ID to article.id,
-                FirebaseAnalytics.Param.ITEM_NAME to article.title,
-                FirebaseAnalytics.Param.ITEM_CATEGORY to article.type
+                FirebaseAnalytics.Param.ITEM_ID to a.id,
+                FirebaseAnalytics.Param.ITEM_NAME to a.title,
+                FirebaseAnalytics.Param.ITEM_CATEGORY to a.type
         ))
     }
 
-    fun sharedToWx(article: StarredArticle?) {
-        if (article == null) {
-            return
-        }
+    fun sharedToWx(article: ReadArticle) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SHARE, bundleOf(
                 FirebaseAnalytics.Param.CONTENT_TYPE to article.type,
                 FirebaseAnalytics.Param.ITEM_ID to article.id,
