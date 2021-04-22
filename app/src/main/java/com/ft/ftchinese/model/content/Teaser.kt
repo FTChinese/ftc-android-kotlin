@@ -3,7 +3,6 @@ package com.ft.ftchinese.model.content
 import android.net.Uri
 import android.os.Parcelable
 import com.beust.klaxon.Json
-import com.ft.ftchinese.database.StarredArticle
 import com.ft.ftchinese.model.fetch.KArticleType
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.HOST_FTC
@@ -71,7 +70,7 @@ data class ChannelList(
  */
 @Parcelize
 data class Teaser(
-    val id: String,
+    val id: String, // The only field required to build jsapi url in case type is Story or Premium.
     // For column type, you should start a ChannelActivity instead of  StoryActivity.
     @KArticleType
     val type: ArticleType, // story | premium | video | photonews | interactive | column
@@ -92,12 +91,11 @@ data class Teaser(
     // "线下活动,企业公告,会员专享"
     val tag: String = "",
 
-    // What's the purpose of this one?
+    // Whether this instance is created by analysing url. In such case, teaser contains only id and type.
+    // For type == story | premium, you should update it based on the loaded story;
+    // for other types, you could only update the teaser from open graph.
     @Json(ignored = true)
-    var webUrl: String = "",
-
-    @Json(ignored = true)
-    var isWebpage: Boolean = false,
+    val isCreatedFromUrl: Boolean = false,
 
 // These properties are not parsed from JSON.
     // They are copy from ChannelMeta
@@ -117,9 +115,8 @@ data class Teaser(
     var channelPerm: Permission? = null,
 ) : Parcelable, AnkoLogger {
 
-
-
-    fun hasRestfulAPI(): Boolean {
+    // Only stories have api.
+    fun hasJsAPI(): Boolean {
         return type == ArticleType.Story || type == ArticleType.Premium
     }
 
@@ -185,29 +182,8 @@ data class Teaser(
         }
     }
 
-    @Deprecated("Chnage to open graph")
-    fun toStarredArticle(): StarredArticle {
-        return StarredArticle(
-                id = id,
-                type = type.toString(),
-                subType = subType ?: "",
-                title = title,
-                standfirst = "",
-                keywords = "",
-                imageUrl = "",
-                audioUrl = audioUrl ?: "",
-                radioUrl = radioUrl ?: "",
-                publishedAt = publishedAt ?: "",
-                webUrl = getCanonicalUrl()
-        )
-    }
-
     // Used for sharing
     fun getCanonicalUrl(): String {
-        if (webUrl.isNotBlank()) {
-            return webUrl
-        }
-
         return "https://$HOST_FTC/$type/$id"
     }
 
@@ -230,7 +206,6 @@ data class Teaser(
     fun cacheNameJson(): String {
         return "${type}_$id.json"
     }
-
 
     fun permission(): Permission {
         val p = channelPerm
@@ -284,6 +259,7 @@ data class Teaser(
         return "story"
     }
 
+    // Used for standard restful api.
     fun apiCacheFileName(lang: Language): String {
         return "${type}_${id}_${lang}.api.json"
     }
@@ -300,15 +276,6 @@ data class Teaser(
         const val HOME_AD_CH_ID = "1000"
         const val DEFAULT_STORY_AD_CH_ID = "1200"
     }
-}
-
-fun buildTeaserFromUri(uri: Uri): Teaser {
-    return Teaser(
-        id = uri.lastPathSegment ?: "",
-        type = ArticleType.fromString(uri.pathSegments[0]),
-        title = "",
-        webUrl = uri.toString()
-    )
 }
 
 
