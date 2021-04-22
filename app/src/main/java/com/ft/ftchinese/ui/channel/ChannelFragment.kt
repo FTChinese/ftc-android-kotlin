@@ -396,6 +396,7 @@ class ChannelFragment : ScopedFragment(),
             return
         }
 
+        // Find which item user is clicked.
         val teaser = articleList
             ?.getOrNull(index)
             ?.withMeta(channelMeta)
@@ -415,7 +416,7 @@ class ChannelFragment : ScopedFragment(),
         if (teaser.type == ArticleType.Column) {
             info("Open a column: $teaser")
 
-            ChannelActivity.start(context, buildColumnChannel(teaser))
+            ChannelActivity.start(context, ChannelSource.fromTeaser(teaser))
             return
         }
 

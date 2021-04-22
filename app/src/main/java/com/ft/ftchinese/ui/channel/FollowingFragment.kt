@@ -9,9 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Following
 import com.ft.ftchinese.model.content.FollowingManager
-import com.ft.ftchinese.model.content.buildFollowChannel
 import com.ft.ftchinese.ui.lists.CardItemViewHolder
 import com.ft.ftchinese.ui.lists.MarginGridDecoration
 import org.jetbrains.anko.AnkoLogger
@@ -66,7 +66,7 @@ class FollowingFragment : Fragment(), AnkoLogger {
             holder.setSecondaryText(null)
 
             holder.itemView.setOnClickListener {
-                ChannelActivity.start(context, buildFollowChannel(item))
+                ChannelActivity.start(context, ChannelSource.ofFollowing(item))
             }
         }
 
