@@ -33,9 +33,9 @@ data class RelatedStory(
 
 data class AiAudio(
     @Json(name = "ai_audio_e")
-    val aiAudioEn: String = "",
+    val english: String = "",
     @Json(name = "ai_audio_c")
-    val aiAudioCn: String = "",
+    val chinese: String = "",
     @Json(name = "interactive_id")
     val interactiveId: String = "",
 )
@@ -111,6 +111,10 @@ class Story (
     val relatedStory: List<RelatedStory>
 ) : AnkoLogger {
 
+    fun isFrom(t: Teaser): Boolean {
+        return id == t.id &&  teaser?.type == t.type
+    }
+
     fun requireMemberTier(): Tier? {
         return when (accesibleBy) {
             "0" -> null
@@ -142,6 +146,32 @@ class Story (
         }
 
         return true
+    }
+
+    fun hasAudio(lang: Language): Boolean {
+        if (aiAudios == null) {
+            return false
+        }
+
+        return when (lang) {
+            Language.CHINESE -> {
+                aiAudios.chinese.isNotEmpty()
+            }
+            Language.ENGLISH, Language.BILINGUAL -> {
+                aiAudios.english.isNotEmpty()
+            }
+        }
+    }
+
+    fun audioUrl(lang: Language): String? {
+        if (aiAudios == null) {
+            return null
+        }
+
+        return when (lang) {
+            Language.CHINESE -> aiAudios.chinese
+            Language.ENGLISH, Language.BILINGUAL -> aiAudios.english
+        }
     }
 
     val isBilingual: Boolean
