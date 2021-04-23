@@ -97,16 +97,58 @@
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+        <com.google.android.material.bottomappbar.BottomAppBar
+            android:id="@+id/bottom_bar"
+            style="@style/Widget.MaterialComponents.BottomAppBar"
+            android:backgroundTint="@color/colorPaper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            app:hideOnScroll="true"
+            app:fabAlignmentMode="end"
+            app:menu="@menu/article_bottom_menu"/>
+
+<!--            <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:paddingStart="@dimen/space_16"-->
+<!--                android:paddingEnd="@dimen/space_16">-->
+
+<!--                <ImageView-->
+<!--                    android:id="@+id/bookmark_icon"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:src="@{isStarring ? @drawable/ic_bookmark_black_24dp : @drawable/ic_bookmark_border_black_24dp}"-->
+<!--                    app:layout_constraintHorizontal_chainStyle="spread_inside"-->
+<!--                    app:layout_constraintStart_toStartOf="parent"-->
+<!--                    app:layout_constraintEnd_toStartOf="@id/share_icon"-->
+<!--                    app:layout_constraintTop_toTopOf="parent"-->
+<!--                    app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                    android:contentDescription="@string/bookmark_icon" />-->
+
+<!--                <ImageView-->
+<!--                    android:id="@+id/share_icon"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:src="@drawable/ic_share_black_24dp"-->
+<!--                    app:layout_constraintBaseline_toBaselineOf="@id/bookmark_icon"-->
+<!--                    app:layout_constraintStart_toEndOf="@id/bookmark_icon"-->
+<!--                    app:layout_constraintEnd_toEndOf="parent"-->
+<!--                    android:contentDescription="@string/share_icon"/>-->
+
+<!--            </androidx.constraintlayout.widget.ConstraintLayout>-->
+<!--        </com.google.android.material.bottomappbar.BottomAppBar>-->
+
 <!--   It seems `app:srcCompat` does not work with data binding.     -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_bookmark"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_gravity="bottom|end"
+            app:layout_anchor="@id/bottom_bar"
             app:fabSize="mini"
             android:src="@{isStarring ? @drawable/ic_bookmark_black_24dp : @drawable/ic_bookmark_border_black_24dp}"
-            android:onClick="@{handler::onClickBookmark}"/>
+            android:onClick="@{handler::onClickBookmark}"
+            android:contentDescription="@string/bookmark_icon" />
 
         <androidx.core.widget.ContentLoadingProgressBar
             android:id="@+id/progress_bar"
