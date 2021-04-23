@@ -169,9 +169,14 @@ class ArticleActivity : ScopedAppActivity(),
         }
 
         // After story json loaded either from cache or from server.
-        articleViewModel.storyLoaded.observe(this) {
+        articleViewModel.storyLoadedLiveData.observe(this) {
             articleViewModel.compileHtml(followingManager.loadTemplateCtx())
             binding.isBilingual = it.isBilingual
+        }
+
+        articleViewModel.audioFoundLiveData.observe(this) {
+            showAudioIcon = it
+            invalidateOptionsMenu()
         }
 
         // Handle social share.
@@ -192,7 +197,7 @@ class ArticleActivity : ScopedAppActivity(),
             }
         }
 
-        articleViewModel.articleRead.observe(this) {
+        articleViewModel.articleReadLiveData.observe(this) {
             statsTracker.storyViewed(it)
         }
 
@@ -365,7 +370,7 @@ class ArticleActivity : ScopedAppActivity(),
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_audio -> {
-                AudioPlayerActivity.start(this, teaser)
+                AiAudioFragment().show(supportFragmentManager, "PlayAudioDialog")
                 true
             }
             else -> super.onOptionsItemSelected(item)
