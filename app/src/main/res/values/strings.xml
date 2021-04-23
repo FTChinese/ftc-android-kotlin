@@ -447,7 +447,9 @@
     <string name="released_at">发布时间</string>
     <string name="alert_audio_deleted">已删除下载的音频</string>
     <string name="api_password_code_not_found">您似乎使用了无效的验证码，请重新获取重置密码邮件</string>
-    
+    <string name="bookmark_icon">bookmark this article</string>
+    <string name="share_icon">Share this article</string>
+
 
     <string-array name="stripe_footnotes">
         <item>* FT中文网的Stripe支付不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</item>
