@@ -29,7 +29,10 @@ class ArticleViewModel(
     private val db: ArticleDb,
 ) : ViewModel(), AnkoLogger {
 
-    private var languageSelected = Language.CHINESE
+    private var _languageSelected = Language.CHINESE
+
+    val language: Language
+        get() = _languageSelected
 
     val inProgress = MutableLiveData<Boolean>()
     val isNetworkAvailable = MutableLiveData<Boolean>()
@@ -38,17 +41,19 @@ class ArticleViewModel(
     val bookmarkState = MutableLiveData<BookmarkState>()
     val socialShareState = MutableLiveData<SocialShareState>()
 
-    val storyLoaded =  MutableLiveData<Story>()
+    val storyLoadedLiveData =  MutableLiveData<Story>()
     val htmlResult: MutableLiveData<Result<String>> by lazy {
         MutableLiveData<Result<String>>()
     }
+
+    val audioFoundLiveData = MutableLiveData<Boolean>()
 
     // Used to load web content directly.
     val webUrlResult: MutableLiveData<Result<String>> by lazy {
         MutableLiveData<Result<String>>()
     }
 
-    val articleRead: MutableLiveData<ReadArticle> by lazy {
+    val articleReadLiveData: MutableLiveData<ReadArticle> by lazy {
         MutableLiveData<ReadArticle>()
     }
 
@@ -58,7 +63,7 @@ class ArticleViewModel(
 
     // Host activity tells fragment to switch content.
     fun switchLang(lang: Language, teaser: Teaser) {
-        languageSelected = lang
+        _languageSelected = lang
         loadStory(teaser, false)
     }
 
@@ -81,14 +86,22 @@ class ArticleViewModel(
         info("Cache story file: $cacheName")
 
         viewModelScope.launch {
+            if (storyLoadedLiveData.value != null) {
+                val s = storyLoadedLiveData.value
+                if (s != null && s.isFrom(teaser)) {
+                    storyLoaded(s)
+                    return@launch
+                }
+            }
+
             if (cacheName.isNotBlank() && !isRefreshing) {
 
                 val story = loadJsonFromCache(cacheName)
                 if (story != null) {
                     story.teaser = teaser
 
-                    storyLoaded.value = story
-                    loaded(ReadArticle.fromStory(story))
+                    storyLoaded(story)
+                    articleRead(ReadArticle.fromStory(story))
                     return@launch
                 }
                 // Cache not found, e.g., loading for the first time or force refreshing.
@@ -97,10 +110,10 @@ class ArticleViewModel(
 
             val data = loadJsonFromServer(teaser) ?: return@launch
 
-            storyLoaded.value = data.value
+            storyLoaded(data.value)
 
             val readHistory = ReadArticle.fromStory(data.value)
-            loaded(readHistory)
+            articleRead(readHistory)
 
             // Cache the downloaded data.
             launch(Dispatchers.IO) {
@@ -188,8 +201,13 @@ class ArticleViewModel(
         }
     }
 
-    private suspend fun loaded(a: ReadArticle) {
-        articleRead.value = a
+    private fun storyLoaded(story: Story) {
+        storyLoadedLiveData.value = story
+        audioFoundLiveData.value = story.hasAudio(_languageSelected)
+    }
+
+    private suspend fun articleRead(a: ReadArticle) {
+        articleReadLiveData.value = a
 
         val isStarring = withContext(Dispatchers.IO) {
             db.starredDao().exists(a.id, a.type)
@@ -202,7 +220,7 @@ class ArticleViewModel(
     }
 
     fun compileHtml(tags: Map<String, String>) {
-        val story = storyLoaded.value ?: return
+        val story = storyLoadedLiveData.value ?: return
 
         viewModelScope.launch {
             val template = cache.readStoryTemplate()
@@ -215,7 +233,7 @@ class ArticleViewModel(
 
             val html = withContext(Dispatchers.Default) {
                 StoryBuilder(template)
-                    .setLanguage(languageSelected)
+                    .setLanguage(_languageSelected)
                     .withStory(story)
                     .withFollows(tags)
                     .withUserInfo(AccountCache.get())
@@ -227,9 +245,9 @@ class ArticleViewModel(
     }
 
     fun bookmark() {
-        info("Bookmark ${articleRead.value}")
+        info("Bookmark ${articleReadLiveData.value}")
 
-        val read = articleRead.value ?: return
+        val read = articleReadLiveData.value ?: return
 
         if (read.id.isBlank() || read.type.isBlank()) {
             return
@@ -262,7 +280,7 @@ class ArticleViewModel(
     }
 
     fun share(appId: SocialAppId) {
-        articleRead.value?.let {
+        articleReadLiveData.value?.let {
             socialShareState.value = SocialShareState(
                 appId = appId,
                 content = it
@@ -284,7 +302,7 @@ class ArticleViewModel(
                 checkAccess(readHistory.permission())
             }
 
-            loaded(readHistory)
+            articleRead(readHistory)
 
             withContext(Dispatchers.IO) {
                 db.readDao().insertOne(readHistory)
