@@ -686,22 +686,22 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         super.onCreateOptionsMenu(menu)
-        menuInflater.inflate(R.menu.article_top_bar, menu)
+        menuInflater.inflate(R.menu.article_top_menu, menu)
 
         return true
     }
 
     // Show system share.
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.menu_share -> {
-                startActivity(Intent.createChooser(Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, "FT中文网 - test")
-                    type = "text/plain"
-                }, "分享"))
-            }
-        }
+//        when (item.itemId) {
+//            R.id.menu_share -> {
+//                startActivity(Intent.createChooser(Intent().apply {
+//                    action = Intent.ACTION_SEND
+//                    putExtra(Intent.EXTRA_TEXT, "FT中文网 - test")
+//                    type = "text/plain"
+//                }, "分享"))
+//            }
+//        }
 
 
         return super.onOptionsItemSelected(item)

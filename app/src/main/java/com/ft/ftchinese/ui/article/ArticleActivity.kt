@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.widget.Toolbar
 import androidx.core.app.TaskStackBuilder
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
@@ -72,8 +73,26 @@ class ArticleActivity : ScopedAppActivity(),
 
     private var shareFragment: SocialShareFragment? = null
     private var teaser: Teaser? = null
+    // Show audio if the article contains mp3 link
+    private var showAudioIcon = false
 
     private val start = Date().time / 1000
+
+    private val bottomBarMenuListener = Toolbar.OnMenuItemClickListener { item: MenuItem ->
+        when (item.itemId) {
+            R.id.menu_share -> {
+                shareFragment = SocialShareFragment()
+                shareFragment?.show(supportFragmentManager, "SocialShareFragment")
+
+                true
+            }
+            R.id.menu_audio -> {
+                AudioPlayerActivity.start(this, teaser)
+                true
+            }
+            else -> true
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -247,6 +266,8 @@ class ArticleActivity : ScopedAppActivity(),
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupUI() {
 
+        binding.bottomBar.setOnMenuItemClickListener(bottomBarMenuListener)
+
         val t = teaser ?: return
 
         articleViewModel.loadStory(
@@ -329,31 +350,20 @@ class ArticleActivity : ScopedAppActivity(),
         }
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        menu?.findItem(R.id.menu_audio)?.isVisible = true
-        return super.onPrepareOptionsMenu(menu)
-    }
-
     /**
      * Setup share button and audio button.
      */
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
 
-        menuInflater.inflate(R.menu.article_top_bar, menu)
+        menuInflater.inflate(R.menu.article_top_menu, menu)
 
-        menu?.findItem(R.id.menu_audio)?.isVisible = teaser?.hasMp3() ?: false
+        menu?.findItem(R.id.menu_audio)?.isVisible = showAudioIcon
 
         return super.onCreateOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.menu_share -> {
-                shareFragment = SocialShareFragment()
-                shareFragment?.show(supportFragmentManager, "SocialShareFragment")
-
-                true
-            }
             R.id.menu_audio -> {
                 AudioPlayerActivity.start(this, teaser)
                 true
