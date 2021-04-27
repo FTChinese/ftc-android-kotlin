@@ -450,6 +450,10 @@
     <string name="bookmark_icon">bookmark this article</string>
     <string name="share_icon">Share this article</string>
 
+    <string name="exo_download_queued">下载正在排队</string>
+    <string name="exo_download_stopped">下载已停止</string>
+    <string name="exo_download_restarting">重新开始下载</string>
+
 
     <string-array name="stripe_footnotes">
         <item>* FT中文网的Stripe支付不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</item>
