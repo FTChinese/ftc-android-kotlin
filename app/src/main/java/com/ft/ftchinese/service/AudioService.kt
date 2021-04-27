@@ -17,20 +17,20 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.LifecycleService
 import com.ft.ftchinese.R
+import com.ft.ftchinese.audio.DownloadUtil
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.AudioPlayerActivity
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
-import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.offline.DownloadHelper
+import com.google.android.exoplayer2.offline.DownloadRequest
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.util.Util
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 private const val PLAYBACK_NOTIFICATION_ID = 1
 private const val MEDIA_SESSION_TAG = "ftc_audio"
@@ -46,8 +46,6 @@ class AudioService : LifecycleService(), AnkoLogger {
             get() = this@AudioService.exoPlayer
     }
 
-    private lateinit var downloader: AudioDownloader
-
     private lateinit var exoPlayer: SimpleExoPlayer
     private var playerNotificationManager: PlayerNotificationManager? = null
     private var mediaSession: MediaSessionCompat? = null
@@ -56,8 +54,6 @@ class AudioService : LifecycleService(), AnkoLogger {
 
     override fun onCreate() {
         super.onCreate()
-
-        downloader = AudioDownloader.getInstance(this)
 
         exoPlayer = SimpleExoPlayer.Builder(this).build()
 
@@ -173,36 +169,31 @@ class AudioService : LifecycleService(), AnkoLogger {
 
     @MainThread
     fun play(uri: Uri) {
-        val mediaSource = if (downloader.isDownloaded(uri)) {
-            info("Using cache audio for $uri")
-            buildCacheMediaSource(uri)
+        val downloadRequest: DownloadRequest? = DownloadUtil
+            .getDownloadTracker(this)
+            .getDownloadRequest(uri)
+
+        val mediaSource = if (downloadRequest == null) {
+            ProgressiveMediaSource
+                .Factory(DownloadUtil.getHttpDataSourceFactory(this))
+                .createMediaSource(MediaItem
+                    .Builder()
+                    .setUri(uri)
+                    .build()
+                )
         } else {
-            info("Using online data for $uri")
-            buildMediaSource(uri)
+            DownloadHelper.createMediaSource(
+                downloadRequest,
+                DownloadUtil
+                    .getReadOnlyDataSourceFactory(this)
+            )
         }
 
-        exoPlayer.prepare(mediaSource, false, false)
-        exoPlayer.playWhenReady = true
-    }
-
-    private fun buildMediaSource(uri: Uri): MediaSource {
-        val dataSourceFactory = DefaultDataSourceFactory(
-                this,
-                Util.getUserAgent(this, "FTC")
-        )
-
-        return ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(uri)
-    }
-
-    private fun buildCacheMediaSource(uri: Uri): MediaSource {
-        val upstreamDataSourceFactory = downloader.buildHttpDataSourceFactory()
-
-        val dataSourceFactory = downloader
-                .buildCacheDataSourceFactory(upstreamDataSourceFactory)
-
-        return ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(uri)
+        exoPlayer.apply {
+            playWhenReady  = true
+            setMediaSource(mediaSource, false)
+            prepare()
+        }
     }
 
     @MainThread

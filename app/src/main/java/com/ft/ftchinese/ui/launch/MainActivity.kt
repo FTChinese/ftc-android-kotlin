@@ -31,7 +31,6 @@ import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.repository.TabPages
-import com.ft.ftchinese.service.AudioDownloadService
 import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.FileCache
@@ -57,7 +56,6 @@ import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.SplashViewModel
-import com.google.android.exoplayer2.offline.DownloadService
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession
@@ -154,11 +152,11 @@ class MainActivity : ScopedAppActivity(),
 
         setupSplashScreen()
 
-        try {
-            DownloadService.start(this, AudioDownloadService::class.java)
-        } catch (e: Exception) {
-            DownloadService.startForeground(this, AudioDownloadService::class.java)
-        }
+//        try {
+//            DownloadService.start(this, AudioDownloadService::class.java)
+//        } catch (e: Exception) {
+//            DownloadService.startForeground(this, AudioDownloadService::class.java)
+//        }
 
         showTermsAndConditions()
         setupWorker()

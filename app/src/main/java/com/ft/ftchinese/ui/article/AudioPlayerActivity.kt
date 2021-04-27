@@ -1,6 +1,5 @@
 package com.ft.ftchinese.ui.article
 
-import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -15,12 +14,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
+import com.ft.ftchinese.audio.AudioDownloadService
+import com.ft.ftchinese.audio.DownloadUtil
 import com.ft.ftchinese.databinding.ActivityAudioPlayerBinding
 import com.ft.ftchinese.model.apicontent.BilingualStory
 import com.ft.ftchinese.model.apicontent.InteractiveStory
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.service.AudioDownloadService
-import com.ft.ftchinese.service.AudioDownloader
 import com.ft.ftchinese.service.AudioService
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.ScopedAppActivity
@@ -28,29 +27,32 @@ import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.AudioViewModel
 import com.ft.ftchinese.viewmodel.AudioViewModelFactory
 import com.ft.ftchinese.viewmodel.Result
+import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.offline.*
-import com.google.android.exoplayer2.source.MediaSource
+import com.google.android.exoplayer2.offline.DownloadHelper
+import com.google.android.exoplayer2.offline.DownloadManager
+import com.google.android.exoplayer2.offline.DownloadRequest
+import com.google.android.exoplayer2.offline.DownloadService
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
-import com.google.android.material.snackbar.Snackbar
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-import org.jetbrains.anko.warn
+
+const val STATE_RESUME_WINDOW = "resumeWindow"
+const val STATE_RESUME_POSITION = "resumePosition"
+const val STATE_PLAYER_PLAYING = "playerOnPlay"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshListener, AnkoLogger {
 
     private var player: SimpleExoPlayer? = null
-    private var playWhenReady = true
+    private var isPlayerPlaying = true
     private var currentWindow = 0
     private var playbackPosition: Long = 0
 
     private var teaser: Teaser? = null
 
-    private lateinit var downloader: AudioDownloader
     private lateinit var binding: ActivityAudioPlayerBinding
     private lateinit var viewModel: AudioViewModel
     private lateinit var cache: FileCache
@@ -96,19 +98,11 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
         info("Is connected: $isConnected")
         viewModel.isNetworkAvailable.value = isConnected
 
-
-
-        downloader = AudioDownloader.getInstance(this)
-
         // Get data passed in.
         teaser = intent.getParcelableExtra(ArticleActivity.EXTRA_ARTICLE_TEASER) ?: return
 
         // Toolbar
         binding.toolbar.toolbar.title = teaser?.title
-
-        // Player
-        player = SimpleExoPlayer.Builder(this).build()
-        binding.playerView.player = player
 
         // Recycler view
         val layout = LinearLayoutManager(this)
@@ -130,8 +124,6 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
             binding.swipeRefresh.isRefreshing = false
             onInteractiveLoaded(it)
         })
-
-
 
         teaser?.let {
             binding.inProgress = true
@@ -191,41 +183,36 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
     private fun initializePlayer() {
         val uri = teaser?.audioUri() ?: return
 
-        player?.playWhenReady = playWhenReady
-        player?.seekTo(currentWindow, playbackPosition)
+        val downloadRequest: DownloadRequest? = DownloadUtil
+            .getDownloadTracker(this)
+            .getDownloadRequest(uri)
 
-        val mediaSource = if (downloader.isDownloaded(uri)) {
-            info("Using cache audio for $uri")
-            buildCacheMediaSource(uri)
+        val mediaSource = if (downloadRequest == null) {
+            ProgressiveMediaSource
+                .Factory(DownloadUtil.getHttpDataSourceFactory(this))
+                .createMediaSource(MediaItem
+                    .Builder()
+                    .setUri(uri)
+                    .build()
+                )
         } else {
-            info("Using online data for $uri")
-            buildMediaSource(uri)
+            DownloadHelper.createMediaSource(
+                downloadRequest,
+                DownloadUtil
+                    .getReadOnlyDataSourceFactory(this)
+            )
         }
 
-        player?.prepare(mediaSource, false, false)
+        player = SimpleExoPlayer.Builder(this).build()
+            .apply {
+                playWhenReady = isPlayerPlaying
+                seekTo(currentWindow, playbackPosition)
+                setMediaSource(mediaSource, false)
+                prepare()
+            }
+
+        binding.playerView.player = player
     }
-
-    private fun buildMediaSource(uri: Uri): MediaSource {
-        val dataSourceFactory = DefaultDataSourceFactory(
-                this,
-                downloader.userAgent
-        )
-
-        return ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(uri)
-    }
-
-    private fun buildCacheMediaSource(uri: Uri): MediaSource {
-        val upstreamDataSourceFactory = downloader.buildHttpDataSourceFactory()
-
-        val dataSourceFactory = downloader
-                .buildCacheDataSourceFactory(upstreamDataSourceFactory)
-
-        return ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(uri)
-    }
-
-
 
     override fun onStart() {
         super.onStart()
@@ -263,17 +250,17 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
 //        unbindService(connection)
     }
 
-    private fun bindToAudioService() {
-        if (audioService == null) {
-            AudioService.newIntent(this, teaser).also {
-                bindService(intent, connection, Context.BIND_AUTO_CREATE)
-            }
-        }
-    }
+//    private fun bindToAudioService() {
+//        if (audioService == null) {
+//            AudioService.newIntent(this, teaser).also {
+//                bindService(intent, connection, Context.BIND_AUTO_CREATE)
+//            }
+//        }
+//    }
 
     private fun releasePlayer() {
         if (player != null) {
-            playWhenReady = player?.playWhenReady ?: true
+            isPlayerPlaying = player?.playWhenReady ?: true
             playbackPosition = player?.currentPosition ?: 0
             currentWindow = player?.currentWindowIndex ?: 0
 
@@ -283,37 +270,15 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
         }
     }
 
-    private fun loadDownloads() {
-        try {
-            downloader
-                    .downloadManager
-                    .downloadIndex
-                    .getDownloads()
-                    .use {
-                        while (it.moveToNext()) {
-                            val download = it.download
-                            info("State ${download.state}")
-                            info("Start time ${download.startTimeMs}")
-                            info("Content length ${download.contentLength}")
-                            info("ID: ${download.request.id}")
-                            info("Type: ${download.request.type}")
-                            info("Uri: ${download.request.uri}")
-                            info("Data: ${String(download.request.data)}")
-                        }
-                    }
-        } catch (e: Exception) {
-            warn("Failed to query downloads: $e")
-        }
-    }
-
     private val downloadManagerListener = object : DownloadManager.Listener {
-        override fun onDownloadChanged(downloadManager: DownloadManager, download: Download) {
-            if (download.state == Download.STATE_COMPLETED) {
-                binding.fabDownloadAudio.setImageResource(R.drawable.ic_delete_black_24dp)
 
-                toast(R.string.download_successful)
-            }
-        }
+//        override fun onDownloadChanged(downloadManager: DownloadManager, download: Download, finalExecption: java.lang.Exception) {
+//            if (download.state == Download.STATE_COMPLETED) {
+//                binding.fabDownloadAudio.setImageResource(R.drawable.ic_delete_black_24dp)
+//
+//                toast(R.string.download_successful)
+//            }
+//        }
     }
 
     private fun setupDownload() {
@@ -324,11 +289,7 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
             return
         }
 
-        downloader
-                .downloadManager
-                .addListener(downloadManagerListener)
-
-        if (downloader.isDownloaded(audioUri)) {
+        if (DownloadUtil.getDownloadTracker(this).isDownloaded(MediaItem.Builder().setUri(audioUri).build())) {
             binding.fabDownloadAudio.setImageResource(R.drawable.ic_delete_black_24dp)
         }
 
@@ -337,62 +298,56 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
         // Is download, show a cancel icon
         // Downloaded, show a delete icon
         binding.fabDownloadAudio.setOnClickListener {
-            val state = AudioDownloader
-                    .getInstance(this)
-                    .getDownloadState(audioUri)
+//            val state = AudioDownloader
+//                    .getInstance(this)
+//                    .getDownloadState(audioUri)
 
-            when (state) {
-                Download.STATE_COMPLETED -> {
-
-                    removeDownload(audioUri.toString())
-
-                    binding.fabDownloadAudio.setImageResource(R.drawable.ic_file_download_black_24dp)
-
-                    Snackbar.make(
-                            it,
-                            R.string.alert_audio_deleted,
-                            Snackbar.LENGTH_SHORT
-                    ).show()
-                }
-                Download.STATE_DOWNLOADING,
-                Download.STATE_QUEUED,
-                Download.STATE_RESTARTING -> {
-
-                    removeDownload(audioUri.toString())
-
-                    binding.fabDownloadAudio.setImageResource(R.drawable.ic_file_download_black_24dp)
-
-                    Snackbar.make(
-                            it,
-                            R.string.alert_audio_deleted,
-                            Snackbar.LENGTH_SHORT
-                    ).show()
-                }
-                else -> {
-
-                    startDownload(audioUri)
-
-                    binding.fabDownloadAudio.setImageResource(R.drawable.ic_cancel_black_24dp)
-
-                    Snackbar.make(
-                            it,
-                            R.string.alert_downloading_audio,
-                            Snackbar.LENGTH_SHORT
-                    ).show()
-                }
-            }
+//            when (state) {
+//                Download.STATE_COMPLETED -> {
+//
+////                    removeDownload(audioUri.toString())
+//
+//                    binding.fabDownloadAudio.setImageResource(R.drawable.ic_file_download_black_24dp)
+//
+//                    Snackbar.make(
+//                            it,
+//                            R.string.alert_audio_deleted,
+//                            Snackbar.LENGTH_SHORT
+//                    ).show()
+//                }
+//                Download.STATE_DOWNLOADING,
+//                Download.STATE_QUEUED,
+//                Download.STATE_RESTARTING -> {
+//
+////                    removeDownload(audioUri.toString())
+//
+//                    binding.fabDownloadAudio.setImageResource(R.drawable.ic_file_download_black_24dp)
+//
+//                    Snackbar.make(
+//                            it,
+//                            R.string.alert_audio_deleted,
+//                            Snackbar.LENGTH_SHORT
+//                    ).show()
+//                }
+//                else -> {
+//
+//                    startDownload(audioUri)
+//
+//                    binding.fabDownloadAudio.setImageResource(R.drawable.ic_cancel_black_24dp)
+//
+//                    Snackbar.make(
+//                            it,
+//                            R.string.alert_downloading_audio,
+//                            Snackbar.LENGTH_SHORT
+//                    ).show()
+//                }
+//            }
         }
     }
 
     private fun startDownload(uri: Uri) {
-        val downloadRequest = DownloadRequest(
-                uri.toString(),
-                DownloadRequest.TYPE_PROGRESSIVE,
-                uri,
-                listOf(),
-                null,
-                teaser?.title?.toByteArray()
-        )
+        val downloadRequest = DownloadRequest.Builder(uri.toString(), uri)
+            .setMimeType("audio/mpeg").build()
 
         DownloadService.sendAddDownload(
                 this,
@@ -400,20 +355,6 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
                 downloadRequest,
                 false
         )
-    }
-
-    private fun removeDownload(id: String) {
-        DownloadService.sendRemoveDownload(
-                this,
-                AudioDownloadService::class.java,
-                id,
-                false
-        )
-    }
-    private fun isServiceRunning(serviceClassName: String): Boolean {
-        val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
-
-        return activityManager?.getRunningServices(Integer.MAX_VALUE)?.any { it.service.className == serviceClassName } ?: false
     }
 
     companion object {
