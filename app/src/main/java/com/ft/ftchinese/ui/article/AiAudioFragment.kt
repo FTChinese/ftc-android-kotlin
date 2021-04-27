@@ -1,39 +1,30 @@
 package com.ft.ftchinese.ui.article
 
+import android.annotation.SuppressLint
 import android.app.Dialog
-import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.*
+import android.webkit.WebChromeClient
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.databinding.FragmentAiAudioBinding
+import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
-import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.source.MediaSource
-import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.util.Util
+import com.ft.ftchinese.ui.base.WVClient
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
+@ExperimentalCoroutinesApi
 class AiAudioFragment : BottomSheetDialogFragment(), AnkoLogger {
 
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var binding: FragmentAiAudioBinding
-
-    private var player: SimpleExoPlayer? = null
-    private var playWhenReady = true
-    private var currentWindow = 0
-    private var playbackPosition: Long = 0
-    private var uri: Uri? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -81,96 +72,52 @@ class AiAudioFragment : BottomSheetDialogFragment(), AnkoLogger {
             ).get(ArticleViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
-
         setupViewModel()
         setupUI()
     }
 
     private fun setupViewModel() {
         articleViewModel.storyLoadedLiveData.observe(viewLifecycleOwner) {
-            val url = it.audioUrl(articleViewModel.language)
-            info("Audio of story $it")
-            uri = try {
-                Uri.parse(url)
-            } catch (e: Exception) {
-                null
-            } ?: return@observe
 
-            initializePlayer()
+            it.aiAudioTeaser(articleViewModel.language)?.let { teaser ->
+                val uri = Config.buildArticleSourceUrl(
+                    AccountCache.get(),
+                    teaser,
+                )
+
+                binding.audioWebView.loadUrl(uri.toString())
+            }
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupUI() {
+        binding.audioWebView.settings.apply {
+            javaScriptEnabled = true
+            loadsImagesAutomatically = true
+            domStorageEnabled = true
+            databaseEnabled = true
+        }
+
+        val wvClient = WVClient(requireContext())
+
+        binding.audioWebView.apply {
+
+            webViewClient = wvClient
+            webChromeClient = WebChromeClient()
+
+            setOnKeyListener { _, keyCode, _ ->
+                if (keyCode == KeyEvent.KEYCODE_BACK && binding.audioWebView.canGoBack()) {
+                    binding.audioWebView.goBack()
+                    return@setOnKeyListener true
+                }
+                false
+            }
         }
     }
 
     fun onCloseBottomSheet(view: View) {
         dismiss()
-    }
-
-    private fun setupUI() {
-        player = SimpleExoPlayer.Builder(requireContext()).build()
-        binding.playerView.player = player
-    }
-
-    private fun initializePlayer() {
-        uri?.let {
-            player?.playWhenReady = playWhenReady
-            player?.seekTo(currentWindow, playbackPosition)
-
-            val mediaSource = buildMediaSource(it)
-
-            player?.prepare(mediaSource, false, false)
-        }
-    }
-
-    private fun buildMediaSource(uri: Uri): MediaSource {
-        val dataSourceFactory = DefaultDataSourceFactory(
-            requireContext(),
-            Util.getUserAgent(requireContext(), "FTC")
-        )
-
-        return ProgressiveMediaSource.Factory(dataSourceFactory)
-            .createMediaSource(uri)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        if (Util.SDK_INT >= 24) {
-            initializePlayer()
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        if ((Util.SDK_INT < 24 || player == null)) {
-            initializePlayer()
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        if (Util.SDK_INT < 24) {
-            releasePlayer()
-        }
-    }
-
-    override fun onStop() {
-        super.onStop()
-
-        if (Util.SDK_INT >= 24) {
-            releasePlayer()
-        }
-    }
-
-    private fun releasePlayer() {
-        if (player != null) {
-            playWhenReady = player?.playWhenReady ?: true
-            playbackPosition = player?.currentPosition ?: 0
-            currentWindow = player?.currentWindowIndex ?: 0
-
-            player?.release()
-
-            player = null
-        }
     }
 
     companion object {
