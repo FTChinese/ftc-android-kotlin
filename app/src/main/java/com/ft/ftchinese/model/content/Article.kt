@@ -164,14 +164,23 @@ class Story (
     }
 
     fun audioUrl(lang: Language): String? {
-        if (aiAudios == null) {
-            return null
-        }
+        aiAudios ?: return null
 
         return when (lang) {
             Language.CHINESE -> aiAudios.chinese
             Language.ENGLISH, Language.BILINGUAL -> aiAudios.english
         }
+    }
+
+    fun aiAudioTeaser(lang: Language): Teaser? {
+        aiAudios ?: return null
+        return Teaser(
+            id = aiAudios.interactiveId,
+            type = ArticleType.Interactive,
+            subType = null,
+            title = titleCN,
+            langVariant = lang
+        )
     }
 
     val isBilingual: Boolean
