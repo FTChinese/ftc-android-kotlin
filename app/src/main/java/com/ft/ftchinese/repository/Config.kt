@@ -96,9 +96,15 @@ object Config {
 
         // Otherwise use webpage.
         builder
-            .appendPath("/${teaser.type}/${teaser.id}")
-            .appendQueryParameter("webview", "ftcapp")
+            .appendPath(teaser.type.toString())
+            .appendPath(teaser.id)
 
+
+        teaser.langVariant?.aiAudioPathSuffix()?.let {
+            builder.appendPath(it)
+        }
+
+        builder.appendQueryParameter("webview", "ftcapp")
 
         when(teaser.type) {
             ArticleType.Interactive -> {
