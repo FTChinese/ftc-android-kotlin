@@ -7,26 +7,25 @@ import com.ft.ftchinese.model.fetch.json
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-object ReaderRepo : AnkoLogger {
+object AuthClient : AnkoLogger {
 
     fun emailExists(email: String): Boolean {
 
         val (resp, _) = Fetch()
-                .get(NextApi.EMAIL_EXISTS)
-                .query("k", "email")
-                .query("v", email)
-                .noCache()
-                .endJsonText()
+            .get(Endpoint.emailExists)
+            .query("v", email)
+            .noCache()
+            .endJsonText()
 
         return resp.code == 204
     }
 
     fun login(c: Credentials): Account? {
         val (_, body) = Fetch()
-                .post(NextApi.LOGIN)
-                .noCache()
-                .sendJson(json.toJsonString(c))
-                .endJsonText()
+            .post(Endpoint.emailLogin)
+            .noCache()
+            .sendJson(json.toJsonString(c))
+            .endJsonText()
 
         return if (body == null) {
             null
@@ -48,6 +47,10 @@ object ReaderRepo : AnkoLogger {
         } else {
             json.parse<Account>(body)
         }
+    }
+
+    fun requestSMSCode(): Boolean {
+        return true
     }
 
     fun passwordResetLetter(email: String): Boolean {
@@ -117,6 +120,4 @@ object ReaderRepo : AnkoLogger {
             .sendJson(Klaxon().toJsonString(dur))
             .endPlainText()
     }
-
-
 }

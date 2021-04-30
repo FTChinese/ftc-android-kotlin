@@ -4,7 +4,7 @@ import com.ft.ftchinese.model.reader.ReadingDuration
 import org.junit.Test
 import java.util.*
 
-class ReaderRepoTest {
+class AuthClientTest {
     @Test fun readingDuration() {
         val dur = ReadingDuration(
                 url = "http://www.ftchinese.com/",
@@ -15,13 +15,13 @@ class ReaderRepoTest {
                 functionName = "onLoad"
         )
 
-        val result = ReaderRepo.engaged(dur)
+        val result = AuthClient.engaged(dur)
 
         println("Result: $result")
     }
 
     @Test fun emailExists() {
-        val ok = ReaderRepo.emailExists("neefrankie@outlook.com")
+        val ok = AuthClient.emailExists("neefrankie@outlook.com")
 
         println("Email exists: $ok")
     }
