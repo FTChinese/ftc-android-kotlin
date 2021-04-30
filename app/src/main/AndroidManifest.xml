@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.ft.ftchinese">
-    <!-- See  https://developer.android.com/training/basics/intents/package-visibility -->
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -13,6 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity
+            android:name=".ui.login.AuthActivity"
+            android:label="@string/title_login"
+            android:parentActivityName=".ui.launch.MainActivity"/>
         <activity
             android:name=".TestActivity"
             android:label="Test"
@@ -198,17 +202,15 @@
         <service
             android:name="com.google.android.exoplayer2.scheduler.PlatformScheduler$PlatformSchedulerService"
             android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-<!--        <service-->
-<!--            android:name=".audio.AudioDownloadService"-->
-<!--            android:exported="false"-->
-<!--            android:permission="android.permission.BIND_JOB_SERVICE">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.google.android.exoplayer.downloadService.action.RESTART" />-->
-
-<!--                <category android:name="android.intent.category.DEFAULT" />-->
-<!--            </intent-filter>-->
-<!--        </service>-->
+            android:permission="android.permission.BIND_JOB_SERVICE" /> <!-- <service -->
+        <!-- android:name=".audio.AudioDownloadService" -->
+        <!-- android:exported="false" -->
+        <!-- android:permission="android.permission.BIND_JOB_SERVICE"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="com.google.android.exoplayer.downloadService.action.RESTART" /> -->
+        <!-- <category android:name="android.intent.category.DEFAULT" /> -->
+        <!-- </intent-filter> -->
+        <!-- </service> -->
         <service
             android:name=".service.AudioService"
             android:exported="false"
@@ -228,8 +230,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- For ExoPlayer download service -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- For ExoPlayer download service -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
