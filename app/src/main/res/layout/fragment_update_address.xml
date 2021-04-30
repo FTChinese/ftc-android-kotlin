@@ -21,8 +21,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:error="@{viewModel.provinceValidator.error}">
+            android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_province"
@@ -32,14 +31,14 @@
                 android:inputType="text"
                 android:text="@={viewModel.provinceLiveData}"
                 android:maxLines="1"
-                android:enabled="@{!viewModel.progressLiveData}"/>
+                android:enabled="@{!viewModel.progressLiveData}"
+                app:error="@{viewModel.provinceValidator.error}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:error="@{viewModel.cityValidator.error}">
+            android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_city"
@@ -49,14 +48,14 @@
                 android:inputType="text"
                 android:text="@={viewModel.cityLiveData}"
                 android:maxLines="1"
-                android:enabled="@{!viewModel.progressLiveData}"/>
+                android:enabled="@{!viewModel.progressLiveData}"
+                app:error="@{viewModel.cityValidator.error}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:error="@{viewModel.districtValidator.error}">
+            android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_district"
@@ -66,14 +65,14 @@
                 android:inputType="text"
                 android:text="@={viewModel.districtLiveData}"
                 android:maxLines="1"
-                android:enabled="@{!viewModel.progressLiveData}"/>
+                android:enabled="@{!viewModel.progressLiveData}"
+                app:error="@{viewModel.districtValidator.error}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:error="@{viewModel.streetValidator.error}">
+            android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_street"
@@ -83,14 +82,14 @@
                 android:inputType="text"
                 android:text="@={viewModel.streetLiveData}"
                 android:maxLines="1"
-                android:enabled="@{!viewModel.progressLiveData}"/>
+                android:enabled="@{!viewModel.progressLiveData}"
+                app:error="@{viewModel.streetValidator.error}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:error="@{viewModel.postCodeValidator.error}">
+            android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/input_postcode"
@@ -100,7 +99,8 @@
                 android:inputType="text"
                 android:text="@={viewModel.postCodeLiveData}"
                 android:maxLines="1"
-                android:enabled="@{!viewModel.progressLiveData}"/>
+                android:enabled="@{!viewModel.progressLiveData}"
+                app:error="@{viewModel.postCodeValidator.error}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
