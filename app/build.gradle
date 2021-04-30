@@ -235,7 +235,7 @@ dependencies {
     implementation "androidx.room:room-coroutines:2.1.0-alpha04"
 
     // Wechat
-    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.6.20'
+    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.6.23'
 
     // Utilities
     implementation 'com.jakewharton.byteunits:byteunits:0.9.1'
