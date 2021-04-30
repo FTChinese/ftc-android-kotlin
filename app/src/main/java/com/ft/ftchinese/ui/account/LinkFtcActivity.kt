@@ -11,12 +11,9 @@ import com.ft.ftchinese.databinding.ActivityFragmentDoubleBinding
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.login.EmailFragment
-import com.ft.ftchinese.ui.login.SignInFragment
-import com.ft.ftchinese.ui.login.SignUpFragment
+import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.login.*
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.viewmodel.Existence
-import com.ft.ftchinese.viewmodel.LoginViewModel
 import com.ft.ftchinese.viewmodel.Result
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -29,7 +26,9 @@ import org.jetbrains.anko.toast
 class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var viewModel: LoginViewModel
+    private lateinit var loginViewModel: LoginViewModel
+    private lateinit var signUpViewModel: SignUpViewModel
+    private lateinit var emailViewModel: EmailExistsViewModel
     private lateinit var binding: ActivityFragmentDoubleBinding
 
     // A flag to determine whether LinkPreviewActivity should be shown.
@@ -49,69 +48,87 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
 
         sessionManager = SessionManager.getInstance(this)
 
-        viewModel = ViewModelProvider(this)
-                .get(LoginViewModel::class.java)
+        loginViewModel = ViewModelProvider(this)
+            .get(LoginViewModel::class.java)
 
-        viewModel.inProgress.observe(this, {
-            binding.inProgress = it
-        })
+        emailViewModel = ViewModelProvider(this)
+            .get(EmailExistsViewModel::class.java)
 
-        viewModel.emailResult.observe(this, {
-            onEmailResult(it)
-        })
+        signUpViewModel = ViewModelProvider(this)
+            .get(SignUpViewModel::class.java)
 
-        viewModel.accountResult.observe(this, {
-            onAccountResult(it)
-        })
+        connectionLiveData.observe(this) {
+            loginViewModel.isNetworkAvailable.value = it
+            emailViewModel.isNetworkAvailable.value = it
+            signUpViewModel.isNetworkAvailable.value = it
+        }
+
+        isConnected.let {
+            emailViewModel.isNetworkAvailable.value = it
+            loginViewModel.isNetworkAvailable.value = it
+            signUpViewModel.isNetworkAvailable.value = it
+        }
+
+        setupViewModel()
 
         supportFragmentManager.commit {
             replace(R.id.double_frag_primary, EmailFragment.newInstance())
         }
     }
 
-    // Handle the result of checking whether email exists.
-    private fun onEmailResult(result: Result<Existence>) {
+    private fun setupViewModel() {
 
-        binding.inProgress = false
-        when (result) {
-            is Result.LocalizedError -> {
-                toast(result.msgId)
-            }
-            is Result.Error -> {
-                result.exception.message?.let { toast(it) }
-            }
-            is Result.Success -> {
-                // If email exists, show sign in.
-                if (result.data.found) {
-                    supportFragmentManager.commit {
-                        replace(R.id.double_frag_primary, SignInFragment.newInstance(result.data.value))
-                        addToBackStack(null)
+        loginViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
+        signUpViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
+        emailViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
+        emailViewModel.existsResult.observe(this) { result ->
+            when (result) {
+                is Result.LocalizedError -> toast(result.msgId)
+                is Result.Error -> result.exception.message?.let { toast(it) }
+                is Result.Success -> {
+                    // If email exists, show sign in.
+                    if (result.data) {
+                        supportFragmentManager.commit {
+                            replace(
+                                R.id.double_frag_primary,
+                                SignInFragment.newInstance(),
+                            )
+                            addToBackStack(null)
+                        }
+                    } else {
+                        // If email does not exist, show sing up.
+                        isSignUp = true
+                        supportFragmentManager.commit {
+                            replace(
+                                R.id.double_frag_primary,
+                                SignUpFragment.newInstance(),
+                            )
+                            addToBackStack(null)
+                        }
                     }
-
-                    return
-                }
-
-                // If email does not exist, show sing up.
-                isSignUp = true
-                supportFragmentManager.commit {
-                    replace(R.id.double_frag_primary, SignUpFragment.newInstance(result.data.value))
-                    addToBackStack(null)
                 }
             }
         }
+
+        loginViewModel.accountResult.observe(this, {
+            onAccountResult(it)
+        })
     }
 
     private fun onAccountResult(accountResult: Result<Account>) {
 
-        binding.inProgress = false
-
         when (accountResult) {
-            is Result.LocalizedError -> {
-                toast(accountResult.msgId)
-            }
-            is Result.Error -> {
-                accountResult.exception.message?.let { toast(it) }
-            }
+            is Result.LocalizedError -> toast(accountResult.msgId)
+            is Result.Error -> accountResult.exception.message?.let { toast(it) }
             is Result.Success -> {
                 // Is user created a new ftc account, do not show the LinkPreviewActivity since the
                 // new account is automatically linked upon creation.
