@@ -4,6 +4,9 @@ import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.request.PasswordResetLetterParams
+import com.ft.ftchinese.model.request.PasswordResetParams
+import com.ft.ftchinese.model.request.PasswordResetVerifier
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -53,18 +56,18 @@ object AuthClient : AnkoLogger {
         return true
     }
 
-    fun passwordResetLetter(email: String): Boolean {
+    fun passwordResetLetter(params: PasswordResetLetterParams): Boolean {
         val (response, _)= Fetch()
             .post(NextApi.PASSWORD_RESET_LETTER)
             .setTimeout(30)
             .noCache()
-            .sendJson(json.toJsonString(mapOf("email" to email)))
+            .sendJson(json.toJsonString(params))
             .endJsonText()
 
         return response.code == 204
     }
 
-    fun verifyPwResetCode(v: PwResetVerifier): PwResetBearer? {
+    fun verifyPwResetCode(v: PasswordResetVerifier): PwResetBearer? {
         val (_, body) = Fetch()
             .get("${NextApi.VERIFY_PW_RESET}?email=${v.email}&code=${v.code}")
             .noCache()
@@ -77,12 +80,12 @@ object AuthClient : AnkoLogger {
         }
     }
 
-    fun resetPassword(v: PasswordResetter): Boolean {
+    fun resetPassword(params: PasswordResetParams): Boolean {
         val (resp, _) = Fetch()
             .post(NextApi.PASSWORD_RESET)
             .setClient()
             .noCache()
-            .sendJson(json.toJsonString(v))
+            .sendJson(json.toJsonString(params))
             .endJsonText()
 
         return resp.code == 204
