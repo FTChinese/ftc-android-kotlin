@@ -11,6 +11,7 @@ import com.ft.ftchinese.model.reader.Credentials
 import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.ui.validator.LiveDataValidator
+import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.parseApiError
@@ -42,6 +43,11 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
         }
     }
 
+    private val isDirty: Boolean
+        get() = !passwordLiveData.value.isNullOrBlank() && !confirmPasswordLiveData.value.isNullOrBlank()
+
+    private val formValidator = LiveDataValidatorResolver(listOf(passwordValidator, confirmPasswordValidator))
+
     val isFormEnabled = MediatorLiveData<Boolean>().apply {
         addSource(passwordLiveData) {
             value = enableSubmit()
@@ -54,20 +60,12 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    init {
-        progressLiveData.value = false
+    private fun enableSubmit(): Boolean {
+        return progressLiveData.value == false && isDirty && formValidator.isValid()
     }
 
-    private fun enableSubmit(): Boolean {
-        if (progressLiveData.value == true) {
-            return false
-        }
-
-        if (passwordLiveData.value.isNullOrBlank() && confirmPasswordLiveData.value.isNullOrBlank()) {
-            return false
-        }
-
-        return passwordValidator.isValid() && confirmPasswordValidator.isValid()
+    init {
+        progressLiveData.value = false
     }
 
     val accountResult: MutableLiveData<Result<Account>> by lazy {
