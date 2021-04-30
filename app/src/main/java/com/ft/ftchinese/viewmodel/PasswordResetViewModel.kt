@@ -8,7 +8,7 @@ import com.ft.ftchinese.model.reader.PasswordResetter
 import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.model.reader.PwResetVerifier
 import com.ft.ftchinese.model.fetch.ClientError
-import com.ft.ftchinese.repository.ReaderRepo
+import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.ui.validator.Validator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -71,7 +71,7 @@ class PasswordResetViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val ok = withContext(Dispatchers.IO) {
-                    ReaderRepo.passwordResetLetter(email)
+                    AuthClient.passwordResetLetter(email)
                 }
 
                 letterResult.value = Result.Success(ok)
@@ -97,7 +97,7 @@ class PasswordResetViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val bearer = withContext(Dispatchers.IO) {
-                    ReaderRepo.verifyPwResetCode(v)
+                    AuthClient.verifyPwResetCode(v)
                 }
 
                 if (bearer == null) {
@@ -128,7 +128,7 @@ class PasswordResetViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val ok = withContext(Dispatchers.IO) {
-                    ReaderRepo.resetPassword(r)
+                    AuthClient.resetPassword(r)
                 }
 
                 resetResult.value = Result.Success(ok)
