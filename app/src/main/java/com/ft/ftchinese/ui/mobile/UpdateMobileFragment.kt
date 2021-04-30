@@ -61,6 +61,7 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
             viewModel.isNetworkAvailable.value = it
         }
 
+        // TODO: this should be removed.
         progressViewModel = activity?.run {
             ViewModelProvider(this).get(ProgressViewModel::class.java)
         } ?: throw Exception("Invalid activity")
@@ -111,7 +112,7 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
         info("Request code button clicked")
         progressViewModel.on()
         sessionManager.loadAccount()?.let {
-            viewModel.requestCode(it)
+            viewModel.requestCodeForUpdate(it)
         }
     }
 
