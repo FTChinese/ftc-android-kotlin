@@ -141,7 +141,7 @@
     <string name="prompt_unlinked">帳號已解除綁定</string>
     <string name="prompt_account_updated">帳號已更新</string>
 
-    <string name="instruct_password_letter">請輸入您的登入FT中文網所用的電子信箱，我們會向該信箱發送郵件，幫您重設密碼码</string>
+    <string name="instruct_password_letter">我們會您的登入信箱發送一封包含驗證碼的郵件，驗證通過後可以重設密碼</string>
     <string name="instruct_verify_email">您的信箱尚未驗證，為保障您的帳號安全，請及時驗證信箱。我們已經給您的登入信箱發送了驗證信件，点击信件中的連接即可。</string>
     <string name="instruct_letter_sent">請檢查您的信件，點擊郵件中的「重設密碼」連接，在所打開的網頁中修改您的密碼。如果幾分鐘內沒有看到信件，請檢查是否被放進了垃圾信件列表。</string>
     <string name="instruct_link_email">您目前使用了微信帳號登入FT中文。为保障帳號安全，建议您綁定在FT中文网註冊的信箱帳號。</string>
