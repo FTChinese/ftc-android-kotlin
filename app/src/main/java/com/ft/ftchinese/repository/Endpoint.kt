@@ -45,6 +45,12 @@ object Endpoint {
         BuildConfig.API_READER_LIVE
     }
 
+    private val authEmailBase = "${subsBase()}/auth/email"
+    val emailExists = "${authEmailBase}/exists"
+    val emailLogin = "${authEmailBase}/login"
+    val emailSignUp = "${authEmailBase}/signup"
+
+
     val contentBase = if (BuildConfig.DEBUG) {
         "$devIP:8100"
     } else {
