@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    xmlns:bind="http://schemas.android.com/apk/res-auto">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <variable
-            name="enableInput"
+            name="isFormEnabled"
             type="Boolean" />
+
+        <variable
+            name="handler"
+            type="com.ft.ftchinese.ui.login.EmailFragment" />
+
+        <variable
+            name="viewModel"
+            type="com.ft.ftchinese.ui.login.EmailExistsViewModel" />
+
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -34,7 +41,9 @@
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:enabled="@{enableInput ?? true}" />
+                android:enabled="@{!viewModel.progressLiveData}"
+                android:text="@={viewModel.emailLiveData}"
+                app:error="@{viewModel.emailValidator.error}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -44,7 +53,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:text="@string/btn_next"
-            android:enabled="@{enableInput ?? false}"
+            android:enabled="@{isFormEnabled}"
+            android:onClick="@{handler::onSubmit}"
             app:layout_constraintEnd_toEndOf="@+id/email_container"
             app:layout_constraintStart_toStartOf="@+id/email_container"
             app:layout_constraintTop_toBottomOf="@+id/email_container" />
