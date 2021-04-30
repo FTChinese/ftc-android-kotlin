@@ -11,6 +11,12 @@
         <variable
             name="result"
             type="com.ft.ftchinese.wxapi.UIWx" />
+        <variable
+            name="handler"
+            type="com.ft.ftchinese.wxapi.WXEntryActivity" />
+        <variable
+            name="viewModel"
+            type="com.ft.ftchinese.wxapi.WxOAuthViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -56,6 +62,7 @@
             android:layout_marginBottom="48dp"
             android:text="@string/action_done"
             android:enabled="@{result.enableButton}"
+            android:onClick="@{handler::onClickDoneButton}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
