@@ -80,6 +80,7 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
         }
 
         viewModel.codeSent.observe(viewLifecycleOwner) {
+            // TODO: remove
             progressViewModel.off()
             when (it) {
                 is Result.LocalizedError -> toast(it.msgId)
