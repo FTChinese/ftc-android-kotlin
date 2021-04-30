@@ -25,30 +25,30 @@ import org.jetbrains.anko.info
 
 class MobileViewModel : ViewModel(), AnkoLogger {
 
+    // Used to toggle button enabled state only.
+    // Progress indicator is controlled by hosting activity.
+    val progressLiveData = MutableLiveData<Boolean>()
+    val isNetworkAvailable = MutableLiveData<Boolean>()
+
     val mobileLiveData = MutableLiveData("")
     val mobileValidator = LiveDataValidator(mobileLiveData).apply {
-        addRule("请输入手机号码") {
-            it.isNullOrBlank()
-        }
-        addRule("请输入正确的手机号码") {
-            !Validator.isMainlandPhone(it)
-        }
-        addRule("") {
+        addRule("请输入正确的手机号码", Validator::isMainlandPhone)
+
+        addRule("手机已设置") {
             // If the input number is the the same as the current one.
-            AccountCache.get()?.mobile == it
+            AccountCache.get()?.mobile != it
         }
     }
 
     val codeLiveData = MutableLiveData("")
     val codeValidator = LiveDataValidator(codeLiveData).apply {
-        addRule("请输入验证码") { it.isNullOrBlank()}
+        addRule("请输入验证码", Validator.minLength(6))
     }
 
-    // Used to toggle button enabled state only.
-    // Progress indicator is controlled by hosting activity.
-    val progressLiveData = MutableLiveData<Boolean>()
-
     val counterLiveData = MutableLiveData<Int>()
+
+    private val isDirty: Boolean
+        get() = !mobileLiveData.value.isNullOrBlank() && !codeLiveData.value.isNullOrBlank()
 
     private val formValidator = LiveDataValidatorResolver(listOf(mobileValidator, codeValidator))
 
@@ -79,6 +79,24 @@ class MobileViewModel : ViewModel(), AnkoLogger {
         }
     }
 
+    private fun enableCodeRequest(): Boolean {
+        if (counterLiveData.value != 0) {
+            return false
+        }
+        return progressLiveData.value == false && !mobileLiveData.value.isNullOrBlank() && mobileValidator.isValid()
+    }
+
+    private fun enableForm(): Boolean {
+        return progressLiveData.value == false && isDirty && formValidator.isValid()
+    }
+
+    init {
+        progressLiveData.value = false
+        isFormEnabled.value = false
+        counterLiveData.value = 0
+        mobileLiveData.value = AccountCache.get()?.mobile
+    }
+
     private val smsCodeParams: SMSCodeParams
         get() = SMSCodeParams(
             mobile = mobileLiveData.value ?: "",
@@ -89,28 +107,6 @@ class MobileViewModel : ViewModel(), AnkoLogger {
             mobile = mobileLiveData.value ?: "",
             code = codeLiveData.value ?: "",
         )
-
-    init {
-        progressLiveData.value = false
-        isFormEnabled.value = false
-        counterLiveData.value = 0
-        mobileLiveData.value = AccountCache.get()?.mobile
-    }
-
-    private fun enableCodeRequest(): Boolean {
-        if (counterLiveData.value != 0) {
-            return false
-        }
-        return progressLiveData.value == false && mobileValidator.isValid()
-    }
-
-    private fun enableForm(): Boolean {
-        return progressLiveData.value == false && formValidator.isValid()
-    }
-
-    val isNetworkAvailable: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>()
-    }
 
     val codeSent: MutableLiveData<Result<Boolean>> by lazy {
         MutableLiveData<Result<Boolean>>()
@@ -129,7 +125,18 @@ class MobileViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun requestCode(account: Account) {
+    // Send SMS for login.
+    fun requestCodeForAuth() {
+
+    }
+
+    // Perform login after SMS cod entered.
+    fun login() {
+
+    }
+
+    // Request code for update after logged-in
+    fun requestCodeForUpdate(account: Account) {
         if (isNetworkAvailable.value != true) {
             codeSent.value = Result.LocalizedError(R.string.prompt_no_network)
             return
@@ -162,6 +169,7 @@ class MobileViewModel : ViewModel(), AnkoLogger {
         }
     }
 
+    // Update mobile in settings.
     fun updateMobile(account: Account) {
         if (isNetworkAvailable.value != true) {
             mobileUpdated.value = Result.LocalizedError(R.string.prompt_no_network)
