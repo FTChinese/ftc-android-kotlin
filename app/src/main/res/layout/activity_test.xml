@@ -47,6 +47,24 @@
                 android:paddingEnd="8dp">
 
                 <Button
+                    android:id="@+id/sign_in_up"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Sign In/Up Activity"
+                    android:textAllCaps="false"/>
+
+                <Button
+                    android:id="@+id/sign_in"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_login"/>
+
+                <Button
+                    android:id="@+id/sign_up"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_sign_up"/>
+                <Button
                     android:id="@+id/btn_free_user"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
