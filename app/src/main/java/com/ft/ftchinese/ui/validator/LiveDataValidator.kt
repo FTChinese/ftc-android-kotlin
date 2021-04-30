@@ -12,9 +12,8 @@ class LiveDataValidator(private val liveData: LiveData<String>) : AnkoLogger {
     var error = MutableLiveData<String?>()
 
     fun isValid(): Boolean {
-        info("Validating live data ${liveData.value}")
         for (i in 0 until validationRules.size) {
-            if (validationRules[i](liveData.value)) {
+            if (!validationRules[i](liveData.value)) {
                 emitErrorMessage(errorMessages[i])
                 return false
             }
