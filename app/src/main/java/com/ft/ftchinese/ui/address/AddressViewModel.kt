@@ -10,16 +10,17 @@ import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
+import com.ft.ftchinese.ui.validator.Validator
 import com.ft.ftchinese.viewmodel.Result
 import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
 class AddressViewModel : ViewModel(), AnkoLogger {
+    val progressLiveData = MutableLiveData<Boolean>()
     val isNetworkAvailable: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
@@ -36,65 +37,33 @@ class AddressViewModel : ViewModel(), AnkoLogger {
 
     val provinceLiveData = MutableLiveData("")
     val provinceValidator = LiveDataValidator(provinceLiveData).apply {
-        addRule("") {
-            it.isNullOrBlank()
-        }
-        addRule("输入内容过长") {
-            it?.length?.let { len ->
-                len > 8
-            } ?: true
-        }
+        addRule("", Validator::notEmpty)
+        addRule("输入内容过长", Validator.maxLength(8))
     }
 
     val cityLiveData = MutableLiveData("")
     val cityValidator = LiveDataValidator(cityLiveData).apply {
-        addRule("") {
-            it.isNullOrBlank()
-        }
-        addRule("输入内容过长") {
-            it?.length?.let { len ->
-                len > 16
-            } ?: true
-        }
+        addRule("", Validator::notEmpty)
+        addRule("输入内容过长", Validator.maxLength(16))
     }
 
     val districtLiveData = MutableLiveData("")
     val districtValidator = LiveDataValidator(districtLiveData).apply {
-        addRule("") {
-            it.isNullOrBlank()
-        }
-        addRule("输入内容过长") {
-            it?.length?.let { len ->
-                len > 16
-            } ?: true
-        }
+        addRule("", Validator::notEmpty)
+        addRule("输入内容过长", Validator.maxLength(16))
     }
 
     val streetLiveData = MutableLiveData("")
     val streetValidator = LiveDataValidator(streetLiveData).apply {
-        addRule("") {
-            it.isNullOrBlank()
-        }
-        addRule("输入内容过长") {
-            it?.length?.let { len ->
-                len > 128
-            } ?: true
-        }
+        addRule("", Validator::notEmpty)
+        addRule("输入内容过长",Validator.maxLength(128))
     }
 
     val postCodeLiveData = MutableLiveData("")
     val postCodeValidator = LiveDataValidator(postCodeLiveData).apply {
-        addRule("") {
-            it.isNullOrBlank()
-        }
-        addRule("输入内容过长") {
-            it?.length?.let { len ->
-                len > 16
-            } ?: true
-        }
+        addRule("", Validator::notEmpty)
+        addRule("输入内容过长", Validator.maxLength(16))
     }
-
-    val progressLiveData = MutableLiveData<Boolean>()
 
     private val formValidator = LiveDataValidatorResolver(listOf(
         provinceValidator,
