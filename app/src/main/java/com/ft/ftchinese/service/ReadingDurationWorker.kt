@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.ft.ftchinese.model.reader.ReadingDuration
-import com.ft.ftchinese.repository.ReaderRepo
+import com.ft.ftchinese.repository.AuthClient
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -26,7 +26,7 @@ class ReadingDurationWorker(appContext: Context, workerParams: WorkerParameters)
         val userId = inputData.getString(KEY_DUR_USER_ID) ?: return Result.success()
 
         try {
-            ReaderRepo.engaged(ReadingDuration(
+            AuthClient.engaged(ReadingDuration(
                 url = url,
                 refer = refer,
                 startUnix = startUnix,
