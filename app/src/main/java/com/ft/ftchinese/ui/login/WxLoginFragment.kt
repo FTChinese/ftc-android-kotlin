@@ -14,7 +14,6 @@ import com.ft.ftchinese.databinding.FragmentWxLoginBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.model.reader.WxOAuth
 import com.ft.ftchinese.model.reader.WxOAuthIntent
-import com.ft.ftchinese.viewmodel.LoginViewModel
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -48,25 +47,25 @@ class WxLoginFragment : Fragment(), AnkoLogger {
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         viewModel = activity?.run {
             ViewModelProvider(this)
-                    .get(LoginViewModel::class.java)
+                .get(LoginViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
-        binding.wechatOauthBtn.setOnClickListener {
-            viewModel.inProgress.value = true
-            authorize()
-        }
+        binding.handler = this
     }
 
-    private fun authorize() {
+    fun onClickOAuth(view: View) {
+        viewModel.progressLiveData.value = true
+
         val nonce = WxOAuth.stateCode()
         info("Wechat oauth state: $nonce")
 
         sessionManager?.saveWxState(nonce)
+        // TODO: store in memory.
         sessionManager?.saveWxIntent(WxOAuthIntent.LOGIN)
 
         val req = SendAuth.Req()
