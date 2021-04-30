@@ -41,6 +41,9 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.LyricsAdapter
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
+import com.ft.ftchinese.ui.login.SignInFragment
+import com.ft.ftchinese.ui.login.AuthActivity
+import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.share.SocialShareFragment
 import com.ft.ftchinese.wxapi.WXEntryActivity
@@ -50,6 +53,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.jetbrains.anko.info
+import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
@@ -74,6 +78,18 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         sessionManager = SessionManager.getInstance(this)
         orderManger = OrderManager.getInstance(this)
         workManager = WorkManager.getInstance(this)
+
+        binding.signInUp.onClick {
+            AuthActivity.start(this@TestActivity)
+        }
+
+        binding.signIn.onClick {
+            SignInFragment().show(supportFragmentManager, "SignInFragment")
+        }
+
+        binding.signUp.onClick {
+            SignUpFragment().show(supportFragmentManager, "SignUpFragment")
+        }
 
         binding.oneTimeWorkManager.setOnClickListener {
             val request = OneTimeWorkRequestBuilder<VerifySubsWorker>().build()
