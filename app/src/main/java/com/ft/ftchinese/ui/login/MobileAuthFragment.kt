@@ -100,15 +100,11 @@ class MobileAuthFragment : ScopedFragment(), AnkoLogger {
 
     fun onClickRequestCode(view: View) {
         info("Request code button clicked")
-        sessionManager.loadAccount()?.let {
-            viewModel.requestCodeForUpdate(it)
-        }
+        viewModel.requestCodeForAuth()
     }
 
     fun onSubmitForm(view: View) {
-        sessionManager.loadAccount()?.let {
-            viewModel.updateMobile(it)
-        }
+        viewModel.login()
     }
 
     companion object {
