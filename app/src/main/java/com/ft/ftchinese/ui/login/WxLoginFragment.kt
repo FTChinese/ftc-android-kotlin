@@ -21,7 +21,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
 /**
- * This fragment shows a Wechat login button inside [LoginActivity] and handles the login process.
+ * Wechat login UI.
  * It just calls the Wechat SDK and the rest operations are
  * delegated to wxapi.WXEntryActivity
  */

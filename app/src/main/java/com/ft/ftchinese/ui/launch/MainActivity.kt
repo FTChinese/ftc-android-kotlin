@@ -47,7 +47,7 @@ import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.MyftPagerAdapter
 import com.ft.ftchinese.ui.channel.SearchableActivity
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
-import com.ft.ftchinese.ui.login.LoginActivity
+import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
@@ -298,7 +298,7 @@ class MainActivity : ScopedAppActivity(),
         // Set a listener that will be notified when a menu item is selected.
         binding.drawerNav.setNavigationItemSelectedListener {
             when (it.itemId) {
-                R.id.action_login ->  LoginActivity.startForResult(this)
+                R.id.action_login ->  AuthActivity.startForResult(this)
                 R.id.action_account -> AccountActivity.start(this)
                 R.id.action_paywall -> {
                     // Tracking
@@ -321,7 +321,7 @@ class MainActivity : ScopedAppActivity(),
         // Set listener on the title text inside drawer's header view
         navHeaderBinding.navHeaderTitle.setOnClickListener {
             if (!sessionManager.isLoggedIn()) {
-                LoginActivity.startForResult(this)
+                AuthActivity.startForResult(this)
                 return@setOnClickListener
             }
 

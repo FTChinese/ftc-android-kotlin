@@ -14,7 +14,7 @@ import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.account.LinkPreviewActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.login.LoginActivity
+import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.viewmodel.Result
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
@@ -295,7 +295,7 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
             return
         }
 
-        LoginActivity.startForResult(this)
+        AuthActivity.startForResult(this)
         finish()
     }
 

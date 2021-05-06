@@ -21,7 +21,7 @@ import com.ft.ftchinese.tracking.PaywallSource
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.WebViewActivity
-import com.ft.ftchinese.ui.login.LoginActivity
+import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -163,7 +163,7 @@ open class WVClient(
             // The `微信登录` button is wrapped in a link with webUrl set to `weixinlogin://www.ftchinese.com/`
             "ftcregister",
             "weixinlogin" -> {
-                LoginActivity.start(context)
+                AuthActivity.start(context)
                 return true
             }
 

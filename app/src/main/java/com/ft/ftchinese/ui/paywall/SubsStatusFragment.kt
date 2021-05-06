@@ -10,9 +10,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentSubsStatusBinding
-import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.ui.login.LoginActivity
+import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.product.ProductViewModel
 
 
@@ -51,7 +51,7 @@ class SubsStatusFragment : Fragment() {
                 binding.loggedIn = false
 
                 binding.loginButton.setOnClickListener {
-                    LoginActivity.startForResult(activity)
+                    AuthActivity.startForResult(activity)
                 }
 
                 return@Observer

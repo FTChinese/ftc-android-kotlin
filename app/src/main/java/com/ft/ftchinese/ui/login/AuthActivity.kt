@@ -100,10 +100,6 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
             binding.inProgress = it
         }
 
-        emailViewModel.progressLiveData.observe(this) {
-            binding.inProgress = it
-        }
-
         emailViewModel.existsResult.observe(this) { result ->
             when (result) {
                 is Result.LocalizedError -> toast(result.msgId)

@@ -14,10 +14,6 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".ui.login.AuthActivity"
-            android:label="@string/title_login"
-            android:parentActivityName=".ui.launch.MainActivity"/>
-        <activity
             android:name=".TestActivity"
             android:label="Test"
             android:parentActivityName=".ui.launch.MainActivity" />
@@ -25,7 +21,8 @@
             android:name=".ui.launch.SplashActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.SplashScreen">
+            android:theme="@style/AppTheme.SplashScreen"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -62,23 +59,15 @@
             android:name=".ui.article.WebViewActivity"
             android:parentActivityName=".ui.launch.MainActivity" />
         <activity
-            android:name=".ui.login.LoginActivity"
-            android:label="@string/title_login_signup"
+            android:name=".ui.login.AuthActivity"
+            android:label="@string/title_login"
             android:parentActivityName=".ui.launch.MainActivity"
-            android:windowSoftInputMode="adjustResize" />
+            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".ui.login.ForgotPasswordActivity"
             android:label="@string/title_forgot_password"
-            android:parentActivityName=".ui.login.LoginActivity"
+            android:parentActivityName=".ui.login.AuthActivity"
             android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".ui.login.VerifyResetCodeActivity"
-            android:label="@string/title_forgot_password"
-            android:parentActivityName=".ui.login.ForgotPasswordActivity" />
-        <activity
-            android:name=".ui.login.ResetPasswordActivity"
-            android:label="@string/title_reset_password"
-            android:parentActivityName=".ui.login.VerifyResetCodeActivity" />
         <activity
             android:name=".ui.account.AccountActivity"
             android:label="@string/title_account"

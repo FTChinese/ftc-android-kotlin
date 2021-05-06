@@ -18,7 +18,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
 /**
- * Hosted both in [LoginActivity] and [com.ft.ftchinese.ui.account.LinkFtcActivity]
+ * Popup when user signup rquired.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class SignUpFragment : ScopedBottomSheetDialogFragment(),

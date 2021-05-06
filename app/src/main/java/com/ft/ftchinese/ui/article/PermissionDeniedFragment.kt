@@ -12,7 +12,7 @@ import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.MemberStatus
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.ui.channel.DenialReason
-import com.ft.ftchinese.ui.login.LoginActivity
+import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -53,7 +53,7 @@ class PermissionDeniedFragment(
 
         binding.loginOrSubscribe.onClick {
             if (denied.status == MemberStatus.NotLoggedIn) {
-                LoginActivity.startForResult(requireActivity())
+                AuthActivity.startForResult(requireActivity())
             } else {
                 PaywallActivity.start(
                     context = requireContext(),
