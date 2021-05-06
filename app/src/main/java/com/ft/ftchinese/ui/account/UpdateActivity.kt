@@ -13,6 +13,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.address.AddressViewModel
 import com.ft.ftchinese.ui.address.UpdateAddressFragment
 import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.mobile.UpdateMobileFragment
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.ProgressViewModel
@@ -28,6 +29,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var sessionManager: SessionManager
     private lateinit var addressViewModel: AddressViewModel
+    private lateinit var mobileViewModel: MobileViewModel
     private lateinit var progressViewModel: ProgressViewModel
 
     private lateinit var binding: ActivityUpdateAccountBinding
@@ -47,13 +49,16 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             .get(ProgressViewModel::class.java)
 
         updateViewModel = ViewModelProvider(this)
-                .get(UpdateViewModel::class.java)
+            .get(UpdateViewModel::class.java)
 
         addressViewModel = ViewModelProvider(this)
             .get(AddressViewModel::class.java)
 
         accountViewModel = ViewModelProvider(this)
-                .get(AccountViewModel::class.java)
+            .get(AccountViewModel::class.java)
+
+        mobileViewModel = ViewModelProvider(this)
+            .get(MobileViewModel::class.java)
 
         sessionManager = SessionManager.getInstance(this)
 
@@ -93,14 +98,20 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun setUp() {
-//        updateViewModel.inProgress.observe(this, {
-//            binding.inProgress = it
-//        })
+        updateViewModel.inProgress.observe(this, {
+            binding.progressing = it
+        })
 
+        // TODO: add progressLiveData to addressViewModel.
 //        addressViewModel.inProgress.observe(this) {
-//            binding.inProgress = it
+//            binding.progressing = it
 //        }
 
+        mobileViewModel.progressLiveData.observe(this) {
+            binding.progressing = it
+        }
+
+        // TODO: remove
         progressViewModel.inProgress.observe(this) {
             binding.progressing = it
         }
