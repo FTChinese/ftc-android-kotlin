@@ -55,7 +55,6 @@ class PromoBoxFragment : Fragment(), AnkoLogger {
          *
          * @return A new instance of fragment PromoBoxFragment.
          */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance() = PromoBoxFragment()
     }
