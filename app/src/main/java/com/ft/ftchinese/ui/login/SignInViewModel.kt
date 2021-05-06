@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 
-class LoginViewModel : ViewModel(), AnkoLogger {
+class SignInViewModel : ViewModel(), AnkoLogger {
 
     val progressLiveData = MutableLiveData<Boolean>()
     val isNetworkAvailable = MutableLiveData<Boolean>()

@@ -12,7 +12,7 @@
             type="com.ft.ftchinese.ui.login.SignInFragment" />
         <variable
             name="viewModel"
-            type="com.ft.ftchinese.ui.login.LoginViewModel" />
+            type="com.ft.ftchinese.ui.login.SignInViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

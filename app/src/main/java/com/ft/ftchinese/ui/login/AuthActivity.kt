@@ -34,7 +34,7 @@ private val tabs = listOf(
 class AuthActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var loginViewModel: LoginViewModel
+    private lateinit var loginViewModel: SignInViewModel
     private lateinit var signUpViewModel: SignUpViewModel
     private lateinit var emailViewModel: EmailExistsViewModel
     private lateinit var binding: ActivityAuthBinding
@@ -65,7 +65,7 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
             .get(EmailExistsViewModel::class.java)
 
         loginViewModel = ViewModelProvider(this)
-            .get(LoginViewModel::class.java)
+            .get(SignInViewModel::class.java)
 
         signUpViewModel = ViewModelProvider(this)
             .get(SignUpViewModel::class.java)

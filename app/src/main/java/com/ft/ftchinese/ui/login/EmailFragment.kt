@@ -15,7 +15,7 @@ import org.jetbrains.anko.AnkoLogger
 class EmailFragment : ScopedFragment(),
         AnkoLogger {
 
-    private lateinit var viewModel: LoginViewModel
+    private lateinit var viewModel: SignInViewModel
     private lateinit var emailViewModel: EmailExistsViewModel
     private lateinit var binding: FragmentEmailBinding
 
@@ -33,7 +33,7 @@ class EmailFragment : ScopedFragment(),
 
         viewModel = activity?.run {
             ViewModelProvider(this)
-                .get(LoginViewModel::class.java)
+                .get(SignInViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
         emailViewModel = activity?.run {

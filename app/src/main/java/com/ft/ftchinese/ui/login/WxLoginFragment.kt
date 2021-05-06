@@ -29,7 +29,7 @@ class WxLoginFragment : Fragment(), AnkoLogger {
 
     private var wxApi: IWXAPI? = null
     private var sessionManager: SessionManager? = null
-    lateinit var viewModel: LoginViewModel
+    lateinit var viewModel: SignInViewModel
     private lateinit var binding: FragmentWxLoginBinding
 
     override fun onAttach(context: Context) {
@@ -52,7 +52,7 @@ class WxLoginFragment : Fragment(), AnkoLogger {
 
         viewModel = activity?.run {
             ViewModelProvider(this)
-                .get(LoginViewModel::class.java)
+                .get(SignInViewModel::class.java)
         } ?: throw Exception("Invalid Exception")
 
         binding.handler = this

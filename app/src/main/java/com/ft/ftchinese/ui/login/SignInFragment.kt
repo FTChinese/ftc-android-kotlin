@@ -13,14 +13,13 @@ import com.ft.ftchinese.databinding.FragmentSignInBinding
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.sdk27.coroutines.onClick
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class SignInFragment : ScopedBottomSheetDialogFragment(),
         AnkoLogger {
 
     private lateinit var tokenManager: TokenManager
-    private lateinit var loginViewModel: LoginViewModel
+    private lateinit var loginViewModel: SignInViewModel
     private lateinit var emailViewModel: EmailExistsViewModel
     private lateinit var binding: FragmentSignInBinding
 
@@ -53,7 +52,7 @@ class SignInFragment : ScopedBottomSheetDialogFragment(),
 
         loginViewModel = activity?.run {
             ViewModelProvider(this)
-                .get(LoginViewModel::class.java)
+                .get(SignInViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
         emailViewModel = activity?.run {

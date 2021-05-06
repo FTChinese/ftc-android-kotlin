@@ -26,7 +26,7 @@ import org.jetbrains.anko.toast
 class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var loginViewModel: LoginViewModel
+    private lateinit var loginViewModel: SignInViewModel
     private lateinit var signUpViewModel: SignUpViewModel
     private lateinit var emailViewModel: EmailExistsViewModel
     private lateinit var binding: ActivityFragmentDoubleBinding
@@ -49,7 +49,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
         sessionManager = SessionManager.getInstance(this)
 
         loginViewModel = ViewModelProvider(this)
-            .get(LoginViewModel::class.java)
+            .get(SignInViewModel::class.java)
 
         emailViewModel = ViewModelProvider(this)
             .get(EmailExistsViewModel::class.java)
