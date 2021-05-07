@@ -4,11 +4,11 @@ import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.*
-import com.ft.ftchinese.model.request.MobilePhoneParams
+import com.ft.ftchinese.model.request.MobileVerificationParams
 import com.ft.ftchinese.model.request.SMSCodeParams
 
 object AccountRepo {
-    private fun loadFtcAccount(ftcId: String): Account? {
+    fun loadFtcAccount(ftcId: String): Account? {
         val(_, body) = Fetch().get(NextApi.ACCOUNT)
                 .noCache()
                 .setUserId(ftcId)
@@ -112,7 +112,7 @@ object AccountRepo {
         return resp.code == 204
     }
 
-    fun updateMobile(account: Account, params: MobilePhoneParams): BaseAccount? {
+    fun updateMobile(account: Account, params: MobileVerificationParams): BaseAccount? {
         val (_, body) = Fetch()
             .patch("${Endpoint.subsBase(account.isTest)}/account/mobile")
             .noCache()
