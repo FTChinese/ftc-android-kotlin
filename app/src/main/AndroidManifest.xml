@@ -20,9 +20,9 @@
         <activity
             android:name=".ui.launch.SplashActivity"
             android:configChanges="orientation"
+            android:exported="false"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.SplashScreen"
-            android:exported="false">
+            android:theme="@style/AppTheme.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -62,7 +62,7 @@
             android:name=".ui.login.AuthActivity"
             android:label="@string/title_login"
             android:parentActivityName=".ui.launch.MainActivity"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.login.ForgotPasswordActivity"
             android:label="@string/title_forgot_password"
@@ -78,15 +78,11 @@
             android:label="@string/title_stripe_setting"
             android:parentActivityName=".ui.account.AccountActivity" />
         <activity
-            android:name=".ui.account.LinkFtcActivity"
+            android:name=".ui.wxlink.LinkFtcActivity"
             android:label="@string/title_link_email"
             android:parentActivityName=".ui.account.AccountActivity" />
         <activity
-            android:name=".ui.account.LinkPreviewActivity"
-            android:label="@string/title_merge_accounts"
-            android:parentActivityName=".ui.account.AccountActivity" />
-        <activity
-            android:name=".ui.account.UnlinkActivity"
+            android:name=".ui.wxlink.UnlinkActivity"
             android:label="@string/title_unlink"
             android:parentActivityName=".ui.account.WxInfoActivity" />
         <activity
@@ -218,8 +214,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- For ExoPlayer download service -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- For ExoPlayer download service -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
