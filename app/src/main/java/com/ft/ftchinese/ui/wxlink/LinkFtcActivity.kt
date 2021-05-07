@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.wxlink
 
 import android.app.Activity
 import android.content.Intent
@@ -8,19 +8,18 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityFragmentDoubleBinding
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.login.*
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.viewmodel.Result
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 /**
- * Lead a wechat user to sign up an FTC account.
+ * UI for a wx-only user to link to an email account.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
@@ -31,13 +30,12 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var emailViewModel: EmailExistsViewModel
     private lateinit var binding: ActivityFragmentDoubleBinding
 
-    // A flag to determine whether LinkPreviewActivity should be shown.
-    // For new sign up, this do not show preview.
-    private var isSignUp = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_fragment_double)
+        binding = DataBindingUtil.setContentView(
+            this,
+            R.layout.activity_fragment_double,
+        )
 
         setSupportActionBar(binding.toolbar.toolbar)
 
@@ -78,6 +76,10 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun setupViewModel() {
 
+        emailViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
         loginViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
         }
@@ -86,70 +88,59 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
             binding.inProgress = it
         }
 
-        emailViewModel.progressLiveData.observe(this) {
-            binding.inProgress = it
-        }
-
         emailViewModel.existsResult.observe(this) { result ->
             when (result) {
-                is Result.LocalizedError -> toast(result.msgId)
-                is Result.Error -> result.exception.message?.let { toast(it) }
-                is Result.Success -> {
+                is FetchResult.LocalizedError -> toast(result.msgId)
+                is FetchResult.Error -> result.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
                     // If email exists, show sign in.
                     if (result.data) {
-                        supportFragmentManager.commit {
-                            replace(
-                                R.id.double_frag_primary,
-                                SignInFragment.newInstance(),
-                            )
-                            addToBackStack(null)
-                        }
+                        SignInFragment()
+                            .show(supportFragmentManager, "WxLinkEmailSignIn")
                     } else {
                         // If email does not exist, show sing up.
-                        isSignUp = true
-                        supportFragmentManager.commit {
-                            replace(
-                                R.id.double_frag_primary,
-                                SignUpFragment.newInstance(),
-                            )
-                            addToBackStack(null)
-                        }
+                        SignUpFragment()
+                            .show(supportFragmentManager, "WxLinkEmailSignUp")
                     }
                 }
             }
         }
 
-        loginViewModel.accountResult.observe(this, {
-            onAccountResult(it)
-        })
-    }
-
-    private fun onAccountResult(accountResult: Result<Account>) {
-
-        when (accountResult) {
-            is Result.LocalizedError -> toast(accountResult.msgId)
-            is Result.Error -> accountResult.exception.message?.let { toast(it) }
-            is Result.Success -> {
-                // Is user created a new ftc account, do not show the LinkPreviewActivity since the
-                // new account is automatically linked upon creation.
-                if (isSignUp) {
-                    sessionManager.saveAccount(accountResult.data)
-                    /**
-                     * Unwrapping chain: [AccountActivity] <- current activity
-                     */
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                    return
+        // Account acquired from email login.
+        loginViewModel.accountResult.observe(this) {
+            when (it) {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
+                    // Show preview UI.
+                    LinkPreviewFragment()
+                        .show(supportFragmentManager, "WxLinkEmailPreview")
                 }
-
-                LinkPreviewActivity.startForResult(this, accountResult.data)
             }
+        }
+
+        signUpViewModel.accountResult.observe(this) {
+           when (it) {
+               is FetchResult.LocalizedError -> toast(it.msgId)
+               is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+               is FetchResult.Success -> {
+                   toast(R.string.prompt_linked)
+                   sessionManager.saveAccount(it.data)
+                   /**
+                    * If user created a new ftc account,
+                    * it is automatically linked upon creation.
+                    * back to [AccountActivity]
+                    */
+                   setResult(Activity.RESULT_OK)
+                   finish()
+               }
+           }
         }
     }
 
     /**
      * Unwrapping chain:
-     * [AccountActivity] <- current activity <- [LinkPreviewActivity]
+     * [AccountActivity] <- current activity <- [LinkPreviewFragment]
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

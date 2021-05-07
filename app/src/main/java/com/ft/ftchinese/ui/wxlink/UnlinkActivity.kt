@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.wxlink
 
 import android.app.Activity
 import android.content.Intent
@@ -16,15 +16,14 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.viewmodel.LinkViewModel
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import org.jetbrains.anko.toast
 
 class UnlinkActivity : AppCompatActivity() {
 
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var sessionManager: SessionManager
-    private lateinit var linkViewModel: LinkViewModel
+    private lateinit var linkViewModel: UnlinkViewModel
     private var anchor: UnlinkAnchor? = null
     private lateinit var binding: ActivityUnlinkBinding
 
@@ -44,7 +43,7 @@ class UnlinkActivity : AppCompatActivity() {
                 .get(AccountViewModel::class.java)
 
         linkViewModel = ViewModelProvider(this)
-                .get(LinkViewModel::class.java)
+                .get(UnlinkViewModel::class.java)
 
         initUI()
 
@@ -92,25 +91,25 @@ class UnlinkActivity : AppCompatActivity() {
             supportFragmentManager.commit {
                 replace(
                         R.id.frag_unlink_anchor,
-                        UnlinkAnchorFragment.newInstance(
-                                account.membership.payMethod == PayMethod.STRIPE
-                        )
+                    UnlinkAnchorFragment.newInstance(
+                        account.membership.payMethod == PayMethod.STRIPE
+                    )
                 )
             }
         }
     }
 
-    private fun onUnlinked(result: Result<Boolean>) {
+    private fun onUnlinked(result: FetchResult<Boolean>) {
         binding.inProgress = false
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 toast(R.string.prompt_unlinked)
 
                 val acnt = sessionManager.loadAccount() ?: return
@@ -124,17 +123,17 @@ class UnlinkActivity : AppCompatActivity() {
         }
     }
 
-    private fun onAccountRefreshed(result: Result<Account>) {
+    private fun onAccountRefreshed(result: FetchResult<Account>) {
         binding.inProgress = false
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 toast(R.string.prompt_updated)
                 sessionManager.saveAccount(result.data)
 

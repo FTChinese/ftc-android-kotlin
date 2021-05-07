@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.wxlink
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -12,13 +12,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentUnlinkAnchorBinding
 import com.ft.ftchinese.model.reader.UnlinkAnchor
-import com.ft.ftchinese.viewmodel.LinkViewModel
 
 private const val ARG_IS_STRIPE = "arg_is_stripe"
 
 class UnlinkAnchorFragment : Fragment() {
 
-    private lateinit var viewModel: LinkViewModel
+    private lateinit var viewModel: UnlinkViewModel
     private lateinit var binding: FragmentUnlinkAnchorBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -33,7 +32,7 @@ class UnlinkAnchorFragment : Fragment() {
 
         viewModel = activity?.run {
             ViewModelProvider(this)
-                    .get(LinkViewModel::class.java)
+                    .get(UnlinkViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
         binding.btnAnchorFtc.setOnClickListener {
