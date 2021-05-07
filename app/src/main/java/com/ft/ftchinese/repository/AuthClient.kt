@@ -4,9 +4,7 @@ import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.request.PasswordResetLetterParams
-import com.ft.ftchinese.model.request.PasswordResetParams
-import com.ft.ftchinese.model.request.PasswordResetVerifier
+import com.ft.ftchinese.model.request.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -27,6 +25,7 @@ object AuthClient : AnkoLogger {
         val (_, body) = Fetch()
             .post(Endpoint.emailLogin)
             .noCache()
+            .setClient()
             .sendJson(json.toJsonString(c))
             .endJsonText()
 
@@ -40,10 +39,11 @@ object AuthClient : AnkoLogger {
     fun signUp(c: Credentials): Account? {
 
         val (_, body) = Fetch()
-                .post(NextApi.SIGN_UP)
-                .noCache()
-                .sendJson(json.toJsonString(c))
-                .endJsonText()
+            .post(Endpoint.emailSignUp)
+            .noCache()
+            .setClient()
+            .sendJson(c.toJsonString())
+            .endJsonText()
 
         return if (body == null) {
             null
@@ -52,8 +52,60 @@ object AuthClient : AnkoLogger {
         }
     }
 
-    fun requestSMSCode(): Boolean {
-        return true
+    fun requestSMSCode(params: SMSCodeParams): Boolean {
+        val (resp, _) = Fetch()
+            .put(Endpoint.mobileVerificationCode)
+            .noCache()
+            .setClient()
+            .sendJson(params.toJsonString())
+            .endJsonText()
+
+        return resp.code == 204
+    }
+
+    fun verifySMSCode(params: MobileAuthParams): UserFound? {
+        val (_, body) = Fetch()
+            .post(Endpoint.mobileVerificationCode)
+            .noCache()
+            .setClient()
+            .sendJson(params.toJsonString())
+            .endJsonText()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<UserFound>(body)
+        }
+    }
+
+    fun mobileLinkEmail(params: MobileLinkParams): Account? {
+        val (_, body) = Fetch()
+            .post(Endpoint.mobileInitialLink)
+            .noCache()
+            .setClient()
+            .sendJson(params.toJsonString())
+            .endJsonText()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<Account>(body)
+        }
+    }
+
+    fun mobileSignUp(params: MobileLinkParams): Account? {
+        val (_, body) = Fetch()
+            .post(Endpoint.mobileSignUp)
+            .noCache()
+            .setClient()
+            .sendJson(params.toJsonString())
+            .endJsonText()
+
+        return if (body == null) {
+            null
+        } else {
+            json.parse<Account>(body)
+        }
     }
 
     fun passwordResetLetter(params: PasswordResetLetterParams): Boolean {
