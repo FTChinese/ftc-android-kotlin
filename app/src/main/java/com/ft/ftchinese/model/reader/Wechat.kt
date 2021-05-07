@@ -11,8 +11,8 @@ import org.jetbrains.anko.AnkoLogger
  */
 @Parcelize
 data class Wechat(
-        val nickname: String? = null,
-        val avatarUrl: String? = null
+    val nickname: String? = null,
+    val avatarUrl: String? = null
 ): Parcelable, AnkoLogger {
 
     @IgnoredOnParcel
