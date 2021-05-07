@@ -17,7 +17,8 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.lists.TwoLineItemViewHolder
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.wxlink.LinkWxDialogFragment
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -153,17 +154,17 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
         }
     }
 
-    private fun onAccountRefreshed(accountResult: Result<Account>) {
+    private fun onAccountRefreshed(accountResult: FetchResult<Account>) {
         binding.swipeRefresh.isRefreshing = false
 
         when (accountResult) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(accountResult.msgId)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 accountResult.exception.message?.let { toast(it) }
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 toast(R.string.prompt_updated)
 
                 sessionManager.saveAccount(accountResult.data)
@@ -195,7 +196,20 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
             holder.itemView.setOnClickListener {
                 when (item.id) {
                     AccountRowType.STRIPE -> CustomerActivity.start(context)
-                    AccountRowType.WECHAT -> WxInfoActivity.start(requireContext())
+                    // If email-wechat linked, show wechat details;
+                    // otherwise show a dialog to ask user to perform wechat OAuth.
+                    AccountRowType.WECHAT -> {
+                        sessionManager.loadAccount()?.let {
+                            if (it.isLinked) {
+                                WxInfoActivity.start(requireContext())
+                                return@setOnClickListener
+                            }
+
+                            if (it.isFtcOnly) {
+                                LinkWxDialogFragment().show(childFragmentManager, "EmailLinkWechat")
+                            }
+                        }
+                    }
                     else -> UpdateActivity.start(requireContext(), item.id)
                 }
             }
