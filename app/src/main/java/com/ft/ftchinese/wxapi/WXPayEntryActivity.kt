@@ -61,11 +61,9 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_wechat)
 
-        binding.result = UIWx(
-                heading = getString(R.string.wxpay_query_order),
-                body = "Please wait",
-                enableButton = false
-        )
+        binding.title = getString(R.string.wxpay_query_order)
+        binding.details = "Please wait..."
+        binding.inProgress = true
 
         setSupportActionBar(binding.toolbar.toolbar)
 
@@ -128,12 +126,9 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 // 错误
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
                 -1 -> {
-
-                    binding.result = UIWx(
-                            heading = getString(R.string.wxpay_failed),
-                            body = "Error code: ${resp.errStr}",
-                            enableButton = true
-                    )
+                    binding.title = getString(R.string.wxpay_failed)
+                    binding.details = "Error code: ${resp.errStr}"
+                    binding.inProgress = false
 
                     val order = orderManager?.load()
 
@@ -144,11 +139,8 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 // 用户取消
                 // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
                 -2 -> {
-
-                    binding.result = UIWx(
-                            heading = getString(R.string.wxpay_cancelled),
-                            enableButton = true
-                    )
+                    binding.title = getString(R.string.wxpay_cancelled)
+                    binding.inProgress = false
                 }
             }
         }
@@ -174,11 +166,9 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         InvoiceStore.getInstance(this).saveInvoices(confirmed.invoices)
 
         // Start retrieving account data from server.
-        binding.result = UIWx(
-            heading = getString(R.string.payment_done),
-            body = getString(R.string.subs_success),
-            enableButton = true
-        )
+        binding.title = getString(R.string.payment_done)
+        binding.details = getString(R.string.subs_success)
+        binding.inProgress = false
 
         verifyPayment()
     }
