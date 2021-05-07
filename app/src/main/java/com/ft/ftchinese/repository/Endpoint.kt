@@ -20,7 +20,6 @@ object NextApi {
     val UPDATE_USER_NAME = "$BASE/user/name"
     val UPDATE_PASSWORD = "$BASE/user/password"
     val ORDERS = "$BASE/user/orders"
-    val STARRED = "$BASE/user/starred"
     val WX_ACCOUNT = "$BASE/user/wx/account/v2"
     val WX_SIGNUP = "$BASE/user/wx/signup"
     val WX_LINK = "$BASE/user/wx/link"
@@ -36,7 +35,7 @@ object ContentApi {
     val INTERACTIVE = "$BASE/interactive/contents"
 }
 
-private const val devIP = "http://192.168.10.121"
+private const val devIP = "http://192.168.10.111"
 
 object Endpoint {
     val readerBase = if (BuildConfig.DEBUG) {
@@ -50,6 +49,10 @@ object Endpoint {
     val emailLogin = "${authEmailBase}/login"
     val emailSignUp = "${authEmailBase}/signup"
 
+    private val authMobileBase = "${subsBase()}/auth/mobile"
+    val mobileVerificationCode = "${authMobileBase}/verification"
+    val mobileInitialLink = "${authMobileBase}/link"
+    val mobileSignUp = "${authMobileBase}/signup"
 
     val contentBase = if (BuildConfig.DEBUG) {
         "$devIP:8100"
