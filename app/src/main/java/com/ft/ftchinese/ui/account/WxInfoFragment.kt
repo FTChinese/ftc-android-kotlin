@@ -17,8 +17,10 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
+import com.ft.ftchinese.ui.wxlink.UnlinkActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.WxRefreshState
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -176,18 +178,18 @@ class WxInfoFragment : ScopedFragment(),
         toast(R.string.wait_while_refresh_wx)
     }
 
-    private fun onWxRefreshed(result: Result<WxRefreshState>) {
+    private fun onWxRefreshed(result: FetchResult<WxRefreshState>) {
         info("Wechat info refresh finished")
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 binding.swipeRefresh.isEnabled = false
                 toast(result.msgId)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 binding.swipeRefresh.isEnabled = false
                 result.exception.message?.let { toast(it) }
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 info("Wechat info refreshed successfully: ${result.data}")
 
                 when (result.data) {
@@ -206,18 +208,18 @@ class WxInfoFragment : ScopedFragment(),
         }
     }
 
-    private fun onAccountRefreshed(result: Result<Account>) {
+    private fun onAccountRefreshed(result: FetchResult<Account>) {
         binding.swipeRefresh.isEnabled = false
         info("Account refresh finished")
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 toast(R.string.prompt_updated)
 
                 sessionManager.saveAccount(result.data)
@@ -230,15 +232,15 @@ class WxInfoFragment : ScopedFragment(),
         }
     }
 
-    private fun onAvatarRetrieved(result: Result<InputStream>) {
+    private fun onAvatarRetrieved(result: FetchResult<InputStream>) {
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 binding.wxAvatar.setImageDrawable(
                         Drawable.createFromStream(
                                 result.data,

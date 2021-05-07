@@ -32,24 +32,15 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
             setDisplayShowTitleEnabled(true)
         }
 
-        val account = sessionManager.loadAccount()
         supportFragmentManager.commit {
-            when {
-                account?.isLinked == true -> {
-                    replace(R.id.frag_account, WxInfoFragment.newInstance())
-                }
-                account?.isFtcOnly == true -> {
-                    replace(R.id.frag_account, WxAuthorizeFragment.newInstance())
-                }
-            }
-
+            replace(R.id.frag_account, WxInfoFragment.newInstance())
         }
     }
 
     /**
      * Received results from [UnlinkActivity] with
      * RequestCode.Unlink.
-     * If [WxAuthorizeFragment] is used inside this activity,
+     * If [LinkWxDialogFragment] is used inside this activity,
      * user starts linking wechat to FTC account, ideally
      * this activity should receive a RequestCode.Link
      * message. But I'm not sure whether this works or not.
@@ -72,14 +63,6 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     companion object {
-
-//        fun startForResult(activity: Activity?, requestCode: Int) {
-//            activity?.startActivityForResult(
-//                    Intent(activity, WxInfoActivity::class.java),
-//                    requestCode
-//            )
-//        }
-
         fun start(context: Context) {
             context.startActivity(Intent(context, WxInfoActivity::class.java))
         }
