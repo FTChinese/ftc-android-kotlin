@@ -8,9 +8,14 @@
         <variable
             name="inProgress"
             type="Boolean" />
+
         <variable
-            name="result"
-            type="com.ft.ftchinese.wxapi.UIWx" />
+            name="title"
+            type="String" />
+        <variable
+            name="details"
+            type="String" />
+
         <variable
             name="handler"
             type="com.ft.ftchinese.wxapi.WXEntryActivity" />
@@ -35,7 +40,7 @@
             android:layout_marginTop="32dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:text="@{result.heading}"
+            android:text="@{title}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar" />
@@ -46,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:textAlignment="center"
-            android:text="@{result.body}"
+            android:text="@{details}"
             app:layout_constraintEnd_toEndOf="@+id/heading_tv"
             app:layout_constraintStart_toStartOf="@+id/heading_tv"
             app:layout_constraintTop_toBottomOf="@+id/heading_tv"/>
@@ -61,7 +66,7 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="48dp"
             android:text="@string/action_done"
-            android:enabled="@{result.enableButton}"
+            android:enabled="@{!inProgress}"
             android:onClick="@{handler::onClickDoneButton}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

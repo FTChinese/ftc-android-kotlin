@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/tools">
 
     <data>
+        <variable
+            name="inProgress"
+            type="Boolean" />
+
         <variable
             name="isFormEnabled"
             type="Boolean" />
@@ -111,11 +115,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/link_reset_password"
-            android:enabled="@{!viewModel.progressLiveData}"
+            android:enabled="@{!inProgress}"
             android:onClick="@{handler::onClickForgotPassword}"
             app:layout_constraintStart_toStartOf="@id/sign_in_btn"
-            app:layout_constraintTop_toBottomOf="@id/sign_in_btn" />
+            app:layout_constraintTop_toBottomOf="@id/sign_in_btn"
+            app:layout_constraintHorizontal_chainStyle="spread"/>
 
+        <com.google.android.material.button.MaterialButton
+            style="@style/AppButton.TextButton"
+            android:id="@+id/signup_link"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/link_sign_up"
+            android:onClick="@{handler::onClickCreateAccount}"
+            android:enabled="@{!inProgress}"
+            app:layout_constraintBaseline_toBaselineOf="@id/forgot_password_link"
+            app:layout_constraintEnd_toEndOf="@id/sign_in_title" />
+
+        <include layout="@layout/progress_indicator_circular"
+            bind:inProgress="@{inProgress}"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

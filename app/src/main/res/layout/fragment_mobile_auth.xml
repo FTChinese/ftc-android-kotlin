@@ -15,21 +15,11 @@
         android:layout_height="match_parent"
         android:padding="@dimen/space_16">
 
-        <TextView
-            style="@style/OrigamiText.Heading1.Center"
-            android:id="@+id/title_mobile_login"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="手机号码登录"
-            android:layout_marginBottom="@dimen/space_16"
-            app:layout_constraintBottom_toTopOf="@id/mobile_container"
-            app:layout_constraintTop_toTopOf="parent"/>
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/mobile_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/title_mobile_login"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toTopOf="@id/warning_msg">
 
             <com.google.android.material.textfield.TextInputEditText

@@ -51,7 +51,7 @@
             android:id="@+id/next_btn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="@dimen/space_16"
             android:text="@string/btn_next"
             android:enabled="@{isFormEnabled}"
             android:onClick="@{handler::onSubmit}"
