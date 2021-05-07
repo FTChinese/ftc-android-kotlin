@@ -7,14 +7,6 @@ import org.threeten.bp.ZonedDateTime
 
 const val WX_AVATAR_NAME = "wx_avatar.jpg"
 
-object WxOAuth {
-    const val SCOPE = "snsapi_userinfo"
-
-    fun stateCode(): String {
-        return generateNonce(5)
-    }
-}
-
 /**
  * The reason why you want to perform wechat OAuth:
  * for LOGIN, account data will be saved;
@@ -25,16 +17,36 @@ enum class WxOAuthIntent {
     LINK
 }
 
+object WxOAuth {
+    const val SCOPE = "snsapi_userinfo"
+    private var code: String? = null
+    private var intent: WxOAuthIntent? = null
+
+    fun codeMatched(respCode: String): Boolean {
+        return code == respCode
+    }
+
+    fun getLastIntent(): WxOAuthIntent? {
+        return intent
+    }
+
+    fun generateStateCode(usedFor: WxOAuthIntent): String {
+        code = generateNonce(5)
+        intent = usedFor
+        return code!!
+    }
+}
+
 /**
  * A session represents the access token and refresh token
  * retrieved from Wechat OAuth API. Since those tokens cannot be
  * store on client-side, a session id is returned for future query.
  */
 data class WxSession(
-        val sessionId: String,
-        val unionId: String,
-        @KDateTime
-        val createdAt: ZonedDateTime
+    val sessionId: String,
+    val unionId: String,
+    @KDateTime
+    val createdAt: ZonedDateTime
 ) {
 
 
