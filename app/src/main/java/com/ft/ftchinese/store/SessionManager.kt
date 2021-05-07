@@ -5,14 +5,13 @@ import androidx.core.content.edit
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.StripeSubStatus
-import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.formatISODateTime
 import com.ft.ftchinese.model.fetch.formatLocalDate
 import com.ft.ftchinese.model.fetch.parseISODateTime
 import com.ft.ftchinese.model.fetch.parseLocalDate
+import com.ft.ftchinese.model.reader.*
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 private const val SESSION_PREF_NAME = "account"
 private const val PREF_USER_ID = "id"
@@ -43,13 +42,9 @@ private const val PREF_PRM_ADDON = "prm_addon"
 private const val PREF_IS_LOGGED_IN = "is_logged_in"
 private const val PREF_LOGIN_METHOD = "login_method"
 
-private const val PREF_OAUTH_STATE = "wx_oauth_state"
 private const val PREF_WX_SESSION_ID = "wx_session_id"
 private const val PREF_WX_UNION_ID = "wx_union_id"
 private const val PREF_WX_OAUTH_TIME = "wx_oauth_time"
-private const val PREF_WX_OAUTH_INTENT = "wx_oauth_intent"
-
-private const val PREF_PASSWORD_RESET_EMAIL = "password_reset_email"
 
 class SessionManager private constructor(context: Context) : AnkoLogger {
     private val sharedPreferences = context.getSharedPreferences(SESSION_PREF_NAME, Context.MODE_PRIVATE)
@@ -194,36 +189,6 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
         return sharedPreferences.getBoolean(PREF_IS_LOGGED_IN, false)
     }
 
-    fun saveWxState(state: String) {
-        sharedPreferences.edit {
-            putString(PREF_OAUTH_STATE, state)
-        }
-    }
-
-    fun loadWxState(): String? {
-        val state = sharedPreferences.getString(PREF_OAUTH_STATE, null)
-
-        info("State: $state")
-
-        return state
-    }
-
-    fun saveWxIntent(intent: WxOAuthIntent) {
-        sharedPreferences.edit {
-            putString(PREF_WX_OAUTH_INTENT, intent.name)
-        }
-    }
-
-    fun loadWxIntent(): WxOAuthIntent? {
-        val intent = sharedPreferences.getString(PREF_WX_OAUTH_INTENT, null) ?: return null
-
-        return try {
-            WxOAuthIntent.valueOf(intent)
-        } catch (e: IllegalArgumentException) {
-            null
-        }
-    }
-
     fun saveWxSession(session: WxSession) {
         sharedPreferences.edit {
             putString(PREF_WX_SESSION_ID, session.sessionId)
@@ -244,22 +209,6 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
                 unionId = unionId,
                 createdAt = createdAt
         )
-    }
-
-    fun savePasswordResetEmail(email: String) {
-        sharedPreferences.edit {
-            putString(PREF_PASSWORD_RESET_EMAIL, email)
-        }
-    }
-
-    fun loadPasswordResetEmail(): String? {
-        return sharedPreferences.getString(PREF_PASSWORD_RESET_EMAIL, null)
-    }
-
-    fun clearPasswordResetEmail() {
-        sharedPreferences.edit {
-            remove(PREF_PASSWORD_RESET_EMAIL)
-        }
     }
 
     fun logout() {
