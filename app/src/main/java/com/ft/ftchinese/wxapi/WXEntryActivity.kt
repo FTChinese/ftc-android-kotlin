@@ -16,7 +16,6 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
-import com.ft.ftchinese.ui.wxlink.LinkViewModel
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
@@ -53,6 +52,8 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
         oauthViewModel = ViewModelProvider(this)
             .get(WxOAuthViewModel::class.java)
+
+        binding.handler = this
 
         setupViewModel()
 

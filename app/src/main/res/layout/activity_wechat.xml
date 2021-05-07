@@ -19,9 +19,6 @@
         <variable
             name="handler"
             type="com.ft.ftchinese.wxapi.WXEntryActivity" />
-        <variable
-            name="viewModel"
-            type="com.ft.ftchinese.wxapi.WxOAuthViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
