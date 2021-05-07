@@ -30,7 +30,7 @@ import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.CustomerViewModel
 import com.ft.ftchinese.viewmodel.CustomerViewModelFactory
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -135,13 +135,13 @@ class CheckOutActivity : ScopedAppActivity(),
         paywallViewModel.stripePrices.observe(this) { result ->
             binding.inProgress = false
             when (result) {
-                is Result.LocalizedError -> {
+                is FetchResult.LocalizedError -> {
                     toast(result.msgId)
                 }
-                is Result.Error -> {
+                is FetchResult.Error -> {
                     result.exception.message?.let { toast(it) }
                 }
-                is Result.Success -> {
+                is FetchResult.Success -> {
                     StripePriceCache.prices = result.data
                     gotoStripe()
                 }
@@ -152,7 +152,7 @@ class CheckOutActivity : ScopedAppActivity(),
             binding.inProgress = false
 
             when (result) {
-               is Result.Success -> {
+               is FetchResult.Success -> {
                    sessionManager.saveStripeId(result.data.id)
 
                    if (gotoStripe()) {
@@ -163,10 +163,10 @@ class CheckOutActivity : ScopedAppActivity(),
                    binding.inProgress = true
                    paywallViewModel.loadStripePrices()
                }
-               is Result.LocalizedError -> {
+               is FetchResult.LocalizedError -> {
                    toast(result.msgId)
                }
-                is Result.Error -> {
+                is FetchResult.Error -> {
                     result.exception.message?.let { toast(it)}
                 }
            }
@@ -318,20 +318,20 @@ class CheckOutActivity : ScopedAppActivity(),
         return true
     }
 
-    private fun onAliPayIntent(result: Result<AliPayIntent>) {
+    private fun onAliPayIntent(result: FetchResult<AliPayIntent>) {
         binding.inProgress = false
         info(result)
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
                 tracker.buyFail(checkOutViewModel.counter?.price)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
                 tracker.buyFail(checkOutViewModel.counter?.price)
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 binding.payBtn.isEnabled = false
                 launchAliPay(result.data)
             }
@@ -415,19 +415,19 @@ class CheckOutActivity : ScopedAppActivity(),
         WorkManager.getInstance(this).enqueue(verifyRequest)
     }
 
-    private fun onWxPayIntent(result: Result<WxPayIntent>) {
+    private fun onWxPayIntent(result: FetchResult<WxPayIntent>) {
         binding.inProgress = false
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
                 tracker.buyFail(checkOutViewModel.counter?.price)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
                 tracker.buyFail(checkOutViewModel.counter?.price)
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 binding.payBtn.isEnabled = false
                 launchWxPay(result.data)
             }

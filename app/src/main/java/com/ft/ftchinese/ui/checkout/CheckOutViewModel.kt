@@ -15,6 +15,7 @@ import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.stripesubs.SubParams
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -31,20 +32,20 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
     val counter: CheckoutCounter?
         get() = _checkoutCounter
 
-    val wxPayIntentResult: MutableLiveData<Result<WxPayIntent>> by lazy {
-        MutableLiveData<Result<WxPayIntent>>()
+    val wxPayIntentResult: MutableLiveData<FetchResult<WxPayIntent>> by lazy {
+        MutableLiveData<FetchResult<WxPayIntent>>()
     }
 
-    val aliPayIntentResult: MutableLiveData<Result<AliPayIntent>> by lazy {
-        MutableLiveData<Result<AliPayIntent>>()
+    val aliPayIntentResult: MutableLiveData<FetchResult<AliPayIntent>> by lazy {
+        MutableLiveData<FetchResult<AliPayIntent>>()
     }
 
-    val stripeSubsResult: MutableLiveData<Result<StripeSubsResult>> by lazy {
-        MutableLiveData<Result<StripeSubsResult>>()
+    val stripeSubsResult: MutableLiveData<FetchResult<StripeSubsResult>> by lazy {
+        MutableLiveData<FetchResult<StripeSubsResult>>()
     }
 
-    val counterResult: MutableLiveData<Result<CheckoutCounter>> by lazy {
-        MutableLiveData<Result<CheckoutCounter>>()
+    val counterResult: MutableLiveData<FetchResult<CheckoutCounter>> by lazy {
+        MutableLiveData<FetchResult<CheckoutCounter>>()
     }
 
     // Create CheckoutCounter instance and tell CartItemFragment to update ui.
@@ -53,9 +54,9 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         if (price != null) {
             val c = CheckoutCounter(price, m)
             _checkoutCounter = c
-            counterResult.value = Result.Success(c)
+            counterResult.value = FetchResult.Success(c)
         } else {
-            counterResult.value = Result.Error(Exception("Price not found"))
+            counterResult.value = FetchResult.Error(Exception("Price not found"))
         }
     }
 
@@ -64,21 +65,21 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
         if (price != null) {
             val c = CheckoutCounter(price, m)
             _checkoutCounter = c
-            counterResult.value = Result.Success(c)
+            counterResult.value = FetchResult.Success(c)
         } else {
-            counterResult.value = Result.Error(Exception("Price not found"))
+            counterResult.value = FetchResult.Error(Exception("Price not found"))
         }
     }
 
     fun createWxOrder(account: Account) {
         if (isNetworkAvailable.value == false) {
-            wxPayIntentResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            wxPayIntentResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
         val price = counter?.price
         if (price == null) {
-            wxPayIntentResult.value = Result.Error(Exception("Price not found"))
+            wxPayIntentResult.value = FetchResult.Error(Exception("Price not found"))
             return
         }
 
@@ -89,32 +90,32 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (wxOrder == null) {
-                    wxPayIntentResult.value = Result.LocalizedError(R.string.toast_order_failed)
+                    wxPayIntentResult.value = FetchResult.LocalizedError(R.string.toast_order_failed)
                     return@launch
                 }
-                wxPayIntentResult.value = Result.Success(wxOrder)
+                wxPayIntentResult.value = FetchResult.Success(wxOrder)
             } catch (e: ClientError) {
 
                 wxPayIntentResult.value = if (e.statusCode == 403) {
-                    Result.LocalizedError(R.string.duplicate_purchase)
+                    FetchResult.LocalizedError(R.string.duplicate_purchase)
                 } else {
-                    parseApiError(e)
+                    FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
-                wxPayIntentResult.value = parseException(e)
+                wxPayIntentResult.value = FetchResult.fromException(e)
             }
         }
     }
 
     fun createAliOrder(account: Account) {
         if (isNetworkAvailable.value == false) {
-            aliPayIntentResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            aliPayIntentResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
         val price = counter?.price
         if (price == null) {
-            aliPayIntentResult.value = Result.Error(Exception("Price not found"))
+            aliPayIntentResult.value = FetchResult.Error(Exception("Price not found"))
             return
         }
 
@@ -125,10 +126,10 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (aliOrder == null) {
-                    aliPayIntentResult.value = Result.LocalizedError(R.string.toast_order_failed)
+                    aliPayIntentResult.value = FetchResult.LocalizedError(R.string.toast_order_failed)
                     return@launch
                 }
-                aliPayIntentResult.value = Result.Success(aliOrder)
+                aliPayIntentResult.value = FetchResult.Success(aliOrder)
             } catch (e: ClientError) {
                 info(e)
                 val msgId = if (e.statusCode == 403) {
@@ -138,20 +139,20 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 aliPayIntentResult.value = if (msgId != null) {
-                    Result.LocalizedError(msgId)
+                    FetchResult.LocalizedError(msgId)
                 } else {
-                    parseApiError(e)
+                    FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
                 info(e)
-                aliPayIntentResult.value = parseException(e)
+                aliPayIntentResult.value = FetchResult.fromException(e)
             }
         }
     }
 
     fun createStripeSub(account: Account, params: SubParams) {
         if (isNetworkAvailable.value == false) {
-            stripeSubsResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            stripeSubsResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -162,28 +163,28 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (sub == null) {
-                    stripeSubsResult.value = Result.LocalizedError(R.string.error_unknown)
+                    stripeSubsResult.value = FetchResult.LocalizedError(R.string.error_unknown)
                     return@launch
                 }
 
-                stripeSubsResult.value = Result.Success(sub)
+                stripeSubsResult.value = FetchResult.Success(sub)
 
             } catch (e: ClientError) {
                 stripeSubsResult.value = if (e.type == "idempotency_error") {
-                    Result.Error(IdempotencyError())
+                    FetchResult.Error(IdempotencyError())
                 } else {
-                    parseApiError(e)
+                    FetchResult.fromServerError(e)
                 }
 
             } catch (e: Exception) {
-                stripeSubsResult.value = parseException(e)
+                stripeSubsResult.value = FetchResult.fromException(e)
             }
         }
     }
 
     fun upgradeStripeSub(account: Account, params: SubParams) {
         if (isNetworkAvailable.value == false) {
-            stripeSubsResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            stripeSubsResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -194,14 +195,14 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (sub == null) {
-                    stripeSubsResult.value = Result.LocalizedError(R.string.error_unknown)
+                    stripeSubsResult.value = FetchResult.LocalizedError(R.string.error_unknown)
                     return@launch
                 }
 
-                stripeSubsResult.value = Result.Success(sub)
+                stripeSubsResult.value = FetchResult.Success(sub)
 
             } catch (e: Exception) {
-                stripeSubsResult.value = parseException(e)
+                stripeSubsResult.value = FetchResult.fromException(e)
             }
         }
     }

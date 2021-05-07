@@ -15,6 +15,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.base.isNetworkConnected
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.*
 import com.stripe.android.*
 import com.stripe.android.model.Customer
@@ -90,21 +91,21 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
         customerViewModel.customerCreated.observe(this) { result ->
             when (result) {
-                is Result.Success -> {
+                is FetchResult.Success -> {
                     sessionManager.saveStripeId(result.data.id)
                     setupCustomerSession()
                 }
-                is Result.LocalizedError -> {
+                is FetchResult.LocalizedError -> {
                     toast(result.msgId)
                 }
-                is Result.Error -> {
+                is FetchResult.Error -> {
                     result.exception.message?.let { toast(it) }
                 }
             }
         }
 
         customerViewModel.customerRetrieved.observe(this) { result ->
-            if (result !is Result.Success) {
+            if (result !is FetchResult.Success) {
                 return@observe
             }
 
@@ -117,15 +118,15 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
         customerViewModel.paymentMethodSet.observe(this) { result ->
             when (result) {
-                is Result.Success -> {
+                is FetchResult.Success -> {
                     toast(R.string.prompt_saved)
                     uiSuccess()
                 }
-                is Result.LocalizedError -> {
+                is FetchResult.LocalizedError -> {
                     toast(result.msgId)
                     uiFailure()
                 }
-                is Result.Error -> {
+                is FetchResult.Error -> {
                     result.exception.message?.let { toast(it) }
                     uiFailure()
                 }

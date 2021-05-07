@@ -27,7 +27,7 @@ import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.product.ProductFragment
 import com.ft.ftchinese.ui.product.ProductViewModel
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import io.noties.markwon.Markwon
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -122,24 +122,24 @@ class PaywallActivity : ScopedAppActivity(),
         /**
          * Load paywall from cache, and then from server.
          */
-        paywallViewModel.paywallResult.observe(this, { result: Result<Paywall> ->
+        paywallViewModel.paywallResult.observe(this, { result: FetchResult<Paywall> ->
             // For manual refreshing, show a toast after completion.
             val isManual = binding.swipeRefresh.isRefreshing
 
             binding.swipeRefresh.isRefreshing = false
 
             when (result) {
-                is Result.LocalizedError -> {
+                is FetchResult.LocalizedError -> {
                     if (isManual) {
                         toast(getString(result.msgId))
                     }
                 }
-                is Result.Error -> {
+                is FetchResult.Error -> {
                     if (isManual) {
                         result.exception.message?.let { toast(it) }
                     }
                 }
-                is Result.Success -> {
+                is FetchResult.Success -> {
                     info("Paywall data ${result.data}")
 
                     setUpPromo(result.data.promo)

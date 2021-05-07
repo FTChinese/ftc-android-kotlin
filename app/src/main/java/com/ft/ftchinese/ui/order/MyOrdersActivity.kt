@@ -13,7 +13,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
@@ -65,17 +65,17 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
         viewModel.fetchOrders(acnt)
     }
 
-    private fun onOrdersFetch(result: Result<List<Order>>) {
+    private fun onOrdersFetch(result: FetchResult<List<Order>>) {
         binding.inProgress = false
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 viewAdapter.setData(result.data)
                 viewAdapter.notifyDataSetChanged()
             }

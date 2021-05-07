@@ -26,7 +26,7 @@ import com.ft.ftchinese.ui.paywall.CustomerServiceFragment
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
@@ -81,13 +81,13 @@ class MemberActivity : ScopedAppActivity(),
 
         // For one-time purchase refreshing, we will simply
         // retrieve user account.
-        accountViewModel.accountRefreshed.observe(this) { result: Result<Account> ->
+        accountViewModel.accountRefreshed.observe(this) { result: FetchResult<Account> ->
             stopRefresh()
 
             when (result) {
-                is Result.LocalizedError -> toast(result.msgId)
-                is Result.Error -> result.exception.message?.let { toast(it) }
-                is Result.Success -> {
+                is FetchResult.LocalizedError -> toast(result.msgId)
+                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+                is FetchResult.Success -> {
                     toast(R.string.prompt_updated)
                     sessionManager.saveAccount(result.data)
                     initUI()
@@ -95,13 +95,13 @@ class MemberActivity : ScopedAppActivity(),
             }
         }
 
-        accountViewModel.addOnResult.observe(this) { result: Result<Membership> ->
+        accountViewModel.addOnResult.observe(this) { result: FetchResult<Membership> ->
             stopRefresh()
 
             when (result) {
-                is Result.LocalizedError -> toast(result.msgId)
-                is Result.Error -> result.exception.message?.let { toast(it) }
-                is Result.Success -> {
+                is FetchResult.LocalizedError -> toast(result.msgId)
+                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+                is FetchResult.Success -> {
                     toast(R.string.prompt_updated)
                     sessionManager.saveMembership(result.data)
                 }
@@ -110,11 +110,11 @@ class MemberActivity : ScopedAppActivity(),
 
         // For Apple subscription, we will verify user's existing
         // receipt against App Store.
-        accountViewModel.iapRefreshResult.observe(this) { result: Result<IAPSubsResult> ->
+        accountViewModel.iapRefreshResult.observe(this) { result: FetchResult<IAPSubsResult> ->
             when (result) {
-                is Result.LocalizedError -> toast(result.msgId)
-                is Result.Error -> result.exception.message?.let { toast(it) }
-                is Result.Success -> {
+                is FetchResult.LocalizedError -> toast(result.msgId)
+                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+                is FetchResult.Success -> {
                     sessionManager.saveMembership(result.data.membership)
                     toast(R.string.iap_refresh_success)
                 }
@@ -131,18 +131,18 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         // Result of refreshing Stripe, or canceling/reactivating subscription.
-        accountViewModel.stripeResult.observe(this) { result: Result<StripeSubsResult> ->
+        accountViewModel.stripeResult.observe(this) { result: FetchResult<StripeSubsResult> ->
             stopRefresh()
             binding.inProgress = false
 
             when (result) {
-                is Result.LocalizedError -> {
+                is FetchResult.LocalizedError -> {
                     toast(result.msgId)
                 }
-                is Result.Error -> {
+                is FetchResult.Error -> {
                     result.exception.message?.let { toast(it) }
                 }
-                is Result.Success -> {
+                is FetchResult.Success -> {
                     toast(R.string.stripe_refresh_success)
                     sessionManager.saveMembership(result.data.membership)
                     initUI()

@@ -15,9 +15,8 @@ import com.ft.ftchinese.repository.ArticleClient
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.share.SocialAppId
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,15 +41,15 @@ class ArticleViewModel(
     val socialShareState = MutableLiveData<SocialShareState>()
 
     val storyLoadedLiveData =  MutableLiveData<Story>()
-    val htmlResult: MutableLiveData<Result<String>> by lazy {
-        MutableLiveData<Result<String>>()
+    val htmlResult: MutableLiveData<FetchResult<String>> by lazy {
+        MutableLiveData<FetchResult<String>>()
     }
 
     val audioFoundLiveData = MutableLiveData<Boolean>()
 
     // Used to load web content directly.
-    val webUrlResult: MutableLiveData<Result<String>> by lazy {
-        MutableLiveData<Result<String>>()
+    val webUrlResult: MutableLiveData<FetchResult<String>> by lazy {
+        MutableLiveData<FetchResult<String>>()
     }
 
     val articleReadLiveData: MutableLiveData<ReadArticle> by lazy {
@@ -133,16 +132,16 @@ class ArticleViewModel(
         info("Loading web page from $remoteUri")
 
         if (remoteUri == null) {
-            webUrlResult.value = Result.LocalizedError(R.string.api_empty_url)
+            webUrlResult.value = FetchResult.LocalizedError(R.string.api_empty_url)
             return
         }
 
         if (isNetworkAvailable.value != true) {
-            webUrlResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            webUrlResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
-        webUrlResult.value = Result.Success(remoteUri.toString())
+        webUrlResult.value = FetchResult.Success(remoteUri.toString())
     }
 
     private suspend fun loadJsonFromCache(cacheName: String): Story? {
@@ -172,12 +171,12 @@ class ArticleViewModel(
         info("Loading json data from $remoteUrl")
 
         if (remoteUrl == null) {
-            htmlResult.value = Result.LocalizedError(R.string.api_empty_url)
+            htmlResult.value = FetchResult.LocalizedError(R.string.api_empty_url)
             return null
         }
 
         if (isNetworkAvailable.value != true) {
-            htmlResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            htmlResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return null
         }
 
@@ -187,7 +186,7 @@ class ArticleViewModel(
             }
 
             if (data == null) {
-                htmlResult.value = Result.LocalizedError(R.string.api_server_error)
+                htmlResult.value = FetchResult.LocalizedError(R.string.api_server_error)
                 return null
             }
 
@@ -196,7 +195,7 @@ class ArticleViewModel(
             return data
         } catch (e: Exception) {
             info(e)
-            htmlResult.value = parseException(e)
+            htmlResult.value = FetchResult.fromException(e)
             return null
         }
     }
@@ -227,7 +226,7 @@ class ArticleViewModel(
 
             if (template == null) {
                 info("Story template not found")
-                htmlResult.value = Result.LocalizedError(R.string.loading_failed)
+                htmlResult.value = FetchResult.LocalizedError(R.string.loading_failed)
                 return@launch
             }
 
@@ -240,7 +239,7 @@ class ArticleViewModel(
                     .render()
             }
 
-            htmlResult.value = Result.Success(html)
+            htmlResult.value = FetchResult.Success(html)
         }
     }
 

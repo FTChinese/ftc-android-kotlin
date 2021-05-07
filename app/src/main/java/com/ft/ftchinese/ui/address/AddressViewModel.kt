@@ -8,11 +8,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.repository.AccountRepo
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -109,13 +108,13 @@ class AddressViewModel : ViewModel(), AnkoLogger {
         isFormValid.value = false
     }
 
-    val addressRetrieved: MutableLiveData<Result<Address>> by lazy {
-        MutableLiveData<Result<Address>>()
+    val addressRetrieved: MutableLiveData<FetchResult<Address>> by lazy {
+        MutableLiveData<FetchResult<Address>>()
     }
 
     fun loadAddress(account: Account) {
         if (isNetworkAvailable.value != true) {
-            addressRetrieved.value = Result.LocalizedError(R.string.prompt_no_network)
+            addressRetrieved.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -137,17 +136,17 @@ class AddressViewModel : ViewModel(), AnkoLogger {
 
                 progressLiveData.value = false
 
-                addressRetrieved.value = Result.Success(address)
+                addressRetrieved.value = FetchResult.Success(address)
             } catch (e: Exception) {
-                addressRetrieved.value = parseException(e)
+                addressRetrieved.value = FetchResult.fromException(e)
 
                 progressLiveData.value = false
             }
         }
     }
 
-    val addressUpdated: MutableLiveData<Result<Boolean>> by lazy {
-        MutableLiveData<Result<Boolean>>()
+    val addressUpdated: MutableLiveData<FetchResult<Boolean>> by lazy {
+        MutableLiveData<FetchResult<Boolean>>()
     }
 
     private fun hasChanged(): Boolean {
@@ -163,12 +162,12 @@ class AddressViewModel : ViewModel(), AnkoLogger {
 
         if (!hasChanged()) {
             info("Address not changed.")
-            addressUpdated.value = Result.Success(true)
+            addressUpdated.value = FetchResult.Success(true)
             return
         }
 
         if (isNetworkAvailable.value != true) {
-            addressUpdated.value = Result.LocalizedError(R.string.prompt_no_network)
+            addressUpdated.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -180,10 +179,10 @@ class AddressViewModel : ViewModel(), AnkoLogger {
                     AccountRepo.updateAddress(account.id, updated)
                 }
 
-                addressUpdated.value = Result.Success(ok)
+                addressUpdated.value = FetchResult.Success(ok)
                 progressLiveData.value = false
             } catch (e: Exception) {
-                addressUpdated.value = parseException(e)
+                addressUpdated.value = FetchResult.fromException(e)
                 progressLiveData.value = false
             }
         }

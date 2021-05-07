@@ -15,7 +15,7 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.WxRefreshState
 import org.jetbrains.anko.AnkoLogger
 
@@ -63,7 +63,7 @@ class AccountActivity : ScopedAppActivity(),
         // Launch wechat authorization if access token
         // expired.
         viewModel.wxRefreshResult.observe(this, Observer {
-            if (it !is Result.Success) {
+            if (it !is FetchResult.Success) {
                 return@Observer
             }
             if (it.data == WxRefreshState.ReAuth) {

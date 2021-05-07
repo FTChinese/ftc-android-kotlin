@@ -13,8 +13,8 @@ import com.ft.ftchinese.databinding.FragmentUpdateAddressBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.ProgressViewModel
-import com.ft.ftchinese.viewmodel.Result
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
@@ -73,9 +73,9 @@ class UpdateAddressFragment : ScopedFragment(), AnkoLogger {
         viewModel.addressRetrieved.observe(viewLifecycleOwner) {
             progressViewModel.off()
             when (it) {
-                is Result.LocalizedError -> toast(it.msgId)
-                is Result.Error -> it.exception.message?.let { msg -> toast(msg) }
-                is Result.Success -> {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
                 }
             }
         }
@@ -83,13 +83,13 @@ class UpdateAddressFragment : ScopedFragment(), AnkoLogger {
         viewModel.addressUpdated.observe(viewLifecycleOwner) {
             progressViewModel.off()
             when (it) {
-                is Result.LocalizedError -> {
+                is FetchResult.LocalizedError -> {
                     toast(it.msgId)
                 }
-                is Result.Error -> {
+                is FetchResult.Error -> {
                     it.exception.message?.let { msg -> toast(msg) }
                 }
-                is Result.Success -> toast(R.string.prompt_saved)
+                is FetchResult.Success -> toast(R.string.prompt_saved)
             }
         }
 

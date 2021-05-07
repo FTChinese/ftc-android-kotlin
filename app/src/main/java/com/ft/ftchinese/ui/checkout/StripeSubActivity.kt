@@ -21,6 +21,7 @@ import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.formatter.formatEdition
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.ft.ftchinese.ui.member.MemberActivity
@@ -135,13 +136,13 @@ class StripeSubActivity : ScopedAppActivity(),
         paywallViewModel.stripePrices.observe(this) { result ->
             uiStateProgress(false)
             when (result) {
-                is Result.LocalizedError -> {
+                is FetchResult.LocalizedError -> {
                     toast(result.msgId)
                 }
-                is Result.Error -> {
+                is FetchResult.Error -> {
                     result.exception.message?.let { toast(it) }
                 }
-                is Result.Success -> {
+                is FetchResult.Success -> {
                     StripePriceCache.prices = result.data
                     initUI()
                 }
@@ -344,20 +345,20 @@ class StripeSubActivity : ScopedAppActivity(),
         }
     }
 
-    private fun onSubsResult(result: Result<StripeSubsResult>) {
+    private fun onSubsResult(result: FetchResult<StripeSubsResult>) {
 
         binding.inProgress = false
 
         info("Subscription response: $result")
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 idempotency.clear()
                 binding.enableInput = true
                 alertError(result.msgId)
                 uiStateProgress(false)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 idempotency.clear()
                 uiStateProgress(false)
                 /**
@@ -378,7 +379,7 @@ class StripeSubActivity : ScopedAppActivity(),
                 }
                 return
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 uiStateDone()
                 info("Subscription result: ${result.data}")
 

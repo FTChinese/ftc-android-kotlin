@@ -15,7 +15,7 @@ import com.ft.ftchinese.model.reader.Passwords
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.validator.Validator
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.UpdateViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
@@ -75,7 +75,7 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
 
         // Re-enable input in case errors
         updateViewModel.updateResult.observe(viewLifecycleOwner, Observer {
-            binding.enableInput = it !is Result.Success
+            binding.enableInput = it !is FetchResult.Success
         })
     }
 

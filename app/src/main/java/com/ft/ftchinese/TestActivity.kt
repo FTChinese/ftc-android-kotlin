@@ -35,8 +35,8 @@ import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.about.LegalDetailsFragment
-import com.ft.ftchinese.ui.account.LinkPreviewActivity
-import com.ft.ftchinese.ui.account.UnlinkActivity
+import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
+import com.ft.ftchinese.ui.wxlink.UnlinkActivity
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.LyricsAdapter
 import com.ft.ftchinese.ui.base.ScopedAppActivity
@@ -665,7 +665,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                 WXEntryActivity.start(this)
             }
             R.id.menu_link_preview -> {
-                LinkPreviewActivity.startForResult(this, Account(
+                LinkPreviewFragment.startForResult(this, Account(
                         id = "",
                         unionId = "AgqiTngwsasF6r8m83jOdhZRolJ9",
                         stripeId = null,

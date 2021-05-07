@@ -9,8 +9,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.viewmodel.parseException
+import com.ft.ftchinese.ui.data.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -21,8 +20,8 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
         ViewModel(), AnkoLogger {
 
     val isNetworkAvailable = MutableLiveData<Boolean>()
-    val contentResult: MutableLiveData<Result<String>> by lazy {
-        MutableLiveData<Result<String>>()
+    val contentResult: MutableLiveData<FetchResult<String>> by lazy {
+        MutableLiveData<FetchResult<String>>()
     }
 
     fun load(channelSource: ChannelSource, bustCache: Boolean) {
@@ -42,7 +41,7 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
 
                     if (!data.isNullOrBlank()) {
                         info("Using cached channel file $cacheName")
-                        contentResult.value = Result.Success(data)
+                        contentResult.value = FetchResult.Success(data)
 
                         if (isNetworkAvailable.value != true) {
                             return@launch
@@ -71,12 +70,12 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
             info("Channel cache not found. Loading from $url")
 
             if (url == null) {
-                contentResult.value = Result.LocalizedError(R.string.api_empty_url)
+                contentResult.value = FetchResult.LocalizedError(R.string.api_empty_url)
                 return@launch
             }
 
             if (isNetworkAvailable.value != true) {
-                contentResult.value = Result.LocalizedError(R.string.prompt_no_network)
+                contentResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
                 return@launch
             }
 
@@ -87,11 +86,11 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
 
                 if (remoteFrag.isNullOrBlank()) {
                     info("Channel fragment is empty")
-                    contentResult.value = Result.LocalizedError(R.string.api_server_error)
+                    contentResult.value = FetchResult.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
 
-                contentResult.value = Result.Success(remoteFrag)
+                contentResult.value = FetchResult.Success(remoteFrag)
 
                 if (!cacheName.isNullOrBlank()) {
                     launch(Dispatchers.IO) {
@@ -100,7 +99,7 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
                 }
 
             } catch (e: Exception) {
-                contentResult.value = parseException(e)
+                contentResult.value = FetchResult.fromException(e)
             }
         }
     }

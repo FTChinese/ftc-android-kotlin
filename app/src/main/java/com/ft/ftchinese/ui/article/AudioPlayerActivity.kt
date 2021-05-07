@@ -24,9 +24,9 @@ import com.ft.ftchinese.service.AudioService
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.AudioViewModel
 import com.ft.ftchinese.viewmodel.AudioViewModelFactory
-import com.ft.ftchinese.viewmodel.Result
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.offline.DownloadHelper
@@ -157,11 +157,11 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
         }
     }
 
-    private fun onStoryLoaded(result: Result<BilingualStory>) {
+    private fun onStoryLoaded(result: FetchResult<BilingualStory>) {
         when (result) {
-            is Result.LocalizedError -> toast(result.msgId)
-            is Result.Error -> result.exception.message?.let { toast(it) }
-            is Result.Success -> {
+            is FetchResult.LocalizedError -> toast(result.msgId)
+            is FetchResult.Error -> result.exception.message?.let { toast(it) }
+            is FetchResult.Success -> {
                 viewAdapter.setData(result.data.lyrics())
 
                 viewAdapter.notifyDataSetChanged()
@@ -169,11 +169,11 @@ class AudioPlayerActivity : ScopedAppActivity(), SwipeRefreshLayout.OnRefreshLis
         }
     }
 
-    private fun onInteractiveLoaded(result: Result<InteractiveStory>) {
+    private fun onInteractiveLoaded(result: FetchResult<InteractiveStory>) {
         when (result) {
-            is Result.LocalizedError -> toast(result.msgId)
-            is Result.Error -> result.exception.message?.let { toast(it) }
-            is Result.Success -> {
+            is FetchResult.LocalizedError -> toast(result.msgId)
+            is FetchResult.Error -> result.exception.message?.let { toast(it) }
+            is FetchResult.Success -> {
                 viewAdapter.setData(result.data.lyrics())
                 viewAdapter.notifyDataSetChanged()
             }

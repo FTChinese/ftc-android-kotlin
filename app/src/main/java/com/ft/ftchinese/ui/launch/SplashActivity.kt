@@ -168,12 +168,12 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
             customTabsOpened = true
 
             CustomTabsIntent
-                    .Builder()
-                    .build()
-                    .launchUrl(
-                            this@SplashActivity,
-                            Uri.parse(splashAd.linkUrl)
-                    )
+                .Builder()
+                .build()
+                .launchUrl(
+                        this@SplashActivity,
+                        Uri.parse(splashAd.linkUrl)
+                )
 
             return@setOnClickListener
         }

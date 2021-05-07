@@ -13,7 +13,7 @@ import com.ft.ftchinese.databinding.FragmentRequestVerificationBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.UpdateViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.alert
@@ -69,20 +69,20 @@ class RequestVerificationFragment : ScopedFragment(), AnkoLogger {
         }
     }
 
-    private fun onEmailSent(result: Result<Boolean>) {
+    private fun onEmailSent(result: FetchResult<Boolean>) {
 
         updateViewModel.inProgress.value = false
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
                 binding.btnSendRequest.isEnabled = true
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
                 binding.btnSendRequest.isEnabled  = true
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 alert(R.string.prompt_letter_sent) {
                     positiveButton("Got it") {
                         it.dismiss()

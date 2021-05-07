@@ -13,7 +13,7 @@ import com.ft.ftchinese.databinding.FragmentUpdateUsernameBinding
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.UpdateViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
@@ -105,7 +105,7 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
 
         // Re-enable button on error.
         updateViewModel.updateResult.observe(viewLifecycleOwner, Observer {
-            binding.enableInput = it !is Result.Success
+            binding.enableInput = it !is FetchResult.Success
         })
     }
 

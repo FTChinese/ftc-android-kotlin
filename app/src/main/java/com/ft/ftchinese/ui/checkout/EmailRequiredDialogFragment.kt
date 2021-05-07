@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.account.LinkFtcActivity
+import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import java.lang.IllegalStateException
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi

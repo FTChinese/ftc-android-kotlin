@@ -15,7 +15,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
@@ -25,7 +24,7 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.SettingsViewModel
 import com.ft.ftchinese.viewmodel.SettingsViewModelFactory
 import org.jetbrains.anko.AnkoLogger
@@ -190,18 +189,18 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
         settingsViewModel.fetchRelease(current = false)
     }
 
-    private fun onLatestRelease(result: Result<AppRelease>) {
+    private fun onLatestRelease(result: FetchResult<AppRelease>) {
 
         binding.inProgress = false
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 info("Latest release ${result.data}")
                 release = result.data
 

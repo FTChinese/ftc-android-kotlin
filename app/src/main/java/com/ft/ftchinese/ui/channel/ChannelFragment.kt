@@ -31,7 +31,7 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -195,20 +195,20 @@ class ChannelFragment : ScopedFragment(),
     }
 
     // Handle loading text into web view.
-    private fun onContentLoaded(result: Result<String>) {
+    private fun onContentLoaded(result: FetchResult<String>) {
         binding.inProgress = false
         binding.swipeRefresh.isRefreshing = false
 
         info("Loaded channel content: ${channelSource?.fileName}")
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 launch {
                     val template = cache.readChannelTemplate()
 

@@ -14,8 +14,7 @@ import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.viewmodel.parseException
+import com.ft.ftchinese.ui.data.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,12 +26,12 @@ class PaywallViewModel(
 ) : ViewModel(), AnkoLogger {
     val isNetworkAvailable = MutableLiveData<Boolean>()
 
-    val paywallResult: MutableLiveData<Result<Paywall>> by lazy {
-        MutableLiveData<Result<Paywall>>()
+    val paywallResult: MutableLiveData<FetchResult<Paywall>> by lazy {
+        MutableLiveData<FetchResult<Paywall>>()
     }
 
-    val stripePrices: MutableLiveData<Result<List<Price>>> by lazy {
-        MutableLiveData<Result<List<Price>>>()
+    val stripePrices: MutableLiveData<FetchResult<List<Price>>> by lazy {
+        MutableLiveData<FetchResult<List<Price>>>()
     }
 
     // The cached file are versioned therefore whenever a user
@@ -62,7 +61,7 @@ class PaywallViewModel(
             if (!isRefreshing) {
                 val pw = getCachedPaywall()
                 if (pw != null) {
-                    paywallResult.value = Result.Success(pw)
+                    paywallResult.value = FetchResult.Success(pw)
                     // Update the in-memory cache.
                     FtcPriceCache.update(pw.products)
                 }
@@ -70,7 +69,7 @@ class PaywallViewModel(
 
             // Always retrieve from api.
             if (isNetworkAvailable.value != true) {
-                paywallResult.value = Result.LocalizedError(R.string.prompt_no_network)
+                paywallResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
                 return@launch
             }
 
@@ -80,11 +79,11 @@ class PaywallViewModel(
                 }
 
                 if (paywall == null) {
-                    paywallResult.value = Result.LocalizedError(R.string.api_server_error)
+                    paywallResult.value = FetchResult.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
 
-                paywallResult.value = Result.Success(paywall.value)
+                paywallResult.value = FetchResult.Success(paywall.value)
                 FtcPriceCache.update(paywall.value.products)
 
                 withContext(Dispatchers.IO) {
@@ -93,7 +92,7 @@ class PaywallViewModel(
 
             } catch (e: Exception) {
                 info(e)
-                paywallResult.value = parseException(e)
+                paywallResult.value = FetchResult.fromException(e)
             }
         }
     }
@@ -155,7 +154,7 @@ class PaywallViewModel(
         viewModelScope.launch {
             val prices = stripeCachedPrices()
             if (prices != null) {
-                stripePrices.value = Result.Success(prices)
+                stripePrices.value = FetchResult.Success(prices)
                 return@launch
             }
 
@@ -168,11 +167,11 @@ class PaywallViewModel(
 
                 info("Stripe prices retrieval failed")
                 if (result == null) {
-                    stripePrices.value = Result.LocalizedError(R.string.api_server_error)
+                    stripePrices.value = FetchResult.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
 
-                stripePrices.value = Result.Success(result.value)
+                stripePrices.value = FetchResult.Success(result.value)
 
                 withContext(Dispatchers.IO) {
                     cache.saveText(CacheFileNames.stripePrices, result.raw)
@@ -181,7 +180,7 @@ class PaywallViewModel(
             }
             catch (e: Exception) {
                 info(e)
-                stripePrices.value = parseException(e)
+                stripePrices.value = FetchResult.fromException(e)
             }
         }
     }

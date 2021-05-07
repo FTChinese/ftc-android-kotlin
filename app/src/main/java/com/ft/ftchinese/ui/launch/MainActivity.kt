@@ -54,7 +54,7 @@ import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.SplashViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
@@ -379,15 +379,15 @@ class MainActivity : ScopedAppActivity(),
         }
     }
 
-    private fun onAvatarRetrieved(result: Result<InputStream>) {
+    private fun onAvatarRetrieved(result: FetchResult<InputStream>) {
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 info(getString(result.msgId))
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 info(result.exception)
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
 
                 navHeaderBinding.avatar = Drawable.createFromStream(
                         result.data,

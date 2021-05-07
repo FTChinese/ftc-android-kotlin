@@ -24,7 +24,7 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.WVViewModel
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
@@ -78,13 +78,13 @@ class WebViewFragment : Fragment(), AnkoLogger {
             articleViewModel.inProgress.value = false
 
             when (result) {
-                is Result.LocalizedError -> {
+                is FetchResult.LocalizedError -> {
                     toast(result.msgId)
                 }
-                is Result.Error -> {
+                is FetchResult.Error -> {
                     result.exception.message?.let { toast(it) }
                 }
-                is Result.Success -> {
+                is FetchResult.Success -> {
 
                     binding.webView.loadDataWithBaseURL(
                         Config.discoverServer(AccountCache.get()),
@@ -100,9 +100,9 @@ class WebViewFragment : Fragment(), AnkoLogger {
             articleViewModel.inProgress.value = false
 
             when (result) {
-                is Result.LocalizedError -> toast(result.msgId)
-                is Result.Error -> result.exception.message?.let { toast(it) }
-                is Result.Success -> binding.webView.loadUrl(result.data)
+                is FetchResult.LocalizedError -> toast(result.msgId)
+                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+                is FetchResult.Success -> binding.webView.loadUrl(result.data)
             }
         }
 

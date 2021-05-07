@@ -17,7 +17,7 @@ import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.mobile.UpdateMobileFragment
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.ProgressViewModel
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.UpdateViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
@@ -126,18 +126,18 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 
-    private fun onUpdated(result: Result<Boolean>) {
+    private fun onUpdated(result: FetchResult<Boolean>) {
 //        showProgress(false)
 //        binding.inProgress = false
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 toast(R.string.prompt_saved)
 
                 val account = sessionManager.loadAccount()
@@ -151,17 +151,17 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 
-    private fun onAccountRefreshed(result: Result<Account>) {
+    private fun onAccountRefreshed(result: FetchResult<Account>) {
 //        binding.inProgress = false
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
                 toast(R.string.prompt_updated)
 
                 sessionManager.saveAccount(result.data)
