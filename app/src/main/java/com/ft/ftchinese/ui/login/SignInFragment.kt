@@ -13,9 +13,20 @@ import com.ft.ftchinese.databinding.FragmentSignInBinding
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.sdk27.coroutines.onClick
 
+/**
+ * Authenticate an existing email account.
+ * It might appears in 3 location:
+ * 1. Email login: the loaded account should be saved locally;
+ * 2. User is trying to login with mobile for the first time,
+ * and is asked to link to an existing account. The mobile,
+ * together with email and password, will be sent to server.
+ * 3. A wx user is trying to link to an existing account.
+ * The loaded account will be used for link preview.
+ */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class SignInFragment : ScopedBottomSheetDialogFragment(),
+class SignInFragment() : ScopedBottomSheetDialogFragment(),
         AnkoLogger {
 
     private lateinit var tokenManager: TokenManager
@@ -68,9 +79,24 @@ class SignInFragment : ScopedBottomSheetDialogFragment(),
         setupUI()
     }
 
+    /**
+     * The account loaded after credentials verified is not
+     * handled here since the account might be used for
+     * various purposes.
+     * It is handled by the [AuthActivity] for email or mobile
+     * login, or [com.ft.ftchinese.ui.wxlink.LinkFtcActivity]
+     * for link prview.
+     */
     private fun setupViewModel() {
+        // Get data from parent activity's input box.
         emailViewModel.emailLiveData.observe(viewLifecycleOwner) {
             loginViewModel.emailLiveData.value = it
+        }
+
+        // TODO: get mobile number from mobile view model.
+
+        loginViewModel.progressLiveData.observe(viewLifecycleOwner) {
+            binding.inProgress = it
         }
 
         loginViewModel.isFormEnabled.observe(viewLifecycleOwner) {
@@ -92,18 +118,7 @@ class SignInFragment : ScopedBottomSheetDialogFragment(),
         ForgotPasswordActivity.start(context, loginViewModel.emailLiveData.value ?: "")
     }
 
-    companion object {
-        private const val ARG_EMAIL = "arg_email"
-
-        @Deprecated("Use no arg version")
-        @JvmStatic
-        fun newInstance(email: String) = SignInFragment().apply {
-            arguments = Bundle().apply {
-                putString(ARG_EMAIL, email)
-            }
-        }
-
-        @JvmStatic
-        fun newInstance() = SignInFragment()
+    fun onClickCreateAccount(view: View) {
+        SignUpFragment().show(childFragmentManager, "SignUpFragment")
     }
 }

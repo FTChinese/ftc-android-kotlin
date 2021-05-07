@@ -7,11 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.repository.AuthClient
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.Validator
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.viewmodel.parseApiError
-import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -49,13 +47,13 @@ class EmailExistsViewModel : ViewModel(), AnkoLogger{
         isFormEnabled.value = progressLiveData.value == false && isDirty && emailValidator.isValid()
     }
 
-    val existsResult: MutableLiveData<Result<Boolean>> by lazy {
-        MutableLiveData<Result<Boolean>>()
+    val existsResult: MutableLiveData<FetchResult<Boolean>> by lazy {
+        MutableLiveData<FetchResult<Boolean>>()
     }
 
     fun startChecking() {
         if (isNetworkAvailable.value != true) {
-            existsResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            existsResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -68,19 +66,19 @@ class EmailExistsViewModel : ViewModel(), AnkoLogger{
                     } ?: false
                 }
 
-                existsResult.value = Result.Success(ok)
+                existsResult.value = FetchResult.Success(ok)
                 progressLiveData.value = false
             } catch (e: ClientError) {
                 progressLiveData.value = false
 
                 if (e.statusCode == 404) {
-                    existsResult.value = Result.Success(false)
+                    existsResult.value = FetchResult.Success(false)
                     return@launch
                 }
 
-                existsResult.value = parseApiError(e)
+                existsResult.value = FetchResult.fromServerError(e)
             } catch (e: Exception) {
-                existsResult.value = parseException(e)
+                existsResult.value = FetchResult.fromException(e)
                 progressLiveData.value = false
             }
         }

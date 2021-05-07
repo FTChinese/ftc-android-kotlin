@@ -11,7 +11,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentPasswordResetBinding
 import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
@@ -62,9 +62,9 @@ class PasswordResetFragment(
     private fun setupViewModel() {
         viewModel.resetResult.observe(viewLifecycleOwner) {
             when (it) {
-                is Result.LocalizedError -> toast(it.msgId)
-                is Result.Error -> it.exception.message?.let { msg -> toast(msg) }
-                is Result.Success -> {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
                     if (it.data) {
                         toast("Password reset successfully.")
                         activity?.finish()

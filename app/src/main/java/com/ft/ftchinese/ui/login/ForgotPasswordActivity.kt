@@ -11,7 +11,7 @@ import com.ft.ftchinese.databinding.ActivityForgotPasswordBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
@@ -72,9 +72,9 @@ class ForgotPasswordActivity : ScopedAppActivity(),
         // Observing sending email result.
         letterViewModel.letterSent.observe(this) { result ->
             when (result) {
-                is Result.LocalizedError -> toast(result.msgId)
-                is Result.Error -> result.exception.message?.let { msg -> toast(msg) }
-                is Result.Success -> {
+                is FetchResult.LocalizedError -> toast(result.msgId)
+                is FetchResult.Error -> result.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
                     if (result.data) {
                         toast("邮件已发送")
                     } else {
@@ -86,9 +86,9 @@ class ForgotPasswordActivity : ScopedAppActivity(),
 
         letterViewModel.verificationResult.observe(this) {
             when (it) {
-                is Result.LocalizedError -> toast(it.msgId)
-                is Result.Error -> it.exception.message?.let { msg -> toast(msg) }
-                is Result.Success -> {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
                     PasswordResetFragment(it.data)
                         .show(supportFragmentManager, "PasswordResetFragment")
                 }

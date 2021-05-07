@@ -7,15 +7,13 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.Credentials
+import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.repository.AuthClient
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.viewmodel.parseApiError
-import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -68,8 +66,8 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
         progressLiveData.value = false
     }
 
-    val accountResult: MutableLiveData<Result<Account>> by lazy {
-        MutableLiveData<Result<Account>>()
+    val accountResult: MutableLiveData<FetchResult<Account>> by lazy {
+        MutableLiveData<FetchResult<Account>>()
     }
 
     /**
@@ -79,7 +77,7 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
     fun signUp(deviceToken: String) {
 
         if (isNetworkAvailable.value == false) {
-            accountResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -100,12 +98,12 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
                 progressLiveData.value = false
                 if (account == null) {
 
-                    accountResult.value = Result.LocalizedError(R.string.loading_failed)
+                    accountResult.value = FetchResult.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
 
                 progressLiveData.value = false
-                accountResult.value = Result.Success(account)
+                accountResult.value = FetchResult.Success(account)
             } catch (e: ClientError) {
                 progressLiveData.value = false
                 val msgId = if (e.statusCode == 422) {
@@ -120,21 +118,21 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
                 }
 
                 accountResult.value = if (msgId != null) {
-                    Result.LocalizedError(msgId)
+                    FetchResult.LocalizedError(msgId)
                 } else {
-                    parseApiError(e)
+                    FetchResult.fromServerError(e)
                 }
 
             } catch (e: Exception) {
                 progressLiveData.value = false
-                accountResult.value = parseException(e)
+                accountResult.value = FetchResult.fromException(e)
             }
         }
     }
 
     fun wxSignUp(deviceToken: String, unionId: String) {
         if (isNetworkAvailable.value == false) {
-            accountResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -154,11 +152,11 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
 
                 if (account == null) {
 
-                    accountResult.value = Result.LocalizedError(R.string.loading_failed)
+                    accountResult.value = FetchResult.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
 
-                accountResult.value = Result.Success(account)
+                accountResult.value = FetchResult.Success(account)
             } catch (e: ClientError) {
                 info(e)
                 val msgId = if (e.statusCode == 422) {
@@ -176,14 +174,14 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
                 }
 
                 accountResult.value = if (msgId != null) {
-                    Result.LocalizedError(msgId)
+                    FetchResult.LocalizedError(msgId)
                 } else {
-                    parseApiError(e)
+                    FetchResult.fromServerError(e)
                 }
 
             } catch (e: Exception) {
                 info(e)
-                accountResult.value = parseException(e)
+                accountResult.value = FetchResult.fromException(e)
             }
         }
     }

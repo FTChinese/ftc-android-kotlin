@@ -2,27 +2,22 @@ package com.ft.ftchinese.ui.login
 
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.Credentials
+import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.repository.AuthClient
+import com.ft.ftchinese.ui.base.BaseViewModel
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.Validator
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.viewmodel.parseApiError
-import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 
-class SignInViewModel : ViewModel(), AnkoLogger {
-
-    val progressLiveData = MutableLiveData<Boolean>()
-    val isNetworkAvailable = MutableLiveData<Boolean>()
+class SignInViewModel : BaseViewModel(), AnkoLogger {
 
     val emailLiveData = MutableLiveData("")
 
@@ -57,13 +52,13 @@ class SignInViewModel : ViewModel(), AnkoLogger {
         return passwordValidator.isValid()
     }
 
-    val accountResult: MutableLiveData<Result<Account>> by lazy {
-        MutableLiveData<Result<Account>>()
+    val accountResult: MutableLiveData<FetchResult<Account>> by lazy {
+        MutableLiveData<FetchResult<Account>>()
     }
 
     fun login(deviceToken: String) {
         if (isNetworkAvailable.value == false) {
-            accountResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -85,22 +80,22 @@ class SignInViewModel : ViewModel(), AnkoLogger {
 
                 if (account == null) {
 
-                    accountResult.value = Result.LocalizedError(R.string.loading_failed)
+                    accountResult.value = FetchResult.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
 
-                accountResult.value = Result.Success(account)
+                accountResult.value = FetchResult.Success(account)
             } catch (e: ClientError) {
                 progressLiveData.value = false
                 accountResult.value = if (e.statusCode == 404) {
-                    Result.LocalizedError(R.string.error_invalid_password)
+                    FetchResult.LocalizedError(R.string.error_invalid_password)
                 } else {
-                    parseApiError(e)
+                    FetchResult.fromServerError(e)
                 }
 
             } catch (e: Exception) {
                 progressLiveData.value = false
-                accountResult.value = parseException(e)
+                accountResult.value = FetchResult.fromException(e)
             }
         }
     }

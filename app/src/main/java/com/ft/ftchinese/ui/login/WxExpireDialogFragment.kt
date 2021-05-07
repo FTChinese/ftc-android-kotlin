@@ -41,7 +41,6 @@ class WxExpireDialogFragment : DialogFragment(), AnkoLogger {
              * NOTE: whichever button is clicked, `onDismiss` method
              * will be called. Be cautious performing destructive
              * actions when overriding it.
-             *
              */
             MaterialAlertDialogBuilder(it).setMessage(R.string.wx_session_expired)
                     .setPositiveButton(R.string.wx_relogin){ dialog, id ->
@@ -59,11 +58,8 @@ class WxExpireDialogFragment : DialogFragment(), AnkoLogger {
     }
 
     private fun authorize() {
-        val nonce = WxOAuth.stateCode()
+        val nonce = WxOAuth.generateStateCode(WxOAuthIntent.LOGIN)
         info("Wechat oauth state: $nonce")
-
-        sessionManager.saveWxState(nonce)
-        sessionManager.saveWxIntent(WxOAuthIntent.LOGIN)
 
         val req = SendAuth.Req()
         req.scope = WxOAuth.SCOPE

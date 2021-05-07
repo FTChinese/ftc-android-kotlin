@@ -16,8 +16,9 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.viewmodel.Result
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
@@ -34,9 +35,12 @@ private val tabs = listOf(
 class AuthActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
+
     private lateinit var loginViewModel: SignInViewModel
     private lateinit var signUpViewModel: SignUpViewModel
     private lateinit var emailViewModel: EmailExistsViewModel
+    private lateinit var mobileViewModel: MobileViewModel
+
     private lateinit var binding: ActivityAuthBinding
 
     private lateinit var statsTracker: StatsTracker
@@ -70,17 +74,22 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
         signUpViewModel = ViewModelProvider(this)
             .get(SignUpViewModel::class.java)
 
+        mobileViewModel = ViewModelProvider(this)
+            .get(MobileViewModel::class.java)
+
         // Setup network
         connectionLiveData.observe(this) {
             loginViewModel.isNetworkAvailable.value = it
             emailViewModel.isNetworkAvailable.value = it
             signUpViewModel.isNetworkAvailable.value = it
+            mobileViewModel.isNetworkAvailable.value = it
         }
 
         isConnected.let {
             emailViewModel.isNetworkAvailable.value = it
             loginViewModel.isNetworkAvailable.value = it
             signUpViewModel.isNetworkAvailable.value = it
+            mobileViewModel.isNetworkAvailable.value = it
         }
 
         setupViewModel()
@@ -90,9 +99,7 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun setupViewModel() {
-        loginViewModel.progressLiveData.observe(this) {
-            binding.inProgress = it
-        }
+        // TODO: move to signup fragment
         signUpViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
         }
@@ -100,40 +107,52 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
             binding.inProgress = it
         }
 
+        // TODO: move to mobile fragment.
+        mobileViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
+        // Open sign-in or sing-up depending on email existence.
         emailViewModel.existsResult.observe(this) { result ->
             when (result) {
-                is Result.LocalizedError -> toast(result.msgId)
-                is Result.Error -> result.exception.message?.let { toast(it) }
-                is Result.Success -> {
+                is FetchResult.LocalizedError -> toast(result.msgId)
+                is FetchResult.Error -> result.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
                     if (result.data) {
                         // Show login dialog
                         SignInFragment()
-                            .show(supportFragmentManager, "SignInDialog")
+                            .show(supportFragmentManager, "EmailAuthSignIn")
                     } else {
                         // Show signup dialog.
                         SignUpFragment()
-                            .show(supportFragmentManager, "SignUpDialog")
+                            .show(supportFragmentManager, "EmailAuthSignUp")
                     }
                 }
             }
         }
 
-        // Observing both login and sign up.
+        // The account might comes from email login,
+        // or mobile login lin,ing existing account.
         loginViewModel.accountResult.observe(this, this::onAccountResult)
 
+        // The account might comes from new signup,
+        // or mobile login linking new account.
         signUpViewModel.accountResult.observe(this, this::onAccountResult)
+
+        // Mobile login returns a linked account.
+        mobileViewModel.accountLoaded.observe(this, this::onAccountResult)
     }
 
-    private fun onAccountResult(result: Result<Account>) {
+    private fun onAccountResult(result: FetchResult<Account>) {
 
         when (result) {
-            is Result.LocalizedError -> {
+            is FetchResult.LocalizedError -> {
                 toast(result.msgId)
             }
-            is Result.Error -> {
+            is FetchResult.Error -> {
                 result.exception.message?.let { toast(it) }
             }
-            is Result.Success -> {
+            is FetchResult.Success -> {
 
                 sessionManager.saveAccount(result.data)
 
@@ -185,3 +204,4 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
         }
     }
 }
+

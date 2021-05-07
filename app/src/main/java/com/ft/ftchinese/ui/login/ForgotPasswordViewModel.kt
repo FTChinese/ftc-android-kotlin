@@ -9,13 +9,10 @@ import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.model.request.PasswordResetLetterParams
 import com.ft.ftchinese.model.request.PasswordResetVerifier
-import com.ft.ftchinese.repository.AuthClient
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.viewmodel.parseApiError
-import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -85,18 +82,18 @@ class ForgotPasswordViewModel : ViewModel(), AnkoLogger {
         isFormEnabled.value = false
     }
 
-    val letterSent: MutableLiveData<Result<Boolean>> by lazy {
-        MutableLiveData<Result<Boolean>>()
+    val letterSent: MutableLiveData<FetchResult<Boolean>> by lazy {
+        MutableLiveData<FetchResult<Boolean>>()
     }
 
-    val verificationResult: MutableLiveData<Result<PwResetBearer>> by lazy {
-        MutableLiveData<Result<PwResetBearer>>()
+    val verificationResult: MutableLiveData<FetchResult<PwResetBearer>> by lazy {
+        MutableLiveData<FetchResult<PwResetBearer>>()
     }
 
     // Ask for a email containing code to verify this password reset session.
     fun requestCode() {
         if (isNetworkAvailable.value != true) {
-            letterSent.value = Result.LocalizedError(R.string.prompt_no_network)
+            letterSent.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -114,17 +111,17 @@ class ForgotPasswordViewModel : ViewModel(), AnkoLogger {
                     true
                 }
 
-                letterSent.value = Result.Success(ok)
+                letterSent.value = FetchResult.Success(ok)
                 progressLiveData.value = false
             } catch (e: ClientError) {
                 progressLiveData.value = false
                 if (e.statusCode == 404) {
-                    letterSent.value = Result.LocalizedError(R.string.api_email_not_found)
+                    letterSent.value = FetchResult.LocalizedError(R.string.api_email_not_found)
                 } else {
-                    letterSent.value = parseApiError(e)
+                    letterSent.value = FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
-                letterSent.value = parseException(e)
+                letterSent.value = FetchResult.fromException(e)
                 progressLiveData.value = false
             }
         }
@@ -132,7 +129,7 @@ class ForgotPasswordViewModel : ViewModel(), AnkoLogger {
 
     fun verifyCode() {
         if (isNetworkAvailable.value != true) {
-            verificationResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            verificationResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -157,21 +154,21 @@ class ForgotPasswordViewModel : ViewModel(), AnkoLogger {
                 progressLiveData.value = false
 
                 if (bearer == null) {
-                    verificationResult.value = Result.LocalizedError(R.string.loading_failed)
+                    verificationResult.value = FetchResult.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
 
-                verificationResult.value = Result.Success(bearer)
+                verificationResult.value = FetchResult.Success(bearer)
             } catch (e: ClientError) {
                 progressLiveData.value = false
                 if (e.statusCode == 404) {
                     verificationResult.value =
-                        Result.LocalizedError(R.string.api_password_code_not_found)
+                        FetchResult.LocalizedError(R.string.api_password_code_not_found)
                 } else {
-                    verificationResult.value = parseApiError(e)
+                    verificationResult.value = FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
-                verificationResult.value = parseException(e)
+                verificationResult.value = FetchResult.fromException(e)
                 progressLiveData.value = false
             }
         }

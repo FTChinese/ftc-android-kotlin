@@ -14,7 +14,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.ProgressViewModel
-import com.ft.ftchinese.viewmodel.Result
+import com.ft.ftchinese.ui.data.FetchResult
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -83,9 +83,9 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
             // TODO: remove
             progressViewModel.off()
             when (it) {
-                is Result.LocalizedError -> toast(it.msgId)
-                is Result.Error -> it.exception.message?.let { msg -> toast(msg) }
-                is Result.Success -> {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
                     toast("验证码已发送")
                 }
             }
@@ -94,9 +94,9 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
         viewModel.mobileUpdated.observe(viewLifecycleOwner) {
             progressViewModel.off()
             when (it) {
-                is Result.LocalizedError -> toast(it.msgId)
-                is Result.Error -> it.exception.message?.let { msg -> toast(msg) }
-                is Result.Success -> {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
                     toast(R.string.prompt_updated)
                     sessionManager
                         .loadAccount()

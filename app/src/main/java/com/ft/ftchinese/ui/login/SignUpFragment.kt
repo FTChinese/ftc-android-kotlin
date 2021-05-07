@@ -12,13 +12,16 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentSignUpBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
-import com.ft.ftchinese.ui.base.*
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
 /**
- * Popup when user signup rquired.
+ * Popup when user signup required.
+ * This dialog might appears in 3 locations:
+ * * Email signup
+ * * User is trying to login with mobile for the first time, an email account is required.
+ * * A wx user is trying to link to a new account.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class SignUpFragment : ScopedBottomSheetDialogFragment(),
@@ -107,10 +110,5 @@ class SignUpFragment : ScopedBottomSheetDialogFragment(),
                 }
             }
         }
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance() = SignUpFragment()
     }
 }

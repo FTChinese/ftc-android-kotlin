@@ -8,12 +8,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.request.PasswordResetParams
 import com.ft.ftchinese.repository.AuthClient
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.viewmodel.parseApiError
-import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -60,13 +58,13 @@ class PasswordResetViewModel : ViewModel(), AnkoLogger {
         progressLiveData.value = false
     }
 
-    val resetResult: MutableLiveData<Result<Boolean>> by lazy {
-        MutableLiveData<Result<Boolean>>()
+    val resetResult: MutableLiveData<FetchResult<Boolean>> by lazy {
+        MutableLiveData<FetchResult<Boolean>>()
     }
 
     fun resetPassword(token: String) {
         if (isNetworkAvailable.value != true) {
-            resetResult.value = Result.LocalizedError(R.string.prompt_no_network)
+            resetResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -81,17 +79,17 @@ class PasswordResetViewModel : ViewModel(), AnkoLogger {
                     AuthClient.resetPassword(params)
                 }
 
-                resetResult.value = Result.Success(ok)
+                resetResult.value = FetchResult.Success(ok)
 
             } catch (e: ClientError) {
                 // TODO: handle 422 error
                 if (e.statusCode == 404) {
-                    resetResult.value = Result.LocalizedError(R.string.api_email_not_found)
+                    resetResult.value = FetchResult.LocalizedError(R.string.api_email_not_found)
                 } else {
-                    resetResult.value = parseApiError(e)
+                    resetResult.value = FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
-                resetResult.value = parseException(e)
+                resetResult.value = FetchResult.fromException(e)
             }
         }
     }

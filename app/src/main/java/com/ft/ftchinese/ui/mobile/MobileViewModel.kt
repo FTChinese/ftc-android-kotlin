@@ -5,17 +5,20 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.BaseAccount
-import com.ft.ftchinese.model.request.MobilePhoneParams
+import com.ft.ftchinese.model.reader.UserFound
+import com.ft.ftchinese.model.request.MobileAuthParams
+import com.ft.ftchinese.model.request.MobileVerificationParams
 import com.ft.ftchinese.model.request.SMSCodeParams
 import com.ft.ftchinese.repository.AccountRepo
+import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.store.AccountCache
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
-import com.ft.ftchinese.viewmodel.Result
-import com.ft.ftchinese.viewmodel.parseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -90,6 +93,15 @@ class MobileViewModel : ViewModel(), AnkoLogger {
         return progressLiveData.value == false && isDirty && formValidator.isValid()
     }
 
+    private fun startCounting() {
+        viewModelScope.launch(Dispatchers.Main) {
+            for (i in 60 downTo 0) {
+                counterLiveData.value = i
+                delay(1000)
+            }
+        }
+    }
+
     init {
         progressLiveData.value = false
         isFormEnabled.value = false
@@ -102,43 +114,146 @@ class MobileViewModel : ViewModel(), AnkoLogger {
             mobile = mobileLiveData.value ?: "",
         )
 
-    private val updateMobileParams: MobilePhoneParams
-        get() = MobilePhoneParams(
+    private val updateMobileParams: MobileVerificationParams
+        get() = MobileVerificationParams(
             mobile = mobileLiveData.value ?: "",
             code = codeLiveData.value ?: "",
         )
 
-    val codeSent: MutableLiveData<Result<Boolean>> by lazy {
-        MutableLiveData<Result<Boolean>>()
+    val codeSent: MutableLiveData<FetchResult<Boolean>> by lazy {
+        MutableLiveData<FetchResult<Boolean>>()
     }
 
-    val mobileUpdated: MutableLiveData<Result<BaseAccount>> by lazy {
-        MutableLiveData<Result<BaseAccount>>()
+    val mobileUpdated: MutableLiveData<FetchResult<BaseAccount>> by lazy {
+        MutableLiveData<FetchResult<BaseAccount>>()
     }
 
-    private fun startCounting() {
-        viewModelScope.launch(Dispatchers.Main) {
-            for (i in 60 downTo 0) {
-                counterLiveData.value = i
-                delay(1000)
+    // If the mobile is used to login for the first time.
+    val mobileNotSet: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
+
+    val accountLoaded: MutableLiveData<FetchResult<Account>> by lazy {
+        MutableLiveData<FetchResult<Account>>()
+    }
+
+    // Send SMS for login.
+    fun requestSMSAuthCode() {
+        if (isNetworkAvailable.value != true) {
+            codeSent.value = FetchResult.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
+        progressLiveData.value = true
+        startCounting()
+
+        viewModelScope.launch {
+            try {
+                val ok = withContext(Dispatchers.IO) {
+                    for (i in 0 until 10) {
+                        delay(1000)
+                    }
+                    true
+                    // TODO: remove comment in production
+//                    AuthClient.requestSMSCode(smsCodeParams)
+                }
+
+                if (ok) {
+                    codeSent.value = FetchResult.Success(true)
+                } else {
+                    codeSent.value = FetchResult.Error(Exception("Unknown error occurred!"))
+                }
+
+                progressLiveData.value = false
+            } catch (e: Exception) {
+                codeSent.value = FetchResult.fromException(e)
+                progressLiveData.value = false
             }
         }
     }
 
-    // Send SMS for login.
-    fun requestCodeForAuth() {
+    // Perform login after SMS cod entered.
+    // Server returns UserFound object.
+    // If the id field is null, launch a ui to enter email
+    // so that we could link this mobile to an email account;
+    // otherwise use the id to fetch account data.
+    fun verifySMSAuthCode(deviceToken: String) {
+        if (isNetworkAvailable.value != true) {
+            accountLoaded.value = FetchResult.LocalizedError(R.string.prompt_no_network)
+            return
+        }
 
+        progressLiveData.value = true
+
+        val params = MobileAuthParams(
+            mobile = mobileLiveData.value ?: "",
+            code = codeLiveData.value ?: "",
+            deviceToken = deviceToken
+        )
+
+        viewModelScope.launch {
+            try {
+                val found = withContext(Dispatchers.IO) {
+//                    for (i in 0 until 10) {
+//                        delay(1000)
+//                    }
+//                    AuthClient.verifySMSCode(params)
+                    // TODO: remove it.
+                    UserFound(
+                        id = null,
+                    )
+                }
+
+                if (found == null) {
+                    accountLoaded.value = FetchResult.LocalizedError(R.string.error_unknown)
+                    progressLiveData.value = false
+                    return@launch
+                }
+
+                if (found.id == null) {
+                    progressLiveData.value = false
+                    mobileNotSet.value = true
+                    return@launch
+                }
+
+                loadByFtcID(found.id)
+            } catch (e: Exception) {
+                accountLoaded.value = FetchResult.fromException(e)
+                progressLiveData.value = false
+            }
+        }
     }
 
-    // Perform login after SMS cod entered.
-    fun login() {
+    private suspend fun loadByFtcID(id: String) {
 
+        try {
+            val account = withContext(Dispatchers.IO) {
+                AccountRepo.loadFtcAccount(id)
+            }
+
+            if (account == null) {
+                accountLoaded.value = FetchResult.LocalizedError(R.string.loading_failed)
+            } else {
+                accountLoaded.value = FetchResult.Success(account)
+            }
+            progressLiveData.value = false
+        } catch (e: ClientError) {
+            progressLiveData.value = false
+            accountLoaded.value = if (e.statusCode == 404) {
+                FetchResult.LocalizedError(R.string.api_account_not_found)
+            } else {
+                FetchResult.fromServerError(e)
+            }
+        } catch (e: Exception) {
+            accountLoaded.value = FetchResult.fromException(e)
+            progressLiveData.value = false
+        }
     }
 
     // Request code for update after logged-in
     fun requestCodeForUpdate(account: Account) {
         if (isNetworkAvailable.value != true) {
-            codeSent.value = Result.LocalizedError(R.string.prompt_no_network)
+            codeSent.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -156,14 +271,14 @@ class MobileViewModel : ViewModel(), AnkoLogger {
                 }
 
                 if (ok) {
-                    codeSent.value = Result.Success(true)
+                    codeSent.value = FetchResult.Success(true)
                 } else {
-                    codeSent.value = Result.Error(Exception("Unknown error occurred!"))
+                    codeSent.value = FetchResult.Error(Exception("Unknown error occurred!"))
                 }
 
                 progressLiveData.value = false
             } catch (e: Exception) {
-                codeSent.value = parseException(e)
+                codeSent.value = FetchResult.fromException(e)
                 progressLiveData.value = false
             }
         }
@@ -172,7 +287,7 @@ class MobileViewModel : ViewModel(), AnkoLogger {
     // Update mobile in settings.
     fun updateMobile(account: Account) {
         if (isNetworkAvailable.value != true) {
-            mobileUpdated.value = Result.LocalizedError(R.string.prompt_no_network)
+            mobileUpdated.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -182,21 +297,18 @@ class MobileViewModel : ViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val baseAccount = withContext(Dispatchers.IO) {
-                    for (i in 0 until 10) {
-                        delay(1000)
-                    }
                     AccountRepo.updateMobile(account,updateMobileParams)
                 }
 
                 if (baseAccount == null) {
-                    mobileUpdated.value = Result.LocalizedError(R.string.error_unknown)
+                    mobileUpdated.value = FetchResult.LocalizedError(R.string.error_unknown)
                 } else {
-                    mobileUpdated.value = Result.Success(baseAccount)
+                    mobileUpdated.value = FetchResult.Success(baseAccount)
                 }
 
                 progressLiveData.value = false
             } catch (e: Exception) {
-                mobileUpdated.value = parseException(e)
+                mobileUpdated.value = FetchResult.fromException(e)
                 progressLiveData.value = false
             }
         }
