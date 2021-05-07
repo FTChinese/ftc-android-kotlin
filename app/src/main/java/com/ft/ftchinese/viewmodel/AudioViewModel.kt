@@ -13,6 +13,7 @@ import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.repository.ContentAPIRepo
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.ui.data.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -23,12 +24,12 @@ class AudioViewModel(private val cache: FileCache) : ViewModel(), AnkoLogger {
 
     val isNetworkAvailable = MutableLiveData<Boolean>()
 
-    val storyResult: MutableLiveData<Result<BilingualStory>> by lazy {
-        MutableLiveData<Result<BilingualStory>>()
+    val storyResult: MutableLiveData<FetchResult<BilingualStory>> by lazy {
+        MutableLiveData<FetchResult<BilingualStory>>()
     }
 
-    val interactiveResult: MutableLiveData<Result<InteractiveStory>> by lazy {
-        MutableLiveData<Result<InteractiveStory>>()
+    val interactiveResult: MutableLiveData<FetchResult<InteractiveStory>> by lazy {
+        MutableLiveData<FetchResult<InteractiveStory>>()
     }
 
     fun loadStory(teaser: Teaser, bustCache: Boolean) {
@@ -54,7 +55,7 @@ class AudioViewModel(private val cache: FileCache) : ViewModel(), AnkoLogger {
 
             if (isNetworkAvailable.value != true) {
                 info("Network not available")
-                storyResult.value = Result.LocalizedError(R.string.prompt_no_network)
+                storyResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
                 return@launch
             }
 
@@ -74,14 +75,14 @@ class AudioViewModel(private val cache: FileCache) : ViewModel(), AnkoLogger {
                         )
                     }
                 } else {
-                    storyResult.value = Result.LocalizedError(R.string.loading_failed)
+                    storyResult.value = FetchResult.LocalizedError(R.string.loading_failed)
                 }
 
             } catch (e: ClientError) {
                 info(e)
                 storyResult.value = when (e.statusCode) {
-                    404 -> Result.LocalizedError(R.string.loading_failed)
-                    else -> parseApiError(e)
+                    404 -> FetchResult.LocalizedError(R.string.loading_failed)
+                    else -> FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
                 info(e)
@@ -89,7 +90,7 @@ class AudioViewModel(private val cache: FileCache) : ViewModel(), AnkoLogger {
                 // in the same activity.
                 // Do not notify all of them which whill
                 // cause error message displayed multiple times.
-                storyResult.value = parseException(e)
+                storyResult.value = FetchResult.fromException(e)
             }
         }
     }
@@ -104,7 +105,7 @@ class AudioViewModel(private val cache: FileCache) : ViewModel(), AnkoLogger {
                     json.parse<BilingualStory>(data)
                 }) ?: return false
 
-                storyResult.value = Result.Success(story)
+                storyResult.value = FetchResult.Success(story)
                 return true
             }
 
@@ -115,7 +116,7 @@ class AudioViewModel(private val cache: FileCache) : ViewModel(), AnkoLogger {
                     json.parse<InteractiveStory>(data)
                 }) ?: return false
 
-                interactiveResult.value = Result.Success(story)
+                interactiveResult.value = FetchResult.Success(story)
                 return true
             }
 

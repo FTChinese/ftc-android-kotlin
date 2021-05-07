@@ -12,6 +12,7 @@ import com.ft.ftchinese.store.AccountStore
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.ui.data.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,22 +25,22 @@ class CustomerViewModel(
 
     val isNetworkAvailable = MutableLiveData<Boolean>()
 
-    val customerCreated: MutableLiveData<Result<StripeCustomer>> by lazy {
-        MutableLiveData<Result<StripeCustomer>>()
+    val customerCreated: MutableLiveData<FetchResult<StripeCustomer>> by lazy {
+        MutableLiveData<FetchResult<StripeCustomer>>()
     }
 
-    val customerRetrieved: MutableLiveData<Result<StripeCustomer>> by lazy {
-        MutableLiveData<Result<StripeCustomer>>()
+    val customerRetrieved: MutableLiveData<FetchResult<StripeCustomer>> by lazy {
+        MutableLiveData<FetchResult<StripeCustomer>>()
     }
 
-    val paymentMethodSet: MutableLiveData<Result<StripeCustomer>> by lazy {
-        MutableLiveData<Result<StripeCustomer>>()
+    val paymentMethodSet: MutableLiveData<FetchResult<StripeCustomer>> by lazy {
+        MutableLiveData<FetchResult<StripeCustomer>>()
     }
 
     // Create stripe customer.
     fun create(account: Account) {
         if (isNetworkAvailable.value == false) {
-            customerCreated.value = Result.LocalizedError(R.string.prompt_no_network)
+            customerCreated.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -51,12 +52,12 @@ class CustomerViewModel(
 
                 if (result == null) {
 
-                    customerCreated.value = Result.LocalizedError(R.string.stripe_customer_not_created)
+                    customerCreated.value = FetchResult.LocalizedError(R.string.stripe_customer_not_created)
                     return@launch
                 }
 
                 result.value.let {
-                    customerCreated.value = Result.Success(it)
+                    customerCreated.value = FetchResult.Success(it)
                     AccountStore.customer = it
                 }
 
@@ -67,13 +68,13 @@ class CustomerViewModel(
             } catch (e: ClientError) {
 
                 customerCreated.value = if (e.statusCode == 404) {
-                    Result.LocalizedError(R.string.stripe_customer_not_found)
+                    FetchResult.LocalizedError(R.string.stripe_customer_not_found)
                 } else {
-                    parseApiError(e)
+                    FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
 
-                customerCreated.value = parseException(e)
+                customerCreated.value = FetchResult.fromException(e)
             }
         }
     }
@@ -96,13 +97,13 @@ class CustomerViewModel(
             }
 
             if (customer != null) {
-                customerRetrieved.value = Result.Success(customer)
+                customerRetrieved.value = FetchResult.Success(customer)
                 AccountStore.customer = customer
                 return@launch
             }
 
             if (isNetworkAvailable.value != true) {
-                customerRetrieved.value = Result.LocalizedError(R.string.api_network_failure)
+                customerRetrieved.value = FetchResult.LocalizedError(R.string.api_network_failure)
                 return@launch
             }
 
@@ -112,18 +113,18 @@ class CustomerViewModel(
                 }
 
                 if (result == null) {
-                    customerRetrieved.value = Result.LocalizedError(R.string.stripe_customer_not_found)
+                    customerRetrieved.value = FetchResult.LocalizedError(R.string.stripe_customer_not_found)
                     return@launch
                 }
 
-                customerRetrieved.value = Result.Success(result.value)
+                customerRetrieved.value = FetchResult.Success(result.value)
                 AccountStore.customer = result.value
 
                 withContext(Dispatchers.IO) {
                     fileCache.saveText(CacheFileNames.stripeCustomer, result.raw)
                 }
             } catch (e: Exception) {
-                customerRetrieved.value = parseException(e)
+                customerRetrieved.value = FetchResult.fromException(e)
             }
         }
     }
@@ -132,7 +133,7 @@ class CustomerViewModel(
     // Set default payment method.
     fun setDefaultPaymentMethod(account: Account, pmId: String) {
         if (isNetworkAvailable.value == false) {
-            paymentMethodSet.value = Result.LocalizedError(R.string.prompt_no_network)
+            paymentMethodSet.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
@@ -143,11 +144,11 @@ class CustomerViewModel(
                 }
 
                 if (result == null) {
-                    paymentMethodSet.value = Result.LocalizedError(R.string.stripe_customer_not_found)
+                    paymentMethodSet.value = FetchResult.LocalizedError(R.string.stripe_customer_not_found)
                     return@launch
                 }
 
-                paymentMethodSet.value = Result.Success(result.value)
+                paymentMethodSet.value = FetchResult.Success(result.value)
                 AccountStore.customer = result.value
 
                 withContext(Dispatchers.IO) {
@@ -156,13 +157,13 @@ class CustomerViewModel(
             } catch (e: ClientError) {
 
                 paymentMethodSet.value = if (e.statusCode == 404) {
-                    Result.LocalizedError(R.string.stripe_customer_not_found)
+                    FetchResult.LocalizedError(R.string.stripe_customer_not_found)
                 } else {
-                    parseApiError(e)
+                    FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
                 info(e)
-                paymentMethodSet.value = parseException(e)
+                paymentMethodSet.value = FetchResult.fromException(e)
             }
         }
     }

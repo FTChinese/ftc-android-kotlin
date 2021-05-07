@@ -8,6 +8,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.Passwords
 import com.ft.ftchinese.repository.AccountRepo
+import com.ft.ftchinese.ui.data.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -19,12 +20,12 @@ class UpdateViewModel : ViewModel() {
         MutableLiveData<UpdateFormState>()
     }
 
-    val updateResult: MutableLiveData<Result<Boolean>> by lazy {
-        MutableLiveData<Result<Boolean>>()
+    val updateResult: MutableLiveData<FetchResult<Boolean>> by lazy {
+        MutableLiveData<FetchResult<Boolean>>()
     }
 
-    val sendEmailResult: MutableLiveData<Result<Boolean>> by lazy {
-        MutableLiveData<Result<Boolean>>()
+    val sendEmailResult: MutableLiveData<FetchResult<Boolean>> by lazy {
+        MutableLiveData<FetchResult<Boolean>>()
     }
 
     fun emailDataChanged(currentEmail: String, newEmail: String) {
@@ -62,7 +63,7 @@ class UpdateViewModel : ViewModel() {
                     AccountRepo.updateEmail(userId, email)
                 }
 
-                updateResult.value = Result.Success(done)
+                updateResult.value = FetchResult.Success(done)
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 422) {
                     when (e.error?.key) {
@@ -75,13 +76,13 @@ class UpdateViewModel : ViewModel() {
                 }
 
                 updateResult.value = if (msgId != null) {
-                    Result.LocalizedError(msgId)
+                    FetchResult.LocalizedError(msgId)
                 } else {
-                    parseApiError(e)
+                    FetchResult.fromServerError(e)
                 }
 
             } catch (e: Exception) {
-                updateResult.value = parseException(e)
+                updateResult.value = FetchResult.fromException(e)
             }
         }
     }
@@ -117,7 +118,7 @@ class UpdateViewModel : ViewModel() {
                     AccountRepo.updateUserName(userId, name)
                 }
 
-                updateResult.value = Result.Success(done)
+                updateResult.value = FetchResult.Success(done)
 
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 422) {
@@ -130,12 +131,12 @@ class UpdateViewModel : ViewModel() {
                 }
 
                 updateResult.value = if (msgId != null) {
-                    Result.LocalizedError(msgId)
+                    FetchResult.LocalizedError(msgId)
                 } else {
-                    parseApiError(e)
+                    FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
-                updateResult.value = parseException(e)
+                updateResult.value = FetchResult.fromException(e)
             }
         }
     }
@@ -147,7 +148,7 @@ class UpdateViewModel : ViewModel() {
                     AccountRepo.updatePassword(userId, passwords)
                 }
 
-                updateResult.value = Result.Success(done)
+                updateResult.value = FetchResult.Success(done)
 
             } catch (e: ClientError) {
                 val msgId = when (e.statusCode) {
@@ -161,13 +162,13 @@ class UpdateViewModel : ViewModel() {
                 }
 
                 updateResult.value = if (msgId != null) {
-                    Result.LocalizedError(msgId)
+                    FetchResult.LocalizedError(msgId)
                 } else {
-                    parseApiError(e)
+                    FetchResult.fromServerError(e)
                 }
 
             } catch (e: Exception) {
-                updateResult.value = parseException(e)
+                updateResult.value = FetchResult.fromException(e)
             }
 
         }
@@ -180,7 +181,7 @@ class UpdateViewModel : ViewModel() {
                     AccountRepo.requestVerification(userId)
                 }
 
-                sendEmailResult.value = Result.Success(done)
+                sendEmailResult.value = FetchResult.Success(done)
 
             } catch (e: ClientError) {
                 val msgId = when (e.statusCode) {
@@ -193,13 +194,13 @@ class UpdateViewModel : ViewModel() {
                 }
 
                 sendEmailResult.value = if (msgId != null) {
-                    Result.LocalizedError(msgId)
+                    FetchResult.LocalizedError(msgId)
                 } else {
-                    parseApiError(e)
+                    FetchResult.fromServerError(e)
                 }
 
             } catch (e: Exception) {
-                sendEmailResult.value = parseException(e)
+                sendEmailResult.value = FetchResult.fromException(e)
             }
         }
     }
