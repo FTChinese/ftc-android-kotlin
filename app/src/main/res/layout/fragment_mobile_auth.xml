@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/tools">
 
     <data>
+        <variable
+            name="inProgress"
+            type="Boolean" />
         <variable
             name="handler"
             type="com.ft.ftchinese.ui.login.MobileAuthFragment" />
@@ -93,5 +97,7 @@
             app:layout_constraintTop_toBottomOf="@+id/code_container"
             app:layout_constraintVertical_bias="1.0" />
 
+        <include layout="@layout/progress_indicator_circular"
+            bind:inProgress="@{inProgress}"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
