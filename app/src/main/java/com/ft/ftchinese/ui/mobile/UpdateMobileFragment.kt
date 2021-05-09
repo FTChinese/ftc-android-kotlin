@@ -13,7 +13,6 @@ import com.ft.ftchinese.databinding.FragmentUpdateMobileBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.viewmodel.ProgressViewModel
 import com.ft.ftchinese.ui.data.FetchResult
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -30,7 +29,6 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: FragmentUpdateMobileBinding
     private lateinit var viewModel: MobileViewModel
-    private lateinit var progressViewModel: ProgressViewModel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -43,7 +41,11 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
     ): View {
         super.onCreateView(inflater, container, savedInstanceState)
 
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_update_mobile, container, false)
+        binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_update_mobile,
+            container,
+            false)
         return binding.root
     }
 
@@ -61,16 +63,15 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
             viewModel.isNetworkAvailable.value = it
         }
 
-        // TODO: this should be removed.
-        progressViewModel = activity?.run {
-            ViewModelProvider(this).get(ProgressViewModel::class.java)
-        } ?: throw Exception("Invalid activity")
-
         binding.viewModel = viewModel
         binding.handler = this
         // Set the binding's lifecycle (otherwise Live Data won't work properly)
         binding.lifecycleOwner = viewLifecycleOwner
 
+        setupViewModel()
+    }
+
+    private fun setupViewModel() {
         viewModel.counterLiveData.observe(viewLifecycleOwner) {
             binding.requestCode.text = if (it == 0) {
                 getString(R.string.mobile_request_code)
@@ -80,8 +81,6 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
         }
 
         viewModel.codeSent.observe(viewLifecycleOwner) {
-            // TODO: remove
-            progressViewModel.off()
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
@@ -92,7 +91,6 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
         }
 
         viewModel.mobileUpdated.observe(viewLifecycleOwner) {
-            progressViewModel.off()
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
@@ -111,14 +109,12 @@ class UpdateMobileFragment : ScopedFragment(), AnkoLogger {
 
     fun onClickRequestCode(view: View) {
         info("Request code button clicked")
-        progressViewModel.on()
         sessionManager.loadAccount()?.let {
             viewModel.requestCodeForUpdate(it)
         }
     }
 
     fun onSubmitForm(view: View) {
-        progressViewModel.on()
         sessionManager.loadAccount()?.let {
             viewModel.updateMobile(it)
         }

@@ -16,22 +16,13 @@
         android:layout_height="match_parent"
         android:padding="@dimen/space_16">
 
-        <TextView
-            android:id="@+id/warning_msg"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/phone_mainland_only"
-            android:layout_marginBottom="@dimen/space_8"
-            app:layout_constraintBottom_toTopOf="@id/mobile_container"
-            app:layout_constraintTop_toTopOf="parent"/>
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/mobile_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:error="@{viewModel.mobileValidator.error}"
-            app:layout_constraintTop_toBottomOf="@id/warning_msg"
-            app:layout_constraintBottom_toTopOf="@id/code_container">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/warning_msg">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/mobile_input"
@@ -45,6 +36,15 @@
                 android:text="@={viewModel.mobileLiveData}" />
 
         </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/warning_msg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/phone_mainland_only"
+            android:layout_marginBottom="@dimen/space_8"
+            app:layout_constraintTop_toBottomOf="@id/mobile_container"
+            app:layout_constraintBottom_toTopOf="@id/code_container"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/code_container"
@@ -95,12 +95,7 @@
             app:layout_constraintTop_toBottomOf="@+id/code_container"
             app:layout_constraintVertical_bias="1.0" />
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_8"
-            android:text="@string/feature_mobile_login"
-            app:layout_constraintTop_toBottomOf="@id/btn_save"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
 
