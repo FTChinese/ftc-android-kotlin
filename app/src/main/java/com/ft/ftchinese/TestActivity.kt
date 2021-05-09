@@ -46,6 +46,7 @@ import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.share.SocialShareFragment
+import com.ft.ftchinese.ui.wxlink.LinkParams
 import com.ft.ftchinese.wxapi.WXEntryActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import com.google.firebase.messaging.FirebaseMessaging
@@ -84,11 +85,15 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         binding.signIn.onClick {
-            SignInFragment().show(supportFragmentManager, "SignInFragment")
+            SignInFragment
+                .forEmailLogin()
+                .show(supportFragmentManager, "SignInFragment")
         }
 
         binding.signUp.onClick {
-            SignUpFragment().show(supportFragmentManager, "SignUpFragment")
+            SignUpFragment
+                .formEmailLogin()
+                .show(supportFragmentManager, "SignUpFragment")
         }
 
         binding.oneTimeWorkManager.setOnClickListener {
@@ -665,20 +670,28 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                 WXEntryActivity.start(this)
             }
             R.id.menu_link_preview -> {
-                LinkPreviewFragment.startForResult(this, Account(
-                        id = "",
-                        unionId = "AgqiTngwsasF6r8m83jOdhZRolJ9",
-                        stripeId = null,
-                        userName = null,
-                        email = "",
-                        isVerified = false,
-                        avatarUrl = null,
-                        loginMethod = LoginMethod.WECHAT,
-                        wechat = Wechat(
+                val current = sessionManager.loadAccount()
+                if (current == null) {
+                    toast("Not logged in yet")
+                    return
+                }
+                LinkPreviewFragment(
+                    LinkParams(
+                        ftc = current,
+                        wx = Account(
+                            id = "",
+                            unionId = "AgqiTngwsasF6r8m83jOdhZRolJ9",
+                            stripeId = null,
+                            userName = null,
+                            email = "",
+                            isVerified = false,
+                            avatarUrl = null,
+                            loginMethod = LoginMethod.WECHAT,
+                            wechat = Wechat(
                                 nickname = "aliquam_quas_minima",
                                 avatarUrl = "https://randomuser.me/api/portraits/thumb/men/17.jpg"
-                        ),
-                        membership = Membership(
+                            ),
+                            membership = Membership(
                                 tier = Tier.STANDARD,
                                 cycle = Cycle.YEAR,
                                 expireDate = LocalDate.now().plusDays(30),
@@ -686,8 +699,11 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                                 autoRenew = false,
                                 status = null,
                                 vip =  false
-                        )
-                ))
+                            )
+                        ),
+                        loginMethod = LoginMethod.EMAIL,
+                    )
+                )
             }
             R.id.menu_clear_idempotency -> {
                 Idempotency.getInstance(this).clear()

@@ -9,12 +9,14 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityWechatBinding
+import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.WxOAuth
 import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.login.AuthActivity
+import com.ft.ftchinese.ui.wxlink.LinkParams
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
@@ -123,8 +125,18 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
                         // For account linking, show preview ui.
                         WxOAuthIntent.LINK -> {
-                            LinkPreviewFragment()
-                                .show(supportFragmentManager, "EmailLinkWxPreview")
+                            sessionManager.loadAccount()?.let { current ->
+                                LinkPreviewFragment(
+                                    LinkParams(
+                                        ftc = current,
+                                        wx = result.data,
+                                        loginMethod = current.loginMethod ?: LoginMethod.EMAIL
+                                    )
+                                ).show(
+                                    supportFragmentManager,
+                                    "PreviewEmailLinkWechat",
+                                )
+                            }
                         }
                     }
                 }
