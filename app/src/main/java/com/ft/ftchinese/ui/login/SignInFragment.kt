@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.login
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,10 +11,20 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentSignInBinding
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
+import com.ft.ftchinese.ui.base.isNetworkConnected
+import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.mobile.MobileViewModel
+import com.ft.ftchinese.ui.wxlink.LinkParams
+import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.toast
 
 /**
  * Authenticate an existing email account.
@@ -26,17 +37,21 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
  * The loaded account will be used for link preview.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class SignInFragment() : ScopedBottomSheetDialogFragment(),
-        AnkoLogger {
+class SignInFragment(
+    private val kind: AuthKind
+) : ScopedBottomSheetDialogFragment(), AnkoLogger {
 
+    private lateinit var sessionManager: SessionManager
     private lateinit var tokenManager: TokenManager
     private lateinit var loginViewModel: SignInViewModel
     private lateinit var emailViewModel: EmailExistsViewModel
+    private lateinit var mobileViewModel: MobileViewModel
     private lateinit var binding: FragmentSignInBinding
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         tokenManager = TokenManager.getInstance(context)
+        sessionManager = SessionManager.getInstance(context)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -53,23 +68,37 @@ class SignInFragment() : ScopedBottomSheetDialogFragment(),
             container,
             false)
 
-        binding.passwordInput.requestFocus()
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        loginViewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(SignInViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-
+        // Used to retrieve email from hosting activity
         emailViewModel = activity?.run {
             ViewModelProvider(this)
                 .get(EmailExistsViewModel::class.java)
         } ?: throw Exception("Invalid activity")
+
+        // Used to retrieve mobile from hosting activity.
+        mobileViewModel = activity?.run {
+            ViewModelProvider(this)
+                .get(MobileViewModel::class.java)
+        } ?: throw Exception("Invalid activity")
+
+        // Scoped to parent activity so that when used
+        // for wechat link, the preview fragment could
+        // retrieve the loaded account.
+        loginViewModel = ViewModelProvider(this)
+            .get(SignInViewModel::class.java)
+
+        connectionLiveData.observe(this) {
+            loginViewModel.isNetworkAvailable.value = it
+        }
+
+        activity?.isNetworkConnected()?.let {
+            loginViewModel.isNetworkAvailable.value = it
+        }
 
         binding.viewModel = loginViewModel
         binding.handler = this
@@ -93,14 +122,59 @@ class SignInFragment() : ScopedBottomSheetDialogFragment(),
             loginViewModel.emailLiveData.value = it
         }
 
-        // TODO: get mobile number from mobile view model.
+        // Pass mobile number on.
+        mobileViewModel.mobileLiveData.observe(viewLifecycleOwner) {
+            loginViewModel.mobileLiveData.value = it
+        }
 
-        loginViewModel.progressLiveData.observe(viewLifecycleOwner) {
+        loginViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
         }
 
-        loginViewModel.isFormEnabled.observe(viewLifecycleOwner) {
+        loginViewModel.isFormEnabled.observe(this) {
             binding.isFormEnabled = it
+        }
+
+        loginViewModel.accountResult.observe(this) {
+            when (it) {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
+                    onAccountLoaded(it.data)
+                }
+            }
+        }
+    }
+
+    private fun onAccountLoaded(account: Account) {
+        when (kind) {
+            AuthKind.EmailLogin,
+            AuthKind.MobileLink -> {
+                toast(R.string.prompt_logged_in)
+                sessionManager.saveAccount(account)
+                context?.let {
+                    StatsTracker
+                        .getInstance(it)
+                        .setUserId(account.id)
+                }
+                activity?.setResult(Activity.RESULT_OK)
+                activity?.finish()
+            }
+            AuthKind.WechatLink -> {
+                sessionManager.loadAccount()?.let { current ->
+                    LinkPreviewFragment(
+                        LinkParams(
+                            ftc = account,
+                            wx = current,
+                            loginMethod = current.loginMethod ?: LoginMethod.WECHAT,
+                        )
+                    ).show(
+                        childFragmentManager,
+                        "PreviewWechatLinkEmail",
+                    )
+                }
+                dismiss()
+            }
         }
     }
 
@@ -108,10 +182,31 @@ class SignInFragment() : ScopedBottomSheetDialogFragment(),
         binding.toolbar.bottomSheetToolbar.onClick {
             dismiss()
         }
+
+        binding.passwordInput.requestFocus()
+
+        when(kind) {
+            AuthKind.EmailLogin -> {
+                binding.title = getString(R.string.title_login)
+                binding.guide = getString(R.string.instruct_sign_in)
+            }
+            AuthKind.MobileLink -> {
+                binding.title = "绑定已有邮箱账号"
+                binding.guide = "首次使用手机号码登录需要绑定邮箱账号，您可以验证已有邮箱账号创建新账号。\n绑定邮箱后下次可以直接使用手机号码登录"
+            }
+            AuthKind.WechatLink -> {
+                binding.title = "验证密码"
+                binding.guide = "验证邮箱账号密码后绑定账号"
+            }
+        }
     }
 
     fun onSubmit(view: View) {
-        loginViewModel.login(tokenManager.getToken())
+        when (kind) {
+            AuthKind.EmailLogin,
+            AuthKind.WechatLink -> loginViewModel.emailAuth(tokenManager.getToken())
+            AuthKind.MobileLink -> loginViewModel.mobileLinkEmail()
+        }
     }
 
     fun onClickForgotPassword(view: View) {
@@ -119,6 +214,18 @@ class SignInFragment() : ScopedBottomSheetDialogFragment(),
     }
 
     fun onClickCreateAccount(view: View) {
-        SignUpFragment().show(childFragmentManager, "SignUpFragment")
+        SignUpFragment(kind)
+            .show(childFragmentManager, "SignUpFragment")
+    }
+
+    companion object {
+        @JvmStatic
+        fun forEmailLogin() = SignInFragment(AuthKind.EmailLogin)
+
+        @JvmStatic
+        fun forMobileLink() = SignInFragment(AuthKind.MobileLink)
+
+        @JvmStatic
+        fun forWechatLink() = SignInFragment(AuthKind.WechatLink)
     }
 }
