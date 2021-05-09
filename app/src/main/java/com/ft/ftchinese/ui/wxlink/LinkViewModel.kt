@@ -60,7 +60,7 @@ class LinkViewModel : BaseViewModel() {
                 }
 
                 if (done) {
-                    accountLinked.value = ApiRequest.asyncRefresh(linkedAccount)
+                    accountLinked.value = ApiRequest.asyncRefreshAccount(linkedAccount)
                     progressLiveData.value = false
                 } else {
                     progressLiveData.value = false

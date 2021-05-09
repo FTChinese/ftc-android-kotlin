@@ -12,7 +12,7 @@ import org.jetbrains.anko.info
 object ApiRequest : AnkoLogger {
     // Refresh a user's account data, regardless of logged in
     // via email or wecaht.
-    suspend fun asyncRefresh(account: Account): FetchResult<Account> {
+    suspend fun asyncRefreshAccount(account: Account): FetchResult<Account> {
         try {
 
             val updatedAccount = withContext(Dispatchers.IO) {
