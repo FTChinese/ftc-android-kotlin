@@ -2,12 +2,12 @@ package com.ft.ftchinese.ui.login
 
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.request.PasswordResetParams
 import com.ft.ftchinese.repository.AuthClient
+import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
@@ -17,10 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 
-class PasswordResetViewModel : ViewModel(), AnkoLogger {
-    val isNetworkAvailable = MutableLiveData<Boolean>()
-    val progressLiveData = MutableLiveData<Boolean>()
-
+class PasswordResetViewModel : BaseViewModel(), AnkoLogger {
     val passwordLiveData = MutableLiveData("")
     val passwordValidator = LiveDataValidator(passwordLiveData).apply {
         addRule("密码不能为空", Validator::notEmpty)
