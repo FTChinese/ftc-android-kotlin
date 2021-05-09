@@ -14,6 +14,7 @@ import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.BaseViewModel
+import com.ft.ftchinese.ui.data.ApiRequest
 import com.ft.ftchinese.ui.data.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -24,10 +25,6 @@ import java.io.ByteArrayInputStream
 import java.io.InputStream
 
 class AccountViewModel : BaseViewModel(), AnkoLogger {
-
-    val inProgress: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>()
-    }
 
     val uiType = MutableLiveData<LoginMethod>()
 
@@ -97,46 +94,22 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
 
     // Refresh a user's account data, regardless of logged in
     // via email or wecaht.
-    fun refresh(account: Account) {
+    fun refresh(account: Account, manual: Boolean = false) {
         if (isNetworkAvailable.value == false) {
             accountRefreshed.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
-        // TODO: progress indicator
+        if (!manual) {
+            progressLiveData.value = true
+        }
         viewModelScope.launch {
             info("Start refreshing account")
 
-            try {
+            accountRefreshed.value = ApiRequest
+                .asyncRefreshAccount(account)
 
-                val updatedAccount = withContext(Dispatchers.IO) {
-                    AccountRepo.refresh(account)
-                }
-
-                if (updatedAccount == null) {
-                    info("Refresh account returned empty data")
-                    accountRefreshed.value = FetchResult.LocalizedError(R.string.loading_failed)
-                    return@launch
-                }
-
-                info("Refresh account success")
-                accountRefreshed.value = FetchResult.Success(updatedAccount)
-            } catch (e: ClientError) {
-
-                info("Refresh account api error $e")
-
-                accountRefreshed.value = if (e.statusCode == 404) {
-                    FetchResult.LocalizedError(R.string.api_account_not_found)
-                } else {
-                    FetchResult.fromServerError(e)
-                }
-
-            } catch (e: Exception) {
-
-                info("Refresh account exception $e")
-
-                accountRefreshed.value = FetchResult.fromException(e)
-            }
+            progressLiveData.value = false
         }
     }
 
