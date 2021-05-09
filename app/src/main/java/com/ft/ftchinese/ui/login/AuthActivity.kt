@@ -15,6 +15,8 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.email.EmailViewModel
+import com.ft.ftchinese.ui.email.EmailExistsFragment
 import com.ft.ftchinese.ui.mobile.MobileFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.util.RequestCode
@@ -35,7 +37,7 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
 
-    private lateinit var emailViewModel: EmailExistsViewModel
+    private lateinit var emailViewModel: EmailViewModel
     private lateinit var mobileViewModel: MobileViewModel
 
     private lateinit var binding: ActivityAuthBinding
@@ -61,7 +63,7 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
         sessionManager = SessionManager.getInstance(this)
 
         emailViewModel = ViewModelProvider(this)
-            .get(EmailExistsViewModel::class.java)
+            .get(EmailViewModel::class.java)
 
         mobileViewModel = ViewModelProvider(this)
             .get(MobileViewModel::class.java)
@@ -126,10 +128,10 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
-                0 -> EmailFragment.newInstance()
+                0 -> EmailExistsFragment.newInstance()
                 1 -> MobileFragment.newInstanceForAuth()
                 2 -> WxLoginFragment.newInstance()
-                else -> EmailFragment.newInstance()
+                else -> EmailExistsFragment.newInstance()
             }
         }
     }
