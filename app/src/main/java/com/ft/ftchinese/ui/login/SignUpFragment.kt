@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.login
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,11 +11,17 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentSignUpBinding
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
+import com.ft.ftchinese.ui.base.isNetworkConnected
+import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.mobile.MobileViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
+import org.jetbrains.anko.support.v4.toast
 
 /**
  * Popup when user signup required.
@@ -24,13 +31,16 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
  * * A wx user is trying to link to a new account.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class SignUpFragment : ScopedBottomSheetDialogFragment(),
+class SignUpFragment(
+    private val kind: AuthKind
+) : ScopedBottomSheetDialogFragment(),
         AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var tokenManager: TokenManager
     private lateinit var emailViewModel: EmailExistsViewModel
     private lateinit var signUpViewModel: SignUpViewModel
+    private lateinit var mobileViewModel: MobileViewModel
     private lateinit var binding: FragmentSignUpBinding
 
     override fun onAttach(context: Context) {
@@ -54,23 +64,34 @@ class SignUpFragment : ScopedBottomSheetDialogFragment(),
             false,
         )
 
-        binding.passwordInput.requestFocus()
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Scoped to parent activity so that it could share data with email fragment.
         emailViewModel = activity?.run {
             ViewModelProvider(this)
                 .get(EmailExistsViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
-        signUpViewModel = activity?.run {
+        // To share dat with mobile fragment.
+        mobileViewModel = activity?.run {
             ViewModelProvider(this)
-                .get(SignUpViewModel::class.java)
+                .get(MobileViewModel::class.java)
         } ?: throw Exception("Invalid activity")
+
+        signUpViewModel = ViewModelProvider(this)
+            .get(SignUpViewModel::class.java)
+
+        connectionLiveData.observe(this) {
+            signUpViewModel.isNetworkAvailable.value = it
+        }
+
+        activity?.isNetworkConnected()?.let {
+            signUpViewModel.isNetworkAvailable.value = it
+        }
 
         binding.viewModel = signUpViewModel
         binding.handler = this
@@ -85,30 +106,96 @@ class SignUpFragment : ScopedBottomSheetDialogFragment(),
             signUpViewModel.emailLiveData.value = it
         }
 
-        signUpViewModel.isFormEnabled.observe(viewLifecycleOwner) {
+        mobileViewModel.mobileLiveData.observe(viewLifecycleOwner) {
+            signUpViewModel.mobileLiveData.value = it
+        }
+
+        signUpViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
+        signUpViewModel.isFormEnabled.observe(this) {
             binding.isFormEnabled = it
         }
+
+        signUpViewModel.accountResult.observe(this) {
+            when (it) {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
+                    onAccountLoaded(it.data)
+                }
+            }
+        }
+    }
+
+    private fun onAccountLoaded(account: Account) {
+        when (kind) {
+            AuthKind.EmailLogin,
+            AuthKind.MobileLink -> {
+                toast(R.string.prompt_signed_up)
+            }
+            AuthKind.WechatLink -> {
+                toast(R.string.prompt_linked)
+            }
+        }
+
+        sessionManager.saveAccount(account)
+        context?.let {
+            StatsTracker
+                .getInstance(it)
+                .setUserId(account.id)
+        }
+        activity?.setResult(Activity.RESULT_OK)
+        activity?.finish()
     }
 
     private fun setupUI() {
         binding.toolbar.bottomSheetToolbar.onClick {
             dismiss()
         }
+
+        binding.passwordInput.requestFocus()
+
+        when (kind) {
+            AuthKind.EmailLogin -> {
+                binding.title = getString(R.string.title_sign_up)
+                binding.guide = getString(R.string.instruct_sign_up)
+            }
+            AuthKind.MobileLink -> {
+                binding.title = "绑定新邮箱"
+                binding.guide = "您的手机号将与新创建的邮箱账号绑定"
+            }
+            AuthKind.WechatLink -> {
+                binding.title = "新建账号"
+                binding.guide = "当前微信将与新创建的邮箱账号绑定"
+            }
+        }
     }
 
     fun onSubmit(view: View) {
 
-        val account = sessionManager.loadAccount()
-
-        // If account exists, this should be wechat signup.
-        if (account == null) {
-            signUpViewModel.signUp(tokenManager.getToken())
-        } else {
-            if (account.isWxOnly) {
-                account.unionId?.let {
-                    signUpViewModel.wxSignUp(tokenManager.getToken(), it)
+        when (kind) {
+            AuthKind.EmailLogin -> signUpViewModel.signUp(tokenManager.getToken())
+            AuthKind.MobileLink -> signUpViewModel.mobileSignUp()
+            AuthKind.WechatLink -> sessionManager
+                .loadAccount()
+                ?.unionId
+                ?.let {
+                    signUpViewModel
+                        .wxSignUp(
+                            deviceToken = tokenManager.getToken(),
+                            unionId = it,
+                        )
                 }
-            }
         }
+    }
+
+    companion object {
+        @JvmStatic
+        fun formEmailLogin() = SignUpFragment(AuthKind.EmailLogin)
+
+        @JvmStatic
+        fun forWechatLink() = SignUpFragment(AuthKind.WechatLink)
     }
 }
