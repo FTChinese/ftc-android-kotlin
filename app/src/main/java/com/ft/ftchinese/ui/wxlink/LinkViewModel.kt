@@ -61,6 +61,7 @@ class LinkViewModel : BaseViewModel() {
 
                 if (done) {
                     accountLinked.value = ApiRequest.asyncRefresh(linkedAccount)
+                    progressLiveData.value = false
                 } else {
                     progressLiveData.value = false
                     accountLinked.value = FetchResult.LocalizedError(R.string.loading_failed)

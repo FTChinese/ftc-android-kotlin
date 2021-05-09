@@ -12,6 +12,8 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.email.EmailViewModel
+import com.ft.ftchinese.ui.email.EmailExistsFragment
 import com.ft.ftchinese.ui.login.*
 import com.ft.ftchinese.util.RequestCode
 import org.jetbrains.anko.AnkoLogger
@@ -25,7 +27,7 @@ import org.jetbrains.anko.toast
 class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var emailViewModel: EmailExistsViewModel
+    private lateinit var emailViewModel: EmailViewModel
     private lateinit var binding: ActivityFragmentDoubleBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +47,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
         sessionManager = SessionManager.getInstance(this)
 
         emailViewModel = ViewModelProvider(this)
-            .get(EmailExistsViewModel::class.java)
+            .get(EmailViewModel::class.java)
 
         connectionLiveData.observe(this) {
             emailViewModel.isNetworkAvailable.value = it
@@ -58,7 +60,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
         setupViewModel()
 
         supportFragmentManager.commit {
-            replace(R.id.double_frag_primary, EmailFragment.newInstance())
+            replace(R.id.double_frag_primary, EmailExistsFragment.newInstance())
         }
     }
 
