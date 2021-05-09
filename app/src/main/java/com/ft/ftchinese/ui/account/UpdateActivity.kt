@@ -1,6 +1,5 @@
 package com.ft.ftchinese.ui.account
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -8,26 +7,31 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpdateAccountBinding
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.address.AddressViewModel
-import com.ft.ftchinese.ui.address.UpdateAddressFragment
+import com.ft.ftchinese.ui.account.password.PasswordViewModel
+import com.ft.ftchinese.ui.account.password.UpdatePasswordFragment
+import com.ft.ftchinese.ui.account.address.AddressViewModel
+import com.ft.ftchinese.ui.account.address.UpdateAddressFragment
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.email.EmailViewModel
+import com.ft.ftchinese.ui.email.RequestVerificationFragment
+import com.ft.ftchinese.ui.email.UpdateEmailFragment
 import com.ft.ftchinese.ui.mobile.MobileFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.viewmodel.UpdateViewModel
+import com.ft.ftchinese.ui.account.name.NameViewModel
+import com.ft.ftchinese.ui.account.name.UpdateNameFragment
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class UpdateActivity : ScopedAppActivity(), AnkoLogger {
 
-    private lateinit var updateViewModel: UpdateViewModel
-    private lateinit var accountViewModel: AccountViewModel
     private lateinit var sessionManager: SessionManager
+
     private lateinit var addressViewModel: AddressViewModel
+    private lateinit var emailViewModel: EmailViewModel
+    private lateinit var nameViewModel: NameViewModel
+    private lateinit var passwordViewModel: PasswordViewModel
     private lateinit var mobileViewModel: MobileViewModel
 
     private lateinit var binding: ActivityUpdateAccountBinding
@@ -43,19 +47,37 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             setDisplayShowTitleEnabled(true)
         }
 
-        updateViewModel = ViewModelProvider(this)
-            .get(UpdateViewModel::class.java)
+        sessionManager = SessionManager.getInstance(this)
+
+        emailViewModel = ViewModelProvider(this)
+            .get(EmailViewModel::class.java)
+
+        nameViewModel = ViewModelProvider(this)
+            .get(NameViewModel::class.java)
+
+        passwordViewModel = ViewModelProvider(this)
+            .get(PasswordViewModel::class.java)
 
         addressViewModel = ViewModelProvider(this)
             .get(AddressViewModel::class.java)
 
-        accountViewModel = ViewModelProvider(this)
-            .get(AccountViewModel::class.java)
-
         mobileViewModel = ViewModelProvider(this)
             .get(MobileViewModel::class.java)
 
-        sessionManager = SessionManager.getInstance(this)
+        connectionLiveData.observe(this) {
+            emailViewModel.isNetworkAvailable.value = it
+            nameViewModel.isNetworkAvailable.value = it
+            passwordViewModel.isNetworkAvailable.value = it
+            addressViewModel.isNetworkAvailable.value = it
+            // MobileViewModel's network is configured in the its fragment.
+        }
+
+        isConnected.let {
+            emailViewModel.isNetworkAvailable.value = it
+            nameViewModel.isNetworkAvailable.value = it
+            passwordViewModel.isNetworkAvailable.value = it
+            addressViewModel.isNetworkAvailable.value = it
+        }
 
         val fm = supportFragmentManager
                 .beginTransaction()
@@ -93,66 +115,21 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     private fun setupViewModel() {
-        updateViewModel.inProgress.observe(this, {
+
+        emailViewModel.progressLiveData.observe(this) {
             binding.progressing = it
-        })
-
-        // TODO: add progressLiveData to addressViewModel.
-//        addressViewModel.inProgress.observe(this) {
-//            binding.progressing = it
-//        }
-
-        updateViewModel.updateResult.observe(this) {
-            onUpdated(it)
         }
 
-        // Observing refreshed account.
-        accountViewModel.accountRefreshed.observe(this, this::onAccountRefreshed)
-    }
-
-    private fun onUpdated(result: FetchResult<Boolean>) {
-
-        when (result) {
-            is FetchResult.LocalizedError -> {
-                toast(result.msgId)
-            }
-            is FetchResult.Error -> {
-                result.exception.message?.let { toast(it) }
-            }
-            is FetchResult.Success -> {
-                toast(R.string.prompt_saved)
-
-                val account = sessionManager.loadAccount()
-                if (account == null) {
-                    toast("Account not found")
-                    return
-                }
-
-                accountViewModel.refresh(account)
-            }
+        nameViewModel.progressLiveData.observe(this) {
+            binding.progressing = it
         }
-    }
 
-    private fun onAccountRefreshed(result: FetchResult<Account>) {
-//        binding.inProgress = false
+        passwordViewModel.progressLiveData.observe(this) {
+            binding.progressing = it
+        }
 
-        when (result) {
-            is FetchResult.LocalizedError -> {
-                toast(result.msgId)
-            }
-            is FetchResult.Error -> {
-                result.exception.message?.let { toast(it) }
-            }
-            is FetchResult.Success -> {
-                toast(R.string.prompt_updated)
-
-                sessionManager.saveAccount(result.data)
-
-                // Signal to calling activity
-                setResult(Activity.RESULT_OK)
-
-                finish()
-            }
+        addressViewModel.progressLiveData.observe(this) {
+            binding.progressing = it
         }
     }
 
