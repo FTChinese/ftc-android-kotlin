@@ -4,7 +4,7 @@ import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.*
-import com.ft.ftchinese.model.request.MobileVerificationParams
+import com.ft.ftchinese.model.request.MobileFormParams
 import com.ft.ftchinese.model.request.SMSCodeParams
 
 object AccountRepo {
@@ -112,7 +112,7 @@ object AccountRepo {
         return resp.code == 204
     }
 
-    fun updateMobile(account: Account, params: MobileVerificationParams): BaseAccount? {
+    fun updateMobile(account: Account, params: MobileFormParams): BaseAccount? {
         val (_, body) = Fetch()
             .patch("${Endpoint.subsBase(account.isTest)}/account/mobile")
             .noCache()
