@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.address
+package com.ft.ftchinese.ui.account.address
 
 import android.content.Context
 import android.os.Bundle
@@ -41,7 +41,12 @@ class UpdateAddressFragment : ScopedFragment(), AnkoLogger {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_update_address, container, false)
+        binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_update_address,
+            container,
+            false,
+        )
         // Inflate the layout for this fragment
         return binding.root
     }

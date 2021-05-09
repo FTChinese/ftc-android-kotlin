@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.address
+package com.ft.ftchinese.ui.account.address
 
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
