@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.login
 
+import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,10 +13,11 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentMobileAuthBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.mobile.MobileViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -59,6 +61,8 @@ class MobileAuthFragment : ScopedFragment(), AnkoLogger {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // MobileViewModel is created under parent scope
+        // since it needs to share data with SignInFragment.
         mobileViewModel = activity?.run {
             ViewModelProvider(this)
                 .get(MobileViewModel::class.java)
@@ -79,6 +83,10 @@ class MobileAuthFragment : ScopedFragment(), AnkoLogger {
     }
 
     private fun setupViewModel() {
+
+        mobileViewModel.progressLiveData.observe(viewLifecycleOwner) {
+            binding.inProgress = it
+        }
 
         mobileViewModel.counterLiveData.observe(viewLifecycleOwner) {
             binding.requestCode.text = if (it == 0) {
@@ -102,9 +110,31 @@ class MobileAuthFragment : ScopedFragment(), AnkoLogger {
         // sent to that device, what we should to depends on
         // the result returned.
         // If user does not exist, start ui to ask for email
+        // We need to share the mobile number to SignInFragment.
         mobileViewModel.mobileNotSet.observe(viewLifecycleOwner) {
-            SignInFragment()
+            SignInFragment
+                .forMobileLink()
                 .show(childFragmentManager, "MobileLinkEmail")
+        }
+
+        // If the mobile is already linked to an email account.
+        mobileViewModel.accountLoaded.observe(viewLifecycleOwner) {
+            when (it) {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
+
+                    sessionManager.saveAccount(it.data)
+                    context?.let { ctx ->
+                        StatsTracker
+                            .getInstance(ctx)
+                            .setUserId(it.data.id)
+                    }
+
+                    activity?.setResult(Activity.RESULT_OK)
+                    activity?.finish()
+                }
+            }
         }
     }
 
