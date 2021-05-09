@@ -6,7 +6,7 @@
     <data>
         <variable
             name="member"
-            type="com.ft.ftchinese.ui.account.UIMemberStatus" />
+            type="com.ft.ftchinese.ui.wxlink.UIMemberStatus" />
     </data>
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
