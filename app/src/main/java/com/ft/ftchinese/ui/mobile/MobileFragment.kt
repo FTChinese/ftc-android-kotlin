@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.login
+package com.ft.ftchinese.ui.mobile
 
 import android.app.Activity
 import android.content.Context
@@ -6,40 +6,47 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
-import com.ft.ftchinese.databinding.FragmentMobileAuthBinding
+import com.ft.ftchinese.databinding.FragmentMobileBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.data.FetchResult
-import com.ft.ftchinese.ui.mobile.MobileViewModel
+import com.ft.ftchinese.ui.login.SignInFragment
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 /**
  * A simple [Fragment] subclass.
- * Use the [MobileAuthFragment.newInstance] factory method to
+ * Use the [MobileFragment.newInstanceForAuth] factory method to
  * create an instance of this fragment.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class MobileAuthFragment : ScopedFragment(), AnkoLogger {
+class MobileFragment : ScopedFragment(), AnkoLogger {
 
-    private lateinit var binding: FragmentMobileAuthBinding
     private lateinit var sessionManager: SessionManager
-    private lateinit var tokenManager: TokenManager
+    private lateinit var binding: FragmentMobileBinding
+    private lateinit var viewModel: MobileViewModel
 
-    private lateinit var mobileViewModel: MobileViewModel
+    private var usage: Int? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         sessionManager = SessionManager.getInstance(context)
-        tokenManager = TokenManager.getInstance(context)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            usage = it.getInt(ARG_USAGE)
+        }
     }
 
     override fun onCreateView(
@@ -50,45 +57,37 @@ class MobileAuthFragment : ScopedFragment(), AnkoLogger {
 
         binding = DataBindingUtil.inflate(
             inflater,
-            R.layout.fragment_mobile_auth,
+            R.layout.fragment_mobile,
             container,
-            false,
-        )
-
+            false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // MobileViewModel is created under parent scope
-        // since it needs to share data with SignInFragment.
-        mobileViewModel = activity?.run {
+        viewModel = activity?.run {
             ViewModelProvider(this)
                 .get(MobileViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
         connectionLiveData.observe(viewLifecycleOwner) {
-            mobileViewModel.isNetworkAvailable.value = it
+            viewModel.isNetworkAvailable.value = it
         }
-        context?.isConnected?.let {
-            mobileViewModel.isNetworkAvailable.value = it
+        activity?.isConnected?.let {
+            viewModel.isNetworkAvailable.value = it
         }
 
-        binding.viewModel = mobileViewModel
+        binding.viewModel = viewModel
         binding.handler = this
+        // Set the binding's lifecycle (otherwise Live Data won't work properly)
         binding.lifecycleOwner = viewLifecycleOwner
 
         setupViewModel()
     }
 
     private fun setupViewModel() {
-
-        mobileViewModel.progressLiveData.observe(viewLifecycleOwner) {
-            binding.inProgress = it
-        }
-
-        mobileViewModel.counterLiveData.observe(viewLifecycleOwner) {
+        viewModel.counterLiveData.observe(viewLifecycleOwner) {
             binding.requestCode.text = if (it == 0) {
                 getString(R.string.mobile_request_code)
             } else {
@@ -96,7 +95,7 @@ class MobileAuthFragment : ScopedFragment(), AnkoLogger {
             }
         }
 
-        mobileViewModel.codeSent.observe(viewLifecycleOwner) {
+        viewModel.codeSent.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
@@ -106,25 +105,23 @@ class MobileAuthFragment : ScopedFragment(), AnkoLogger {
             }
         }
 
-        // After user submitted the mobile number and the SMS
-        // sent to that device, what we should to depends on
-        // the result returned.
-        // If user does not exist, start ui to ask for email
-        // We need to share the mobile number to SignInFragment.
-        mobileViewModel.mobileNotSet.observe(viewLifecycleOwner) {
+        viewModel.mobileNotSet.observe(viewLifecycleOwner) {
             SignInFragment
                 .forMobileLink()
-                .show(childFragmentManager, "MobileLinkEmail")
+                .show(
+                    childFragmentManager,
+                    "MobileLinkEmail",
+                )
         }
 
-        // If the mobile is already linked to an email account.
-        mobileViewModel.accountLoaded.observe(viewLifecycleOwner) {
+        viewModel.accountLoaded.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
 
                     sessionManager.saveAccount(it.data)
+
                     context?.let { ctx ->
                         StatsTracker
                             .getInstance(ctx)
@@ -136,24 +133,77 @@ class MobileAuthFragment : ScopedFragment(), AnkoLogger {
                 }
             }
         }
+
+        viewModel.mobileUpdated.observe(viewLifecycleOwner) {
+            when (it) {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
+                    toast(R.string.prompt_updated)
+                    sessionManager
+                        .loadAccount()
+                        ?.withBaseAccount(it.data)
+                        ?.let { account ->
+                            sessionManager.saveAccount(account)
+                        }
+                }
+            }
+        }
     }
 
     fun onClickRequestCode(view: View) {
         info("Request code button clicked")
-        mobileViewModel.requestSMSAuthCode()
+
+        when (usage) {
+            USAGE_AUTH -> {
+                viewModel.requestSMSAuthCode()
+            }
+            USAGE_UPDATE -> {
+                sessionManager
+                    .loadAccount()
+                    ?.let {
+                        viewModel.requestCodeForUpdate(it)
+                    }
+            }
+        }
     }
 
-    // The result is handled in mobileAuthenticated observer.
     fun onSubmitForm(view: View) {
-        mobileViewModel.verifySMSAuthCode(tokenManager.getToken())
+        when (usage) {
+            USAGE_AUTH -> {
+                context?.let {
+                    viewModel.verifySMSAuthCode(
+                        TokenManager
+                            .getInstance(it)
+                            .getToken()
+                    )
+                }
+            }
+            USAGE_UPDATE -> {
+                sessionManager.loadAccount()?.let {
+                    viewModel.updateMobile(it)
+                }
+            }
+        }
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         */
+        private const val ARG_USAGE = "arg_usage"
+        private const val USAGE_AUTH = 1
+        private const val USAGE_UPDATE = 2
+
         @JvmStatic
-        fun newInstance() = MobileAuthFragment()
+        fun newInstanceForAuth() = MobileFragment().apply {
+            arguments = bundleOf(
+                ARG_USAGE to USAGE_AUTH
+            )
+        }
+
+        @JvmStatic
+        fun newInstanceForUpdate() = MobileFragment().apply {
+            arguments = bundleOf(
+                ARG_USAGE to USAGE_UPDATE
+            )
+        }
     }
 }

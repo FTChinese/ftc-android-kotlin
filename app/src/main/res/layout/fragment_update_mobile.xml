@@ -6,7 +6,7 @@
     <data>
         <variable
             name="handler"
-            type="com.ft.ftchinese.ui.mobile.UpdateMobileFragment" />
+            type="com.ft.ftchinese.ui.mobile.MobileFragment" />
         <variable
             name="viewModel"
             type="com.ft.ftchinese.ui.mobile.MobileViewModel" />

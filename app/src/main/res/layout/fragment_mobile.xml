@@ -9,7 +9,7 @@
             type="Boolean" />
         <variable
             name="handler"
-            type="com.ft.ftchinese.ui.login.MobileAuthFragment" />
+            type="com.ft.ftchinese.ui.mobile.MobileFragment" />
         <variable
             name="viewModel"
             type="com.ft.ftchinese.ui.mobile.MobileViewModel" />
@@ -30,7 +30,7 @@
                 android:id="@+id/mobile_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:enabled="@{!viewModel.progressLiveData}"
+                android:enabled="@{!inProgress}"
                 android:hint="@string/mobile_phone"
                 android:inputType="phone"
                 android:maxLines="1"
@@ -63,7 +63,7 @@
                 android:id="@+id/code_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:enabled="@{!viewModel.progressLiveData}"
+                android:enabled="@{!inProgress}"
                 android:hint="@string/mobile_verification_code"
                 android:inputType="number"
                 android:maxLines="1"

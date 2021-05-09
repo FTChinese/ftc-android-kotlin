@@ -13,11 +13,10 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.address.AddressViewModel
 import com.ft.ftchinese.ui.address.UpdateAddressFragment
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.ui.mobile.UpdateMobileFragment
-import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.viewmodel.ProgressViewModel
 import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.mobile.MobileFragment
+import com.ft.ftchinese.ui.mobile.MobileViewModel
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.viewmodel.UpdateViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
@@ -30,7 +29,6 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var sessionManager: SessionManager
     private lateinit var addressViewModel: AddressViewModel
     private lateinit var mobileViewModel: MobileViewModel
-    private lateinit var progressViewModel: ProgressViewModel
 
     private lateinit var binding: ActivityUpdateAccountBinding
 
@@ -44,9 +42,6 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
         }
-
-        progressViewModel = ViewModelProvider(this)
-            .get(ProgressViewModel::class.java)
 
         updateViewModel = ViewModelProvider(this)
             .get(UpdateViewModel::class.java)
@@ -88,16 +83,16 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             }
             AccountRowType.MOBILE -> {
                 supportActionBar?.title = "关联手机号码"
-                fm.replace(R.id.update_frag_holder, UpdateMobileFragment.newInstance())
+                fm.replace(R.id.update_frag_holder, MobileFragment.newInstanceForUpdate())
             }
         }
 
         fm.commit()
 
-        setUp()
+        setupViewModel()
     }
 
-    private fun setUp() {
+    private fun setupViewModel() {
         updateViewModel.inProgress.observe(this, {
             binding.progressing = it
         })
@@ -107,28 +102,15 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
 //            binding.progressing = it
 //        }
 
-        mobileViewModel.progressLiveData.observe(this) {
-            binding.progressing = it
-        }
-
-        // TODO: remove
-        progressViewModel.inProgress.observe(this) {
-            binding.progressing = it
-        }
-
         updateViewModel.updateResult.observe(this) {
             onUpdated(it)
         }
 
         // Observing refreshed account.
-        accountViewModel.accountRefreshed.observe(this) {
-            onAccountRefreshed(it)
-        }
+        accountViewModel.accountRefreshed.observe(this, this::onAccountRefreshed)
     }
 
     private fun onUpdated(result: FetchResult<Boolean>) {
-//        showProgress(false)
-//        binding.inProgress = false
 
         when (result) {
             is FetchResult.LocalizedError -> {
@@ -181,9 +163,9 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
         @JvmStatic
         fun start(context: Context, rowType: AccountRowType?) {
             context.startActivity(
-                    Intent(context, UpdateActivity::class.java).apply {
-                        putExtra(TARGET_FRAG, rowType)
-                    }
+                Intent(context, UpdateActivity::class.java).apply {
+                    putExtra(TARGET_FRAG, rowType)
+                }
             )
         }
     }

@@ -15,6 +15,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.mobile.MobileFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.util.RequestCode
 import com.google.android.material.tabs.TabLayoutMediator
@@ -68,12 +69,10 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
         // Setup network
         connectionLiveData.observe(this) {
             emailViewModel.isNetworkAvailable.value = it
-            mobileViewModel.isNetworkAvailable.value = it
         }
 
         isConnected.let {
             emailViewModel.isNetworkAvailable.value = it
-            mobileViewModel.isNetworkAvailable.value = it
         }
 
         setupViewModel()
@@ -82,6 +81,10 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
     private fun setupViewModel() {
 
         emailViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
+        mobileViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
         }
 
@@ -124,7 +127,7 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> EmailFragment.newInstance()
-                1 -> MobileAuthFragment.newInstance()
+                1 -> MobileFragment.newInstanceForAuth()
                 2 -> WxLoginFragment.newInstance()
                 else -> EmailFragment.newInstance()
             }

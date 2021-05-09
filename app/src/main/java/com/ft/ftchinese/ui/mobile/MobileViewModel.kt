@@ -2,7 +2,6 @@ package com.ft.ftchinese.ui.mobile
 
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
@@ -10,11 +9,11 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.BaseAccount
 import com.ft.ftchinese.model.reader.UserFound
 import com.ft.ftchinese.model.request.MobileAuthParams
-import com.ft.ftchinese.model.request.MobileVerificationParams
+import com.ft.ftchinese.model.request.MobileFormParams
 import com.ft.ftchinese.model.request.SMSCodeParams
 import com.ft.ftchinese.repository.AccountRepo
-import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.store.AccountCache
+import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
@@ -26,12 +25,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-class MobileViewModel : ViewModel(), AnkoLogger {
-
-    // Used to toggle button enabled state only.
-    // Progress indicator is controlled by hosting activity.
-    val progressLiveData = MutableLiveData<Boolean>()
-    val isNetworkAvailable = MutableLiveData<Boolean>()
+class MobileViewModel : BaseViewModel(), AnkoLogger {
 
     val mobileLiveData = MutableLiveData("")
     val mobileValidator = LiveDataValidator(mobileLiveData).apply {
@@ -114,8 +108,8 @@ class MobileViewModel : ViewModel(), AnkoLogger {
             mobile = mobileLiveData.value ?: "",
         )
 
-    private val updateMobileParams: MobileVerificationParams
-        get() = MobileVerificationParams(
+    private val updateMobileParams: MobileFormParams
+        get() = MobileFormParams(
             mobile = mobileLiveData.value ?: "",
             code = codeLiveData.value ?: "",
         )

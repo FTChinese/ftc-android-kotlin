@@ -2,18 +2,19 @@ package com.ft.ftchinese.viewmodel
 
 import android.util.Patterns
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.Passwords
 import com.ft.ftchinese.repository.AccountRepo
+import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.anko.AnkoLogger
 
-class UpdateViewModel : ViewModel() {
+class UpdateViewModel : BaseViewModel(), AnkoLogger {
     val inProgress = MutableLiveData<Boolean>()
 
     val updateFormState: MutableLiveData<UpdateFormState> by lazy {
