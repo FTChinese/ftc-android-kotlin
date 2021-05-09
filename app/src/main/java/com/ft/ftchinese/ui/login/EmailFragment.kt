@@ -15,7 +15,6 @@ import org.jetbrains.anko.AnkoLogger
 class EmailFragment : ScopedFragment(),
         AnkoLogger {
 
-    private lateinit var viewModel: SignInViewModel
     private lateinit var emailViewModel: EmailExistsViewModel
     private lateinit var binding: FragmentEmailBinding
 
@@ -23,18 +22,11 @@ class EmailFragment : ScopedFragment(),
         super.onCreateView(inflater, container, savedInstanceState)
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_email, container, false)
 
-        binding.emailInput.requestFocus()
-
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        viewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(SignInViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
 
         emailViewModel = activity?.run {
             ViewModelProvider(this)
@@ -52,6 +44,8 @@ class EmailFragment : ScopedFragment(),
         emailViewModel.isFormEnabled.observe(viewLifecycleOwner) {
             binding.isFormEnabled = it
         }
+
+        binding.emailInput.requestFocus()
     }
 
     fun onSubmit(view: View) {
