@@ -36,6 +36,10 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
         }
     }
 
+    // Passed from MobileViewModel when the sign in ui
+    // is launched by mobile login.
+    val mobileLiveData = MutableLiveData("")
+
     init {
         progressLiveData.value = false
     }
@@ -56,7 +60,10 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
         MutableLiveData<FetchResult<Account>>()
     }
 
-    fun login(deviceToken: String) {
+    // Authenticate using email + password.
+    // This could be a plain login with email, or authentication launched
+    // by a wechat-only use to perform linking to this email account.
+    fun emailAuth(deviceToken: String) {
         if (isNetworkAvailable.value == false) {
             accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
@@ -98,5 +105,10 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
                 accountResult.value = FetchResult.fromException(e)
             }
         }
+    }
+
+    // A mobile number is used for the first time for login.
+    fun mobileLinkEmail() {
+        // TODO: implementation
     }
 }

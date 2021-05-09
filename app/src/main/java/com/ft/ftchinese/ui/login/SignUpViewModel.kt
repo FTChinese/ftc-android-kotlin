@@ -62,6 +62,8 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
         return progressLiveData.value == false && isDirty && formValidator.isValid()
     }
 
+    val mobileLiveData = MutableLiveData("")
+
     init {
         progressLiveData.value = false
     }
@@ -128,6 +130,10 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
                 accountResult.value = FetchResult.fromException(e)
             }
         }
+    }
+
+    fun mobileSignUp() {
+        // TODO: implementation
     }
 
     fun wxSignUp(deviceToken: String, unionId: String) {
