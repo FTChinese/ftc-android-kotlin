@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".ui.address.UpdateAddressFragment"
+    tools:context=".ui.account.address.UpdateAddressFragment"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
         <variable
             name="handler"
-            type="com.ft.ftchinese.ui.address.UpdateAddressFragment" />
+            type="com.ft.ftchinese.ui.account.address.UpdateAddressFragment" />
         <variable
             name="viewModel"
-            type="com.ft.ftchinese.ui.address.AddressViewModel" />
+            type="com.ft.ftchinese.ui.account.address.AddressViewModel" />
     </data>
 
     <LinearLayout

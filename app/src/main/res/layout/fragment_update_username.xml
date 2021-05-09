@@ -5,11 +5,14 @@
 
     <data>
         <variable
-            name="enableInput"
-            type="Boolean" />
-        <variable
             name="userName"
             type="String" />
+        <variable
+            name="viewModel"
+            type="com.ft.ftchinese.ui.account.name.NameViewModel" />
+        <variable
+            name="handler"
+            type="com.ft.ftchinese.ui.account.name.UpdateNameFragment" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -57,7 +60,9 @@
                 android:inputType="text"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:enabled="@{enableInput ?? true}"/>
+                android:enabled="@{!viewModel.progressLiveData}"
+                android:text="@={viewModel.nameLiveData}"
+                app:error="@{viewModel.nameValidator.error}"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -68,7 +73,8 @@
             android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
             android:text="@string/btn_save"
-            android:enabled="@{enableInput ?? false}"
+            android:enabled="@{viewModel.isFormEnabled}"
+            android:onClick="@{handler::onSubmit}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/label_name_tv"
             app:layout_constraintStart_toStartOf="@+id/label_name_tv"

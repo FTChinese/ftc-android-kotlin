@@ -4,11 +4,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+        <variable
+            name="viewModel"
+            type="com.ft.ftchinese.ui.email.EmailViewModel" />
+        <variable
+            name="handler"
+            type="com.ft.ftchinese.ui.email.RequestVerificationFragment" />
+    </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        tools:context=".ui.account.RequestVerificationFragment">
+        tools:context=".ui.email.RequestVerificationFragment">
 
         <TextView
             android:id="@+id/banner_message"
@@ -27,6 +35,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@string/btn_request_verify"
+            android:onClick="@{handler::onClickButton}"
+            android:enabled="@{viewModel.isLetterBtnEnabled}"
             app:layout_constraintEnd_toEndOf="@+id/banner_message"
             app:layout_constraintTop_toBottomOf="@+id/banner_message" />
 
