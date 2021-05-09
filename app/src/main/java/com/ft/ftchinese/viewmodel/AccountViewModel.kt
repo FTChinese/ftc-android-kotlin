@@ -1,7 +1,6 @@
 package com.ft.ftchinese.viewmodel
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
@@ -14,6 +13,7 @@ import com.ft.ftchinese.repository.AppleClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,13 +23,11 @@ import org.jetbrains.anko.info
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 
-class AccountViewModel : ViewModel(), AnkoLogger {
+class AccountViewModel : BaseViewModel(), AnkoLogger {
 
     val inProgress: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
-
-    val isNetworkAvailable = MutableLiveData<Boolean>()
 
     val uiType = MutableLiveData<LoginMethod>()
 
@@ -104,6 +102,8 @@ class AccountViewModel : ViewModel(), AnkoLogger {
             accountRefreshed.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
+
+        // TODO: progress indicator
         viewModelScope.launch {
             info("Start refreshing account")
 
