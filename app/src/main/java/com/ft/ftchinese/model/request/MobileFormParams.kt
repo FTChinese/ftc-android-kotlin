@@ -3,7 +3,7 @@ package com.ft.ftchinese.model.request
 import com.ft.ftchinese.model.fetch.json
 
 // HTTP request to set/update mobile number.
-data class MobileVerificationParams(
+data class MobileFormParams(
     val mobile: String,
     val code: String,
 ) {
