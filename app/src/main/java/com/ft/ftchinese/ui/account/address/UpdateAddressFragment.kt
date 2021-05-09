@@ -14,7 +14,6 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.data.FetchResult
-import com.ft.ftchinese.viewmodel.ProgressViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
@@ -27,7 +26,6 @@ import org.jetbrains.anko.support.v4.toast
 class UpdateAddressFragment : ScopedFragment(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var progressViewModel: ProgressViewModel
     private lateinit var viewModel: AddressViewModel
     private lateinit var binding: FragmentUpdateAddressBinding
 
@@ -59,11 +57,6 @@ class UpdateAddressFragment : ScopedFragment(), AnkoLogger {
                 .get(AddressViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        progressViewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(ProgressViewModel::class.java)
-        } ?: throw Exception("Invalid activity")
-
         connectionLiveData.observe(viewLifecycleOwner) {
             viewModel.isNetworkAvailable.value = it
         }
@@ -76,7 +69,6 @@ class UpdateAddressFragment : ScopedFragment(), AnkoLogger {
         binding.lifecycleOwner = viewLifecycleOwner
 
         viewModel.addressRetrieved.observe(viewLifecycleOwner) {
-            progressViewModel.off()
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
@@ -86,7 +78,6 @@ class UpdateAddressFragment : ScopedFragment(), AnkoLogger {
         }
 
         viewModel.addressUpdated.observe(viewLifecycleOwner) {
-            progressViewModel.off()
             when (it) {
                 is FetchResult.LocalizedError -> {
                     toast(it.msgId)
@@ -99,15 +90,12 @@ class UpdateAddressFragment : ScopedFragment(), AnkoLogger {
         }
 
         sessionManager.loadAccount()?.let {
-            progressViewModel.on()
             viewModel.loadAddress(it)
         }
     }
 
     fun onSubmitForm(view: View) {
-        progressViewModel.on()
         sessionManager.loadAccount()?.let {
-
             viewModel.updateAddress(it)
         }
     }
