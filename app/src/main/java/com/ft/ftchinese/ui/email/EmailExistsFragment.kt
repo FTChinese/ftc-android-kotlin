@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.login
+package com.ft.ftchinese.ui.email
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,20 +7,24 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
-import com.ft.ftchinese.databinding.FragmentEmailBinding
+import com.ft.ftchinese.databinding.FragmentEmailExistsBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
 import org.jetbrains.anko.AnkoLogger
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class EmailFragment : ScopedFragment(),
+class EmailExistsFragment : ScopedFragment(),
         AnkoLogger {
 
-    private lateinit var emailViewModel: EmailExistsViewModel
-    private lateinit var binding: FragmentEmailBinding
+    private lateinit var emailViewModel: EmailViewModel
+    private lateinit var binding: FragmentEmailExistsBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super.onCreateView(inflater, container, savedInstanceState)
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_email, container, false)
+        binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_email_exists,
+            container,
+            false)
 
         return binding.root
     }
@@ -30,7 +34,7 @@ class EmailFragment : ScopedFragment(),
 
         emailViewModel = activity?.run {
             ViewModelProvider(this)
-                .get(EmailExistsViewModel::class.java)
+                .get(EmailViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
         binding.viewModel = emailViewModel
@@ -49,12 +53,12 @@ class EmailFragment : ScopedFragment(),
     }
 
     fun onSubmit(view: View) {
-        emailViewModel.startChecking()
+        emailViewModel.checkExists()
     }
 
     companion object {
         @JvmStatic
-        fun newInstance() = EmailFragment()
+        fun newInstance() = EmailExistsFragment()
     }
 }
 

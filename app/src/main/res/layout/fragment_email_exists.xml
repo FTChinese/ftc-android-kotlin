@@ -10,17 +10,17 @@
 
         <variable
             name="handler"
-            type="com.ft.ftchinese.ui.login.EmailFragment" />
+            type="com.ft.ftchinese.ui.email.EmailExistsFragment" />
 
         <variable
             name="viewModel"
-            type="com.ft.ftchinese.ui.login.EmailExistsViewModel" />
+            type="com.ft.ftchinese.ui.email.EmailViewModel" />
 
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.login.EmailFragment">
+        tools:context=".ui.email.EmailExistsFragment">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/email_container"
