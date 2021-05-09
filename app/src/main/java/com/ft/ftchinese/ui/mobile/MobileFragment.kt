@@ -84,6 +84,12 @@ class MobileFragment : ScopedFragment(), AnkoLogger {
         binding.lifecycleOwner = viewLifecycleOwner
 
         setupViewModel()
+
+        binding.btnName = when (usage) {
+            USAGE_AUTH -> getString(R.string.btn_login)
+            USAGE_UPDATE -> getString(R.string.btn_save)
+            else -> ""
+        }
     }
 
     private fun setupViewModel() {

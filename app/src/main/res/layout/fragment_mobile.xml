@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:bind="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
         <variable
-            name="inProgress"
-            type="Boolean" />
+            name="btnName"
+            type="String" />
         <variable
             name="handler"
             type="com.ft.ftchinese.ui.mobile.MobileFragment" />
@@ -30,7 +29,7 @@
                 android:id="@+id/mobile_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:enabled="@{!inProgress}"
+                android:enabled="@{!viewModel.progressLiveData}"
                 android:hint="@string/mobile_phone"
                 android:inputType="phone"
                 android:maxLines="1"
@@ -63,7 +62,7 @@
                 android:id="@+id/code_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:enabled="@{!inProgress}"
+                android:enabled="@{!viewModel.progressLiveData}"
                 android:hint="@string/mobile_verification_code"
                 android:inputType="number"
                 android:maxLines="1"
@@ -91,13 +90,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/btn_login"
+            android:text="@{btnName}"
             android:enabled="@{viewModel.isFormEnabled}"
             android:onClick="@{handler::onSubmitForm}"
             app:layout_constraintTop_toBottomOf="@+id/code_container"
             app:layout_constraintVertical_bias="1.0" />
-
-        <include layout="@layout/progress_indicator_circular"
-            bind:inProgress="@{inProgress}"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
