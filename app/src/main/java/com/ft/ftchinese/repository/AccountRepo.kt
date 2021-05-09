@@ -5,6 +5,7 @@ import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.request.MobileFormParams
+import com.ft.ftchinese.model.request.PasswordUpdateParams
 import com.ft.ftchinese.model.request.SMSCodeParams
 
 object AccountRepo {
@@ -57,31 +58,39 @@ object AccountRepo {
         }
     }
 
-    fun updateEmail(ftcId: String, email: String): Boolean {
-        val (resp, _) = Fetch().patch(NextApi.UPDATE_EMAIL)
+    fun updateEmail(ftcId: String, email: String): BaseAccount? {
+        val (_, body) = Fetch().patch(Endpoint.email)
                 .noCache()
                 .setUserId(ftcId)
                 .sendJson(json.toJsonString(mapOf("email" to email)))
                 .endJsonText()
 
-        return resp.code == 204
+        return if (body == null) {
+            null
+        } else {
+            json.parse<BaseAccount>(body)
+        }
     }
 
-    fun updateUserName(ftcId: String, name: String): Boolean {
-        val (resp, _) = Fetch().patch(NextApi.UPDATE_USER_NAME)
+    fun updateUserName(ftcId: String, name: String): BaseAccount? {
+        val (_, body) = Fetch().patch(Endpoint.userName)
                 .noCache()
                 .setUserId(ftcId)
                 .sendJson(json.toJsonString(mapOf("userName" to name)))
                 .endJsonText()
 
-        return resp.code == 204
+        return if (body == null) {
+            null
+        } else {
+            json.parse<BaseAccount>(body)
+        }
     }
 
-    fun updatePassword(ftcId: String, pw: Passwords): Boolean {
+    fun updatePassword(ftcId: String, params: PasswordUpdateParams): Boolean {
         val(resp, _) = Fetch().patch(NextApi.UPDATE_PASSWORD)
                 .noCache()
                 .setUserId(ftcId)
-                .sendJson(json.toJsonString(pw))
+                .sendJson(params.toJsonString())
                 .endJsonText()
 
         return resp.code == 204

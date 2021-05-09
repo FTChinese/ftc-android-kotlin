@@ -54,6 +54,12 @@ object Endpoint {
     val mobileInitialLink = "${authMobileBase}/link"
     val mobileSignUp = "${authMobileBase}/signup"
 
+    private val accountBase = "${subsBase()}/account"
+    val email = "${accountBase}/email"
+    val emailVrfLetter = "${accountBase}/email/request-verification"
+
+    val userName = "${accountBase}/name"
+
     val contentBase = if (BuildConfig.DEBUG) {
         "$devIP:8100"
     } else {
