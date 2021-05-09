@@ -11,6 +11,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentPasswordResetBinding
 import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.data.FetchResult
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -46,21 +47,30 @@ class PasswordResetFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(PasswordResetViewModel::class.java)
-        } ?: throw Exception("Invalid activity")
+        viewModel = ViewModelProvider(this)
+            .get(PasswordResetViewModel::class.java)
 
         binding.viewModel = viewModel
         binding.handler = this
-        binding.lifecycleOwner = viewLifecycleOwner
+        binding.lifecycleOwner = this
+
+        connectionLiveData.observe(this) {
+            viewModel.isNetworkAvailable.value = it
+        }
+        context?.isConnected?.let {
+            viewModel.isNetworkAvailable.value = it
+        }
 
         setupViewModel()
         setupUI()
     }
 
     private fun setupViewModel() {
-        viewModel.resetResult.observe(viewLifecycleOwner) {
+        viewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
+        viewModel.resetResult.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
