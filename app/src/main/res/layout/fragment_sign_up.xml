@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/tools">
 
     <data>
-
+        <variable
+            name="inProgress"
+            type="Boolean" />
+        <variable
+            name="title"
+            type="String" />
+        <variable
+            name="guide"
+            type="String" />
         <variable
             name="isFormEnabled"
             type="Boolean" />
@@ -30,11 +38,22 @@
             android:id="@+id/sign_up_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/title_sign_up"
+            android:text="@{title}"
             app:layout_constraintTop_toBottomOf="@id/toolbar"
             android:layout_marginStart="@dimen/space_16"
             android:layout_marginEnd="@dimen/space_16"
             android:layout_marginTop="@dimen/space_16"/>
+
+        <TextView
+            style="@style/OrigamiText.Body2.Light"
+            android:id="@+id/instruct_sign_up_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_16"
+            android:text="@{guide}"
+            app:layout_constraintTop_toBottomOf="@id/sign_up_title"
+            app:layout_constraintEnd_toEndOf="@id/email_container"
+            app:layout_constraintStart_toStartOf="@id/email_container"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/email_container"
@@ -43,7 +62,7 @@
             android:layout_marginTop="@dimen/space_16"
             app:layout_constraintEnd_toEndOf="@id/sign_up_title"
             app:layout_constraintStart_toStartOf="@id/sign_up_title"
-            app:layout_constraintTop_toBottomOf="@id/sign_up_title">
+            app:layout_constraintTop_toBottomOf="@id/instruct_sign_up_tv">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/email_input"
@@ -106,17 +125,6 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            style="@style/OrigamiText.Body2.Light"
-            android:id="@+id/instruct_sign_up_tv"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/instruct_sign_up"
-            app:layout_constraintTop_toBottomOf="@id/confirm_password_container"
-            app:layout_constraintEnd_toEndOf="@id/email_container"
-            app:layout_constraintStart_toStartOf="@id/email_container"/>
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/sign_up_btn"
             android:layout_width="0dp"
@@ -127,9 +135,11 @@
             android:onClick="@{handler::onSubmit}"
             app:layout_constraintEnd_toEndOf="@id/email_container"
             app:layout_constraintStart_toStartOf="@id/email_container"
-            app:layout_constraintTop_toBottomOf="@id/instruct_sign_up_tv" />
+            app:layout_constraintTop_toBottomOf="@id/confirm_password_container" />
+
+        <include layout="@layout/progress_indicator_circular"
+            bind:inProgress="@{inProgress}"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </layout>
 
