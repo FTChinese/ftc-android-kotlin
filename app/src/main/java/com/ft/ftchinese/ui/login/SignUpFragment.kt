@@ -18,6 +18,7 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -38,7 +39,7 @@ class SignUpFragment(
 
     private lateinit var sessionManager: SessionManager
     private lateinit var tokenManager: TokenManager
-    private lateinit var emailViewModel: EmailExistsViewModel
+    private lateinit var emailViewModel: EmailViewModel
     private lateinit var signUpViewModel: SignUpViewModel
     private lateinit var mobileViewModel: MobileViewModel
     private lateinit var binding: FragmentSignUpBinding
@@ -73,7 +74,7 @@ class SignUpFragment(
         // Scoped to parent activity so that it could share data with email fragment.
         emailViewModel = activity?.run {
             ViewModelProvider(this)
-                .get(EmailExistsViewModel::class.java)
+                .get(EmailViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
         // To share dat with mobile fragment.

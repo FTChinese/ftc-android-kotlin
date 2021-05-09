@@ -73,7 +73,6 @@
                 android:inputType="textEmailAddress"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:enabled="false"
                 android:text="@={viewModel.emailLiveData}"/>
 
         </com.google.android.material.textfield.TextInputLayout>

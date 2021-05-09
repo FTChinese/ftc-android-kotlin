@@ -19,6 +19,7 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.wxlink.LinkParams
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
@@ -44,7 +45,7 @@ class SignInFragment(
     private lateinit var sessionManager: SessionManager
     private lateinit var tokenManager: TokenManager
     private lateinit var loginViewModel: SignInViewModel
-    private lateinit var emailViewModel: EmailExistsViewModel
+    private lateinit var emailViewModel: EmailViewModel
     private lateinit var mobileViewModel: MobileViewModel
     private lateinit var binding: FragmentSignInBinding
 
@@ -77,7 +78,7 @@ class SignInFragment(
         // Used to retrieve email from hosting activity
         emailViewModel = activity?.run {
             ViewModelProvider(this)
-                .get(EmailExistsViewModel::class.java)
+                .get(EmailViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
         // Used to retrieve mobile from hosting activity.
@@ -189,6 +190,7 @@ class SignInFragment(
             AuthKind.EmailLogin -> {
                 binding.title = getString(R.string.title_login)
                 binding.guide = getString(R.string.instruct_sign_in)
+                binding.emailInput.isEnabled = false
             }
             AuthKind.MobileLink -> {
                 binding.title = "绑定已有邮箱账号"
