@@ -12,6 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAccountBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
@@ -47,12 +48,23 @@ class AccountActivity : ScopedAppActivity(),
 
         sessionManager = SessionManager.getInstance(this)
 
-        initUI()
-
         viewModel = ViewModelProvider(this)
-                .get(AccountViewModel::class.java)
+            .get(AccountViewModel::class.java)
 
-        viewModel.inProgress.observe(this, {
+        connectionLiveData.observe(this) {
+            viewModel.isNetworkAvailable.value = it
+        }
+
+        isConnected.let {
+            viewModel.isNetworkAvailable.value = it
+        }
+
+        setupViewModel()
+        initUI()
+    }
+
+    private fun setupViewModel() {
+        viewModel.progressLiveData.observe(this, {
             binding.inProgress = it
         })
 
@@ -69,7 +81,7 @@ class AccountActivity : ScopedAppActivity(),
             if (it.data == WxRefreshState.ReAuth) {
 
                 WxExpireDialogFragment()
-                        .show(supportFragmentManager, "WxExpireDialog")
+                    .show(supportFragmentManager, "WxExpireDialog")
 
                 sessionManager.logout()
             }

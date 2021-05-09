@@ -11,16 +11,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentFtcAccountBinding
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.ui.lists.TwoLineItemViewHolder
-import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.ui.lists.TwoLineItemViewHolder
 import com.ft.ftchinese.ui.wxlink.LinkWxDialogFragment
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,14 +35,27 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
         sessionManager = SessionManager.getInstance(context)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_ftc_account, container, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_ftc_account,
+            container,
+            false,
+        )
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        accountViewModel = activity?.run {
+            ViewModelProvider(this)
+                .get(AccountViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
 
         val layout = LinearLayoutManager(context)
 
@@ -54,129 +65,54 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
             adapter = listAdapter
         }
 
-        updateUI()
+        setupViewModel()
+        initUI()
     }
 
-    override fun onResume() {
-        super.onResume()
-        updateUI()
-    }
-
-    private fun updateUI() {
-        listAdapter.setData(buildRows())
-    }
-
-    private fun buildRows(): List<AccountRow> {
-        val account = sessionManager.loadAccount() ?: return listOf()
-
-        return listOf(
-            AccountRow(
-                id = AccountRowType.EMAIL,
-
-                primary = if (account.isVerified) getString(R.string.label_email) else getString(R.string.email_not_verified),
-                secondary = if (account.email.isNotBlank()) {
-                    account.email
-                } else {
-                    getString(R.string.default_not_set)
-                }
-            ),
-            AccountRow(
-                id = AccountRowType.USER_NAME,
-                primary = getString(R.string.label_user_name),
-                secondary = if (account.userName.isNullOrBlank()) {
-                    getString(R.string.default_not_set)
-                } else {
-                    account.userName
-                }
-            ),
-            AccountRow(
-                id = AccountRowType.PASSWORD,
-                primary = getString(R.string.label_password),
-                secondary = "********",
-            ),
-            AccountRow(
-              id = AccountRowType.Address,
-                primary = "地址",
-                secondary = "设置或更改地址",
-            ),
-            AccountRow(
-                id = AccountRowType.STRIPE,
-                primary = "Stripe钱包",
-                secondary = "添加银行卡或设置默认支付方式"
-            ),
-            AccountRow(
-                id = AccountRowType.WECHAT,
-                primary = getString(R.string.label_wechat),
-                secondary = if (account.isLinked) {
-                    getString(R.string.action_bound_account)
-                } else {
-                    getString(R.string.action_bind_account)
-                }
-            ),
-            AccountRow(
-                id = AccountRowType.MOBILE,
-                primary = "手机号",
-                secondary = account.mobile ?: getString(R.string.default_not_set)
-            ),
-        )
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        accountViewModel = activity?.run {
-            ViewModelProvider(this)
-                    .get(AccountViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-
+    private fun setupViewModel() {
         accountViewModel.accountRefreshed.observe(viewLifecycleOwner) {
-            onAccountRefreshed(it)
+            binding.swipeRefresh.isRefreshing = false
+
+            when (it) {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
+                    toast(R.string.prompt_updated)
+                    sessionManager.saveAccount(it.data)
+
+                    if (it.data.isWxOnly) {
+                        accountViewModel.switchUI(LoginMethod.WECHAT)
+                        return@observe
+                    }
+                    updateUI()
+                }
+            }
         }
+    }
+
+    private fun initUI() {
+        updateUI()
 
         binding.swipeRefresh.setOnRefreshListener {
-            if (context?.isConnected != true) {
-                toast(R.string.prompt_no_network)
-                binding.swipeRefresh.isRefreshing = false
-                return@setOnRefreshListener
-            }
 
             val acnt = sessionManager.loadAccount()
-
             if (acnt == null) {
-                toast("Account not found")
                 binding.swipeRefresh.isRefreshing = false
                 return@setOnRefreshListener
             }
 
             toast(R.string.refreshing_account)
-
             accountViewModel.refresh(acnt)
         }
     }
 
-    private fun onAccountRefreshed(accountResult: FetchResult<Account>) {
-        binding.swipeRefresh.isRefreshing = false
+    private fun updateUI() {
+        listAdapter.setData(buildAccountRows(requireContext()))
+    }
 
-        when (accountResult) {
-            is FetchResult.LocalizedError -> {
-                toast(accountResult.msgId)
-            }
-            is FetchResult.Error -> {
-                accountResult.exception.message?.let { toast(it) }
-            }
-            is FetchResult.Success -> {
-                toast(R.string.prompt_updated)
-
-                sessionManager.saveAccount(accountResult.data)
-
-                if (accountResult.data.isWxOnly) {
-                    info("A wechat only account. Switch UI.")
-                    accountViewModel.switchUI(LoginMethod.WECHAT)
-                    return
-                }
-                updateUI()
-            }
-        }
+    override fun onResume() {
+        super.onResume()
+        updateUI()
     }
 
     inner class ListAdapter : RecyclerView.Adapter<TwoLineItemViewHolder>() {
