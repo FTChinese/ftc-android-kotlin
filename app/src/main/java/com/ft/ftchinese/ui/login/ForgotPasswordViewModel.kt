@@ -2,13 +2,13 @@ package com.ft.ftchinese.ui.login
 
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.model.request.PasswordResetLetterParams
 import com.ft.ftchinese.model.request.PasswordResetVerifier
+import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
@@ -19,10 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 
-class ForgotPasswordViewModel : ViewModel(), AnkoLogger {
-    val isNetworkAvailable = MutableLiveData<Boolean>()
-    val progressLiveData = MutableLiveData<Boolean>()
-
+class ForgotPasswordViewModel : BaseViewModel(), AnkoLogger {
     val emailLiveData = MutableLiveData("")
     val emailValidator = LiveDataValidator(emailLiveData).apply {
         addRule("请输入正确的邮箱", Validator::isEmail)
