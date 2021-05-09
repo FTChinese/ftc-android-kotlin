@@ -11,7 +11,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentLinkTargetBinding
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.fetch.formatLocalDate
-import com.ft.ftchinese.ui.account.UIMemberStatus
 import org.jetbrains.anko.AnkoLogger
 
 /**

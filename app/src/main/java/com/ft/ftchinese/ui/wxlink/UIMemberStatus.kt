@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.account
+package com.ft.ftchinese.ui.wxlink
 
 data class UIMemberStatus(
         val heading: String? = null,
