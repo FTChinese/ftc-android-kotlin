@@ -74,7 +74,7 @@
             android:parentActivityName=".ui.launch.MainActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
-            android:name=".ui.account.CustomerActivity"
+            android:name=".ui.customer.CustomerActivity"
             android:label="@string/title_stripe_setting"
             android:parentActivityName=".ui.account.AccountActivity" />
         <activity
