@@ -86,26 +86,26 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             AccountRowType.EMAIL -> {
                 supportActionBar?.setTitle(R.string.title_change_email)
                 if (sessionManager.loadAccount()?.isVerified == false) {
-                    fm.replace(R.id.update_frag_holder, RequestVerificationFragment.newInstance())
+                    fm.replace(R.id.first_frag, RequestVerificationFragment.newInstance())
                 }
 
-                fm.replace(R.id.update_frag_holder, UpdateEmailFragment.newInstance())
+                fm.replace(R.id.second_frag, UpdateEmailFragment.newInstance())
             }
             AccountRowType.USER_NAME -> {
                 supportActionBar?.setTitle(R.string.title_change_username)
-                fm.replace(R.id.update_frag_holder, UpdateNameFragment.newInstance())
+                fm.replace(R.id.first_frag, UpdateNameFragment.newInstance())
             }
             AccountRowType.PASSWORD -> {
                 supportActionBar?.setTitle(R.string.title_change_password)
-                fm.replace(R.id.update_frag_holder, UpdatePasswordFragment.newInstance())
+                fm.replace(R.id.first_frag, UpdatePasswordFragment.newInstance())
             }
             AccountRowType.Address -> {
                 supportActionBar?.title = "设置地址"
-                fm.replace(R.id.update_frag_holder, UpdateAddressFragment.newInstance())
+                fm.replace(R.id.first_frag, UpdateAddressFragment.newInstance())
             }
             AccountRowType.MOBILE -> {
                 supportActionBar?.title = "关联手机号码"
-                fm.replace(R.id.update_frag_holder, MobileFragment.newInstanceForUpdate())
+                fm.replace(R.id.first_frag, MobileFragment.newInstanceForUpdate())
             }
         }
 
@@ -117,19 +117,19 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     private fun setupViewModel() {
 
         emailViewModel.progressLiveData.observe(this) {
-            binding.progressing = it
+            binding.inProgress = it
         }
 
         nameViewModel.progressLiveData.observe(this) {
-            binding.progressing = it
+            binding.inProgress = it
         }
 
         passwordViewModel.progressLiveData.observe(this) {
-            binding.progressing = it
+            binding.inProgress = it
         }
 
         addressViewModel.progressLiveData.observe(this) {
-            binding.progressing = it
+            binding.inProgress = it
         }
     }
 
