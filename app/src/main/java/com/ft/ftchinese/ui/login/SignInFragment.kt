@@ -96,7 +96,6 @@ class SignInFragment(
         connectionLiveData.observe(this) {
             loginViewModel.isNetworkAvailable.value = it
         }
-
         activity?.isNetworkConnected()?.let {
             loginViewModel.isNetworkAvailable.value = it
         }
@@ -130,10 +129,6 @@ class SignInFragment(
 
         loginViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
-        }
-
-        loginViewModel.isFormEnabled.observe(this) {
-            binding.isFormEnabled = it
         }
 
         loginViewModel.accountResult.observe(this) {
@@ -184,21 +179,26 @@ class SignInFragment(
             dismiss()
         }
 
-        binding.passwordInput.requestFocus()
-
         when(kind) {
             AuthKind.EmailLogin -> {
                 binding.title = getString(R.string.title_login)
                 binding.guide = getString(R.string.instruct_sign_in)
                 binding.emailInput.isEnabled = false
+                binding.passwordInput.requestFocus()
+                binding.showCreateAccount = false
             }
             AuthKind.MobileLink -> {
                 binding.title = "绑定已有邮箱账号"
-                binding.guide = "首次使用手机号码登录需要绑定邮箱账号，您可以验证已有邮箱账号创建新账号。\n绑定邮箱后下次可以直接使用手机号码登录"
+                binding.guide = "首次使用手机号码登录需要绑定邮箱账号，您可以验证已有邮箱账号或创建新账号。\n绑定邮箱后下次可以直接使用手机号码登录"
+                binding.emailInput.requestFocus()
+                binding.showCreateAccount = true
             }
             AuthKind.WechatLink -> {
                 binding.title = "验证密码"
-                binding.guide = "验证邮箱账号密码后绑定账号"
+                binding.guide = "验证邮箱账号密码后绑定微信"
+                binding.emailInput.isEnabled = false
+                binding.passwordInput.requestFocus()
+                binding.showCreateAccount = false
             }
         }
     }
