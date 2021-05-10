@@ -41,13 +41,6 @@ class EmailExistsFragment : ScopedFragment(),
         binding.handler = this
         binding.lifecycleOwner = viewLifecycleOwner
 
-        // It's very weired if we assign the view model's
-        // isFormEnabled directly in xml, it only works on initial
-        // state. When progress changes, the button state does
-        // not change.
-        emailViewModel.isFormEnabled.observe(viewLifecycleOwner) {
-            binding.isFormEnabled = it
-        }
 
         binding.emailInput.requestFocus()
     }

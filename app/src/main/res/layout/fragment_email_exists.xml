@@ -5,13 +5,8 @@
 
     <data>
         <variable
-            name="isFormEnabled"
-            type="Boolean" />
-
-        <variable
             name="handler"
             type="com.ft.ftchinese.ui.email.EmailExistsFragment" />
-
         <variable
             name="viewModel"
             type="com.ft.ftchinese.ui.email.EmailViewModel" />
@@ -53,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_16"
             android:text="@string/btn_next"
-            android:enabled="@{isFormEnabled}"
+            android:enabled="@{viewModel.isFormEnabled()}"
             android:onClick="@{handler::onSubmit}"
             app:layout_constraintEnd_toEndOf="@+id/email_container"
             app:layout_constraintStart_toStartOf="@+id/email_container"
