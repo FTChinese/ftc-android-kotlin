@@ -150,15 +150,13 @@ object AuthClient : AnkoLogger {
      * Then you can use [WxSession] to retrieve Wechat
      * info or refresh account data.
      */
-    fun wxLogin(code: String): WxSession? {
+    fun wxLogin(params: WxAuthParams): WxSession? {
         val (_, body) = Fetch().post(Endpoint.wxLogin)
             .setClient()
             .setAppId()
             .noCache()
             .setTimeout(30)
-            .sendJson(json.toJsonString(mapOf(
-                    "code" to code
-            )))
+            .sendJson(params.toJsonString())
             .endJsonText()
 
         return if (body == null) {

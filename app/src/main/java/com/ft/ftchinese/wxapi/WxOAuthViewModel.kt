@@ -6,6 +6,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.WxSession
+import com.ft.ftchinese.model.request.WxAuthParams
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.ui.base.BaseViewModel
@@ -45,11 +46,15 @@ class WxOAuthViewModel : BaseViewModel(), AnkoLogger {
         }
 
         progressLiveData.value = true
+
+        val params = WxAuthParams(
+            code = code,
+        )
         viewModelScope.launch {
             try {
                 info("Start requesting wechat oauth session data")
                 val sess = withContext(Dispatchers.IO) {
-                    AuthClient.wxLogin(code)
+                    AuthClient.wxLogin(params)
                 }
 
                 // Fetched wx session data and send it to
