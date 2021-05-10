@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:bind="http://schemas.android.com/apk/res-auto">
 
     <data>
         <variable
-            name="progressing"
+            name="inProgress"
             type="Boolean" />
     </data>
 
@@ -20,13 +18,18 @@
             layout="@layout/simple_toolbar" />
 
         <FrameLayout
-            android:id="@+id/update_frag_holder"
+            android:id="@+id/first_frag"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+            app:layout_constraintTop_toBottomOf="@id/toolbar"/>
+        <FrameLayout
+            android:id="@+id/second_frag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/first_frag" />
 
         <include layout="@layout/progress_indicator_circular"
-            bind:inProgress="@{progressing}"/>
+            bind:inProgress="@{inProgress}"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
