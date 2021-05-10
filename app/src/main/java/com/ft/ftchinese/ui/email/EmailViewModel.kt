@@ -115,7 +115,7 @@ class EmailViewModel : BaseViewModel(), AnkoLogger{
                     emailUpdated.value = FetchResult.LocalizedError(R.string.error_unknown)
                 } else {
                     emailUpdated.value = FetchResult.Success(baseAccount)
-                    isFormEnabled.value = false
+                    clear()
                 }
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 422) {
@@ -184,5 +184,9 @@ class EmailViewModel : BaseViewModel(), AnkoLogger{
                 isLetterBtnEnabled.value = true
             }
         }
+    }
+
+    fun clear() {
+        emailLiveData.value = ""
     }
 }
