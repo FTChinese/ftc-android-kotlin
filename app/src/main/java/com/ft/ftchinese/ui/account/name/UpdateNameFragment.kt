@@ -77,7 +77,8 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
                             sessionManager.saveAccount(account)
                         }
 
-                    initUI()
+                    // Refresh UI.
+                    binding.userName = it.data.userName
                 }
             }
         }
