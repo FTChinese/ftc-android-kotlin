@@ -9,6 +9,9 @@
         <variable
             name="inProgress"
             type="Boolean" />
+        <variable
+            name="handler"
+            type="com.ft.ftchinese.ui.wxlink.UnlinkActivity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -85,6 +88,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/title_unlink"
+            android:onClick="@{handler::onSubmit}"
+            android:enabled="@{!inProgress}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />

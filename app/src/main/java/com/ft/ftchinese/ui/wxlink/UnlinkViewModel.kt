@@ -6,6 +6,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.UnlinkAnchor
+import com.ft.ftchinese.model.request.WxUnlinkParams
 import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.FetchResult
@@ -25,15 +26,37 @@ class UnlinkViewModel : BaseViewModel() {
         anchorSelected.value = anchor
     }
 
-    fun unlink(account: Account, anchor: UnlinkAnchor? = null) {
+    fun unlink(account: Account) {
+        if (isNetworkAvailable.value == false) {
+            unlinkResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
+        val anchor = anchorSelected.value
+
+        if (account.isMember && anchor == null) {
+            unlinkResult.value = FetchResult.LocalizedError(R.string.api_anchor_missing)
+            return
+        }
+
+        if (account.unionId == null) {
+            unlinkResult.value = FetchResult.LocalizedError(R.string.unlink_missing_union_id)
+            return
+        }
+
+        val params = WxUnlinkParams(
+            ftcId = account.id,
+            anchor = anchor,
+        )
+
+        progressLiveData.value = true
         viewModelScope.launch {
             try {
                 val done = withContext(Dispatchers.IO) {
-                    LinkRepo.unlink(account, anchor)
+                    LinkRepo.unlink(account.unionId, params)
                 }
 
                 unlinkResult.value = FetchResult.Success(done)
-
             } catch (e: ClientError) {
                 val msgId = when (e.statusCode) {
                     422 -> when (e.error?.key) {
@@ -49,10 +72,10 @@ class UnlinkViewModel : BaseViewModel() {
                 } else {
                     FetchResult.fromServerError(e)
                 }
-
+                progressLiveData.value = false
             } catch (e: Exception) {
                 unlinkResult.value = FetchResult.fromException(e)
-
+                progressLiveData.value = false
             }
         }
     }

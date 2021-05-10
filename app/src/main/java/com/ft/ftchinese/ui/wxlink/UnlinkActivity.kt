@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.wxlink
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -11,25 +11,29 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUnlinkBinding
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.UnlinkAnchor
-import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.data.FetchResult
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.toast
 
-class UnlinkActivity : AppCompatActivity() {
+@ExperimentalCoroutinesApi
+class UnlinkActivity : ScopedAppActivity() {
 
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var sessionManager: SessionManager
     private lateinit var linkViewModel: UnlinkViewModel
-    private var anchor: UnlinkAnchor? = null
     private lateinit var binding: ActivityUnlinkBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_unlink)
+        binding = DataBindingUtil.setContentView(
+            this,
+            R.layout.activity_unlink,
+        )
         setSupportActionBar(binding.toolbar.toolbar)
 
         supportActionBar?.apply {
@@ -40,42 +44,65 @@ class UnlinkActivity : AppCompatActivity() {
         sessionManager = SessionManager.getInstance(this)
 
         accountViewModel = ViewModelProvider(this)
-                .get(AccountViewModel::class.java)
+            .get(AccountViewModel::class.java)
 
         linkViewModel = ViewModelProvider(this)
-                .get(UnlinkViewModel::class.java)
+            .get(UnlinkViewModel::class.java)
 
+        connectionLiveData.observe(this) {
+            accountViewModel.isNetworkAvailable.value = it
+            linkViewModel.isNetworkAvailable.value = it
+        }
+        isConnected.let {
+            accountViewModel.isNetworkAvailable.value = it
+            linkViewModel.isNetworkAvailable.value = it
+        }
+
+        setupViewModel()
         initUI()
+    }
 
-        linkViewModel.anchorSelected.observe(this, {
-                anchor = it
-        })
+    private fun setupViewModel() {
 
-        linkViewModel.unlinkResult.observe(this, {
-                onUnlinked(it)
-        })
+        accountViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
 
-        accountViewModel.accountRefreshed.observe(this, {
-                onAccountRefreshed(it)
-        })
+        linkViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
 
-        binding.btnUnlink.setOnClickListener {
-            if (!isConnected) {
-                toast(R.string.prompt_no_network)
-                return@setOnClickListener
+        linkViewModel.unlinkResult.observe(this) {
+            when (result) {
+                is FetchResult.LocalizedError -> toast(result.msgId)
+                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+                is FetchResult.Success -> {
+                    toast(R.string.prompt_unlinked)
+
+                    toast(R.string.refreshing_data)
+                    sessionManager.loadAccount()?.let {
+                        accountViewModel.refresh(it)
+                    }
+                }
             }
+        }
 
-            val account = sessionManager.loadAccount() ?: return@setOnClickListener
+        accountViewModel.accountRefreshed.observe(this) {
+            when (result) {
+                is FetchResult.LocalizedError -> toast(result.msgId)
+                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+                is FetchResult.Success -> {
+                    toast(R.string.prompt_updated)
+                    sessionManager.saveAccount(result.data)
 
-            if (account.isMember && anchor == null) {
-                toast(R.string.api_anchor_missing)
-                return@setOnClickListener
+                    // Signal to calling activity.
+                    /**
+                     * Notify [WxInfoActivity] the unlink result, which should in return notify [AccountActivity]
+                     */
+                    setResult(Activity.RESULT_OK)
+                    finish()
+                }
             }
-
-            binding.inProgress = true
-            it.isEnabled = false
-
-            linkViewModel.unlink(account, anchor)
         }
     }
 
@@ -90,60 +117,16 @@ class UnlinkActivity : AppCompatActivity() {
         if (account.isMember) {
             supportFragmentManager.commit {
                 replace(
-                        R.id.frag_unlink_anchor,
-                    UnlinkAnchorFragment.newInstance(
-                        account.membership.payMethod == PayMethod.STRIPE
-                    )
+                    R.id.frag_unlink_anchor,
+                    UnlinkAnchorFragment.newInstance(),
                 )
             }
         }
     }
 
-    private fun onUnlinked(result: FetchResult<Boolean>) {
-        binding.inProgress = false
-
-        when (result) {
-            is FetchResult.LocalizedError -> {
-                toast(result.msgId)
-            }
-            is FetchResult.Error -> {
-                result.exception.message?.let { toast(it) }
-            }
-            is FetchResult.Success -> {
-                toast(R.string.prompt_unlinked)
-
-                val acnt = sessionManager.loadAccount() ?: return
-
-                // Start refreshing account.
-                binding.inProgress = true
-
-                toast(R.string.refreshing_data)
-                accountViewModel.refresh(acnt)
-            }
-        }
-    }
-
-    private fun onAccountRefreshed(result: FetchResult<Account>) {
-        binding.inProgress = false
-
-        when (result) {
-            is FetchResult.LocalizedError -> {
-                toast(result.msgId)
-            }
-            is FetchResult.Error -> {
-                result.exception.message?.let { toast(it) }
-            }
-            is FetchResult.Success -> {
-                toast(R.string.prompt_updated)
-                sessionManager.saveAccount(result.data)
-
-                // Signal to calling activity.
-                /**
-                 * Notify [WxInfoActivity] the unlink result, which should in return notify [AccountActivity]
-                 */
-                setResult(Activity.RESULT_OK)
-                finish()
-            }
+    fun onSubmit(view: View) {
+        sessionManager.loadAccount()?.let {
+            linkViewModel.unlink(it)
         }
     }
 
