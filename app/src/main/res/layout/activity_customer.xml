@@ -10,13 +10,8 @@
         <variable
             name="inProgress"
             type="Boolean" />
-
         <variable
-            name="enablePicker"
-            type="Boolean" />
-
-        <variable
-            name="enableDefaultBtn"
+            name="isDefaultPayMethod"
             type="Boolean" />
         <variable
             name="showDefaultIcon"
@@ -25,12 +20,16 @@
         <variable
             name="card"
             type="com.ft.ftchinese.ui.account.UIBankCard" />
+
+        <variable
+            name="handler"
+            type="com.ft.ftchinese.ui.customer.CustomerActivity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.account.CustomerActivity">
+        tools:context=".ui.customer.CustomerActivity">
 
         <include
             android:id="@+id/toolbar"
@@ -42,7 +41,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:enabled="@{enablePicker}"
+            android:enabled="@{!inProgress}"
+            android:onClick="@{handler::onClickBankCard}"
             app:cardBackgroundColor="@color/colorWhite"
             app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
@@ -72,7 +72,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Default"
-                    android:visibility="@{showDefaultIcon ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{isDefaultPayMethod ? View.VISIBLE : View.GONE}"
                     app:layout_constraintBaseline_toBaselineOf="@id/tv_card_brand"
                     app:layout_constraintStart_toEndOf="@id/tv_card_brand"
                     app:layout_constraintEnd_toEndOf="@id/card_container" />
@@ -98,7 +98,8 @@
             android:layout_margin="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:enabled="@{enableDefaultBtn}"
+            android:enabled="@{!inProgress &amp;&amp; !isDefaultPayMethod}"
+            android:onClick="@{handler::onSetDefaultPaymentMethod}"
             app:layout_constraintTop_toBottomOf="@id/bank_card_picker"
             android:text="@string/set_default_payment_method"/>
 

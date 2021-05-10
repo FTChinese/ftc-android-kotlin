@@ -8,6 +8,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import java.lang.IllegalStateException
 
+/**
+ * Urge wechat user to link to email so that we could create
+ * Stripe customer.
+ */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class EmailRequiredDialogFragment : DialogFragment() {
 

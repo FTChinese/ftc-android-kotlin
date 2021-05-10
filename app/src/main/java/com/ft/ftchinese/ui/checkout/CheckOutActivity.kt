@@ -28,8 +28,9 @@ import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.viewmodel.CustomerViewModel
-import com.ft.ftchinese.viewmodel.CustomerViewModelFactory
+import com.ft.ftchinese.ui.customer.CustomerViewModel
+import com.ft.ftchinese.ui.customer.CreateCustomerDialogFragment
+import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
 import com.ft.ftchinese.ui.data.FetchResult
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
@@ -148,8 +149,11 @@ class CheckOutActivity : ScopedAppActivity(),
             }
         }
 
+        customerViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
         customerViewModel.customerCreated.observe(this) { result ->
-            binding.inProgress = false
 
             when (result) {
                is FetchResult.Success -> {
@@ -271,10 +275,10 @@ class CheckOutActivity : ScopedAppActivity(),
                     return
                 }
                 if (account.stripeId.isNullOrBlank()) {
-                    StripeCustomerDialogFragment()
+                    CreateCustomerDialogFragment()
                         .onPositiveButtonClicked { dialog, _ ->
                             binding.inProgress = true
-                            customerViewModel.create(account)
+                            customerViewModel.createCustomer(account)
                             dialog.dismiss()
                         }
                         .onNegativeButtonClicked { dialog, _ ->
@@ -520,7 +524,7 @@ class CheckOutActivity : ScopedAppActivity(),
             if (!account.stripeId.isNullOrBlank()) {
                 return
             }
-            customerViewModel.create(account)
+            customerViewModel.createCustomer(account)
             toast("Creating Stripe customer...")
             binding.inProgress = true
             // Next goes to `customerViewModel.customerCreated`

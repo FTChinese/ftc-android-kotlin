@@ -10,15 +10,20 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAccountBinding
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.customer.CustomerActivity
+import com.ft.ftchinese.ui.customer.CustomerViewModel
+import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.viewmodel.WxRefreshState
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.toast
 
 /**
  * Show user's account details.
@@ -34,6 +39,8 @@ class AccountActivity : ScopedAppActivity(),
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: AccountViewModel
     private lateinit var binding: ActivityAccountBinding
+
+    private lateinit var customerViewModel: CustomerViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +58,11 @@ class AccountActivity : ScopedAppActivity(),
         viewModel = ViewModelProvider(this)
             .get(AccountViewModel::class.java)
 
+        customerViewModel = ViewModelProvider(
+            this,
+            CustomerViewModelFactory(FileCache(this)),
+        ).get(CustomerViewModel::class.java)
+
         connectionLiveData.observe(this) {
             viewModel.isNetworkAvailable.value = it
         }
@@ -67,6 +79,21 @@ class AccountActivity : ScopedAppActivity(),
         viewModel.progressLiveData.observe(this, {
             binding.inProgress = it
         })
+
+        customerViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
+        customerViewModel.customerCreated.observe(this) {
+            when (it) {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
+                    sessionManager.saveStripeId(it.data.id)
+                    CustomerActivity.start(this)
+                }
+            }
+        }
 
         viewModel.uiType.observe(this, {
             initUI()

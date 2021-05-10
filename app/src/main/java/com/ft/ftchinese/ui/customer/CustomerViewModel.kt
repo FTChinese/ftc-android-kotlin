@@ -1,17 +1,17 @@
-package com.ft.ftchinese.viewmodel
+package com.ft.ftchinese.ui.customer
 
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.StripeCustomer
-import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.repository.StripeClient
-import com.ft.ftchinese.store.AccountStore
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,9 +21,26 @@ import org.jetbrains.anko.info
 
 class CustomerViewModel(
     private val fileCache: FileCache
-) : ViewModel(), AnkoLogger {
+) : BaseViewModel(), AnkoLogger {
 
-    val isNetworkAvailable = MutableLiveData<Boolean>()
+    // Use when letting user to choose default payment method.
+    val customerSessionProgress = MutableLiveData(false)
+    val paymentSessionProgress = MutableLiveData(false)
+    val bankCardProgress = MediatorLiveData<Boolean>().apply {
+        addSource(progressLiveData) {
+            value = isSetPaymentInProgress()
+        }
+        addSource(customerSessionProgress) {
+            value = isSetPaymentInProgress()
+        }
+        addSource(paymentSessionProgress) {
+            value = isSetPaymentInProgress()
+        }
+    }
+
+    private fun isSetPaymentInProgress(): Boolean {
+        return progressLiveData.value == true || paymentSessionProgress.value == true || customerSessionProgress.value == true
+    }
 
     val customerCreated: MutableLiveData<FetchResult<StripeCustomer>> by lazy {
         MutableLiveData<FetchResult<StripeCustomer>>()
@@ -38,49 +55,49 @@ class CustomerViewModel(
     }
 
     // Create stripe customer.
-    fun create(account: Account) {
+    fun createCustomer(account: Account) {
         if (isNetworkAvailable.value == false) {
             customerCreated.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
+        progressLiveData.value = true
         viewModelScope.launch {
             try {
                 val result = withContext(Dispatchers.IO) {
                     StripeClient.createCustomer(account)
                 }
 
-                if (result == null) {
+                progressLiveData.value = false
 
+                if (result == null) {
                     customerCreated.value = FetchResult.LocalizedError(R.string.stripe_customer_not_created)
                     return@launch
                 }
 
-                result.value.let {
-                    customerCreated.value = FetchResult.Success(it)
-                    AccountStore.customer = it
-                }
-
+                customerCreated.value = FetchResult.Success(result.value)
+                // Why do I cache this?
                 withContext(Dispatchers.IO) {
                     fileCache.saveText(CacheFileNames.stripeCustomer, result.raw)
                 }
 
             } catch (e: ClientError) {
 
+                progressLiveData.value = false
                 customerCreated.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.stripe_customer_not_found)
                 } else {
                     FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
-
+                progressLiveData.value = false
                 customerCreated.value = FetchResult.fromException(e)
             }
         }
     }
 
     // Load stripe customer.
-    fun load(account: Account) {
+    fun loadCustomer(account: Account) {
         viewModelScope.launch {
             val customer = withContext(Dispatchers.IO) {
                 val data = fileCache.loadText(CacheFileNames.stripeCustomer)
@@ -98,7 +115,6 @@ class CustomerViewModel(
 
             if (customer != null) {
                 customerRetrieved.value = FetchResult.Success(customer)
-                AccountStore.customer = customer
                 return@launch
             }
 
@@ -118,7 +134,6 @@ class CustomerViewModel(
                 }
 
                 customerRetrieved.value = FetchResult.Success(result.value)
-                AccountStore.customer = result.value
 
                 withContext(Dispatchers.IO) {
                     fileCache.saveText(CacheFileNames.stripeCustomer, result.raw)
@@ -129,7 +144,6 @@ class CustomerViewModel(
         }
     }
 
-
     // Set default payment method.
     fun setDefaultPaymentMethod(account: Account, pmId: String) {
         if (isNetworkAvailable.value == false) {
@@ -137,6 +151,7 @@ class CustomerViewModel(
             return
         }
 
+        progressLiveData.value = true
         viewModelScope.launch {
             try {
                 val result = withContext(Dispatchers.IO) {
@@ -145,17 +160,19 @@ class CustomerViewModel(
 
                 if (result == null) {
                     paymentMethodSet.value = FetchResult.LocalizedError(R.string.stripe_customer_not_found)
+                    progressLiveData.value = false
                     return@launch
                 }
 
                 paymentMethodSet.value = FetchResult.Success(result.value)
-                AccountStore.customer = result.value
+                progressLiveData.value = false
 
                 withContext(Dispatchers.IO) {
                     fileCache.saveText(CacheFileNames.stripeCustomer, result.raw)
                 }
             } catch (e: ClientError) {
 
+                progressLiveData.value = false
                 paymentMethodSet.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.stripe_customer_not_found)
                 } else {
@@ -163,6 +180,7 @@ class CustomerViewModel(
                 }
             } catch (e: Exception) {
                 info(e)
+                progressLiveData.value = false
                 paymentMethodSet.value = FetchResult.fromException(e)
             }
         }

@@ -12,12 +12,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentFtcAccountBinding
 import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.store.AccountCache
+import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
+import com.ft.ftchinese.ui.customer.CreateCustomerDialogFragment
+import com.ft.ftchinese.ui.customer.CustomerActivity
+import com.ft.ftchinese.ui.customer.CustomerViewModel
 import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.lists.TwoLineItemViewHolder
 import com.ft.ftchinese.ui.wxlink.LinkWxDialogFragment
 import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
@@ -27,6 +33,8 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var binding: FragmentFtcAccountBinding
+
+    private lateinit var customerViewModel: CustomerViewModel
 
     private var listAdapter: ListAdapter = ListAdapter()
 
@@ -55,6 +63,15 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
         accountViewModel = activity?.run {
             ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+
+        customerViewModel = activity?.run {
+            ViewModelProvider(
+                this,
+                CustomerViewModelFactory(
+                    FileCache(requireContext()),
+                ),
+            ).get(CustomerViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
         val layout = LinearLayoutManager(context)
@@ -131,21 +148,8 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
 
             holder.itemView.setOnClickListener {
                 when (item.id) {
-                    AccountRowType.STRIPE -> CustomerActivity.start(context)
-                    // If email-wechat linked, show wechat details;
-                    // otherwise show a dialog to ask user to perform wechat OAuth.
-                    AccountRowType.WECHAT -> {
-                        sessionManager.loadAccount()?.let {
-                            if (it.isLinked) {
-                                WxInfoActivity.start(requireContext())
-                                return@setOnClickListener
-                            }
-
-                            if (it.isFtcOnly) {
-                                LinkWxDialogFragment().show(childFragmentManager, "EmailLinkWechat")
-                            }
-                        }
-                    }
+                    AccountRowType.STRIPE -> onClickStripe()
+                    AccountRowType.WECHAT -> onClickWechat()
                     else -> UpdateActivity.start(requireContext(), item.id)
                 }
             }
@@ -156,6 +160,43 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
         fun setData(items: List<AccountRow>) {
             this.rows = items
             notifyDataSetChanged()
+        }
+
+        // If user is already a Stripe customer, show the
+        // CustomerActivity; otherwise pop up a dialog urging
+        // user to become a Stripe customer.
+        private fun onClickStripe() {
+            if (AccountCache.get()?.stripeId.isNullOrBlank()) {
+                CreateCustomerDialogFragment()
+                    .onPositiveButtonClicked { dialog, _ ->
+                        AccountCache.get()?.let {
+                            customerViewModel.createCustomer(it)
+                            toast(R.string.stripe_init)
+                            dialog.dismiss()
+                        }
+                    }
+                    .onNegativeButtonClicked { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show(childFragmentManager, "CreateStripeCustomer")
+                return
+            }
+            CustomerActivity.start(context)
+        }
+
+        // If email-wechat linked, show wechat details;
+        // otherwise show a dialog to ask user to perform wechat OAuth.
+        private fun onClickWechat() {
+            AccountCache.get()?.let {
+                if (it.isLinked) {
+                    WxInfoActivity.start(requireContext())
+                    return
+                }
+
+                if (it.isFtcOnly) {
+                    LinkWxDialogFragment().show(childFragmentManager, "EmailLinkWechat")
+                }
+            }
         }
     }
 

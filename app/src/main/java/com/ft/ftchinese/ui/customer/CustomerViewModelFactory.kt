@@ -1,4 +1,4 @@
-package com.ft.ftchinese.viewmodel
+package com.ft.ftchinese.ui.customer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
