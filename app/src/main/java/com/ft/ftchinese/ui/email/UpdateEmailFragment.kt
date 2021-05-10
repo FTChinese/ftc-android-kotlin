@@ -9,6 +9,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentUpdateEmailBinding
+import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
@@ -63,8 +64,7 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
 
         setupViewModel()
 
-        binding.currentEmail = sessionManager
-            .loadAccount()?.email
+        binding.currentEmail = AccountCache.get()?.email
         binding.emailInput.requestFocus()
     }
 
@@ -81,6 +81,9 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
                         ?.let { account ->
                             sessionManager.saveAccount(account)
                         }
+
+                    // Refresh UI.
+                    binding.currentEmail = it.data.email
                 }
             }
         }
