@@ -7,6 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
+import com.ft.ftchinese.model.request.MobileLinkParams
 import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.FetchResult
@@ -94,6 +95,7 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
                 accountResult.value = FetchResult.Success(account)
             } catch (e: ClientError) {
                 progressLiveData.value = false
+                // TODO: handle status code as server changed
                 accountResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.error_invalid_password)
                 } else {
@@ -108,7 +110,39 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
     }
 
     // A mobile number is used for the first time for login.
-    fun mobileLinkEmail() {
-        // TODO: implementation
+    fun mobileLinkEmail(deviceToken: String) {
+        if (isNetworkAvailable.value == false) {
+            accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
+        progressLiveData.value = true
+
+        val params = MobileLinkParams(
+            email = emailLiveData.value ?: "",
+            password = passwordLiveData.value ?: "",
+            mobile = mobileLiveData.value ?: "",
+            deviceToken = deviceToken
+        )
+
+        viewModelScope.launch {
+            try {
+                val account = withContext(Dispatchers.IO) {
+                    AuthClient.mobileLinkEmail(params)
+                }
+
+                progressLiveData.value = false
+
+                if (account == null) {
+
+                    accountResult.value = FetchResult.LocalizedError(R.string.loading_failed)
+                    return@launch
+                }
+
+                accountResult.value = FetchResult.Success(account)
+            } catch (e: Exception) {
+
+            }
+        }
     }
 }
