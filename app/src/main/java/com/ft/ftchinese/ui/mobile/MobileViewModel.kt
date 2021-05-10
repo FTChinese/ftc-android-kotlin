@@ -7,11 +7,11 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.BaseAccount
-import com.ft.ftchinese.model.reader.UserFound
 import com.ft.ftchinese.model.request.MobileAuthParams
 import com.ft.ftchinese.model.request.MobileFormParams
 import com.ft.ftchinese.model.request.SMSCodeParams
 import com.ft.ftchinese.repository.AccountRepo
+import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.FetchResult
@@ -144,12 +144,7 @@ class MobileViewModel : BaseViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val ok = withContext(Dispatchers.IO) {
-                    for (i in 0 until 10) {
-                        delay(1000)
-                    }
-                    true
-                    // TODO: remove comment in production
-//                    AuthClient.requestSMSCode(smsCodeParams)
+                    AuthClient.requestSMSCode(smsCodeParams)
                 }
 
                 if (ok) {
@@ -188,14 +183,7 @@ class MobileViewModel : BaseViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val found = withContext(Dispatchers.IO) {
-//                    for (i in 0 until 10) {
-//                        delay(1000)
-//                    }
-//                    AuthClient.verifySMSCode(params)
-                    // TODO: remove it.
-                    UserFound(
-                        id = null,
-                    )
+                    AuthClient.verifySMSCode(params)
                 }
 
                 if (found == null) {
@@ -258,9 +246,6 @@ class MobileViewModel : BaseViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val ok = withContext(Dispatchers.IO) {
-//                    for (i in 0 until 10) {
-//                        delay(1000)
-//                    }
                     AccountRepo.requestSMSCode(account, smsCodeParams)
                 }
 
