@@ -39,9 +39,11 @@ class SignUpFragment(
 
     private lateinit var sessionManager: SessionManager
     private lateinit var tokenManager: TokenManager
+
     private lateinit var emailViewModel: EmailViewModel
     private lateinit var signUpViewModel: SignUpViewModel
     private lateinit var mobileViewModel: MobileViewModel
+
     private lateinit var binding: FragmentSignUpBinding
 
     override fun onAttach(context: Context) {
@@ -115,17 +117,11 @@ class SignUpFragment(
             binding.inProgress = it
         }
 
-        signUpViewModel.isFormEnabled.observe(this) {
-            binding.isFormEnabled = it
-        }
-
         signUpViewModel.accountResult.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
-                is FetchResult.Success -> {
-                    onAccountLoaded(it.data)
-                }
+                is FetchResult.Success -> onAccountLoaded(it.data)
             }
         }
     }
@@ -156,20 +152,23 @@ class SignUpFragment(
             dismiss()
         }
 
-        binding.passwordInput.requestFocus()
-
         when (kind) {
             AuthKind.EmailLogin -> {
                 binding.title = getString(R.string.title_sign_up)
                 binding.guide = getString(R.string.instruct_sign_up)
+                binding.emailInput.isEnabled = false
+                binding.passwordInput.requestFocus()
             }
             AuthKind.MobileLink -> {
                 binding.title = "绑定新邮箱"
                 binding.guide = "您的手机号将与新创建的邮箱账号绑定"
+                binding.emailInput.requestFocus()
             }
             AuthKind.WechatLink -> {
                 binding.title = "新建账号"
                 binding.guide = "当前微信将与新创建的邮箱账号绑定"
+                binding.emailInput.isEnabled = false
+                binding.passwordInput.requestFocus()
             }
         }
     }
