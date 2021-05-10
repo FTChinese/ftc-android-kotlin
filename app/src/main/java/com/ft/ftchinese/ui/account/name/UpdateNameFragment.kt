@@ -9,6 +9,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentUpdateUsernameBinding
+import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
@@ -54,10 +55,12 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
             viewModel.isNetworkAvailable.value = it
         }
 
-        setupViewModel()
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
+        binding.handler = this
 
-        binding.userName = sessionManager.loadAccount()?.userName
-        binding.userNameInput.requestFocus()
+        setupViewModel()
+        initUI()
     }
 
     private fun setupViewModel() {
@@ -73,9 +76,16 @@ class UpdateNameFragment : ScopedFragment(), AnkoLogger {
                         ?.let { account ->
                             sessionManager.saveAccount(account)
                         }
+
+                    initUI()
                 }
             }
         }
+    }
+
+    private fun initUI() {
+        binding.userName = AccountCache.get()?.userName
+        binding.userNameInput.requestFocus()
     }
 
     fun onSubmit(view: View) {
