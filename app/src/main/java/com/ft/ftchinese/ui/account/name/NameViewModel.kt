@@ -68,7 +68,7 @@ class NameViewModel : BaseViewModel() {
                     nameUpdated.value = FetchResult.LocalizedError(R.string.error_unknown)
                 } else {
                     nameUpdated.value = FetchResult.Success(baseAccount)
-                    isFormEnabled.value = false
+                    clear()
                 }
             } catch (e: ClientError) {
                 val msgId = if (e.statusCode == 422) {
@@ -91,5 +91,10 @@ class NameViewModel : BaseViewModel() {
                 progressLiveData.value = false
             }
         }
+    }
+
+    // Clear form data after success.
+    fun clear() {
+        nameLiveData.value = ""
     }
 }
