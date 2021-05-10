@@ -73,10 +73,10 @@
 
         <Button
             android:id="@+id/request_code"
-            style="@style/AppButton.OutlinedButton"
+            style="@style/AppButton.InlineText"
+            android:textSize="14sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/space_8"
             android:enabled="@{viewModel.isCodeRequestEnabled}"
             android:onClick="@{handler::onClickRequestCode}"
             android:text="@string/mobile_request_code"

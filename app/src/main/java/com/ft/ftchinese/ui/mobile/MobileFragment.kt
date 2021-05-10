@@ -90,6 +90,7 @@ class MobileFragment : ScopedFragment(), AnkoLogger {
             USAGE_UPDATE -> getString(R.string.btn_save)
             else -> ""
         }
+        binding.mobileInput.requestFocus()
     }
 
     private fun setupViewModel() {
