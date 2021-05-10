@@ -17,14 +17,14 @@ object LinkRepo {
      * Link two existing accounts.
      */
     fun link(ftcId: String, unionId: String): Boolean {
-        val (resp, _) = Fetch().put(NextApi.WX_LINK)
-                .setUnionId(unionId)
-                .noCache()
-                .sendJson(Klaxon().toJsonString(mapOf(
-                    "userId" to ftcId, // Deprecated.
-                    "ftcId" to ftcId
-                )))
-                .endJsonText()
+        val (resp, _) = Fetch().put(Endpoint.wxLink)
+            .setUnionId(unionId)
+            .noCache()
+            .sendJson(Klaxon().toJsonString(mapOf(
+                "userId" to ftcId, // Deprecated.
+                "ftcId" to ftcId
+            )))
+            .endJsonText()
 
         return resp.code == 204
     }
@@ -33,12 +33,12 @@ object LinkRepo {
      * Wechat user creates a new email account.
      */
     fun signUp(c: Credentials, unionId: String): Account? {
-        val (_, body) = Fetch().post(NextApi.WX_SIGNUP)
-                    .setUnionId(unionId)
-                    .setClient()
-                    .noCache()
-                    .sendJson(json.toJsonString(c))
-                    .endJsonText()
+        val (_, body) = Fetch().post(Endpoint.wxSignUp)
+                .setUnionId(unionId)
+                .setClient()
+                .noCache()
+                .sendJson(json.toJsonString(c))
+                .endJsonText()
 
         return if (body == null) {
             null
@@ -53,7 +53,7 @@ object LinkRepo {
         }
 
         val (resp, _) = Fetch()
-            .delete(NextApi.WX_LINK)
+            .delete(Endpoint.wxUnlink)
             .setUnionId(account.unionId)
             .sendJson(json.toJsonString(UnlinkReqBody(
                 ftcId = account.id,

@@ -10,7 +10,7 @@ import com.ft.ftchinese.model.request.SMSCodeParams
 
 object AccountRepo {
     fun loadFtcAccount(ftcId: String): Account? {
-        val(_, body) = Fetch().get(NextApi.ACCOUNT)
+        val(_, body) = Fetch().get(Endpoint.ftcAccount)
                 .noCache()
                 .setUserId(ftcId)
                 .endJsonText()
@@ -32,7 +32,7 @@ object AccountRepo {
      */
     fun loadWxAccount(unionId: String): Account? {
         val (_, body) = Fetch()
-                .get(NextApi.WX_ACCOUNT)
+                .get(Endpoint.wxAccount)
                 .setUnionId(unionId)
                 .noCache()
                 .endJsonText()
@@ -87,7 +87,7 @@ object AccountRepo {
     }
 
     fun updatePassword(ftcId: String, params: PasswordUpdateParams): Boolean {
-        val(resp, _) = Fetch().patch(NextApi.UPDATE_PASSWORD)
+        val(resp, _) = Fetch().patch(Endpoint.passwordUpdate)
                 .noCache()
                 .setUserId(ftcId)
                 .sendJson(params.toJsonString())
@@ -98,7 +98,7 @@ object AccountRepo {
 
     fun requestVerification(ftcId: String): Boolean {
         val (resp, _) = Fetch()
-                .post(NextApi.REQUEST_VERIFICATION)
+                .post(Endpoint.emailVrfLetter)
                 .setTimeout(30)
                 .noCache()
                 .setClient()
@@ -141,7 +141,7 @@ object AccountRepo {
      * Asks the API to refresh current wechat user's access token and information.
      */
     fun refreshWxInfo(wxSession: WxSession): Boolean {
-        val (resp, _) = Fetch().put(SubsApi.WX_REFRESH)
+        val (resp, _) = Fetch().put(Endpoint.wxRefresh)
                 .noCache()
                 .setAppId()
                 .setTimeout(30)
@@ -162,7 +162,7 @@ object AccountRepo {
 
     fun loadAddress(ftcId: String): Address? {
         val (_, body) = Fetch()
-            .get(NextApi.ADDRESS)
+            .get(Endpoint.address)
             .setUserId(ftcId)
             .noCache()
             .endJsonText()
@@ -176,7 +176,7 @@ object AccountRepo {
 
     fun updateAddress(ftcId: String, address: Address): Boolean {
         val (resp, _) = Fetch()
-            .patch(NextApi.ADDRESS)
+            .patch(Endpoint.address)
             .setUserId(ftcId)
             .noCache()
             .sendJson(json.toJsonString(address))

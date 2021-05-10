@@ -3,29 +3,17 @@ package com.ft.ftchinese.repository
 import com.ft.ftchinese.BuildConfig
 
 object NextApi {
-    private val BASE = Endpoint.readerBase
-    val EMAIL_EXISTS = "$BASE/users/exists"
-    val LOGIN = "$BASE/users/login"
-    val SIGN_UP = "$BASE/users/signup"
-    val PASSWORD_RESET = "$BASE/users/password-reset"
-    val PASSWORD_RESET_LETTER = "$PASSWORD_RESET/letter"
-    val VERIFY_PW_RESET = "$PASSWORD_RESET/codes"
-    // Refresh account data.
-    val ACCOUNT = "$BASE/user/account/v2"
-    val PROFILE = "$BASE/user/profile"
-    val ADDRESS = "$BASE/user/address"
-    val UPDATE_EMAIL = "$BASE/user/email"
-    // Resend email verification letter
-    val REQUEST_VERIFICATION = "$BASE/user/email/request-verification"
-    val UPDATE_USER_NAME = "$BASE/user/name"
-    val UPDATE_PASSWORD = "$BASE/user/password"
-    val ORDERS = "$BASE/user/orders"
-    val WX_ACCOUNT = "$BASE/user/wx/account/v2"
-    val WX_SIGNUP = "$BASE/user/wx/signup"
-    val WX_LINK = "$BASE/user/wx/link"
+    private val readerBase = if (BuildConfig.DEBUG) {
+        "$devIP:8000"
+    } else {
+        BuildConfig.API_READER_LIVE
+    }
 
-    val latestRelease = "$BASE/apps/android/latest"
-    val releaseOf = "$BASE/apps/android/releases"
+    @Deprecated("Deprecated since 4.2.2")
+    val ORDERS = "$readerBase/user/orders"
+
+    val latestRelease = "$readerBase/apps/android/latest"
+    val releaseOf = "$readerBase/apps/android/releases"
 }
 
 object ContentApi {
@@ -35,14 +23,10 @@ object ContentApi {
     val INTERACTIVE = "$BASE/interactive/contents"
 }
 
-private const val devIP = "http://192.168.10.111"
+private const val devIP = "http://192.168.10.109"
 
 object Endpoint {
-    val readerBase = if (BuildConfig.DEBUG) {
-        "$devIP:8000"
-    } else {
-        BuildConfig.API_READER_LIVE
-    }
+
 
     private val authEmailBase = "${subsBase()}/auth/email"
     val emailExists = "${authEmailBase}/exists"
@@ -54,11 +38,24 @@ object Endpoint {
     val mobileInitialLink = "${authMobileBase}/link"
     val mobileSignUp = "${authMobileBase}/signup"
 
-    private val accountBase = "${subsBase()}/account"
-    val email = "${accountBase}/email"
-    val emailVrfLetter = "${accountBase}/email/request-verification"
+    val passwordReset = "${subsBase()}/auth/password-reset"
+    val passwordResetLetter = "${passwordReset}/letter"
+    val passwordResetCodes = "${passwordReset}/codes"
 
-    val userName = "${accountBase}/name"
+    val wxLogin = "${subsBase()}/wx/login"
+    val wxRefresh = "${subsBase()}/wx/refresh"
+
+    val ftcAccount = "${subsBase()}/account"
+    val email = "${ftcAccount}/email"
+    val emailVrfLetter = "${ftcAccount}/email/request-verification"
+
+    val userName = "${ftcAccount}/name"
+    val passwordUpdate = "${ftcAccount}/password"
+    val address = "${ftcAccount}/address"
+    val wxAccount = "${ftcAccount}/wx"
+    val wxSignUp = "${wxAccount}/signup"
+    val wxLink = "${wxAccount}/link"
+    val wxUnlink = "${wxAccount}/unlink"
 
     val contentBase = if (BuildConfig.DEBUG) {
         "$devIP:8100"
@@ -85,14 +82,6 @@ object Endpoint {
             BuildConfig.API_SUBS_LIVE
         }
     }
-}
-
-object SubsApi {
-    private val BASE = Endpoint.subsBase(false)
-
-    val WX_LOGIN = "$BASE/wx/oauth/login"
-    val WX_REFRESH = "$BASE/wx/oauth/refresh"
-
 }
 
 const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"

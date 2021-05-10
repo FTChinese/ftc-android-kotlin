@@ -110,7 +110,7 @@ object AuthClient : AnkoLogger {
 
     fun passwordResetLetter(params: PasswordResetLetterParams): Boolean {
         val (response, _)= Fetch()
-            .post(NextApi.PASSWORD_RESET_LETTER)
+            .post(Endpoint.passwordResetLetter)
             .setTimeout(30)
             .noCache()
             .sendJson(json.toJsonString(params))
@@ -121,7 +121,7 @@ object AuthClient : AnkoLogger {
 
     fun verifyPwResetCode(v: PasswordResetVerifier): PwResetBearer? {
         val (_, body) = Fetch()
-            .get("${NextApi.VERIFY_PW_RESET}?email=${v.email}&code=${v.code}")
+            .get("${Endpoint.passwordResetCodes}?email=${v.email}&code=${v.code}")
             .noCache()
             .endJsonText()
 
@@ -134,7 +134,7 @@ object AuthClient : AnkoLogger {
 
     fun resetPassword(params: PasswordResetParams): Boolean {
         val (resp, _) = Fetch()
-            .post(NextApi.PASSWORD_RESET)
+            .post(Endpoint.passwordReset)
             .setClient()
             .noCache()
             .sendJson(json.toJsonString(params))
@@ -151,15 +151,15 @@ object AuthClient : AnkoLogger {
      * info or refresh account data.
      */
     fun wxLogin(code: String): WxSession? {
-        val (_, body) = Fetch().post(SubsApi.WX_LOGIN)
-                .setClient()
-                .setAppId()
-                .noCache()
-                .setTimeout(30)
-                .sendJson(json.toJsonString(mapOf(
-                        "code" to code
-                )))
-                .endJsonText()
+        val (_, body) = Fetch().post(Endpoint.wxLogin)
+            .setClient()
+            .setAppId()
+            .noCache()
+            .setTimeout(30)
+            .sendJson(json.toJsonString(mapOf(
+                    "code" to code
+            )))
+            .endJsonText()
 
         return if (body == null) {
             null
