@@ -8,6 +8,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
+import com.ft.ftchinese.model.request.MobileLinkParams
 import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.ui.data.FetchResult
@@ -76,7 +77,7 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
      * Handles both a new user signup, or wechat-logged-in
      * user trying to link to a new account.
      */
-    fun signUp(deviceToken: String) {
+    fun emailSignUp(deviceToken: String) {
 
         if (isNetworkAvailable.value == false) {
             accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
@@ -108,23 +109,7 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
                 accountResult.value = FetchResult.Success(account)
             } catch (e: ClientError) {
                 progressLiveData.value = false
-                val msgId = if (e.statusCode == 422) {
-                    when (e.error?.key) {
-                        "email_already_exists" -> R.string.api_email_taken
-                        "email_invalid" -> R.string.error_invalid_email
-                        "password_invalid" -> R.string.error_invalid_password
-                        else -> null
-                    }
-                } else {
-                    null
-                }
-
-                accountResult.value = if (msgId != null) {
-                    FetchResult.LocalizedError(msgId)
-                } else {
-                    FetchResult.fromServerError(e)
-                }
-
+                handleSignUpError(e)
             } catch (e: Exception) {
                 progressLiveData.value = false
                 accountResult.value = FetchResult.fromException(e)
@@ -132,8 +117,61 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun mobileSignUp() {
-        // TODO: implementation
+    fun mobileSignUp(deviceToken: String) {
+        if (isNetworkAvailable.value == false) {
+            accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
+            return
+        }
+
+        progressLiveData.value = true
+
+        val params = MobileLinkParams(
+            email = emailLiveData.value ?: "",
+            password = passwordLiveData.value ?: "",
+            mobile = mobileLiveData.value ?: "",
+            deviceToken = deviceToken,
+        )
+
+        viewModelScope.launch {
+            try {
+                val account = withContext(Dispatchers.IO) {
+                    AuthClient.mobileSignUp(params)
+                }
+
+                progressLiveData.value = false
+
+                if (account == null) {
+                    accountResult.value = FetchResult.LocalizedError(R.string.loading_failed)
+                    return@launch
+                }
+
+                accountResult.value = FetchResult.Success(account)
+            } catch (e: ClientError) {
+                progressLiveData.value = false
+                handleSignUpError(e)
+            } catch (e: Exception) {
+                progressLiveData.value = false
+                accountResult.value = FetchResult.fromException(e)
+            }
+        }
+    }
+
+    private fun handleSignUpError(e: ClientError) {
+        accountResult.value = when (e.statusCode) {
+            422 -> {
+                if (e.error == null) {
+                    FetchResult.fromServerError(e)
+                } else {
+                    when {
+                        e.error.isFieldAlreadyExists("email") -> FetchResult.LocalizedError(R.string.signup_email_taken)
+                        e.error.isFieldInvalid("email") -> FetchResult.LocalizedError(R.string.signup_invalid_email)
+                        e.error.isFieldInvalid("password") -> FetchResult.LocalizedError(R.string.signup_invalid_password)
+                        else -> FetchResult.fromServerError(e)
+                    }
+                }
+            }
+            else -> FetchResult.fromServerError(e)
+        }
     }
 
     fun wxSignUp(deviceToken: String, unionId: String) {
@@ -156,8 +194,8 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
                     LinkRepo.signUp(c, unionId)
                 }
 
+                progressLiveData.value = false
                 if (account == null) {
-
                     accountResult.value = FetchResult.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
@@ -165,26 +203,8 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
                 accountResult.value = FetchResult.Success(account)
             } catch (e: ClientError) {
                 info(e)
-                val msgId = if (e.statusCode == 422) {
-                    when (e.error?.key) {
-                        "email_already_exists" -> R.string.api_email_taken
-                        "email_invalid" -> R.string.error_invalid_email
-                        "password_invalid" -> R.string.error_invalid_password
-                        // handles wechat user sign up.
-                        "account_link_already_taken" -> R.string.api_wechat_already_linked
-                        "membership_link_already_taken" -> R.string.api_wechat_member_already_linked
-                        else -> null
-                    }
-                } else {
-                    null
-                }
-
-                accountResult.value = if (msgId != null) {
-                    FetchResult.LocalizedError(msgId)
-                } else {
-                    FetchResult.fromServerError(e)
-                }
-
+                progressLiveData.value = false
+                handleSignUpError(e)
             } catch (e: Exception) {
                 info(e)
                 accountResult.value = FetchResult.fromException(e)
