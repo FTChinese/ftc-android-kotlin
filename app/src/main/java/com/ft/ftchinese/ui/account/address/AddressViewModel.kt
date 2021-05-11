@@ -8,6 +8,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.repository.AccountRepo
+import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
@@ -18,11 +19,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-class AddressViewModel : ViewModel(), AnkoLogger {
-    val progressLiveData = MutableLiveData<Boolean>()
-    val isNetworkAvailable: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>()
-    }
+class AddressViewModel : BaseViewModel(), AnkoLogger {
 
     private var current = Address()
     private val updated: Address
@@ -99,7 +96,6 @@ class AddressViewModel : ViewModel(), AnkoLogger {
             return false
         }
 
-        info("Current address $current, updated address $updated")
         return formValidator.isValid()
     }
 
@@ -139,7 +135,6 @@ class AddressViewModel : ViewModel(), AnkoLogger {
                 addressRetrieved.value = FetchResult.Success(address)
             } catch (e: Exception) {
                 addressRetrieved.value = FetchResult.fromException(e)
-
                 progressLiveData.value = false
             }
         }
