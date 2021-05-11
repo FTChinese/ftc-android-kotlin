@@ -88,7 +88,7 @@ class PasswordResetFragment(
     }
 
     private fun alertErrMsg(id: Int) {
-        AlertDialog.Builder(this)
+        AlertDialog.Builder(requireContext())
             .setMessage(id)
             .setPositiveButton(R.string.action_ok) { dialog, _ ->
                 dialog.dismiss()
