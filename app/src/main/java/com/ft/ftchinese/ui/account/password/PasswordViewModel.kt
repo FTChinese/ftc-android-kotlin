@@ -94,7 +94,7 @@ class PasswordViewModel : BaseViewModel() {
                     403 -> R.string.error_incorrect_old_password
                     404 -> R.string.api_account_not_found
                     422 -> when (e.error?.key) {
-                        "password_invalid" -> R.string.error_invalid_password
+                        "password_invalid" -> R.string.signup_invalid_password
                         else -> null
                     }
                     else -> null
