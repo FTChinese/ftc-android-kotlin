@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.email
 
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -71,7 +72,7 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
     private fun setupViewModel() {
         emailViewModel.emailUpdated.observe(viewLifecycleOwner) {
             when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.LocalizedError -> alertErrorMsg(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
                     toast(R.string.prompt_updated)
@@ -87,6 +88,16 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
                 }
             }
         }
+    }
+
+    private fun alertErrorMsg(id: Int) {
+        AlertDialog.Builder(requireContext())
+            .setMessage(id)
+            .setPositiveButton(R.string.action_ok) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
     }
 
     fun onSubmit(view: View) {

@@ -35,6 +35,10 @@ data class Unprocessable(
     val isCodeInvalid: Boolean
         get() = code == codeInvalid
 
+    fun isResourceMissing(f: String): Boolean {
+        return field == f && code == codeMissing
+    }
+
     fun isFieldMissing(f: String): Boolean {
         return field == f && code == codeMissingField
     }

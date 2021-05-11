@@ -118,25 +118,25 @@ class EmailViewModel : BaseViewModel(), AnkoLogger{
                     clear()
                 }
             } catch (e: ClientError) {
-                val msgId = if (e.statusCode == 422) {
-                    when (e.error?.key) {
-                        "email_already_exists" -> R.string.api_email_taken
-                        "email_invalid" -> R.string.error_invalid_email
-                        else -> null
-                    }
-                } else {
-                    null
-                }
+                progressLiveData.value = false
 
-                emailUpdated.value = if (msgId != null) {
-                    FetchResult.LocalizedError(msgId)
-                } else {
-                    FetchResult.fromServerError(e)
+                emailUpdated.value = when (e.statusCode) {
+                    422 -> {
+                        if (e.error == null) {
+                            FetchResult.fromServerError(e)
+                        } else {
+                            when {
+                                e.error.isFieldAlreadyExists("email") -> FetchResult.LocalizedError(R.string.signup_email_taken)
+                                e.error.isFieldInvalid("email") -> FetchResult.LocalizedError(R.string.signup_invalid_email)
+                                else -> FetchResult.fromServerError(e)
+                            }
+                        }
+                    }
+                    else -> FetchResult.fromServerError(e)
                 }
-                progressLiveData.value = false
             } catch (e: Exception) {
-                emailUpdated.value = FetchResult.fromException(e)
                 progressLiveData.value = false
+                emailUpdated.value = FetchResult.fromException(e)
             }
         }
     }
@@ -164,10 +164,9 @@ class EmailViewModel : BaseViewModel(), AnkoLogger{
             } catch (e: ClientError) {
                 val msgId = when (e.statusCode) {
                     404 -> R.string.api_account_not_found
-                    422 -> when (e.error?.key) {
-                        "email_server_missing" -> R.string.api_email_server_down
-                        else -> null
-                    }
+                    422 -> if (e.error?.isResourceMissing("email_server") == true) {
+                        R.string.api_email_server_down
+                    } else null
                     else -> null
                 }
 
