@@ -147,6 +147,13 @@
                     android:textAllCaps="false"/>
 
                 <Button
+                    android:id="@+id/btn_message_dialog"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Show Message Dialog"
+                    android:textAllCaps="false"/>
+
+                <Button
                     android:id="@+id/btn_iap_auto_renew_off"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
@@ -39,6 +40,7 @@ import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
 import com.ft.ftchinese.ui.wxlink.UnlinkActivity
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.LyricsAdapter
+import com.ft.ftchinese.ui.base.MessageDialogFragment
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.login.SignInFragment
@@ -559,6 +561,19 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             )
 
             LatestInvoiceActivity.start(this)
+        }
+
+        binding.btnMessageDialog.onClick {
+//            MessageDialogFragment("This is a message dialog that can do nothing")
+//                .show(supportFragmentManager, "TestMessageDialog")
+
+            AlertDialog.Builder(this@TestActivity)
+                .setMessage(R.string.mobile_link_taken)
+                .setPositiveButton(R.string.action_done) { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
         }
 
         binding.bottomDialog.setOnClickListener {
