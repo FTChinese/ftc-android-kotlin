@@ -96,7 +96,7 @@
     <string name="btn_verify">驗證</string>
     <string name="reset_password_guide">重設%1$s的密码</string>
     <string name="btn_reset_password">重設密碼</string>
-    <string name="prompt_letter_sent">信件已發送</string>
+    <string name="email_vrf_letter_sent">信件已發送</string>
     <string name="btn_save">保存</string>
     <string name="btn_next">下一步</string>
     <string name="btn_verify_password">驗證密碼</string>
@@ -341,13 +341,13 @@
     <string name="prompt_no_keyword">後输入关键字後搜尋</string>
 
     <!-- Error message -->
-    <string name="error_mismatched_confirm_password">兩次輸入的新密碼不一致</string>
+    <string name="password_repeat_mismatch">兩次輸入的新密碼不一致</string>
     <string name="login_incorrect_password">密碼錯誤</string>
-    <string name="error_incorrect_old_password">當前密碼錯誤，不能設置新密碼</string>
+    <string name="password_current_incorrect">當前密碼錯誤，不能設置新密碼</string>
     <string name="error_field_required">請填寫此項</string>
     <string name="signup_email_taken">電子信箱已經註冊</string>
     <string name="login_email_not_found">電子信箱尚未註冊</string>
-    <string name="api_account_not_found">沒有找到您的帳號</string>
+    <string name="account_not_found">沒有找到您的帳號</string>
     <string name="api_bad_request">無效的請求</string>
 
     <!-- API error message -->
