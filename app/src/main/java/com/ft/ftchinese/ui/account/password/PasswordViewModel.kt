@@ -25,7 +25,7 @@ class PasswordViewModel : BaseViewModel() {
 
     val passwordLiveData = MutableLiveData("")
     val passwordValidator = LiveDataValidator(passwordLiveData).apply {
-        addRule("密码不能为空", Validator::notEmpty)
+        addRule("新密码不能为空", Validator::notEmpty)
         addRule("长度不能少于8位", Validator.minLength(8))
     }
 
@@ -39,7 +39,7 @@ class PasswordViewModel : BaseViewModel() {
     }
 
     private val isDirty: Boolean
-        get() = !oldPasswordLiveData.value.isNullOrBlank() && !passwordLiveData.value.isNullOrBlank() && !confirmPasswordLiveData.value.isNullOrBlank()
+        get() = oldPasswordValidator.isDirty() || passwordValidator.isDirty() || confirmPasswordValidator.isDirty()
 
     private val formValidator = LiveDataValidatorResolver(listOf(
         oldPasswordValidator,
@@ -47,7 +47,13 @@ class PasswordViewModel : BaseViewModel() {
         confirmPasswordValidator))
 
     val isFormEnabled = MediatorLiveData<Boolean>().apply {
+        addSource(oldPasswordLiveData) {
+            value = progressLiveData.value == false
+        }
         addSource(passwordLiveData) {
+            value = enableForm()
+        }
+        addSource(confirmPasswordLiveData) {
             value = enableForm()
         }
         addSource(progressLiveData) {
@@ -76,8 +82,8 @@ class PasswordViewModel : BaseViewModel() {
         progressLiveData.value = true
         val userId = AccountCache.get()?.id ?: return
         val params = PasswordUpdateParams(
-            oldPassword = oldPasswordLiveData.value ?: "",
-            password = passwordLiveData.value ?: ""
+            oldPassword = oldPasswordLiveData.value?.trim() ?: "",
+            password = passwordLiveData.value?.trim() ?: ""
         )
 
         viewModelScope.launch {
@@ -88,28 +94,31 @@ class PasswordViewModel : BaseViewModel() {
 
                 progressLiveData.value = false
                 updated.value = FetchResult.Success(done)
-                isFormEnabled.value = !done
+                clear()
             } catch (e: ClientError) {
-                val msgId = when (e.statusCode) {
-                    403 -> R.string.error_incorrect_old_password
-                    404 -> R.string.api_account_not_found
-                    422 -> when (e.error?.key) {
-                        "password_invalid" -> R.string.signup_invalid_password
-                        else -> null
+                progressLiveData.value = false
+
+                updated.value = when (e.statusCode) {
+                    403 -> FetchResult.LocalizedError(R.string.password_current_incorrect)
+                    404 -> FetchResult.LocalizedError(R.string.account_not_found)
+                    422 -> when {
+                        e.error == null -> FetchResult.fromServerError(e)
+                        e.error.isFieldInvalid("password") -> FetchResult.LocalizedError(R.string.signup_invalid_password)
+                        else -> FetchResult.fromServerError(e)
                     }
-                    else -> null
+                    else -> FetchResult.fromServerError(e)
                 }
 
-                updated.value = if (msgId != null) {
-                    FetchResult.LocalizedError(msgId)
-                } else {
-                    FetchResult.fromServerError(e)
-                }
-                progressLiveData.value = false
             } catch (e: Exception) {
-                updated.value = FetchResult.fromException(e)
                 progressLiveData.value = false
+                updated.value = FetchResult.fromException(e)
             }
         }
+    }
+
+    private fun clear() {
+        oldPasswordLiveData.value = ""
+        passwordLiveData.value = ""
+        confirmPasswordLiveData.value = ""
     }
 }
