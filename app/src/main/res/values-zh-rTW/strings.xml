@@ -88,17 +88,13 @@
     <string name="greeting_wx_login">你好，%1$s！欢迎登入FT中文網。</string>
     <string name="btn_login">登入</string>
     <string name="btn_sign_up">註冊</string>
-    <string name="title_forgot_password">找回密碼</string>
-    <string name="title_reset_password">重設密碼</string>
+    <string name="forgot_password_title">找回密碼</string>
+    <string name="reset_password_title">重設密碼</string>
     <string name="btn_password_letter">寄送電子郵件</string>
 
     <!-- Forgot password -->
-    <string name="prompt_password_reset_code">請輸入重設密碼信件中的驗證码</string>
-    <string name="hint_password_code">驗證码</string>
     <string name="btn_verify">驗證</string>
-    <string name="btn_goto_reset_code">已有驗證码？</string>
-    <string name="error_invalid_code">驗證码無效</string>
-    <string name="prompt_reset_password">重設%1$s的密码</string>
+    <string name="reset_password_guide">重設%1$s的密码</string>
     <string name="btn_reset_password">重設密碼</string>
     <string name="prompt_letter_sent">信件已發送</string>
     <string name="btn_save">保存</string>
@@ -141,9 +137,9 @@
     <string name="prompt_unlinked">帳號已解除綁定</string>
     <string name="prompt_account_updated">帳號已更新</string>
 
-    <string name="instruct_password_letter">我們會您的登入信箱發送一封包含驗證碼的郵件，驗證通過後可以重設密碼</string>
+    <string name="forgot_password_guide">我們會您的登入信箱發送一封包含驗證碼的郵件，驗證通過後可以重設密碼</string>
     <string name="instruct_verify_email">您的信箱尚未驗證，為保障您的帳號安全，請及時驗證信箱。我們已經給您的登入信箱發送了驗證信件，点击信件中的連接即可。</string>
-    <string name="instruct_letter_sent">請檢查您的信件，點擊郵件中的「重設密碼」連接，在所打開的網頁中修改您的密碼。如果幾分鐘內沒有看到信件，請檢查是否被放進了垃圾信件列表。</string>
+    <string name="forgot_password_letter_sent">請檢查您的信件，點擊郵件中的「重設密碼」連接，在所打開的網頁中修改您的密碼。如果幾分鐘內沒有看到信件，請檢查是否被放進了垃圾信件列表。</string>
     <string name="instruct_link_email">您目前使用了微信帳號登入FT中文。为保障帳號安全，建议您綁定在FT中文网註冊的信箱帳號。</string>
     <string name="instruct_bind_login">信箱 %1$s 已经註冊了FT中文網帳號，请输入密码驗證身份，即可綁定微信帳號和信箱</string>
     <string name="instruct_sign_up">該信箱尚未註冊FT中文網帳號，請設置密碼創建帳號</string>
@@ -162,17 +158,17 @@
     <string name="unlink_anchor">請選擇解除关联後，會員信息保留在哪一方？</string>
     <string name="progress_request_verification">正在寄送驗證信件…</string>
     <string name="progress_logging">正在登入…</string>
-    <string name="link_reset_password">忘記密碼?</string>
+    <string name="forgot_password_link">忘記密碼?</string>
     <string name="link_sign_up">註冊帳號</string>
     <string name="link_login">已有帳號？登入</string>
-    <string name="error_invalid_email">電子信箱錯誤</string>
+    <string name="signup_invalid_email">電子信箱錯誤</string>
 
     <string name="error_email_unchanged">您已經在使用該電子信箱</string>
     <string name="error_invalid_name"> 使用者名稱不能为空且不超过32 个字符</string>
 
     <string name="error_name_unchanged">不能與當前使用者名稱相同</string>
     <string name="error_too_long">過长</string>
-    <string name="error_invalid_password">密碼無效</string>
+    <string name="signup_invalid_password">密碼無效</string>
 
     <!-- Generic buttons -->
     <string name="action_done">完成</string>
@@ -346,12 +342,11 @@
 
     <!-- Error message -->
     <string name="error_mismatched_confirm_password">兩次輸入的新密碼不一致</string>
-    <string name="error_incorrect_password">密碼錯誤</string>
+    <string name="login_incorrect_password">密碼錯誤</string>
     <string name="error_incorrect_old_password">當前密碼錯誤，不能設置新密碼</string>
     <string name="error_field_required">請填寫此項</string>
-    <string name="api_wrong_credentials">密碼錯誤</string>
-    <string name="api_email_taken">電子信箱已經註冊</string>
-    <string name="api_email_not_found">電子信箱尚未註冊</string>
+    <string name="signup_email_taken">電子信箱已經註冊</string>
+    <string name="login_email_not_found">電子信箱尚未註冊</string>
     <string name="api_account_not_found">沒有找到您的帳號</string>
     <string name="api_bad_request">無效的請求</string>
 
@@ -427,7 +422,7 @@
 
     <string name="released_at">發佈時間</string>
     <string name="alert_audio_deleted">已删除下載的音頻</string>
-    <string name="api_password_code_not_found">您似乎使用了無效的驗證码，请重新獲取重設密碼信件</string>
+    <string name="forgot_password_code_not_found">您似乎使用了無效的驗證码，请重新獲取重設密碼信件</string>
 
     <string-array name="stripe_footnotes">
         <item>* FT中文網的Stripe支付不接受人民幣計價的銀行卡，建議中國大陸以外地區用戶使用</item>
@@ -478,8 +473,7 @@
     <string name="current_is_standard">您目前是標準會員</string>
     <string name="not_subscribed_yet">你還不是會員</string>
     <string name="mobile_phone">手機號碼</string>
-    <string name="phone_mainland_only">僅限中國大陸地區手機號碼</string>
-    <string name="feature_mobile_login">* 我們將在後續版本推出手機號碼登入功能</string>
+    <string name="mobile_mainland_only">僅限中國大陸地區手機號碼</string>
     <string name="mobile_code_counter">重新獲取%1$ds</string>
     <string name="mobile_request_code">獲取驗證碼</string>
     <string name="mobile_verification_code">驗證碼</string>

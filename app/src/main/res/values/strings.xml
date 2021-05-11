@@ -87,22 +87,9 @@
     <string name="greeting_wx_login">你好，%1$s！欢迎登录FT中文网。</string>
     <string name="btn_login">登录</string>
     <string name="btn_sign_up">注册</string>
-    <string name="title_forgot_password">找回密码</string>
-    <string name="title_reset_password">重置密码</string>
     <string name="btn_password_letter">发送邮件</string>
 
-    <!-- Forgot password -->
-    <string name="prompt_password_reset_code">请输入重置密码邮件中的验证码</string>
-    <string name="hint_password_code">验证码</string>
-    <string name="btn_verify">验证</string>
-    <string name="btn_goto_reset_code">已有验证码？</string>
-    <string name="error_invalid_code">验证码无效</string>
-    <string name="prompt_reset_password">重置%1$s的密码</string>
-    <string name="btn_reset_password">重置密码</string>
-    <string name="prompt_letter_sent">邮件已发送</string>
-    <string name="btn_save">保存</string>
-    <string name="btn_next">下一步</string>
-    <string name="btn_verify_password">验证密码</string>
+
     <!-- FTC account -->
     <string name="btn_link">绑定邮箱</string>
     <string name="btn_unlink">解除绑定</string>
@@ -133,21 +120,24 @@
 
     <string name="prompt_not_logged_in">您尚未登录，登录后可以查看</string>
     <string name="prompt_no_email_app">您的设备上没有安装邮件程序，无法发送反馈邮件</string>
+
+    <!--  Generic message  -->
     <string name="prompt_saved">保存成功!</string>
     <string name="prompt_updated">更新成功!</string>
+    <string name="prompt_account_updated">账号已更新</string>
 
     <string name="prompt_linked">账号已绑定</string>
     <string name="prompt_unlinked">账号已解除绑定</string>
-    <string name="prompt_account_updated">账号已更新</string>
 
-    <string name="instruct_password_letter">我们会向您的登录邮箱发送一封包含验证码的邮件，验证通过后可以重置密码</string>
+
+    <!--  Email verification and updating  -->
+    <string name="prompt_letter_sent">邮件已发送</string>
     <string name="instruct_verify_email">您的邮箱尚未验证，为保障您的账号安全，请及时验证邮箱。我们已经给您的登录邮箱发送了验证邮件，点击邮件中的链接即可。</string>
-    <string name="instruct_letter_sent">请检查您的邮件，点击邮件中的“重置密码”链接，在所打开的网页中修改您的密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</string>
     <string name="instruct_link_email">您目前使用了微信账号登录FT中文网。为保障账号安全，建议您绑定在FT中文网注册的邮箱账号。</string>
     <string name="instruct_bind_login">邮箱 %1$s 已经注册了FT中文网账号，请输入密码验证身份，即可绑定微信账号和邮箱</string>
     <string name="instruct_sign_up">该邮箱尚未注册FT中文网账号，请设置密码创建账号</string>
 
-
+    <!--  Wechat Link  -->
     <string name="instruct_sign_in">该邮箱已经注册了FT中文网账号，请输入登录密码</string>
     <string name="link_heading">您选择合并如下账号</string>
     <string name="accounts_already_linked">两个账号已经绑定，无需操作。如果您未看到绑定后的账号信息，请返回"账号与安全"后下拉刷新</string>
@@ -161,10 +151,9 @@
     <string name="unlink_anchor">请选择解除关联后，会员信息保留在哪一方？</string>
     <string name="progress_request_verification">正在发送验证邮件&#8230;</string>
     <string name="progress_logging">正在登录&#8230;</string>
-    <string name="link_reset_password">忘记密码?</string>
+
     <string name="link_sign_up">注册账号</string>
     <string name="link_login">已有账号?登录</string>
-    <string name="error_invalid_email">邮箱地址无效</string>
 
     <string name="error_email_unchanged">您已经在使用该邮箱了</string>
     <string name="error_invalid_name">用户名不能为空且不超过32 个字符</string>
@@ -173,7 +162,68 @@
     <string name="error_too_long">过长</string>
     <string name="error_too_short">过短</string>
     <string name="error_form_incomplete">表单未填写完整</string>
-    <string name="error_invalid_password">密码无效</string>
+
+    <!-- Error message -->
+    <string name="error_mismatched_confirm_password">两次输入的新密码不一致</string>
+    <string name="error_incorrect_old_password">当前密码错误，不能设置新密码</string>
+    <string name="error_field_required">请填写此项</string>
+    <string name="api_account_not_found">没有找到您的账号</string>
+    <string name="api_bad_request">无效的请求</string>
+
+    <!-- API error message -->
+    <string name="api_too_many_request">请求过于频繁，请稍后再试</string>
+
+    <string name="api_unauthorized">没有访问服务器的权限</string>
+    <string name="api_server_error">服务器错误，请稍后再试</string>
+    <string name="api_email_server_down">邮件服务器暂时不可用</string>
+    <string name="api_name_taken">用户名已被占用</string>
+    <string name="api_account_already_linked">当前账号或目标账号已被绑定</string>
+    <string name="api_membership_already_linked">当前账号或目标账号的会员已被绑定</string>
+    <string name="api_membership_all_valid">不能绑定两个拥有未过期会员的账号</string>
+    <string name="api_wechat_already_linked">当前微信账号已经绑定了其他FTC账号</string>
+    <string name="api_wechat_member_already_linked">当前微信账号拥有的会员已经绑定了其他FTC账号</string>
+    <string name="api_anchor_missing">会员账号解绑必须选择哪个账号保留会员信息</string>
+    <string name="unlink_missing_union_id">无法解除绑定：您似乎尚未绑定微信</string>
+    <string name="api_missing_field">请求参数缺失</string>
+    <string name="api_empty_url">请求地址错误</string>
+    <string name="api_network_failure">网络错误</string>
+    <string name="api_io_error">无法读取数据</string>
+    <string name="api_json_syntax">无法解析数据</string>
+    <string name="api_empty_response">服务器没有响应</string>
+    <string name="error_unknown">发生未知错误</string>
+
+    <!--  Mobile Login  -->
+    <string name="mobile_phone">手机号</string>
+    <string name="mobile_invalid">请填写正确的手机号码</string>
+    <string name="mobile_mainland_only">仅限中国大陆地区手机号码</string>
+    <string name="mobile_verification_code">验证码</string>
+    <string name="mobile_request_code">获取验证码</string>
+    <string name="mobile_code_counter">重新获取%1$ds</string>
+    <string name="mobile_link_taken">该邮箱已经设置了其他手机号码，请关联其他邮箱，或者使用该邮箱账号登录。</string>
+
+    <!--  Sign Up  -->
+    <string name="signup_invalid_password">密码无效</string>
+    <string name="signup_email_taken">该邮箱已经注册</string>
+    <string name="signup_invalid_email">邮箱地址无效</string>
+
+    <!--  Sign In  -->
+    <string name="login_incorrect_password">密码错误</string>
+    <string name="login_email_not_found">邮箱尚未注册</string>
+
+    <!--  Forgot password  -->
+    <string name="forgot_password_link">忘记密码?</string>
+    <string name="forgot_password_title">找回密码</string>
+    <string name="forgot_password_guide">我们会向您的登录邮箱发送一封包含验证码的邮件，验证通过后可以重置密码</string>
+    <string name="forgot_password_letter_sent">请检查您的邮件，输入邮件中的验证码，验证通过后可以重置密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</string>
+    <string name="forgot_password_code_not_found">您似乎使用了无效的验证码，请重新获取重置密码邮件</string>
+    <string name="reset_password_guide">重置%1$s的密码</string>
+    <string name="reset_password_title">重置密码</string>
+    <string name="btn_verify">验证</string>
+    <string name="btn_reset_password">重置密码</string>
+
+    <string name="btn_save">保存</string>
+    <string name="btn_next">下一步</string>
+    <string name="btn_verify_password">验证密码</string>
 
     <!-- Generic buttons -->
     <string name="action_done">完成</string>
@@ -342,12 +392,6 @@
     <string name="iap_refresh_success">App Store订阅以已更新</string>
     <string name="iap_refresh_failed">无法更新苹果内购的订阅</string>
 
-    <string name="mobile_phone">手机号</string>
-    <string name="phone_mainland_only">仅限中国大陆地区手机号码</string>
-    <string name="feature_mobile_login">* 我们将在后续版本推出手机号码登录功能</string>
-    <string name="mobile_verification_code">验证码</string>
-    <string name="mobile_request_code">获取验证码</string>
-    <string name="mobile_code_counter">重新获取%1$ds</string>
     <!-- List of orders -->
     <string name="refreshing_data">更新数据&#8230;</string>
     <string name="refreshing_account">更新账号数据&#8230;</string>
@@ -361,40 +405,6 @@
 
 
     <string name="prompt_no_keyword">请输入关键字后搜索</string>
-
-    <!-- Error message -->
-    <string name="error_mismatched_confirm_password">两次输入的新密码不一致</string>
-    <string name="error_incorrect_password">密码错误</string>
-    <string name="error_incorrect_old_password">当前密码错误，不能设置新密码</string>
-    <string name="error_field_required">请填写此项</string>
-    <string name="error_invalid_mobile">请填写正确的手机号码</string>
-    <string name="api_wrong_credentials">密码错误</string>
-    <string name="api_email_taken">该邮箱已经注册</string>
-    <string name="api_email_not_found">邮箱尚未注册</string>
-    <string name="api_account_not_found">没有找到您的账号</string>
-    <string name="api_bad_request">无效的请求</string>
-
-    <!-- API error message -->
-    <string name="api_too_many_request">请求过于频繁，请稍后再试</string>
-
-    <string name="api_unauthorized">没有访问服务器的权限</string>
-    <string name="api_server_error">服务器错误，请稍后再试</string>
-    <string name="api_email_server_down">邮件服务器暂时不可用</string>
-    <string name="api_name_taken">用户名已被占用</string>
-    <string name="api_account_already_linked">当前账号或目标账号已被绑定</string>
-    <string name="api_membership_already_linked">当前账号或目标账号的会员已被绑定</string>
-    <string name="api_membership_all_valid">不能绑定两个拥有未过期会员的账号</string>
-    <string name="api_wechat_already_linked">当前微信账号已经绑定了其他FTC账号</string>
-    <string name="api_wechat_member_already_linked">当前微信账号拥有的会员已经绑定了其他FTC账号</string>
-    <string name="api_anchor_missing">会员账号解绑必须选择哪个账号保留会员信息</string>
-    <string name="unlink_missing_union_id">无法解除绑定：您似乎尚未绑定微信</string>
-    <string name="api_missing_field">请求参数缺失</string>
-    <string name="api_empty_url">请求地址错误</string>
-    <string name="api_network_failure">网络错误</string>
-    <string name="api_io_error">无法读取数据</string>
-    <string name="api_json_syntax">无法解析数据</string>
-    <string name="api_empty_response">服务器没有响应</string>
-    <string name="error_unknown">发生未知错误</string>
 
     <string name="prompt_cache_cleared">缓存已清空</string>
     <string name="prompt_cache_not_cleared">无法清空缓存</string>
@@ -447,7 +457,6 @@
 
     <string name="released_at">发布时间</string>
     <string name="alert_audio_deleted">已删除下载的音频</string>
-    <string name="api_password_code_not_found">您似乎使用了无效的验证码，请重新获取重置密码邮件</string>
     <string name="bookmark_icon">bookmark this article</string>
     <string name="share_icon">Share this article</string>
 

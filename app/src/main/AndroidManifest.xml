@@ -65,7 +65,7 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.login.ForgotPasswordActivity"
-            android:label="@string/title_forgot_password"
+            android:label="@string/forgot_password_title"
             android:parentActivityName=".ui.login.AuthActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity

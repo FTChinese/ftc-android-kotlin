@@ -43,7 +43,7 @@
             android:id="@+id/warning_msg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/phone_mainland_only"
+            android:text="@string/mobile_mainland_only"
             app:layout_constraintTop_toBottomOf="@id/mobile_container"
             app:layout_constraintBottom_toTopOf="@id/code_container"/>
 
