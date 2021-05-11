@@ -65,6 +65,7 @@ class PasswordResetViewModel : BaseViewModel(), AnkoLogger {
             return
         }
 
+        progressLiveData.value = true
         val params = PasswordResetParams(
             token = token,
             password = passwordLiveData.value ?: ""
@@ -76,16 +77,16 @@ class PasswordResetViewModel : BaseViewModel(), AnkoLogger {
                     AuthClient.resetPassword(params)
                 }
 
+                progressLiveData.value = false
                 resetResult.value = FetchResult.Success(ok)
-
             } catch (e: ClientError) {
-                // TODO: handle 422 error
-                if (e.statusCode == 404) {
-                    resetResult.value = FetchResult.LocalizedError(R.string.api_email_not_found)
-                } else {
-                    resetResult.value = FetchResult.fromServerError(e)
+                progressLiveData.value = false
+                resetResult.value = when (e.statusCode) {
+                    404 -> FetchResult.LocalizedError(R.string.forgot_password_code_not_found)
+                    else -> FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
+                progressLiveData.value = false
                 resetResult.value = FetchResult.fromException(e)
             }
         }

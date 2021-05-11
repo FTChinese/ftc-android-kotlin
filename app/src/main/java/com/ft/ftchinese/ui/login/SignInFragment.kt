@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -133,12 +134,25 @@ class SignInFragment(
 
         loginViewModel.accountResult.observe(this) {
             when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.LocalizedError -> handleErrMsgId(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
-                is FetchResult.Success -> {
-                    onAccountLoaded(it.data)
-                }
+                is FetchResult.Success -> onAccountLoaded(it.data)
             }
+        }
+    }
+
+    private fun handleErrMsgId(id: Int) {
+        when (id) {
+            R.string.mobile_link_taken -> {
+                AlertDialog.Builder(requireContext())
+                    .setMessage(id)
+                    .setPositiveButton(R.string.action_done) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .create()
+                    .show()
+            }
+            else  -> toast(id)
         }
     }
 
@@ -207,7 +221,7 @@ class SignInFragment(
         when (kind) {
             AuthKind.EmailLogin,
             AuthKind.WechatLink -> loginViewModel.emailAuth(tokenManager.getToken())
-            AuthKind.MobileLink -> loginViewModel.mobileLinkEmail()
+            AuthKind.MobileLink -> loginViewModel.mobileLinkEmail(tokenManager.getToken())
         }
     }
 

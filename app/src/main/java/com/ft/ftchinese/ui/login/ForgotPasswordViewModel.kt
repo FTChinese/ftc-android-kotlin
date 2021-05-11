@@ -8,13 +8,13 @@ import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.model.request.PasswordResetLetterParams
 import com.ft.ftchinese.model.request.PasswordResetVerifier
+import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
@@ -103,19 +103,16 @@ class ForgotPasswordViewModel : BaseViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val ok = withContext(Dispatchers.IO) {
-//                    AuthClient.passwordResetLetter(params)
-                    delay(3000)
-                    true
+                    AuthClient.passwordResetLetter(params)
                 }
 
                 letterSent.value = FetchResult.Success(ok)
                 progressLiveData.value = false
             } catch (e: ClientError) {
                 progressLiveData.value = false
-                if (e.statusCode == 404) {
-                    letterSent.value = FetchResult.LocalizedError(R.string.api_email_not_found)
-                } else {
-                    letterSent.value = FetchResult.fromServerError(e)
+                letterSent.value = when (e.statusCode) {
+                    404 -> FetchResult.LocalizedError(R.string.login_email_not_found)
+                    else -> FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
                 letterSent.value = FetchResult.fromException(e)
@@ -140,12 +137,7 @@ class ForgotPasswordViewModel : BaseViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val bearer = withContext(Dispatchers.IO) {
-//                    AuthClient.verifyPwResetCode(params)
-                    delay(2000)
-                    PwResetBearer(
-                        email = params.email,
-                        token = "abcedfghijklmnopqrstuvwxyz"
-                    )
+                    AuthClient.verifyPwResetCode(params)
                 }
 
                 progressLiveData.value = false
@@ -158,15 +150,13 @@ class ForgotPasswordViewModel : BaseViewModel(), AnkoLogger {
                 verificationResult.value = FetchResult.Success(bearer)
             } catch (e: ClientError) {
                 progressLiveData.value = false
-                if (e.statusCode == 404) {
-                    verificationResult.value =
-                        FetchResult.LocalizedError(R.string.api_password_code_not_found)
-                } else {
-                    verificationResult.value = FetchResult.fromServerError(e)
+                verificationResult.value = when (e.statusCode) {
+                    404 -> FetchResult.LocalizedError(R.string.forgot_password_code_not_found)
+                    else -> FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
-                verificationResult.value = FetchResult.fromException(e)
                 progressLiveData.value = false
+                verificationResult.value = FetchResult.fromException(e)
             }
         }
     }

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -72,7 +73,7 @@ class PasswordResetFragment(
 
         viewModel.resetResult.observe(this) {
             when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.LocalizedError -> alertErrMsg(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
                     if (it.data) {
@@ -84,6 +85,16 @@ class PasswordResetFragment(
                 }
             }
         }
+    }
+
+    private fun alertErrMsg(id: Int) {
+        AlertDialog.Builder(this)
+            .setMessage(id)
+            .setPositiveButton(R.string.action_ok) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
     }
 
     private fun setupUI() {

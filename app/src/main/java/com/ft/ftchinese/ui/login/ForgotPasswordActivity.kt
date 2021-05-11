@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
@@ -79,7 +80,7 @@ class ForgotPasswordActivity : ScopedAppActivity(),
                 is FetchResult.Error -> result.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
                     if (result.data) {
-                        toast("邮件已发送")
+                        alertLetterSent()
                     } else {
                         toast("邮件发送失败，未知错误！")
                     }
@@ -89,7 +90,7 @@ class ForgotPasswordActivity : ScopedAppActivity(),
 
         letterViewModel.verificationResult.observe(this) {
             when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.LocalizedError -> alertVrfFailure(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
                     PasswordResetFragment(it.data)
@@ -97,6 +98,26 @@ class ForgotPasswordActivity : ScopedAppActivity(),
                 }
             }
         }
+    }
+
+    private fun alertLetterSent() {
+        AlertDialog.Builder(this)
+            .setMessage(R.string.forgot_password_letter_sent)
+            .setPositiveButton(R.string.action_ok) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
+    }
+
+    private fun alertVrfFailure(msgId: Int) {
+        AlertDialog.Builder(this)
+            .setMessage(msgId)
+            .setPositiveButton(R.string.action_ok) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
     }
 
     fun onClickRequestLetter(view: View) {
@@ -108,6 +129,8 @@ class ForgotPasswordActivity : ScopedAppActivity(),
     }
 
     companion object {
+        private const val ARG_EMAIL = "arg_email"
+
         fun start(context: Context?, email: String) {
             val intent = Intent(context, ForgotPasswordActivity::class.java).apply {
                 putExtra(ARG_EMAIL, email)

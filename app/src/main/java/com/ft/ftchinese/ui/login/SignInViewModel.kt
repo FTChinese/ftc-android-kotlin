@@ -95,13 +95,7 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
                 accountResult.value = FetchResult.Success(account)
             } catch (e: ClientError) {
                 progressLiveData.value = false
-                // TODO: handle status code as server changed
-                accountResult.value = if (e.statusCode == 404) {
-                    FetchResult.LocalizedError(R.string.error_invalid_password)
-                } else {
-                    FetchResult.fromServerError(e)
-                }
-
+                handleLoginError(e)
             } catch (e: Exception) {
                 progressLiveData.value = false
                 accountResult.value = FetchResult.fromException(e)
@@ -140,9 +134,27 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
                 }
 
                 accountResult.value = FetchResult.Success(account)
-            } catch (e: Exception) {
+            } catch (e: ClientError) {
+                progressLiveData.value = false
 
+                handleLoginError(e)
+            } catch (e: Exception) {
+                progressLiveData.value = false
+                accountResult.value = FetchResult.fromException(e)
             }
+        }
+    }
+
+    private fun handleLoginError(e: ClientError) {
+        if (e.error?.isFieldAlreadyExists("mobile") == true) {
+            accountResult.value = FetchResult.LocalizedError(R.string.mobile_link_taken)
+            return
+        }
+
+        accountResult.value = when (e.statusCode) {
+            403 -> FetchResult.LocalizedError(R.string.login_incorrect_password)
+            404 -> FetchResult.LocalizedError(R.string.api_account_not_found)
+            else -> FetchResult.fromServerError(e)
         }
     }
 }

@@ -176,8 +176,8 @@ class SignUpFragment(
     fun onSubmit(view: View) {
 
         when (kind) {
-            AuthKind.EmailLogin -> signUpViewModel.signUp(tokenManager.getToken())
-            AuthKind.MobileLink -> signUpViewModel.mobileSignUp()
+            AuthKind.EmailLogin -> signUpViewModel.emailSignUp(tokenManager.getToken())
+            AuthKind.MobileLink -> signUpViewModel.mobileSignUp(tokenManager.getToken())
             AuthKind.WechatLink -> sessionManager
                 .loadAccount()
                 ?.unionId
