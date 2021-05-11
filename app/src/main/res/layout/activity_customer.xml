@@ -14,13 +14,8 @@
             name="isDefaultPayMethod"
             type="Boolean" />
         <variable
-            name="showDefaultIcon"
-            type="Boolean" />
-
-        <variable
             name="card"
             type="com.ft.ftchinese.ui.account.UIBankCard" />
-
         <variable
             name="handler"
             type="com.ft.ftchinese.ui.customer.CustomerActivity" />

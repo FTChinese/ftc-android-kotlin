@@ -13,6 +13,7 @@ import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.FetchResult
+import com.stripe.android.model.PaymentMethod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,6 +41,14 @@ class CustomerViewModel(
 
     private fun isSetPaymentInProgress(): Boolean {
         return progressLiveData.value == true || paymentSessionProgress.value == true || customerSessionProgress.value == true
+    }
+
+    val paymentMethodSelected: MutableLiveData<PaymentMethod> by lazy {
+        MutableLiveData<PaymentMethod>()
+    }
+
+    val isFormEnabled = MediatorLiveData<Boolean>().apply {
+        addSource()
     }
 
     val customerCreated: MutableLiveData<FetchResult<StripeCustomer>> by lazy {

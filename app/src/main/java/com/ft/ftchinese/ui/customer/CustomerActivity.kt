@@ -62,16 +62,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
         sessionManager = SessionManager.getInstance(this)
         fileCache = FileCache(this)
-
-        paymentSession = PaymentSession(
-            this,
-            PaymentSessionConfig.Builder()
-                .setShippingInfoRequired(false)
-                .setShippingMethodsRequired(false)
-                .setShouldShowGooglePay(false)
-                .build()
-        )
-
+        
         setupViewModel()
         initUI()
     }
@@ -128,9 +119,23 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun initUI() {
         setCardText(null)
+
+        setupCustomerSession()
+
+        paymentSession = PaymentSession(
+            this,
+            PaymentSessionConfig.Builder()
+                .setShippingInfoRequired(false)
+                .setShippingMethodsRequired(false)
+                .setShouldShowGooglePay(false)
+                .build()
+        )
+
+        paymentSession.init(paymentSessionListener)
+        customerViewModel.paymentSessionProgress.value = true
         // Setup stripe customer session after ui initiated; otherwise the ui might be disabled if stripe customer data
         // is retrieved too quickly.
-        setupCustomerSession()
+
     }
 
     private fun setupCustomerSession() {
@@ -155,15 +160,12 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
             }
         }
 
+        // Let stripe to retrieve customer.
         toast(R.string.retrieve_customer)
-
         customerViewModel.customerSessionProgress.value = true
         CustomerSession
             .getInstance()
             .retrieveCurrentCustomer(customerRetrievalListener)
-
-        customerViewModel.paymentSessionProgress.value = true
-        paymentSession.init(paymentSessionListener)
     }
 
     private val customerRetrievalListener = object : CustomerSession.CustomerRetrievalListener {
@@ -203,16 +205,19 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
             customerViewModel.paymentSessionProgress.value = false
         }
 
+        // Is  this used to handle payment method selection?
         override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
             customerViewModel.paymentSessionProgress.value = false
 
             val pm = data.paymentMethod
+            // TODO: remove this.
             if (pm == null) {
                 binding.btnSetDefault.isEnabled = false
                 return
             }
 
             paymentMethod = pm
+
             pm.card?.let {
                 setCardText(it)
                 // Only enable the set default button if the selected payment method is not te default one.
