@@ -1,62 +1,17 @@
 package com.ft.ftchinese.ui.validator
 
 import android.util.Patterns
-import com.ft.ftchinese.R
 import java.util.regex.Pattern
 
 object Validator {
-    fun ensureEmail(email: String): Int? {
-        if (email.isBlank()) {
-            return R.string.error_field_required
-        }
-
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            return R.string.signup_invalid_email
-        }
-
-        return null
-    }
-
-    fun ensurePassword(pw: String): Int? {
-        if (pw.isBlank()) {
-            return R.string.error_field_required
-        }
-
-        if (pw.length < 8) {
-            return R.string.signup_invalid_password
-        }
-
-        return null
-    }
-
-    // Verification code for password reset
-    fun validateCode(c: String): Boolean {
-        return c.length == 6
-    }
-
-    fun ensureLength(s: String?, min: Int, max: Int): Int? {
-        if (s.isNullOrBlank()) {
-            return R.string.error_field_required
-        }
-
-        if (s.length < min ) {
-            return R.string.error_too_short
-        }
-
-        if (s.length > max) {
-            return R.string.error_too_long
-        }
-
-        return null
-    }
 
     fun notEmpty(s: String?): Boolean {
-        return !s.isNullOrBlank()
+        return !s?.trim().isNullOrBlank()
     }
 
     fun minLength(l: Int): Predicate {
         return fun (s: String?): Boolean {
-            return s?.length?.let {
+            return s?.trim()?.length?.let {
                 it >= l
             } ?: false
         }
@@ -64,7 +19,7 @@ object Validator {
 
     fun maxLength(l: Int): Predicate {
         return fun(s: String?): Boolean {
-            return s?.length?.let {
+            return s?.trim()?.length?.let {
                 it <= l
             } ?: false
         }
