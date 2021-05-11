@@ -112,6 +112,7 @@ object AuthClient : AnkoLogger {
         val (response, _)= Fetch()
             .post(Endpoint.passwordResetLetter)
             .setTimeout(30)
+            .setClient()
             .noCache()
             .sendJson(json.toJsonString(params))
             .endJsonText()
