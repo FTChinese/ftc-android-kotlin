@@ -23,6 +23,10 @@ class LiveDataValidator(private val liveData: LiveData<String>) : AnkoLogger {
         return true
     }
 
+    fun isDirty(): Boolean {
+        return !liveData.value?.trim().isNullOrBlank()
+    }
+
     private fun emitErrorMessage(messageRes: String?) {
         error.value = messageRes
     }
