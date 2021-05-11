@@ -163,7 +163,7 @@ class EmailViewModel : BaseViewModel(), AnkoLogger{
                 isLetterBtnEnabled.value = !done
             } catch (e: ClientError) {
                 val msgId = when (e.statusCode) {
-                    404 -> R.string.api_account_not_found
+                    404 -> R.string.account_not_found
                     422 -> if (e.error?.isResourceMissing("email_server") == true) {
                         R.string.api_email_server_down
                     } else null

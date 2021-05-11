@@ -25,7 +25,7 @@ object ApiRequest : AnkoLogger {
             info("Refresh account api error $e")
 
             return if (e.statusCode == 404) {
-                FetchResult.LocalizedError(R.string.api_account_not_found)
+                FetchResult.LocalizedError(R.string.account_not_found)
             } else {
                 FetchResult.fromServerError(e)
             }

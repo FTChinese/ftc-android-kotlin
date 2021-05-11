@@ -153,7 +153,7 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
 
         accountResult.value = when (e.statusCode) {
             403 -> FetchResult.LocalizedError(R.string.login_incorrect_password)
-            404 -> FetchResult.LocalizedError(R.string.api_account_not_found)
+            404 -> FetchResult.LocalizedError(R.string.account_not_found)
             else -> FetchResult.fromServerError(e)
         }
     }

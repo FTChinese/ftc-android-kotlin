@@ -63,7 +63,7 @@ class UnlinkViewModel : BaseViewModel() {
                         "anchor_missing_field" -> R.string.api_anchor_missing
                         else -> null
                     }
-                    404 -> R.string.api_account_not_found
+                    404 -> R.string.account_not_found
                     else -> null
                 }
 

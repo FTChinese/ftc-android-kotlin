@@ -222,7 +222,7 @@ class MobileViewModel : BaseViewModel(), AnkoLogger {
         } catch (e: ClientError) {
             progressLiveData.value = false
             accountLoaded.value = if (e.statusCode == 404) {
-                FetchResult.LocalizedError(R.string.api_account_not_found)
+                FetchResult.LocalizedError(R.string.account_not_found)
             } else {
                 FetchResult.fromServerError(e)
             }

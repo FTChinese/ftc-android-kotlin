@@ -70,7 +70,7 @@ class RequestVerificationFragment : ScopedFragment(), AnkoLogger {
     }
 
     private fun showAlert() {
-        alert(R.string.prompt_letter_sent) {
+        alert(R.string.email_vrf_letter_sent) {
             positiveButton("Got it") {
                 it.dismiss()
             }

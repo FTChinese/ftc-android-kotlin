@@ -68,7 +68,7 @@ class LinkViewModel : BaseViewModel() {
                 }
             } catch (e: ClientError) {
                 val msgId = when(e.statusCode) {
-                    404 -> R.string.api_account_not_found
+                    404 -> R.string.account_not_found
                     422 -> when (e.error?.key) {
                         "account_link_already_taken" -> R.string.api_account_already_linked
                         "membership_link_already_taken" -> R.string.api_membership_already_linked

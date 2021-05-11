@@ -81,7 +81,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                 info("Refresh wx info api error: $e")
                 wxRefreshResult.value = when (e.statusCode) {
                     422 -> FetchResult.Success(WxRefreshState.ReAuth)
-                    404 -> FetchResult.LocalizedError(R.string.api_account_not_found)
+                    404 -> FetchResult.LocalizedError(R.string.account_not_found)
                     else -> FetchResult.fromServerError(e)
                 }
 
