@@ -12,11 +12,39 @@ import org.jetbrains.anko.AnkoLogger
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
+private const val codeMissing = "missing"
+private const val codeMissingField = "missing_field"
+private const val codeAlreadyExists = "already_exists"
+private const val codeInvalid = "invalid"
+
 data class Unprocessable(
     val field: String,
     val code: String
 ) {
     val key: String = "${field}_$code"
+
+    val isCodeMissing: Boolean
+        get() = code == codeMissing
+
+    val isCodeFieldMissing: Boolean
+        get() = code == codeMissingField
+
+    val isCodeAlreadyExists: Boolean
+        get() = code == codeAlreadyExists
+
+    val isCodeInvalid: Boolean
+        get() = code == codeInvalid
+
+    fun isFieldMissing(f: String): Boolean {
+        return field == f && code == codeMissingField
+    }
+    fun isFieldAlreadyExists(f: String): Boolean {
+        return field == f && code == codeAlreadyExists
+    }
+
+    fun isFieldInvalid(f: String): Boolean {
+        return field == f && code == codeInvalid
+    }
 }
 
 data class ClientError(
@@ -29,29 +57,33 @@ data class ClientError(
     val code: String? = null,
     val param: String? = null,
     val type: String? = null
-) : Exception(message)
+) : Exception(message) {
 
-fun parseRespErr(resp: Response): ClientError? {
-    /**
-     * @throws IOException when turning to string.
-     */
-    val body = resp.body?.string()
+    companion object {
+        @JvmStatic
+        fun from(resp: Response): ClientError? {
+            /**
+             * @throws IOException when turning to string.
+             */
+            val body = resp.body?.string()
 
-    // Avoid throwing JSON parse error.
-    val clientErr = if (body != null) {
-        /**
-         * Throws JSON parse error.
-         */
-        Klaxon().parse<ClientError>(body)
-    } else {
-        ClientError(
-            message = "No response from server"
-        )
+            // Avoid throwing JSON parse error.
+            val clientErr = if (body != null) {
+                /**
+                 * Throws JSON parse error.
+                 */
+                Klaxon().parse<ClientError>(body)
+            } else {
+                ClientError(
+                    message = "No response from server"
+                )
+            }
+
+            clientErr?.statusCode = resp.code
+
+            return clientErr
+        }
     }
-
-    clientErr?.statusCode = resp.code
-
-    return clientErr
 }
 
 /**
@@ -232,7 +264,7 @@ class Fetch : AnkoLogger {
             return Pair(resp, resp.body?.string())
         }
 
-        throw parseRespErr(resp) ?: ClientError(
+        throw ClientError.from(resp) ?: ClientError(
                 statusCode = resp.code,
                 message = "Unknown error occurred when sending request"
         )
