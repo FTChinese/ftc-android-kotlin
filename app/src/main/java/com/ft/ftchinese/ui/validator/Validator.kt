@@ -11,7 +11,7 @@ object Validator {
         }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            return R.string.error_invalid_email
+            return R.string.signup_invalid_email
         }
 
         return null
@@ -23,7 +23,7 @@ object Validator {
         }
 
         if (pw.length < 8) {
-            return R.string.error_invalid_password
+            return R.string.signup_invalid_password
         }
 
         return null
