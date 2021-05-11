@@ -73,9 +73,9 @@ class UnlinkActivity : ScopedAppActivity() {
         }
 
         linkViewModel.unlinkResult.observe(this) {
-            when (result) {
-                is FetchResult.LocalizedError -> toast(result.msgId)
-                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+            when (it) {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { toast(it) }
                 is FetchResult.Success -> {
                     toast(R.string.prompt_unlinked)
 
@@ -88,12 +88,12 @@ class UnlinkActivity : ScopedAppActivity() {
         }
 
         accountViewModel.accountRefreshed.observe(this) {
-            when (result) {
-                is FetchResult.LocalizedError -> toast(result.msgId)
-                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+            when (it) {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
                     toast(R.string.prompt_updated)
-                    sessionManager.saveAccount(result.data)
+                    sessionManager.saveAccount(it.data)
 
                     // Signal to calling activity.
                     /**
