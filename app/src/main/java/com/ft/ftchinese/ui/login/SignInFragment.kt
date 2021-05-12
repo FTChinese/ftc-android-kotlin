@@ -22,9 +22,10 @@ import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.ui.wxlink.LinkParams
+import com.ft.ftchinese.ui.wxlink.WxEmailLink
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
 
@@ -171,19 +172,20 @@ class SignInFragment(
                 activity?.finish()
             }
             AuthKind.WechatLink -> {
+                info("Wechat is linking to an existing account $account")
                 sessionManager.loadAccount()?.let { current ->
                     LinkPreviewFragment(
-                        LinkParams(
-                            ftc = account,
-                            wx = current,
+                        WxEmailLink(
+                            ftc = account, // Retrieved account
+                            wx = current, // Currently logged-in account
                             loginMethod = current.loginMethod ?: LoginMethod.WECHAT,
                         )
                     ).show(
                         childFragmentManager,
                         "PreviewWechatLinkEmail",
                     )
+                    // You cannot call dismiss here since all child dialog will be dismissed.
                 }
-                dismiss()
             }
         }
     }
