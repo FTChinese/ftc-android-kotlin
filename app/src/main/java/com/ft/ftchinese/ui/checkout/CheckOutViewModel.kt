@@ -16,6 +16,7 @@ import com.ft.ftchinese.model.stripesubs.SubParams
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.viewmodel.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -23,9 +24,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-class CheckOutViewModel : ViewModel(), AnkoLogger {
-
-    val isNetworkAvailable = MutableLiveData<Boolean>()
+class CheckOutViewModel : BaseViewModel(), AnkoLogger {
 
     private var _checkoutCounter: CheckoutCounter? = null
 
