@@ -6,20 +6,19 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.request.WxLinkParams
 import com.ft.ftchinese.model.request.WxUnlinkParams
 
 object LinkRepo {
     /**
      * Link two existing accounts.
      */
-    fun link(ftcId: String, unionId: String): Boolean {
-        val (resp, _) = Fetch().put(Endpoint.wxLink)
+    fun link(unionId: String, params: WxLinkParams): Boolean {
+        val (resp, _) = Fetch()
+            .post(Endpoint.wxLink)
             .setUnionId(unionId)
             .noCache()
-            .sendJson(Klaxon().toJsonString(mapOf(
-                "userId" to ftcId, // Deprecated.
-                "ftcId" to ftcId
-            )))
+            .sendJson(params.toJsonString())
             .endJsonText()
 
         return resp.code == 204
@@ -46,7 +45,7 @@ object LinkRepo {
     fun unlink(unionId: String, params: WxUnlinkParams): Boolean {
 
         val (resp, _) = Fetch()
-            .delete(Endpoint.wxUnlink)
+            .post(Endpoint.wxUnlink)
             .setUnionId(unionId)
             .sendJson(params.toJsonString())
             .noCache()
