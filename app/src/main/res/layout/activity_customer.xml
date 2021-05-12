@@ -11,8 +11,14 @@
             name="inProgress"
             type="Boolean" />
         <variable
-            name="isDefaultPayMethod"
+            name="enableSubmit"
             type="Boolean" />
+        <variable
+            name="defaultIconVisible"
+            type="Boolean" />
+        <variable
+            name="customerEmail"
+            type="String" />
         <variable
             name="card"
             type="com.ft.ftchinese.ui.account.UIBankCard" />
@@ -62,27 +68,35 @@
                     app:layout_constraintTop_toTopOf="@id/card_container" />
 
                 <TextView
-                    style="@style/OrigamiText.Body2.Light"
                     android:id="@+id/default_mark"
+                    style="@style/OrigamiText.Body2.Light"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Default"
-                    android:visibility="@{isDefaultPayMethod ? View.VISIBLE : View.GONE}"
+                    android:visibility="@{defaultIconVisible ? View.VISIBLE : View.GONE}"
                     app:layout_constraintBaseline_toBaselineOf="@id/tv_card_brand"
                     app:layout_constraintStart_toEndOf="@id/tv_card_brand"
                     app:layout_constraintEnd_toEndOf="@id/card_container" />
 
                 <TextView
-                    style="@style/OrigamiText.Body1"
                     android:id="@+id/tv_card_number"
-                    app:layout_constraintTop_toBottomOf="@id/tv_card_brand"
-                    app:layout_constraintBottom_toBottomOf="@id/card_container"
-                    app:layout_constraintStart_toStartOf="@id/tv_card_brand"
-                    app:layout_constraintEnd_toEndOf="@id/card_container"
+                    style="@style/OrigamiText.Body1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="@{card.number}"/>
+                    android:text="@{card.number}"
+                    app:layout_constraintTop_toBottomOf="@id/tv_card_brand"
+                    app:layout_constraintStart_toStartOf="@id/tv_card_brand"
+                    app:layout_constraintEnd_toEndOf="@id/card_container"/>
+
+                <TextView
+                    android:id="@+id/customer_email_tv"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_16"
+                    android:text="@{customerEmail}"
+                    app:layout_constraintTop_toBottomOf="@id/tv_card_number"
+                    app:layout_constraintBottom_toBottomOf="@id/card_container" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -93,9 +107,11 @@
             android:layout_margin="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:enabled="@{!inProgress &amp;&amp; !isDefaultPayMethod}"
-            android:onClick="@{handler::onSetDefaultPaymentMethod}"
+            android:enabled="@{enableSubmit}"
+            android:onClick="@{handler::onUpdatePaymentMethod}"
             app:layout_constraintTop_toBottomOf="@id/bank_card_picker"
+            app:layout_constraintStart_toStartOf="@id/bank_card_picker"
+            app:layout_constraintEnd_toEndOf="@id/bank_card_picker"
             android:text="@string/set_default_payment_method"/>
 
         <include layout="@layout/progress_indicator_circular"
