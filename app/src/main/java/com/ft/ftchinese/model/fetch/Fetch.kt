@@ -1,7 +1,5 @@
 package com.ft.ftchinese.model.fetch
 
-import com.beust.klaxon.Json
-import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.repository.Config
 import okhttp3.*
@@ -11,84 +9,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.jetbrains.anko.AnkoLogger
 import java.io.IOException
 import java.util.concurrent.TimeUnit
-
-private const val codeMissing = "missing"
-private const val codeMissingField = "missing_field"
-private const val codeAlreadyExists = "already_exists"
-private const val codeInvalid = "invalid"
-
-data class Unprocessable(
-    val field: String,
-    val code: String
-) {
-    val key: String = "${field}_$code"
-
-    val isCodeMissing: Boolean
-        get() = code == codeMissing
-
-    val isCodeFieldMissing: Boolean
-        get() = code == codeMissingField
-
-    val isCodeAlreadyExists: Boolean
-        get() = code == codeAlreadyExists
-
-    val isCodeInvalid: Boolean
-        get() = code == codeInvalid
-
-    fun isResourceMissing(f: String): Boolean {
-        return field == f && code == codeMissing
-    }
-
-    fun isFieldMissing(f: String): Boolean {
-        return field == f && code == codeMissingField
-    }
-    fun isFieldAlreadyExists(f: String): Boolean {
-        return field == f && code == codeAlreadyExists
-    }
-
-    fun isFieldInvalid(f: String): Boolean {
-        return field == f && code == codeInvalid
-    }
-}
-
-data class ServerError(
-    override val message: String,
-    val error: Unprocessable? = null,
-
-    @Json(ignored = true)
-    var statusCode: Int = 400, // HTTP status code
-
-    val code: String? = null,
-    val param: String? = null,
-    val type: String? = null
-) : Exception(message) {
-
-    companion object {
-        @JvmStatic
-        fun from(resp: Response): ServerError? {
-            /**
-             * @throws IOException when turning to string.
-             */
-            val body = resp.body?.string()
-
-            // Avoid throwing JSON parse error.
-            val clientErr = if (body != null) {
-                /**
-                 * Throws JSON parse error.
-                 */
-                Klaxon().parse<ServerError>(body)
-            } else {
-                ServerError(
-                    message = "No response from server"
-                )
-            }
-
-            clientErr?.statusCode = resp.code
-
-            return clientErr
-        }
-    }
-}
 
 /**
  * To use okhttp, you need to build url first using `HttpUrl.Builder`;
@@ -327,10 +247,3 @@ class Fetch : AnkoLogger {
     }
 }
 
-/**
- * [JSONResult] contains the parsed json and its raw string.
- */
-data class JSONResult<T>(
-    val value: T,
-    val raw: String,
-)
