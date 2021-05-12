@@ -51,7 +51,7 @@ data class Unprocessable(
     }
 }
 
-data class ClientError(
+data class ServerError(
     override val message: String,
     val error: Unprocessable? = null,
 
@@ -65,7 +65,7 @@ data class ClientError(
 
     companion object {
         @JvmStatic
-        fun from(resp: Response): ClientError? {
+        fun from(resp: Response): ServerError? {
             /**
              * @throws IOException when turning to string.
              */
@@ -76,9 +76,9 @@ data class ClientError(
                 /**
                  * Throws JSON parse error.
                  */
-                Klaxon().parse<ClientError>(body)
+                Klaxon().parse<ServerError>(body)
             } else {
-                ClientError(
+                ServerError(
                     message = "No response from server"
                 )
             }
@@ -268,7 +268,7 @@ class Fetch : AnkoLogger {
             return Pair(resp, resp.body?.string())
         }
 
-        throw ClientError.from(resp) ?: ClientError(
+        throw ServerError.from(resp) ?: ServerError(
                 statusCode = resp.code,
                 message = "Unknown error occurred when sending request"
         )

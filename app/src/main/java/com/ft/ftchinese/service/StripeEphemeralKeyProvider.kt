@@ -2,7 +2,7 @@ package com.ft.ftchinese.service
 
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.StripeClient
-import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.fetch.ServerError
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.EphemeralKeyUpdateListener
 import kotlinx.coroutines.*
@@ -50,7 +50,7 @@ class StripeEphemeralKeyProvider(
 
                 keyUpdateListener.onKeyUpdateFailure(200, "Empty raw key")
 
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 // ClientError(
                 // message=No such customer: 'cus_abc',
                 // error=null,

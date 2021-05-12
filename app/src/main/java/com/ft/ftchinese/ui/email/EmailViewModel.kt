@@ -4,7 +4,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.reader.BaseAccount
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.AuthClient
@@ -79,7 +79,7 @@ class EmailViewModel : BaseViewModel(), AnkoLogger{
 
                 existsResult.value = FetchResult.Success(ok)
                 progressLiveData.value = false
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 progressLiveData.value = false
 
                 if (e.statusCode == 404) {
@@ -117,7 +117,7 @@ class EmailViewModel : BaseViewModel(), AnkoLogger{
                     emailUpdated.value = FetchResult.Success(baseAccount)
                     clear()
                 }
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 progressLiveData.value = false
 
                 emailUpdated.value = when (e.statusCode) {
@@ -161,7 +161,7 @@ class EmailViewModel : BaseViewModel(), AnkoLogger{
 
                 progressLiveData.value = false
                 isLetterBtnEnabled.value = !done
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 val msgId = when (e.statusCode) {
                     404 -> R.string.account_not_found
                     422 -> if (e.error?.isResourceMissing("email_server") == true) {

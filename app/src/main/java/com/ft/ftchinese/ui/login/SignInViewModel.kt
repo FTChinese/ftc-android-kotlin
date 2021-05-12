@@ -4,7 +4,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.model.request.MobileLinkParams
@@ -93,7 +93,7 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
                 }
 
                 accountResult.value = FetchResult.Success(account)
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 progressLiveData.value = false
                 handleLoginError(e)
             } catch (e: Exception) {
@@ -134,7 +134,7 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
                 }
 
                 accountResult.value = FetchResult.Success(account)
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 progressLiveData.value = false
 
                 handleLoginError(e)
@@ -145,7 +145,7 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
         }
     }
 
-    private fun handleLoginError(e: ClientError) {
+    private fun handleLoginError(e: ServerError) {
         if (e.error?.isFieldAlreadyExists("mobile") == true) {
             accountResult.value = FetchResult.LocalizedError(R.string.mobile_link_taken)
             return

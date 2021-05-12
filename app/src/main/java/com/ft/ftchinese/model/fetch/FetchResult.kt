@@ -22,7 +22,7 @@ sealed class FetchResult<out T : Any> {
 
     companion object {
         @JvmStatic
-        fun fromServerError(e: ClientError): FetchResult<Nothing> {
+        fun fromServerError(e: ServerError): FetchResult<Nothing> {
             return when (e.statusCode) {
                 401 -> LocalizedError(R.string.api_unauthorized)
                 429 -> LocalizedError(R.string.api_too_many_request)

@@ -4,7 +4,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.BaseAccount
 import com.ft.ftchinese.model.request.MobileAuthParams
@@ -219,7 +219,7 @@ class MobileViewModel : BaseViewModel(), AnkoLogger {
                 accountLoaded.value = FetchResult.Success(account)
             }
             progressLiveData.value = false
-        } catch (e: ClientError) {
+        } catch (e: ServerError) {
             progressLiveData.value = false
             accountLoaded.value = if (e.statusCode == 404) {
                 FetchResult.LocalizedError(R.string.account_not_found)

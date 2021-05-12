@@ -4,7 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.ftcsubs.WxPayIntent
 import com.ft.ftchinese.model.paywall.FtcPriceCache
@@ -94,7 +94,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                     return@launch
                 }
                 wxPayIntentResult.value = FetchResult.Success(wxOrder)
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
 
                 wxPayIntentResult.value = if (e.statusCode == 403) {
                     FetchResult.LocalizedError(R.string.duplicate_purchase)
@@ -130,7 +130,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
                     return@launch
                 }
                 aliPayIntentResult.value = FetchResult.Success(aliOrder)
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 info(e)
                 val msgId = if (e.statusCode == 403) {
                     R.string.duplicate_purchase
@@ -169,7 +169,7 @@ class CheckOutViewModel : ViewModel(), AnkoLogger {
 
                 stripeSubsResult.value = FetchResult.Success(sub)
 
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 stripeSubsResult.value = if (e.type == "idempotency_error") {
                     FetchResult.Error(IdempotencyError())
                 } else {

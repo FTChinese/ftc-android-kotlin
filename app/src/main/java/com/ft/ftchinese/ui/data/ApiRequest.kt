@@ -1,7 +1,7 @@
 package com.ft.ftchinese.ui.data
 
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.AccountRepo
@@ -21,7 +21,7 @@ object ApiRequest : AnkoLogger {
             } ?: return FetchResult.LocalizedError(R.string.loading_failed)
 
             return FetchResult.Success(updatedAccount)
-        } catch (e: ClientError) {
+        } catch (e: ServerError) {
 
             info("Refresh account api error $e")
 

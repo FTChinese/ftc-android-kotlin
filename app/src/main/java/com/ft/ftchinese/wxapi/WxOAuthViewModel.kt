@@ -3,7 +3,7 @@ package com.ft.ftchinese.wxapi
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.WxSession
 import com.ft.ftchinese.model.request.WxAuthParams
@@ -110,7 +110,7 @@ class WxOAuthViewModel : BaseViewModel(), AnkoLogger {
             info("Loaded wechat account: $account")
 
             accountResult.value = FetchResult.Success(account)
-        } catch (e: ClientError) {
+        } catch (e: ServerError) {
             info("Retrieving wechat account error $e")
             progressLiveData.value = false
             accountResult.value = if (e.statusCode == 404) {

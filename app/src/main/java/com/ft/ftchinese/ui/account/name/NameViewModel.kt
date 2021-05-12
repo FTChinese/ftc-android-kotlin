@@ -4,7 +4,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.reader.BaseAccount
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.store.AccountCache
@@ -70,7 +70,7 @@ class NameViewModel : BaseViewModel() {
                     nameUpdated.value = FetchResult.Success(baseAccount)
                     clear()
                 }
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 val msgId = if (e.statusCode == 422) {
                     when (e.error?.key) {
                         "userName_already_exists" -> R.string.api_name_taken

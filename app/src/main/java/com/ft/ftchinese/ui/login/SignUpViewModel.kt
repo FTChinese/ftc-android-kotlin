@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.model.request.MobileLinkParams
@@ -107,7 +107,7 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
 
                 progressLiveData.value = false
                 accountResult.value = FetchResult.Success(account)
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 progressLiveData.value = false
                 handleSignUpError(e)
             } catch (e: Exception) {
@@ -146,7 +146,7 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
                 }
 
                 accountResult.value = FetchResult.Success(account)
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 progressLiveData.value = false
                 handleSignUpError(e)
             } catch (e: Exception) {
@@ -156,7 +156,7 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    private fun handleSignUpError(e: ClientError) {
+    private fun handleSignUpError(e: ServerError) {
         accountResult.value = when (e.statusCode) {
             422 -> {
                 if (e.error == null) {
@@ -201,7 +201,7 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
                 }
 
                 accountResult.value = FetchResult.Success(account)
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 info(e)
                 progressLiveData.value = false
                 handleSignUpError(e)

@@ -4,7 +4,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.model.request.PasswordResetLetterParams
 import com.ft.ftchinese.model.request.PasswordResetVerifier
@@ -108,7 +108,7 @@ class ForgotPasswordViewModel : BaseViewModel(), AnkoLogger {
 
                 letterSent.value = FetchResult.Success(ok)
                 progressLiveData.value = false
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 progressLiveData.value = false
                 letterSent.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.login_email_not_found)
@@ -148,7 +148,7 @@ class ForgotPasswordViewModel : BaseViewModel(), AnkoLogger {
                 }
 
                 verificationResult.value = FetchResult.Success(bearer)
-            } catch (e: ClientError) {
+            } catch (e: ServerError) {
                 progressLiveData.value = false
                 verificationResult.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.forgot_password_code_not_found)
