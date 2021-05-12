@@ -9,7 +9,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCustomerBinding
-import com.ft.ftchinese.model.stripesubs.StripeCustomer
+import com.ft.ftchinese.model.fetch.FetchError
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
@@ -17,7 +18,6 @@ import com.ft.ftchinese.ui.account.UIBankCard
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.ui.data.FetchResult
 import com.stripe.android.*
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
@@ -37,10 +37,6 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var paymentSession: PaymentSession
     private lateinit var binding: ActivityCustomerBinding
-
-    // retrieved in the payment session listener.
-    private var paymentMethod: PaymentMethod? = null
-    private var customer: StripeCustomer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +70,8 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
             CustomerViewModelFactory(fileCache)
         ).get(CustomerViewModel::class.java)
 
+        binding.handler = this
+
         connectionLiveData.observe(this, {
             customerViewModel.isNetworkAvailable.value = it
         })
@@ -81,34 +79,39 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
             customerViewModel.isNetworkAvailable.value = it
         }
 
-        customerViewModel.bankCardProgress.observe(this) {
-            binding.inProgress
+        customerViewModel.progressMediatorLiveData.observe(this) {
+            binding.inProgress = it
         }
 
-        customerViewModel.customerRetrieved.observe(this) {
+        customerViewModel.errorLiveData.observe(this) {
+            when (it) {
+                is FetchError.ResourceId -> toast(it.resId)
+                is FetchError.PlainText -> toast(it.message)
+            }
+        }
+
+        customerViewModel.customerLoaded.observe(this) {
+            info("Stripe customer loaded form API: $it")
+        }
+
+        customerViewModel.isFormEnabled.observe(this) {
+            binding.enableSubmit = it
+        }
+
+        customerViewModel.defaultIconVisible.observe(this) {
+            binding.defaultIconVisible = it
+        }
+
+        customerViewModel.paymentMethodUpdated.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
-                    customer = it.data
-                    isDefaultPaymentMethodSelected()
+                    toast(R.string.prompt_updated)
+                    customerViewModel.customerLoaded.value = it.data
                 }
             }
         }
-
-        customerViewModel.paymentMethodSet.observe(this) { result ->
-            when (result) {
-                is FetchResult.LocalizedError -> toast(result.msgId)
-                is FetchResult.Error -> result.exception.message?.let { toast(it) }
-                is FetchResult.Success -> {
-                    toast(R.string.prompt_saved)
-                    customer = result.data
-                    isDefaultPaymentMethodSelected()
-                }
-            }
-        }
-
-        binding.handler = this
 
         // Load customer from our API.
         sessionManager.loadAccount()?.let {
@@ -132,7 +135,6 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         )
 
         paymentSession.init(paymentSessionListener)
-        customerViewModel.paymentSessionProgress.value = true
         // Setup stripe customer session after ui initiated; otherwise the ui might be disabled if stripe customer data
         // is retrieved too quickly.
 
@@ -148,6 +150,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
             CustomerSession.getInstance()
             info("CustomerSession already instantiated")
         } catch (e: Exception) {
+            info("CustomerSession not instantiated.")
             info(e)
             // Pass ftc user id to subscription api,
             // which retrieves stripe's customer id and use
@@ -172,6 +175,9 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         override fun onCustomerRetrieved(customer: Customer) {
             info("Customer $customer")
             customerViewModel.customerSessionProgress.value = false
+            customer.email?.let {
+                binding.customerEmail = "Stripe账号 $it"
+            }
         }
 
         override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
@@ -191,50 +197,28 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
     private val paymentSessionListener = object : PaymentSession.PaymentSessionListener {
         override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
+            customerViewModel.customerSessionProgress.value = isCommunicating
             if (isCommunicating) {
-                customerViewModel.paymentSessionProgress.value = true
+                info("Payment session communicating...")
             } else {
-                customerViewModel.paymentSessionProgress.value = false
-
-                isDefaultPaymentMethodSelected()
+                info("Payment session stop communication")
             }
         }
 
         override fun onError(errorCode: Int, errorMessage: String) {
             toast(errorMessage)
-            customerViewModel.paymentSessionProgress.value = false
         }
 
         // Is  this used to handle payment method selection?
         override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
-            customerViewModel.paymentSessionProgress.value = false
+            info("Payment session data changed: $data")
+            data.paymentMethod?.let {
+                customerViewModel.paymentMethodSelected.value = it
 
-            val pm = data.paymentMethod
-            // TODO: remove this.
-            if (pm == null) {
-                binding.btnSetDefault.isEnabled = false
-                return
+                it.card?.let { card ->
+                    setCardText(card)
+                }
             }
-
-            paymentMethod = pm
-
-            pm.card?.let {
-                setCardText(it)
-                // Only enable the set default button if the selected payment method is not te default one.
-                isDefaultPaymentMethodSelected()
-            }
-        }
-    }
-
-    // UI data change is caused by 3 sources:
-    // SDK customer session;
-    // SDK payment session;
-    // Ftc API retrieve customer.
-    private fun isDefaultPaymentMethodSelected() {
-        binding.isDefaultPayMethod = if (paymentMethod == null || customer == null) {
-            false
-        } else {
-            paymentMethod?.id != customer?.defaultPaymentMethod
         }
     }
 
@@ -259,15 +243,9 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     // Set the selection payment method as default.
-    fun onSetDefaultPaymentMethod(view: View) {
-        val pmId = paymentMethod?.id
-        if (pmId == null) {
-            toast("请选择或添加支付方式")
-            return
-        }
-
+    fun onUpdatePaymentMethod(view: View) {
         sessionManager.loadAccount()?.let {
-            customerViewModel.setDefaultPaymentMethod(it, pmId)
+            customerViewModel.setDefaultPaymentMethod(it)
         }
     }
 
