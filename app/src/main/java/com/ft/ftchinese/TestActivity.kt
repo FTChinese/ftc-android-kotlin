@@ -47,7 +47,7 @@ import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.share.SocialShareFragment
-import com.ft.ftchinese.ui.wxlink.LinkParams
+import com.ft.ftchinese.ui.wxlink.WxEmailLink
 import com.ft.ftchinese.wxapi.WXEntryActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import com.google.firebase.messaging.FirebaseMessaging
@@ -690,7 +690,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                     return
                 }
                 LinkPreviewFragment(
-                    LinkParams(
+                    WxEmailLink(
                         ftc = current,
                         wx = Account(
                             id = "",
