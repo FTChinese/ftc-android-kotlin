@@ -25,7 +25,6 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
     val passwordLiveData = MutableLiveData("")
     val passwordValidator = LiveDataValidator(passwordLiveData).apply {
         addRule("密码不能为空", Validator::notEmpty)
-        addRule("长度不能少于8位", Validator.minLength(8))
     }
 
     val isFormEnabled = MediatorLiveData<Boolean>().apply {
