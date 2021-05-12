@@ -71,14 +71,13 @@ class LinkViewModel : BaseViewModel(), AnkoLogger {
                     )
                 }
 
-                progressLiveData.value = false
-
                 if (done) {
                     accountLinked.value = ApiRequest.asyncRefreshAccount(linkedAccount)
                     isFormEnabled.value = false
                 } else {
                     accountLinked.value = FetchResult.LocalizedError(R.string.loading_failed)
                 }
+                progressLiveData.value = false
             } catch (e: ServerError) {
                 progressLiveData.value = false
                 handleServerError(e)
