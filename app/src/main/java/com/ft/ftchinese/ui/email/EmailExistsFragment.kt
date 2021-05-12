@@ -41,7 +41,6 @@ class EmailExistsFragment : ScopedFragment(),
         binding.handler = this
         binding.lifecycleOwner = viewLifecycleOwner
 
-
         binding.emailInput.requestFocus()
     }
 

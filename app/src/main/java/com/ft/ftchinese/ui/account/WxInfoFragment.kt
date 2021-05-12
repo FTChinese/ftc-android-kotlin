@@ -129,6 +129,7 @@ class WxInfoFragment : ScopedFragment(),
             onAvatarRetrieved(it)
         })
 
+        // Set refreshing listener
         binding.swipeRefresh.setOnRefreshListener {
             onRefresh()
         }
