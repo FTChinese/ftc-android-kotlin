@@ -10,37 +10,38 @@ import com.ft.ftchinese.model.request.WxUnlinkParams
 import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.ui.data.ApiRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class UnlinkViewModel : BaseViewModel() {
 
-    val anchorSelected = MutableLiveData<UnlinkAnchor>()
-
-    val unlinkResult: MutableLiveData<FetchResult<Boolean>> by lazy {
-        MutableLiveData<FetchResult<Boolean>>()
-    }
+    private val anchorSelected = MutableLiveData<UnlinkAnchor>()
 
     fun selectAnchor(anchor: UnlinkAnchor) {
         anchorSelected.value = anchor
     }
 
+    val accountLoaded: MutableLiveData<FetchResult<Account>> by lazy {
+        MutableLiveData<FetchResult<Account>>()
+    }
+
     fun unlink(account: Account) {
         if (isNetworkAvailable.value == false) {
-            unlinkResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
+            accountLoaded.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
         val anchor = anchorSelected.value
 
         if (account.isMember && anchor == null) {
-            unlinkResult.value = FetchResult.LocalizedError(R.string.api_anchor_missing)
+            accountLoaded.value = FetchResult.LocalizedError(R.string.api_anchor_missing)
             return
         }
 
         if (account.unionId == null) {
-            unlinkResult.value = FetchResult.LocalizedError(R.string.unlink_missing_union_id)
+            accountLoaded.value = FetchResult.LocalizedError(R.string.unlink_missing_union_id)
             return
         }
 
@@ -56,25 +57,29 @@ class UnlinkViewModel : BaseViewModel() {
                     LinkRepo.unlink(account.unionId, params)
                 }
 
-                unlinkResult.value = FetchResult.Success(done)
+                if (done) {
+                    accountLoaded.value = ApiRequest.asyncRefreshAccount(account)
+                } else {
+                    accountLoaded.value = FetchResult.LocalizedError(R.string.loading_failed)
+                }
+                progressLiveData.value = false
             } catch (e: ServerError) {
                 val msgId = when (e.statusCode) {
-                    422 -> when (e.error?.key) {
-                        "anchor_missing_field" -> R.string.api_anchor_missing
-                        else -> null
-                    }
+                    422 -> if (e.error?.isFieldMissing("anchor") == true) {
+                        R.string.api_anchor_missing
+                    } else null
                     404 -> R.string.account_not_found
                     else -> null
                 }
 
-                unlinkResult.value = if (msgId != null) {
+                accountLoaded.value = if (msgId != null) {
                     FetchResult.LocalizedError(msgId)
                 } else {
                     FetchResult.fromServerError(e)
                 }
                 progressLiveData.value = false
             } catch (e: Exception) {
-                unlinkResult.value = FetchResult.fromException(e)
+                accountLoaded.value = FetchResult.fromException(e)
                 progressLiveData.value = false
             }
         }
