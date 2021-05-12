@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 
-data class LinkParams(
+data class WxEmailLink(
     val ftc: Account,
     val wx: Account,
     val loginMethod: LoginMethod,
