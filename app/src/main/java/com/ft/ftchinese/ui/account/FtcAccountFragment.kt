@@ -130,7 +130,10 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
             }
 
             toast(R.string.refreshing_account)
-            accountViewModel.refresh(acnt)
+            accountViewModel.refresh(
+                account = acnt,
+                manual = true,
+            )
         }
     }
 
