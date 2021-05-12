@@ -1,8 +1,8 @@
 package com.ft.ftchinese.ui.wxlink
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,12 +13,10 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentLinkPreviewBinding
-import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.util.RequestCode
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
@@ -32,7 +30,7 @@ import org.jetbrains.anko.support.v4.toast
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class LinkPreviewFragment(
-    private val params: LinkParams
+    private val params: WxEmailLink
 ) : ScopedBottomSheetDialogFragment(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
@@ -77,7 +75,6 @@ class LinkPreviewFragment(
         connectionLiveData.observe(this) {
             linkViewModel.isNetworkAvailable.value = it
         }
-
         activity?.isConnected?.let {
             linkViewModel.isNetworkAvailable.value
         }
@@ -97,18 +94,19 @@ class LinkPreviewFragment(
 
         linkViewModel.accountLinked.observe(this) {
             when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.LocalizedError -> {
+                    AlertDialog.Builder(requireContext())
+                        .setMessage(it.msgId)
+                        .setPositiveButton(R.string.action_ok) { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .create()
+                        .show()
+                }
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
                     toast(R.string.prompt_linked)
                     sessionManager.saveAccount(it.data)
-                    /**
-                     * Pass data back to [LinkFtcActivity].
-                     * If this activity is started from WxEntryActivity,
-                     * it is meaningless to pass data back.
-                     * Unwrapping chain:
-                     * [AccountActivity] <- [LinkFtcActivity] <- current activity.
-                     */
                     activity?.setResult(Activity.RESULT_OK)
                     activity?.finish()
                 }
@@ -126,14 +124,12 @@ class LinkPreviewFragment(
             replace(R.id.frag_ftc_account, LinkTargetFragment.newInstance(
                 m = params.ftc.membership,
                 heading = "${getString(R.string.label_ftc_account)}\n${params.ftc.email}"
-            )
-            )
+            ))
 
             replace(R.id.frag_wx_account, LinkTargetFragment.newInstance(
                 m = params.wx.membership,
                 heading = "${getString(R.string.label_wx_account)}\n${params.wx.wechat.nickname}"
-            )
-            )
+            ))
         }
 
         val result = params.link(requireContext())
@@ -148,18 +144,5 @@ class LinkPreviewFragment(
 
     fun onClickLink(view: View) {
         linkViewModel.link()
-    }
-
-    companion object {
-        private const val EXTRA_ACCOUNT = "extra_account"
-
-        @Deprecated("")
-        fun startForResult(activity: Activity?, account: Account) {
-            val intent = Intent(activity, LinkPreviewFragment::class.java).apply {
-                putExtra(EXTRA_ACCOUNT, account)
-            }
-
-            activity?.startActivityForResult(intent, RequestCode.LINK)
-        }
     }
 }
