@@ -14,7 +14,6 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.customer.CustomerActivity
 import com.ft.ftchinese.ui.customer.CustomerViewModel
 import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
@@ -23,7 +22,6 @@ import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.viewmodel.WxRefreshState
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.toast
 
 /**
  * Show user's account details.
@@ -37,7 +35,7 @@ class AccountActivity : ScopedAppActivity(),
         AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var viewModel: AccountViewModel
+    private lateinit var accountViewModel: AccountViewModel
     private lateinit var binding: ActivityAccountBinding
 
     private lateinit var customerViewModel: CustomerViewModel
@@ -55,7 +53,7 @@ class AccountActivity : ScopedAppActivity(),
 
         sessionManager = SessionManager.getInstance(this)
 
-        viewModel = ViewModelProvider(this)
+        accountViewModel = ViewModelProvider(this)
             .get(AccountViewModel::class.java)
 
         customerViewModel = ViewModelProvider(
@@ -64,11 +62,11 @@ class AccountActivity : ScopedAppActivity(),
         ).get(CustomerViewModel::class.java)
 
         connectionLiveData.observe(this) {
-            viewModel.isNetworkAvailable.value = it
+            accountViewModel.isNetworkAvailable.value = it
         }
 
         isConnected.let {
-            viewModel.isNetworkAvailable.value = it
+            accountViewModel.isNetworkAvailable.value = it
         }
 
         setupViewModel()
@@ -76,7 +74,7 @@ class AccountActivity : ScopedAppActivity(),
     }
 
     private fun setupViewModel() {
-        viewModel.progressLiveData.observe(this, {
+        accountViewModel.progressLiveData.observe(this, {
             binding.inProgress = it
         })
 
@@ -84,24 +82,13 @@ class AccountActivity : ScopedAppActivity(),
             binding.inProgress = it
         }
 
-        customerViewModel.customerCreated.observe(this) {
-            when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
-                is FetchResult.Success -> {
-                    sessionManager.saveStripeId(it.data.id)
-                    CustomerActivity.start(this)
-                }
-            }
-        }
-
-        viewModel.uiType.observe(this, {
+        accountViewModel.uiType.observe(this, {
             initUI()
         })
 
         // Launch wechat authorization if access token
         // expired.
-        viewModel.wxRefreshResult.observe(this, Observer {
+        accountViewModel.wxRefreshResult.observe(this, Observer {
             if (it !is FetchResult.Success) {
                 return@Observer
             }
