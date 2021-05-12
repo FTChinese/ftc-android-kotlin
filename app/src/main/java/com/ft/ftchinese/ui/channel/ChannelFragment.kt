@@ -31,7 +31,7 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch

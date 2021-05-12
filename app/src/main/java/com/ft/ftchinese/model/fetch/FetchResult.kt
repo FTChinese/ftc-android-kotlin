@@ -1,7 +1,6 @@
-package com.ft.ftchinese.ui.data
+package com.ft.ftchinese.model.fetch
 
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ClientError
 
 /**
  * A generic class that holds a value with its loading status.

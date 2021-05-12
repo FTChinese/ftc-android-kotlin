@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentCartItemBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import org.jetbrains.anko.support.v4.toast
 
 /**

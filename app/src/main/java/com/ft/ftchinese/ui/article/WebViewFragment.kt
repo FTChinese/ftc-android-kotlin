@@ -24,7 +24,7 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.WVViewModel
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger

@@ -8,7 +8,7 @@ import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.model.request.PasswordResetParams
 import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator

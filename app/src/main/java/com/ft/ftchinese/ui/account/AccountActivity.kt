@@ -20,7 +20,7 @@ import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.viewmodel.WxRefreshState
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast

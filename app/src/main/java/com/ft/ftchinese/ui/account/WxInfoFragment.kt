@@ -20,7 +20,7 @@ import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.ui.wxlink.UnlinkActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.viewmodel.WxRefreshState
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info

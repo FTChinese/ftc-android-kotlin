@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.data
 
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.ClientError
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.AccountRepo
 import kotlinx.coroutines.Dispatchers

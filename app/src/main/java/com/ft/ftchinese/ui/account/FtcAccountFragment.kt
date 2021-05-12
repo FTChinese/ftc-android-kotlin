@@ -19,7 +19,7 @@ import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.customer.CreateCustomerDialogFragment
 import com.ft.ftchinese.ui.customer.CustomerActivity
 import com.ft.ftchinese.ui.customer.CustomerViewModel
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.lists.TwoLineItemViewHolder
 import com.ft.ftchinese.ui.wxlink.LinkWxDialogFragment
 import com.ft.ftchinese.viewmodel.AccountViewModel

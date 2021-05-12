@@ -13,7 +13,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 

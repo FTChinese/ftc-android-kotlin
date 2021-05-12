@@ -26,7 +26,7 @@ import com.ft.ftchinese.ui.paywall.CustomerServiceFragment
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat

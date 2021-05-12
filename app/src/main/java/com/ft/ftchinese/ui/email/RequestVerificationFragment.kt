@@ -11,7 +11,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentRequestVerificationBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.alert
 import org.jetbrains.anko.support.v4.toast

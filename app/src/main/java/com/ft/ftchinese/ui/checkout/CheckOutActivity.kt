@@ -31,7 +31,7 @@ import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.ui.customer.CustomerViewModel
 import com.ft.ftchinese.ui.customer.CreateCustomerDialogFragment
 import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI

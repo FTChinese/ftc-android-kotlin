@@ -17,7 +17,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.util.RequestCode
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick

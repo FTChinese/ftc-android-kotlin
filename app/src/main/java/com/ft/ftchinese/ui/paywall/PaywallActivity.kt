@@ -27,7 +27,7 @@ import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.product.ProductFragment
 import com.ft.ftchinese.ui.product.ProductViewModel
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import io.noties.markwon.Markwon
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info

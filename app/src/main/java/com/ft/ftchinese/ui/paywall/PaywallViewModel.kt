@@ -14,7 +14,7 @@ import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

@@ -15,7 +15,7 @@ import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.stripesubs.SubParams
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.viewmodel.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -24,7 +24,7 @@ import com.ft.ftchinese.service.AudioService
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.viewmodel.AudioViewModel
 import com.ft.ftchinese.viewmodel.AudioViewModelFactory
 import com.google.android.exoplayer2.MediaItem

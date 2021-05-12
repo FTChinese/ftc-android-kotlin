@@ -21,7 +21,7 @@ import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.formatter.formatEdition
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.ft.ftchinese.ui.member.MemberActivity

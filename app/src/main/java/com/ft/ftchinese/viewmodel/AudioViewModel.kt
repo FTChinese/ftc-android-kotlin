@@ -13,7 +13,7 @@ import com.ft.ftchinese.model.fetch.ClientError
 import com.ft.ftchinese.repository.ContentAPIRepo
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

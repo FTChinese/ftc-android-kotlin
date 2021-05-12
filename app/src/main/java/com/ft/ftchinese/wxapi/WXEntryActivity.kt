@@ -14,7 +14,7 @@ import com.ft.ftchinese.model.reader.WxOAuth
 import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.wxlink.LinkParams
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment

@@ -9,12 +9,10 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUnlinkBinding
-import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi

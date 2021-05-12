@@ -14,7 +14,7 @@ import com.ft.ftchinese.databinding.ActivityAuthBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.email.EmailExistsFragment
 import com.ft.ftchinese.ui.mobile.MobileFragment

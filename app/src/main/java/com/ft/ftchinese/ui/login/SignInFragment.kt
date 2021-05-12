@@ -19,7 +19,7 @@ import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.wxlink.LinkParams

@@ -9,7 +9,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.ApiRequest
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

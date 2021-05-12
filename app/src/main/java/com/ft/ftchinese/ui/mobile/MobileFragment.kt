@@ -17,7 +17,7 @@ import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.login.SignInFragment
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info

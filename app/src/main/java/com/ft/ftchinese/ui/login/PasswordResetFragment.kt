@@ -13,7 +13,7 @@ import com.ft.ftchinese.databinding.FragmentPasswordResetBinding
 import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast

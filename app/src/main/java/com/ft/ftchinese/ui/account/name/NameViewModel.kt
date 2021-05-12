@@ -9,7 +9,7 @@ import com.ft.ftchinese.model.reader.BaseAccount
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.Validator
 import kotlinx.coroutines.Dispatchers

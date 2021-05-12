@@ -10,7 +10,7 @@ import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.model.request.MobileLinkParams
 import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.Validator
 import kotlinx.coroutines.Dispatchers

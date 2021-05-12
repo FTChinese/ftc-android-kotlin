@@ -15,7 +15,7 @@ import com.ft.ftchinese.repository.ArticleClient
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.share.SocialAppId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

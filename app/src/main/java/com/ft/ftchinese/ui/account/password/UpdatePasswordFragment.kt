@@ -11,7 +11,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentUpdatePasswordBinding
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.data.FetchResult
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.login.ForgotPasswordActivity
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
