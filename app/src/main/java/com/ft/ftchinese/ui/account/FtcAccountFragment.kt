@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentFtcAccountBinding
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
@@ -19,11 +20,10 @@ import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.customer.CreateCustomerDialogFragment
 import com.ft.ftchinese.ui.customer.CustomerActivity
 import com.ft.ftchinese.ui.customer.CustomerViewModel
-import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
 import com.ft.ftchinese.ui.lists.TwoLineItemViewHolder
 import com.ft.ftchinese.ui.wxlink.LinkWxDialogFragment
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
@@ -105,6 +105,17 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
                 }
             }
         }
+
+        customerViewModel.customerCreated.observe(viewLifecycleOwner) {
+            when (it) {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> {
+                    sessionManager.saveStripeId(it.data.id)
+                    CustomerActivity.start(context)
+                }
+            }
+        }
     }
 
     private fun initUI() {
@@ -170,8 +181,8 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
                 CreateCustomerDialogFragment()
                     .onPositiveButtonClicked { dialog, _ ->
                         AccountCache.get()?.let {
-                            customerViewModel.createCustomer(it)
                             toast(R.string.stripe_init)
+                            customerViewModel.createCustomer(it)
                             dialog.dismiss()
                         }
                     }
