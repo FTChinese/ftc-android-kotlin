@@ -65,6 +65,7 @@ class UnlinkActivity : ScopedAppActivity() {
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
                     toast(R.string.prompt_unlinked)
+                    sessionManager.saveAccount(it.data)
                     setResult(Activity.RESULT_OK)
                     finish()
                 }
