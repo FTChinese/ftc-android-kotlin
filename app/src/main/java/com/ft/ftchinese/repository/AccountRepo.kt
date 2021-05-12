@@ -141,16 +141,18 @@ object AccountRepo {
      * Asks the API to refresh current wechat user's access token and information.
      */
     fun refreshWxInfo(wxSession: WxSession): Boolean {
-        val (resp, _) = Fetch().put(Endpoint.wxRefresh)
-                .noCache()
-                .setAppId()
-                .setTimeout(30)
-                .sendJson(Klaxon().toJsonString(mapOf(
-                        "sessionId" to wxSession.sessionId
-                )))
-                .endJsonText()
+        val (resp, _) = Fetch()
+            .post(Endpoint.wxRefresh)
+            .noCache()
+            .setAppId()
+            .setTimeout(30)
+            .sendJson(Klaxon().toJsonString(mapOf(
+                    "sessionId" to wxSession.sessionId
+            )))
+            .endJsonText()
 
-        return resp.code == 204
+        // The server API might change and return data in the future.
+        return resp.code == 204 || resp.code == 200
     }
 
     fun loadWxAvatar(url: String): ByteArray? {
