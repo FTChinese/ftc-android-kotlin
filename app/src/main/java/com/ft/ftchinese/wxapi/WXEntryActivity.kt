@@ -16,7 +16,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.login.AuthActivity
-import com.ft.ftchinese.ui.wxlink.LinkParams
+import com.ft.ftchinese.ui.wxlink.WxEmailLink
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
@@ -127,7 +127,7 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                         WxOAuthIntent.LINK -> {
                             sessionManager.loadAccount()?.let { current ->
                                 LinkPreviewFragment(
-                                    LinkParams(
+                                    WxEmailLink(
                                         ftc = current,
                                         wx = result.data,
                                         loginMethod = current.loginMethod ?: LoginMethod.EMAIL
