@@ -214,6 +214,10 @@
     <string name="instruct_bind_login">邮箱 %1$s 已经注册了FT中文网账号，请输入密码验证身份，即可绑定微信账号和邮箱</string>
     <string name="instruct_sign_up">该邮箱尚未注册FT中文网账号，请设置密码创建账号</string>
 
+    <!--  Stripe Customer setting  -->
+    <string name="stripe_no_payment_selected">请选择或添加支付方式</string>
+    <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
+
     <!-- Account related -->
     <string name="label_current_name">当前用户名</string>
     <string name="label_user_name">用户名</string>
@@ -322,7 +326,6 @@
     <string name="stripe_cancel">取消Stripe订阅</string>
     <string name="reactivate_auto_renew">打开自动续订</string>
     <string name="retrieve_customer">查询Stripe账号&#8230;</string>
-    <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
     <string name="card_brand_last4">%1$s (尾号%2$s)</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
     <string name="stripe_in_pounds">* 使用Stripe订阅FT中文网会员以英镑计价</string>
