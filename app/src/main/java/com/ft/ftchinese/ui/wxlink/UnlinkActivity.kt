@@ -56,6 +56,7 @@ class UnlinkActivity : ScopedAppActivity() {
             linkViewModel.isNetworkAvailable.value = it
         }
 
+        binding.handler = this
         setupViewModel()
         initUI()
     }
@@ -73,7 +74,7 @@ class UnlinkActivity : ScopedAppActivity() {
         linkViewModel.unlinkResult.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { toast(it) }
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
                     toast(R.string.prompt_unlinked)
 
