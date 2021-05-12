@@ -80,6 +80,7 @@ object StripeClient : AnkoLogger {
         }
     }
 
+    // TODO: define a class for the parameters.
     fun setDefaultPaymentMethod(account: Account, pmId: String): JSONResult<StripeCustomer>? {
         val (_, body) = Fetch()
             .post("$baseUrl/customers/${account.stripeId}/default-payment-method")
