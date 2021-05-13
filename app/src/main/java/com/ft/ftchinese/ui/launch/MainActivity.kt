@@ -152,12 +152,6 @@ class MainActivity : ScopedAppActivity(),
 
         setupSplashScreen()
 
-//        try {
-//            DownloadService.start(this, AudioDownloadService::class.java)
-//        } catch (e: Exception) {
-//            DownloadService.startForeground(this, AudioDownloadService::class.java)
-//        }
-
         showTermsAndConditions()
         setupWorker()
     }
