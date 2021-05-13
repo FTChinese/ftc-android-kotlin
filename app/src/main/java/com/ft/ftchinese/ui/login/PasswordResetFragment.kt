@@ -77,10 +77,10 @@ class PasswordResetFragment(
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
                     if (it.data) {
-                        toast("Password reset successfully.")
+                        toast(R.string.reset_password_success)
                         activity?.finish()
                     } else {
-                        toast("Password reset failed. Please retry later")
+                        toast(R.string.reset_password_failure)
                     }
                 }
             }
