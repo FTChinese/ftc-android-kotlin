@@ -18,6 +18,7 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.ui.base.SimpleDialogFragment
 import com.ft.ftchinese.ui.login.SignInFragment
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -104,7 +105,7 @@ class MobileFragment : ScopedFragment(), AnkoLogger {
 
         viewModel.codeSent.observe(viewLifecycleOwner) {
             when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.LocalizedError -> onSendCodeError(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
                     toast("验证码已发送")
@@ -121,6 +122,7 @@ class MobileFragment : ScopedFragment(), AnkoLogger {
                 )
         }
 
+        // Used for login.
         viewModel.accountLoaded.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
@@ -141,9 +143,10 @@ class MobileFragment : ScopedFragment(), AnkoLogger {
             }
         }
 
+        // Used for updating mobile.
         viewModel.mobileUpdated.observe(viewLifecycleOwner) {
             when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.LocalizedError -> onUpdateError(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
                     toast(R.string.prompt_updated)
@@ -155,6 +158,28 @@ class MobileFragment : ScopedFragment(), AnkoLogger {
                         }
                 }
             }
+        }
+    }
+
+    private fun onSendCodeError(msgId: Int) {
+        if (msgId == R.string.mobile_conflict) {
+            SimpleDialogFragment
+                .newInstance(getString(msgId))
+                .show(childFragmentManager, "AlertMobileCodeError")
+        } else {
+            toast(msgId)
+        }
+    }
+
+    private fun onUpdateError(msgId: Int) {
+        when (msgId) {
+            R.string.mobile_code_not_found,
+            R.string.mobile_already_exists -> {
+                SimpleDialogFragment
+                    .newInstance(getString(msgId))
+                    .show(childFragmentManager, "AlertUpdateMobileError")
+            }
+            else -> toast(msgId)
         }
     }
 
