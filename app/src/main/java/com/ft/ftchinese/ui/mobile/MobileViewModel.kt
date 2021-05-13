@@ -18,10 +18,7 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -43,9 +40,7 @@ class MobileViewModel : BaseViewModel(), AnkoLogger {
     }
 
     val counterLiveData = MutableLiveData<Int>()
-
-    private val isDirty: Boolean
-        get() = !mobileLiveData.value.isNullOrBlank() && !codeLiveData.value.isNullOrBlank()
+    private var job: Job? = null
 
     private val formValidator = LiveDataValidatorResolver(listOf(mobileValidator, codeValidator))
 
@@ -64,6 +59,22 @@ class MobileViewModel : BaseViewModel(), AnkoLogger {
         }
     }
 
+    private fun enableCodeRequest(): Boolean {
+        if (progressLiveData.value == true) {
+            return false
+        }
+
+        if (mobileLiveData.value.isNullOrBlank()) {
+            return false
+        }
+
+        if (counterLiveData.value != 0) {
+            return false
+        }
+
+        return mobileValidator.isValid()
+    }
+
     val isFormEnabled = MediatorLiveData<Boolean>().apply {
         addSource(mobileLiveData) {
             value = enableForm()
@@ -76,24 +87,31 @@ class MobileViewModel : BaseViewModel(), AnkoLogger {
         }
     }
 
-    private fun enableCodeRequest(): Boolean {
-        if (counterLiveData.value != 0) {
+    private fun enableForm(): Boolean {
+        if (progressLiveData.value == true) {
             return false
         }
-        return progressLiveData.value == false && !mobileLiveData.value.isNullOrBlank() && mobileValidator.isValid()
-    }
-
-    private fun enableForm(): Boolean {
-        return progressLiveData.value == false && isDirty && formValidator.isValid()
+        if (mobileLiveData.value.isNullOrBlank()) {
+            return false
+        }
+        if (codeLiveData.value.isNullOrBlank()) {
+            return false
+        }
+        return formValidator.isValid()
     }
 
     private fun startCounting() {
-        viewModelScope.launch(Dispatchers.Main) {
+        job = viewModelScope.launch(Dispatchers.Main) {
             for (i in 60 downTo 0) {
                 counterLiveData.value = i
                 delay(1000)
             }
         }
+    }
+
+    private fun clearCounter() {
+        job?.cancel()
+        counterLiveData.value = 0
     }
 
     init {
@@ -155,8 +173,9 @@ class MobileViewModel : BaseViewModel(), AnkoLogger {
 
                 progressLiveData.value = false
             } catch (e: Exception) {
-                codeSent.value = FetchResult.fromException(e)
                 progressLiveData.value = false
+                clearCounter()
+                codeSent.value = FetchResult.fromException(e)
             }
         }
     }
@@ -200,8 +219,9 @@ class MobileViewModel : BaseViewModel(), AnkoLogger {
 
                 loadByFtcID(found.id)
             } catch (e: Exception) {
-                accountLoaded.value = FetchResult.fromException(e)
                 progressLiveData.value = false
+                clearCounter()
+                accountLoaded.value = FetchResult.fromException(e)
             }
         }
     }
@@ -252,13 +272,31 @@ class MobileViewModel : BaseViewModel(), AnkoLogger {
                 if (ok) {
                     codeSent.value = FetchResult.Success(true)
                 } else {
-                    codeSent.value = FetchResult.Error(Exception("Unknown error occurred!"))
+                    codeSent.value = FetchResult.LocalizedError(R.string.error_unknown)
                 }
 
                 progressLiveData.value = false
-            } catch (e: Exception) {
-                codeSent.value = FetchResult.fromException(e)
+            } catch (e: ServerError) {
                 progressLiveData.value = false
+                clearCounter()
+                codeSent.value = when (e.statusCode) {
+                    404 -> FetchResult.LocalizedError(R.string.account_not_found)
+                    422 -> if (e.error == null) {
+                        FetchResult.fromServerError(e)
+                    } else {
+                        when {
+                            // Alert this message
+                            e.error.isFieldAlreadyExists("mobile") -> FetchResult.LocalizedError(R.string.mobile_conflict)
+                            e.error.isFieldInvalid("mobile") -> FetchResult.LocalizedError(R.string.mobile_invalid)
+                            else -> FetchResult.fromServerError(e)
+                        }
+                    }
+                    else -> FetchResult.fromServerError(e)
+                }
+            } catch (e: Exception) {
+                progressLiveData.value = false
+                clearCounter()
+                codeSent.value = FetchResult.fromException(e)
             }
         }
     }
@@ -286,9 +324,27 @@ class MobileViewModel : BaseViewModel(), AnkoLogger {
                 }
 
                 progressLiveData.value = false
-            } catch (e: Exception) {
-                mobileUpdated.value = FetchResult.fromException(e)
+            } catch (e: ServerError) {
                 progressLiveData.value = false
+                clearCounter()
+                mobileUpdated.value = when (e.statusCode) {
+                    404 -> FetchResult.LocalizedError(R.string.mobile_code_not_found)
+                    422 -> if (e.error == null) {
+                        FetchResult.fromServerError(e)
+                    } else {
+                        when {
+                            e.error.isFieldAlreadyExists("mobile") -> FetchResult.LocalizedError(R.string.mobile_already_exists)
+                            e.error.isFieldInvalid("mobile") -> FetchResult.LocalizedError(R.string.mobile_invalid)
+                            e.error.isFieldInvalid("code") -> FetchResult.LocalizedError(R.string.mobile_code_invalid)
+                            else -> FetchResult.fromServerError(e)
+                        }
+                    }
+                    else -> FetchResult.fromServerError(e)
+                }
+            } catch (e: Exception) {
+                progressLiveData.value = false
+                clearCounter()
+                mobileUpdated.value = FetchResult.fromException(e)
             }
         }
     }
