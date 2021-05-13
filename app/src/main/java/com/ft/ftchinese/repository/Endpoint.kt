@@ -27,7 +27,6 @@ private const val devIP = "http://192.168.10.109"
 
 object Endpoint {
 
-
     private val authEmailBase = "${subsBase()}/auth/email"
     val emailExists = "${authEmailBase}/exists"
     val emailLogin = "${authEmailBase}/login"
@@ -42,8 +41,9 @@ object Endpoint {
     val passwordResetLetter = "${passwordReset}/letter"
     val passwordResetCodes = "${passwordReset}/codes"
 
-    val wxLogin = "${subsBase()}/wx/login"
-    val wxRefresh = "${subsBase()}/wx/refresh"
+    private val authWxBase = "${subsBase()}/auth"
+    val wxLogin = "${authWxBase}/wx/login"
+    val wxRefresh = "${authWxBase}/wx/refresh"
 
     val ftcAccount = "${subsBase()}/account"
     val email = "${ftcAccount}/email"
