@@ -38,7 +38,7 @@ class StoryBuilder(private val template: String) : AnkoLogger {
         }
         ctx["<!-- AndroidUserInfo -->"] = """
 <script>
-var androidUserInfo = ${json.toJsonString(account)};
+var androidUserInfo = ${account.toJsonString()};
 </script>""".trimIndent()
 
         return this
@@ -148,8 +148,6 @@ var androidUserInfo = ${json.toJsonString(account)};
 
         return this
     }
-
-
 
     fun render(): String {
         var result = template
