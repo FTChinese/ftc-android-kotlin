@@ -38,10 +38,6 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
         MutableLiveData<FetchResult<InputStream>>()
     }
 
-    val wxRefreshResult: MutableLiveData<FetchResult<WxRefreshState>> by lazy {
-        MutableLiveData<FetchResult<WxRefreshState>>()
-    }
-
     val addOnResult: MutableLiveData<FetchResult<Membership>> by lazy {
         MutableLiveData<FetchResult<Membership>>()
     }
