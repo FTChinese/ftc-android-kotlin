@@ -39,6 +39,7 @@ class AccountActivity : ScopedAppActivity(),
     private lateinit var binding: ActivityAccountBinding
 
     private lateinit var customerViewModel: CustomerViewModel
+    private lateinit var wxInfoViewModel: WxInfoViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,12 +62,19 @@ class AccountActivity : ScopedAppActivity(),
             CustomerViewModelFactory(FileCache(this)),
         ).get(CustomerViewModel::class.java)
 
+        wxInfoViewModel = ViewModelProvider(this)
+            .get(WxInfoViewModel::class.java)
+
         connectionLiveData.observe(this) {
             accountViewModel.isNetworkAvailable.value = it
+            customerViewModel.isNetworkAvailable.value = it
+            wxInfoViewModel.isNetworkAvailable.value = it
         }
 
         isConnected.let {
             accountViewModel.isNetworkAvailable.value = it
+            customerViewModel.isNetworkAvailable.value = it
+            wxInfoViewModel.isNetworkAvailable.value = it
         }
 
         setupViewModel()
@@ -82,24 +90,9 @@ class AccountActivity : ScopedAppActivity(),
             binding.inProgress = it
         }
 
-        accountViewModel.uiType.observe(this, {
+        accountViewModel.uiSwitched.observe(this) {
             initUI()
-        })
-
-        // Launch wechat authorization if access token
-        // expired.
-        accountViewModel.wxRefreshResult.observe(this, Observer {
-            if (it !is FetchResult.Success) {
-                return@Observer
-            }
-            if (it.data == WxRefreshState.ReAuth) {
-
-                WxExpireDialogFragment()
-                    .show(supportFragmentManager, "WxExpireDialog")
-
-                sessionManager.logout()
-            }
-        })
+        }
     }
 
     private fun initUI() {
@@ -136,7 +129,9 @@ class AccountActivity : ScopedAppActivity(),
             return
         }
 
-        // If user linked accounts, reload ui.
+        // UNLINK is Passsed back from WxInfoActivity;
+        // LINK is passed from WXEntryActivity.
+        // Used when user is logged in using email account.
         if (requestCode == RequestCode.LINK || requestCode == RequestCode.UNLINK) {
             initUI()
         }
