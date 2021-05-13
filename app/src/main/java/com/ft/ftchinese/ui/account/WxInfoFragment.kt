@@ -98,7 +98,7 @@ class WxInfoFragment : ScopedFragment(), SwipeRefreshLayout.OnRefreshListener,
         }
 
         // Avatar
-        infoViewModel.avatarLoaded.observe(viewLifecycleOwner, {
+        infoViewModel.avatarLoaded.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error ->  it.exception.message?.let { msg -> toast(msg) }
@@ -111,18 +111,6 @@ class WxInfoFragment : ScopedFragment(), SwipeRefreshLayout.OnRefreshListener,
                     )
                 }
             }
-        })
-
-        // Set refreshing listener
-        binding.swipeRefresh.setOnRefreshListener(this)
-
-        // Initial loading avatar.
-        sessionManager.loadAccount()?.let {
-            // Start fetching wechat avatar in background.
-            infoViewModel.loadAvatar(
-                it.wechat,
-                cache,
-            )
         }
     }
 
@@ -154,10 +142,15 @@ class WxInfoFragment : ScopedFragment(), SwipeRefreshLayout.OnRefreshListener,
             // Wechat OAuth expired if the account is linked.
             binding.swipeRefresh.isEnabled = it.isWxOnly
 
-            if (it.wechat.isEmpty) {
-                toast(R.string.wechat_not_found)
-                return
-            }
+            // Set refreshing listener
+            binding.swipeRefresh.setOnRefreshListener(this)
+
+            // Initial loading avatar.
+            // Start fetching wechat avatar in background.
+            infoViewModel.loadAvatar(
+                it.wechat,
+                cache,
+            )
         }
     }
 
