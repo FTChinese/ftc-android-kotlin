@@ -26,7 +26,9 @@ import java.io.InputStream
 
 class AccountViewModel : BaseViewModel(), AnkoLogger {
 
-    val uiType = MutableLiveData<LoginMethod>()
+    val uiSwitched: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
 
     val accountRefreshed: MutableLiveData<FetchResult<Account>> by lazy {
         MutableLiveData<FetchResult<Account>>()
@@ -54,42 +56,6 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
 
     val ordersResult: MutableLiveData<FetchResult<List<Order>>> by lazy {
         MutableLiveData<FetchResult<List<Order>>>()
-    }
-
-    // Ask API to fetch user's latest wechat info and save
-    // it to database.
-    fun refreshWxInfo(wxSession: WxSession) {
-        if (isNetworkAvailable.value == false) {
-            wxRefreshResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val done = withContext(Dispatchers.IO) {
-                    AccountRepo.refreshWxInfo(wxSession)
-                }
-
-                info("Refresh wx info result: $done")
-                wxRefreshResult.value = if (done) {
-                    FetchResult.Success(WxRefreshState.SUCCESS)
-                } else {
-                    FetchResult.Success(WxRefreshState.ReAuth)
-                }
-
-            } catch (e: ServerError) {
-                info("Refresh wx info api error: $e")
-                wxRefreshResult.value = when (e.statusCode) {
-                    422 -> FetchResult.Success(WxRefreshState.ReAuth)
-                    404 -> FetchResult.LocalizedError(R.string.account_not_found)
-                    else -> FetchResult.fromServerError(e)
-                }
-
-            } catch (e: Exception) {
-                info("Refresh wx info exception: $e")
-                wxRefreshResult.value = FetchResult.fromException(e)
-            }
-        }
     }
 
     // Refresh a user's account data, regardless of logged in
@@ -304,15 +270,6 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                 iapRefreshResult.value = FetchResult.fromException(e)
             }
         }
-    }
-
-    fun switchUI(m: LoginMethod) {
-        uiType.value = m
-    }
-
-    // Show re-authorzation dialog for wechat.
-    fun showReAuth() {
-        wxRefreshResult.value = FetchResult.Success(WxRefreshState.ReAuth)
     }
 
     fun fetchOrders(account: Account) {
