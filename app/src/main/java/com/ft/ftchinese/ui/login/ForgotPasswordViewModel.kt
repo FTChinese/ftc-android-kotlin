@@ -15,6 +15,7 @@ import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
@@ -73,6 +74,15 @@ class ForgotPasswordViewModel : BaseViewModel(), AnkoLogger {
         return progressLiveData.value == false && isDirty && formValidator.isValid()
     }
 
+    private fun startCounting() {
+        viewModelScope.launch(Dispatchers.Main) {
+            for (i in 60 downTo 0) {
+                counterLiveData.value = i
+                delay(1000)
+            }
+        }
+    }
+
     init {
         counterLiveData.value = 0
         progressLiveData.value = false
@@ -100,6 +110,7 @@ class ForgotPasswordViewModel : BaseViewModel(), AnkoLogger {
             email = emailLiveData.value ?: ""
         )
 
+        startCounting()
         viewModelScope.launch {
             try {
                 val ok = withContext(Dispatchers.IO) {
