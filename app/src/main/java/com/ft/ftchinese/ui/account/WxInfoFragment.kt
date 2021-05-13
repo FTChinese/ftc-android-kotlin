@@ -8,36 +8,31 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentWxAccountBinding
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.ui.wxlink.UnlinkActivity
-import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.viewmodel.WxRefreshState
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
-import java.io.InputStream
 
 /**
  * Contained both by [AccountActivity] and [WxInfoActivity]
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class WxInfoFragment : ScopedFragment(),
+class WxInfoFragment : ScopedFragment(), SwipeRefreshLayout.OnRefreshListener,
         AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var cache: FileCache
-    private lateinit var accountViewModel: AccountViewModel
     private lateinit var binding: FragmentWxAccountBinding
 
     private lateinit var infoViewModel: WxInfoViewModel
@@ -68,32 +63,21 @@ class WxInfoFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // TODO: remove this
-        accountViewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(AccountViewModel::class.java)
-        } ?: throw Exception("Invalid Exception")
-
         infoViewModel = activity?.run {
             ViewModelProvider(this)
                 .get(WxInfoViewModel::class.java)
         } ?: throw Exception("Invalid exception")
 
-        connectionLiveData.observe(viewLifecycleOwner) {
-            infoViewModel.isNetworkAvailable.value = it
-        }
-        activity?.isConnected?.let {
-            infoViewModel.isNetworkAvailable.value = it
-        }
-
         binding.handler = this
+        binding.viewModel = infoViewModel
+        binding.lifecycleOwner = viewLifecycleOwner
 
         setupViewModel()
         initUI()
     }
 
     private fun setupViewModel() {
-        infoViewModel.swipingLiveData.observe(viewLifecycleOwner) {
+        infoViewModel.progressLiveData.observe(viewLifecycleOwner) {
             binding.swipeRefresh.isRefreshing = it
         }
 
@@ -101,6 +85,7 @@ class WxInfoFragment : ScopedFragment(),
             when (it) {
                 WxRefreshState.SUCCESS -> {}
                 WxRefreshState.ReAuth -> showReAuth()
+                else -> {}
             }
         }
 
@@ -108,20 +93,12 @@ class WxInfoFragment : ScopedFragment(),
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
-                is FetchResult.Success -> {
-                    toast(R.string.prompt_updated)
-                    sessionManager.saveAccount(it.data)
-
-                    if (!it.data.isWxOnly) {
-                        info("Not an wechat-only account")
-                        accountViewModel.switchUI(LoginMethod.EMAIL)
-                    }
-                }
+                is FetchResult.Success -> onAccountRefreshed(it.data)
             }
         }
 
         // Avatar
-        accountViewModel.avatarRetrieved.observe(viewLifecycleOwner, {
+        infoViewModel.avatarLoaded.observe(viewLifecycleOwner, {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error ->  it.exception.message?.let { msg -> toast(msg) }
@@ -137,40 +114,34 @@ class WxInfoFragment : ScopedFragment(),
         })
 
         // Set refreshing listener
-        binding.swipeRefresh.setOnRefreshListener {
-            val account = sessionManager.loadAccount()
+        binding.swipeRefresh.setOnRefreshListener(this)
 
-            if (account == null) {
-                toast("Account not found")
-                infoViewModel.swipingLiveData.value = false
-                return@setOnRefreshListener
-            }
-
-            val wxSession = sessionManager.loadWxSession()
-            // If a linked user logged in, the WxSession
-            // data will be definitely not existed.
-            // In such case, show the re-authorization dialog.
-            // TODO: how should we handle a linked user logged in with email?
-            if (wxSession == null) {
-                showReAuth()
-                infoViewModel.swipingLiveData.value = false
-                return@setOnRefreshListener
-            }
-
-            toast(R.string.refreshing_account)
-
-            infoViewModel.refresh(account, wxSession)
-
-            toast(R.string.wait_while_refresh_wx)
-        }
-
+        // Initial loading avatar.
         sessionManager.loadAccount()?.let {
             // Start fetching wechat avatar in background.
-            accountViewModel.fetchWxAvatar(
+            infoViewModel.loadAvatar(
+                it.wechat,
                 cache,
-                it.wechat
             )
         }
+    }
+
+    // Since we only allow refreshing for wechat-logged in user,
+    // there is not need to worry about UI switching to FtcAccountFragment.
+    private fun onAccountRefreshed(account: Account) {
+        toast(R.string.prompt_updated)
+
+        sessionManager.saveAccount(account)
+        infoViewModel.refreshAvatar(account.wechat, cache)
+
+        // When user is logged in with Wechat, it must be a wechat-only account.
+        // After rereshing, the account linking status could only have 2 case:
+        // It is kept intact, so we only need to update the the ui data;
+        // It is linked to an email account (possibly on other platforms). In such case wechat info is still kept, so we only show
+        // the change info without switching to AccountActivity.
+        // If is impossible for a wechat-only user to become
+        // an email-only user.
+        initUI()
     }
 
     private fun initUI() {
@@ -196,6 +167,7 @@ class WxInfoFragment : ScopedFragment(),
 
         sessionManager.logout()
     }
+
     /**
      * If current is not linked, launch [LinkFtcActivity] which will call setResult() to notify
      * [AccountActivity];
@@ -211,6 +183,32 @@ class WxInfoFragment : ScopedFragment(),
                 LinkFtcActivity.startForResult(activity)
             }
         }
+    }
+
+    override fun onRefresh() {
+        val account = sessionManager.loadAccount()
+
+        if (account == null) {
+            toast(R.string.account_not_found)
+            infoViewModel.progressLiveData.value = false
+            return
+        }
+
+        val wxSession = sessionManager.loadWxSession()
+        // If a linked user logged in, the WxSession
+        // data will be definitely not existed.
+        // In such case, show the re-authorization dialog.
+        if (wxSession == null) {
+            showReAuth()
+            infoViewModel.progressLiveData.value = false
+            return
+        }
+
+        toast(R.string.refreshing_account)
+
+        infoViewModel.refresh(account, wxSession)
+
+        toast(R.string.wait_while_refresh_wx)
     }
 
     companion object {
