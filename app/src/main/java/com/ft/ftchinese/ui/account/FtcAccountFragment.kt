@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentFtcAccountBinding
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
@@ -93,16 +93,7 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
-                is FetchResult.Success -> {
-                    toast(R.string.prompt_updated)
-                    sessionManager.saveAccount(it.data)
-
-                    if (it.data.isWxOnly) {
-                        accountViewModel.switchUI(LoginMethod.WECHAT)
-                        return@observe
-                    }
-                    updateUI()
-                }
+                is FetchResult.Success -> onAccountRefreshed(it.data)
             }
         }
 
@@ -116,6 +107,28 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
                 }
             }
         }
+    }
+
+    // After account refreshed, email-wechat linking status might be
+    // changed (possibly on other platforms).
+    // 1. User logged in with email:
+    // If previsouly it is email-only, and after refreshing, it is still email-only, only update ui data;
+    // If it changed from email-only to linked, only update the ui data.
+    // If previsouly unlinked, and after refreshing it is unlinked,
+    // this is still an email account, only update the ui data.
+    //
+    // 2. User logged in with wechat, then this must be a linked account since when using this fragment.
+    // If still linked after refreshing, only update the ui data;
+    // If unlinked after refreshing, we need to switch to wechat UI.
+    private fun onAccountRefreshed(account: Account) {
+        toast(R.string.prompt_updated)
+        sessionManager.saveAccount(account)
+
+        if (account.isWxOnly) {
+            accountViewModel.uiSwitched.value = true
+            return
+        }
+        updateUI()
     }
 
     private fun initUI() {
