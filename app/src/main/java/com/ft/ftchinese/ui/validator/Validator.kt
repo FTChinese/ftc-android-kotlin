@@ -9,6 +9,13 @@ object Validator {
         return !s?.trim().isNullOrBlank()
     }
 
+    fun containNoSpace(s: String?): Boolean {
+        if (s == null) {
+            return true
+        }
+        return s.indexOf(" ") < 0
+    }
+
     fun minLength(l: Int): Predicate {
         return fun (s: String?): Boolean {
             return s?.trim()?.length?.let {
