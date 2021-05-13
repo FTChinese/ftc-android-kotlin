@@ -12,6 +12,9 @@
         <variable
             name="handler"
             type="com.ft.ftchinese.ui.account.WxInfoFragment" />
+        <variable
+            name="viewModel"
+            type="com.ft.ftchinese.ui.account.WxInfoViewModel" />
     </data>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -72,6 +75,7 @@
                 android:text="@{account.isLinked ? @string/btn_unlink : @string/btn_link}"
                 android:visibility="@{account == null ? View.GONE : View.VISIBLE}"
                 android:layout_marginTop="16dp"
+                android:enabled="@{!viewModel.progressLiveData}"
                 android:onClick="@{handler::onClickLinkUnlink}"
                 app:layout_constraintEnd_toEndOf="@id/wx_nickname"
                 app:layout_constraintTop_toBottomOf="@+id/tv_urge_linking" />
