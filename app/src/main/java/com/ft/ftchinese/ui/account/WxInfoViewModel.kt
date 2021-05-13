@@ -17,10 +17,12 @@ import com.ft.ftchinese.viewmodel.WxRefreshState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 
-class WxInfoViewModel : BaseViewModel() {
+class WxInfoViewModel : BaseViewModel(), AnkoLogger {
 
     val accountLoaded: MutableLiveData<FetchResult<Account>> by lazy {
         MutableLiveData<FetchResult<Account>>()
@@ -39,6 +41,8 @@ class WxInfoViewModel : BaseViewModel() {
     fun loadAvatar(wechat: Wechat, cache: FileCache) {
         wechat.avatarUrl ?: return
 
+        info("Start loading wechat avatar: ${wechat.avatarUrl}")
+
         viewModelScope.launch {
             try {
                 val fis = withContext(Dispatchers.IO) {
@@ -46,6 +50,7 @@ class WxInfoViewModel : BaseViewModel() {
                 }
 
                 if (fis != null) {
+                    info("Wx avatar loaded from cache")
                     avatarLoaded.value = FetchResult.Success(fis)
                     return@launch
                 }
@@ -58,6 +63,7 @@ class WxInfoViewModel : BaseViewModel() {
                     AccountRepo.loadWxAvatar(wechat.avatarUrl)
                 } ?: return@launch
 
+                info("Avatar loaded from server")
                 avatarLoaded.value = FetchResult.Success(ByteArrayInputStream(bytes))
 
                 withContext(Dispatchers.IO) {
