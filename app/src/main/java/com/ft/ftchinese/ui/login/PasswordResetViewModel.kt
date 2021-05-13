@@ -21,25 +21,27 @@ class PasswordResetViewModel : BaseViewModel(), AnkoLogger {
     val passwordLiveData = MutableLiveData("")
     val passwordValidator = LiveDataValidator(passwordLiveData).apply {
         addRule("密码不能为空", Validator::notEmpty)
+        addRule("不能包含空格", Validator::containNoSpace)
         addRule("长度不能少于8位", Validator.minLength(8))
     }
 
     val confirmPasswordLiveData = MutableLiveData("")
     val confirmPasswordValidator = LiveDataValidator(confirmPasswordLiveData).apply {
         addRule("确认密码不能为空", Validator::notEmpty)
+        addRule("不能包含空格", Validator::containNoSpace)
         addRule("长度不能少于8位", Validator.minLength(8))
         addRule("两次输入的密码不同") {
             it != null && it == passwordLiveData.value
         }
     }
 
-    private val isDirty: Boolean
-        get() = !passwordLiveData.value.isNullOrBlank() && !confirmPasswordLiveData.value.isNullOrBlank()
-
     private val formValidator = LiveDataValidatorResolver(listOf(passwordValidator, confirmPasswordValidator))
 
     val isFormEnabled = MediatorLiveData<Boolean>().apply {
         addSource(passwordLiveData) {
+            value = enableForm()
+        }
+        addSource(confirmPasswordLiveData) {
             value = enableForm()
         }
         addSource(progressLiveData) {
@@ -48,7 +50,21 @@ class PasswordResetViewModel : BaseViewModel(), AnkoLogger {
     }
 
     private fun enableForm(): Boolean {
-        return progressLiveData.value == false && isDirty && formValidator.isValid()
+        // If in progress, disable form.
+        if (progressLiveData.value == true) {
+            return false
+        }
+
+        // Not in progress.
+        if (passwordLiveData.value?.trim().isNullOrBlank()) {
+            return false
+        }
+
+        if (passwordLiveData.value?.trim().isNullOrBlank()) {
+            return false
+        }
+
+        return formValidator.isValid()
     }
 
     init {
@@ -68,7 +84,7 @@ class PasswordResetViewModel : BaseViewModel(), AnkoLogger {
         progressLiveData.value = true
         val params = PasswordResetParams(
             token = token,
-            password = passwordLiveData.value ?: ""
+            password = passwordLiveData.value?.trim() ?: ""
         )
 
         viewModelScope.launch {
