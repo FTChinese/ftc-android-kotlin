@@ -6,10 +6,12 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAccountBinding
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
 import org.jetbrains.anko.AnkoLogger
 
@@ -18,6 +20,8 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: ActivityAccountBinding
+
+    private lateinit var infoViewModel: WxInfoViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +34,16 @@ class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
             setDisplayShowTitleEnabled(true)
+        }
+
+        infoViewModel = ViewModelProvider(this)
+            .get(WxInfoViewModel::class.java)
+
+        connectionLiveData.observe(this) {
+            infoViewModel.isNetworkAvailable.value = it
+        }
+        isConnected.let {
+            infoViewModel.isNetworkAvailable.value = it
         }
 
         supportFragmentManager.commit {
