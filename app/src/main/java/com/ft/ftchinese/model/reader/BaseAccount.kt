@@ -9,4 +9,5 @@ open class BaseAccount(
     open val userName: String? = null,
     open val avatarUrl: String? = null,
     open val isVerified: Boolean = false,
+    open val campaignCode: String? = null,
 )

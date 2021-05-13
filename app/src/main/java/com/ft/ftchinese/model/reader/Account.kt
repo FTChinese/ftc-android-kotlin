@@ -1,7 +1,9 @@
 package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
+import com.beust.klaxon.Json
 import com.ft.ftchinese.model.fetch.KLoginMethod
+import com.ft.ftchinese.model.fetch.json
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -20,6 +22,7 @@ data class Account(
     override val mobile: String? = null,
     override val isVerified: Boolean = false,
     override val avatarUrl: String? = null,
+    override val campaignCode: String? = null,
     @KLoginMethod
     val loginMethod: LoginMethod? = null,
     val wechat: Wechat,
@@ -32,8 +35,13 @@ data class Account(
     mobile = mobile,
     userName = userName,
     avatarUrl = avatarUrl,
-    isVerified = isVerified
+    isVerified = isVerified,
+    campaignCode = campaignCode,
 ), Parcelable {
+
+    fun toJsonString(): String {
+        return json.toJsonString(this)
+    }
 
     // Perform partial update.
     fun withMembership(m: Membership): Account {
@@ -84,6 +92,7 @@ data class Account(
         )
     }
 
+    @Json(ignored = true)
     val isTest: Boolean
         get() = email.endsWith(".test@ftchinese.com")
     /**
@@ -96,6 +105,7 @@ data class Account(
     /**
      * Checks whether an ftc account is bound to a wechat account.
      */
+    @Json(ignored = true)
     val isLinked: Boolean
         get() = id.isNotBlank() && !unionId.isNullOrBlank()
 
@@ -103,6 +113,7 @@ data class Account(
      * Is this account a wechat-only one?
      * -- logged in with wecaht and not bound to FTC account.
      */
+    @Json(ignored = true)
     val isWxOnly: Boolean
         get() = !unionId.isNullOrBlank() && id.isBlank()
 
@@ -110,12 +121,14 @@ data class Account(
      * Is this account an FTC-only one?
      * -- logged in with email and not bound to a wechat account.
      */
+    @Json(ignored = true)
     val isFtcOnly: Boolean
         get() = id.isNotBlank() && unionId.isNullOrBlank()
 
     /**
      * isMember checks whether user is/was a member.
      */
+    @Json(ignored = true)
     val isMember: Boolean
         get() = when {
             membership.vip -> true
@@ -129,6 +142,7 @@ data class Account(
      * otherwise use the name part of email address;
      * finally tell user userName is not set.
      */
+    @Json(ignored = true)
     val displayName: String
         get() {
             if (userName != null) {
