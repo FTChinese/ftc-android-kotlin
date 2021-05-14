@@ -1,4 +1,4 @@
-package com.ft.ftchinese.viewmodel
+package com.ft.ftchinese.ui.account
 
 enum class WxRefreshState {
     SUCCESS, // Wx account is successfully refreshed.

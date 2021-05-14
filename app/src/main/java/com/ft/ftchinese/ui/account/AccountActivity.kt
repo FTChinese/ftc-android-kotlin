@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAccountBinding
@@ -16,11 +15,8 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.customer.CustomerViewModel
 import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
-import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.viewmodel.WxRefreshState
 import org.jetbrains.anko.AnkoLogger
 
 /**

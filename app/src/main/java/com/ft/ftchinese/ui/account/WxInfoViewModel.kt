@@ -13,7 +13,6 @@ import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.ApiRequest
-import com.ft.ftchinese.viewmodel.WxRefreshState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

@@ -20,7 +20,6 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.ui.wxlink.UnlinkActivity
-import com.ft.ftchinese.viewmodel.WxRefreshState
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
