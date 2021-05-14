@@ -82,6 +82,7 @@ object Endpoint {
             BuildConfig.API_SUBS_LIVE
         }
     }
+
+    const val splashScheduleUrl = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
 }
 
-const val LAUNCH_SCHEDULE_URL = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
