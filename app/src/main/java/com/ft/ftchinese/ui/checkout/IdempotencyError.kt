@@ -1,4 +1,4 @@
-package com.ft.ftchinese.viewmodel
+package com.ft.ftchinese.ui.checkout
 
 import java.lang.Exception
 
