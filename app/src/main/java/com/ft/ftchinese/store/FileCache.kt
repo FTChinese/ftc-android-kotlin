@@ -15,6 +15,7 @@ object CacheFileNames {
     const val paywall = "subs_paywall.${BuildConfig.VERSION_CODE}.json"
     const val stripeCustomer = "account_stripe_customer.${BuildConfig.VERSION_CODE}.json"
     const val wxAvatar = "wx_avatar.jpg"
+    const val splashSchedule = "splash_schedule.json"
 }
 
 val templateCache: MutableMap<String, String> = HashMap()
