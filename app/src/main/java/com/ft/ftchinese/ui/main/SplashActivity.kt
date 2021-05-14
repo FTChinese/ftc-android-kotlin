@@ -7,16 +7,19 @@ import android.view.View
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.work.*
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivitySplashBinding
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.splash.SplashScreenManager
+import com.ft.ftchinese.service.SplashWorker
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.base.isConnected
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -32,24 +35,41 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var statsTracker: StatsTracker
     private lateinit var splashManager: SplashScreenManager
     private lateinit var splashViewModel: SplashViewModel
-    private var counterJob: Job? = null
+    // Why this?
     private var customTabsOpened: Boolean = false
     private lateinit var binding: ActivitySplashBinding
+    private lateinit var workManager: WorkManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_splash)
+        binding = DataBindingUtil.setContentView(
+            this,
+            R.layout.activity_splash)
 
         cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
         splashManager = SplashScreenManager(this)
-        splashViewModel = ViewModelProvider(this)
-                .get(SplashViewModel::class.java)
-
         statsTracker = StatsTracker.getInstance(this)
 
-        initUI()
+        workManager = WorkManager.getInstance(this)
 
+        splashViewModel = ViewModelProvider(this)
+            .get(SplashViewModel::class.java)
+
+        connectionLiveData.observe(this) {
+            splashViewModel.isNetworkAvailable.value = it
+        }
+
+        isConnected.let {
+            splashViewModel.isNetworkAvailable.value = it
+        }
+
+        binding.handler = this
+        setupViewModel()
+        handleMessaging()
+    }
+
+    private fun handleMessaging() {
         // FCM delivers data to the `intent` as key-value pairs,
         // including your custom data, when the app is in background.
         // When app is in foreground, data will be delivered to
@@ -93,112 +113,127 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
             RemoteMessageType.Interactive -> {
 
                 ArticleActivity.startWithParentStack(this, Teaser(
-                        id = pageId,
-                        type = ArticleType.fromString(contentType),
-                        title = ""
+                    id = pageId,
+                    type = ArticleType.fromString(contentType),
+                    title = ""
                 ))
             }
 
             RemoteMessageType.Tag,
             RemoteMessageType.Channel -> {
                 ChannelActivity.startWithParentStack(this, ChannelSource(
-                        title = pageId,
-                        name = "${msgType}_$pageId",
+                    title = pageId,
+                    name = "${msgType}_$pageId",
                     path = "",
                     query = "",
-                        htmlType = HTML_TYPE_FRAGMENT
+                    htmlType = HTML_TYPE_FRAGMENT
                 ))
             }
 
         }
-
-        counterJob?.cancel()
-        showSystemUI()
-        finish()
     }
 
-    private fun initUI() {
-
-        val splashAd = splashManager.load()
-
-        if (splashAd == null) {
+    private fun setupViewModel() {
+        splashViewModel.shouldExit.observe(this) {
             exit()
-            return
         }
 
-        if (!splashAd.isToday()) {
-            exit()
-            return
+        // Show the image.
+        splashViewModel.imageLoaded.observe(this) {
+            val drawable = Drawable.createFromStream(
+                it.first,
+                it.second,
+            )
+
+            if (drawable == null) {
+                exit()
+                return@observe
+            }
+
+            hideSystemUI()
+            binding.adImage.setImageDrawable(drawable)
+            splashViewModel.startCounting()
         }
 
-        val imageName = splashAd.imageName
-        if (imageName == null) {
-            exit()
-            return
+        splashViewModel.adLoaded.observe(this) {
+            // Tracking event ad viewed.
+            statsTracker.adViewed(it)
+            // Send a request to the tracking url defined in the ad
+            // data.
+            it.impressionDest().forEach { url ->
+                statsTracker.launchAdSent(url)
+                splashViewModel.sendImpression(url)
+            }
         }
 
-        if (!cache.exists(imageName)) {
-            exit()
-            return
+        // Tracking if impression is successfully sent.
+        splashViewModel.impressionResult.observe(this) {
+            if (it.first) {
+                statsTracker.launchAdSuccess(it.second)
+            } else {
+                statsTracker.launchAdFail(it.second)
+            }
         }
 
-        val drawable = Drawable.createFromStream(
-                openFileInput(imageName),
-                imageName
-        )
-
-        if (drawable == null) {
-            exit()
-            return
+        // Timer text.
+        splashViewModel.counterLiveData.observe(this) {
+            binding.timerText = getString(R.string.prompt_ad_timer, it)
         }
 
-        binding.adTimer.setOnClickListener {
-            statsTracker.adSkipped(splashAd)
-            counterJob?.cancel()
+        splashViewModel.loadAd(splashManager, cache)
+    }
 
-            exit()
-            return@setOnClickListener
+    private fun setupWorker() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.UNMETERED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+
+        val splashWork = OneTimeWorkRequestBuilder<SplashWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        workManager
+            .enqueueUniqueWork(
+                "nextRoundSplash",
+                ExistingWorkPolicy.REPLACE
+            )
+
+        workManager.getWorkInfoByIdLiveData(splashWork.id).observe(this) {
+            info("splashWork statu ${it.state}")
         }
+    }
 
-        binding.adImage.setOnClickListener {
-            statsTracker.adClicked(splashAd)
-            counterJob?.cancel()
+    // When clicking counter, skip the ad.
+    fun onClickCounter(view: View) {
+        splashViewModel.adLoaded.value?.let {
+            statsTracker.adSkipped(it)
+        }
+        splashViewModel.stopCounting()
+    }
 
+    fun onClickImage(view: View) {
+        splashViewModel.adLoaded.value?.let {
+            // Why this?
             customTabsOpened = true
+            statsTracker.adClicked(it)
 
             CustomTabsIntent
                 .Builder()
                 .build()
                 .launchUrl(
-                        this@SplashActivity,
-                        Uri.parse(splashAd.linkUrl)
+                    this,
+                    Uri.parse(it.linkUrl)
                 )
-
-            return@setOnClickListener
         }
 
-        counterJob = launch(Dispatchers.Main) {
-
-            splashViewModel.sendImpression(splashAd, statsTracker)
-
-            statsTracker.adViewed(splashAd)
-
-            hideSystemUI()
-
-            binding.adImage.setImageDrawable(drawable)
-
-            for (i in 5 downTo  1) {
-                binding.timerText = getString(R.string.prompt_ad_timer, i)
-                delay(1000)
-            }
-
-            exit()
-        }
+        splashViewModel.stopCounting()
     }
 
     // NOTE: it must be called in the main thread.
     // If you call is in a non-Main coroutine, it crashes.
     private fun exit() {
+        // TODO: remove this
         binding.timerText = null
 
         showSystemUI()

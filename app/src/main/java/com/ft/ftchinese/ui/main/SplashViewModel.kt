@@ -1,138 +1,108 @@
 package com.ft.ftchinese.ui.main
 
-import android.net.Uri
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.beust.klaxon.Klaxon
-import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.fetch.Fetch
+import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.splash.SPLASH_SCHEDULE_FILE
 import com.ft.ftchinese.model.splash.Schedule
 import com.ft.ftchinese.model.splash.ScreenAd
-import com.ft.ftchinese.model.fetch.Fetch
-import com.ft.ftchinese.repository.LAUNCH_SCHEDULE_URL
+import com.ft.ftchinese.model.splash.SplashScreenManager
+import com.ft.ftchinese.repository.AdClient
+import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.ft.ftchinese.ui.base.BaseViewModel
+import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import java.io.InputStream
 import java.util.*
 
-class SplashViewModel : ViewModel(), AnkoLogger {
+class SplashViewModel : BaseViewModel(), AnkoLogger {
 
     val screenAdSelected = MutableLiveData<ScreenAd>()
 
-    private fun loadSchedule(cache: FileCache, onWifi: Boolean): Schedule? {
-
-        val body = cache.loadText(SPLASH_SCHEDULE_FILE)
-
-        // Cache not found
-        if (body.isNullOrBlank()) {
-            return if (onWifi) {
-                fetchSchedule(cache)
-            } else {
-                null
-            }
-        }
-
-        // Cache found.
-        return try {
-            Klaxon().parse<Schedule>(body)
-        } catch (e: Exception) {
-            null
-        } finally {
-            if (onWifi) {
-                viewModelScope.launch {
-                    withContext(Dispatchers.IO) {
-                        fetchSchedule(cache)
-                    }
-                }
-            }
-        }
+    val shouldExit = MutableLiveData(false)
+    val adLoaded = MutableLiveData<ScreenAd>()
+    // The input stream of image and its name.
+    val imageLoaded = MutableLiveData<Pair<InputStream, String>> by lazy {
+        MutableLiveData<InputStream>()
     }
 
 
-    private fun fetchSchedule(cache: FileCache): Schedule? {
-        try {
-            val body = Fetch()
-                    .get(LAUNCH_SCHEDULE_URL)
-                    .endPlainText()
-
-            if (body.isNullOrBlank()) {
-                return null
-            }
-
-            cache.saveText(SPLASH_SCHEDULE_FILE, body)
-
-            return Klaxon().parse<Schedule>(body)
-
-        } catch (e: Exception) {
-            return null
-        }
+    // Tracking the tracking of sending impression result.
+    // Pair.first indicates success/failure.
+    // Pair.second is the url sent to.
+    val impressionResult: MutableLiveData<Pair<Boolean, String>> by lazy {
+        MutableLiveData<Pair<Boolean, String>>()
     }
 
+    fun loadAd(store: SplashScreenManager, cache: FileCache) {
+        val splashAd = store.load()
 
-    fun prepareNextRound(cache: FileCache, onWifi: Boolean, tier: Tier?) {
-        // 1. Load all schedule
-        // 2. Find today's ScreenAd from the schedule.
-        // 3. Pick a random ScreenAd from today's list.
-        // 4. Save the selected ScreenAd.
-        // 5. Download the image used by this ScreenAd
+        if (splashAd == null) {
+            shouldExit.value = true
+            return
+        }
+
+        if (!splashAd.isToday()) {
+            shouldExit.value = true
+            return
+        }
+
+        val imageName = splashAd.imageName
+        if (imageName == null) {
+            shouldExit.value = true
+            return
+        }
+
         viewModelScope.launch {
-            val screenAd = withContext(Dispatchers.IO) {
-                val schedule = loadSchedule(cache, onWifi) ?: return@withContext null
+            val fis = withContext(Dispatchers.IO) {
+                cache.readBinaryFile(imageName)
+            }
 
-                val todayAds = schedule.findToday(tier)
-                todayAds.pickRandom()
-            } ?: return@launch
-
-            screenAdSelected.value = screenAd
-
-            if (!onWifi) {
+            if (fis == null) {
+                shouldExit.value = true
                 return@launch
             }
 
-            withContext(Dispatchers.IO) {
-                try {
-                    val imageBytes = Fetch()
-                            .get(screenAd.imageUrl)
-                            .download()
-                            ?: return@withContext
+            imageLoaded.value = Pair(fis, imageName)
+            adLoaded.value = splashAd
+        }
+    }
 
-                    val imageName = screenAd.imageName ?: return@withContext
-
-                    cache.writeBinaryFile(imageName, imageBytes)
-                } catch (e: Exception) {
-                    info(e)
+    fun sendImpression(url: String) {
+        viewModelScope.launch() {
+            try {
+                withContext(Dispatchers.IO) {
+                    AdClient.sendImpression(url)
                 }
+
+                impressionResult.value = Pair(true, url)
+            } catch (e: Exception) {
+                info(e)
+                impressionResult.value = Pair(false, url)
             }
         }
     }
 
-    fun sendImpression(screenAd: ScreenAd, tracker: StatsTracker) {
-        viewModelScope.launch(Dispatchers.IO) {
-            screenAd.impressionDest().forEach {
-                val timestamp = Date().time / 1000
+    val counterLiveData = MutableLiveData<Int>()
+    private var job: Job? = null
 
-                val bustedUrl = Uri.parse(it.replace("[timestamp]", "$timestamp"))
-                        .buildUpon()
-                        .appendQueryParameter("fttime", "$timestamp")
-                        .build()
-                        .toString()
-
-                try {
-                    tracker.launchAdSent(it)
-
-                    Fetch().get(bustedUrl).endPlainText()
-
-                    tracker.launchAdSuccess(it)
-                } catch (e: Exception) {
-
-                    tracker.launchAdFail(it)
-                }
+    fun startCounting() {
+        job = viewModelScope.launch {
+            for (i in 5 downTo 0) {
+                counterLiveData.value = i
+                delay(1000)
             }
+            shouldExit.value = true
         }
+    }
+
+    fun stopCounting() {
+        job?.cancel()
+        shouldExit.value = true
     }
 }

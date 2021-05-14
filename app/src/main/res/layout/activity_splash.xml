@@ -9,6 +9,9 @@
         <variable
             name="timerText"
             type="String" />
+        <variable
+            name="handler"
+            type="com.ft.ftchinese.ui.main.SplashActivity" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -24,8 +27,7 @@
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
             android:visibility="@{timerText == null ? View.GONE : View.VISIBLE}"
-            tools:layout_editor_absoluteX="-149dp"
-            tools:layout_editor_absoluteY="114dp" />
+            android:onClick="@{handler::onClickImage}" />
 
         <TextView
             android:id="@+id/ad_timer"
@@ -35,6 +37,7 @@
             android:layout_marginEnd="16dp"
             android:background="@drawable/timer_background"
             android:text="@{timerText}"
+            android:onClick="@{handler::onClickCounter}"
             android:textColor="@color/colorBlack20"
             android:visibility="@{timerText == null ? View.GONE : View.VISIBLE}"
             app:layout_constraintEnd_toEndOf="parent"
