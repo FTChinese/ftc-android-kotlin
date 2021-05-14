@@ -121,10 +121,10 @@ class StatsTracker private constructor(context: Context) {
 
     fun launchAdFail(label:String) {
         tracker.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.LAUNCH_AD)
-                .setAction(GAAction.LAUNCH_AD_FAIL)
-                .setLabel(label)
-                .build())
+            .setCategory(GACategory.LAUNCH_AD)
+            .setAction(GAAction.LAUNCH_AD_FAIL)
+            .setLabel(label)
+            .build())
     }
 
     fun adClicked(screenAd: ScreenAd) {
