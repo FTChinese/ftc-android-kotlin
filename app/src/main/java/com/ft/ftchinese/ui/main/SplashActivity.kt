@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.launch
+package com.ft.ftchinese.ui.main
 
 import android.graphics.drawable.Drawable
 import android.net.Uri
@@ -17,7 +17,6 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.viewmodel.SplashViewModel
 import kotlinx.coroutines.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info

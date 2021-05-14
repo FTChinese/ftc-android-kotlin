@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.launch
+package com.ft.ftchinese.ui.main
 
 import android.app.Activity
 import android.app.NotificationChannel
@@ -55,7 +55,6 @@ import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.viewmodel.SplashViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession

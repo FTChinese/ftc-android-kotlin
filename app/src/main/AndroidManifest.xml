@@ -16,9 +16,9 @@
         <activity
             android:name=".TestActivity"
             android:label="Test"
-            android:parentActivityName=".ui.launch.MainActivity" />
+            android:parentActivityName=".ui.main.MainActivity" />
         <activity
-            android:name=".ui.launch.SplashActivity"
+            android:name=".ui.main.SplashActivity"
             android:configChanges="orientation"
             android:exported="false"
             android:screenOrientation="portrait"
@@ -30,14 +30,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.launch.MainActivity"
+            android:name=".ui.main.MainActivity"
             android:configChanges="orientation"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.channel.SearchableActivity"
             android:launchMode="singleTop"
-            android:parentActivityName=".ui.launch.MainActivity">
+            android:parentActivityName=".ui.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -48,20 +48,20 @@
         </activity>
         <activity
             android:name=".ui.channel.ChannelActivity"
-            android:parentActivityName=".ui.launch.MainActivity" />
+            android:parentActivityName=".ui.main.MainActivity" />
         <activity
             android:name=".ui.article.ArticleActivity"
-            android:parentActivityName=".ui.launch.MainActivity" />
+            android:parentActivityName=".ui.main.MainActivity" />
         <activity
             android:name=".ui.article.AudioPlayerActivity"
             android:parentActivityName=".ui.article.ArticleActivity" />
         <activity
             android:name=".ui.article.WebViewActivity"
-            android:parentActivityName=".ui.launch.MainActivity" />
+            android:parentActivityName=".ui.main.MainActivity" />
         <activity
             android:name=".ui.login.AuthActivity"
             android:label="@string/title_login"
-            android:parentActivityName=".ui.launch.MainActivity"
+            android:parentActivityName=".ui.main.MainActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.login.ForgotPasswordActivity"
@@ -71,7 +71,7 @@
         <activity
             android:name=".ui.account.AccountActivity"
             android:label="@string/title_account"
-            android:parentActivityName=".ui.launch.MainActivity"
+            android:parentActivityName=".ui.main.MainActivity"
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.customer.CustomerActivity"
@@ -96,11 +96,11 @@
         <activity
             android:name=".ui.member.MemberActivity"
             android:label="@string/title_my_subs"
-            android:parentActivityName=".ui.launch.MainActivity" />
+            android:parentActivityName=".ui.main.MainActivity" />
         <activity
             android:name=".ui.paywall.PaywallActivity"
             android:label="@string/title_subscription"
-            android:parentActivityName=".ui.launch.MainActivity" />
+            android:parentActivityName=".ui.main.MainActivity" />
         <activity
             android:name=".ui.checkout.CheckOutActivity"
             android:label="@string/check_out"
@@ -149,11 +149,11 @@
         <activity
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/action_settings"
-            android:parentActivityName=".ui.launch.MainActivity" />
+            android:parentActivityName=".ui.main.MainActivity" />
         <activity
             android:name=".ui.about.AboutActivity"
             android:label="@string/title_about_us"
-            android:parentActivityName=".ui.launch.MainActivity" />
+            android:parentActivityName=".ui.main.MainActivity" />
         <activity
             android:name=".ui.settings.FCMActivity"
             android:label="@string/fcm_setting_title"

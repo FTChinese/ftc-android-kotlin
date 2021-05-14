@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.launch
+package com.ft.ftchinese.ui.main
 
 import android.annotation.SuppressLint
 import android.app.Dialog
