@@ -48,7 +48,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
 
         cache = FileCache(this)
         sessionManager = SessionManager.getInstance(this)
-        splashManager = SplashScreenManager(this)
+        splashManager = SplashScreenManager.getInstance(this)
         statsTracker = StatsTracker.getInstance(this)
 
         workManager = WorkManager.getInstance(this)
@@ -65,6 +65,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         binding.handler = this
+
         setupViewModel()
         handleMessaging()
     }
@@ -156,6 +157,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         splashViewModel.adLoaded.observe(this) {
+            info("Splash loaded $it")
             // Tracking event ad viewed.
             statsTracker.adViewed(it)
             // Send a request to the tracking url defined in the ad
@@ -196,11 +198,12 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
         workManager
             .enqueueUniqueWork(
                 "nextRoundSplash",
-                ExistingWorkPolicy.REPLACE
+                ExistingWorkPolicy.REPLACE,
+                splashWork,
             )
 
         workManager.getWorkInfoByIdLiveData(splashWork.id).observe(this) {
-            info("splashWork statu ${it.state}")
+            info("splashWork status ${it.state}")
         }
     }
 
@@ -233,11 +236,10 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
     // NOTE: it must be called in the main thread.
     // If you call is in a non-Main coroutine, it crashes.
     private fun exit() {
-        // TODO: remove this
-        binding.timerText = null
 
         showSystemUI()
         MainActivity.start(this)
+        setupWorker()
         finish()
     }
 

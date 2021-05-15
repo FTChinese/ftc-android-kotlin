@@ -11,9 +11,9 @@ import org.threeten.bp.LocalDate
  * [Schedule] for today.
  */
 data class TodayAds(
-        @KDate
-        val date: LocalDate,
-        val items: List<ScreenAd>
+    @KDate
+    val date: LocalDate,
+    val items: List<ScreenAd>
 ) : AnkoLogger {
 
     /**
@@ -33,6 +33,8 @@ data class TodayAds(
 
         val distribution = EnumeratedDistribution(pmf)
 
-        return distribution.sample()
+        return distribution.sample()?.apply {
+            this.date = this@TodayAds.date
+        }
     }
 }

@@ -29,7 +29,6 @@ import com.ft.ftchinese.databinding.ActivityMainBinding
 import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
-import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.repository.TabPages
 import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker
@@ -42,7 +41,6 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.about.AboutActivity
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isActiveNetworkWifi
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.MyftPagerAdapter
 import com.ft.ftchinese.ui.channel.SearchableActivity
@@ -82,7 +80,6 @@ class MainActivity : ScopedAppActivity(),
     private var pagerAdapter: TabPagerAdapter? = null
 
     private lateinit var accountViewModel: AccountViewModel
-    private lateinit var splashViewModel: SplashViewModel
     private lateinit var binding: ActivityMainBinding
     private lateinit var navHeaderBinding: DrawerNavHeaderBinding
 
@@ -148,8 +145,6 @@ class MainActivity : ScopedAppActivity(),
         statsTracker.appOpened()
 
         checkWxSession()
-
-        setupSplashScreen()
 
         showTermsAndConditions()
         setupWorker()
@@ -401,23 +396,6 @@ class MainActivity : ScopedAppActivity(),
         supportActionBar?.setDisplayUseLogoEnabled(false)
         supportActionBar?.setDisplayShowTitleEnabled(true)
         supportActionBar?.setTitle(title)
-    }
-
-    private fun setupSplashScreen() {
-
-        splashViewModel = ViewModelProvider(this)
-                .get(SplashViewModel::class.java)
-
-        splashViewModel.screenAdSelected.observe(this, {
-            SplashScreenManager(this).save(it, LocalDate.now())
-        })
-
-
-        splashViewModel.prepareNextRound(
-                cache,
-                isActiveNetworkWifi(),
-                sessionManager.loadAccount()?.membership?.tier
-        )
     }
 
     /**

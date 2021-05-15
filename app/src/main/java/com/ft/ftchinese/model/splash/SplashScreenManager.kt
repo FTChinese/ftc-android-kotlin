@@ -5,9 +5,6 @@ import androidx.core.content.edit
 import com.ft.ftchinese.model.fetch.formatLocalDate
 import com.ft.ftchinese.model.fetch.parseLocalDate
 import org.jetbrains.anko.AnkoLogger
-import org.threeten.bp.LocalDate
-
-const val SPLASH_SCHEDULE_FILE = "splash_schedule.json"
 
 private const val SPLASH_AD_PREF_NAME = "splash_ad"
 private const val PREF_TYPE = "type"
@@ -29,7 +26,7 @@ class SplashScreenManager(context: Context) : AnkoLogger {
     /**
      * Save ScreenAd to be used upon app launch next time.
      */
-    fun save(ad: ScreenAd, date: LocalDate) {
+    fun save(ad: ScreenAd) {
         sharedPreferences.edit {
             putString(PREF_TYPE, ad.type)
             putString(PREF_TITLE, ad.title)
@@ -41,7 +38,7 @@ class SplashScreenManager(context: Context) : AnkoLogger {
             putString(PREF_TARGET_USER, ad.targetUser)
             putStringSet(PREF_SCHEDULED_ON, ad.scheduledOn.toSet())
             putString(PREF_WEIGHT, ad.weight)
-            putString(PREF_DATE, formatLocalDate(date))
+            putString(PREF_DATE, formatLocalDate(ad.date))
         }
     }
 
@@ -55,31 +52,43 @@ class SplashScreenManager(context: Context) : AnkoLogger {
         val dateStr = sharedPreferences.getString(PREF_DATE, "")
 
         val ad = ScreenAd(
-                type = sharedPreferences.getString(PREF_TYPE, "")
-                        ?: "",
-                title = sharedPreferences.getString(PREF_TITLE, "")
-                        ?: "",
-                imageUrl = imageUrl,
-                linkUrl = sharedPreferences.getString(PREF_LINK_URL, "")
-                        ?: "",
-                impressionUrl1 = sharedPreferences.getString(PREF_IMPRESSION_URL_1, "")
-                        ?: "",
-                impressionUrl2 = sharedPreferences.getString(PREF_IMPRESSION_URL_2, "")
-                        ?: "",
-                impressionUrl3 = sharedPreferences.getString(PREF_IMPRESSION_URL_3, "")
-                        ?: "",
-                iphone = "",
-                android = "",
-                ipad = "",
-                targetUser = sharedPreferences.getString(PREF_TARGET_USER, null),
-                dates = sharedPreferences.getStringSet(PREF_SCHEDULED_ON, setOf())?.joinToString()
-                        ?: "",
-                weight = sharedPreferences.getString(PREF_WEIGHT, "")
-                        ?: ""
+            type = sharedPreferences.getString(PREF_TYPE, "")
+                    ?: "",
+            title = sharedPreferences.getString(PREF_TITLE, "")
+                    ?: "",
+            imageUrl = imageUrl,
+            linkUrl = sharedPreferences.getString(PREF_LINK_URL, "")
+                    ?: "",
+            impressionUrl1 = sharedPreferences.getString(PREF_IMPRESSION_URL_1, "")
+                    ?: "",
+            impressionUrl2 = sharedPreferences.getString(PREF_IMPRESSION_URL_2, "")
+                    ?: "",
+            impressionUrl3 = sharedPreferences.getString(PREF_IMPRESSION_URL_3, "")
+                    ?: "",
+            iphone = "",
+            android = "",
+            ipad = "",
+            targetUser = sharedPreferences.getString(PREF_TARGET_USER, null),
+            dates = sharedPreferences.getStringSet(PREF_SCHEDULED_ON, setOf())?.joinToString()
+                    ?: "",
+            weight = sharedPreferences.getString(PREF_WEIGHT, "")
+                    ?: ""
         )
 
         ad.date = parseLocalDate(dateStr)
 
         return ad
+    }
+
+    companion object {
+        private var instance: SplashScreenManager? = null
+
+        @Synchronized fun getInstance(ctx: Context): SplashScreenManager {
+            if (instance == null) {
+                instance = SplashScreenManager(ctx.applicationContext)
+            }
+
+            return instance!!
+        }
     }
 }

@@ -35,28 +35,28 @@ class Schedule(
         val tierStr = tier?.toString() ?: "free"
 
         val todayAds = sections
-                .filter {
-                    it.android == "yes" && it.scheduledOn.isNotEmpty()
+            .filter {
+                it.android == "yes" && it.scheduledOn.isNotEmpty()
+            }
+            .filter {
+                if (it.targetUser == "all") {
+                    true
+                } else {
+                    it.targetUser == tierStr
                 }
-                .filter {
-                    if (it.targetUser == "all") {
-                        true
-                    } else {
-                        it.targetUser == tierStr
-                    }
-                }
-                .filter {
-                    it.scheduledOn.any {
-                        try {
-                            val date = LocalDate.parse(it, DateTimeFormatter.BASIC_ISO_DATE)
+            }
+            .filter {
+                it.scheduledOn.any {
+                    try {
+                        val date = LocalDate.parse(it, DateTimeFormatter.BASIC_ISO_DATE)
 
-                            today.isEqual(date)
-                        } catch (e: Exception) {
-                            info(e.message)
-                            false
-                        }
+                        today.isEqual(date)
+                    } catch (e: Exception) {
+                        info(e.message)
+                        false
                     }
                 }
+            }
 
         return TodayAds(date = today, items = todayAds)
     }

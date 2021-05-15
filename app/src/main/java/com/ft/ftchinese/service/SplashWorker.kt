@@ -6,6 +6,7 @@ import androidx.work.WorkerParameters
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.splash.Schedule
+import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.repository.AdClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
@@ -17,43 +18,60 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
 
     private val cache = FileCache(appContext)
     private val userSession = SessionManager.getInstance(appContext)
+    private val store = SplashScreenManager.getInstance(appContext)
 
     override fun doWork(): Result {
-        return downloadSchedule()?.let {
+        val downloaded = downloadSchedule()
+        if (downloaded != null) {
+            info("Splash schedule downloaded $downloaded")
+            return prepareNextRound(downloaded)
+        }
+
+        return cachedSchedule()?.let {
+            info("Cached splash schedule found $it")
             prepareNextRound(it)
-            Result.success()
         } ?: Result.failure()
     }
 
     private fun cachedSchedule(): Schedule? {
-        return cache.loadText(CacheFileNames)?.let {
+        info("Cache splash schedule")
+        return cache.loadText(CacheFileNames.splashSchedule)?.let {
             try {
                 json.parse<Schedule>(it)
             } catch (e: Exception) {
                 null
             }
-        } ?: null
+        }
     }
 
-    private fun prepareNextRound(schedule: Schedule) {
-        val selectedAd = schedule
+    private fun prepareNextRound(schedule: Schedule): Result {
+        info("Prepare next round fof splash")
+        val ad = schedule
             .findToday(userSession.loadAccount()?.membership?.tier)
-            .pickRandom()
+            .pickRandom() ?: return Result.failure()
 
-        downloadImage(
-            url = selectedAd.imageUrl,
-            fileName = selectedAd.imageName
-        )
+        info("Selected splash for next round: $ad")
+        return ad.imageName?.let {
+            val done = downloadImage(
+                url = ad.imageUrl,
+                fileName = it
+            )
+
+            if (done) {
+                store.save(ad)
+                Result.success()
+            } else {
+                Result.retry()
+            }
+        } ?: Result.failure()
     }
 
     private fun downloadSchedule(): Schedule? {
+        info("Start download splash schedule")
         try {
-            val result = AdClient.fetchSchedule()
+            val result = AdClient.fetchSchedule() ?: return null
 
-            if (result == null) {
-                return null
-            }
-
+            info("Splash schedule downloaded. Cache it.")
             cache.saveText(
                 CacheFileNames.splashSchedule,
                 result.raw,
@@ -65,16 +83,20 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
         }
     }
 
-    private fun downloadImage(url: String, fileName: String) {
-        try {
-            val imageBytes = Fetch()
+    private fun downloadImage(url: String, fileName: String): Boolean {
+        info("Download splash image from $url")
+        return try {
+            Fetch()
                 .get(url)
                 .download()
-                ?: return
+                ?.let {
+                    cache.writeBinaryFile(fileName, it)
+                }
 
-            cache.writeBinaryFile(fileName, imageBytes)
+            true
         } catch (e: Exception) {
             info(e)
+            false
         }
     }
 }
