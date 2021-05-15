@@ -72,7 +72,6 @@ class MainActivity : ScopedAppActivity(),
     private var mBackKeyPressed = false
     private var pagerAdapter: TabPagerAdapter? = null
 
-    private lateinit var accountViewModel: AccountViewModel
     private lateinit var logoutViewMode: LogoutViewModel
     private lateinit var wxInfoViewModel: WxInfoViewModel
 
@@ -115,9 +114,6 @@ class MainActivity : ScopedAppActivity(),
         acceptance = ServiceAcceptance.getInstance(this)
         tokenManager = TokenManager.getInstance(this)
         workManager = WorkManager.getInstance(this)
-
-        accountViewModel = ViewModelProvider(this)
-            .get(AccountViewModel::class.java)
 
         logoutViewMode = ViewModelProvider(this)
             .get(LogoutViewModel::class.java)
