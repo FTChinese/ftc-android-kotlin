@@ -29,11 +29,8 @@ object AdClient {
             return null
         }
 
-        val s = json.parse<Schedule>(body)
-        if (s == null) {
-            return null
-        } else {
-            JSONResult(s, body)
+        return json.parse<Schedule>(body)?.let {
+            JSONResult(it, body)
         }
     }
 }
