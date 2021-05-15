@@ -20,7 +20,6 @@
         <activity
             android:name=".ui.main.SplashActivity"
             android:configChanges="orientation"
-            android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.SplashScreen">
             <intent-filter>
