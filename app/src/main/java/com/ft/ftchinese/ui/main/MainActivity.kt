@@ -37,6 +37,7 @@ import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.about.AboutActivity
 import com.ft.ftchinese.ui.account.AccountActivity
+import com.ft.ftchinese.ui.account.WxInfoViewModel
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.MyftPagerAdapter
@@ -73,6 +74,8 @@ class MainActivity : ScopedAppActivity(),
 
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var logoutViewMode: LogoutViewModel
+    private lateinit var wxInfoViewModel: WxInfoViewModel
+
     private lateinit var binding: ActivityMainBinding
     private lateinit var navHeaderBinding: DrawerNavHeaderBinding
 
@@ -119,6 +122,18 @@ class MainActivity : ScopedAppActivity(),
         logoutViewMode = ViewModelProvider(this)
             .get(LogoutViewModel::class.java)
 
+        wxInfoViewModel = ViewModelProvider(this)
+            .get(WxInfoViewModel::class.java)
+
+        connectionLiveData.observe(this) {
+            wxInfoViewModel.isNetworkAvailable.value = it
+        }
+        isConnected.let {
+            wxInfoViewModel.isNetworkAvailable.value = it
+        }
+
+        setupViewModel()
+
         // Set ViewPager adapter
         setupHome()
 
@@ -129,12 +144,6 @@ class MainActivity : ScopedAppActivity(),
         setupBottomNav()
         setupDrawer()
 
-        setupViewModel()
-
-        if (BuildConfig.DEBUG) {
-            info("onCreate finished. Build flavor: ${BuildConfig.FLAVOR}. Is debug: ${BuildConfig.DEBUG}")
-        }
-
         statsTracker.appOpened()
 
         checkWxSession()
@@ -144,8 +153,7 @@ class MainActivity : ScopedAppActivity(),
     }
 
     private fun setupViewModel() {
-        // If avatar is downloaded from network.
-        accountViewModel.avatarRetrieved.observe(this, {
+        wxInfoViewModel.avatarLoaded.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> info(getString(it.msgId))
                 is FetchResult.Error -> info(it.exception)
@@ -156,7 +164,7 @@ class MainActivity : ScopedAppActivity(),
                     )
                 }
             }
-        })
+        }
 
         logoutViewMode.loggedOutLiveData.observe(this) {
             logout()
@@ -165,13 +173,12 @@ class MainActivity : ScopedAppActivity(),
 
     private fun showTermsAndConditions() {
         info("Service accepted ${acceptance.isAccepted()}")
-        // Service acceptance
-        if (!acceptance.isAccepted()) {
-            val frag = AcceptServiceDialogFragment()
-            supportFragmentManager.commit {
-                add(android.R.id.content, frag)
-                addToBackStack(null)
-            }
+        if (acceptance.isAccepted()) {
+            return
+        }
+        supportFragmentManager.commit {
+            add(android.R.id.content, AcceptServiceDialogFragment())
+            addToBackStack(null)
         }
     }
 
@@ -265,9 +272,11 @@ class MainActivity : ScopedAppActivity(),
         pagerAdapter = TabPagerAdapter(TabPages.newsPages, supportFragmentManager)
         binding.viewPager.adapter = pagerAdapter
 
-        supportActionBar?.setDisplayUseLogoEnabled(true)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-        supportActionBar?.setLogo(R.drawable.ic_menu_masthead)
+        supportActionBar?.apply {
+            setDisplayUseLogoEnabled(true)
+            setDisplayShowTitleEnabled(false)
+            setLogo(R.drawable.ic_menu_masthead)
+        }
     }
 
     /**
@@ -281,21 +290,20 @@ class MainActivity : ScopedAppActivity(),
             binding.drawerNav,
             false)
 
-        binding.drawerNav.addHeaderView(navHeaderBinding.root)
+        // Set listener on the title text inside drawer's header view
+        navHeaderBinding.navHeaderTitle.setOnClickListener {
+            if (!sessionManager.isLoggedIn()) {
+                AuthActivity.startForResult(this)
+                return@setOnClickListener
+            }
 
-        // For testing
-        binding.drawerNav.menu
-            .setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
+            LogoutDialogFragment()
+                .show(supportFragmentManager, "LogoutDialog")
+        }
 
-        ActionBarDrawerToggle(
-            this,
-            binding.drawerLayout,
-            binding.toolbar,
-            R.string.navigation_drawer_open,
-            R.string.navigation_drawer_close
-        ).apply {
-            binding.drawerLayout.addDrawerListener(this)
-            syncState()
+        binding.drawerNav.apply {
+            addHeaderView(navHeaderBinding.root)
+            menu.setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
         }
 
         // Set a listener that will be notified when a menu item is selected.
@@ -306,7 +314,6 @@ class MainActivity : ScopedAppActivity(),
                 R.id.action_paywall -> {
                     // Tracking
                     PaywallTracker.fromDrawer()
-
                     PaywallActivity.start(this)
                 }
                 R.id.action_my_subs -> MemberActivity.start(this)
@@ -321,15 +328,15 @@ class MainActivity : ScopedAppActivity(),
             true
         }
 
-        // Set listener on the title text inside drawer's header view
-        navHeaderBinding.navHeaderTitle.setOnClickListener {
-            if (!sessionManager.isLoggedIn()) {
-                AuthActivity.startForResult(this)
-                return@setOnClickListener
-            }
-
-            LogoutDialogFragment()
-                .show(supportFragmentManager, "LogoutDialog")
+        ActionBarDrawerToggle(
+            this,
+            binding.drawerLayout,
+            binding.toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        ).apply {
+            binding.drawerLayout.addDrawerListener(this)
+            syncState()
         }
 
         updateSessionUI()
@@ -342,6 +349,13 @@ class MainActivity : ScopedAppActivity(),
 
         val account = sessionManager.loadAccount()
 
+        account?.let {
+            wxInfoViewModel.loadAvatar(
+                it.wechat,
+                cache
+            )
+        }
+
         navHeaderBinding.account = account
 
         binding.drawerNav.menu.apply {
@@ -352,15 +366,6 @@ class MainActivity : ScopedAppActivity(),
             // Only show when user is a member.
             findItem(R.id.action_my_subs)?.isVisible = account?.isMember ?: false
             findItem(R.id.action_paywall)?.isVisible = !(account?.isMember ?: false)
-        }
-
-        account?.let {
-            if (isConnected) {
-                accountViewModel.fetchWxAvatar(
-                    cache,
-                    it.wechat
-                )
-            }
         }
     }
 
@@ -373,9 +378,11 @@ class MainActivity : ScopedAppActivity(),
     }
 
     private fun displayTitle(title: Int) {
-        supportActionBar?.setDisplayUseLogoEnabled(false)
-        supportActionBar?.setDisplayShowTitleEnabled(true)
-        supportActionBar?.setTitle(title)
+        supportActionBar?.apply {
+            setDisplayUseLogoEnabled(false)
+            setDisplayShowTitleEnabled(true)
+            setTitle(title)
+        }
     }
 
     /**

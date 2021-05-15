@@ -42,6 +42,7 @@ class WxInfoViewModel : BaseViewModel(), AnkoLogger {
 
         info("Start loading wechat avatar: ${wechat.avatarUrl}")
 
+
         viewModelScope.launch {
             try {
                 val fis = withContext(Dispatchers.IO) {
@@ -55,6 +56,7 @@ class WxInfoViewModel : BaseViewModel(), AnkoLogger {
                 }
 
                 if (isNetworkAvailable.value == false) {
+                    avatarLoaded.value = FetchResult.LocalizedError(R.string.prompt_no_network)
                     return@launch
                 }
 
@@ -74,7 +76,6 @@ class WxInfoViewModel : BaseViewModel(), AnkoLogger {
             } catch (e: Exception) {
                 avatarLoaded.value = FetchResult.fromException(e)
             }
-
         }
     }
 
