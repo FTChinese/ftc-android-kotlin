@@ -34,10 +34,6 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
         MutableLiveData<FetchResult<Account>>()
     }
 
-    val avatarRetrieved: MutableLiveData<FetchResult<InputStream>> by lazy {
-        MutableLiveData<FetchResult<InputStream>>()
-    }
-
     val addOnResult: MutableLiveData<FetchResult<Membership>> by lazy {
         MutableLiveData<FetchResult<Membership>>()
     }
@@ -72,39 +68,6 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                 .asyncRefreshAccount(account)
 
             progressLiveData.value = false
-        }
-    }
-
-    fun fetchWxAvatar(cache: FileCache, wechat: Wechat) {
-        if (wechat.avatarUrl == null) {
-            info("Wx avatar url empty")
-            return
-        }
-
-        if (isNetworkAvailable.value == false) {
-            avatarRetrieved.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val bytes = withContext(Dispatchers.IO) {
-                    AccountRepo.loadWxAvatar(wechat.avatarUrl)
-                } ?: return@launch
-
-                avatarRetrieved.value = FetchResult.Success(ByteArrayInputStream(bytes))
-
-                withContext(Dispatchers.IO) {
-                    cache.writeBinaryFile(
-                            WX_AVATAR_NAME,
-                            bytes
-                    )
-                }
-
-            } catch (e: Exception) {
-
-                avatarRetrieved.value = FetchResult.fromException(e)
-            }
         }
     }
 
