@@ -14,7 +14,6 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.webkit.WebView
-import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.GravityCompat
@@ -27,15 +26,13 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.TestActivity
 import com.ft.ftchinese.databinding.ActivityMainBinding
 import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.repository.TabPages
 import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker
-import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.store.ServiceAcceptance
-import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.store.TokenManager
+import com.ft.ftchinese.store.*
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.about.AboutActivity
@@ -52,8 +49,6 @@ import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -64,8 +59,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
-import org.threeten.bp.LocalDate
-import java.io.InputStream
 
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
@@ -75,11 +68,11 @@ class MainActivity : ScopedAppActivity(),
         TabLayout.OnTabSelectedListener,
         AnkoLogger {
 
-    private var bottomDialog: BottomSheetDialog? = null
     private var mBackKeyPressed = false
     private var pagerAdapter: TabPagerAdapter? = null
 
     private lateinit var accountViewModel: AccountViewModel
+    private lateinit var logoutViewMode: LogoutViewModel
     private lateinit var binding: ActivityMainBinding
     private lateinit var navHeaderBinding: DrawerNavHeaderBinding
 
@@ -96,7 +89,10 @@ class MainActivity : ScopedAppActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding = DataBindingUtil.setContentView(
+            this,
+            R.layout.activity_main,
+        )
         setSupportActionBar(binding.toolbar)
 
         if (BuildConfig.DEBUG) {
@@ -106,8 +102,6 @@ class MainActivity : ScopedAppActivity(),
         createNotificationChannel()
 
         cache = FileCache(this)
-
-
         statsTracker = StatsTracker.getInstance(this)
 
         // Register Wechat id
@@ -120,8 +114,10 @@ class MainActivity : ScopedAppActivity(),
         workManager = WorkManager.getInstance(this)
 
         accountViewModel = ViewModelProvider(this)
-                .get(AccountViewModel::class.java)
+            .get(AccountViewModel::class.java)
 
+        logoutViewMode = ViewModelProvider(this)
+            .get(LogoutViewModel::class.java)
 
         // Set ViewPager adapter
         setupHome()
@@ -133,10 +129,7 @@ class MainActivity : ScopedAppActivity(),
         setupBottomNav()
         setupDrawer()
 
-        // If avatar is downloaded from network.
-        accountViewModel.avatarRetrieved.observe(this, {
-            onAvatarRetrieved(it)
-        })
+        setupViewModel()
 
         if (BuildConfig.DEBUG) {
             info("onCreate finished. Build flavor: ${BuildConfig.FLAVOR}. Is debug: ${BuildConfig.DEBUG}")
@@ -148,6 +141,26 @@ class MainActivity : ScopedAppActivity(),
 
         showTermsAndConditions()
         setupWorker()
+    }
+
+    private fun setupViewModel() {
+        // If avatar is downloaded from network.
+        accountViewModel.avatarRetrieved.observe(this, {
+            when (it) {
+                is FetchResult.LocalizedError -> info(getString(it.msgId))
+                is FetchResult.Error -> info(it.exception)
+                is FetchResult.Success -> {
+                    navHeaderBinding.avatar = Drawable.createFromStream(
+                        it.data,
+                        CacheFileNames.wxAvatar
+                    )
+                }
+            }
+        })
+
+        logoutViewMode.loggedOutLiveData.observe(this) {
+            logout()
+        }
     }
 
     private fun showTermsAndConditions() {
@@ -263,10 +276,10 @@ class MainActivity : ScopedAppActivity(),
     private fun setupDrawer() {
 
         navHeaderBinding = DataBindingUtil.inflate(
-                layoutInflater,
-                R.layout.drawer_nav_header,
-                binding.drawerNav,
-                false)
+            layoutInflater,
+            R.layout.drawer_nav_header,
+            binding.drawerNav,
+            false)
 
         binding.drawerNav.addHeaderView(navHeaderBinding.root)
 
@@ -274,14 +287,16 @@ class MainActivity : ScopedAppActivity(),
         binding.drawerNav.menu
             .setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
 
-        val toggle = ActionBarDrawerToggle(
-                this,
-                binding.drawerLayout,
-                binding.toolbar,
-                R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close)
-        binding.drawerLayout.addDrawerListener(toggle)
-        toggle.syncState()
+        ActionBarDrawerToggle(
+            this,
+            binding.drawerLayout,
+            binding.toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        ).apply {
+            binding.drawerLayout.addDrawerListener(this)
+            syncState()
+        }
 
         // Set a listener that will be notified when a menu item is selected.
         binding.drawerNav.setNavigationItemSelectedListener {
@@ -313,20 +328,8 @@ class MainActivity : ScopedAppActivity(),
                 return@setOnClickListener
             }
 
-            // Setup bottom dialog
-            if (bottomDialog == null) {
-                bottomDialog = BottomSheetDialog(this)
-                bottomDialog?.setContentView(R.layout.fragment_logout)
-            }
-
-            bottomDialog?.findViewById<TextView>(R.id.action_logout)?.setOnClickListener{
-                logout()
-
-                bottomDialog?.dismiss()
-                toast("账号已登出")
-            }
-
-            bottomDialog?.show()
+            LogoutDialogFragment()
+                .show(supportFragmentManager, "LogoutDialog")
         }
 
         updateSessionUI()
@@ -340,46 +343,22 @@ class MainActivity : ScopedAppActivity(),
         val account = sessionManager.loadAccount()
 
         navHeaderBinding.account = account
-        // show signin/signup if account is null.
-        binding.drawerNav.menu.setGroupVisible(R.id.drawer_group_sign_in_up, account == null)
 
-        // Show login/signup if account does not exist.
-        binding.drawerNav.menu
-                .findItem(R.id.action_account)
-                ?.isVisible = account != null
-
-        // Only show when user is a member.
-        binding.drawerNav.menu
-                .findItem(R.id.action_my_subs)
-                ?.isVisible = account?.isMember ?: false
-
-        // If account is null, or not a member, show paywall.
-        binding.drawerNav.menu
-                .findItem(R.id.action_paywall)
-                ?.isVisible = !(account?.isMember ?: false)
-
-        // Load wechat avatar.
-        if (account != null && isConnected) {
-            accountViewModel.fetchWxAvatar(
-                    cache,
-                    account.wechat
-            )
+        binding.drawerNav.menu.apply {
+            // show signin/signup if account is null.
+            setGroupVisible(R.id.drawer_group_sign_in_up, account == null)
+            // Show account.
+            findItem(R.id.action_account)?.isVisible = account != null
+            // Only show when user is a member.
+            findItem(R.id.action_my_subs)?.isVisible = account?.isMember ?: false
+            findItem(R.id.action_paywall)?.isVisible = !(account?.isMember ?: false)
         }
-    }
 
-    private fun onAvatarRetrieved(result: FetchResult<InputStream>) {
-        when (result) {
-            is FetchResult.LocalizedError -> {
-                info(getString(result.msgId))
-            }
-            is FetchResult.Error -> {
-                info(result.exception)
-            }
-            is FetchResult.Success -> {
-
-                navHeaderBinding.avatar = Drawable.createFromStream(
-                        result.data,
-                        WX_AVATAR_NAME
+        account?.let {
+            if (isConnected) {
+                accountViewModel.fetchWxAvatar(
+                    cache,
+                    it.wechat
                 )
             }
         }
@@ -390,6 +369,7 @@ class MainActivity : ScopedAppActivity(),
         cache.deleteFile(WX_AVATAR_NAME)
         CustomerSession.endCustomerSession()
         updateSessionUI()
+        toast("账号已登出")
     }
 
     private fun displayTitle(title: Int) {
