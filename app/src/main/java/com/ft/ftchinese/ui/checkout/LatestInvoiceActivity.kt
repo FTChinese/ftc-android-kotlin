@@ -31,7 +31,10 @@ class LatestInvoiceActivity : ScopedAppActivity(), AnkoLogger {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_latest_invoice)
+        binding = DataBindingUtil.setContentView(
+            this,
+            R.layout.activity_latest_invoice,
+        )
 
         setSupportActionBar(binding.toolbar.toolbar)
         supportActionBar?.apply {
