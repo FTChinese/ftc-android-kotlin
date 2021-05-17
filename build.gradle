@@ -20,6 +20,9 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:7.0.0-alpha15'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        // https://developers.google.com/android/guides/google-services-plugin
+        // As part of enabling Google APIs or Firebase services
+        // Process the google-services.json file and produce Android resources that can be used in your application's code
         classpath 'com.google.gms:google-services:4.3.5'
 
         // Check here for latest version: https://docs.fabric.io/android/changelog.html#fabric-gradle-plugin
