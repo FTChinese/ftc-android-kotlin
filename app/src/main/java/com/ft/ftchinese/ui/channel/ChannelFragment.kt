@@ -20,6 +20,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentChannelBinding
 import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
@@ -31,11 +32,9 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.model.fetch.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
@@ -132,12 +131,6 @@ class ChannelFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupViewModel()
-        setupUI()
-        initLoading()
-    }
-
-    private fun setupViewModel() {
         channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache, sessionManager.loadAccount()))
             .get(ChannelViewModel::class.java)
 
@@ -150,10 +143,31 @@ class ChannelFragment : ScopedFragment(),
         })
         channelViewModel.isNetworkAvailable.value = context?.isConnected
 
-        // Whe the HTML is fetched from server.
-        channelViewModel.contentResult.observe(viewLifecycleOwner, {
-            onContentLoaded(it)
-        })
+        setupViewModel()
+        setupUI()
+        initLoading()
+    }
+
+    private fun setupViewModel() {
+
+        channelViewModel.progressLiveData.observe(viewLifecycleOwner) {
+            binding.inProgress = it
+        }
+
+        channelViewModel.swipingLiveData.observe(viewLifecycleOwner) {
+            binding.swipeRefresh.isRefreshing = it
+            toast(R.string.prompt_updated)
+        }
+
+        channelViewModel.htmlRendered.observe(viewLifecycleOwner) {
+            info("Loaded channel content: ${channelSource?.fileName}")
+
+            when (it) {
+                is FetchResult.LocalizedError -> toast(it.msgId)
+                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.Success -> load(it.data)
+            }
+        }
 
         /**
          * If user clicked on a link inside webview
@@ -194,44 +208,6 @@ class ChannelFragment : ScopedFragment(),
         }
     }
 
-    // Handle loading text into web view.
-    private fun onContentLoaded(result: FetchResult<String>) {
-        binding.inProgress = false
-        binding.swipeRefresh.isRefreshing = false
-
-        info("Loaded channel content: ${channelSource?.fileName}")
-
-        when (result) {
-            is FetchResult.LocalizedError -> {
-                toast(result.msgId)
-            }
-            is FetchResult.Error -> {
-                result.exception.message?.let { toast(it) }
-            }
-            is FetchResult.Success -> {
-                launch {
-                    val template = cache.readChannelTemplate()
-
-                    if (template.isBlank()) {
-                        toast("Error loading data")
-                        return@launch
-                    }
-
-                    info("Rendering channel page")
-                    val html = withContext(Dispatchers.Default) {
-                        StoryBuilder(template)
-                            .withChannel(result.data)
-                            .withUserInfo(sessionManager.loadAccount())
-                            .render()
-                    }
-
-
-                    load(html)
-                }
-            }
-        }
-    }
-
     override fun onRefresh() {
         toast(R.string.refreshing_data)
         initLoading()
@@ -240,25 +216,20 @@ class ChannelFragment : ScopedFragment(),
     private fun initLoading() {
         val chSrc = channelSource
         if (chSrc == null) {
-            binding.inProgress = false
             binding.swipeRefresh.isRefreshing = false
-
             return
         }
-
-        // Progress bar and swiping is mutually exclusive.
-        binding.inProgress = !binding.swipeRefresh.isRefreshing
 
         // For partial HTML, we need to crawl its content and render it with a template file to get the template HTML page.
         when (chSrc.htmlType) {
             HTML_TYPE_FRAGMENT -> {
                 info("initLoading: html fragment")
 
-                channelViewModel.load(
-                    channelSource = chSrc,
-                    bustCache = binding.swipeRefresh.isRefreshing
-                )
-
+                if (binding.swipeRefresh.isRefreshing) {
+                    channelViewModel.refresh(chSrc, sessionManager.loadAccount())
+                } else {
+                    channelViewModel.load(chSrc, sessionManager.loadAccount())
+                }
             }
             // For complete HTML, load it directly into Web view.
             HTML_TYPE_COMPLETE -> {
@@ -283,13 +254,6 @@ class ChannelFragment : ScopedFragment(),
             "text/html",
             null,
             null)
-
-        if (binding.swipeRefresh.isRefreshing) {
-            toast(R.string.prompt_updated)
-        }
-
-        binding.inProgress = false
-        binding.swipeRefresh.isRefreshing = false
     }
 
     override fun onPause() {
