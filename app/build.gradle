@@ -4,12 +4,15 @@
 //apply plugin:
 plugins {
     id 'com.android.application'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
     id 'kotlin-android'
     id 'kotlin-kapt'
     id "kotlin-parcelize"
 }
 
-apply plugin: 'com.google.firebase.crashlytics'
+//apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: "androidx.navigation.safeargs.kotlin"
 
 
@@ -259,7 +262,7 @@ dependencies {
     androidTestImplementation "androidx.work:work-testing:$work_version"
 }
 
-apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.gms.google-services'
 
 task zip(type: Zip, group: "Archive", description: "Archives sources in a zip file") {
     from("../") {
