@@ -38,7 +38,7 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
         viewModelScope.launch {
             // Fetch from server
             if (cacheName.isNullOrBlank()) {
-                startFetching(channelSource, account)
+                loadFromServer(channelSource, account)
                 return@launch
             }
 
@@ -49,7 +49,7 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
                 return@launch
             }
 
-            startFetching(channelSource, account)
+            loadFromServer(channelSource, account)
         }
     }
 
@@ -82,139 +82,28 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
         }
     }
 
-    private suspend fun startFetching(channelSource: ChannelSource, account: Account?) {
-        info("Fetching channel from server")
-        if (isNetworkAvailable.value != true) {
-            htmlRendered.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        val url = Config.buildChannelSourceUrl(account, channelSource)
-        if (url == null) {
-            info("Failed to build channel fetch url")
-            htmlRendered.value = FetchResult.LocalizedError(R.string.api_empty_url)
-            return
-        }
-
+    private suspend fun loadFromServer(channelSource: ChannelSource, account: Account?) {
         progressLiveData.value = true
 
-        try {
-            val content = withContext(Dispatchers.IO) {
-                Fetch()
-                    .get(url.toString())
-                    .endPlainText()
-            }
+        htmlRendered.value = fetchAndRender(channelSource, account)
 
-            if (content.isNullOrBlank()) {
-                info("Channel data not fetched from server")
-                htmlRendered.value = FetchResult.LocalizedError(R.string.loading_failed)
-                progressLiveData.value = false
-                return
-            }
-
-            info("Render channel from server data")
-            htmlRendered.value = render(content, account)
-            progressLiveData.value = false
-
-            info("Cached server-side channel data")
-            cacheChannel(channelSource, content)
-        } catch (e: Exception) {
-            info(e)
-            progressLiveData.value = false
-            htmlRendered.value = FetchResult.fromException(e)
-        }
+        progressLiveData.value = false
     }
 
-    private suspend fun fetchAndRender(channelSource: ChannelSource, account: Account?): FetchResult<String> {
-        info("Fetching channel from server")
-        if (isNetworkAvailable.value != true) {
-            return FetchResult.LocalizedError(R.string.prompt_no_network)
-        }
 
-        val url = Config.buildChannelSourceUrl(account, channelSource)
-        if (url == null) {
-            info("Failed to build channel fetch url")
-            return FetchResult.LocalizedError(R.string.api_empty_url)
-        }
-
-        try {
-            val content = withContext(Dispatchers.IO) {
-                Fetch()
-                    .get(url.toString())
-                    .endPlainText()
-            }
-
-            if (content.isNullOrBlank()) {
-                info("Channel data not fetched from server")
-                return FetchResult.LocalizedError(R.string.loading_failed)
-            }
-
-            info("Render channel from server data")
-
-            cacheChannel(channelSource, content)
-
-            info("Return render result...")
-            return render(content, account)
-        } catch (e: Exception) {
-            info(e)
-            return FetchResult.fromException(e)
-        }
-    }
 
     fun refresh(channelSource: ChannelSource, account: Account?) {
-        if (isNetworkAvailable.value != true) {
-            swipingLiveData.value = false
-            htmlRendered.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        val url = Config.buildChannelSourceUrl(account, channelSource)
-        if (url == null) {
-            info("Failed to build channel fetch url")
-            htmlRendered.value = FetchResult.LocalizedError(R.string.api_empty_url)
-            return
-        }
-
         viewModelScope.launch {
-
-            val content = withContext(Dispatchers.IO) {
-                Fetch()
-                    .get(url.toString())
-                    .endPlainText()
-            }
-
-            try {
-                val content = withContext(Dispatchers.IO) {
-                    Fetch()
-                        .get(url.toString())
-                        .endPlainText()
-                }
-
-                if (content.isNullOrBlank()) {
-                    info("Channel data not fetched from server")
-                    htmlRendered.value = FetchResult.LocalizedError(R.string.loading_failed)
-                    swipingLiveData.value = false
-                    return@launch
-                }
-
-                info("Render channel from server data")
-                htmlRendered.value = render(content, account)
-                swipingLiveData.value = false
-
-                info("Cached server-side channel data")
-                cacheChannel(channelSource, content)
-            } catch (e: Exception) {
-                info(e)
-                swipingLiveData.value = false
-                htmlRendered.value = FetchResult.fromException(e)
-            }
+            swipingLiveData.value = true
+            htmlRendered.value = fetchAndRender(channelSource, account)
+            swipingLiveData.value = false
         }
     }
 
     private suspend fun render(content: String, account: Account?): FetchResult<String> {
         val template = withContext(Dispatchers.IO) {
             cache.readChannelTemplate()
-        } ?: return FetchResult.LocalizedError(R.string.loading_failed)
+        }
 
         val html = withContext(Dispatchers.Default) {
             StoryBuilder(template)
@@ -240,15 +129,54 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
         } ?: return
 
         render(content, account)
-        cacheChannel(channelSource, content)
+
+        channelSource.fileName?.let {
+            cacheChannel(it, content)
+        }
     }
 
-    private suspend fun cacheChannel(channelSource: ChannelSource, content: String) {
-        channelSource.fileName?.let {
-            info("Caching channel data...")
-            viewModelScope.launch(Dispatchers.IO) {
-                cache.saveText(it, content)
+    // Used when both loading and refreshing.
+    private suspend fun fetchAndRender(channelSource: ChannelSource, account: Account?): FetchResult<String> {
+        info("Fetching channel from server")
+        if (isNetworkAvailable.value != true) {
+            return FetchResult.LocalizedError(R.string.prompt_no_network)
+        }
+
+        val url = Config.buildChannelSourceUrl(account, channelSource)
+        if (url == null) {
+            info("Failed to build channel fetch url")
+            return FetchResult.LocalizedError(R.string.api_empty_url)
+        }
+
+        try {
+            val content = withContext(Dispatchers.IO) {
+                Fetch()
+                    .get(url.toString())
+                    .endPlainText()
             }
+
+            if (content.isNullOrBlank()) {
+                info("Channel data not fetched from server")
+                return FetchResult.LocalizedError(R.string.loading_failed)
+            }
+
+            channelSource.fileName?.let {
+                cacheChannel(it, content)
+            }
+
+            info("Return render result...")
+            return render(content, account)
+        } catch (e: Exception) {
+            info(e)
+            return FetchResult.fromException(e)
+        }
+    }
+
+    private fun cacheChannel(filename: String, content: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            info("Caching channel started $filename")
+            cache.saveText(filename, content)
+            info("Caching channel finished $filename")
         }
     }
 }
