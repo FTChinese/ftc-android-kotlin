@@ -1,5 +1,7 @@
 package com.ft.ftchinese.model.reader
 
+import com.ft.ftchinese.model.fetch.json
+
 data class Address(
     val country: String? = null,
     val province: String? = null,
@@ -8,6 +10,10 @@ data class Address(
     val street: String? = null,
     val postcode: String? = null,
 ) {
+
+    fun toJsonString(): String {
+        return json.toJsonString(this)
+    }
 
     fun withProvince(p: String): Address {
         return Address(
