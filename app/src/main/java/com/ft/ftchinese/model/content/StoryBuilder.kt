@@ -5,6 +5,7 @@ import com.ft.ftchinese.tracking.AdParser
 import com.ft.ftchinese.tracking.AdPosition
 import com.ft.ftchinese.tracking.JSCodes
 import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.reader.Address
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
@@ -39,6 +40,15 @@ class StoryBuilder(private val template: String) : AnkoLogger {
         ctx["<!-- AndroidUserInfo -->"] = """
 <script>
 var androidUserInfo = ${account.toJsonString()};
+</script>""".trimIndent()
+
+        return this
+    }
+
+    fun withAddress(addr: Address): StoryBuilder {
+        ctx["<!-- AndroidUserAddress -->"] = """
+<script>
+var androidUserAddress = ${addr.toJsonString()}
 </script>""".trimIndent()
 
         return this
