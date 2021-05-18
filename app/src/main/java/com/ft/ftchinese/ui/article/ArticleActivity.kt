@@ -179,11 +179,6 @@ class ArticleActivity : ScopedAppActivity(),
             invalidateOptionsMenu()
         }
 
-        // Handle social share.
-        shareViewModel.appSelected.observe(this) {
-            articleViewModel.share(it.id)
-        }
-
         // Show message after bookmark clicked.
         articleViewModel.bookmarkState.observe(this) {
             info("Bookmark state $it")
@@ -238,7 +233,7 @@ class ArticleActivity : ScopedAppActivity(),
                     wxApi.sendReq(createWechatShareRequest(socialShare))
                     statsTracker.sharedToWx(socialShare.content)
                 }
-
+                SocialAppId.SCREENSHOT -> { }
                 SocialAppId.OPEN_IN_BROWSER -> {
                     try {
                         val webpage = Uri.parse(teaser?.getCanonicalUrl())
@@ -275,6 +270,7 @@ class ArticleActivity : ScopedAppActivity(),
 
         val t = teaser ?: return
 
+        // Load a story.
         articleViewModel.loadStory(
             teaser = t,
             isRefreshing = false,

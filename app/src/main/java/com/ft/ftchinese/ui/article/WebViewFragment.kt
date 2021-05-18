@@ -2,6 +2,8 @@ package com.ft.ftchinese.ui.article
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -25,17 +27,22 @@ import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.WVViewModel
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.ui.share.SocialAppId
+import com.ft.ftchinese.ui.share.SocialShareViewModel
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
+import java.io.File
+import java.io.FileOutputStream
 
 
 class WebViewFragment : Fragment(), AnkoLogger {
 
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var wvViewModel: WVViewModel
+    private lateinit var shareViewModel: SocialShareViewModel
     private lateinit var binding: FragmentWebViewBinding
     private lateinit var followingManager: FollowingManager
 
@@ -73,6 +80,24 @@ class WebViewFragment : Fragment(), AnkoLogger {
                 .get(WVViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
+        shareViewModel = activity?.run {
+            ViewModelProvider(this)
+                .get(SocialShareViewModel::class.java)
+        } ?: throw Exception("Invalid activity")
+
+        binding.webView.settings.apply {
+            javaScriptEnabled = true
+            loadsImagesAutomatically = true
+            domStorageEnabled = true
+            databaseEnabled = true
+        }
+
+        setupViewModel()
+        initUI()
+    }
+
+    private fun setupViewModel() {
+        // If article view model render the complete html locally, load it into webview as a string.
         articleViewModel.htmlResult.observe(viewLifecycleOwner) { result ->
 
             articleViewModel.inProgress.value = false
@@ -96,6 +121,7 @@ class WebViewFragment : Fragment(), AnkoLogger {
             }
         }
 
+        // If article view mode find out this is a complete webpage, load it directly.
         articleViewModel.webUrlResult.observe(viewLifecycleOwner) { result ->
             articleViewModel.inProgress.value = false
 
@@ -106,13 +132,35 @@ class WebViewFragment : Fragment(), AnkoLogger {
             }
         }
 
-        binding.webView.settings.apply {
-            javaScriptEnabled = true
-            loadsImagesAutomatically = true
-            domStorageEnabled = true
-            databaseEnabled = true
-        }
+        // Pass clicking event from share view mode lto article view model.
+        shareViewModel.appSelected.observe(viewLifecycleOwner) {
+            if (it.id != SocialAppId.SCREENSHOT) {
+                articleViewModel.share(it.id)
+            }
 
+            // Reference: https://www.jianshu.com/p/3950665e93e6
+            val bitmap = Bitmap.createBitmap(binding.webView.width, binding.webView.height, Bitmap.Config.ARGB_8888)
+
+            val canvas = Canvas(bitmap)
+
+            binding.webView.draw(canvas)
+
+            val file = File(requireContext().filesDir, "test.jpg")
+
+            try {
+                val fos = FileOutputStream(file)
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos)
+                fos.flush()
+                fos.close()
+                toast("File created")
+            } catch (e: Exception) {
+                info(e)
+            }
+            bitmap.recycle()
+        }
+    }
+
+    private fun initUI() {
         val wvClient = WVClient(requireContext(), wvViewModel)
 
         binding.webView.apply {

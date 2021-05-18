@@ -64,6 +64,11 @@ class SocialShareFragment :
                 id = SocialAppId.OPEN_IN_BROWSER
             ),
             SocialApp(
+                name = "全文截屏",
+                icon = R.drawable.screenshot,
+                id = SocialAppId.SCREENSHOT,
+            ),
+            SocialApp(
                 name = "更多",
                 icon = R.drawable.ic_more_horiz_black_24dp,
                 id = SocialAppId.MORE_OPTIONS

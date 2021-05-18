@@ -31,10 +31,6 @@ class WebViewActivity : AppCompatActivity(), AnkoLogger {
 
         val url = intent.getStringExtra(EXTRA_WEB_URL) ?: return
 
-        info("Loading url: $url")
-
-        binding.webContent.loadUrl(url)
-
         binding.webContent.settings.apply {
             javaScriptEnabled = true
             loadsImagesAutomatically = true
@@ -52,6 +48,9 @@ class WebViewActivity : AppCompatActivity(), AnkoLogger {
                 false
             }
         }
+
+        info("Loading url: $url")
+        binding.webContent.loadUrl(url)
     }
 
     companion object {

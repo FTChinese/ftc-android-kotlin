@@ -4,6 +4,7 @@ enum class SocialAppId {
     WECHAT_FRIEND,
     WECHAT_MOMENTS,
     OPEN_IN_BROWSER,
+    SCREENSHOT,
     MORE_OPTIONS
 }
 
