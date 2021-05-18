@@ -74,7 +74,7 @@ data class Teaser(
     // For column type, you should start a ChannelActivity instead of  StoryActivity.
     @KArticleType
     val type: ArticleType, // story | premium | video | photonews | interactive | column
-    val subType: String? = null, // speedreading | radio
+    val subType: String? = null, // speedreading | radio | bilingual to show cn-en content.
 
     @Json(name = "headline")
     var title: String,
