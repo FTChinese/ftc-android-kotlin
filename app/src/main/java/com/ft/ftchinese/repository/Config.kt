@@ -8,7 +8,7 @@ import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.enums.Tier
-import java.lang.Exception
+import kotlin.Exception
 
 const val HOST_FTC = "www.ftchinese.com"
 const val HOST_FTA = "www.ftacademy.cn"
@@ -72,6 +72,24 @@ object Config {
             }
 
             appendUtm(builder).build()
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun buildSubsConfirmUrl(account: Account, action: String): Uri? {
+        return try {
+            val builder = Uri.parse(discoverServer(account))
+                .buildUpon()
+                .path("/m/corp/preview.html")
+                .appendQueryParameter("pageid", "subscriptioninfoconfirm")
+                .appendQueryParameter("to", "all")
+                .appendQueryParameter("key", account.membership.tier?.toString())
+                .appendQueryParameter("action", action)
+                .appendQueryParameter("webview", "ftcapp")
+                .appendQueryParameter("bodyonly", "yes")
+
+            builder.build()
         } catch (e: Exception) {
             null
         }
