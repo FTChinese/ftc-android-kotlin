@@ -1,5 +1,6 @@
 package com.ft.ftchinese.model.ftcsubs
 
+import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.model.reader.Membership
 
@@ -15,5 +16,13 @@ data class Invoices(
         }
 
         return newMember.withInvoice(carriedOver)
+    }
+
+    fun confirmPageActionParam(): String {
+        return if (purchased.orderKind == OrderKind.Renew) {
+            "renew"
+        } else {
+            "create"
+        }
     }
 }
