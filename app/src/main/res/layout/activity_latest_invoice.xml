@@ -36,7 +36,7 @@
             android:id="@+id/btn_subscription_done"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/action_done"
+            android:text="下一步，确认或完善个人信息"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintVertical_bias="1.0"/>
 
