@@ -42,7 +42,6 @@ class WebViewFragment : Fragment(), AnkoLogger {
 
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var wvViewModel: WVViewModel
-    private lateinit var shareViewModel: SocialShareViewModel
     private lateinit var binding: FragmentWebViewBinding
     private lateinit var followingManager: FollowingManager
 
@@ -80,11 +79,6 @@ class WebViewFragment : Fragment(), AnkoLogger {
                 .get(WVViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
-        shareViewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(SocialShareViewModel::class.java)
-        } ?: throw Exception("Invalid activity")
-
         binding.webView.settings.apply {
             javaScriptEnabled = true
             loadsImagesAutomatically = true
@@ -100,7 +94,7 @@ class WebViewFragment : Fragment(), AnkoLogger {
         // If article view model render the complete html locally, load it into webview as a string.
         articleViewModel.htmlResult.observe(viewLifecycleOwner) { result ->
 
-            articleViewModel.inProgress.value = false
+            articleViewModel.progressLiveData.value = false
 
             when (result) {
                 is FetchResult.LocalizedError -> {
@@ -123,7 +117,7 @@ class WebViewFragment : Fragment(), AnkoLogger {
 
         // If article view mode find out this is a complete webpage, load it directly.
         articleViewModel.webUrlResult.observe(viewLifecycleOwner) { result ->
-            articleViewModel.inProgress.value = false
+            articleViewModel.progressLiveData.value = false
 
             when (result) {
                 is FetchResult.LocalizedError -> toast(result.msgId)
@@ -132,34 +126,13 @@ class WebViewFragment : Fragment(), AnkoLogger {
             }
         }
 
-        // Pass clicking event from share view mode lto article view model.
-        shareViewModel.appSelected.observe(viewLifecycleOwner) {
-            if (it.id != SocialAppId.SCREENSHOT) {
-                articleViewModel.share(it.id)
-            }
 
-            // Reference: https://www.jianshu.com/p/3950665e93e6
-            val bitmap = Bitmap.createBitmap(binding.webView.width, binding.webView.height, Bitmap.Config.ARGB_8888)
-
-            val canvas = Canvas(bitmap)
-
-            binding.webView.draw(canvas)
-
-            val file = File(requireContext().filesDir, "test.jpg")
-
-            try {
-                val fos = FileOutputStream(file)
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos)
-                fos.flush()
-                fos.close()
-                toast("File created")
-            } catch (e: Exception) {
-                info(e)
-            }
-            bitmap.recycle()
+        articleViewModel.screenshotName.observe(viewLifecycleOwner) {
+            screenshot(it)
         }
     }
 
+    @ExperimentalCoroutinesApi
     private fun initUI() {
         val wvClient = WVClient(requireContext(), wvViewModel)
 
@@ -180,6 +153,30 @@ class WebViewFragment : Fragment(), AnkoLogger {
                 false
             }
         }
+    }
+
+    // Reference: https://www.jianshu.com/p/3950665e93e6
+    private fun screenshot(imageName: String) {
+
+        val bitmap = Bitmap.createBitmap(binding.webView.width, binding.webView.height, Bitmap.Config.ARGB_8888)
+
+        val canvas = Canvas(bitmap)
+
+        binding.webView.draw(canvas)
+
+        val file = File(requireContext().filesDir, imageName)
+
+        try {
+            val fos = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos)
+            fos.flush()
+            fos.close()
+            articleViewModel.screenshotTaken()
+            toast("File created")
+        } catch (e: Exception) {
+            info(e)
+        }
+        bitmap.recycle()
     }
 
     @JavascriptInterface

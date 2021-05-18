@@ -149,7 +149,7 @@ class ArticleActivity : ScopedAppActivity(),
         articleViewModel.isNetworkAvailable.value = isConnected
 
         // Show/Hide progress indicator which should be controlled by child fragment.
-        articleViewModel.inProgress.observe(this, {
+        articleViewModel.progressLiveData.observe(this, {
             binding.inProgress = it
             if (!it) {
                 binding.articleRefresh.isRefreshing = it
@@ -220,9 +220,20 @@ class ArticleActivity : ScopedAppActivity(),
         // Stop progress after webview send signal page finished loading.
         // However, this is not of much use since the it waits all
         // static loaded.
-        wvViewModel.pageFinished.observe(this, {
-            articleViewModel.inProgress.value = !it
-        })
+        wvViewModel.pageFinished.observe(this) {
+            articleViewModel.progressLiveData.value = !it
+        }
+
+        shareViewModel.appSelected.observe(this) {
+            if (it.id != SocialAppId.SCREENSHOT) {
+                articleViewModel.share(it.id)
+                return@observe
+            }
+
+            teaser?.let {
+                articleViewModel.takeScreenshot(it.screenshotName())
+            }
+        }
 
         articleViewModel.socialShareState.observe(this) { socialShare ->
             shareFragment = null

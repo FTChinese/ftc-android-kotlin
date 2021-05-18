@@ -16,6 +16,7 @@ import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.share.SocialAppId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,15 +27,12 @@ import org.jetbrains.anko.info
 class ArticleViewModel(
     private val cache: FileCache,
     private val db: ArticleDb,
-) : ViewModel(), AnkoLogger {
+) : BaseViewModel(), AnkoLogger {
 
     private var _languageSelected = Language.CHINESE
 
     val language: Language
         get() = _languageSelected
-
-    val inProgress = MutableLiveData<Boolean>()
-    val isNetworkAvailable = MutableLiveData<Boolean>()
 
     // Used on UI to determine which bookmark icon should be used.
     val bookmarkState = MutableLiveData<BookmarkState>()
@@ -58,6 +56,10 @@ class ArticleViewModel(
 
     val accessChecked: MutableLiveData<Access> by lazy {
         MutableLiveData<Access>()
+    }
+
+    val screenshotName: MutableLiveData<String> by lazy {
+        MutableLiveData<String>()
     }
 
     // Host activity tells fragment to switch content.
@@ -316,5 +318,14 @@ class ArticleViewModel(
             contentPerm = content,
             who = AccountCache.get()
         )
+    }
+
+    fun takeScreenshot(imageName: String) {
+        progressLiveData.value = true
+        screenshotName.value = imageName
+    }
+
+    fun screenshotTaken() {
+        progressLiveData.value = false
     }
 }

@@ -207,6 +207,10 @@ data class Teaser(
         return "${type}_$id.json"
     }
 
+    fun screenshotName(): String {
+        return "${type}_$id.jpeg"
+    }
+    
     fun permission(): Permission {
         val p = channelPerm
         if (p != null) {
