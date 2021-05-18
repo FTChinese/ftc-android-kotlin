@@ -94,8 +94,6 @@ class CheckOutActivity : ScopedAppActivity(),
 
         setupViewModel()
         initUI()
-
-//        tracker.addCart(p)
     }
 
     private fun setupViewModel() {
@@ -122,6 +120,10 @@ class CheckOutActivity : ScopedAppActivity(),
             accountViewModel.isNetworkAvailable.value = it
             paywallViewModel.isNetworkAvailable.value = it
             customerViewModel.isNetworkAvailable.value = it
+        }
+
+        checkOutViewModel.priceSelected.observe(this) {
+            tracker.addCart(it)
         }
 
         checkOutViewModel.wxPayIntentResult.observe(this) {

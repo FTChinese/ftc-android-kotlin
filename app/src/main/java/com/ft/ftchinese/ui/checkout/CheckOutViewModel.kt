@@ -15,6 +15,7 @@ import com.ft.ftchinese.model.stripesubs.SubParams
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.SubRepo
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.viewmodel.*
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +30,10 @@ class CheckOutViewModel : BaseViewModel(), AnkoLogger {
 
     val counter: CheckoutCounter?
         get() = _checkoutCounter
+
+    val priceSelected: MutableLiveData<Price> by lazy {
+        MutableLiveData<Price>()
+    }
 
     val wxPayIntentResult: MutableLiveData<FetchResult<WxPayIntent>> by lazy {
         MutableLiveData<FetchResult<WxPayIntent>>()
@@ -50,6 +55,7 @@ class CheckOutViewModel : BaseViewModel(), AnkoLogger {
     fun initFtcCounter(priceId: String, m: Membership) {
         val price = FtcPriceCache.find(priceId)
         if (price != null) {
+            priceSelected.value = price
             val c = CheckoutCounter(price, m)
             _checkoutCounter = c
             counterResult.value = FetchResult.Success(c)
@@ -61,6 +67,7 @@ class CheckOutViewModel : BaseViewModel(), AnkoLogger {
     fun initStripeCounter(priceId: String, m: Membership) {
         val price = StripePriceCache.find(priceId)
         if (price != null) {
+            priceSelected.value = price
             val c = CheckoutCounter(price, m)
             _checkoutCounter = c
             counterResult.value = FetchResult.Success(c)
