@@ -89,7 +89,7 @@ object Config {
                 .appendQueryParameter("webview", "ftcapp")
                 .appendQueryParameter("bodyonly", "yes")
 
-            builder.build()
+            appendUtm(builder).build()
         } catch (e: Exception) {
             null
         }
