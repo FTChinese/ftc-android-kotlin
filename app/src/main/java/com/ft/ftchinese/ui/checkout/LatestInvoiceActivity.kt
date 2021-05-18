@@ -16,9 +16,9 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.formatter.formatEdition
 import com.ft.ftchinese.ui.formatter.getCurrencySymbol
 import com.ft.ftchinese.ui.lists.TwoColItemViewHolder
-import com.ft.ftchinese.ui.member.MemberActivity
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.jetbrains.anko.sdk27.coroutines.onClick
 
 /**
  * [LatestInvoiceActivity] shows the payment result of alipay of wxpay.
@@ -41,8 +41,8 @@ class LatestInvoiceActivity : ScopedAppActivity(), AnkoLogger {
             setDisplayShowTitleEnabled(true)
         }
 
-        binding.btnSubscriptionDone.setOnClickListener {
-            MemberActivity.start(this)
+        binding.btnSubscriptionDone.onClick {
+            BuyerInfoActivity.start(this@LatestInvoiceActivity)
             finish()
         }
 

@@ -24,7 +24,9 @@ import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
+import com.ft.ftchinese.model.ftcsubs.Invoices
 import com.ft.ftchinese.model.ftcsubs.Order
+import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
@@ -41,6 +43,7 @@ import com.ft.ftchinese.ui.wxlink.UnlinkActivity
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.LyricsAdapter
 import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.AuthActivity
@@ -58,6 +61,7 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
+import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZonedDateTime
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -80,6 +84,29 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         sessionManager = SessionManager.getInstance(this)
         orderManger = OrderManager.getInstance(this)
         workManager = WorkManager.getInstance(this)
+
+        binding.buyerInfoPage.onClick {
+            InvoiceStore
+                .getInstance(this@TestActivity)
+                .saveInvoices(Invoices(
+                    purchased = Invoice(
+                        id = "invoice-id",
+                        compoundId = "user-compound-id",
+                        tier = Tier.STANDARD,
+                        cycle = Cycle.YEAR,
+                        orderKind = OrderKind.Create,
+                        paidAmount = 258.0,
+                        payMethod = PayMethod.WXPAY,
+                        priceId = "price-id",
+                        createdUtc = ZonedDateTime.now(),
+                        consumedUtc = ZonedDateTime.now(),
+                        startUtc = ZonedDateTime.now(),
+                        endUtc = ZonedDateTime.now().plusYears(1),
+                    ),
+                    carriedOver = null,
+                ))
+            BuyerInfoActivity.start(this@TestActivity)
+        }
 
         binding.signInUp.onClick {
             AuthActivity.start(this@TestActivity)

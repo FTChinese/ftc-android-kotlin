@@ -47,6 +47,12 @@
                 android:paddingEnd="8dp">
 
                 <Button
+                    android:id="@+id/buyer_info_page"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Buyer Address"
+                    android:textAllCaps="false"/>
+                <Button
                     android:id="@+id/sign_in_up"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

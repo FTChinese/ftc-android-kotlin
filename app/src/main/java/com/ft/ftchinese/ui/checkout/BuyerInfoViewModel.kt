@@ -6,67 +6,88 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.StoryBuilder
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.ftcsubs.Invoices
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.repository.AccountRepo
+import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.BaseViewModel
 import kotlinx.coroutines.*
+import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 
-class BuyerInfoViewModel : BaseViewModel() {
+class BuyerInfoViewModel : BaseViewModel(), AnkoLogger {
 
-    val htmlRendered = MutableLiveData<String>()
+    val htmlRendered = MutableLiveData<FetchResult<String>>()
 
-    suspend private fun asyncLoadAddress(account: Account): Address? {
-        return try {
-            withContext(Dispatchers.IO) {
-                AccountRepo.loadAddress(account.id)
-            }
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    suspend private fun asyncCrawlWeb(url: String): String? {
-        return try {
-            Fetch()
-                .get(url)
-                .endPlainText()
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    fun loadPage(account: Account, url: String) {
+    /**
+     * @param action - `buy` or `renew`.
+     */
+    fun loadPage(account: Account, cache: FileCache, action: String) {
         if (isNetworkAvailable.value == false) {
             return
         }
 
+        val uri = Config.buildSubsConfirmUrl(account, action)
+        if (uri == null) {
+            info("Address url is empty")
+            htmlRendered.value = FetchResult.LocalizedError(R.string.loading_failed)
+            return
+        }
+
+        info("Fetching address page from ${uri.toString()}")
+
+        progressLiveData.value = true
         viewModelScope.launch {
 
-            val deferreds = listOf(
-                async {
-                    asyncCrawlWeb(url)
-                },
-                async {
-                    asyncLoadAddress(account)
+            try {
+                val webContentAsync = async(Dispatchers.IO) {
+                    Fetch()
+                        .get(uri.toString())
+                        .endPlainText()
                 }
-            )
+                val addressAsync = async(Dispatchers.IO) {
+                    info("Fetching address...")
+                    AccountRepo.loadAddress(account.id)
+                }
 
-            val (webContent, addr) = deferreds.awaitAll()
+                val webContent = webContentAsync.await()
+                val address = addressAsync.await()
+
+                progressLiveData.value = false
+
+                if (webContent.isNullOrBlank() || address == null) {
+                    htmlRendered.value = FetchResult.LocalizedError(R.string.loading_failed)
+                    return@launch
+                }
+                val html = render(
+                    account = account,
+                    cache = cache,
+                    content = webContent,
+                    address = address,
+                )
+
+                htmlRendered.value = FetchResult.Success(html)
+            } catch (e: Exception) {
+                info(e)
+                progressLiveData.value = false
+                htmlRendered.value = FetchResult.fromException(e)
+            }
         }
     }
 
-    private suspend fun render(content: String, addr: Address, cache: FileCache): String {
+    private suspend fun render(account: Account, cache: FileCache, content: String, address: Address): String {
         val template = withContext(Dispatchers.IO) {
             cache.readChannelTemplate()
         }
 
-        val html = withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.Default) {
             StoryBuilder(template)
+                .withUserInfo(account)
+                .withAddress(address)
+                .withChannel(content)
                 .render()
         }
-
-        return html
     }
 }

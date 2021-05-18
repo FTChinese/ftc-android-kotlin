@@ -35,7 +35,8 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".ui.checkout.BuyerInfoActivity"
-            android:exported="true" />
+            android:parentActivityName=".ui.member.MemberActivity"
+            android:label="完善信息"/>
         <activity
             android:name=".TestActivity"
             android:label="Test"
