@@ -74,6 +74,8 @@ class ArticleViewModel(
      * @isRefreshing - when this is true, fetching data directly
      * from server.
      * It also indicates tracking data should not be sent.
+     * If content might have JSON api, we render it against template;
+     * otherwise loading url directly.
      */
     fun loadStory(teaser: Teaser, isRefreshing: Boolean) {
         if (!teaser.hasJsAPI()) {
