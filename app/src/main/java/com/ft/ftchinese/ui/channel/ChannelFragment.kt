@@ -131,7 +131,7 @@ class ChannelFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache, sessionManager.loadAccount()))
+        channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache))
             .get(ChannelViewModel::class.java)
 
         wvViewModel = ViewModelProvider(this)

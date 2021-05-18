@@ -17,7 +17,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-class ChannelViewModel(val cache: FileCache, val account: Account?) :
+class ChannelViewModel(val cache: FileCache) :
         BaseViewModel(), AnkoLogger {
 
     val swipingLiveData: MutableLiveData<Boolean> by lazy {
@@ -89,8 +89,6 @@ class ChannelViewModel(val cache: FileCache, val account: Account?) :
 
         progressLiveData.value = false
     }
-
-
 
     fun refresh(channelSource: ChannelSource, account: Account?) {
         viewModelScope.launch {
