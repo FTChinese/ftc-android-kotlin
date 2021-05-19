@@ -208,7 +208,7 @@ data class Teaser(
     }
 
     fun screenshotName(): String {
-        return "${type}_$id.jpeg"
+        return "${type}_$id.png"
     }
     
     fun permission(): Permission {
