@@ -23,7 +23,10 @@ class SocialShareFragment :
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.fragment_social_share, container, false)
+        val view = inflater.inflate(
+            R.layout.fragment_social_share,
+            container,
+            false)
 
         view.findViewById<RecyclerView>(R.id.share_rv).apply {
             setHasFixedSize(true)
