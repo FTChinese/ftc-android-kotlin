@@ -42,14 +42,17 @@ import com.ft.ftchinese.ui.share.SocialShareFragment
 import com.ft.ftchinese.ui.share.SocialShareViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
+import com.tencent.mm.opensdk.modelmsg.WXImageObject
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
 import com.tencent.mm.opensdk.modelmsg.WXWebpageObject
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.util.*
 
 /**
@@ -66,10 +69,12 @@ class ArticleActivity : ScopedAppActivity(),
     private lateinit var followingManager: FollowingManager
 
     private lateinit var wxApi: IWXAPI
+    private lateinit var binding: ActivityArticleBinding
+
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var shareViewModel: SocialShareViewModel
     private lateinit var wvViewModel: WVViewModel
-    private lateinit var binding: ActivityArticleBinding
+    private lateinit var screenshotViewModel: ScreenshotViewModel
 
     private var shareFragment: SocialShareFragment? = null
     private var teaser: Teaser? = null
@@ -122,13 +127,6 @@ class ArticleActivity : ScopedAppActivity(),
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
         followingManager = FollowingManager.getInstance(this)
 
-        setupViewModel()
-        setupUI()
-
-        statsTracker.selectListItem(teaser)
-    }
-
-    private fun setupViewModel() {
         articleViewModel = ViewModelProvider(
             this,
             ArticleViewModelFactory(
@@ -143,18 +141,33 @@ class ArticleActivity : ScopedAppActivity(),
         shareViewModel = ViewModelProvider(this)
             .get(SocialShareViewModel::class.java)
 
+        screenshotViewModel = ViewModelProvider(this)
+            .get(ScreenshotViewModel::class.java)
+
         connectionLiveData.observe(this) {
             articleViewModel.isNetworkAvailable.value = it
         }
         articleViewModel.isNetworkAvailable.value = isConnected
 
+        setupViewModel()
+        setupUI()
+
+        statsTracker.selectListItem(teaser)
+    }
+
+    private fun setupViewModel() {
+
         // Show/Hide progress indicator which should be controlled by child fragment.
-        articleViewModel.progressLiveData.observe(this, {
+        articleViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
             if (!it) {
                 binding.articleRefresh.isRefreshing = it
             }
-        })
+        }
+
+        screenshotViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
 
         articleViewModel.accessChecked.observe(this) {
 
@@ -224,15 +237,9 @@ class ArticleActivity : ScopedAppActivity(),
             articleViewModel.progressLiveData.value = !it
         }
 
+        // Pass the share app selected share component to article view model.
         shareViewModel.appSelected.observe(this) {
-            if (it.id != SocialAppId.SCREENSHOT) {
-                articleViewModel.share(it.id)
-                return@observe
-            }
-
-            teaser?.let {
-                articleViewModel.takeScreenshot(it.screenshotName())
-            }
+            articleViewModel.share(it.id)
         }
 
         articleViewModel.socialShareState.observe(this) { socialShare ->
@@ -244,7 +251,12 @@ class ArticleActivity : ScopedAppActivity(),
                     wxApi.sendReq(createWechatShareRequest(socialShare))
                     statsTracker.sharedToWx(socialShare.content)
                 }
-                SocialAppId.SCREENSHOT -> { }
+                SocialAppId.SCREENSHOT -> {
+                    teaser?.let {
+                        toast("生成截图...")
+                        screenshotViewModel.takeScreenshot(it)
+                    }
+                }
                 SocialAppId.OPEN_IN_BROWSER -> {
                     try {
                         val webpage = Uri.parse(teaser?.getCanonicalUrl())
@@ -271,6 +283,11 @@ class ArticleActivity : ScopedAppActivity(),
                     )
                 }
             }
+        }
+
+        screenshotViewModel.appSelected.observe(this) {
+            info("Share screenshot to $it")
+            wxApi.sendReq(buildWxImageShareReq(it.id))
         }
     }
 
@@ -385,27 +402,53 @@ class ArticleActivity : ScopedAppActivity(),
     }
 
     private fun createWechatShareRequest(socialShare: SocialShareState): SendMessageToWX.Req {
-        val webpage = WXWebpageObject()
-        webpage.webpageUrl = teaser?.getCanonicalUrl()
+        val webpage = WXWebpageObject().apply {
+            webpageUrl = teaser?.getCanonicalUrl()
+        }
 
-        val msg = WXMediaMessage(webpage)
-        msg.title = socialShare.content.title
-        msg.description = socialShare.content.standfirst
+        val msg = WXMediaMessage(webpage).apply {
+            title = socialShare.content.title
+            description = socialShare.content.standfirst
+        }
 
         val bmp = BitmapFactory.decodeResource(resources, R.drawable.ic_splash)
         val thumbBmp = Bitmap.createScaledBitmap(bmp, 150, 150, true)
         bmp.recycle()
         msg.thumbData = bmpToByteArray(thumbBmp, true)
 
-        val req = SendMessageToWX.Req()
-        req.transaction = System.currentTimeMillis().toString()
-        req.message = msg
-        req.scene = if (socialShare.appId == SocialAppId.WECHAT_FRIEND)
-            SendMessageToWX.Req.WXSceneSession
-        else
-            SendMessageToWX.Req.WXSceneTimeline
+        return SendMessageToWX.Req().apply {
+            transaction = System.currentTimeMillis().toString()
+            message = msg
+            scene = if (socialShare.appId == SocialAppId.WECHAT_FRIEND)
+                SendMessageToWX.Req.WXSceneSession
+            else
+                SendMessageToWX.Req.WXSceneTimeline
+        }
+    }
 
-        return req
+    private fun buildWxImageShareReq(appId: SocialAppId): SendMessageToWX.Req {
+        val imageName = teaser?.screenshotName()
+        val file = File(filesDir, imageName)
+
+        info("Wx image share $file")
+        val bmp = BitmapFactory.decodeFile(file.toString())
+
+        val msg = WXMediaMessage().apply {
+            mediaObject = WXImageObject(bmp)
+        }
+
+        val thumbBmp = Bitmap.createScaledBitmap(bmp, 150, 150, true)
+        bmp.recycle()
+        msg.thumbData = bmpToByteArray(thumbBmp, true)
+
+        return SendMessageToWX.Req().apply {
+            transaction = System.currentTimeMillis().toString()
+            message = msg
+            scene = if (appId == SocialAppId.WECHAT_FRIEND)
+                SendMessageToWX.Req.WXSceneSession
+            else
+                SendMessageToWX.Req.WXSceneTimeline
+        }
     }
 
     override fun onDestroy() {

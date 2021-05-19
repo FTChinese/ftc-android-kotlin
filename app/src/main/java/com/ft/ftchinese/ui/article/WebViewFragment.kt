@@ -27,8 +27,6 @@ import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.WVViewModel
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.ui.share.SocialAppId
-import com.ft.ftchinese.ui.share.SocialShareViewModel
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
@@ -37,11 +35,13 @@ import org.jetbrains.anko.support.v4.toast
 import java.io.File
 import java.io.FileOutputStream
 
-
+@ExperimentalCoroutinesApi
 class WebViewFragment : Fragment(), AnkoLogger {
 
     private lateinit var articleViewModel: ArticleViewModel
+    private lateinit var screenshotViewModel: ScreenshotViewModel
     private lateinit var wvViewModel: WVViewModel
+
     private lateinit var binding: FragmentWebViewBinding
     private lateinit var followingManager: FollowingManager
 
@@ -77,6 +77,11 @@ class WebViewFragment : Fragment(), AnkoLogger {
         wvViewModel = activity?.run {
             ViewModelProvider(this)
                 .get(WVViewModel::class.java)
+        } ?: throw Exception("Invalid activity")
+
+        screenshotViewModel = activity?.run {
+            ViewModelProvider(this)
+                .get(ScreenshotViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
         binding.webView.settings.apply {
@@ -126,13 +131,12 @@ class WebViewFragment : Fragment(), AnkoLogger {
             }
         }
 
-
-        articleViewModel.screenshotName.observe(viewLifecycleOwner) {
-            screenshot(it)
+        screenshotViewModel.teaserLiveData.observe(viewLifecycleOwner) {
+            screenshot(it.screenshotName())
         }
     }
 
-    @ExperimentalCoroutinesApi
+
     private fun initUI() {
         val wvClient = WVClient(requireContext(), wvViewModel)
 
@@ -168,11 +172,12 @@ class WebViewFragment : Fragment(), AnkoLogger {
 
         try {
             val fos = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, fos)
             fos.flush()
             fos.close()
-            articleViewModel.screenshotTaken()
-            toast("File created")
+            screenshotViewModel.progressLiveData.value = false
+            ScreenshotFragment.newInstance()
+                .show(childFragmentManager, "ScreenshotDialog")
         } catch (e: Exception) {
             info(e)
         }

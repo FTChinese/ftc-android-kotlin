@@ -1,12 +1,12 @@
 package com.ft.ftchinese.ui.article
 
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.JSONResult
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Access
@@ -15,7 +15,6 @@ import com.ft.ftchinese.repository.ArticleClient
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.share.SocialAppId
 import kotlinx.coroutines.Dispatchers
@@ -56,10 +55,6 @@ class ArticleViewModel(
 
     val accessChecked: MutableLiveData<Access> by lazy {
         MutableLiveData<Access>()
-    }
-
-    val screenshotName: MutableLiveData<String> by lazy {
-        MutableLiveData<String>()
     }
 
     // Host activity tells fragment to switch content.
@@ -320,12 +315,5 @@ class ArticleViewModel(
         )
     }
 
-    fun takeScreenshot(imageName: String) {
-        progressLiveData.value = true
-        screenshotName.value = imageName
-    }
 
-    fun screenshotTaken() {
-        progressLiveData.value = false
-    }
 }
