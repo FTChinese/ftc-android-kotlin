@@ -279,8 +279,3 @@ task copy(type: Copy, group: "Archive", description: "Copies sources to the dest
     into "/Volumes/Zion/department/Tech/android-release"
 }
 
-tasks.whenTaskAdded {task ->
-    if(task.name.toLowerCase().contains("crashlytics")) {
-        task.enabled = false
-    }
-}
