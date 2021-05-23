@@ -5,7 +5,6 @@ import android.os.Parcelable
 import com.beust.klaxon.Json
 import com.ft.ftchinese.model.fetch.KArticleType
 import com.ft.ftchinese.model.reader.Permission
-import com.ft.ftchinese.repository.HOST_FTC
 import kotlinx.parcelize.Parcelize
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -182,11 +181,6 @@ data class Teaser(
         }
     }
 
-    // Used for sharing
-    fun getCanonicalUrl(): String {
-        return "https://$HOST_FTC/$type/$id"
-    }
-
     private fun isSevenDaysOld(): Boolean {
         if (publishedAt == null) {
             return false
@@ -208,7 +202,7 @@ data class Teaser(
     }
 
     fun screenshotName(): String {
-        return "${type}_$id.png"
+        return "${type}_$id"
     }
     
     fun permission(): Permission {
