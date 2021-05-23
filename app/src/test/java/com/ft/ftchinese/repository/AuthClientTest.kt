@@ -1,8 +1,10 @@
 package com.ft.ftchinese.repository
 
+import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.reader.ReadingDuration
 import org.junit.Test
 import java.util.*
+import kotlin.test.assertTrue
 
 class AuthClientTest {
     @Test fun readingDuration() {
@@ -20,19 +22,24 @@ class AuthClientTest {
         println("Result: $result")
     }
 
-    @Test fun emailExists() {
-        val ok = AuthClient.emailExists("neefrankie@outlook.com")
-
-        println("Email exists: $ok")
-    }
-
     @Test
-    fun login() {
-
+    fun testEmailExists() {
+        try {
+            val ok = AuthClient.emailExists("neefrankie@163.com")
+            assertTrue(ok)
+        } catch (e: Exception) {
+            println(e)
+        }
     }
-
-    @Test
-    fun signUp() {
-
-    }
+    fun testLogin() {}
+    fun testSignUp() {}
+    fun testRequestSMSCode() {}
+    fun testVerifySMSCode() {}
+    fun testMobileLinkEmail() {}
+    fun testMobileSignUp() {}
+    fun testPasswordResetLetter() {}
+    fun testVerifyPwResetCode() {}
+    fun testResetPassword() {}
+    fun testWxLogin() {}
+    fun testEngaged() {}
 }
