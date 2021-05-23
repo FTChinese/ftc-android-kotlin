@@ -24,11 +24,6 @@ val internalHost = listOf(
 )
 
 object Config {
-    val accessToken = if (BuildConfig.DEBUG) {
-        BuildConfig.ACCESS_TOKEN_TEST
-    } else {
-        BuildConfig.ACCESS_TOKEN_LIVE
-    }
 
     fun isInternalLink(host: String): Boolean {
         return internalHost.contains(host)

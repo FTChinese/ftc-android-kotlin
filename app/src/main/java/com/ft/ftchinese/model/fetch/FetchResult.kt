@@ -26,7 +26,6 @@ sealed class FetchResult<out T : Any> {
             return when (e.statusCode) {
                 401 -> LocalizedError(R.string.api_unauthorized)
                 429 -> LocalizedError(R.string.api_too_many_request)
-                500 -> LocalizedError(R.string.api_server_error)
                 else -> Error(e)
             }
         }

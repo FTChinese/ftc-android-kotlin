@@ -2,11 +2,13 @@ package com.ft.ftchinese.model.fetch
 
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.repository.Endpoint
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.jetbrains.anko.AnkoLogger
+import org.jetbrains.anko.info
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -27,25 +29,30 @@ class Fetch : AnkoLogger {
     private var disableCache = false
 
     fun get(url: String) = apply {
+        info("GET $url")
         urlBuilder = url.toHttpUrl().newBuilder()
     }
 
     fun post(url: String) = apply {
+        info("POST $url")
         urlBuilder = url.toHttpUrl().newBuilder()
         method = "POST"
     }
 
     fun put(url: String) = apply {
+        info("PUT $url")
         urlBuilder = url.toHttpUrl().newBuilder()
         method = "PUT"
     }
 
     fun patch(url: String) = apply {
+        info("PATCH $url")
         urlBuilder = url.toHttpUrl().newBuilder()
         method = "PATCH"
     }
 
     fun delete(url: String) = apply {
+        info("DELETE $url")
         urlBuilder = url.toHttpUrl().newBuilder()
         method = "DELETE"
     }
@@ -90,7 +97,7 @@ class Fetch : AnkoLogger {
 
     // Authorization: Bearer xxxxxxx
     private fun setAccessKey() = apply {
-        headers["Authorization"] = "Bearer ${Config.accessToken}"
+        headers["Authorization"] = "Bearer ${Endpoint.accessToken}"
     }
 
     // X-Client-Type: android
@@ -176,7 +183,6 @@ class Fetch : AnkoLogger {
      */
     fun endJsonText(): Pair<Response, String?> {
         setAccessKey()
-        setClient()
 
         val resp = end()
 
@@ -188,10 +194,7 @@ class Fetch : AnkoLogger {
             return Pair(resp, resp.body?.string())
         }
 
-        throw ServerError.from(resp) ?: ServerError(
-                statusCode = resp.code,
-                message = "Unknown error occurred when sending request"
-        )
+        throw ServerError.from(resp)
     }
 
     /**
@@ -199,15 +202,15 @@ class Fetch : AnkoLogger {
      */
     private fun end(): Response {
         val reqBuilder = Request.Builder()
-                .url(urlBuilder.build())
-                .headers(headers.build())
+            .url(urlBuilder.build())
+            .headers(headers.build())
 
         if (disableCache) {
             reqBuilder.cacheControl(CacheControl.Builder()
-                    .noCache()
-                    .noStore()
-                    .noTransform()
-                    .build())
+                .noCache()
+                .noStore()
+                .noTransform()
+                .build())
         }
 
         /**

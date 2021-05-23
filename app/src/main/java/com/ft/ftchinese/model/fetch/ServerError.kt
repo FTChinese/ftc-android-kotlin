@@ -3,6 +3,7 @@ package com.ft.ftchinese.model.fetch
 import com.beust.klaxon.Json
 import com.beust.klaxon.Klaxon
 import okhttp3.Response
+import org.jetbrains.anko.AnkoLogger
 
 data class ServerError(
     override val message: String,
@@ -14,31 +15,48 @@ data class ServerError(
     val code: String? = null,
     val param: String? = null,
     val type: String? = null
-) : Exception(message) {
+) : Exception(message), AnkoLogger {
 
     companion object {
         @JvmStatic
-        fun from(resp: Response): ServerError? {
+        fun from(resp: Response): ServerError {
             /**
              * @throws IOException when turning to string.
              */
             val body = resp.body?.string()
 
             // Avoid throwing JSON parse error.
-            val clientErr = if (body != null) {
+            if (body != null) {
+                // Might not return json body
+                if (body.startsWith("<")) {
+                    return ServerError(
+                        message = body,
+                        statusCode = 500
+                    )
+                }
+
                 /**
                  * Throws JSON parse error.
                  */
-                Klaxon().parse<ServerError>(body)
-            } else {
-                ServerError(
-                    message = "No response from server"
-                )
+                return try {
+                    Klaxon().parse<ServerError>(body)?.apply {
+                        statusCode = resp.code
+                    } ?: ServerError(
+                            message = "Kalxon.parse error",
+                            statusCode = 500
+                        )
+                } catch (e: Exception) {
+                    ServerError(
+                        message = e.message ?: "Error parsing JSON",
+                        statusCode = 500
+                    )
+                }
             }
 
-            clientErr?.statusCode = resp.code
-
-            return clientErr
+            return  ServerError(
+                message = "No response from server",
+                statusCode = resp.code
+            )
         }
     }
 }

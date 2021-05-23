@@ -23,8 +23,8 @@ object ContentApi {
     val INTERACTIVE = "$BASE/interactive/contents"
 }
 
-private const val devIP = "http://192.168.10.115"
-
+//private const val devIP = "http://192.168.10.115"
+private const val devIP = "http://10.0.0.2"
 object Endpoint {
 
     private val authEmailBase = "${subsBase()}/auth/email"
@@ -76,11 +76,19 @@ object Endpoint {
             BuildConfig.API_SUBS_SANDBOX
         }
     } else {
-        if (BuildConfig.DEBUG) {
-            "$devIP:8202"
-        } else {
-            BuildConfig.API_SUBS_LIVE
-        }
+        BuildConfig.API_SUBS_LIVE
+//        if (BuildConfig.DEBUG) {
+//            "$devIP:8202"
+//        } else {
+//            BuildConfig.API_SUBS_LIVE
+//        }
+    }
+
+    val accessToken = if (BuildConfig.DEBUG) {
+//        BuildConfig.ACCESS_TOKEN_TEST
+        BuildConfig.ACCESS_TOKEN_LIVE
+    } else {
+        BuildConfig.ACCESS_TOKEN_LIVE
     }
 
     const val splashScheduleUrl = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"

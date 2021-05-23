@@ -2,6 +2,7 @@ package com.ft.ftchinese.repository
 
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.fetch.Fetch
+import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.request.*
@@ -11,14 +12,28 @@ import org.jetbrains.anko.info
 object AuthClient : AnkoLogger {
 
     fun emailExists(email: String): Boolean {
+        try {
+            val (resp, _) = Fetch()
+                .get(Endpoint.emailExists)
+                .query("v", email)
+                .noCache()
+                .endJsonText()
 
-        val (resp, _) = Fetch()
-            .get(Endpoint.emailExists)
-            .query("v", email)
-            .noCache()
-            .endJsonText()
+            // Code below 400
+            if (resp.code != 204) {
+                throw ServerError(
+                    message = "Unexpected status code ${resp.code}",
+                    statusCode = resp.code
+                )
+            }
+            return true
+        } catch (e: ServerError) {
+            if (e.statusCode == 404) {
+                return false
+            }
 
-        return resp.code == 204
+            throw e
+        }
     }
 
     fun login(c: Credentials): Account? {
