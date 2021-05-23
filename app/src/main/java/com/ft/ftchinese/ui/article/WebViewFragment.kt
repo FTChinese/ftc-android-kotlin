@@ -12,31 +12,32 @@ import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.databinding.FragmentWebViewBinding
 import com.ft.ftchinese.model.content.Following
 import com.ft.ftchinese.model.content.FollowingManager
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.WVViewModel
 import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
-import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.ui.share.ArticleScreenshot
+import com.ft.ftchinese.ui.share.ScreenshotFragment
+import com.ft.ftchinese.ui.share.ScreenshotViewModel
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
-import java.io.File
-import java.io.FileOutputStream
 
 @ExperimentalCoroutinesApi
-class WebViewFragment : Fragment(), AnkoLogger {
+class WebViewFragment : ScopedFragment(), AnkoLogger {
 
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var screenshotViewModel: ScreenshotViewModel
@@ -131,11 +132,33 @@ class WebViewFragment : Fragment(), AnkoLogger {
             }
         }
 
-        screenshotViewModel.teaserLiveData.observe(viewLifecycleOwner) {
-            screenshot(it.screenshotName())
+        // Once a row is created for the scrennshot
+        // in MediaStore, we write the actually image file
+        // the uri.
+        screenshotViewModel.imageRowCreated.observe(viewLifecycleOwner) { screenshot: ArticleScreenshot ->
+            val bitmap = Bitmap.createBitmap(
+                binding.webView.width,
+                binding.webView.height,
+                Bitmap.Config.ARGB_8888)
+
+            val canvas = Canvas(bitmap)
+
+            binding.webView.draw(canvas)
+
+            requireContext()
+                .contentResolver
+                .openOutputStream(screenshot.imageUri, "w")?.use {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 50, it)
+
+                    it.flush()
+
+                    bitmap.recycle()
+                    ScreenshotFragment
+                        .newInstance()
+                        .show(childFragmentManager, "ScreenshotDialog")
+                }
         }
     }
-
 
     private fun initUI() {
         val wvClient = WVClient(requireContext(), wvViewModel)
@@ -157,31 +180,6 @@ class WebViewFragment : Fragment(), AnkoLogger {
                 false
             }
         }
-    }
-
-    // Reference: https://www.jianshu.com/p/3950665e93e6
-    private fun screenshot(imageName: String) {
-
-        val bitmap = Bitmap.createBitmap(binding.webView.width, binding.webView.height, Bitmap.Config.ARGB_8888)
-
-        val canvas = Canvas(bitmap)
-
-        binding.webView.draw(canvas)
-
-        val file = File(requireContext().filesDir, imageName)
-
-        try {
-            val fos = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 90, fos)
-            fos.flush()
-            fos.close()
-            screenshotViewModel.progressLiveData.value = false
-            ScreenshotFragment.newInstance()
-                .show(childFragmentManager, "ScreenshotDialog")
-        } catch (e: Exception) {
-            info(e)
-        }
-        bitmap.recycle()
     }
 
     @JavascriptInterface

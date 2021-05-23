@@ -1,17 +1,20 @@
 package com.ft.ftchinese.ui.article
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
 import androidx.core.app.TaskStackBuilder
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -37,23 +40,18 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.WVViewModel
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.share.SocialAppId
-import com.ft.ftchinese.ui.share.SocialShareFragment
-import com.ft.ftchinese.ui.share.SocialShareViewModel
+import com.ft.ftchinese.ui.share.*
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
-import com.tencent.mm.opensdk.modelmsg.WXImageObject
-import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
-import com.tencent.mm.opensdk.modelmsg.WXWebpageObject
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
-import java.io.ByteArrayOutputStream
-import java.io.File
 import java.util.*
+
+/** The request code for requesting [Manifest.permission.READ_EXTERNAL_STORAGE] permission. */
+private const val READ_EXTERNAL_STORAGE_REQUEST = 0x1045
 
 /**
  * NOTE: after trial and error, as of Android Studio RC1, data binding class cannot be
@@ -238,56 +236,164 @@ class ArticleActivity : ScopedAppActivity(),
         }
 
         // Pass the share app selected share component to article view model.
-        shareViewModel.appSelected.observe(this) {
-            articleViewModel.share(it.id)
-        }
+        shareViewModel.appSelected.observe(this, this::onShareIconClicked)
 
-        articleViewModel.socialShareState.observe(this) { socialShare ->
-            shareFragment = null
+        // If user want to share screenshot.
+        screenshotViewModel.shareSelected.observe(this) { appId ->
+            val screenshot = screenshotViewModel.imageRowCreated.value ?: return@observe
 
-            when (socialShare.appId) {
-                SocialAppId.WECHAT_FRIEND,
-                SocialAppId.WECHAT_MOMENTS -> {
-                    wxApi.sendReq(createWechatShareRequest(socialShare))
-                    statsTracker.sharedToWx(socialShare.content)
-                }
-                SocialAppId.SCREENSHOT -> {
-                    teaser?.let {
-                        toast("生成截图...")
-                        screenshotViewModel.takeScreenshot(it)
-                    }
-                }
-                SocialAppId.OPEN_IN_BROWSER -> {
-                    try {
-                        val webpage = Uri.parse(teaser?.getCanonicalUrl())
-                        val intent = Intent(Intent.ACTION_VIEW, webpage)
-                        if (intent.resolveActivity(packageManager) != null) {
-                            startActivity(intent)
-                        }
-                    } catch (e: Exception) {
-                        toast("URL not found")
-                    }
-                }
+            info("Share screenshot to $appId")
+            grantUriPermission(
+                "com.tencent.mm",
+                screenshot.imageUri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
 
-                SocialAppId.MORE_OPTIONS -> {
-                    val shareString = getString(R.string.share_template, socialShare.content.title, teaser?.getCanonicalUrl())
-
-                    val sendIntent = Intent().apply {
-                        action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TEXT, shareString)
-                        type = "text/plain"
-                    }
-                    startActivity(
-                        Intent.createChooser(sendIntent,
-                            getString(R.string.share_to))
+            val req = contentResolver
+                .openInputStream(screenshot.imageUri)
+                ?.use {  stream ->
+                    ShareUtils.wxShareScreenshotReq(
+                        appId = appId,
+                        stream = stream,
+                        screenshot = screenshot
                     )
+                } ?: return@observe
+
+            wxApi.sendReq(req)
+        }
+    }
+
+    private fun onShareIconClicked(shareApp: SocialApp) {
+        shareFragment = null
+        val article = articleViewModel.articleReadLiveData.value ?: return
+
+        when (shareApp.id) {
+            SocialAppId.WECHAT_FRIEND,
+            SocialAppId.WECHAT_MOMENTS -> {
+                wxApi.sendReq(
+                    ShareUtils.wxShareArticleReq(
+                        res = resources,
+                        appId= shareApp.id,
+                        article = article,
+                    )
+                )
+                statsTracker.sharedToWx(article)
+            }
+            SocialAppId.SCREENSHOT -> {
+                if (haveStoragePermission()) {
+                    startScreenshot()
+                } else {
+                    requestPermission()
                 }
             }
-        }
+            SocialAppId.OPEN_IN_BROWSER -> {
+                try {
+                    val webpageUri = Uri.parse(article.canonicalUrl)
+                    val intent = Intent(Intent.ACTION_VIEW, webpageUri)
+                    if (intent.resolveActivity(packageManager) != null) {
+                        startActivity(intent)
+                    }
+                } catch (e: Exception) {
+                    toast("URL not found")
+                }
+            }
 
-        screenshotViewModel.appSelected.observe(this) {
-            info("Share screenshot to $it")
-            wxApi.sendReq(buildWxImageShareReq(it.id))
+            SocialAppId.MORE_OPTIONS -> {
+                val shareString = getString(
+                    R.string.share_template,
+                    article.title,
+                    article.canonicalUrl)
+
+                val sendIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, shareString)
+                    type = "text/plain"
+                }
+                startActivity(
+                    Intent.createChooser(
+                        sendIntent,
+                        getString(R.string.share_to),
+                    )
+                )
+            }
+        }
+    }
+
+    private fun startScreenshot() {
+        articleViewModel.articleReadLiveData.value?.let {
+            toast("生成截图...")
+            screenshotViewModel.createUri(it)
+        }
+    }
+
+    private fun haveStoragePermission() =
+        ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+
+    private fun requestPermission() {
+        if (!haveStoragePermission()) {
+            val permissions = arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            ActivityCompat.requestPermissions(this, permissions, READ_EXTERNAL_STORAGE_REQUEST)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            READ_EXTERNAL_STORAGE_REQUEST -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startScreenshot()
+                } else {
+                    // If we weren't granted the permission, check to see if we should show
+                    // rationale for the permission.
+                    val showRationale = ActivityCompat.shouldShowRequestPermissionRationale(
+                        this,
+                        Manifest.permission.READ_EXTERNAL_STORAGE
+                    )
+
+                    /**
+                     * If we should show the rationale for requesting storage permission, then
+                     * we'll show [ActivityMainBinding.permissionRationaleView] which does this.
+                     *
+                     * If `showRationale` is false, this means the user has not only denied
+                     * the permission, but they've clicked "Don't ask again". In this case
+                     * we send the user to the settings page for the app so they can grant
+                     * the permission (Yay!) or uninstall the app.
+                     */
+                    if (showRationale) {
+                        showNoAccess()
+                    } else {
+                        goToSettings()
+                    }
+                }
+            }
+            else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
+    }
+
+    private fun showNoAccess() {
+        MaterialAlertDialogBuilder(this)
+            .setMessage("生成截图需要访问图片存储空间")
+            .setPositiveButton(R.string.action_ok) { dialog, _: Int ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun goToSettings() {
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")).apply {
+            addCategory(Intent.CATEGORY_DEFAULT)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }.also { intent ->
+            startActivity(intent)
         }
     }
 
@@ -401,56 +507,6 @@ class ArticleActivity : ScopedAppActivity(),
         }
     }
 
-    private fun createWechatShareRequest(socialShare: SocialShareState): SendMessageToWX.Req {
-        val webpage = WXWebpageObject().apply {
-            webpageUrl = teaser?.getCanonicalUrl()
-        }
-
-        val msg = WXMediaMessage(webpage).apply {
-            title = socialShare.content.title
-            description = socialShare.content.standfirst
-        }
-
-        val bmp = BitmapFactory.decodeResource(resources, R.drawable.ic_splash)
-        val thumbBmp = Bitmap.createScaledBitmap(bmp, 150, 150, true)
-        bmp.recycle()
-        msg.thumbData = bmpToByteArray(thumbBmp, true)
-
-        return SendMessageToWX.Req().apply {
-            transaction = System.currentTimeMillis().toString()
-            message = msg
-            scene = if (socialShare.appId == SocialAppId.WECHAT_FRIEND)
-                SendMessageToWX.Req.WXSceneSession
-            else
-                SendMessageToWX.Req.WXSceneTimeline
-        }
-    }
-
-    private fun buildWxImageShareReq(appId: SocialAppId): SendMessageToWX.Req {
-        val imageName = teaser?.screenshotName()
-        val file = File(filesDir, imageName)
-
-        info("Wx image share $file")
-        val bmp = BitmapFactory.decodeFile(file.toString())
-
-        val msg = WXMediaMessage().apply {
-            mediaObject = WXImageObject(bmp)
-        }
-
-        val thumbBmp = Bitmap.createScaledBitmap(bmp, 150, 150, true)
-        bmp.recycle()
-        msg.thumbData = bmpToByteArray(thumbBmp, true)
-
-        return SendMessageToWX.Req().apply {
-            transaction = System.currentTimeMillis().toString()
-            message = msg
-            scene = if (appId == SocialAppId.WECHAT_FRIEND)
-                SendMessageToWX.Req.WXSceneSession
-            else
-                SendMessageToWX.Req.WXSceneTimeline
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
 
@@ -521,19 +577,3 @@ class ArticleActivity : ScopedAppActivity(),
     }
 }
 
-fun bmpToByteArray(bmp: Bitmap, needRecycle: Boolean): ByteArray {
-    val output = ByteArrayOutputStream()
-    bmp.compress(Bitmap.CompressFormat.PNG, 100, output)
-    if (needRecycle) {
-        bmp.recycle()
-    }
-
-    val result = output.toByteArray()
-    try {
-        output.close()
-    } catch (e: Exception) {
-        e.printStackTrace()
-    }
-
-    return result
-}

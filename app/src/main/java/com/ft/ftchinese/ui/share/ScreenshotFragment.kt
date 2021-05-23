@@ -1,6 +1,6 @@
-package com.ft.ftchinese.ui.article
+package com.ft.ftchinese.ui.share
 
-import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +10,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DecodeFormat
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.target.Target
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentScreenshotBinding
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
@@ -18,9 +22,7 @@ import com.ft.ftchinese.ui.share.SocialAppId
 import com.ft.ftchinese.ui.share.SocialShareViewHolder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.sdk27.coroutines.onClick
-import java.io.File
 
 /**
  * A simple [Fragment] subclass.
@@ -61,14 +63,17 @@ class ScreenshotFragment : ScopedBottomSheetDialogFragment(), AnkoLogger {
     }
 
     private fun setupViewModel() {
-        viewModel.teaserLiveData.observe(viewLifecycleOwner) {
-            val imageName = it.screenshotName()
-            val file = File(requireContext().filesDir, imageName).toString()
-            info("Show image $file")
-            binding.screenshotImage
-                .setImageDrawable(
-                    Drawable.createFromPath(file.toString())
-                )
+
+        // Retrieve the image URI and display it.
+        viewModel.imageRowCreated.observe(viewLifecycleOwner) { screenshot ->
+            // See https://www.cnblogs.com/yongfengnice/p/13576466.html
+            Glide.with(this)
+                .load(screenshot.imageUri)
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL) // This is important to show the original image; otherwise it loads a thumbnail-like one.
+                .format(DecodeFormat.PREFER_RGB_565) // Reduce memory usage.
+                .into(binding.screenshotImage)
         }
     }
 
@@ -77,6 +82,7 @@ class ScreenshotFragment : ScopedBottomSheetDialogFragment(), AnkoLogger {
             dismiss()
         }
 
+        // Show share icons.
         binding.shareScreenshotRv.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context).apply {

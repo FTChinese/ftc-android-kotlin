@@ -35,7 +35,6 @@ class ArticleViewModel(
 
     // Used on UI to determine which bookmark icon should be used.
     val bookmarkState = MutableLiveData<BookmarkState>()
-    val socialShareState = MutableLiveData<SocialShareState>()
 
     val storyLoadedLiveData =  MutableLiveData<Story>()
     val htmlResult: MutableLiveData<FetchResult<String>> by lazy {
@@ -277,15 +276,6 @@ class ArticleViewModel(
         }
     }
 
-    fun share(appId: SocialAppId) {
-        articleReadLiveData.value?.let {
-            socialShareState.value = SocialShareState(
-                appId = appId,
-                content = it
-            )
-        }
-    }
-
     // Used by web pages which does not provide structured data
     // for us to know what kind of content is loaded.
     fun lastResortByOG(og: OpenGraphMeta, teaser: Teaser?) {
@@ -314,6 +304,4 @@ class ArticleViewModel(
             who = AccountCache.get()
         )
     }
-
-
 }
