@@ -63,3 +63,5 @@ fastlane/readme.md
 
 .classpath
 .project
+
+.DS_Store
