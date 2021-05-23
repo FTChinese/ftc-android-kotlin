@@ -77,7 +77,7 @@ class StatsTracker private constructor(context: Context) {
     }
 
     fun buySuccess(item: CheckoutItem?, payMethod: PayMethod?) {
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ECOMMERCE_PURCHASE, Bundle().apply {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.PURCHASE, Bundle().apply {
             putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
             putDouble(FirebaseAnalytics.Param.VALUE, item?.payableAmount ?: 0.0)
             putString(FirebaseAnalytics.Param.METHOD, payMethod?.toString())
