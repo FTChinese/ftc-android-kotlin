@@ -10,6 +10,7 @@ import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.formatSQLDateTime
 import com.ft.ftchinese.model.reader.Permission
+import com.ft.ftchinese.repository.HOST_FTC
 import org.threeten.bp.LocalDateTime
 import java.util.*
 
@@ -59,6 +60,9 @@ data class ReadArticle(
     @ColumnInfo(name = "tier")
     var tier: String = "", // "", standard, premium
 ) {
+
+    val canonicalUrl: String
+        get() = "https://$HOST_FTC/$type/$id"
 
     fun toTeaser(): Teaser {
         return Teaser(
