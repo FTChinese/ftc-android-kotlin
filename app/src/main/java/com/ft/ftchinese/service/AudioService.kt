@@ -86,13 +86,6 @@ class AudioService : LifecycleService(), AnkoLogger {
                     }
                 },
                 object : PlayerNotificationManager.NotificationListener {
-                    override fun onNotificationStarted(notificationId: Int, notification: Notification) {
-                        startForeground(notificationId, notification)
-                    }
-
-                    override fun onNotificationCancelled(notificationId: Int, dismissedByUser: Boolean) {
-                        super.onNotificationCancelled(notificationId, dismissedByUser)
-                    }
 
                     override fun onNotificationPosted(notificationId: Int, notification: Notification, ongoing: Boolean) {
                         if (ongoing) {
