@@ -3,10 +3,13 @@ package com.ft.ftchinese
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
@@ -38,18 +41,18 @@ import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.about.LegalDetailsFragment
-import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
-import com.ft.ftchinese.ui.wxlink.UnlinkActivity
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.LyricsAdapter
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
-import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.AuthActivity
+import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.share.SocialShareFragment
+import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
+import com.ft.ftchinese.ui.wxlink.UnlinkActivity
 import com.ft.ftchinese.ui.wxlink.WxEmailLink
 import com.ft.ftchinese.wxapi.WXEntryActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
@@ -61,8 +64,14 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
-import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZonedDateTime
+
+data class MyImage(
+    val uri: Uri,
+    val name: String,
+    val size: Int,
+)
+
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class TestActivity : ScopedAppActivity(), AnkoLogger {
@@ -84,6 +93,10 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         sessionManager = SessionManager.getInstance(this)
         orderManger = OrderManager.getInstance(this)
         workManager = WorkManager.getInstance(this)
+
+        binding.mediaStoreDemo.onClick {
+            browseImage()
+        }
 
         binding.buyerInfoPage.onClick {
             InvoiceStore
@@ -638,6 +651,62 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                 "<p>Many politicians and business leaders are alarmed by the fresh spending packages to tackle the pandemic in Japan.</p>",
                 "<p>“Our economic strategy is using a considerable amount of money, and honestly speaking it’s going to be a big fiscal problem in the future,” said Hiroaki Nakanishi, executive chairman of Hitachi and head of the Keidanren business lobby, in a recent interview with the Financial Times. “I have no good plan. Until the economy is properly back on its feet, I don’t think there is any sensible answer.”</p>"
             ))
+        }
+    }
+
+    private fun browseImage() {
+        info("Preparing media store query...")
+        val imageList = mutableListOf<MyImage>()
+        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            MediaStore.Images.Media.getContentUri(
+                MediaStore.VOLUME_EXTERNAL
+            )
+        } else {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        }
+
+        info("Uri: $collection")
+
+        val projection = arrayOf(
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.DISPLAY_NAME,
+            MediaStore.Images.Media.SIZE,
+        )
+
+        info("Projection: $projection")
+
+        val sortOrder = "${MediaStore.Video.Media.DATE_ADDED} DESC"
+
+        info("Sort order: $sortOrder")
+
+        val query = contentResolver.query(
+            collection,
+            projection,
+            null,
+            null,
+            sortOrder
+        )
+        query?.use { cursor ->
+            info("Cursor ${cursor.columnCount}")
+
+            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+            val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+            val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
+
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(idColumn)
+                val name = cursor.getString(nameColumn)
+                val size = cursor.getInt(sizeColumn)
+
+                val contentUri = ContentUris.withAppendedId(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    id
+                )
+
+                imageList += MyImage(contentUri, name, size)
+            }
+
+            info("Image query finished: $imageList")
         }
     }
 
