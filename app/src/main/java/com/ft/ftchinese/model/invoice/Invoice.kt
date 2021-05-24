@@ -41,6 +41,10 @@ data class Invoice(
     val carriedOverUtc: ZonedDateTime? = null,
 ) {
 
+    fun toJsonString(): String {
+        return json.toJsonString(this)
+    }
+
     val edition: Edition
         get() = Edition(tier, cycle)
 
