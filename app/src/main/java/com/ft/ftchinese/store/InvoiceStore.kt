@@ -13,17 +13,19 @@ class InvoiceStore private constructor(ctx: Context) : AnkoLogger {
     private val sharedPref = ctx.getSharedPreferences(FILE_NAME_INVOICE, Context.MODE_PRIVATE)
 
     fun saveInvoices(inv: Invoices) {
-        sharedPref.edit {
+        sharedPref.edit(commit = true) {
             clear()
         }
 
-        sharedPref.edit {
-            putString(KEY_PURCHASED, json.toJsonString(inv.purchased))
-            putString(KEY_CARRIED_OVER, json.toJsonString(inv.carriedOver))
+        info("Save invoices")
+        sharedPref.edit(commit = true) {
+            putString(KEY_PURCHASED, inv.purchased.toJsonString())
+            putString(KEY_CARRIED_OVER, inv.carriedOver?.toJsonString())
         }
     }
 
     fun loadInvoices(): Invoices? {
+        info("Loading invoices")
         val purchased = sharedPref.getString(KEY_PURCHASED, null)?.let {
             try {
                 json.parse<Invoice>(it)

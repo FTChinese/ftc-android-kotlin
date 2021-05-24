@@ -52,7 +52,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
     fun saveAccount(account: Account) {
         AccountCache.save(account)
 
-        sharedPreferences.edit {
+        sharedPreferences.edit(commit = true) {
             putString(PREF_USER_ID, account.id)
             putString(PREF_UNION_ID, account.unionId)
             putString(PREF_STRIPE_CUS_ID, account.stripeId)
@@ -74,7 +74,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
     fun saveMembership(member: Membership) {
         AccountCache.updateMembership(member)
 
-        sharedPreferences.edit {
+        sharedPreferences.edit(commit = true) {
             putString(PREF_MEMBER_TIER, member.tier?.toString())
             putString(PREF_MEMBER_CYCLE, member.cycle?.toString())
             putString(PREF_MEMBER_EXPIRE, formatLocalDate(member.expireDate))
@@ -180,7 +180,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
     fun saveStripeId(id: String) {
         AccountCache.updateStripeID(id)
 
-        sharedPreferences.edit {
+        sharedPreferences.edit(commit = true) {
             putString(PREF_STRIPE_CUS_ID, id)
         }
     }
@@ -190,7 +190,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
     }
 
     fun saveWxSession(session: WxSession) {
-        sharedPreferences.edit {
+        sharedPreferences.edit(commit = true) {
             putString(PREF_WX_SESSION_ID, session.sessionId)
             putString(PREF_WX_UNION_ID, session.unionId)
             putString(PREF_WX_OAUTH_TIME, formatISODateTime(session.createdAt))
