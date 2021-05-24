@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.checkout
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
@@ -75,6 +76,7 @@ class BuyerInfoActivity : ScopedAppActivity() {
             ?.confirmPageActionParam()
 
         if (account == null || action == null) {
+            Log.i(TAG, "Either account or action is null")
             MemberActivity.start(this)
             finish()
             return
@@ -88,6 +90,8 @@ class BuyerInfoActivity : ScopedAppActivity() {
     }
 
     companion object {
+        private const val TAG = "BuyerInfoActivity"
+
         @JvmStatic
         fun start(context: Context) {
             context.startActivity(
