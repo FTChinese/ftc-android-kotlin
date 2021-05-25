@@ -83,7 +83,7 @@ class SplashViewModel : BaseViewModel(), AnkoLogger {
             }
 
             imageLoaded.value = Pair(fis, imageName)
-            adLoaded.value = splashAd!!
+            adLoaded.value = splashAd
         }
     }
 
