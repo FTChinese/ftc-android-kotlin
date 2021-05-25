@@ -16,7 +16,10 @@ import java.util.*
 class SplashViewModel : BaseViewModel(), AnkoLogger {
 
     val shouldExit = MutableLiveData(false)
-    val adLoaded = MutableLiveData<ScreenAd>()
+    val adLoaded: MutableLiveData<ScreenAd> by lazy {
+        MutableLiveData<ScreenAd>()
+    }
+
     // The input stream of image and its name.
     val imageLoaded: MutableLiveData<Pair<InputStream, String>> by lazy {
         MutableLiveData<Pair<InputStream, String>>()
