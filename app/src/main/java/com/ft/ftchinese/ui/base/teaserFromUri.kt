@@ -18,3 +18,17 @@ fun teaserFromUri(uri: Uri): Teaser {
     )
 }
 
+fun teaserFromFtcSchema(uri: Uri): Teaser {
+    return Teaser(
+        id = uri.lastPathSegment ?: "",
+        type = ArticleType.Interactive,
+        subType = null,
+        title = "",
+        audioUrl = uri.getQueryParameter("audio"),
+        radioUrl = null,
+        publishedAt = null,
+        tag = "",
+        isCreatedFromUrl = true,
+    )
+}
+
