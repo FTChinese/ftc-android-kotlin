@@ -248,6 +248,7 @@ class ChannelFragment : ScopedFragment(),
         if (BuildConfig.DEBUG) {
             info("Loading web page to web view")
         }
+
         binding.webView.loadDataWithBaseURL(
             Config.discoverServer(sessionManager.loadAccount()),
             html,
