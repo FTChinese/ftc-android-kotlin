@@ -167,6 +167,14 @@ open class WVClient(
                 return true
             }
 
+            "ftchinese" -> {
+                if (uri.pathSegments.size > 0 && uri.pathSegments[0] != TYPE_STORY) {
+                    ArticleActivity.start(context, teaserFromFtcSchema(uri))
+                } else {
+                    context.toast("Unsupported link!")
+                }
+                return true
+            }
             /**
              * If the clicked webUrl is of the pattern `.../story/xxxxxx`, you should use `StoryActivity`
              * and fetch JSON from server and concatenate it with a html bundle into the package `raw/story.html`,

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
@@ -12,16 +13,14 @@ import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivitySearchableBinding
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.base.WVClient
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
-class SearchableActivity : AppCompatActivity(),
-        AnkoLogger {
+@ExperimentalCoroutinesApi
+class SearchableActivity : AppCompatActivity() {
 
     private lateinit var cache: FileCache
     private lateinit var binding: ActivitySearchableBinding
@@ -30,7 +29,9 @@ class SearchableActivity : AppCompatActivity(),
     private var template: String? = null
     private var keyword: String? = null
 
-    @ExperimentalCoroutinesApi
+
+    // An anonymous class overriding onPageFinished method
+    // of WVClient.
     private val wvClient = object : WVClient(this) {
         override fun onPageFinished(view: WebView?, url: String?) {
             if (keyword == null) {
@@ -38,15 +39,18 @@ class SearchableActivity : AppCompatActivity(),
                 return
             }
 
+            // Call JS function after page loaded.
+            // Loaded content is a list of links.
+            // Navigation is handled by analyzing the
+            // content of each url.
             view?.evaluateJavascript("""
                     search('$keyword');
                     """.trimIndent()) {
-                info("evaluated search.")
+                Log.i(TAG, "evaluateJavascript finished")
             }
         }
     }
 
-    @ExperimentalCoroutinesApi
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,8 +90,6 @@ class SearchableActivity : AppCompatActivity(),
             false
         }
 
-        info("onCreate")
-
         handleIntent(intent)
     }
 
@@ -95,14 +97,14 @@ class SearchableActivity : AppCompatActivity(),
         super.onNewIntent(intent)
         handleIntent(intent)
 
-        info("onNewIntent")
+        Log.i(TAG, "onNewIntent")
     }
 
     private fun handleIntent(intent: Intent) {
 
         if (Intent.ACTION_SEARCH == intent.action) {
             intent.getStringExtra(SearchManager.QUERY)?.also {
-                info("Keyword: $it")
+                Log.i(TAG, "Search keyword entered: $it")
                 keyword = it
 
                 load(it)
@@ -118,8 +120,11 @@ class SearchableActivity : AppCompatActivity(),
 
         supportActionBar?.title = getString(R.string.title_search, keyword)
 
+        // Hide the placeholder
         val tmpl = template?.replace("{search-html}", "") ?: return
 
+        // Load empty html template. After the page loaded,
+        // call JS function search() to start loading content.
         binding.wvSearchResult.loadDataWithBaseURL(
                 Config.discoverServer(session.loadAccount()),
                 tmpl,
@@ -131,6 +136,10 @@ class SearchableActivity : AppCompatActivity(),
 
     @JavascriptInterface
     fun onPageLoaded(message: String) {
-        info("Search loaded: $message")
+        Log.i(TAG, "Search loaded: $message")
+    }
+
+    companion object {
+        const val TAG = "SearchableActivity"
     }
 }
