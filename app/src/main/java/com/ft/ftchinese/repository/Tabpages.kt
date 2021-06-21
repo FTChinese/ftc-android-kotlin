@@ -568,6 +568,19 @@ object TabPages {
     )
 
     val ftaPages = listOf(
+        /**
+         * Example items in this page:
+         * Teaser(
+         *  id=42837,
+         *  type=interactive,
+         *  subType=bilingual,
+         *  title=迪弗洛&amp;班纳吉：经济学是一门社会科学,
+         *  audioUrl=null,
+         *  radioUrl=null,
+         *  publishedAt=null,
+         *  tag=新型冠状病毒,气候变化,国际货币基金组织,Twitter,G20,双语阅读,interactive_search,FT商学院,高端专享,FTArticle,AITranslation,
+         *  isCreatedFromUrl=false)
+         */
         ChannelSource(
             title = "最新",
             name = "fta_latest",
