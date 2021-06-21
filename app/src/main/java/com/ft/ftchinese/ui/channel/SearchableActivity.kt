@@ -48,6 +48,8 @@ class SearchableActivity : AppCompatActivity() {
                     """.trimIndent()) {
                 Log.i(TAG, "evaluateJavascript finished")
             }
+
+            binding.inProgress = false
         }
     }
 
@@ -101,6 +103,7 @@ class SearchableActivity : AppCompatActivity() {
     }
 
     private fun handleIntent(intent: Intent) {
+        binding.inProgress = true
 
         if (Intent.ACTION_SEARCH == intent.action) {
             intent.getStringExtra(SearchManager.QUERY)?.also {
