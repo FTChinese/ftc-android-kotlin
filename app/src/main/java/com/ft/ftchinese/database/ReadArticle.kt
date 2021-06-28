@@ -138,7 +138,8 @@ data class ReadArticle(
         }
 
         /**
-         * When we need
+         * For articles without JSON api, we need to get
+         * structured data from JS.
          */
         @JvmStatic
         fun fromOpenGraph(og: OpenGraphMeta, teaser: Teaser?): ReadArticle {
