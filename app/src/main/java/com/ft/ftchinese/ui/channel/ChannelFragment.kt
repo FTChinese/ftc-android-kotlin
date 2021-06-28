@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.channel
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
@@ -287,7 +288,8 @@ class ChannelFragment : ScopedFragment(),
     }
 
     /**
-     * Collection data when a web page is loaded into a web view.
+     * After HTML is loaded into webview, it will call this
+     * method in JS and a list of Teaser is posted.
      */
     @JavascriptInterface
     fun onPageLoaded(message: String) {
@@ -296,7 +298,9 @@ class ChannelFragment : ScopedFragment(),
 
         val channelContent = json.parse<ChannelContent>(message) ?: return
 
+        // Save all teasers.
         articleList = channelContent.sections[0].lists[0].items
+        Log.i(TAG, "Channel teasers $articleList")
         channelMeta = channelContent.meta
 
         cacheChannelData(message)
@@ -425,6 +429,7 @@ class ChannelFragment : ScopedFragment(),
          * fragment.
          */
         private const val ARG_CHANNEL_SOURCE = "arg_channel_source"
+        private const val TAG = "ChannelFragment"
 
         /**
          * Returns a new instance of this fragment for the given section
