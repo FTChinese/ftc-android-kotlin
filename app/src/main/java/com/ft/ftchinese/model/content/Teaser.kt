@@ -116,7 +116,15 @@ data class Teaser(
 
     // Only stories have api.
     fun hasJsAPI(): Boolean {
-        return type == ArticleType.Story || type == ArticleType.Premium
+        return type == ArticleType.Story || type == ArticleType.Premium || (type == ArticleType.Interactive && subType == "bilingual")
+    }
+
+    fun apiPathSegment(): String {
+        return when (type) {
+            ArticleType.Story, ArticleType.Premium -> "/index.php/jsapi/get_story_more_info/${id}"
+            ArticleType.Interactive -> "/index.php/jsapi/get_interactive_more_info/${id}"
+            else -> ""
+        }
     }
 
     fun hasMp3(): Boolean {
@@ -200,6 +208,9 @@ data class Teaser(
     fun cacheNameJson(): String {
         return "${type}_$id.json"
     }
+
+    val cacheNameHtml: String
+        get() = "${type}_$id.html"
 
     fun screenshotName(): String {
         return "${type}_$id"
