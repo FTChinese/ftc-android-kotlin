@@ -100,7 +100,7 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
         // If article view model render the complete html locally, load it into webview as a string.
         articleViewModel.htmlResult.observe(viewLifecycleOwner) { result ->
 
-            articleViewModel.progressLiveData.value = false
+//            articleViewModel.progressLiveData.value = false
 
             when (result) {
                 is FetchResult.LocalizedError -> {
@@ -110,7 +110,6 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
                     result.exception.message?.let { toast(it) }
                 }
                 is FetchResult.Success -> {
-
                     binding.webView.loadDataWithBaseURL(
                         Config.discoverServer(AccountCache.get()),
                         result.data,
@@ -122,17 +121,17 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
         }
 
         // If article view mode find out this is a complete webpage, load it directly.
-        articleViewModel.webUrlResult.observe(viewLifecycleOwner) { result ->
-            articleViewModel.progressLiveData.value = false
+//        articleViewModel.webUrlResult.observe(viewLifecycleOwner) { result ->
+//            articleViewModel.progressLiveData.value = false
+//
+//            when (result) {
+//                is FetchResult.LocalizedError -> toast(result.msgId)
+//                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+//                is FetchResult.Success -> binding.webView.loadUrl(result.data)
+//            }
+//        }
 
-            when (result) {
-                is FetchResult.LocalizedError -> toast(result.msgId)
-                is FetchResult.Error -> result.exception.message?.let { toast(it) }
-                is FetchResult.Success -> binding.webView.loadUrl(result.data)
-            }
-        }
-
-        // Once a row is created for the scrennshot
+        // Once a row is created for the screenshot
         // in MediaStore, we write the actually image file
         // the uri.
         screenshotViewModel.imageRowCreated.observe(viewLifecycleOwner) { screenshot: ArticleScreenshot ->
@@ -210,6 +209,7 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
     }
 
     companion object {
+        private const val TAG = "WebViewFragment"
         @JvmStatic
         fun newInstance() = WebViewFragment()
     }
