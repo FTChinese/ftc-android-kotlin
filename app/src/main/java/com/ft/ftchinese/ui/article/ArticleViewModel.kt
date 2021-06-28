@@ -7,7 +7,6 @@ import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.fetch.JSONResult
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Permission
@@ -16,7 +15,6 @@ import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.ui.share.SocialAppId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -33,25 +31,40 @@ class ArticleViewModel(
     val language: Language
         get() = _languageSelected
 
-    // Used on UI to determine which bookmark icon should be used.
+    /**
+     * Used on to determine which bookmark icon should be used.
+     */
     val bookmarkState = MutableLiveData<BookmarkState>()
 
     val storyLoadedLiveData =  MutableLiveData<Story>()
+
+    /**
+     * Determine whether audio icon should be visible.
+     */
+    val audioFoundLiveData = MutableLiveData<Boolean>()
+
+    /**
+     * [WebViewFragment] should either load the the html string
+     * compiled from template, or load a url directly.
+     */
     val htmlResult: MutableLiveData<FetchResult<String>> by lazy {
         MutableLiveData<FetchResult<String>>()
     }
 
-    val audioFoundLiveData = MutableLiveData<Boolean>()
-
-    // Used to load web content directly.
-    val webUrlResult: MutableLiveData<FetchResult<String>> by lazy {
-        MutableLiveData<FetchResult<String>>()
-    }
+    /**
+     * Used to load web content directly by [WebViewFragment].
+     */
+//    val webUrlResult: MutableLiveData<FetchResult<String>> by lazy {
+//        MutableLiveData<FetchResult<String>>()
+//    }
 
     val articleReadLiveData: MutableLiveData<ReadArticle> by lazy {
         MutableLiveData<ReadArticle>()
     }
 
+    /**
+     * Notify UI whether paywall barrier should be visible.
+     */
     val accessChecked: MutableLiveData<Access> by lazy {
         MutableLiveData<Access>()
     }
@@ -74,15 +87,109 @@ class ArticleViewModel(
      * otherwise loading url directly.
      */
     fun loadStory(teaser: Teaser, isRefreshing: Boolean) {
+        // If this article does not have JSON API, loading it directly from url.
         if (!teaser.hasJsAPI()) {
-            loadUrl(teaser)
-            return
+            crawlHtml(teaser, isRefreshing)
+        } else {
+            loadJson(teaser, isRefreshing)
+        }
+    }
+
+    /**
+     * Craw HTML page and load the string into webview
+     * and cache the HTML to a document.
+     */
+    private fun crawlHtml(teaser: Teaser, isRefreshing: Boolean) {
+
+        // Show progress indicator only when user is not
+        // manually refreshing.
+        if (!isRefreshing) {
+            progressLiveData.value = true
         }
 
-        val cacheName = teaser.cacheNameJson()
-        info("Cache story file: $cacheName")
+        viewModelScope.launch {
+
+            // If cache name exits, and is not refreshing,
+            // use cached html.
+            if (!isRefreshing) {
+
+                val html = loadCachedHtml(teaser)
+                if (html != null) {
+
+                    htmlResult.value = FetchResult.Success(html)
+                    progressLiveData.value = false
+                    return@launch
+                }
+                // Cache not found, e.g., loading for the first time or force refreshing.
+                // When loading for the first time, isRefreshing is false.
+            }
+
+            val result = loadRemoteHtml(teaser)
+            htmlResult.value = result
+            progressLiveData.value = false
+
+            if (result is FetchResult.Success) {
+                launch(Dispatchers.IO) {
+                    cache.saveText(teaser.cacheNameHtml, result.data)
+                }
+            }
+        }
+    }
+
+    private suspend fun loadCachedHtml(teaser: Teaser): String? {
+
+        return try {
+            withContext(Dispatchers.IO) {
+                cache.loadText(teaser.cacheNameHtml)
+            }
+        } catch (e: Exception) {
+            info(e)
+            null
+        }
+    }
+
+    private suspend fun loadRemoteHtml(teaser: Teaser): FetchResult<String> {
+        val remoteUri = Config.buildArticleSourceUrl(
+            AccountCache.get(),
+            teaser
+        ) ?: return FetchResult.LocalizedError(R.string.api_empty_url)
+
+        // Fetch data from server
+        info("Crawling web page from $remoteUri")
+
+        if (isNetworkAvailable.value != true) {
+            return FetchResult.LocalizedError(R.string.prompt_no_network)
+        }
+
+        return try {
+            val data = withContext(Dispatchers.IO) {
+                ArticleClient.crawlHtml(url = remoteUri.toString())
+            }
+
+            if (data.isNullOrBlank()) {
+                FetchResult.LocalizedError(R.string.api_server_error)
+            } else {
+                FetchResult.Success(data)
+            }
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
+    }
+
+    /**
+     * Load story in JSON format either from cache
+     * or from server.
+     */
+    private fun loadJson(teaser: Teaser, isRefreshing: Boolean) {
+
+        // Show progress indicator only when user is not
+        // manually refreshing.
+        if (!isRefreshing) {
+            progressLiveData.value = true
+        }
 
         viewModelScope.launch {
+            // Why this?
             if (storyLoadedLiveData.value != null) {
                 val s = storyLoadedLiveData.value
                 if (s != null && s.isFrom(teaser)) {
@@ -91,65 +198,45 @@ class ArticleViewModel(
                 }
             }
 
-            if (cacheName.isNotBlank() && !isRefreshing) {
-
-                val story = loadJsonFromCache(cacheName)
+            // If cache name exits, and is not refreshing,
+            // use cached story.
+            if (!isRefreshing) {
+                val story = loadJsonFromCache(teaser)
                 if (story != null) {
-                    story.teaser = teaser
-
                     storyLoaded(story)
-                    articleRead(ReadArticle.fromStory(story))
                     return@launch
                 }
-                // Cache not found, e.g., loading for the first time or force refreshing.
-                // When loading for the first time, isRefreshing is false.
             }
 
-            val data = loadJsonFromServer(teaser) ?: return@launch
-
-            storyLoaded(data.value)
-
-            val readHistory = ReadArticle.fromStory(data.value)
-            articleRead(readHistory)
-
-            // Cache the downloaded data.
-            launch(Dispatchers.IO) {
-                cache.saveText(teaser.cacheNameJson(), data.raw)
-                db.readDao().insertOne(readHistory)
+            when (val result = loadServerJson(teaser)) {
+                is FetchResult.Success -> {
+                    storyLoaded(result.data)
+                    articleRead(ReadArticle.fromStory(result.data))
+                }
+                is FetchResult.LocalizedError -> {
+                    htmlResult.value = FetchResult.LocalizedError(result.msgId)
+                }
+                is FetchResult.Error -> {
+                    htmlResult.value = FetchResult.Error(result.exception)
+                }
             }
         }
     }
 
-    private fun loadUrl(teaser: Teaser) {
-        val remoteUri = Config.buildArticleSourceUrl(
-            AccountCache.get(),
-            teaser
-        )
+    /**
+     * Load JSON file from cache.
+     */
+    private suspend fun loadJsonFromCache(teaser: Teaser): Story? {
 
-        // Fetch data from server
-        info("Loading web page from $remoteUri")
-
-        if (remoteUri == null) {
-            webUrlResult.value = FetchResult.LocalizedError(R.string.api_empty_url)
-            return
-        }
-
-        if (isNetworkAvailable.value != true) {
-            webUrlResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        webUrlResult.value = FetchResult.Success(remoteUri.toString())
-    }
-
-    private suspend fun loadJsonFromCache(cacheName: String): Story? {
         return try {
             val data = withContext(Dispatchers.IO) {
-                cache.loadText(cacheName)
+                cache.loadText(teaser.cacheNameJson())
             }
 
             if (!data.isNullOrBlank()) {
-                json.parse<Story>(data)
+                json.parse<Story>(data)?.apply {
+                    this.teaser = teaser
+                }
             } else {
                 null
             }
@@ -159,74 +246,80 @@ class ArticleViewModel(
         }
     }
 
-    private suspend fun loadJsonFromServer(teaser: Teaser): JSONResult<Story>? {
-        val remoteUrl = Config.buildArticleSourceUrl(
-            AccountCache.get(),
-            teaser
-        )
-
-        // Fetch data from server
-        info("Loading json data from $remoteUrl")
-
-        if (remoteUrl == null) {
-            htmlResult.value = FetchResult.LocalizedError(R.string.api_empty_url)
-            return null
-        }
+    private suspend fun loadServerJson(teaser: Teaser): FetchResult<Story> {
 
         if (isNetworkAvailable.value != true) {
-            htmlResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return null
+            return FetchResult.LocalizedError(R.string.prompt_no_network)
         }
 
+        val baseUrl = Config.discoverServer(AccountCache.get())
         try {
-            val data = withContext(Dispatchers.IO) {
-                ArticleClient.fetchStory(remoteUrl.toString())
+
+            val jsonResult = withContext(Dispatchers.IO) {
+                ArticleClient.fetchStory(teaser, baseUrl)
+            } ?: return FetchResult.LocalizedError(R.string.api_server_error)
+
+            // After JSON is fetched, it should handle:
+            // * Check any errors
+            // * Fill the teaser field
+            // * Notify UI to compile JSON to html
+            // * Show/hide audio icon
+            // * Check bookmark icon
+            // * Reading history
+
+            jsonResult.value.teaser = teaser
+            // Cache the downloaded data.
+            viewModelScope.launch(Dispatchers.IO) {
+                cache.saveText(teaser.cacheNameJson(), jsonResult.raw)
             }
 
-            if (data == null) {
-                htmlResult.value = FetchResult.LocalizedError(R.string.api_server_error)
-                return null
-            }
-
-            data.value.teaser = teaser
-
-            return data
+            return FetchResult.Success(jsonResult.value)
         } catch (e: Exception) {
             info(e)
-            htmlResult.value = FetchResult.fromException(e)
-            return null
+            return FetchResult.fromException(e)
         }
     }
 
-    private fun storyLoaded(story: Story) {
+    // After story is loaded, update live data.
+    // Read history is not updated here since it might derived
+    // from open graph, or might not need to be recorded if
+    // loaded from cache which indicates user already read it.
+    private suspend fun storyLoaded(story: Story) {
         storyLoadedLiveData.value = story
         audioFoundLiveData.value = story.hasAudio(_languageSelected)
-    }
-
-    private suspend fun articleRead(a: ReadArticle) {
-        articleReadLiveData.value = a
+        // After story loaded, turn off progress indicator
+        // even if this is refreshing since it can do no harm.
+        progressLiveData.value = false
 
         val isStarring = withContext(Dispatchers.IO) {
-            db.starredDao().exists(a.id, a.type)
+            db.starredDao().exists(story.id, story.teaser?.type.toString())
         }
 
         bookmarkState.value = BookmarkState(
             isStarring = isStarring,
-            message = null,
         )
     }
 
+    /**
+     * After article read, send a notification to ui.
+     * Then check if this article is bookmarked.
+     */
+    private suspend fun articleRead(a: ReadArticle) {
+        articleReadLiveData.value = a
+
+        withContext(Dispatchers.IO) {
+            db.readDao().insertOne(a)
+        }
+    }
+
+    /**
+     * Render story template with JSON data.
+     */
     fun compileHtml(tags: Map<String, String>) {
         val story = storyLoadedLiveData.value ?: return
 
         viewModelScope.launch {
             val template = cache.readStoryTemplate()
-
-            if (template == null) {
-                info("Story template not found")
-                htmlResult.value = FetchResult.LocalizedError(R.string.loading_failed)
-                return@launch
-            }
 
             val html = withContext(Dispatchers.Default) {
                 StoryBuilder(template)
@@ -291,10 +384,6 @@ class ArticleViewModel(
             }
 
             articleRead(readHistory)
-
-            withContext(Dispatchers.IO) {
-                db.readDao().insertOne(readHistory)
-            }
         }
     }
 
