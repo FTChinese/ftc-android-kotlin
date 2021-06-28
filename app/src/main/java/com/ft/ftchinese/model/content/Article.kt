@@ -9,26 +9,25 @@ import org.jetbrains.anko.AnkoLogger
 import java.util.*
 
 data class Bilingual(
-        var cn: String,
+    var cn: String,
         var en: String?
 )
 
 data class StoryPic(
-        val smallbutton: String,
-        val other: String
+    val smallbutton: String,
 )
 
 data class RelatedStory(
-        val id: String,
+    val id: String,
 
-        @Json(name = "cheadline")
-        val titleCN: String,
+    @Json(name = "cheadline")
+    val titleCN: String,
 
-        @Json(name = "eheadline")
-        val titleEN: String = "", // This might not exist.
+    @Json(name = "eheadline")
+    val titleEN: String = "", // This might not exist.
 
-        @Json(name = "last_publish_time")
-        val publishedAt: String
+    @Json(name = "last_publish_time")
+    val publishedAt: String
 )
 
 data class AiAudio(
@@ -96,7 +95,7 @@ class Story (
     // 1 - standard
     // 2 - premium
     @Json(name = "accessright")
-    val accesibleBy: String,
+    val accessibleBy: String? = null,
 
     @Json(name = "last_publish_time")
     val publishedAt: String,
@@ -108,7 +107,7 @@ class Story (
     val aiAudios: AiAudio? = null,
 
     @Json(name = "relative_story")
-    val relatedStory: List<RelatedStory>
+    val relatedStory: List<RelatedStory> = listOf(),
 ) : AnkoLogger {
 
     fun isFrom(t: Teaser): Boolean {
@@ -116,7 +115,7 @@ class Story (
     }
 
     fun requireMemberTier(): Tier? {
-        return when (accesibleBy) {
+        return when (accessibleBy) {
             "0" -> null
             "1" -> Tier.STANDARD
             "2" -> Tier.PREMIUM
@@ -126,8 +125,8 @@ class Story (
 
     fun permission(): Permission {
         return when {
-            accesibleBy == "1" -> Permission.STANDARD
-            accesibleBy == "2" -> Permission.PREMIUM
+            accessibleBy == "1" -> Permission.STANDARD
+            accessibleBy == "2" -> Permission.PREMIUM
             isSevenDaysOld() -> Permission.STANDARD
             else -> Permission.FREE
         }
