@@ -455,6 +455,17 @@ object TabPages {
     )
 
     val englishPages = listOf(
+        /**
+         * Example teaser
+         * id=43217,
+         * type=interactive,
+         * subType=radio,
+         * title=通过使养老金无法负担来使其安全是愚蠢的,
+         * audioUrl=null,
+         * radioUrl=https://creatives.ftacademy.cn/album/138974df-5dc0-47e4-acb8-e2eb048fe8bd-1624799313.mp3,
+         * publishedAt=null,
+         * tag=英语电台,AI合成,interactive_search
+         */
         ChannelSource(
             title = "最新",
             name = "english_latest",
