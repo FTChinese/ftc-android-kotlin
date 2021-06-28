@@ -44,6 +44,11 @@
             android:id="@+id/action_about"
             android:icon="@drawable/ic_info_black_24dp"
             android:title="@string/title_about_us" />
+
+        <item
+            android:id="@+id/action_privacy"
+            android:icon="@drawable/ic_baseline_privacy_tip_24"
+            android:title="隐私政策"/>
     </group>
 
     <group
