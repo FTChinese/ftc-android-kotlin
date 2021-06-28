@@ -207,14 +207,22 @@ class ArticleActivity : ScopedAppActivity(),
             statsTracker.storyViewed(it)
         }
 
+        /**
+         * Evaluate open graph by JS to get essential data of
+         * an article loading directly with URL.
+         * The value is posted from WVClient via WVViewModel.
+         */
         wvViewModel.openGraphEvaluated.observe(this) {
             // If the teaser is not create by analysing url,
             // just ignore the open graph data since we already
             // has a structured data providing enough information.
-            if (teaser?.isCreatedFromUrl == false) {
-                return@observe
-            }
+//            if (teaser?.isCreatedFromUrl == false) {
+//                return@observe
+//            }
 
+            // Even if the article is loaded by clicking URL,
+            // we can still get enough structured data if
+            // it has JSON API.
             if (teaser?.hasJsAPI() == true) {
                 return@observe
             }
@@ -332,6 +340,9 @@ class ArticleActivity : ScopedAppActivity(),
             Manifest.permission.READ_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED
 
+    /**
+     * Request permission to store screenshot
+     */
     private fun requestPermission() {
         if (!haveStoragePermission()) {
             val permissions = arrayOf(
@@ -409,6 +420,7 @@ class ArticleActivity : ScopedAppActivity(),
             teaser = t,
             isRefreshing = false,
         )
+        // TODO: move this to view model?
         binding.inProgress = true
 
         supportFragmentManager.commit {
