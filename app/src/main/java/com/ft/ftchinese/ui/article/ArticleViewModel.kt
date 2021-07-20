@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.article
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
@@ -18,13 +19,13 @@ import com.ft.ftchinese.ui.base.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
+
+private const val TAG = "ArticleViewModel"
 
 class ArticleViewModel(
     private val cache: FileCache,
     private val db: ArticleDb,
-) : BaseViewModel(), AnkoLogger {
+) : BaseViewModel() {
 
     private var _languageSelected = Language.CHINESE
 
@@ -50,13 +51,6 @@ class ArticleViewModel(
     val htmlResult: MutableLiveData<FetchResult<String>> by lazy {
         MutableLiveData<FetchResult<String>>()
     }
-
-    /**
-     * Used to load web content directly by [WebViewFragment].
-     */
-//    val webUrlResult: MutableLiveData<FetchResult<String>> by lazy {
-//        MutableLiveData<FetchResult<String>>()
-//    }
 
     val articleReadLiveData: MutableLiveData<ReadArticle> by lazy {
         MutableLiveData<ReadArticle>()
@@ -100,6 +94,7 @@ class ArticleViewModel(
      * and cache the HTML to a document.
      */
     private fun crawlHtml(teaser: Teaser, isRefreshing: Boolean) {
+        Log.i(TAG, "Start crawling webpage $teaser")
 
         // Show progress indicator only when user is not
         // manually refreshing.
@@ -143,7 +138,7 @@ class ArticleViewModel(
                 cache.loadText(teaser.cacheNameHtml)
             }
         } catch (e: Exception) {
-            info(e)
+            e.message?.let { msg -> Log.i(TAG, msg)}
             null
         }
     }
@@ -155,7 +150,7 @@ class ArticleViewModel(
         ) ?: return FetchResult.LocalizedError(R.string.api_empty_url)
 
         // Fetch data from server
-        info("Crawling web page from $remoteUri")
+        Log.i(TAG, "Crawling web page from $remoteUri")
 
         if (isNetworkAvailable.value != true) {
             return FetchResult.LocalizedError(R.string.prompt_no_network)
@@ -241,7 +236,7 @@ class ArticleViewModel(
                 null
             }
         } catch (e: Exception) {
-            info(e)
+            e.message?.let { msg -> Log.i(TAG, msg) }
             null
         }
     }
@@ -275,7 +270,7 @@ class ArticleViewModel(
 
             return FetchResult.Success(jsonResult.value)
         } catch (e: Exception) {
-            info(e)
+            e.message?.let { msg -> Log.i(TAG, msg)}
             return FetchResult.fromException(e)
         }
     }
@@ -335,7 +330,7 @@ class ArticleViewModel(
     }
 
     fun bookmark() {
-        info("Bookmark ${articleReadLiveData.value}")
+        Log.i(TAG, "Bookmark ${articleReadLiveData.value}")
 
         val read = articleReadLiveData.value ?: return
 
@@ -373,7 +368,7 @@ class ArticleViewModel(
     // for us to know what kind of content is loaded.
     fun lastResortByOG(og: OpenGraphMeta, teaser: Teaser?) {
 
-        info("OG evaluated: $og, for teaser $teaser")
+        Log.i(TAG, "OG evaluated: $og, for teaser $teaser")
 
         viewModelScope.launch {
             val readHistory = ReadArticle.fromOpenGraph(og, teaser)

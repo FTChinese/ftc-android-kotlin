@@ -36,8 +36,6 @@ import com.ft.ftchinese.ui.base.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 import java.util.*
 import kotlin.properties.Delegates
@@ -50,8 +48,7 @@ const val JS_INTERFACE_NAME = "Android"
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ChannelFragment : ScopedFragment(),
-    SwipeRefreshLayout.OnRefreshListener,
-    AnkoLogger {
+    SwipeRefreshLayout.OnRefreshListener {
 
     /**
      * Meta data about current page: the tab's title, where to load data, etc.
@@ -94,7 +91,6 @@ class ChannelFragment : ScopedFragment(),
         start = Date().time / 1000
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {
 
@@ -107,24 +103,6 @@ class ChannelFragment : ScopedFragment(),
 
         // Setup swipe refresh listener
         binding.swipeRefresh.setOnRefreshListener(this)
-
-        // Configure web view.
-        binding.webView.settings.apply {
-            javaScriptEnabled = true
-            loadsImagesAutomatically = true
-            domStorageEnabled = true
-            databaseEnabled = true
-        }
-
-        // Setup back key behavior.
-        binding.webView.setOnKeyListener { _, keyCode, _ ->
-            if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
-                binding.webView.goBack()
-                return@setOnKeyListener true
-            }
-
-            false
-        }
 
         return binding.root
     }
@@ -161,7 +139,7 @@ class ChannelFragment : ScopedFragment(),
         }
 
         channelViewModel.htmlRendered.observe(viewLifecycleOwner) {
-            info("Loaded channel content: ${channelSource?.fileName}")
+            Log.i(TAG, "Loaded channel content: ${channelSource?.fileName}")
 
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
@@ -192,7 +170,16 @@ class ChannelFragment : ScopedFragment(),
         })
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private fun setupUI() {
+        // Configure web view.
+        binding.webView.settings.apply {
+            javaScriptEnabled = true
+            loadsImagesAutomatically = true
+            domStorageEnabled = true
+            databaseEnabled = true
+        }
+
         binding.webView.apply {
 
             // Interact with JS.
@@ -206,6 +193,15 @@ class ChannelFragment : ScopedFragment(),
             webViewClient = WVClient(requireContext(), wvViewModel)
 
             webChromeClient = ChromeClient()
+
+            setOnKeyListener { _, keyCode, _ ->
+                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
+                    binding.webView.goBack()
+                    return@setOnKeyListener true
+                }
+
+                false
+            }
         }
     }
 
@@ -224,7 +220,7 @@ class ChannelFragment : ScopedFragment(),
         // For partial HTML, we need to crawl its content and render it with a template file to get the template HTML page.
         when (chSrc.htmlType) {
             HTML_TYPE_FRAGMENT -> {
-                info("initLoading: html fragment")
+                Log.i(TAG, "initLoading: html fragment")
 
                 if (binding.swipeRefresh.isRefreshing) {
                     channelViewModel.refresh(chSrc, sessionManager.loadAccount())
@@ -235,7 +231,7 @@ class ChannelFragment : ScopedFragment(),
             // For complete HTML, load it directly into Web view.
             HTML_TYPE_COMPLETE -> {
                 val url =  Config.buildChannelSourceUrl(sessionManager.loadAccount(), chSrc) ?: return
-                info("initLoading: web page on $url")
+                Log.i(TAG, "initLoading: web page on $url")
                 binding.webView.loadUrl(url.toString())
                 if (binding.swipeRefresh.isRefreshing) {
                     toast(R.string.prompt_updated)
@@ -247,7 +243,7 @@ class ChannelFragment : ScopedFragment(),
 
     private fun load(html: String) {
         if (BuildConfig.DEBUG) {
-            info("Loading web page to web view")
+            Log.i(TAG, "Loading web page to web view")
         }
 
         binding.webView.loadDataWithBaseURL(
@@ -276,13 +272,13 @@ class ChannelFragment : ScopedFragment(),
 
         val pagedSource = source.withPagination(p.key, p.page)
 
-        info("Open a pagination: $pagedSource")
+        Log.i(TAG, "Open a pagination: $pagedSource")
 
         // If the the pagination number is not changed, simply refresh it.
         if (pagedSource.shouldReload) {
             onRefresh()
         } else {
-            info("Start a new activity for $pagedSource")
+            Log.i(TAG, "Start a new activity for $pagedSource")
             ChannelActivity.start(activity, pagedSource)
         }
     }
@@ -294,7 +290,7 @@ class ChannelFragment : ScopedFragment(),
     @JavascriptInterface
     fun onPageLoaded(message: String) {
 
-        info("JS onPageLoaded")
+        Log.i(TAG, "JS onPageLoaded")
 
         val channelContent = json.parse<ChannelContent>(message) ?: return
 
@@ -308,7 +304,7 @@ class ChannelFragment : ScopedFragment(),
 
     @JavascriptInterface
     fun onSelectItem(index: String) {
-        info("JS select item: $index")
+        Log.i(TAG, "JS select item: $index")
 
         val i = try {
             index.toInt()
@@ -327,19 +323,19 @@ class ChannelFragment : ScopedFragment(),
             val name = channelSource?.name
 
             if (name != null) {
-                info("Saving js posted data for sponsors of $channelSource")
+                Log.i(TAG, "Saving js posted data for sponsors of $channelSource")
                 launch {
                     cache.saveText("${name}_sponsors.json", message)
                 }
             }
         }
 
-        info("Loaded sponsors: $message")
+        Log.i(TAG, "Loaded sponsors: $message")
 
         try {
             SponsorManager.sponsors = json.parseArray(message) ?: return
         } catch (e: Exception) {
-            info(e)
+            e.message?.let { msg -> Log.i(TAG, msg) }
         }
     }
 
@@ -360,7 +356,7 @@ class ChannelFragment : ScopedFragment(),
      * the js interface sends the clickd item index back.
      */
     private fun selectItem(index: Int) {
-        info("JS interface responding to click on an item")
+        Log.i(TAG, "JS interface responding to click on an item")
         if (index < 0) {
             return
         }
@@ -372,7 +368,7 @@ class ChannelFragment : ScopedFragment(),
             ?.withParentPerm(channelSource?.permission)
             ?: return
 
-        info("Select item: $teaser")
+        Log.i(TAG, "Select item: $teaser")
 
         /**
          * {
@@ -383,7 +379,7 @@ class ChannelFragment : ScopedFragment(),
          * Content URL: https://api003.ftmailbox.com/column/007000049?webview=ftcapp&bodyonly=yes
          */
         if (teaser.type == ArticleType.Column) {
-            info("Open a column: $teaser")
+            Log.i(TAG, "Open a column: $teaser")
 
             ChannelActivity.start(context, ChannelSource.fromTeaser(teaser))
             return

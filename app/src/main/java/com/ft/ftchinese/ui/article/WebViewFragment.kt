@@ -5,12 +5,12 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Bundle
+import android.util.Log
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
-import android.webkit.WebChromeClient
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
@@ -23,6 +23,7 @@ import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.WVViewModel
@@ -32,12 +33,10 @@ import com.ft.ftchinese.ui.share.ScreenshotFragment
 import com.ft.ftchinese.ui.share.ScreenshotViewModel
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 @ExperimentalCoroutinesApi
-class WebViewFragment : ScopedFragment(), AnkoLogger {
+class WebViewFragment : ScopedFragment() {
 
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var screenshotViewModel: ScreenshotViewModel
@@ -60,7 +59,6 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
         return binding.root
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -85,13 +83,6 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
                 .get(ScreenshotViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
-        binding.webView.settings.apply {
-            javaScriptEnabled = true
-            loadsImagesAutomatically = true
-            domStorageEnabled = true
-            databaseEnabled = true
-        }
-
         setupViewModel()
         initUI()
     }
@@ -99,8 +90,6 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
     private fun setupViewModel() {
         // If article view model render the complete html locally, load it into webview as a string.
         articleViewModel.htmlResult.observe(viewLifecycleOwner) { result ->
-
-//            articleViewModel.progressLiveData.value = false
 
             when (result) {
                 is FetchResult.LocalizedError -> {
@@ -110,6 +99,7 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
                     result.exception.message?.let { toast(it) }
                 }
                 is FetchResult.Success -> {
+                    Log.i(TAG, "Loading web page content")
                     binding.webView.loadDataWithBaseURL(
                         Config.discoverServer(AccountCache.get()),
                         result.data,
@@ -119,17 +109,6 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
                 }
             }
         }
-
-        // If article view mode find out this is a complete webpage, load it directly.
-//        articleViewModel.webUrlResult.observe(viewLifecycleOwner) { result ->
-//            articleViewModel.progressLiveData.value = false
-//
-//            when (result) {
-//                is FetchResult.LocalizedError -> toast(result.msgId)
-//                is FetchResult.Error -> result.exception.message?.let { toast(it) }
-//                is FetchResult.Success -> binding.webView.loadUrl(result.data)
-//            }
-//        }
 
         // Once a row is created for the screenshot
         // in MediaStore, we write the actually image file
@@ -159,8 +138,15 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
         }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private fun initUI() {
-        val wvClient = WVClient(requireContext(), wvViewModel)
+
+        binding.webView.settings.apply {
+            javaScriptEnabled = true
+            loadsImagesAutomatically = true
+            domStorageEnabled = true
+            databaseEnabled = true
+        }
 
         binding.webView.apply {
             addJavascriptInterface(
@@ -168,8 +154,8 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
                 JS_INTERFACE_NAME
             )
 
-            webViewClient = wvClient
-            webChromeClient = WebChromeClient()
+            webViewClient = WVClient(requireContext(), wvViewModel)
+            webChromeClient = ChromeClient()
 
             setOnKeyListener { _, keyCode, _ ->
                 if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
@@ -183,7 +169,7 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
 
     @JavascriptInterface
     fun follow(message: String) {
-        info("Clicked follow: $message")
+        Log.i(TAG, "Clicked follow: $message")
 
         try {
             val following = json.parse<Following>(message) ?: return
@@ -194,17 +180,17 @@ class WebViewFragment : ScopedFragment(), AnkoLogger {
                 FirebaseMessaging.getInstance()
                     .subscribeToTopic(following.topic)
                     .addOnCompleteListener { task ->
-                        info("Subscribing to topic ${following.topic} success: ${task.isSuccessful}")
+                        Log.i(TAG, "Subscribing to topic ${following.topic} success: ${task.isSuccessful}")
                     }
             } else {
                 FirebaseMessaging.getInstance()
                     .unsubscribeFromTopic(following.topic)
                     .addOnCompleteListener { task ->
-                        info("Unsubscribing from topic ${following.topic} success: ${task.isSuccessful}")
+                        Log.i(TAG, "Unsubscribing from topic ${following.topic} success: ${task.isSuccessful}")
                     }
             }
         } catch (e: Exception) {
-            info(e)
+            e.message?.let { msg -> Log.i(TAG, msg) }
         }
     }
 

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -23,9 +24,9 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.article.WebViewActivity
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
+
+private const val TAG = "WVClient"
 
 private const val TYPE_STORY = "story"
 private const val TYPE_PREMIUM = "premium"
@@ -45,7 +46,7 @@ private const val TYPE_ARCHIVE = "archiver"
 open class WVClient(
         private val context: Context,
         private val viewModel: WVViewModel? = null
-) : WebViewClient(), AnkoLogger {
+) : WebViewClient() {
 
     private fun getPrivilegeCode(): String {
         val account = AccountCache.get()
@@ -66,14 +67,13 @@ open class WVClient(
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
 
-        info("Start loading $url")
+        Log.i(TAG, "Start loading $url")
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
         super.onPageFinished(view, url)
-        info("Finished loading $url")
+        Log.i(TAG, "Finished loading $url")
 
-        info("WVViewModel $viewModel")
         viewModel?.pageFinished?.value = true
 
         view?.evaluateJavascript("""
@@ -82,7 +82,7 @@ open class WVClient(
             return window.gPrivileges;
             })()
         """.trimIndent()) {
-            info("Privilege result: $it")
+            Log.i(TAG, "Privilege result: $it")
         }
 
         view?.evaluateJavascript("""
@@ -127,23 +127,21 @@ open class WVClient(
             return graph;
         })();
         """.trimIndent()) {
-            info("JS evaluation result: $it")
+            Log.i(TAG, "JS evaluation result: $it")
             viewModel?.openGraphEvaluated?.value = it
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
-        info("Error when requesting ${request?.url}")
-
-        info("Error code: ${error?.errorCode}, description: ${error?.description}")
+        Log.i(TAG, "Error when requesting ${request?.url}. Error code: ${error?.errorCode}, description: ${error?.description}")
     }
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
 
         val uri = request?.url ?: return true
 
-        info("shouldOverrideUrlLoading: $uri")
+        Log.i(TAG, "shouldOverrideUrlLoading: $uri")
 
         // At the comment section of story page there is a login form.
         // Handle login in web view.
@@ -229,7 +227,7 @@ open class WVClient(
 
         val pathSegments = uri.pathSegments
 
-        info("Handle in-site link. Path segments: $pathSegments")
+        Log.i(TAG, "Handle in-site link. Path segments: $pathSegments")
 
         /**
          * Handle pagination links.
@@ -253,7 +251,7 @@ open class WVClient(
             ?: uri.getQueryParameter("p")
 
         if (pageNumber != null) {
-            info("Open channel pagination for uri: $uri")
+            Log.i(TAG, "Open channel pagination for uri: $uri")
 
             val paging = Paging(
                 key = if (uri.getQueryParameter("page") != null)
@@ -325,7 +323,7 @@ open class WVClient(
              * `/channel/money.html`
              */
             TYPE_CHANNEL -> {
-                info("Open a channel link: $uri")
+                Log.i(TAG, "Open a channel link: $uri")
                 viewModel?.urlChannelSelected?.value = channelFromUri(uri)
                 true
             }
@@ -336,7 +334,7 @@ open class WVClient(
              * or /m/corp/preview.html?pageid=huawei2018
              */
             TYPE_M -> {
-                info("Loading marketing page")
+                Log.i(TAG, "Loading marketing page")
 
                 viewModel?.urlChannelSelected?.value = marketingChannelFromUri(uri)
 
@@ -349,13 +347,13 @@ open class WVClient(
              */
             TYPE_TAG,
             TYPE_ARCHIVE -> {
-                info("Loading tag or archive")
+                Log.i(TAG, "Loading tag or archive")
                 viewModel?.urlChannelSelected?.value = tagOrArchiveChannel(uri)
                 true
             }
 
             else -> {
-                info("Loading a plain web page")
+                Log.i(TAG, "Loading a plain web page")
                 WebViewActivity.start(context, uri.toString())
                 true
             }

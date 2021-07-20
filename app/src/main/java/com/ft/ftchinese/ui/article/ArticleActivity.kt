@@ -1,13 +1,13 @@
 package com.ft.ftchinese.ui.article
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -45,8 +45,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import java.util.*
 
@@ -59,8 +57,7 @@ private const val READ_EXTERNAL_STORAGE_REQUEST = 0x1045
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ArticleActivity : ScopedAppActivity(),
-    SwipeRefreshLayout.OnRefreshListener,
-    AnkoLogger {
+    SwipeRefreshLayout.OnRefreshListener {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var statsTracker: StatsTracker
@@ -111,7 +108,7 @@ class ArticleActivity : ScopedAppActivity(),
         }
 
         val teaser = intent.getParcelableExtra<Teaser>(EXTRA_ARTICLE_TEASER) ?: return
-        info("Article teaser: $teaser")
+        Log.i(TAG, "Article teaser: $teaser")
 
         this.teaser = teaser
 
@@ -153,6 +150,27 @@ class ArticleActivity : ScopedAppActivity(),
         statsTracker.selectListItem(teaser)
     }
 
+    private fun setupUI() {
+
+        binding.bottomBar.setOnMenuItemClickListener(bottomBarMenuListener)
+
+        val t = teaser ?: return
+
+        // Load a story.
+        articleViewModel.loadStory(
+            teaser = t,
+            isRefreshing = false,
+        )
+
+        supportFragmentManager.commit {
+            replace(R.id.content_container, WebViewFragment.newInstance())
+        }
+
+        // Check access rights.
+        Log.i(TAG, "Checking access of teaser $teaser")
+        articleViewModel.checkAccess(t.permission())
+    }
+
     private fun setupViewModel() {
 
         // Show/Hide progress indicator which should be controlled by child fragment.
@@ -192,7 +210,7 @@ class ArticleActivity : ScopedAppActivity(),
 
         // Show message after bookmark clicked.
         articleViewModel.bookmarkState.observe(this) {
-            info("Bookmark state $it")
+            Log.i(TAG, "Bookmark state $it")
             binding.isStarring = it.isStarring
             if (it.message != null) {
                 Snackbar.make(
@@ -250,7 +268,7 @@ class ArticleActivity : ScopedAppActivity(),
         screenshotViewModel.shareSelected.observe(this) { appId ->
             val screenshot = screenshotViewModel.imageRowCreated.value ?: return@observe
 
-            info("Share screenshot to $appId")
+            Log.i(TAG, "Share screenshot to $appId")
             grantUriPermission(
                 "com.tencent.mm",
                 screenshot.imageUri,
@@ -408,29 +426,7 @@ class ArticleActivity : ScopedAppActivity(),
         }
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupUI() {
 
-        binding.bottomBar.setOnMenuItemClickListener(bottomBarMenuListener)
-
-        val t = teaser ?: return
-
-        // Load a story.
-        articleViewModel.loadStory(
-            teaser = t,
-            isRefreshing = false,
-        )
-        // TODO: move this to view model?
-        binding.inProgress = true
-
-        supportFragmentManager.commit {
-            replace(R.id.content_container, WebViewFragment.newInstance())
-        }
-
-        // Check access rights.
-        info("Checking access of teaser $teaser")
-        articleViewModel.checkAccess(t.permission())
-    }
 
     private fun handleLangPermission(lang: Language) {
         val account = sessionManager.loadAccount()
@@ -463,19 +459,19 @@ class ArticleActivity : ScopedAppActivity(),
     }
 
     fun onClickChinese(view: View) {
-        info("Clicking chinese tab")
+        Log.i(TAG, "Clicking chinese tab")
         teaser?.let {
             articleViewModel.switchLang(Language.CHINESE, it)
         }
     }
 
     fun onClickEnglish(view: View) {
-        info("Clicking english tag")
+        Log.i(TAG, "Clicking english tag")
         handleLangPermission(Language.ENGLISH)
     }
 
     fun onClickBilingual(view: View) {
-        info("Clicking bilingual tag")
+        Log.i(TAG, "Clicking bilingual tag")
         handleLangPermission(Language.BILINGUAL)
     }
 
@@ -548,7 +544,7 @@ class ArticleActivity : ScopedAppActivity(),
     }
 
     companion object {
-
+        const val TAG = "ArticleActivity"
         const val EXTRA_ARTICLE_TEASER = "extra_article_teaser"
 
         @JvmStatic
