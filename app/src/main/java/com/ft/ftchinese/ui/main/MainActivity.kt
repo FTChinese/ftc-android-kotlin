@@ -16,7 +16,6 @@ import android.view.MenuItem
 import android.webkit.WebView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.SearchView
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
@@ -36,7 +35,6 @@ import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.*
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.about.AboutActivity
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.account.WxInfoViewModel
 import com.ft.ftchinese.ui.base.ScopedAppActivity
@@ -49,6 +47,7 @@ import com.ft.ftchinese.ui.login.WxExpireDialogFragment
 import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
+import com.ft.ftchinese.ui.webabout.AboutListActivity
 import com.ft.ftchinese.util.RequestCode
 import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession
@@ -315,8 +314,7 @@ class MainActivity : ScopedAppActivity(),
                 R.id.action_my_subs -> MemberActivity.start(this)
                 R.id.action_feedback -> feedbackEmail()
                 R.id.action_settings -> SettingsActivity.start(this)
-                R.id.action_about -> AboutActivity.start(this)
-                R.id.action_privacy -> openPrivacyPage()
+                R.id.action_about -> AboutListActivity.start(this)
                 R.id.action_test -> TestActivity.start(this)
             }
 
@@ -562,16 +560,6 @@ class MainActivity : ScopedAppActivity(),
         } else {
             toast(R.string.prompt_no_email_app)
         }
-    }
-
-    private fun openPrivacyPage() {
-        CustomTabsIntent
-            .Builder()
-            .build()
-            .launchUrl(
-                this,
-                Uri.parse("http://www.ftacademy.cn/service.html")
-            )
     }
 
     companion object {

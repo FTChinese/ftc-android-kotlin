@@ -13,9 +13,9 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <!--  If your app uses scoped storage, it should request storage-related permissions only for devices that run Android 9 (API level 28) or lower.   -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- If your app uses scoped storage, it should request storage-related permissions only for devices that run Android 9 (API level 28) or lower. -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- For ExoPlayer download service -->
@@ -35,10 +35,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity android:name=".ui.webabout.AboutListActivity"
+            android:label="@string/title_about_us"
+            android:parentActivityName=".ui.main.MainActivity"/>
+        <activity
+            android:name=".ui.about.AboutActivity"
+            android:label="@string/title_about_us"
+            android:parentActivityName=".ui.main.MainActivity" />
+        <activity android:name=".ui.webabout.LegalDocActivity"
+            android:parentActivityName=".ui.webabout.AboutListActivity"/>
         <activity
             android:name=".ui.checkout.BuyerInfoActivity"
-            android:parentActivityName=".ui.member.MemberActivity"
-            android:label="完善信息"/>
+            android:label="完善信息"
+            android:parentActivityName=".ui.member.MemberActivity" />
         <activity
             android:name=".TestActivity"
             android:label="Test"
@@ -175,10 +184,7 @@
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/action_settings"
             android:parentActivityName=".ui.main.MainActivity" />
-        <activity
-            android:name=".ui.about.AboutActivity"
-            android:label="@string/title_about_us"
-            android:parentActivityName=".ui.main.MainActivity" />
+
         <activity
             android:name=".ui.settings.FCMActivity"
             android:label="@string/fcm_setting_title"

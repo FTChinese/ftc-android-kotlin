@@ -1,12 +1,10 @@
 package com.ft.ftchinese.ui.about
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.navArgs
 import com.ft.ftchinese.R
@@ -36,12 +34,11 @@ class LegalDetailsFragment : ScopedFragment(), AnkoLogger {
         return binding.root
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val index = args.index
         val doc = legalDocs[index]
-        view.findViewById<TextView>(R.id.heading_tv).text = doc.title
+        binding.headingTv.text = doc.title
         val spanned = markwon.toMarkdown(doc.content)
         markwon.setParsedMarkdown(binding.contentTv, spanned)
     }

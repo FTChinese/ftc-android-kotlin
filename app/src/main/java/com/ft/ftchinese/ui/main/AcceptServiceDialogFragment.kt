@@ -1,18 +1,20 @@
 package com.ft.ftchinese.ui.main
 
-import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.view.*
-import android.widget.TextView
+import android.view.KeyEvent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.commit
 import com.ft.ftchinese.R
-import com.ft.ftchinese.databinding.FragmentLegalDetailsBinding
-import com.ft.ftchinese.model.legal.legalDocs
+import com.ft.ftchinese.databinding.FragmentAcceptServiceDialogBinding
 import com.ft.ftchinese.store.ServiceAcceptance
-import io.noties.markwon.Markwon
+import com.ft.ftchinese.ui.webabout.WebpageFragment
+import com.ft.ftchinese.ui.webabout.legalPages
 import org.jetbrains.anko.AnkoLogger
 
 /**
@@ -21,29 +23,34 @@ import org.jetbrains.anko.AnkoLogger
 class AcceptServiceDialogFragment : DialogFragment(), AnkoLogger {
 
     private lateinit var acceptance: ServiceAcceptance
-    private lateinit var binding: FragmentLegalDetailsBinding
-    private lateinit var markwon: Markwon
+    private lateinit var binding: FragmentAcceptServiceDialogBinding
+//    private lateinit var markwon: Markwon
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         acceptance = ServiceAcceptance.getInstance(context)
-        markwon = Markwon.create(context)
+//        markwon = Markwon.create(context)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_legal_details, container, false)
-        binding.showBtn = true
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_accept_service_dialog, container, false)
         return binding.root
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
+    override fun onStart() {
+        super.onStart()
+        dialog?.let {
+            it.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val doc = legalDocs[0]
-        view.findViewById<TextView>(R.id.heading_tv).text = doc.title
-        val spanned = markwon.toMarkdown(doc.content)
-        markwon.setParsedMarkdown(binding.contentTv, spanned)
+        val page = legalPages[0]
 
+        childFragmentManager.commit {
+            replace(R.id.terms_holder, WebpageFragment.newInstance(page.url))
+        }
         binding.declineBtn.setOnClickListener {
             dismiss()
             activity?.finish()

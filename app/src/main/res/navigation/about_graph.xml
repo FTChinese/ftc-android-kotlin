@@ -6,7 +6,7 @@
     <fragment
         android:id="@+id/aboutListFragment"
         android:name="com.ft.ftchinese.ui.about.AboutListFragment"
-        android:label="fragment_about_list">
+        android:label="@string/title_about_us">
         <action
             android:id="@+id/action_aboutListFragment_to_legalDetailsFragment"
             app:destination="@id/legalDetailsFragment"
@@ -15,7 +15,7 @@
     <fragment
         android:id="@+id/legalDetailsFragment"
         android:name="com.ft.ftchinese.ui.about.LegalDetailsFragment"
-        android:label="LegalDetailsFragment" >
+        android:label="" >
         <argument
             android:name="index"
             app:argType="integer" />
