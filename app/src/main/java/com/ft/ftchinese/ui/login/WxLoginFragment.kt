@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.login
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,15 +16,13 @@ import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 /**
  * Wechat login UI.
  * It just calls the Wechat SDK and the rest operations are
  * delegated to wxapi.WXEntryActivity
  */
-class WxLoginFragment : Fragment(), AnkoLogger {
+class WxLoginFragment : Fragment() {
 
     private var wxApi: IWXAPI? = null
     private lateinit var binding: FragmentWxLoginBinding
@@ -52,7 +51,7 @@ class WxLoginFragment : Fragment(), AnkoLogger {
         view.isEnabled = false
 
         val nonce = WxOAuth.generateStateCode(WxOAuthIntent.LOGIN)
-        info("Wechat oauth state: $nonce")
+        Log.i(TAG, "Wechat oauth state: $nonce")
 
         val req = SendAuth.Req()
         req.scope = WxOAuth.SCOPE
@@ -64,6 +63,7 @@ class WxLoginFragment : Fragment(), AnkoLogger {
     }
 
     companion object {
+        private const val TAG = "WxLoginFragment"
         @JvmStatic
         fun newInstance() = WxLoginFragment()
     }

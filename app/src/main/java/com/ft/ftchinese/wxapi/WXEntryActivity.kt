@@ -3,6 +3,7 @@ package com.ft.ftchinese.wxapi
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -25,13 +26,11 @@ import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 private const val EXTRA_UI_TEST = "extra_ui_test"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
+class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler {
     private lateinit var api: IWXAPI
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: ActivityWechatBinding
@@ -69,7 +68,9 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         try {
             api.handleIntent(intent, this)
         } catch (e: Exception) {
-            info(e)
+            e.message?.let {
+                Log.i(TAG, it)
+            }
         }
     }
 
@@ -155,13 +156,13 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     override fun onReq(req: BaseReq?) {}
 
     override fun onResp(resp: BaseResp?) {
-        info("Wx login response type: ${resp?.type}, error code: ${resp?.errCode}")
+        Log.i(TAG, "Wx login response type: ${resp?.type}, error code: ${resp?.errCode}")
 
         when (resp?.type) {
             // Wechat Login.
             ConstantsAPI.COMMAND_SENDAUTH -> {
                 setTitle(R.string.title_wx_login)
-                info("Start processing login...")
+                Log.i(TAG, "Start processing login...")
                 processLogin(resp)
             }
             // This is used to handle your app sending message to wx and then return back to your app.
@@ -185,18 +186,18 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         binding.title = getString(R.string.progress_logging)
         binding.details = getString(R.string.wait_while_wx_login)
 
-        info("Resp code: ${resp.errCode}, resp msg: ${resp.errStr}")
+        Log.i(TAG, "Resp code: ${resp.errCode}, resp msg: ${resp.errStr}")
 
         when (resp.errCode) {
             BaseResp.ErrCode.ERR_OK -> {
-                info("User authorized")
+                Log.i(TAG, "User authorized")
 
                 if (resp is SendAuth.Resp) {
                     // 第一步：请求CODE
                     // 用户点击授权后，微信客户端会被拉起，
                     // 跳转至授权界面，用户在该界面点击允许或取消，
                     // SDK通过SendAuth的Resp返回数据给调用方
-                    info("code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
+                    Log.i(TAG, "code: ${resp.code}, state: ${resp.state}, lang: ${resp.lang}, country: ${resp.country}")
 
                     if (!WxOAuth.codeMatched(resp.state)) {
                         binding.title = getString(R.string.prompt_login_failed)
@@ -207,7 +208,7 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                     }
 
                     // The login process is handled here.
-                    info("Use oauth code to exchange for ftc login session...")
+                    Log.i(TAG, "Use oauth code to exchange for ftc login session...")
                     oauthViewModel.getSession(code = resp.code)
                     return
                 }
@@ -269,6 +270,8 @@ class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     }
 
     companion object {
+        private const val TAG = "WxEntryActivity"
+
         @JvmStatic
         fun start(context: Context) {
             val intent = Intent(
