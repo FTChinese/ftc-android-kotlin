@@ -6,9 +6,9 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.SENDTO" />
-
             <data android:mimeType="text/plain" />
         </intent>
+        <package android:name="com.tencent.mm" />
     </queries>
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
