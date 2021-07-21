@@ -14,6 +14,9 @@ import org.jetbrains.anko.info
 
 private const val EXTRA_WEB_URL = "extra_web_url"
 
+/**
+ * Used to load a webpage.
+ */
 class WebViewActivity : AppCompatActivity(), AnkoLogger {
 
     private lateinit var binding: ActivityWebViewBinding
