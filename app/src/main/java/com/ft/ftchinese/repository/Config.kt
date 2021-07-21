@@ -72,24 +72,6 @@ object Config {
         }
     }
 
-    fun buildSubsConfirmUrl(account: Account, action: String): Uri? {
-        return try {
-            val builder = Uri.parse(discoverServer(account))
-                .buildUpon()
-                .path("/m/corp/preview.html")
-                .appendQueryParameter("pageid", "subscriptioninfoconfirm")
-                .appendQueryParameter("to", "all")
-                .appendQueryParameter("key", account.membership.tier?.toString())
-                .appendQueryParameter("action", action)
-                .appendQueryParameter("webview", "ftcapp")
-                .appendQueryParameter("bodyonly", "yes")
-
-            appendUtm(builder).build()
-        } catch (e: Exception) {
-            null
-        }
-    }
-
     // How to retrieve an article based on teaser.
     // ArticleType.Column is ignored here since it is opened in a ChannelFragment.
     fun buildArticleSourceUrl(account: Account?, teaser: Teaser): Uri? {
@@ -140,5 +122,23 @@ object Config {
         }
 
         return appendUtm(builder).build()
+    }
+
+    fun buildSubsConfirmUrl(account: Account, action: String): Uri? {
+        return try {
+            val builder = Uri.parse(discoverServer(account))
+                .buildUpon()
+                .path("/m/corp/preview.html")
+                .appendQueryParameter("pageid", "subscriptioninfoconfirm")
+                .appendQueryParameter("to", "all")
+                .appendQueryParameter("key", account.membership.tier?.toString())
+                .appendQueryParameter("action", action)
+                .appendQueryParameter("webview", "ftcapp")
+                .appendQueryParameter("bodyonly", "yes")
+
+            appendUtm(builder).build()
+        } catch (e: Exception) {
+            null
+        }
     }
 }
