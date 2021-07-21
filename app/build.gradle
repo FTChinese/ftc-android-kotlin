@@ -36,6 +36,7 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 //}
 
 android {
+    // minSdkVersion <= targetSdkVersion <= compileSdkVersion
     compileSdkVersion 30
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -57,8 +58,10 @@ android {
     defaultConfig {
         applicationId "com.ft.ftchinese"
         minSdkVersion 21
+        // Target sdk version 30 cannot call wechat SDK.
+        // See https://open.weixin.qq.com/cgi-bin/announce?action=getannouncement&key=11600155960jI9EY&version=&lang=zh_CN&token=
         targetSdkVersion 30
-        versionCode 64
+        versionCode 65
         versionName "4.3.2"
 
         setProperty("archivesBaseName", "ftchinese-v$versionName")
@@ -166,7 +169,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     def room_version = '2.2.5'
     def lifecycle_version = "2.2.0"
-    def exo_player = "2.14.0"
+    def exo_player = "2.14.1"
     def work_version = "2.5.0"
 
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.
