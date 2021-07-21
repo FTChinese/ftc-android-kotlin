@@ -1,18 +1,17 @@
 package com.ft.ftchinese.ui.share
 
 import android.app.Application
-import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.database.ReadArticle
-import com.ft.ftchinese.model.content.Teaser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+// TODO: can we merge this into SocialShareViewModel?
 class ScreenshotViewModel(application: Application): AndroidViewModel(application) {
 
     val progressLiveData = MutableLiveData(false)

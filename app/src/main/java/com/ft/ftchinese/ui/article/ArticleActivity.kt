@@ -1,22 +1,26 @@
 package com.ft.ftchinese.ui.article
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.webkit.JavascriptInterface
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import androidx.work.Data
@@ -28,21 +32,27 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.databinding.ActivityArticleBinding
 import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
+import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.ChromeClient
 import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.WVViewModel
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.share.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.messaging.FirebaseMessaging
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import org.jetbrains.anko.toast
@@ -150,9 +160,12 @@ class ArticleActivity : ScopedAppActivity(),
         statsTracker.selectListItem(teaser)
     }
 
+
     private fun setupUI() {
 
         binding.bottomBar.setOnMenuItemClickListener(bottomBarMenuListener)
+
+        setupWebView()
 
         val t = teaser ?: return
 
@@ -162,13 +175,42 @@ class ArticleActivity : ScopedAppActivity(),
             isRefreshing = false,
         )
 
-        supportFragmentManager.commit {
-            replace(R.id.content_container, WebViewFragment.newInstance())
-        }
+//        supportFragmentManager.commit {
+//            replace(R.id.content_container, ArticleFragment.newInstance())
+//        }
 
         // Check access rights.
         Log.i(TAG, "Checking access of teaser $teaser")
         articleViewModel.checkAccess(t.permission())
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupWebView() {
+        // Setup webview
+        binding.webView.settings.apply {
+            javaScriptEnabled = true
+            loadsImagesAutomatically = true
+            domStorageEnabled = true
+            databaseEnabled = true
+        }
+
+        binding.webView.apply {
+            addJavascriptInterface(
+                this@ArticleActivity,
+                JS_INTERFACE_NAME
+            )
+
+            webViewClient = WVClient(this@ArticleActivity, wvViewModel)
+            webChromeClient = ChromeClient()
+
+            setOnKeyListener { _, keyCode, _ ->
+                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
+                    binding.webView.goBack()
+                    return@setOnKeyListener true
+                }
+                false
+            }
+        }
     }
 
     private fun setupViewModel() {
@@ -201,6 +243,28 @@ class ArticleActivity : ScopedAppActivity(),
         articleViewModel.storyLoadedLiveData.observe(this) {
             articleViewModel.compileHtml(followingManager.loadTemplateCtx())
             binding.isBilingual = it.isBilingual
+        }
+
+        // If article view model render the complete html locally, load it into webview as a string.
+        articleViewModel.htmlResult.observe(this) { result ->
+
+            when (result) {
+                is FetchResult.LocalizedError -> {
+                    toast(result.msgId)
+                }
+                is FetchResult.Error -> {
+                    result.exception.message?.let { toast(it) }
+                }
+                is FetchResult.Success -> {
+                    Log.i(TAG, "Loading web page content")
+                    binding.webView.loadDataWithBaseURL(
+                        Config.discoverServer(AccountCache.get()),
+                        result.data,
+                        "text/html",
+                        null,
+                        null)
+                }
+            }
         }
 
         articleViewModel.audioFoundLiveData.observe(this) {
@@ -263,6 +327,32 @@ class ArticleActivity : ScopedAppActivity(),
 
         // Pass the share app selected share component to article view model.
         shareViewModel.appSelected.observe(this, this::onShareIconClicked)
+
+        // Once a row is created for the screenshot
+        // in MediaStore, we write the actually image file
+        // the uri.
+        screenshotViewModel.imageRowCreated.observe(this) { screenshot: ArticleScreenshot ->
+            val bitmap = Bitmap.createBitmap(
+                binding.webView.width,
+                binding.webView.height,
+                Bitmap.Config.ARGB_8888)
+
+            val canvas = Canvas(bitmap)
+
+            binding.webView.draw(canvas)
+
+            contentResolver
+                .openOutputStream(screenshot.imageUri, "w")?.use {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 50, it)
+
+                    it.flush()
+
+                    bitmap.recycle()
+                    ScreenshotFragment
+                        .newInstance()
+                        .show(supportFragmentManager, "ScreenshotDialog")
+                }
+        }
 
         // If user want to share screenshot.
         screenshotViewModel.shareSelected.observe(this) { appId ->
@@ -426,8 +516,6 @@ class ArticleActivity : ScopedAppActivity(),
         }
     }
 
-
-
     private fun handleLangPermission(lang: Language) {
         val account = sessionManager.loadAccount()
 
@@ -541,6 +629,33 @@ class ArticleActivity : ScopedAppActivity(),
             .build()
 
         WorkManager.getInstance(this).enqueue(lenWorker)
+    }
+
+    @JavascriptInterface
+    fun follow(message: String) {
+        Log.i(TAG, "Clicked follow: $message")
+
+        try {
+            val following = json.parse<Following>(message) ?: return
+
+            val isSubscribed = followingManager.save(following)
+
+            if (isSubscribed) {
+                FirebaseMessaging.getInstance()
+                    .subscribeToTopic(following.topic)
+                    .addOnCompleteListener { task ->
+                        Log.i(TAG, "Subscribing to topic ${following.topic} success: ${task.isSuccessful}")
+                    }
+            } else {
+                FirebaseMessaging.getInstance()
+                    .unsubscribeFromTopic(following.topic)
+                    .addOnCompleteListener { task ->
+                        Log.i(TAG, "Unsubscribing from topic ${following.topic} success: ${task.isSuccessful}")
+                    }
+            }
+        } catch (e: Exception) {
+            e.message?.let { msg -> Log.i(TAG, msg) }
+        }
     }
 
     companion object {

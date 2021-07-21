@@ -44,10 +44,6 @@ class ArticleViewModel(
      */
     val audioFoundLiveData = MutableLiveData<Boolean>()
 
-    /**
-     * [WebViewFragment] should either load the the html string
-     * compiled from template, or load a url directly.
-     */
     val htmlResult: MutableLiveData<FetchResult<String>> by lazy {
         MutableLiveData<FetchResult<String>>()
     }
