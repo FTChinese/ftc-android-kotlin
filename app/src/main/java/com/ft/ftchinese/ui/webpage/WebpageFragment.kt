@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.webabout
+package com.ft.ftchinese.ui.webpage
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment

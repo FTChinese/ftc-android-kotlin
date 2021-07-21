@@ -12,6 +12,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityLegalDocBinding
+import com.ft.ftchinese.ui.webpage.WebpageFragment
 
 class LegalDocActivity : AppCompatActivity() {
 
