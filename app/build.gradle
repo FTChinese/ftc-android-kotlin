@@ -62,7 +62,7 @@ android {
         // See https://open.weixin.qq.com/cgi-bin/announce?action=getannouncement&key=11600155960jI9EY&version=&lang=zh_CN&token=
         targetSdkVersion 30
         versionCode 65
-        versionName "4.3.2"
+        versionName "4.3.3"
 
         setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
