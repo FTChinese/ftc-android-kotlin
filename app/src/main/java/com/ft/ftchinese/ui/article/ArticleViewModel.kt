@@ -202,7 +202,6 @@ class ArticleViewModel(
             when (val result = loadServerJson(teaser)) {
                 is FetchResult.Success -> {
                     storyLoaded(result.data)
-                    articleRead(ReadArticle.fromStory(result.data))
                 }
                 is FetchResult.LocalizedError -> {
                     htmlResult.value = FetchResult.LocalizedError(result.msgId)
@@ -286,9 +285,12 @@ class ArticleViewModel(
             db.starredDao().exists(story.id, story.teaser?.type.toString())
         }
 
+        // For initial loading, do not show snackbar message.
         bookmarkState.value = BookmarkState(
             isStarring = isStarring,
         )
+
+        articleRead(ReadArticle.fromStory(story))
     }
 
     /**
