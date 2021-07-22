@@ -21,9 +21,10 @@ import com.ft.ftchinese.tracking.GACategory
 import com.ft.ftchinese.tracking.PaywallSource
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.article.WebViewActivity
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
+import com.ft.ftchinese.ui.webpage.WebpageActivity
+import com.ft.ftchinese.ui.webpage.WebpageMeta
 import org.jetbrains.anko.toast
 
 private const val TAG = "WVClient"
@@ -354,7 +355,10 @@ open class WVClient(
 
             else -> {
                 Log.i(TAG, "Loading a plain web page")
-                WebViewActivity.start(context, uri.toString())
+                WebpageActivity.start(context, WebpageMeta(
+                    title = "",
+                    url = uri.toString()
+                ))
                 true
             }
         }
