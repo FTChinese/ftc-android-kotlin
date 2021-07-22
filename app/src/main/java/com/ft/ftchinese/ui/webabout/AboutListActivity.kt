@@ -2,15 +2,17 @@ package com.ft.ftchinese.ui.webabout
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAboutListBinding
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
+import com.ft.ftchinese.ui.webpage.WebpageActivity
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 class AboutListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAboutListBinding
@@ -40,13 +42,14 @@ class AboutListActivity : AppCompatActivity() {
             return SingleLineItemViewHolder.create(parent)
         }
 
+        @ExperimentalCoroutinesApi
         override fun onBindViewHolder(holder: SingleLineItemViewHolder, position: Int) {
             holder.setLeadingIcon(null)
             val item = legalPages[position]
             holder.setText(item.title)
 
             holder.itemView.setOnClickListener {
-                LegalDocActivity.start(this@AboutListActivity, item.url)
+                WebpageActivity.start(this@AboutListActivity, item)
             }
         }
 
