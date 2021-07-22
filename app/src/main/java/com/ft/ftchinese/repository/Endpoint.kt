@@ -91,6 +91,6 @@ object Endpoint {
         BuildConfig.ACCESS_TOKEN_LIVE
     }
 
-    const val splashScheduleUrl = "https://api003.ftmailbox.com/index.php/jsapi/applaunchschedule"
+    const val splashSchedule = "/index.php/jsapi/applaunchschedule"
 }
 

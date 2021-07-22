@@ -20,9 +20,9 @@ object AdClient {
         Fetch().get(bustedUrl).endPlainText()
     }
 
-    fun fetchSchedule(): JSONResult<Schedule>? {
+    fun fetchSchedule(url: String): JSONResult<Schedule>? {
         val body = Fetch()
-            .get(Endpoint.splashScheduleUrl)
+            .get(url)
             .endPlainText()
 
         if (body.isNullOrBlank()) {
