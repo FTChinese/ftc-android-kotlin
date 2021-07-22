@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.main
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.databinding.DataBindingUtil
@@ -11,24 +12,23 @@ import androidx.work.*
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivitySplashBinding
 import com.ft.ftchinese.model.content.*
-import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.service.SplashWorker
-import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.channel.ChannelActivity
 import kotlinx.coroutines.*
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 private const val EXTRA_MESSAGE_TYPE = "content_type"
 private const val EXTRA_CONTENT_ID = "content_id"
+private const val TAG = "SplashActivity"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class SplashActivity : ScopedAppActivity(), AnkoLogger {
+class SplashActivity : ScopedAppActivity() {
 
     private lateinit var cache: FileCache
     private lateinit var sessionManager: SessionManager
@@ -67,6 +67,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
         binding.handler = this
 
         setupViewModel()
+        splashViewModel.loadAd(splashManager, cache)
         handleMessaging()
     }
 
@@ -90,7 +91,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
         intent.extras?.let {
             for (key in it.keySet()) {
                 val value = intent.extras?.get(key)
-                info("$key: $value")
+                Log.i(TAG, "$key: $value")
             }
         }
 
@@ -104,7 +105,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
 
         val pageId = intent.getStringExtra(EXTRA_CONTENT_ID) ?: return
 
-        info("Message type: $msgType, content id: $pageId")
+        Log.i(TAG, "Message type: $msgType, content id: $pageId")
 
         val contentType = msgType.toArticleType() ?: return
         when (msgType) {
@@ -136,28 +137,14 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun setupViewModel() {
         splashViewModel.shouldExit.observe(this) {
-            exit()
-        }
-
-        // Show the image.
-        splashViewModel.imageLoaded.observe(this) {
-            val drawable = Drawable.createFromStream(
-                it.first,
-                it.second,
-            )
-
-            if (drawable == null) {
+            if (it) {
+                Log.i(TAG, "shouldExit is $it")
                 exit()
-                return@observe
             }
-
-            hideSystemUI()
-            binding.adImage.setImageDrawable(drawable)
-            splashViewModel.startCounting()
         }
 
         splashViewModel.adLoaded.observe(this) {
-            info("Splash loaded $it")
+            Log.i(TAG, "Splash loaded $it")
             // Tracking event ad viewed.
             statsTracker.adViewed(it)
             // Send a request to the tracking url defined in the ad
@@ -166,6 +153,25 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
                 statsTracker.launchAdSent(url)
                 splashViewModel.sendImpression(url)
             }
+        }
+
+        // Show the image.
+        splashViewModel.imageLoaded.observe(this) {
+            Log.i(TAG, "Splash image loaded. Creating drawable")
+            val drawable = Drawable.createFromStream(
+                it.first,
+                it.second,
+            )
+
+            if (drawable == null) {
+                Log.i(TAG, "Create drawable failed.")
+                exit()
+                return@observe
+            }
+
+            hideSystemUI()
+            binding.adImage.setImageDrawable(drawable)
+            splashViewModel.startCounting()
         }
 
         // Tracking if impression is successfully sent.
@@ -181,8 +187,6 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
         splashViewModel.counterLiveData.observe(this) {
             binding.timerText = getString(R.string.prompt_ad_timer, it)
         }
-
-        splashViewModel.loadAd(splashManager, cache)
     }
 
     private fun setupWorker() {
@@ -203,7 +207,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
             )
 
         workManager.getWorkInfoByIdLiveData(splashWork.id).observe(this) {
-            info("splashWork status ${it.state}")
+            Log.i(TAG, "splashWork status ${it.state}")
         }
     }
 
@@ -236,7 +240,7 @@ class SplashActivity : ScopedAppActivity(), AnkoLogger {
     // NOTE: it must be called in the main thread.
     // If you call is in a non-Main coroutine, it crashes.
     private fun exit() {
-
+        Log.i(TAG, "Exiting Splash Activity")
         showSystemUI()
         MainActivity.start(this)
         setupWorker()
