@@ -16,7 +16,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.webkit.JavascriptInterface
-import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
@@ -88,21 +87,21 @@ class ArticleActivity : ScopedAppActivity(),
 
     private val start = Date().time / 1000
 
-    private val bottomBarMenuListener = Toolbar.OnMenuItemClickListener { item: MenuItem ->
-        when (item.itemId) {
-            R.id.menu_share -> {
-                shareFragment = SocialShareFragment()
-                shareFragment?.show(supportFragmentManager, "SocialShareFragment")
-
-                true
-            }
-            R.id.menu_audio -> {
-                AudioPlayerActivity.start(this, teaser)
-                true
-            }
-            else -> true
-        }
-    }
+//    private val bottomBarMenuListener = Toolbar.OnMenuItemClickListener { item: MenuItem ->
+//        when (item.itemId) {
+//            R.id.menu_share -> {
+//                shareFragment = SocialShareFragment()
+//                shareFragment?.show(supportFragmentManager, "SocialShareFragment")
+//
+//                true
+//            }
+//            R.id.menu_audio -> {
+//                AudioPlayerActivity.start(this, teaser)
+//                true
+//            }
+//            else -> true
+//        }
+//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -163,7 +162,7 @@ class ArticleActivity : ScopedAppActivity(),
 
     private fun setupUI() {
 
-        binding.bottomBar.setOnMenuItemClickListener(bottomBarMenuListener)
+//        binding.bottomBar.setOnMenuItemClickListener(bottomBarMenuListener)
 
         setupWebView()
 
@@ -174,10 +173,6 @@ class ArticleActivity : ScopedAppActivity(),
             teaser = t,
             isRefreshing = false,
         )
-
-//        supportFragmentManager.commit {
-//            replace(R.id.content_container, ArticleFragment.newInstance())
-//        }
 
         // Check access rights.
         Log.i(TAG, "Checking access of teaser $teaser")
@@ -565,6 +560,11 @@ class ArticleActivity : ScopedAppActivity(),
 
     fun onClickBookmark(view: View) {
         articleViewModel.bookmark()
+    }
+
+    fun onClickShare(view: View) {
+        shareFragment = SocialShareFragment()
+        shareFragment?.show(supportFragmentManager, "SocialShareFragment")
     }
 
     override fun onRefresh() {
