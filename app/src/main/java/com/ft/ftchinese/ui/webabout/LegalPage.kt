@@ -1,17 +1,16 @@
 package com.ft.ftchinese.ui.webabout
 
-data class LegalPage (
-    val title: String,
-    val url: String,
-)
+import com.ft.ftchinese.ui.webpage.WebpageMeta
 
 val legalPages = listOf(
-    LegalPage(
+    WebpageMeta(
         title = "服务条款",
         url = "http://www.ftacademy.cn/service.html",
+        showMenu = true,
     ),
-    LegalPage(
+    WebpageMeta(
         title = "隐私政策",
         url = "http://www.ftacademy.cn/privacy.html",
+        showMenu = true,
     )
 )
