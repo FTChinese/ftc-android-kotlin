@@ -48,6 +48,7 @@ import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.ui.webabout.AboutListActivity
+import com.ft.ftchinese.ui.webpage.WebpageViewModel
 import com.ft.ftchinese.util.RequestCode
 import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession
@@ -71,7 +72,7 @@ class MainActivity : ScopedAppActivity(),
     private var mBackKeyPressed = false
     private var pagerAdapter: TabPagerAdapter? = null
 
-    private lateinit var logoutViewMode: LogoutViewModel
+    private lateinit var logoutViewModel: LogoutViewModel
     private lateinit var wxInfoViewModel: WxInfoViewModel
 
     private lateinit var binding: ActivityMainBinding
@@ -84,6 +85,7 @@ class MainActivity : ScopedAppActivity(),
     private lateinit var tokenManager: TokenManager
     private lateinit var wxApi: IWXAPI
     private lateinit var workManager: WorkManager
+    private lateinit var webpageViewModel: WebpageViewModel
 
     private lateinit var statsTracker: StatsTracker
 
@@ -114,8 +116,11 @@ class MainActivity : ScopedAppActivity(),
         tokenManager = TokenManager.getInstance(this)
         workManager = WorkManager.getInstance(this)
 
-        logoutViewMode = ViewModelProvider(this)
+        logoutViewModel = ViewModelProvider(this)
             .get(LogoutViewModel::class.java)
+
+        webpageViewModel = ViewModelProvider(this)
+            .get(WebpageViewModel::class.java)
 
         wxInfoViewModel = ViewModelProvider(this)
             .get(WxInfoViewModel::class.java)
@@ -161,7 +166,7 @@ class MainActivity : ScopedAppActivity(),
             }
         }
 
-        logoutViewMode.loggedOutLiveData.observe(this) {
+        logoutViewModel.loggedOutLiveData.observe(this) {
             logout()
         }
     }
@@ -219,7 +224,7 @@ class MainActivity : ScopedAppActivity(),
     }
 
     private fun setupBottomNav() {
-        binding.bottomNav.setOnNavigationItemSelectedListener {
+        binding.bottomNav.setOnItemSelectedListener {
             info("Selected bottom nav item ${it.title}")
 
             when (it.itemId) {
