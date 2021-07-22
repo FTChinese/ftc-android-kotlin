@@ -217,11 +217,16 @@ class SplashActivity : ScopedAppActivity() {
             statsTracker.adSkipped(it)
         }
         splashViewModel.stopCounting()
+        exit()
     }
 
     fun onClickImage(view: View) {
+        // Stop counting and exit
+        splashViewModel.stopCounting()
         splashViewModel.adLoaded.value?.let {
-            // Why this?
+            // Chrome web opened on top of this activity to show ad.
+            // After user exited from ad, the onResume method is called and if customTabsOpened is true, it will
+            // call exit().
             customTabsOpened = true
             statsTracker.adClicked(it)
 
@@ -233,13 +238,11 @@ class SplashActivity : ScopedAppActivity() {
                     Uri.parse(it.linkUrl)
                 )
         }
-
-        splashViewModel.stopCounting()
     }
 
     // NOTE: it must be called in the main thread.
     // If you call is in a non-Main coroutine, it crashes.
-    private fun exit() {
+    private fun exit(showAd: Boolean = false) {
         Log.i(TAG, "Exiting Splash Activity")
         showSystemUI()
         MainActivity.start(this)
