@@ -385,6 +385,18 @@ class ChannelFragment : ScopedFragment(),
             return
         }
 
+        /**
+         * For this type of data, load url directly.
+         * Teaser(
+         * id=44330,
+         * type=interactive,
+         * subType=mbagym,
+         * title=一周新闻小测：2021年07月17日,
+         * audioUrl=null,
+         * radioUrl=null,
+         * publishedAt=null,
+         * tag=FT商学院,教程,一周新闻,入门级,FTQuiz,AITranslation)
+         */
         ArticleActivity.start(activity, teaser)
     }
 
