@@ -10,11 +10,13 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.commit
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentAcceptServiceDialogBinding
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.ui.webabout.legalPages
 import com.ft.ftchinese.ui.webpage.WebpageFragment
+import com.ft.ftchinese.ui.webpage.WebpageViewModel
 import org.jetbrains.anko.AnkoLogger
 
 /**
@@ -24,12 +26,11 @@ class AcceptServiceDialogFragment : DialogFragment(), AnkoLogger {
 
     private lateinit var acceptance: ServiceAcceptance
     private lateinit var binding: FragmentAcceptServiceDialogBinding
-//    private lateinit var markwon: Markwon
+    private lateinit var wpViewModel: WebpageViewModel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         acceptance = ServiceAcceptance.getInstance(context)
-//        markwon = Markwon.create(context)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -46,11 +47,19 @@ class AcceptServiceDialogFragment : DialogFragment(), AnkoLogger {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        wpViewModel = activity?.run {
+            ViewModelProvider(this).get(WebpageViewModel::class.java)
+        } ?: throw Exception("Invalid activity")
+
         val page = legalPages[0]
 
+        wpViewModel.urlLiveData.value = page.url
+
         childFragmentManager.commit {
-            replace(R.id.terms_holder, WebpageFragment.newInstance(page.url))
+            replace(R.id.terms_holder, WebpageFragment.newInstance())
         }
+
         binding.declineBtn.setOnClickListener {
             dismiss()
             activity?.finish()
