@@ -42,7 +42,7 @@
             android:name=".ui.about.AboutActivity"
             android:label="@string/title_about_us"
             android:parentActivityName=".ui.main.MainActivity" />
-        <activity android:name=".ui.webabout.LegalDocActivity"
+        <activity android:name=".ui.webpage.WebpageActivity"
             android:parentActivityName=".ui.webabout.AboutListActivity"/>
         <activity
             android:name=".ui.checkout.BuyerInfoActivity"
@@ -89,9 +89,6 @@
         <activity
             android:name=".ui.article.AudioPlayerActivity"
             android:parentActivityName=".ui.article.ArticleActivity" />
-        <activity
-            android:name=".ui.article.WebViewActivity"
-            android:parentActivityName=".ui.main.MainActivity" />
         <activity
             android:name=".ui.login.AuthActivity"
             android:label="@string/title_login"
