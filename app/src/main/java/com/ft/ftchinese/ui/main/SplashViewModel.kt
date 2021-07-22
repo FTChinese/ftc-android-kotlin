@@ -49,7 +49,6 @@ class SplashViewModel : BaseViewModel() {
     fun stopCounting() {
         Log.i(TAG, "Stop counter")
         job?.cancel()
-        shouldExit.value = true
     }
 
     fun loadAd(store: SplashScreenManager, cache: FileCache) {
