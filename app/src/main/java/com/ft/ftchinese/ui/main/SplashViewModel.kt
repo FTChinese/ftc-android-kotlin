@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.main
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.model.splash.ScreenAd
@@ -8,12 +9,12 @@ import com.ft.ftchinese.repository.AdClient
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.BaseViewModel
 import kotlinx.coroutines.*
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import java.io.InputStream
 import java.util.*
 
-class SplashViewModel : BaseViewModel(), AnkoLogger {
+private const val TAG = "SplashViewModel"
+
+class SplashViewModel : BaseViewModel() {
 
     val shouldExit = MutableLiveData(false)
     val adLoaded: MutableLiveData<ScreenAd> by lazy {
@@ -46,6 +47,7 @@ class SplashViewModel : BaseViewModel(), AnkoLogger {
     }
 
     fun stopCounting() {
+        Log.i(TAG, "Stop counter")
         job?.cancel()
         shouldExit.value = true
     }
@@ -57,21 +59,21 @@ class SplashViewModel : BaseViewModel(), AnkoLogger {
             val splashAd = store.load()
 
             if (splashAd == null) {
-                info("Splash not found. Exit")
+                Log.i(TAG, "Splash not found. Exit")
                 shouldExit.value = true
                 return@launch
             }
 
-            info("Splash found $splashAd")
+            Log.i(TAG, "Splash found $splashAd")
             if (!splashAd.isToday()) {
-                info("Splash is not targeting today. Exit")
+                Log.i(TAG, "Splash is not targeting today. Exit")
                 shouldExit.value = true
                 return@launch
             }
 
             val imageName = splashAd.imageName
             if (imageName == null) {
-                info("Splash has no image name. Exit")
+                Log.i(TAG, "Splash has no image name. Exit")
                 shouldExit.value = true
                 return@launch
             }
@@ -80,7 +82,7 @@ class SplashViewModel : BaseViewModel(), AnkoLogger {
             }
 
             if (fis == null) {
-                info("Splash image not read $imageName")
+                Log.i(TAG, "Splash image not read $imageName")
                 shouldExit.value = true
                 return@launch
             }
@@ -99,7 +101,7 @@ class SplashViewModel : BaseViewModel(), AnkoLogger {
 
                 impressionResult.value = Pair(true, url)
             } catch (e: Exception) {
-                info(e)
+                e.message?.let { Log.i(TAG, it) }
                 impressionResult.value = Pair(false, url)
             }
         }
