@@ -1,27 +1,20 @@
 package com.ft.ftchinese.ui.webpage
 
+import android.annotation.SuppressLint
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentWebpageBinding
 
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_URL = "param1"
-
 class WebpageFragment : Fragment() {
     private lateinit var binding: FragmentWebpageBinding
-    private var url: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            url = it.getString(ARG_URL)
-        }
-    }
+    private lateinit var wpViewModel: WebpageViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,25 +26,46 @@ class WebpageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        url?.let {
+
+        wpViewModel = activity?.run {
+            ViewModelProvider(this)
+                .get(WebpageViewModel::class.java)
+        } ?: throw Exception("Invalid Activity")
+
+        setupWebView()
+        setupViewModel()
+    }
+
+    private fun setupViewModel() {
+        wpViewModel.urlLiveData.observe(viewLifecycleOwner) {
             binding.webView.loadUrl(it)
         }
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param url Parameter 1.
-         * @return A new instance of fragment WebpageFragment.
-         */
-        @JvmStatic
-        fun newInstance(url: String) =
-            WebpageFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_URL, url)
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupWebView() {
+        // Setup webview
+        binding.webView.settings.apply {
+            javaScriptEnabled = true
+            loadsImagesAutomatically = true
+            domStorageEnabled = true
+            databaseEnabled = true
+        }
+
+        binding.webView.apply {
+
+            setOnKeyListener { _, keyCode, _ ->
+                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
+                    binding.webView.goBack()
+                    return@setOnKeyListener true
                 }
+                false
             }
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun newInstance() = WebpageFragment()
     }
 }
