@@ -1,9 +1,11 @@
 package com.ft.ftchinese.ui.checkout
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
@@ -42,6 +44,7 @@ class BuyerInfoActivity : ScopedAppActivity() {
             .get(BuyerInfoViewModel::class.java)
 
         setupViewModel()
+        setupWebView()
         init()
     }
 
@@ -62,6 +65,28 @@ class BuyerInfoActivity : ScopedAppActivity() {
                         null,
                         null)
                 }
+            }
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupWebView() {
+        // Setup webview
+        binding.webView.settings.apply {
+            javaScriptEnabled = true
+            loadsImagesAutomatically = true
+            domStorageEnabled = true
+            databaseEnabled = true
+        }
+
+        binding.webView.apply {
+
+            setOnKeyListener { _, keyCode, _ ->
+                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
+                    binding.webView.goBack()
+                    return@setOnKeyListener true
+                }
+                false
             }
         }
     }
