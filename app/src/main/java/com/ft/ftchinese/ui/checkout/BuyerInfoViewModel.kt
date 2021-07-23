@@ -6,7 +6,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.StoryBuilder
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.ftcsubs.Invoices
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.repository.AccountRepo
