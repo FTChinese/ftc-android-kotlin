@@ -137,13 +137,17 @@ android {
             dimension "appStore"
             versionNameSuffix "-ftc"
         }
-        samsung {
+//        samsung {
+//            dimension "appStore"
+//            versionNameSuffix "-samsung"
+//        }
+//        anzhi {
+//            dimension "appStore"
+//            versionNameSuffix "-anzhi"
+//        }
+        oppo {
             dimension "appStore"
-            versionNameSuffix "-samsung"
-        }
-        anzhi {
-            dimension "appStore"
-            versionNameSuffix "-anzhi"
+            versionNameSuffix "-oppo"
         }
     }
 

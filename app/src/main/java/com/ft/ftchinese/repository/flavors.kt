@@ -12,7 +12,8 @@ val flavors = mapOf(
     "sanliuling" to "an_360shouji",
     "ftc" to defaultFlavor,
     "tencent" to "an_tencent",
-    "samsung" to "an_samsung"
+    "samsung" to "an_samsung",
+    "oppo" to "an_oppo",
 )
 
 val currentFlavor = flavors[BuildConfig.FLAVOR] ?: defaultFlavor
