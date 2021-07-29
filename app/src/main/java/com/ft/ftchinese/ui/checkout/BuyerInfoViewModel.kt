@@ -48,7 +48,11 @@ class BuyerInfoViewModel : BaseViewModel(), AnkoLogger {
                 }
                 val addressAsync = async(Dispatchers.IO) {
                     info("Fetching address...")
-                    AccountRepo.loadAddress(account.id)
+                    if (account.isFtcOnly) {
+                        AccountRepo.loadAddress(account.id)
+                    } else {
+                        Address()
+                    }
                 }
 
                 val webContent = webContentAsync.await()
