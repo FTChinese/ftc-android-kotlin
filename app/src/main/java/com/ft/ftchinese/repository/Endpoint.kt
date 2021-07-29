@@ -71,17 +71,18 @@ object Endpoint {
      */
     fun subsBase(isTest: Boolean = false) = if (isTest) {
         if (BuildConfig.DEBUG) {
-            "$devIP:8202"
+//            "$devIP:8202"
+            BuildConfig.API_SUBS_SANDBOX
         } else {
             BuildConfig.API_SUBS_SANDBOX
         }
     } else {
-        BuildConfig.API_SUBS_LIVE
-//        if (BuildConfig.DEBUG) {
+        if (BuildConfig.DEBUG) {
 //            "$devIP:8202"
-//        } else {
-//            BuildConfig.API_SUBS_LIVE
-//        }
+            BuildConfig.API_SUBS_LIVE
+        } else {
+            BuildConfig.API_SUBS_LIVE
+        }
     }
 
     val accessToken = if (BuildConfig.DEBUG) {
