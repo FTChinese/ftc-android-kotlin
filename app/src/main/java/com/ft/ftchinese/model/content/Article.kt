@@ -428,7 +428,13 @@ class Story (
             arrBody.add(10, AdParser.getAdCode(AdPosition.MIDDLE_TWO))
         }
 
-        return arrBody.joinToString("")
+        return if (bodyCN.startsWith("<p>")) {
+            arrBody.joinToString("")
+        } else {
+            arrBody.joinToString("") {
+                "<p>$it</p>"
+            }
+        }
     }
 
     fun getEnBody(withAd: Boolean = true): String {
@@ -453,7 +459,13 @@ class Story (
             arrBody.add(10, AdParser.getAdCode(AdPosition.MIDDLE_TWO))
         }
 
-        return arrBody.joinToString("")
+        return if (bodyEN.startsWith("<p>")) {
+            arrBody.joinToString("")
+        } else {
+            arrBody.joinToString("") {
+                "<p>$it</p>"
+            }
+        }
     }
 
     fun getBilingualBody(): String {
@@ -463,25 +475,43 @@ class Story (
 
         val alignedBody = alignBody()
 
-        return alignedBody.joinToString("") {
-            "${it.en}${it.cn}"
+        return if (bodyEN.startsWith("<p>")) {
+            alignedBody.joinToString("") {
+                "${it.en}${it.cn}"
+            }
+        } else {
+            alignedBody.joinToString("") {
+                "<p>${it.en}</p><p>${it.cn}</p>"
+            }
         }
     }
 
     private fun splitCnBody(): List<String> {
-        return bodyCN.split("\r\n")
+        return bodyCN.split("\r\n").let {
+            if (it.size > 1) {
+                it
+            } else {
+                bodyCN.split("\n\n")
+            }
+        }
     }
 
     private fun splitEnBody(): List<String> {
-        return bodyEN.split("\r\n")
+        return bodyEN.split("\r\n").let {
+            if (it.size > 1) {
+                it
+            } else {
+                bodyEN.split("\n\n")
+            }
+        }
     }
 
     /**
      * Align english text to chinese text paragraph by paragraph.
      */
     private fun alignBody(): List<Bilingual> {
-        val cnArray = bodyCN.split("\r\n")
-        val enArray = bodyEN.split("\r\n")
+        val cnArray = splitCnBody()
+        val enArray = splitEnBody()
 
         val bi = mutableListOf<Bilingual>()
 
@@ -493,21 +523,27 @@ class Story (
 
 
         while (cIndex < cLen && eIndex < eLen) {
-            val pair = Bilingual(cn = cnArray[cIndex], en = enArray[eIndex])
-            bi.add(pair)
+            bi.add(Bilingual(
+                cn = cnArray[cIndex],
+                en = enArray[eIndex]),
+            )
             cIndex++
             eIndex++
         }
 
         while (cIndex < cLen) {
-            val pair = Bilingual(cn = cnArray[cIndex], en = "")
-            bi.add(pair)
+            bi.add(Bilingual(
+                cn = cnArray[cIndex],
+                en = "",
+            ))
             cIndex++
         }
 
         while (eIndex < eLen) {
-            val pair = Bilingual(cn = "", en = enArray[eIndex])
-            bi.add(pair)
+            bi.add(Bilingual(
+                cn = "",
+                en = enArray[eIndex],
+            ))
             eIndex++
         }
 
