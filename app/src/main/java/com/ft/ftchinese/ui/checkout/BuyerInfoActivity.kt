@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
+import android.webkit.JavascriptInterface
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
@@ -15,7 +16,10 @@ import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.ChromeClient
+import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.member.MemberActivity
 import org.jetbrains.anko.toast
 
@@ -80,6 +84,13 @@ class BuyerInfoActivity : ScopedAppActivity() {
         }
 
         binding.webView.apply {
+            addJavascriptInterface(
+                this@BuyerInfoActivity,
+                JS_INTERFACE_NAME
+            )
+
+            webViewClient = WVClient(this@BuyerInfoActivity)
+            webChromeClient = ChromeClient()
 
             setOnKeyListener { _, keyCode, _ ->
                 if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
@@ -112,6 +123,11 @@ class BuyerInfoActivity : ScopedAppActivity() {
             cache = fileCache,
             action = action
         )
+    }
+
+    @JavascriptInterface
+    fun wvClosePage() {
+        finish()
     }
 
     companion object {
