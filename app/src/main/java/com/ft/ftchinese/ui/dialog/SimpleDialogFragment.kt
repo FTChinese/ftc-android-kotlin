@@ -2,25 +2,12 @@ package com.ft.ftchinese.ui.dialog
 
 import android.app.Dialog
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
 import androidx.fragment.app.DialogFragment
-import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 
 class SimpleDialogFragment : DialogFragment() {
-
-    private lateinit var viewModel: DialogViewModel
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        viewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(DialogViewModel::class.java)
-        } ?: throw IllegalStateException("Invalid activity")
-    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val params = arguments?.getParcelable(ARG_SIMPLE_DIALOG) ?: DialogParams(
@@ -34,13 +21,11 @@ class SimpleDialogFragment : DialogFragment() {
                 .setMessage(params.message)
                 .setPositiveButton(params.positive) { dialog, _ ->
                     dialog.dismiss()
-                    viewModel.positiveButtonClicked.value = true
                 }
 
             if (params.negative != null) {
                 builder.setNegativeButton(params.negative) { dialog, _ ->
                     dialog.dismiss()
-                    viewModel.negativeButtonClicked.value = true
                 }
             }
 

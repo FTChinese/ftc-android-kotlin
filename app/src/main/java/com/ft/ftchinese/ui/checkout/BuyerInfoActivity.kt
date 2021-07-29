@@ -21,7 +21,6 @@ import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.dialog.DialogParams
-import com.ft.ftchinese.ui.dialog.DialogViewModel
 import com.ft.ftchinese.ui.dialog.SimpleDialogFragment
 import com.ft.ftchinese.ui.member.MemberActivity
 import org.jetbrains.anko.toast
@@ -33,7 +32,6 @@ class BuyerInfoActivity : ScopedAppActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var fileCache: FileCache
     private lateinit var viewModel: BuyerInfoViewModel
-    private lateinit var dialogViewModel: DialogViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,9 +48,6 @@ class BuyerInfoActivity : ScopedAppActivity() {
 
         viewModel = ViewModelProvider(this)
             .get(BuyerInfoViewModel::class.java)
-
-        dialogViewModel = ViewModelProvider(this)
-            .get(DialogViewModel::class.java)
 
         setupViewModel()
         setupWebView()
@@ -77,11 +72,6 @@ class BuyerInfoActivity : ScopedAppActivity() {
                         null)
                 }
             }
-        }
-
-        dialogViewModel.positiveButtonClicked.observe(this) {
-            MemberActivity.start(this)
-            finish()
         }
     }
 
@@ -141,6 +131,7 @@ class BuyerInfoActivity : ScopedAppActivity() {
 
     @JavascriptInterface
     fun wvClosePage() {
+        MemberActivity.start(this)
         finish()
     }
 
