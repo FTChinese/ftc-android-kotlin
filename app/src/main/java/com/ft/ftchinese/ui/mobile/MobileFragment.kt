@@ -18,7 +18,8 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.ui.base.SimpleDialogFragment
+import com.ft.ftchinese.ui.dialog.DialogParams
+import com.ft.ftchinese.ui.dialog.SimpleDialogFragment
 import com.ft.ftchinese.ui.login.SignInFragment
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -164,7 +165,10 @@ class MobileFragment : ScopedFragment(), AnkoLogger {
     private fun onSendCodeError(msgId: Int) {
         if (msgId == R.string.mobile_conflict) {
             SimpleDialogFragment
-                .newInstance(getString(msgId))
+                .newInstance(DialogParams(
+                    positive = getString(R.string.action_ok),
+                    message = getString(msgId)
+                ))
                 .show(childFragmentManager, "AlertMobileCodeError")
         } else {
             toast(msgId)
@@ -176,7 +180,11 @@ class MobileFragment : ScopedFragment(), AnkoLogger {
             R.string.mobile_code_not_found,
             R.string.mobile_already_exists -> {
                 SimpleDialogFragment
-                    .newInstance(getString(msgId))
+                    .newInstance(
+                        DialogParams(
+                            positive = getString(R.string.action_ok),
+                            message = getString(msgId)
+                    ))
                     .show(childFragmentManager, "AlertUpdateMobileError")
             }
             else -> toast(msgId)
