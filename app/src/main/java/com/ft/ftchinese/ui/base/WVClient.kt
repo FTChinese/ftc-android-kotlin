@@ -271,6 +271,10 @@ open class WVClient(
             return true
         }
 
+        // In case no path segments
+        if (pathSegments.size == 0) {
+            return true
+        }
         /**
          * URL needs to be handled on home page
          * 每日英语 /channel/english.html?webview=ftcapp
