@@ -40,8 +40,6 @@ import org.jetbrains.anko.support.v4.toast
 import java.util.*
 import kotlin.properties.Delegates
 
-const val JS_INTERFACE_NAME = "Android"
-
 /**
  * Hosted inside [TabPagerAdapter] or [ChannelActivity]
  * when used to handle pagination.

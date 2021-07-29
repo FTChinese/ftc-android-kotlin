@@ -47,7 +47,7 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.WVClient
 import com.ft.ftchinese.ui.base.WVViewModel
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.channel.JS_INTERFACE_NAME
+import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.share.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -86,22 +86,6 @@ class ArticleActivity : ScopedAppActivity(),
     private var showAudioIcon = false
 
     private val start = Date().time / 1000
-
-//    private val bottomBarMenuListener = Toolbar.OnMenuItemClickListener { item: MenuItem ->
-//        when (item.itemId) {
-//            R.id.menu_share -> {
-//                shareFragment = SocialShareFragment()
-//                shareFragment?.show(supportFragmentManager, "SocialShareFragment")
-//
-//                true
-//            }
-//            R.id.menu_audio -> {
-//                AudioPlayerActivity.start(this, teaser)
-//                true
-//            }
-//            else -> true
-//        }
-//    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -161,8 +145,6 @@ class ArticleActivity : ScopedAppActivity(),
 
 
     private fun setupUI() {
-
-//        binding.bottomBar.setOnMenuItemClickListener(bottomBarMenuListener)
 
         setupWebView()
 
@@ -290,12 +272,6 @@ class ArticleActivity : ScopedAppActivity(),
          * The value is posted from WVClient via WVViewModel.
          */
         wvViewModel.openGraphEvaluated.observe(this) {
-            // If the teaser is not create by analysing url,
-            // just ignore the open graph data since we already
-            // has a structured data providing enough information.
-//            if (teaser?.isCreatedFromUrl == false) {
-//                return@observe
-//            }
 
             // Even if the article is loaded by clicking URL,
             // we can still get enough structured data if
