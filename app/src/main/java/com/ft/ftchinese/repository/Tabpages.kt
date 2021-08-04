@@ -377,6 +377,38 @@ object TabPages {
             query = "",
             htmlType = HTML_TYPE_FRAGMENT),
         /**
+         * [
+        "title": "换脑ReWired",
+        "listapi":"https://www.ftchinese.com/channel/rewired.html?webview=ftcapp&bodyonly=yes",
+        "url":"http://www.ftchinese.com/channel/rewired.html?webview=ftcapp",
+        "screenName":"homepage/rewired",
+        "compactLayout": "OutOfBox",
+        "coverTheme": "OutOfBox"
+        ],
+        [
+        "title": "艺术及文化活动",
+        "listapi":"https://www.ftchinese.com/channel/art_culture.html?webview=ftcapp&bodyonly=yes",
+        "url":"http://www.ftchinese.com/channel/art_culture.html?webview=ftcapp",
+        "screenName":"homepage/art_culture",
+        "compactLayout": "OutOfBox",
+        "coverTheme": "OutOfBox"
+        ],
+         */
+        ChannelSource(
+            title = "换脑ReWired",
+            name = "rewired",
+            path = "/channel/rewired.html",
+            query = "",
+            htmlType = HTML_TYPE_FRAGMENT
+        ),
+        ChannelSource(
+            title = "艺术及文化活动",
+            name = "art_culture",
+            path = "/channel/art_culture.html",
+            query = "",
+            htmlType = HTML_TYPE_FRAGMENT
+        ),
+        /**
          * "meta": {
          *   "title": "数据新闻",
          *   "description": "",

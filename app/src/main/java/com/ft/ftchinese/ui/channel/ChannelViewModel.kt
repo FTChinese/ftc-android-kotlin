@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.channel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
@@ -14,11 +15,11 @@ import com.ft.ftchinese.ui.base.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
+
+private const val TAG = "ChannelViewModel"
 
 class ChannelViewModel(val cache: FileCache) :
-        BaseViewModel(), AnkoLogger {
+        BaseViewModel() {
 
     val swipingLiveData: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
@@ -29,15 +30,15 @@ class ChannelViewModel(val cache: FileCache) :
     }
 
     fun load(channelSource: ChannelSource, account: Account?) {
-        info("Loading channel content from $channelSource")
 
        val cacheName = channelSource.fileName
 
-        info("Channel page cache file: $cacheName")
+        Log.i(TAG, "Loading channel content for $channelSource. Cache file name $cacheName")
 
         viewModelScope.launch {
             // Fetch from server
             if (cacheName.isNullOrBlank()) {
+                Log.i(TAG, "Channel ${channelSource.path} cache file name empty. Load from server.")
                 loadFromServer(channelSource, account)
                 return@launch
             }
@@ -45,10 +46,12 @@ class ChannelViewModel(val cache: FileCache) :
             val ok = loadFromCache(cacheName, account)
             // If loaded from cache, update cache silently and stop.
             if (ok) {
+                Log.i(TAG, "Channel ${channelSource.path} cache found. Start silent update.")
                 silentUpdate(channelSource, account)
                 return@launch
             }
 
+            Log.i(TAG, "Start loading ${channelSource.path} from server")
             loadFromServer(channelSource, account)
         }
     }
@@ -59,13 +62,13 @@ class ChannelViewModel(val cache: FileCache) :
     private suspend fun loadFromCache(cacheName: String, account: Account?): Boolean {
         progressLiveData.value = true
         try {
-            info("Loading channel cache file $cacheName")
+            Log.i(TAG, "Loading channel cache file $cacheName")
             val content = withContext(Dispatchers.IO) {
                 cache.loadText(cacheName)
             }
             // Cache not found
             if (content.isNullOrBlank()) {
-                info("Cached channel not found")
+                Log.i(TAG, "Cached channel not found")
                 progressLiveData.value = false
                 return false
             }
@@ -75,7 +78,9 @@ class ChannelViewModel(val cache: FileCache) :
             // Rendered from cache
             return true
         } catch (e: Exception) {
-            info(e)
+            e.message?.let {
+                Log.i(TAG, it)
+            }
             // Error from cache.
             progressLiveData.value = false
             return false
@@ -120,6 +125,8 @@ class ChannelViewModel(val cache: FileCache) :
 
         val url = Config.buildChannelSourceUrl(account, channelSource) ?: return
 
+        Log.i(TAG, "Silent update ${channelSource.path} from $url")
+
         val content = withContext(Dispatchers.IO) {
             Fetch()
                 .get(url.toString())
@@ -135,17 +142,18 @@ class ChannelViewModel(val cache: FileCache) :
 
     // Used when both loading and refreshing.
     private suspend fun fetchAndRender(channelSource: ChannelSource, account: Account?): FetchResult<String> {
-        info("Fetching channel from server")
+        Log.i(TAG, "Fetching channel ${channelSource.path} from server")
         if (isNetworkAvailable.value != true) {
             return FetchResult.LocalizedError(R.string.prompt_no_network)
         }
 
         val url = Config.buildChannelSourceUrl(account, channelSource)
         if (url == null) {
-            info("Failed to build channel fetch url")
+            Log.i(TAG,"Channel url for ${channelSource.path} is emmpty")
             return FetchResult.LocalizedError(R.string.api_empty_url)
         }
 
+        Log.i(TAG, "Channel ${channelSource.path} url $url")
         try {
             val content = withContext(Dispatchers.IO) {
                 Fetch()
@@ -154,7 +162,7 @@ class ChannelViewModel(val cache: FileCache) :
             }
 
             if (content.isNullOrBlank()) {
-                info("Channel data not fetched from server")
+                Log.i(TAG, "Channel ${channelSource.path} data not fetched from server")
                 return FetchResult.LocalizedError(R.string.loading_failed)
             }
 
@@ -162,19 +170,17 @@ class ChannelViewModel(val cache: FileCache) :
                 cacheChannel(it, content)
             }
 
-            info("Return render result...")
             return render(content, account)
         } catch (e: Exception) {
-            info(e)
+            e.message?.let{ Log.i(TAG, it)}
             return FetchResult.fromException(e)
         }
     }
 
     private fun cacheChannel(filename: String, content: String) {
         viewModelScope.launch(Dispatchers.IO) {
-            info("Caching channel started $filename")
+            Log.i(TAG, "Caching channel started $filename")
             cache.saveText(filename, content)
-            info("Caching channel finished $filename")
         }
     }
 }
