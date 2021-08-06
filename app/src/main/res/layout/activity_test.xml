@@ -47,16 +47,21 @@
                 android:paddingEnd="8dp">
 
                 <Button
-                    android:id="@+id/media_store_demo"
+                    android:id="@+id/address_buy"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Media Store Demo"/>
-                <Button
-                    android:id="@+id/buyer_info_page"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Buyer Address"
+                    android:text="Address - Buy"
                     android:textAllCaps="false"/>
+                <Button
+                    android:id="@+id/address_renew"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Address - Renew"/>
+                <Button
+                    android:id="@+id/address_winback"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Buy - win back"/>
                 <Button
                     android:id="@+id/sign_in_up"
                     android:layout_width="match_parent"
@@ -242,10 +247,6 @@
                     android:layout_height="wrap_content"
                     android:text="Open Audio Player"/>
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_html"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
             </LinearLayout>
 
 

@@ -3,13 +3,10 @@ package com.ft.ftchinese
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.content.ContentUris
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
@@ -18,7 +15,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
@@ -27,9 +23,7 @@ import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
-import com.ft.ftchinese.model.ftcsubs.Invoices
 import com.ft.ftchinese.model.ftcsubs.Order
-import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
@@ -42,7 +36,6 @@ import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.about.LegalDetailsFragment
 import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.article.LyricsAdapter
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
@@ -66,12 +59,6 @@ import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
 
-data class MyImage(
-    val uri: Uri,
-    val name: String,
-    val size: Int,
-)
-
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class TestActivity : ScopedAppActivity(), AnkoLogger {
@@ -94,30 +81,21 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         orderManger = OrderManager.getInstance(this)
         workManager = WorkManager.getInstance(this)
 
-        binding.mediaStoreDemo.onClick {
-            browseImage()
+        binding.addressBuy.onClick {
+            InvoiceStore.getInstance(this@TestActivity)
+                .savePurchaseAction(PurchaseAction.BUY)
+            BuyerInfoActivity.start(this@TestActivity)
         }
 
-        binding.buyerInfoPage.onClick {
-            InvoiceStore
-                .getInstance(this@TestActivity)
-                .saveInvoices(Invoices(
-                    purchased = Invoice(
-                        id = "invoice-id",
-                        compoundId = "user-compound-id",
-                        tier = Tier.STANDARD,
-                        cycle = Cycle.YEAR,
-                        orderKind = OrderKind.Create,
-                        paidAmount = 258.0,
-                        payMethod = PayMethod.WXPAY,
-                        priceId = "price-id",
-                        createdUtc = ZonedDateTime.now(),
-                        consumedUtc = ZonedDateTime.now(),
-                        startUtc = ZonedDateTime.now(),
-                        endUtc = ZonedDateTime.now().plusYears(1),
-                    ),
-                    carriedOver = null,
-                ))
+        binding.addressRenew.onClick {
+            InvoiceStore.getInstance(this@TestActivity)
+                .savePurchaseAction(PurchaseAction.RENEW)
+            BuyerInfoActivity.start(this@TestActivity)
+        }
+
+        binding.addressWinback.onClick {
+            InvoiceStore.getInstance(this@TestActivity)
+                .savePurchaseAction(PurchaseAction.WIN_BACK)
             BuyerInfoActivity.start(this@TestActivity)
         }
 
@@ -632,82 +610,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         binding.clearServiceAccepted.setOnClickListener {
             ServiceAcceptance.getInstance(this).clear()
         }
-
-        val layout = LinearLayoutManager(this)
-        binding.rvHtml.apply {
-            layoutManager = layout
-            adapter = LyricsAdapter(listOf(
-                "<p>Rich countries are set to take on at least $17tn of extra public debt as they battle the economic consequences of the pandemic, according to the OECD, as sharp drops in tax revenues are expected to dwarf the stimulus measures put in place to battle the disease. </p>",
-                "<p>Across the OECD club of rich countries, average government financial liabilities are expected to rise from 109 per cent of gross domestic product to more than 137 per cent this year, leaving many with public debt burdens similar to the current level in Italy.</p>",
-                "<p>Additional debt of that scale would amount to a minimum of $13,000 per person across the 1.3bn people that live in OECD member countries. Debt levels could rise even further if the economic recovery from the pandemic is slower than many economists hope. </p>",
-                "<p>Randall Kroszner, of the Chicago Booth School of Business and a former Federal Reserve governor, said the situation raised questions about the long-term sustainability of high levels of public and private debt.</p>",
-                "<p>“We have to face the hard reality we’re not going to have a V-shaped recovery,” he said.</p>",
-                "<p>The OECD said that public debt among its members rose by 28 percentage points of GDP in the financial crisis of 2008-09, totalling $17tn. “For 2020, the economic impact of the Covid-19 pandemic is expected to be worse than the great financial crisis,” it said.</p>",
-                "<p>Although many governments have introduced additional fiscal measures this year ranging from 1 per cent of GDP in France and Spain to 6 per cent in the US, they are likely to be outpaced by the rise in public debt because tax revenues tend to fall even faster than economic activity in a deep recession, according to the OECD.</p>",
-                "<p>A decade ago, fashionable economic thinking suggested that beyond 90 per cent of GDP, government debt levels became unsustainable. Although most economists do not now believe there is such a clear limit, many still believe that allowing public debt to build up ever higher would threaten to undermine private sector spending, creating a drag on growth. </p>",
-                "<p>Rising debt levels will become a problem in future, Angel Gurría, OECD secretary-general, has warned, although he said that countries should not worry about their fiscal positions now in the middle of the crisis.</p>",
-                "<p>“We are going to be heavy on the wing because we are trying to fly and we were already carrying a lot of debt and now we are adding more,” he said. </p>",
-                "<p>As a result, many more countries are set to face a similar economic environment to that experienced by Japan since its financial bubble burst in the early 1990s. Concern about government debt and deficits has been a defining feature of Japan’s political economy ever since, with debt eventually stabilising at about 240 per cent of GDP under current prime minister Shinzo Abe.</p>",
-                "<p>Many politicians and business leaders are alarmed by the fresh spending packages to tackle the pandemic in Japan.</p>",
-                "<p>“Our economic strategy is using a considerable amount of money, and honestly speaking it’s going to be a big fiscal problem in the future,” said Hiroaki Nakanishi, executive chairman of Hitachi and head of the Keidanren business lobby, in a recent interview with the Financial Times. “I have no good plan. Until the economy is properly back on its feet, I don’t think there is any sensible answer.”</p>"
-            ))
-        }
-    }
-
-    private fun browseImage() {
-        info("Preparing media store query...")
-        val imageList = mutableListOf<MyImage>()
-        val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            MediaStore.Images.Media.getContentUri(
-                MediaStore.VOLUME_EXTERNAL
-            )
-        } else {
-            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        }
-
-        info("Uri: $collection")
-
-        val projection = arrayOf(
-            MediaStore.Images.Media._ID,
-            MediaStore.Images.Media.DISPLAY_NAME,
-            MediaStore.Images.Media.SIZE,
-        )
-
-        info("Projection: $projection")
-
-        val sortOrder = "${MediaStore.Video.Media.DATE_ADDED} DESC"
-
-        info("Sort order: $sortOrder")
-
-        val query = contentResolver.query(
-            collection,
-            projection,
-            null,
-            null,
-            sortOrder
-        )
-        query?.use { cursor ->
-            info("Cursor ${cursor.columnCount}")
-
-            val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-            val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
-            val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.SIZE)
-
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idColumn)
-                val name = cursor.getString(nameColumn)
-                val size = cursor.getInt(sizeColumn)
-
-                val contentUri = ContentUris.withAppendedId(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    id
-                )
-
-                imageList += MyImage(contentUri, name, size)
-            }
-
-            info("Image query finished: $imageList")
-        }
     }
 
     private fun createNotification() {
@@ -831,22 +733,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         menuInflater.inflate(R.menu.article_top_menu, menu)
 
         return true
-    }
-
-    // Show system share.
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-//        when (item.itemId) {
-//            R.id.menu_share -> {
-//                startActivity(Intent.createChooser(Intent().apply {
-//                    action = Intent.ACTION_SEND
-//                    putExtra(Intent.EXTRA_TEXT, "FT中文网 - test")
-//                    type = "text/plain"
-//                }, "分享"))
-//            }
-//        }
-
-
-        return super.onOptionsItemSelected(item)
     }
 
     companion object {
