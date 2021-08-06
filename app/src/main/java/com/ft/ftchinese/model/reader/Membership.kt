@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
+import com.beust.klaxon.Json
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.invoice.AddOn
 import com.ft.ftchinese.model.enums.*
@@ -36,6 +37,21 @@ data class Membership(
     val vip: Boolean = false,
 ) : Parcelable {
 
+    fun toJsonString(): String {
+        return json.toJsonString(this)
+    }
+
+    fun tierQueryVal(): String {
+        return when (tier) {
+            Tier.STANDARD -> when (cycle) {
+                Cycle.YEAR -> "standard"
+                Cycle.MONTH -> "standardmonthly"
+                else -> "unknown"
+            }
+            Tier.PREMIUM -> "premium"
+            else -> "unknown"
+        }
+    }
     // Renew expiration date if auto-renewal subscription expired.
     private fun renew(): Membership {
         return Membership(
@@ -81,6 +97,7 @@ data class Membership(
         )
     }
 
+    // Build new membership based on invoices from a new purchase.
     fun withInvoice(inv: Invoice?): Membership {
         if (inv == null) {
             return this
@@ -157,6 +174,7 @@ data class Membership(
         return this
     }
 
+    @Json(ignored = true)
     val addOns: List<Pair<Tier, Long>>
         get() = mutableListOf<Pair<Tier, Long>>().apply {
             if (hasPremiumAddOn) {
@@ -167,6 +185,7 @@ data class Membership(
             }
         }
 
+    @Json(ignored = true)
     val tierStringRes: Int
         get() = when {
             vip -> R.string.tier_vip
@@ -175,6 +194,7 @@ data class Membership(
             else -> R.string.tier_free
         }
 
+    @Json(ignored = true)
     val autoRenewMoment: AutoRenewMoment?
         get() = if (autoRenew && expireDate != null && cycle != null) {
             AutoRenewMoment(
@@ -187,6 +207,7 @@ data class Membership(
         } else null
 
     // In case legacy purchase has payment method null.
+    @Json(ignored = true)
     val normalizedPayMethod: PayMethod?
         get() = payMethod
             ?: if (tier != null) {
@@ -195,12 +216,15 @@ data class Membership(
                 null
             }
 
+    @Json(ignored = true)
     val isStripe: Boolean
         get() = payMethod == PayMethod.STRIPE && stripeSubsId != null
 
+    @Json(ignored = true)
     val isInvalidStripe: Boolean
         get() = isStripe && status?.isInvalid() == true
 
+    @Json(ignored = true)
     val canCancelStripe: Boolean
         get() = if (payMethod != PayMethod.STRIPE) {
             false
@@ -208,6 +232,7 @@ data class Membership(
             autoRenew
         }
 
+    @Json(ignored = true)
     val offerKinds: List<OfferKind>
         get() = when {
             tier == null -> listOf(OfferKind.Promotion)
@@ -247,6 +272,7 @@ data class Membership(
 
     // Tests if the expiration date is before today.
     // This does not take into account whether user is using auto renewal subscription.
+    @Json(ignored = true)
     val expired: Boolean
         get() = when {
             vip -> false
@@ -259,21 +285,26 @@ data class Membership(
     // 1. Auto Renew
     // 2. Expiration Date
     // 3. Has AddOns
+    @Json(ignored = true)
     val autoRenewOffExpired: Boolean
         get() = !autoRenew && expired
 
+    @Json(ignored = true)
     val hasAddOn: Boolean
         get() = standardAddOn > 0 || premiumAddOn > 0
 
+    @Json(ignored = true)
     val hasStandardAddOn: Boolean
         get() = standardAddOn > 0
 
+    @Json(ignored = true)
     val hasPremiumAddOn: Boolean
         get() = premiumAddOn > 0
 
     // Tests whether subscription time has moved to add-ons.
     // Usually you call this method without calling normalize method;
     // otherwise it won't reflect user's actual membership state.
+    @Json(ignored = true)
     val shouldUseAddOn: Boolean
         get() = !autoRenew && expired && hasAddOn
 
