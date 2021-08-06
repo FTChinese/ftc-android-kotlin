@@ -3,21 +3,17 @@ package com.ft.ftchinese.wxapi
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.databinding.DataBindingUtil
+import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
-import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.databinding.ActivityWechatBinding
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.paywall.FtcPriceCache
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.OrderManager
-import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.CheckOutViewModel
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.member.MemberActivity
@@ -26,12 +22,8 @@ import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
-import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
-import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 private const val EXTRA_UI_TEST = "extra_ui_test"
 
@@ -43,33 +35,21 @@ private const val EXTRA_UI_TEST = "extra_ui_test"
  * to this page.
  */
 @ExperimentalCoroutinesApi
-class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
+class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
 
-    private var api: IWXAPI? = null
-    private var sessionManager: SessionManager? = null
     private var orderManager: OrderManager? = null
-
     private var tracker: StatsTracker? = null
-//    private var isPaymentSuccess: Boolean = false
-
-    private lateinit var binding: ActivityWechatBinding
 
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var checkoutViewModel: CheckOutViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_wechat)
 
         binding.title = getString(R.string.wxpay_query_order)
-        binding.details = "Please wait..."
+        binding.details = "请稍后..."
         binding.inProgress = true
 
-        setSupportActionBar(binding.toolbar.toolbar)
-
-        api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
-
-        sessionManager = SessionManager.getInstance(this)
         orderManager = OrderManager.getInstance(this)
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
@@ -111,7 +91,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
      *  No this is crap. Use the result of client and schedule a background task to verify against server.
      */
     override fun onResp(resp: BaseResp?) {
-        info("onPayFinish, errCode = ${resp?.errCode}")
+        Log.i(TAG, "onPayFinish, errCode = ${resp?.errCode}")
 
         if (resp?.type == ConstantsAPI.COMMAND_PAY_BY_WX) {
 
@@ -119,7 +99,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
                 // 成功
                 // 展示成功页面
                 0 -> {
-                    info("Start querying order")
+                    Log.i(TAG, "Start querying order")
 //                    isPaymentSuccess = true
                     confirmSubscription()
                 }
@@ -150,7 +130,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
     private fun confirmSubscription() {
 
         // Load current membership
-        val account = sessionManager?.loadAccount() ?: return
+        val account = sessionManager.loadAccount() ?: return
         val member = account.membership
 
         // Confirm the order locally sand save it.
@@ -162,7 +142,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
         ).buildResult()
 
         orderManager?.save(confirmed.order)
-        sessionManager?.saveMembership(confirmed.membership)
+        sessionManager.saveMembership(confirmed.membership)
         InvoiceStore.getInstance(this).saveInvoices(confirmed.invoices)
 
         // Start retrieving account data from server.
@@ -222,6 +202,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler, AnkoLogger {
 
 
     companion object {
+        private const val TAG = "WxPayEntryActivity"
         @JvmStatic
         fun start(context: Context) {
             val intent = Intent(
