@@ -1,5 +1,6 @@
 package com.ft.ftchinese.model.ftcsubs
 
+import com.beust.klaxon.Json
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
@@ -40,6 +41,11 @@ data class Order(
     var endDate: LocalDate? = null
 ) {
 
+    fun toJsonString(): String {
+        return json.toJsonString(this)
+    }
+
+    @Json(ignored = true)
     val edition: Edition
         get() = Edition(
             tier = tier,
