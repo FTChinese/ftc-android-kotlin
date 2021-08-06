@@ -1,13 +1,10 @@
 package com.ft.ftchinese.ui.checkout
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -17,6 +14,8 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCheckOutBinding
 import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.paywall.StripePriceCache
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
@@ -24,14 +23,13 @@ import com.ft.ftchinese.store.*
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.customer.CreateCustomerDialogFragment
+import com.ft.ftchinese.ui.customer.CustomerViewModel
+import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.ui.customer.CustomerViewModel
-import com.ft.ftchinese.ui.customer.CreateCustomerDialogFragment
-import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -39,13 +37,10 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class CheckOutActivity : ScopedAppActivity(),
-        AnkoLogger {
+class CheckOutActivity : ScopedAppActivity() {
 
     private lateinit var checkOutViewModel: CheckOutViewModel
     private lateinit var accountViewModel: AccountViewModel
@@ -205,7 +200,7 @@ class CheckOutActivity : ScopedAppActivity(),
         }
 
         // Ask permission.
-        requestPermission()
+//        requestPermission()
 
         binding.alipayBtn.setOnClickListener {
             onSelectPayMethod(PayMethod.ALIPAY)
@@ -314,7 +309,7 @@ class CheckOutActivity : ScopedAppActivity(),
             .find(plan.edition)
             ?: return false
 
-        info("Start stripe subscription activity...")
+        Log.i(TAG, "Start stripe subscription activity...")
         StripeSubActivity.startForResult(
             activity = this,
             requestCode = RequestCode.PAYMENT,
@@ -326,7 +321,6 @@ class CheckOutActivity : ScopedAppActivity(),
 
     private fun onAliPayIntent(result: FetchResult<AliPayIntent>) {
         binding.inProgress = false
-        info(result)
 
         when (result) {
             is FetchResult.LocalizedError -> {
@@ -339,6 +333,7 @@ class CheckOutActivity : ScopedAppActivity(),
             }
             is FetchResult.Success -> {
                 binding.payBtn.isEnabled = false
+                Log.i(TAG, json.toJsonString(result.data))
                 launchAliPay(result.data)
             }
         }
@@ -361,7 +356,7 @@ class CheckOutActivity : ScopedAppActivity(),
                 PayTask(this@CheckOutActivity).payV2(aliPayIntent.param, true)
             }
 
-            info("Alipay result: $payResult")
+            Log.i(TAG, "Alipay result: $payResult")
 
             val resultStatus = payResult["resultStatus"]
             val msg = payResult["memo"] ?: getString(R.string.wxpay_failed)
@@ -395,8 +390,8 @@ class CheckOutActivity : ScopedAppActivity(),
 
         orderManager.save(confirmed.order)
         sessionManager.saveMembership(confirmed.membership)
-        invoiceStore.saveInvoices(confirmed.invoices)
-        info("New membership: ${confirmed.membership}")
+        invoiceStore.save(confirmed)
+        Log.i(TAG, "New membership: ${confirmed.membership}")
 
         toast(R.string.subs_success)
 
@@ -462,51 +457,6 @@ class CheckOutActivity : ScopedAppActivity(),
         finish()
     }
 
-    private fun requestPermission() {
-        try {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED ) {
-
-                ActivityCompat.requestPermissions(
-                        this,
-                        arrayOf(Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                        RequestCode.PERMISSIONS
-                )
-            }
-        } catch (e: IllegalStateException) {
-            info(e)
-
-            toast(R.string.permission_alipay_denied)
-
-            binding.alipayBtn.isEnabled = false
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        when (requestCode) {
-            RequestCode.PERMISSIONS -> {
-                if (grantResults.isEmpty()) {
-                    toast(R.string.permission_alipay_denied)
-
-                    binding.alipayBtn.isEnabled = false
-                    return
-                }
-
-                for (x in grantResults) {
-                    if (x == PackageManager.PERMISSION_DENIED) {
-                        toast(R.string.permission_alipay_denied)
-
-                        binding.alipayBtn.isEnabled = false
-                        return
-                    }
-                }
-
-                toast(R.string.permission_alipay_granted)
-            }
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -535,6 +485,7 @@ class CheckOutActivity : ScopedAppActivity(),
     }
 
     companion object {
+        private const val TAG = "CheckoutActivity"
         const val EXTRA_PRICE_ID = "extra_price_id"
 
         @JvmStatic
