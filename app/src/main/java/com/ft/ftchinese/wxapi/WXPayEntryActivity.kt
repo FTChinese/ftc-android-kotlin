@@ -143,7 +143,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
 
         orderManager?.save(confirmed.order)
         sessionManager.saveMembership(confirmed.membership)
-        InvoiceStore.getInstance(this).saveInvoices(confirmed.invoices)
+        InvoiceStore.getInstance(this).save(confirmed)
 
         // Start retrieving account data from server.
         binding.title = getString(R.string.payment_done)
