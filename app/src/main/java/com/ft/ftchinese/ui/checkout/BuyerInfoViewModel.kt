@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.StoryBuilder
+import com.ft.ftchinese.model.enums.PurchaseAction
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
@@ -23,7 +24,7 @@ class BuyerInfoViewModel : BaseViewModel(), AnkoLogger {
     /**
      * @param action - `buy` or `renew`.
      */
-    fun loadPage(account: Account, cache: FileCache, action: String) {
+    fun loadPage(account: Account, cache: FileCache, action: PurchaseAction) {
         if (isNetworkAvailable.value == false) {
             return
         }
