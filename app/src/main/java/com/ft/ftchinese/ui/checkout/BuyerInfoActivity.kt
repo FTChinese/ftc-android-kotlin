@@ -110,8 +110,7 @@ class BuyerInfoActivity : ScopedAppActivity() {
 
         val action = InvoiceStore
             .getInstance(this)
-            .loadInvoices()
-            ?.confirmPageActionParam()
+            .loadPurchaseAction()
 
         if (account == null || action == null) {
             Log.i(TAG, "Either account or action is null")
