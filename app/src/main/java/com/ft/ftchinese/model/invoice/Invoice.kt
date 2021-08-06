@@ -45,6 +45,7 @@ data class Invoice(
         return json.toJsonString(this)
     }
 
+    @Json(ignored = true)
     val edition: Edition
         get() = Edition(tier, cycle)
 
@@ -53,6 +54,7 @@ data class Invoice(
         return this
     }
 
+    @Json(ignored = true)
     val totalDays: Int
         get() = years * 366 + months * 31 + days
 
