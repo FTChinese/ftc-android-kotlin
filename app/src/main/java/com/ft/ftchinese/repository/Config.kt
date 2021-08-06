@@ -6,9 +6,10 @@ import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.enums.PurchaseAction
 import com.ft.ftchinese.model.enums.Tier
-import kotlin.Exception
+import com.ft.ftchinese.model.reader.Account
+import java.util.*
 
 const val HOST_FTC = "www.ftchinese.com"
 const val HOST_FTA = "www.ftacademy.cn"
@@ -112,6 +113,7 @@ object Config {
                         .appendQueryParameter("inNavigation", "yes")
                         .appendQueryParameter("for", "audio")
                         .appendQueryParameter("enableScript", "yes")
+                        .appendQueryParameter("timestamp", "${Date().time}")
                 }
             }
 
@@ -124,15 +126,17 @@ object Config {
         return appendUtm(builder).build()
     }
 
-    fun buildSubsConfirmUrl(account: Account, action: String): Uri? {
+    // membership: premium|standard|standardmonthly
+    // action: buy|renew|winback
+    fun buildSubsConfirmUrl(account: Account, action: PurchaseAction): Uri? {
         return try {
             val builder = Uri.parse(discoverServer(account))
                 .buildUpon()
                 .path("/m/corp/preview.html")
                 .appendQueryParameter("pageid", "subscriptioninfoconfirm")
                 .appendQueryParameter("to", "all")
-                .appendQueryParameter("key", account.membership.tier?.toString())
-                .appendQueryParameter("action", action)
+                .appendQueryParameter("membership", account.membership.tierQueryVal())
+                .appendQueryParameter("action", action.toString())
                 .appendQueryParameter("webview", "ftcapp")
                 .appendQueryParameter("bodyonly", "yes")
 
