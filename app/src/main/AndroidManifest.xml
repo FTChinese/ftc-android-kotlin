@@ -6,8 +6,10 @@
     <queries>
         <intent>
             <action android:name="android.intent.action.SENDTO" />
+
             <data android:mimeType="text/plain" />
         </intent>
+
         <package android:name="com.tencent.mm" />
     </queries>
 
@@ -35,15 +37,19 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".ui.webabout.AboutListActivity"
+        <activity
+            android:name=".wxapi.WxBaseActivity" />
+        <activity
+            android:name=".ui.webabout.AboutListActivity"
             android:label="@string/title_about_us"
-            android:parentActivityName=".ui.main.MainActivity"/>
+            android:parentActivityName=".ui.main.MainActivity" />
         <activity
             android:name=".ui.about.AboutActivity"
             android:label="@string/title_about_us"
             android:parentActivityName=".ui.main.MainActivity" />
-        <activity android:name=".ui.webpage.WebpageActivity"
-            android:parentActivityName=".ui.webabout.AboutListActivity"/>
+        <activity
+            android:name=".ui.webpage.WebpageActivity"
+            android:parentActivityName=".ui.webabout.AboutListActivity" />
         <activity
             android:name=".ui.checkout.BuyerInfoActivity"
             android:label="完善信息"
@@ -181,7 +187,6 @@
             android:name=".ui.settings.SettingsActivity"
             android:label="@string/action_settings"
             android:parentActivityName=".ui.main.MainActivity" />
-
         <activity
             android:name=".ui.settings.FCMActivity"
             android:label="@string/fcm_setting_title"
