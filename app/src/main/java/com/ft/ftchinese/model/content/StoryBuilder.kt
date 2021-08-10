@@ -1,14 +1,15 @@
 package com.ft.ftchinese.model.content
 
+import android.util.Log
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.tracking.AdParser
 import com.ft.ftchinese.tracking.AdPosition
 import com.ft.ftchinese.tracking.JSCodes
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-class StoryBuilder(private val template: String) : AnkoLogger {
+private const val TAG = "StoryBuilder"
+
+class StoryBuilder(private val template: String) {
     private val ctx: MutableMap<String, String> = HashMap()
     private var language: Language = Language.CHINESE
     private var shouldHideAd = false
@@ -24,7 +25,7 @@ class StoryBuilder(private val template: String) : AnkoLogger {
 
     fun withFollows(follows: Map<String, String>): StoryBuilder {
 
-        info(follows)
+        Log.i(TAG, "$follows")
         follows.forEach { (key, value) ->
             ctx[key] = value
         }
@@ -54,7 +55,7 @@ var androidUserAddress = ${addr.toJsonString()}
     }
 
     fun withStory(story: Story): StoryBuilder {
-        val (shouldHideAd, sponsorTitle) = story.shouldHideAd(story.teaser)
+        val (shouldHideAd, sponsorTitle) = story.shouldHideAd()
 
         var body = ""
         var title = ""
@@ -147,7 +148,7 @@ var androidUserAddress = ${addr.toJsonString()}
         ctx["{related-stories}"] = story.htmlForRelatedStories()
         ctx["{related-topics}"] = story.htmlForRelatedTopics()
 
-        ctx["{ad-zone}"] = story.getAdZone(Teaser.HOME_AD_ZONE, Teaser.DEFAULT_STORY_AD_ZONE, story.teaser?.adZone ?: "")
+        ctx["{ad-zone}"] = story.getAdZone(Teaser.HOME_AD_ZONE, Teaser.DEFAULT_STORY_AD_ZONE, story.teaser?.channelMeta?.adZone ?: "")
 
         ctx["{ad-mpu}"] = if (shouldHideAd) "" else AdParser.getAdCode(AdPosition.MIDDLE_ONE)
 
@@ -162,6 +163,7 @@ var androidUserAddress = ${addr.toJsonString()}
         var result = template
 
         ctx.forEach { (key, value) ->
+            Log.i(TAG, "$key - $value")
             result = result.replace(key, value)
         }
 

@@ -16,34 +16,35 @@ import java.util.*
  * `ChannelMeta` represent the `meta` fieled in JSON data.
  */
 data class ChannelContent(
-        val meta: ChannelMeta,
-        val sections: List<ChannelSection>
+    val meta: ChannelMeta,
+    val sections: List<ChannelSection>
 )
 
+@Parcelize
 data class ChannelMeta(
-        val title: String,
-        val description: String,
-        val theme: String,
-        val adid: String,
-        val adZone: String = "home"
-)
+    val title: String,
+    val description: String,
+    val theme: String,
+    val adid: String,
+    val adZone: String = "home"
+) : Parcelable
 
 
 data class ChannelSection(
-        val type: String,
-        val title: String,
-        val name: String,
-        val side: String,
-        val sideAlign: String,
-        val lists: List<ChannelList>
+    val type: String,
+    val title: String,
+    val name: String,
+    val side: String,
+    val sideAlign: String,
+    val lists: List<ChannelList>
 )
 
 data class ChannelList(
-        val name: String,
-        val title: String,
-        val preferLead: String,
-        val sponsorAdId: String,
-        val items: List<Teaser>
+    val name: String,
+    val title: String,
+    val preferLead: String,
+    val sponsorAdId: String,
+    val items: List<Teaser>
 )
 /**
  * ChannelItem represents an item in a page of ViewPager.
@@ -96,22 +97,16 @@ data class Teaser(
     @Json(ignored = true)
     val isCreatedFromUrl: Boolean = false,
 
-// These properties are not parsed from JSON.
-    // They are copy from ChannelMeta
-    @Json(ignored = true)
-    var channelTitle: String = "",
-    @Json(ignored = true)
-    var theme: String = "default",
-    @Json(ignored = true)
-    var adId: String = "",
-    @Json(ignored = true)
-    var adZone: String = "",
+    // These properties are not parsed from JSON.
+    // Copied from ChannelMeta
     @Json(ignored = true)
     var hideAd: Boolean = false,
     @Json(ignored = true)
     var langVariant: Language? = null,
     @Json(ignored = true)
     var channelPerm: Permission? = null,
+    @Json(ignored = true)
+    var channelMeta: ChannelMeta? = null,
 ) : Parcelable, AnkoLogger {
 
     // Only stories have api.
@@ -167,26 +162,15 @@ data class Teaser(
     }
 
     fun withMeta(meta: ChannelMeta?): Teaser {
-        if (meta == null) {
-            return this
-        }
-
-        channelTitle = meta.title
-        theme = meta.theme
-        adId = meta.adid
-        adZone = meta.adZone
+        channelMeta = meta
 
         return this
     }
 
     // Pass permission from hosting channel.
     fun withParentPerm(p: Permission?): Teaser {
-        return if (p == null) {
-            this
-        } else {
-            channelPerm = p
-            this
-        }
+        channelPerm = p
+        return this
     }
 
     private fun isSevenDaysOld(): Boolean {

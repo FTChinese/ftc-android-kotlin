@@ -125,10 +125,143 @@ data class Sponsor(
     val storyKeyWords: String,
     val cntopic: String,
     val hideAd: String = ""
-)
+) {
+    fun normalizeZone(): String {
+        return if (zone.contains("/")) {
+            zone
+        } else {
+            "home/special/${zone}"
+        }
+    }
 
+    fun isKeywordsIn(text: String): Boolean {
+        if (storyKeyWords.isBlank()) {
+            return false
+        }
+
+       return Regex(storyKeyWords.replace(Regex(", *"), "|")).containsMatchIn(text)
+    }
+}
+
+/**
+ * [{
+ * "tag":"后疫情时代的独角兽之路",
+ * "title":"后疫情时代的独角兽之路",
+ * "adid":"",
+ * "zone":"unicorn",
+ * "channel":"",
+ * "storyKeyWords":"",
+ * "cntopic":"",
+ * "hideAd":"no"
+ * },{
+ * "tag":"高端物业",
+ * "title":"高端物业",
+ * "adid":"",
+ * "zone":"property",
+ * "channel":"",
+ * "storyKeyWords":"",
+ * "cntopic":"",
+ * "hideAd":"no"
+ * },{
+ * "tag":"换脑",
+ * "title":"换脑 - ReWired 跨年对话",
+ * "adid":"",
+ * "zone":"rewired",
+ * "channel":"",
+ * "storyKeyWords":"",
+ * "cntopic":"",
+ * "hideAd":"no"
+ * },{
+ * "tag":"16周年好文精选",
+ * "title":"FT中文网16周年好文精选",
+ * "adid":"",
+ * "zone":"16years",
+ * "channel":"",
+ * "storyKeyWords":"",
+ * "cntopic":"",
+ * "hideAd":"no"
+ * },{
+ * "tag":"",
+ * "title":"奔驰维权",
+ * "adid":"",
+ * "zone":"",
+ * "channel":"",
+ * "storyKeyWords":"奔驰维权,消费者权益,西安车主",
+ * "cntopic":"benzprotest",
+ * "hideAd":"no"
+ * },{
+ * "tag":"",
+ * "title":"恐怖袭击",
+ * "adid":"5048",
+ * "zone":"disaster",
+ * "channel":"",
+ * "storyKeyWords":"恐怖袭击",
+ * "cntopic":"",
+ * "hideAd":"no"
+ * },{
+ * "tag":"讣告",
+ * "title":"讣告",
+ * "adid":"5048",
+ * "zone":"disaster",
+ * "channel":"",
+ * "storyKeyWords":"",
+ * "cntopic":"",
+ * "hideAd":"no"
+ * },{
+ * "tag":"灾难",
+ * "title":"灾难",
+ * "adid":"5048",
+ * "zone":"disaster",
+ * "channel":"",
+ * "storyKeyWords":"",
+ * "cntopic":"",
+ * "hideAd":"no"
+ * },{
+ * "tag":"空难",
+ * "title":"空难",
+ * "adid":"5048",
+ * "zone":"disaster",
+ * "channel":"",
+ * "storyKeyWords":"",
+ * "cntopic":"",
+ * "hideAd":"no"
+ * },{
+ * "tag":"自然灾害",
+ * "title":"自然灾害",
+ * "adid":"5048",
+ * "zone":"disaster",
+ * "channel":"",
+ * "storyKeyWords":"",
+ * "cntopic":"",
+ * "hideAd":"no"
+ * },{
+ * "tag":"车祸",
+ * "title":"车祸",
+ * "adid":"5048",
+ * "zone":"disaster",
+ * "channel":"",
+ * "storyKeyWords":"",
+ * "cntopic":"",
+ * "hideAd":"no"
+ * },{
+ * "tag":"地震",
+ * "title":"地震",
+ * "adid":"5048",
+ * "zone":"disaster",
+ * "channel":"",
+ * "storyKeyWords":"",
+ * "cntopic":"",
+ * "hideAd":"no"
+ * }]
+ */
 object SponsorManager {
     var sponsors: List<Sponsor> = listOf()
+
+    fun findMatchIn(kw: String): Sponsor? {
+        return sponsors.find {
+            it.tag.isNotBlank() && Regex("${it.tag}|${it.title}").containsMatchIn(kw)
+        }
+    }
 }
 
 object Keywords {

@@ -10,7 +10,7 @@ import java.util.*
 
 data class Bilingual(
     var cn: String,
-        var en: String?
+    var en: String?
 )
 
 data class StoryPic(
@@ -191,13 +191,21 @@ class Story (
     private val tags: List<String>
         get() = tag.split(",")
 
-    // This is a very weired way to product a comma-separated string. Why not use array and join directly?
-    // And why a string? Isn't it keeping `keywords` as an array of string more ideal?
+    /**
+     * Example:
+     * tag": "16周年好文精选,通货膨胀,货币政策,金融市场,全球经济",
+     * area": "global",
+     * genre": "column",
+     * "topic": "economy",
+     */
     val keywords: String
         get() = "$tag,$area,$topic,$genre"
                 .replace(Regex(",+"), ",")
                 .replace(Regex("^,"), "")
                 .replace(Regex(",$"), "")
+
+    private val fullText: String
+        get() = "$bodyCN$keywords$titleCN$titleEN$bodyEN"
 
     fun getAdZone(homepageZone: String, fallbackZone: String, overrideAdZone: String): String {
         if (keywords.isBlank()) {
@@ -209,13 +217,11 @@ class Story (
                 continue
             }
 
-            val matched = isMatchInKeysAndBody(sponsor)
-
-            if ((keywords.contains(sponsor.tag) || keywords.contains(sponsor.title) || matched) && sponsor.zone.isNotEmpty() ) {
-                return if (sponsor.zone.contains("/")) {
-                    sponsor.zone
-                } else {
-                    "home/special/${sponsor.zone}"
+            if ( keywords.contains(sponsor.tag) ||
+                keywords.contains(sponsor.title) ||
+                sponsor.isKeywordsIn(fullText) ) {
+                if (sponsor.zone.isNotEmpty()) {
+                    return sponsor.normalizeZone()
                 }
             }
         }
@@ -241,14 +247,48 @@ class Story (
         }
 
         for (sponsor in SponsorManager.sponsors) {
-            val matched = isMatchInKeysAndBody(sponsor)
-
-            if (matched && sponsor.cntopic != "") {
+            if (sponsor.isKeywordsIn(fullText) && sponsor.cntopic != "") {
                 return sponsor.cntopic
             }
         }
 
         return ""
+    }
+
+    // Return shouldHideAd and sponsorTitle
+    fun shouldHideAd(): Pair<Boolean, String?> {
+        if (teaser == null) {
+            return Pair(false, null)
+        }
+
+        if (teaser?.hideAd == true) {
+            return Pair(true, null)
+        }
+
+        if (keywords.isBlank()) {
+            return Pair(false, null)
+        }
+
+        if (keywords.contains(Keywords.removeAd)) {
+            return Pair(true, null)
+        }
+
+        for (sponsor in SponsorManager.sponsors) {
+
+            if (sponsor.tag.isBlank()) {
+                continue
+            }
+
+            if (keywords.contains(sponsor.tag) || keywords.contains(sponsor.title)) {
+
+                return Pair(
+                    sponsor.hideAd == "yes",
+                    if (sponsor.title.isNotBlank()) sponsor.title else null
+                )
+            }
+        }
+
+        return Pair(false, null)
     }
 
     fun pickAdchID(homepageId: String, fallbackId: String): String {
@@ -260,8 +300,8 @@ class Story (
                 }
             }
 
-            if (teaser?.adId != homepageId) {
-                return teaser?.adId ?: ""
+            if (teaser?.channelMeta?.adid != homepageId) {
+                return teaser?.channelMeta?.adid ?: ""
             }
 
             if (keywords.contains("lifestyle")) {
@@ -295,59 +335,10 @@ class Story (
             return "1200"
         }
 
-        if (teaser?.adId.isNullOrBlank()) {
+        if (teaser?.channelMeta?.adid.isNullOrBlank()) {
             return fallbackId
         }
         return fallbackId
-    }
-
-    // Return shouldHideAd and sponsorTitle
-    fun shouldHideAd(teaser: Teaser?): Pair<Boolean, String?> {
-        if (teaser == null) {
-            return Pair(false, null)
-        }
-
-        if (teaser.hideAd) {
-            return Pair(true, null)
-        }
-
-        if (keywords.isBlank()) {
-            return Pair(false, null)
-        }
-
-        if (keywords.contains(Keywords.removeAd)) {
-            return Pair(true, null)
-        }
-
-        for (sponsor in SponsorManager.sponsors) {
-
-            if (sponsor.tag.isBlank()) {
-                continue
-            }
-
-            if (keywords.contains(sponsor.tag) || keywords.contains(sponsor.title)) {
-
-                return Pair(
-                    sponsor.hideAd == "yes",
-                    if (sponsor.title.isNotBlank()) sponsor.title else null
-                )
-            }
-        }
-
-        return Pair(false, null)
-    }
-
-    private fun isMatchInKeysAndBody(sponsor: Sponsor): Boolean {
-        if (sponsor.storyKeyWords.isBlank()) {
-            return false
-        }
-
-        val regexStr = sponsor.storyKeyWords.replace(Regex(", *"), "|")
-        val regex = Regex(regexStr)
-
-        val fullContent = "$bodyCN$keywords$titleCN$titleEN$bodyEN"
-
-        return regex.containsMatchIn(fullContent)
     }
 
     fun formatPublishTime(): String {
