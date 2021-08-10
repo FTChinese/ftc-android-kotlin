@@ -52,7 +52,7 @@ class AcceptServiceDialogFragment : DialogFragment(), AnkoLogger {
             ViewModelProvider(this).get(WebpageViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
-        val page = legalPages[0]
+        val page = legalPages[1]
 
         wpViewModel.urlLiveData.value = page.url
 
