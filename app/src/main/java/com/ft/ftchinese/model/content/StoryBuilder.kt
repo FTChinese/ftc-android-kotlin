@@ -148,6 +148,10 @@ var androidUserAddress = ${addr.toJsonString()}
         ctx["{related-stories}"] = story.htmlForRelatedStories()
         ctx["{related-topics}"] = story.htmlForRelatedTopics()
 
+        // {ad-zone} Google广告输入正确的zone，输入值。
+        // zone代表广告内容定向，发送给Google。
+        // 数据来源：html div数组。
+
         ctx["{ad-zone}"] = story.getAdZone(Teaser.HOME_AD_ZONE, Teaser.DEFAULT_STORY_AD_ZONE, story.teaser?.channelMeta?.adZone ?: "")
 
         ctx["{ad-mpu}"] = if (shouldHideAd) "" else AdParser.getAdCode(AdPosition.MIDDLE_ONE)
