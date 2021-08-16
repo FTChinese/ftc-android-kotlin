@@ -2,13 +2,16 @@ package com.ft.ftchinese.model.reader
 
 data class Access(
     val status: MemberStatus,
-    val rights: Int,
-    val content: Permission,
+    val rights: Int, // User owned permissions. Sum of multiple binary.
+    val content: Permission, // Content allowed permission.
 ) {
+    // Check if content's permission is contained by user rights.
     val granted: Boolean
         get() = content.grant(rights)
 
     companion object {
+        // Deduce user's access permissions against
+        // content's permission.
         @JvmStatic
         fun of(contentPerm: Permission, who: Account?): Access {
             if (who == null) {
