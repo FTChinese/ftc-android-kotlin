@@ -275,6 +275,8 @@ class ArticleViewModel(
     // from open graph, or might not need to be recorded if
     // loaded from cache which indicates user already read it.
     private suspend fun storyLoaded(story: Story) {
+        checkAccess(story.permission())
+
         storyLoadedLiveData.value = story
         audioFoundLiveData.value = story.hasAudio(_languageSelected)
         // After story loaded, turn off progress indicator
@@ -380,6 +382,7 @@ class ArticleViewModel(
         }
     }
 
+    // Checking access rights and notify hosting activity.
     fun checkAccess(content: Permission) {
         accessChecked.value = Access.of(
             contentPerm = content,
