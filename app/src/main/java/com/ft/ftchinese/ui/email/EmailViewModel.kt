@@ -22,7 +22,7 @@ class EmailViewModel : BaseViewModel(), AnkoLogger{
 
     val emailLiveData = MutableLiveData("")
     val emailValidator = LiveDataValidator(emailLiveData).apply {
-        addRule("请输入正确的邮箱", Validator::isEmail)
+        addRule("请输入完整的邮箱", Validator::isEmail)
         addRule("不能使用当前邮箱") {
             AccountCache.get()?.email != it
         }
