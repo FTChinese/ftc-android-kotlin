@@ -80,6 +80,7 @@ class ArticleActivity : ScopedAppActivity(),
     private lateinit var wvViewModel: WVViewModel
     private lateinit var screenshotViewModel: ScreenshotViewModel
 
+    private var permissionFragment: PermissionDeniedFragment? = null
     private var shareFragment: SocialShareFragment? = null
     private var teaser: Teaser? = null
     // Show audio if the article contains mp3 link
@@ -204,6 +205,10 @@ class ArticleActivity : ScopedAppActivity(),
             binding.inProgress = it
         }
 
+        // Access rights may comes from 3 sources, in order:
+        // 1. Defined on a Teaser;
+        // 2. Defined on a Story;
+        // 3. Acquired from html meta data of open graph.
         articleViewModel.accessChecked.observe(this) {
 
             if (it.granted) {
@@ -212,8 +217,12 @@ class ArticleActivity : ScopedAppActivity(),
 
             PaywallTracker.fromArticle(teaser)
 
-            PermissionDeniedFragment(it)
-                .show(supportFragmentManager, "PermissionDeniedFragment")
+            if (permissionFragment == null) {
+                permissionFragment = PermissionDeniedFragment(it)
+                permissionFragment?.show(supportFragmentManager, "PermissionDeniedFragment")
+            } else {
+                permissionFragment?.show(supportFragmentManager, "PermissionDeniedFragment")
+            }
         }
 
         // After story json loaded either from cache or from server.
