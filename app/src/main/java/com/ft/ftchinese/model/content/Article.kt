@@ -108,6 +108,7 @@ class Story (
 
     @Json(name = "relative_story")
     val relatedStory: List<RelatedStory> = listOf(),
+    val whitelist: Int = 0,
 ) : AnkoLogger {
 
     fun isFrom(t: Teaser): Boolean {
@@ -127,6 +128,7 @@ class Story (
         return when {
             accessibleBy == "1" -> Permission.STANDARD
             accessibleBy == "2" -> Permission.PREMIUM
+            whitelist == 1 -> Permission.STANDARD
             isSevenDaysOld() -> Permission.STANDARD
             else -> Permission.FREE
         }
