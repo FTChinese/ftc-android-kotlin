@@ -126,11 +126,11 @@ class Story (
 
     fun permission(): Permission {
         return when {
-            accessibleBy == "1" -> Permission.STANDARD
-            accessibleBy == "2" -> Permission.PREMIUM
-            whitelist == 1 -> Permission.STANDARD
+            whitelist == 1 -> Permission.FREE
+//            accessibleBy == "1" -> Permission.STANDARD
+//            accessibleBy == "2" -> Permission.PREMIUM
             isSevenDaysOld() -> Permission.STANDARD
-            else -> Permission.FREE
+            else -> teaser?.permission() ?: Permission.FREE
         }
     }
 
