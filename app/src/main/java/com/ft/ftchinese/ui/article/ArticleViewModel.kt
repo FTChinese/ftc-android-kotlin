@@ -79,6 +79,7 @@ class ArticleViewModel(
     fun loadStory(teaser: Teaser, isRefreshing: Boolean) {
         // If this article does not have JSON API, loading it directly from url.
         if (!teaser.hasJsAPI()) {
+            checkAccess(teaser.permission())
             crawlHtml(teaser, isRefreshing)
         } else {
             loadJson(teaser, isRefreshing)
@@ -242,11 +243,10 @@ class ArticleViewModel(
             return FetchResult.LocalizedError(R.string.prompt_no_network)
         }
 
-        val baseUrl = Config.discoverServer(AccountCache.get())
         try {
 
             val jsonResult = withContext(Dispatchers.IO) {
-                ArticleClient.fetchStory(teaser, baseUrl)
+                ArticleClient.fetchStory(teaser, Config.discoverServer(AccountCache.get()))
             } ?: return FetchResult.LocalizedError(R.string.api_server_error)
 
             // After JSON is fetched, it should handle:
@@ -376,14 +376,13 @@ class ArticleViewModel(
             val p = teaser?.permission()
             if (p == null || p == Permission.FREE) {
                 checkAccess(readHistory.permission())
+                articleRead(readHistory)
             }
-
-            articleRead(readHistory)
         }
     }
 
     // Checking access rights and notify hosting activity.
-    fun checkAccess(contentPerm: Permission) {
+    private fun checkAccess(contentPerm: Permission) {
         Log.i(TAG, "Content permission $contentPerm")
         accessChecked.value = Access.of(
             contentPerm = contentPerm,
