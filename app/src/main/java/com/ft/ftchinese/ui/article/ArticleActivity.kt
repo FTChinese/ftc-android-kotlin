@@ -159,7 +159,6 @@ class ArticleActivity : ScopedAppActivity(),
 
         // Check access rights.
         Log.i(TAG, "Checking access of teaser $teaser")
-        articleViewModel.checkAccess(t.permission())
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -212,6 +211,7 @@ class ArticleActivity : ScopedAppActivity(),
         articleViewModel.accessChecked.observe(this) {
 
             if (it.granted) {
+                permissionFragment?.dismiss()
                 return@observe
             }
 
