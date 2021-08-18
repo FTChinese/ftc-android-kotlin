@@ -383,9 +383,10 @@ class ArticleViewModel(
     }
 
     // Checking access rights and notify hosting activity.
-    fun checkAccess(content: Permission) {
+    fun checkAccess(contentPerm: Permission) {
+        Log.i(TAG, "Content permission $contentPerm")
         accessChecked.value = Access.of(
-            contentPerm = content,
+            contentPerm = contentPerm,
             who = AccountCache.get()
         )
     }
