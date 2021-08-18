@@ -122,6 +122,10 @@ data class Teaser(
         }
     }
 
+    fun articleUrl(baseUrl: String): String {
+        return "${baseUrl}${apiPathSegment()}"
+    }
+
     fun hasMp3(): Boolean {
         return !audioUrl.isNullOrBlank() || !radioUrl.isNullOrBlank()
     }
