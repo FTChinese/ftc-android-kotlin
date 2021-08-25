@@ -1,15 +1,12 @@
 package com.ft.ftchinese.ui.share
 
 import android.content.ContentValues
-import android.content.Context
-import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.provider.MediaStore
-import com.ft.ftchinese.database.ReadArticle
-import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.R
+import com.ft.ftchinese.database.ReadArticle
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXImageObject
 import com.tencent.mm.opensdk.modelmsg.WXMediaMessage
