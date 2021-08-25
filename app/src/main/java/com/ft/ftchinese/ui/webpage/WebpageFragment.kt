@@ -1,20 +1,20 @@
 package com.ft.ftchinese.ui.webpage
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentWebpageBinding
+import com.ft.ftchinese.repository.Config
+import com.ft.ftchinese.store.AccountCache
+import com.ft.ftchinese.ui.share.ArticleScreenshot
+import com.ft.ftchinese.ui.share.ScreenshotFragment
 
-class WebpageFragment : Fragment() {
+@kotlinx.coroutines.ExperimentalCoroutinesApi
+class WebpageFragment : WVBaseFragment() {
     private lateinit var binding: FragmentWebpageBinding
-    private lateinit var wpViewModel: WebpageViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,39 +27,36 @@ class WebpageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        wpViewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(WebpageViewModel::class.java)
-        } ?: throw Exception("Invalid Activity")
-
-        setupWebView()
+        configWebView(binding.webView)
         setupViewModel()
     }
 
     private fun setupViewModel() {
-        wpViewModel.urlLiveData.observe(viewLifecycleOwner) {
+        // In case we are loading a url directly into webview.
+        wvViewModel.urlLiveData.observe(viewLifecycleOwner) {
             binding.webView.loadUrl(it)
         }
-    }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupWebView() {
-        // Setup webview
-        binding.webView.settings.apply {
-            javaScriptEnabled = true
-            loadsImagesAutomatically = true
-            domStorageEnabled = true
-            databaseEnabled = true
+        // In case we are loading a html string.
+        // TODO: base url might not be ftc.
+        wvViewModel.htmlReceived.observe(viewLifecycleOwner) {
+            binding.webView.loadDataWithBaseURL(
+                Config.discoverServer(AccountCache.get()),
+                it,
+                "text/html",
+                null,
+                null,
+            )
         }
 
-        binding.webView.apply {
+        screenshotViewModel.imageRowCreated.observe(viewLifecycleOwner)  { screenshot: ArticleScreenshot ->
 
-            setOnKeyListener { _, keyCode, _ ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
-                    binding.webView.goBack()
-                    return@setOnKeyListener true
-                }
-                false
+            val ok = takeScreenshot(binding.webView, screenshot.imageUri)
+
+            if (ok) {
+                ScreenshotFragment
+                    .newInstance()
+                    .show(childFragmentManager, "ScreenshotDialog")
             }
         }
     }
