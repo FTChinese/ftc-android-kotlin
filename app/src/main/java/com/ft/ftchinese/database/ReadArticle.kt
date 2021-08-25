@@ -119,6 +119,9 @@ data class ReadArticle(
     }
 
     companion object {
+        /**
+         * After loaded JSON data for a story.
+         */
         @JvmStatic
         fun fromStory(story: Story): ReadArticle {
             return ReadArticle(
@@ -134,6 +137,24 @@ data class ReadArticle(
                 publishedAt = story.publishedAt,
                 readAt = formatSQLDateTime(LocalDateTime.now()),
                 tier = story.requireMemberTier()?.toString() ?: "",
+            )
+        }
+
+        @JvmStatic
+        fun fromTeaser(teaser: Teaser): ReadArticle {
+            return ReadArticle(
+                id = teaser.id,
+                type = teaser.type.toString(),
+                subType = teaser.subType ?: "",
+                title = teaser.title,
+                standfirst = "",
+                keywords = teaser.tag,
+                imageUrl = "",
+                audioUrl = teaser.audioUrl ?: "",
+                radioUrl = teaser.radioUrl ?: "",
+                publishedAt = teaser.publishedAt ?: "",
+                readAt = formatSQLDateTime(LocalDateTime.now()),
+                tier = "",
             )
         }
 
