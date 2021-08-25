@@ -13,7 +13,7 @@ import com.ft.ftchinese.databinding.FragmentAiAudioBinding
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.ui.base.WVClient
+import com.ft.ftchinese.ui.webpage.WVClient
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment

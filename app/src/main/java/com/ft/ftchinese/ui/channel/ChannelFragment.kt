@@ -30,9 +30,11 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.SponsorManager
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.ChromeClient
+import com.ft.ftchinese.ui.webpage.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
+import com.ft.ftchinese.ui.webpage.WVClient
+import com.ft.ftchinese.ui.webpage.WVViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch

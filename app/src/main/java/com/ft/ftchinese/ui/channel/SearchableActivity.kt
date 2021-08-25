@@ -16,7 +16,7 @@ import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
-import com.ft.ftchinese.ui.base.WVClient
+import com.ft.ftchinese.ui.webpage.WVClient
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.toast
 

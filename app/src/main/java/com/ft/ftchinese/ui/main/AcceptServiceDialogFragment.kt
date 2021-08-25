@@ -15,18 +15,20 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentAcceptServiceDialogBinding
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.ui.webabout.legalPages
+import com.ft.ftchinese.ui.webpage.WVViewModel
 import com.ft.ftchinese.ui.webpage.WebpageFragment
-import com.ft.ftchinese.ui.webpage.WebpageViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
 
 /**
  * https://developer.android.com/guide/topics/ui/dialogs#FullscreenDialog
  */
+@ExperimentalCoroutinesApi
 class AcceptServiceDialogFragment : DialogFragment(), AnkoLogger {
 
     private lateinit var acceptance: ServiceAcceptance
     private lateinit var binding: FragmentAcceptServiceDialogBinding
-    private lateinit var wpViewModel: WebpageViewModel
+    private lateinit var wvViewModel: WVViewModel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -45,16 +47,17 @@ class AcceptServiceDialogFragment : DialogFragment(), AnkoLogger {
         }
     }
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        wpViewModel = activity?.run {
-            ViewModelProvider(this).get(WebpageViewModel::class.java)
+        wvViewModel = activity?.run {
+            ViewModelProvider(this).get(WVViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
         val page = legalPages[1]
 
-        wpViewModel.urlLiveData.value = page.url
+        wvViewModel.urlLiveData.value = page.url
 
         childFragmentManager.commit {
             replace(R.id.terms_holder, WebpageFragment.newInstance())
