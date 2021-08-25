@@ -1,6 +1,5 @@
 package com.ft.ftchinese.ui.share
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,9 +16,6 @@ import com.bumptech.glide.request.target.Target
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentScreenshotBinding
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
-import com.ft.ftchinese.ui.share.SocialApp
-import com.ft.ftchinese.ui.share.SocialAppId
-import com.ft.ftchinese.ui.share.SocialShareViewHolder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -92,7 +88,7 @@ class ScreenshotFragment : ScopedBottomSheetDialogFragment(), AnkoLogger {
         }
     }
 
-    inner  class Adapter : RecyclerView.Adapter<SocialShareViewHolder>() {
+    inner class Adapter : RecyclerView.Adapter<SocialShareViewHolder>() {
         private val socialApps = arrayOf(
             SocialApp(
                 name = "好友",
