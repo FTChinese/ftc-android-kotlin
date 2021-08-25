@@ -167,7 +167,6 @@ var androidUserAddress = ${addr.toJsonString()}
         var result = template
 
         ctx.forEach { (key, value) ->
-            Log.i(TAG, "$key - $value")
             result = result.replace(key, value)
         }
 
