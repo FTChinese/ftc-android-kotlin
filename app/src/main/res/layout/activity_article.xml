@@ -77,6 +77,8 @@
 
         </androidx.appcompat.widget.Toolbar>
 
+
+
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/article_refresh"
             android:layout_width="match_parent"
@@ -84,11 +86,22 @@
             app:layout_constraintTop_toBottomOf="@id/article_toolbar"
             app:layout_constraintBottom_toTopOf="@id/bottom_toolbar">
 
-                <WebView
-                    android:id="@+id/web_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@android:color/transparent"/>
+            <FrameLayout
+                android:id="@+id/content_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_constraintTop_toBottomOf="@id/article_toolbar"
+                app:layout_constraintBottom_toTopOf="@id/bottom_toolbar"/>
+
+<!--            <androidx.core.widget.NestedScrollView-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent">-->
+<!--                <WebView-->
+<!--                    android:id="@+id/web_view"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:background="@android:color/transparent"/>-->
+<!--            </androidx.core.widget.NestedScrollView>-->
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
