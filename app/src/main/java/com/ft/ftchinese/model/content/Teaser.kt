@@ -178,11 +178,16 @@ data class Teaser(
     }
 
     private fun isSevenDaysOld(): Boolean {
-        if (publishedAt == null) {
+        if (publishedAt.isNullOrBlank()) {
             return false
         }
 
-        val sevenDaysLater = Date((publishedAt.toLong() + 7 * 24 * 60 * 60) * 1000)
+        val sevenDaysLater = try {
+            Date((publishedAt.toLong() + 7 * 24 * 60 * 60) * 1000)
+        } catch (e: NumberFormatException) {
+            return false
+        }
+
         val now = Date()
 
         if (sevenDaysLater.after(now)) {
