@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.base
+package com.ft.ftchinese.ui.webpage
 
 import android.content.Context
 import android.content.Intent
@@ -21,10 +21,9 @@ import com.ft.ftchinese.tracking.GACategory
 import com.ft.ftchinese.tracking.PaywallSource
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
-import com.ft.ftchinese.ui.webpage.WebpageActivity
-import com.ft.ftchinese.ui.webpage.WebpageMeta
 import org.jetbrains.anko.toast
 
 private const val TAG = "WVClient"
