@@ -109,7 +109,7 @@ class ArticleViewModel(
                 if (html != null) {
 
                     htmlResult.value = FetchResult.Success(html)
-                    progressLiveData.value = false
+                    webpageLoaded(teaser)
                     return@launch
                 }
                 // Cache not found, e.g., loading for the first time or force refreshing.
@@ -118,13 +118,7 @@ class ArticleViewModel(
 
             val result = loadRemoteHtml(teaser)
             htmlResult.value = result
-            progressLiveData.value = false
-
-            if (result is FetchResult.Success) {
-                launch(Dispatchers.IO) {
-                    cache.saveText(teaser.cacheNameHtml, result.data)
-                }
-            }
+            webpageLoaded(teaser)
         }
     }
 
@@ -161,6 +155,11 @@ class ArticleViewModel(
             if (data.isNullOrBlank()) {
                 FetchResult.LocalizedError(R.string.api_server_error)
             } else {
+                // Cache html
+                viewModelScope.launch(Dispatchers.IO) {
+                    cache.saveText(teaser.cacheNameHtml, data)
+                }
+
                 FetchResult.Success(data)
             }
         } catch (e: Exception) {
@@ -182,13 +181,13 @@ class ArticleViewModel(
 
         viewModelScope.launch {
             // Why this?
-            if (storyLoadedLiveData.value != null) {
-                val s = storyLoadedLiveData.value
-                if (s != null && s.isFrom(teaser)) {
-                    storyLoaded(s)
-                    return@launch
-                }
-            }
+//            if (storyLoadedLiveData.value != null) {
+//                val s = storyLoadedLiveData.value
+//                if (s != null && s.isFrom(teaser)) {
+//                    storyLoaded(s)
+//                    return@launch
+//                }
+//            }
 
             // If cache name exits, and is not refreshing,
             // use cached story.
@@ -270,6 +269,27 @@ class ArticleViewModel(
         }
     }
 
+    /**
+     * After webpage loaded, use teaser data to compose
+     * reading history so that share and bookmark button
+     * is usable. Ideally we should use meta data collected
+     * from open graph, but it's slow adn unreliable.
+     */
+    private suspend fun webpageLoaded(teaser: Teaser) {
+        Log.i(TAG, "Webpage loaded")
+
+        progressLiveData.value = false
+        val isStarring = withContext(Dispatchers.IO) {
+            db.starredDao().exists(teaser.id, teaser.type.toString())
+        }
+
+        bookmarkState.value = BookmarkState(
+            isStarring = isStarring,
+        )
+
+        articleRead(ReadArticle.fromTeaser(teaser))
+    }
+
     // After story is loaded, update live data.
     // Read history is not updated here since it might derived
     // from open graph, or might not need to be recorded if
@@ -301,6 +321,8 @@ class ArticleViewModel(
      */
     private suspend fun articleRead(a: ReadArticle) {
         articleReadLiveData.value = a
+
+        Log.i(TAG, "Article read $a")
 
         withContext(Dispatchers.IO) {
             db.readDao().insertOne(a)
@@ -366,6 +388,26 @@ class ArticleViewModel(
 
     // Used by web pages which does not provide structured data
     // for us to know what kind of content is loaded.
+    // It is only called if teaser does not have JSON api.
+    /**
+     * OpenGraphMeta(
+     * title=一周新闻小测：2021年08月21日 - FT商学院,
+     * description=您对本周的全球重大新闻了解如何？来做个小测试吧！,
+     * keywords=,
+     * type=,
+     * image=,
+     * url=)
+     * Teaser(
+     * id=46427,
+     * type=interactive,
+     * subType=mbagym,
+     * title=一周新闻小测：2021年08月21日,
+     * audioUrl=null,
+     * radioUrl=null,
+     * publishedAt=null,
+     * tag=FT商学院,教程,一周新闻,入门级,FTQuiz,
+     * isCreatedFromUrl=false,)
+     */
     fun lastResortByOG(og: OpenGraphMeta, teaser: Teaser?) {
 
         Log.i(TAG, "OG evaluated: $og, for teaser $teaser")
@@ -373,11 +415,14 @@ class ArticleViewModel(
         viewModelScope.launch {
             val readHistory = ReadArticle.fromOpenGraph(og, teaser)
 
+            // If permission is already denied from teaser,
+            // do not show the barrier.
             val p = teaser?.permission()
             if (p == null || p == Permission.FREE) {
                 checkAccess(readHistory.permission())
-                articleRead(readHistory)
             }
+
+            articleRead(readHistory)
         }
     }
 
