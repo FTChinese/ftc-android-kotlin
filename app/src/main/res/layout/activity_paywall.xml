@@ -39,7 +39,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp"
+                    android:padding="@dimen/space_16"
                     android:orientation="vertical">
 
                     <!-- Account and membership status -->
@@ -88,11 +88,17 @@
                         android:text="@{promoTerms}"
                         android:visibility="@{promoTerms == null ? View.GONE : View.VISIBLE}" />
 
-                    <TextView
-                        android:id="@+id/payment_guide"
+                    <FrameLayout
+                        android:id="@+id/subs_rule_container"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/space_16"/>
+
+<!--                    <TextView-->
+<!--                        android:id="@+id/payment_guide"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_marginBottom="@dimen/space_16"/>-->
 
                     <!-- Customer service-->
                     <FrameLayout
