@@ -26,9 +26,6 @@ data class SubsStatus(
     val addOns: List<Pair<String, String>>,
 ) {
 
-    val hasAddOn: Boolean
-        get() = addOns.isNotEmpty()
-
     companion object {
         // The membership should be the normalized version.
         @JvmStatic
@@ -43,7 +40,9 @@ data class SubsStatus(
                 )
             }
 
-            val name = ctx.getString(m.tierStringRes)
+            val productTitle = ctx.getString(m.tierStringRes)
+
+            // List addon
             val addOns = m.addOns.map {
                 Pair(ctx.getString(it.first.stringRes), "${it.second}天")
             }
@@ -60,7 +59,7 @@ data class SubsStatus(
                                 else -> null
                             }
                         },
-                        productName = name,
+                        productName = productTitle,
                         details = listOf(Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate())),
                         addOns = addOns,
                     )
@@ -70,15 +69,14 @@ data class SubsStatus(
                     val expired = m.expired
                     val reminder =  when {
                         expired -> ctx.getString(R.string.member_has_expired)
-                        m.isInvalidStripe -> ctx.getString(R.string.member_status_invalid)
+                        m.status?.isInvalid() == true -> ctx.getString(R.string.member_status_invalid)
                         else -> null
                     }
 
-                    // Cancelled and expired
                     if (m.autoRenew) {
                         SubsStatus(
                             reminder = reminder,
-                            productName = name,
+                            productName = productTitle,
                             details = listOf(
                                 Pair(ctx.getString(R.string.label_subs_source), brand),
                                 Pair("自动续订", m.autoRenewMoment?.let {
@@ -90,7 +88,7 @@ data class SubsStatus(
                     } else {
                         SubsStatus(
                             reminder = reminder,
-                            productName = name,
+                            productName = productTitle,
                             details = listOf(
                                 Pair(ctx.getString(R.string.label_subs_source), brand),
                                 Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate()),
@@ -103,7 +101,7 @@ data class SubsStatus(
                 }
                 PayMethod.B2B -> SubsStatus(
                     reminder = "企业订阅续订或升级请联系所属机构的管理人员",
-                    productName = name,
+                    productName = productTitle,
                     details = listOf(
                         Pair(ctx.getString(R.string.label_subs_source), ctx.getString(R.string.pay_brand_b2b)),
                         Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate())
@@ -111,8 +109,8 @@ data class SubsStatus(
                     addOns = addOns,
                 )
                 else -> SubsStatus(
-                    reminder = "Unknown Subscription Source",
-                    productName = name,
+                    reminder = "订阅方式缺失",
+                    productName = productTitle,
                     details = addOns,
                     addOns = addOns
                 )
