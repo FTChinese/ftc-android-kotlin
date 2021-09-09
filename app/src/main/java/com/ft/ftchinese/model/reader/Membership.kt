@@ -277,7 +277,6 @@ data class Membership(
         get() = when {
             vip -> false
             expireDate == null -> true
-            isInvalidStripe -> true
             else -> expireDate.isBefore(LocalDate.now())
         }
 
