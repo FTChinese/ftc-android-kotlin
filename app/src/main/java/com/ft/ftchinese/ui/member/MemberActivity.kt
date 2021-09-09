@@ -27,6 +27,7 @@ import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.ui.paywall.SubsRuleFragment
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
@@ -42,6 +43,7 @@ class MemberActivity : ScopedAppActivity(),
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var subsStatusViewModel: SubsStatusViewModel
     private lateinit var binding: ActivityMemberBinding
+    private var addonFragment: SubsAddOnFragment? = null
 
     private fun stopRefresh() {
         binding.swipeRefresh.isRefreshing = false
@@ -79,6 +81,18 @@ class MemberActivity : ScopedAppActivity(),
             accountViewModel.isNetworkAvailable.value = it
         }
 
+        subsStatusViewModel.reactivateStripeRequired.observe(this) {
+            if (!it) {
+                return@observe
+            }
+
+            binding.inProgress = true
+            toast(R.string.stripe_refreshing)
+            sessionManager.loadAccount()?.let {
+                accountViewModel.reactivateStripe(it)
+            }
+        }
+
         // For one-time purchase refreshing, we will simply
         // retrieve user account.
         accountViewModel.accountRefreshed.observe(this) { result: FetchResult<Account> ->
@@ -90,7 +104,7 @@ class MemberActivity : ScopedAppActivity(),
                 is FetchResult.Success -> {
                     toast(R.string.prompt_updated)
                     sessionManager.saveAccount(result.data)
-                    initUI()
+                    subsChanged(result.data.membership)
                 }
             }
         }
@@ -104,6 +118,7 @@ class MemberActivity : ScopedAppActivity(),
                 is FetchResult.Success -> {
                     toast(R.string.prompt_updated)
                     sessionManager.saveMembership(result.data)
+                    subsChanged(result.data)
                 }
             }
         }
@@ -117,16 +132,8 @@ class MemberActivity : ScopedAppActivity(),
                 is FetchResult.Success -> {
                     sessionManager.saveMembership(result.data.membership)
                     toast(R.string.iap_refresh_success)
+                    subsChanged(result.data.membership)
                 }
-            }
-        }
-
-        // Reactivate a scheduled Stripe cancellation.
-        subsStatusViewModel.autoRenewWanted.observe(this) {
-            binding.inProgress = true
-            toast(R.string.stripe_refreshing)
-            sessionManager.loadAccount()?.let {
-                accountViewModel.reactivateStripe(it)
             }
         }
 
@@ -145,7 +152,7 @@ class MemberActivity : ScopedAppActivity(),
                 is FetchResult.Success -> {
                     toast(R.string.stripe_refresh_success)
                     sessionManager.saveMembership(result.data.membership)
-                    initUI()
+                    subsChanged(result.data.membership)
                 }
             }
         }
@@ -153,11 +160,9 @@ class MemberActivity : ScopedAppActivity(),
 
     private fun initUI() {
 
-        val account = sessionManager.loadAccount() ?: return
-        val member = account.membership
-
         supportFragmentManager.commit {
-            replace(R.id.subs_status_card, MySubsFragment.newInstance())
+            replace(R.id.frag_subs_status, MembershipFragment.newInstance())
+            replace(R.id.frag_subs_rule, SubsRuleFragment.newInstance())
             replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
         }
 
@@ -165,7 +170,38 @@ class MemberActivity : ScopedAppActivity(),
             PaywallActivity.start(this)
         }
 
-        subsStatusViewModel.statusChanged.value = member
+        sessionManager.loadAccount()?.membership?.let {
+            subsChanged(it)
+        }
+    }
+
+    private fun subsChanged(m: Membership) {
+
+        if (m.hasAddOn) {
+            SubsAddOnFragment.newInstance().let {
+                supportFragmentManager.commit {
+                    replace(R.id.frag_subs_addon, it)
+                }
+                addonFragment = it
+            }
+        } else {
+            addonFragment?.let {
+                supportFragmentManager.commit {
+                    remove(it)
+                }
+            }
+        }
+
+        val status = SubsStatus.newInstance(
+            this,
+            m
+        )
+
+        // TODO: expiration calculation not accurate.
+        // TODO: reactivate stripe button not shown
+        binding.status = status
+
+        subsStatusViewModel.statusChanged.value = status
 
         invalidateOptionsMenu()
     }
