@@ -640,7 +640,11 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
                     if (autoRenewal) {
                         StripeSubStatus.Active
                     } else {
-                        StripeSubStatus.Canceled
+                        if (expired) {
+                            StripeSubStatus.Canceled
+                        } else {
+                            StripeSubStatus.Active
+                        }
                     }
                 } else {
                     null
