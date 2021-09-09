@@ -2,14 +2,13 @@ package com.ft.ftchinese.ui.member
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.ft.ftchinese.model.reader.Membership
 
 class SubsStatusViewModel : ViewModel() {
-    val statusChanged: MutableLiveData<Membership> by lazy {
-        MutableLiveData<Membership>()
+    val statusChanged: MutableLiveData<SubsStatus> by lazy {
+        MutableLiveData<SubsStatus>()
     }
 
-    val autoRenewWanted: MutableLiveData<Boolean> by lazy {
+    val reactivateStripeRequired: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
 }
