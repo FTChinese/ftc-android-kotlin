@@ -12,7 +12,7 @@
         android:id="@+id/equal_col_leading"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textAlignment="textEnd"
+        android:textAlignment="textStart"
         android:paddingStart="@dimen/space_4"
         android:paddingEnd="@dimen/space_4"
         android:layout_weight="1"/>
@@ -23,6 +23,6 @@
         android:layout_height="wrap_content"
         android:paddingStart="@dimen/space_4"
         android:paddingEnd="@dimen/space_4"
-        android:textAlignment="textStart"
+        android:textAlignment="textEnd"
         android:layout_weight="1"/>
 </LinearLayout>
