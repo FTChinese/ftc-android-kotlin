@@ -183,344 +183,153 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
         binding.btnFreeUser.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-                unionId = null,
-                stripeId = null,
-                userName = "Free Edition",
-                email = "free@example.org",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.EMAIL,
-                wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-                ),
-                membership = Membership()
-            ))
+            sessionManager.saveAccount(AccountBuilder()
+                .withTier(null)
+                .build())
         }
 
         binding.btnWxonlyUser.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "",
-                unionId = "0lwxee2KvHdym1FPhj1HdgIN7nW1",
-                stripeId = null,
-                userName = "Wx-only User",
-                email = "",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.WECHAT,
-                wechat = Wechat(
-                    nickname = "Marvin4296",
-                    avatarUrl = "https://randomuser.me/api/portraits/thumb/men/10.jpg"
-                ),
-                membership = Membership()
-            ))
+            sessionManager.saveAccount(AccountBuilder()
+                .withAccountKind(LoginMethod.WECHAT)
+                .withTier(null)
+                .build())
         }
 
         binding.btnStandardUser.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-                unionId = null,
-                stripeId = null,
-                userName = "Standard Edition",
-                email = "standard@example.org",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.EMAIL,
-                wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-                ),
-                membership = Membership(
-                    tier = Tier.STANDARD,
-                    cycle = Cycle.YEAR,
-                    expireDate = LocalDate.now().plusYears(1),
-                    payMethod = PayMethod.ALIPAY,
-                    autoRenew = false,
-                    status = null,
-                    vip = false
-                )
-            ))
+            sessionManager.saveAccount(AccountBuilder()
+                .build())
         }
 
         binding.btnPremiumUser.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-                unionId = null,
-                stripeId = null,
-                userName = "Premium Edition",
-                email = "premium@example.org",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.EMAIL,
-                wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-                ),
-                membership = Membership(
-                    tier = Tier.PREMIUM,
-                    cycle = Cycle.YEAR,
-                    expireDate = LocalDate.now().plusYears(1),
-                    payMethod = PayMethod.ALIPAY,
-                    autoRenew = false,
-                    status = null,
-                    vip = false
-                )
-            ))
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withTier(Tier.PREMIUM)
+                    .build()
+            )
         }
 
         binding.btnVipUser.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-                unionId = null,
-                stripeId = null,
-                userName = "Premium Edition",
-                email = "premium@example.org",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.EMAIL,
-                wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-                ),
-                membership = Membership(
-                    tier = null,
-                    cycle = null,
-                    expireDate = null,
-                    payMethod = null,
-                    autoRenew = false,
-                    status = null,
-                    vip = true
-                )
-            ))
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withVip(true)
+                    .build()
+            )
         }
 
         binding.btnStripeStdYear.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-                unionId = null,
-                stripeId = "cus_abc",
-                userName = "Standard Yearly Edition",
-                email = "standard@example.org",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.EMAIL,
-                wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-                ),
-                membership = Membership(
-                    tier = Tier.STANDARD,
-                    cycle = Cycle.YEAR,
-                    expireDate = LocalDate.now().plusYears(1),
-                    payMethod = PayMethod.STRIPE,
-                    autoRenew = true,
-                    status = StripeSubStatus.Active,
-                    vip = false
-                )
-            ))
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withTier(Tier.STANDARD)
+                    .withPayMethod(PayMethod.STRIPE)
+                    .withAutoRenewal(true)
+                    .build()
+            )
         }
 
         binding.btnStripeStdMonth.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-                unionId = null,
-                stripeId = "cus_abc",
-                userName = "Standard Edition",
-                email = "standard@example.org",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.EMAIL,
-                wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-                ),
-                membership = Membership(
-                    tier = Tier.STANDARD,
-                    cycle = Cycle.MONTH,
-                    expireDate = LocalDate.now().plusYears(1),
-                    payMethod = PayMethod.STRIPE,
-                    autoRenew = true,
-                    status = StripeSubStatus.Active,
-                    vip = false
-                )
-            ))
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.STRIPE)
+                    .withAutoRenewal(true)
+                    .withCycle(Cycle.MONTH)
+                    .build()
+            )
         }
 
         binding.btnStripePremium.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-                unionId = null,
-                stripeId = "cus_abc",
-                userName = "Standard Edition",
-                email = "standard@example.org",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.EMAIL,
-                wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-                ),
-                membership = Membership(
-                    tier = Tier.PREMIUM,
-                    cycle = Cycle.YEAR,
-                    expireDate = LocalDate.now().plusYears(1),
-                    payMethod = PayMethod.STRIPE,
-                    autoRenew = true,
-                    status = StripeSubStatus.Active,
-                    vip = false
-                )
-            ))
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.STRIPE)
+                    .withAutoRenewal(true)
+                    .withTier(Tier.PREMIUM)
+                    .build()
+            )
         }
 
         binding.btnStripeAutoRenewOff.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-                unionId = null,
-                stripeId = "cus_abc",
-                userName = "Auto Renew Off",
-                email = "standard@example.org",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.EMAIL,
-                wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-                ),
-                membership = Membership(
-                    tier = Tier.PREMIUM,
-                    cycle = Cycle.YEAR,
-                    expireDate = LocalDate.now().plusYears(1),
-                    payMethod = PayMethod.STRIPE,
-                    autoRenew = false,
-                    status = StripeSubStatus.Active,
-                    vip = false
-                )
-            ))
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.STRIPE)
+                    .withAutoRenewal(false)
+                    .build()
+            )
         }
 
         binding.btnStripeWithAddon.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-                unionId = null,
-                stripeId = "cus_abc",
-                userName = "Add On",
-                email = "standard@example.org",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.EMAIL,
-                wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-                ),
-                membership = Membership(
-                    tier = Tier.PREMIUM,
-                    cycle = Cycle.YEAR,
-                    expireDate = LocalDate.now().plusMonths(-1),
-                    payMethod = PayMethod.STRIPE,
-                    autoRenew = false,
-                    status = StripeSubStatus.Canceled,
-                    vip = false,
-                    standardAddOn = 30,
-                    premiumAddOn = 366,
-                )
-            ))
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.STRIPE)
+                    .withAutoRenewal(true)
+                    .withStdAddOn(30)
+                    .withPrmAddOn(366)
+                    .build()
+            )
         }
 
         binding.btnIapStandard.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-                unionId = null,
-                stripeId = null,
-                userName = "IAP Standard",
-                email = "standard@example.org",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.EMAIL,
-                wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-                ),
-                membership = Membership(
-                    tier = Tier.STANDARD,
-                    cycle = Cycle.YEAR,
-                    expireDate = LocalDate.now().plusYears(1),
-                    payMethod = PayMethod.APPLE,
-                    autoRenew = true,
-                    status = null,
-                    appleSubsId = "1000000266289493",
-                    vip = false
-                )
-            ))
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.APPLE)
+                    .withAutoRenewal(true)
+                    .build()
+            )
         }
 
         binding.btnIapPremium.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-                unionId = null,
-                stripeId = null,
-                userName = "IAP Premium",
-                email = "prmeium@example.org",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.EMAIL,
-                wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-                ),
-                membership = Membership(
-                    tier = Tier.PREMIUM,
-                    cycle = Cycle.YEAR,
-                    expireDate = LocalDate.now().plusYears(1),
-                    payMethod = PayMethod.APPLE,
-                    autoRenew = true,
-                    status = null,
-                    appleSubsId = "1000000266289493",
-                    vip = false
-                )
-            ))
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withTier(Tier.PREMIUM)
+                    .withPayMethod(PayMethod.APPLE)
+                    .withAutoRenewal(true)
+                    .build()
+            )
         }
 
         binding.btnIapAutoRenewOff.setOnClickListener {
             sessionManager.logout()
-            sessionManager.saveAccount(Account(
-                id = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a",
-                unionId = null,
-                stripeId = null,
-                userName = "IAP Premium",
-                email = "prmeium@example.org",
-                isVerified = false,
-                avatarUrl = null,
-                loginMethod = LoginMethod.EMAIL,
-                wechat = Wechat(
-                    nickname = null,
-                    avatarUrl = null
-                ),
-                membership = Membership(
-                    tier = Tier.PREMIUM,
-                    cycle = Cycle.YEAR,
-                    expireDate = LocalDate.now().plusYears(1),
-                    payMethod = PayMethod.APPLE,
-                    autoRenew = false,
-                    status = null,
-                    appleSubsId = "1000000266289493",
-                    vip = false
-                )
-            ))
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.APPLE)
+                    .withAutoRenewal(false)
+                    .build()
+            )
         }
 
+        binding.btnIapAddon.setOnClickListener {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.APPLE)
+                    .withAutoRenewal(true)
+                    .withStdAddOn(31)
+                    .withPrmAddOn(366)
+                    .build()
+            )
+        }
+
+        binding.btnIapExpiredAddon.setOnClickListener {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.APPLE)
+                    .withAutoRenewal(false)
+                    .withExpired(true)
+                    .withStdAddOn(31)
+                    .withPrmAddOn(366)
+                    .build()
+            )
+        }
         binding.btnPaymentResult.setOnClickListener {
             InvoiceStore.getInstance(this).saveInvoices(
                 ConfirmationParams(
@@ -733,6 +542,159 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         menuInflater.inflate(R.menu.article_top_menu, menu)
 
         return true
+    }
+
+    class AccountBuilder {
+
+        private val ftcId = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a"
+        private val unionId = "0lwxee2KvHdym1FPhj1HdgIN7nW1"
+        private val stripeCusId = "cus_Fo3kC8njfCdo"
+        private val stripeSubId = "sub_65gBB0LBU3uD"
+        private val iapTxId = "1000000799792245"
+        private val licenceId = "lic_x0DaRxLHHuLG"
+        private val mobile = "12345678901"
+
+        private var accountKind: LoginMethod = LoginMethod.EMAIL
+        private var tier: Tier? = Tier.STANDARD
+        private var cycle = Cycle.YEAR
+        private var payMethod = PayMethod.ALIPAY
+        private var expired = false
+        private var autoRenewal = false
+        private var stdAddOn: Long = 0
+        private var prmAddOn: Long = 0
+        private var isVip = false
+
+
+        fun withAccountKind(k: LoginMethod): AccountBuilder {
+            accountKind = k
+            return this
+        }
+
+        fun withTier(t: Tier?): AccountBuilder {
+            tier = t
+            return this
+        }
+
+        fun withCycle(c: Cycle): AccountBuilder {
+            cycle = c
+            return this
+        }
+
+        fun withPayMethod(p: PayMethod): AccountBuilder {
+            payMethod = p
+            return this
+        }
+
+        fun withExpired(yes: Boolean): AccountBuilder {
+            expired = yes
+            return this
+        }
+
+        fun withAutoRenewal(on: Boolean): AccountBuilder {
+            autoRenewal = on
+            return this
+        }
+
+        fun withStdAddOn(days: Long): AccountBuilder {
+            stdAddOn = days
+            return this
+        }
+
+        fun withPrmAddOn(days: Long): AccountBuilder {
+            prmAddOn = days
+            return this
+        }
+
+        fun withVip(yes: Boolean): AccountBuilder {
+            isVip = yes
+            return this
+        }
+
+        private fun buildMembership(): Membership {
+            if (isVip) {
+                return Membership(
+                    vip = true
+                )
+            }
+
+            if (tier == null) {
+                return Membership()
+            }
+
+            return Membership(
+                tier = tier,
+                cycle = cycle,
+                expireDate = if (expired) {
+                    LocalDate.now().minusDays(1)
+                } else {
+                    LocalDate.now().plusDays(1)
+                },
+                payMethod = payMethod,
+                stripeSubsId = if (payMethod == PayMethod.STRIPE) {
+                    stripeSubId
+                } else {
+                    null
+                },
+                autoRenew = autoRenewal,
+                status = if (payMethod == PayMethod.STRIPE) {
+                    if (autoRenewal) {
+                        StripeSubStatus.Active
+                    } else {
+                        StripeSubStatus.Canceled
+                    }
+                } else {
+                    null
+                },
+                appleSubsId = if (payMethod == PayMethod.ALIPAY) {
+                    iapTxId
+                } else {
+                    null
+                },
+                b2bLicenceId = if (payMethod == PayMethod.B2B) {
+                    licenceId
+                } else {
+                    null
+                },
+                standardAddOn = stdAddOn,
+                premiumAddOn = prmAddOn,
+                vip = isVip,
+            )
+        }
+
+        fun build(): Account {
+            return Account(
+                id = when (accountKind) {
+                    LoginMethod.EMAIL -> ftcId
+                    LoginMethod.WECHAT -> ""
+                    LoginMethod.MOBILE -> ftcId
+                },
+                unionId = when (accountKind) {
+                    LoginMethod.EMAIL -> ""
+                    LoginMethod.WECHAT -> unionId
+                    LoginMethod.MOBILE -> ""
+                },
+                userName = "$payMethod $tier",
+                email = "$tier@example.org",
+                mobile = if (accountKind == LoginMethod.MOBILE) {
+                    mobile
+                } else {
+                    null
+                },
+                isVerified = false,
+                avatarUrl = null,
+                campaignCode = null,
+                loginMethod = accountKind,
+                wechat = if (accountKind == LoginMethod.WECHAT) {
+                    Wechat(
+                        nickname = "Wechat User",
+                        avatarUrl = "https://randomuser.me/api/portraits/thumb/women/7.jpg"
+                    )
+                } else {
+                    Wechat()
+                },
+                membership = buildMembership()
+            )
+        }
     }
 
     companion object {
