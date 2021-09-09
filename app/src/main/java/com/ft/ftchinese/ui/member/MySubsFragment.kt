@@ -39,8 +39,8 @@ class MySubsFragment : Fragment(), AnkoLogger {
         return binding.root
     }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         subsStatusAdapter = ListAdapter()
         addOnDetailAdapter = ListAdapter()
 
@@ -103,7 +103,6 @@ class MySubsFragment : Fragment(), AnkoLogger {
          * this fragment using the provided parameters.
          */
         @JvmStatic
-        fun newInstance() =
-                MySubsFragment()
+        fun newInstance() = MySubsFragment()
     }
 }
