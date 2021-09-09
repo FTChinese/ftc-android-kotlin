@@ -197,10 +197,6 @@ class MemberActivity : ScopedAppActivity(),
             m
         )
 
-        // TODO: expiration calculation not accurate.
-        // TODO: reactivate stripe button not shown
-        binding.status = status
-
         subsStatusViewModel.statusChanged.value = status
 
         invalidateOptionsMenu()
