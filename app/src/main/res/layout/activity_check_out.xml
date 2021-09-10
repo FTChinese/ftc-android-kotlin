@@ -47,6 +47,14 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="@dimen/space_8"/>
 
+                <TextView
+                    android:id="@+id/pay_warning"
+                    style="@style/OrigamiText.Body2.Warning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@{intents.warning}"
+                    android:layout_margin="16dp" />
+
                 <!-- Select payment method -->
                 <RadioGroup
                     android:id="@+id/payment_methods"
@@ -101,13 +109,6 @@
                         android:textSize="18sp"/>
 
                 </RadioGroup>
-
-                <TextView
-                    android:id="@+id/pay_warning"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@{intents.warning}"
-                    android:layout_margin="16dp" />
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
