@@ -174,7 +174,7 @@ dependencies {
     def room_version = '2.2.5'
     def lifecycle_version = "2.2.0"
     def exo_player = "2.14.1"
-    def work_version = "2.5.0"
+    def work_version = "2.6.0"
 
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
