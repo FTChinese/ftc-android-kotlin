@@ -235,7 +235,10 @@ data class Membership(
     @Json(ignored = true)
     val offerKinds: List<OfferKind>
         get() = when {
-            tier == null -> listOf(OfferKind.Promotion)
+            tier == null -> listOf(
+                OfferKind.Promotion,
+                OfferKind.Introductory,
+            )
             autoRenewOffExpired -> listOf(
                 OfferKind.Promotion,
                 OfferKind.WinBack,
