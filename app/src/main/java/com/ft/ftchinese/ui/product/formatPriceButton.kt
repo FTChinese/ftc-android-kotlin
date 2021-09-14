@@ -9,6 +9,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.ui.formatter.getCurrencySymbol
 
+/**
+ * Generate the price text. If the price has discount,
+ * the original price will be crossed.
+ */
 fun formatPriceButton(ctx: Context, item: CheckoutItem): Spannable {
     val payableStr = ctx.getString(
         R.string.formatter_price_cycle,
