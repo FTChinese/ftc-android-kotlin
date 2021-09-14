@@ -18,8 +18,10 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.legal.privacyConsentLine
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
+import io.noties.markwon.Markwon
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
@@ -45,12 +47,14 @@ class SignUpFragment(
     private lateinit var mobileViewModel: MobileViewModel
 
     private lateinit var binding: FragmentSignUpBinding
+    private lateinit var markwon: Markwon
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
         sessionManager = SessionManager.getInstance(context)
         tokenManager = TokenManager.getInstance(context)
+        markwon = Markwon.create(context)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -148,6 +152,9 @@ class SignUpFragment(
     }
 
     private fun setupUI() {
+        markwon.setParsedMarkdown(binding.privacyConsent, markwon.toMarkdown(privacyConsentLine))
+
+        binding.privacyConsent.text
         binding.toolbar.bottomSheetToolbar.onClick {
             dismiss()
         }
@@ -175,6 +182,14 @@ class SignUpFragment(
 
     fun onSubmit(view: View) {
 
+        if (!binding.privacyConsent.isChecked) {
+            toast("您需要同意用户协议和服务政策才能注册")
+            return
+        } else {
+            toast("Success")
+            return
+        }
+
         when (kind) {
             AuthKind.EmailLogin -> signUpViewModel.emailSignUp(tokenManager.getToken())
             AuthKind.MobileLink -> signUpViewModel.mobileSignUp(tokenManager.getToken())
@@ -193,7 +208,7 @@ class SignUpFragment(
 
     companion object {
         @JvmStatic
-        fun formEmailLogin() = SignUpFragment(AuthKind.EmailLogin)
+        fun forEmailLogin() = SignUpFragment(AuthKind.EmailLogin)
 
         @JvmStatic
         fun forWechatLink() = SignUpFragment(AuthKind.WechatLink)

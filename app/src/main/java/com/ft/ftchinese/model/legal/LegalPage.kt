@@ -1,6 +1,4 @@
-package com.ft.ftchinese.ui.webabout
-
-import com.ft.ftchinese.ui.webpage.WebpageMeta
+package com.ft.ftchinese.model.legal
 
 val legalPages = listOf(
     WebpageMeta(
@@ -14,3 +12,8 @@ val legalPages = listOf(
         showMenu = true,
     )
 )
+
+const val privacyConsentLine = """
+我已阅读并同意 [用户协议](http://www.ftacademy.cn/service.html) 和 [隐私政策](http://www.ftacademy.cn/privacy.html)
+"""
+

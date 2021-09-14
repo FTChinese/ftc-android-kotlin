@@ -134,6 +134,14 @@
             app:layout_constraintStart_toStartOf="@id/email_container"
             app:layout_constraintTop_toBottomOf="@id/confirm_password_container" />
 
+        <CheckBox
+            android:id="@+id/privacy_consent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="@id/email_container"
+            app:layout_constraintEnd_toEndOf="@id/email_container"
+            app:layout_constraintTop_toBottomOf="@id/sign_up_btn"/>
+
         <include layout="@layout/progress_indicator_circular"
             bind:inProgress="@{inProgress}"/>
 

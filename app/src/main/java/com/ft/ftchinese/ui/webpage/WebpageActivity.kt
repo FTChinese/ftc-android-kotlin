@@ -12,6 +12,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityWebpageBinding
+import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 

@@ -104,7 +104,7 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
                     } else {
                         // Show signup dialog.
                         SignUpFragment
-                            .formEmailLogin()
+                            .forEmailLogin()
                             .show(supportFragmentManager, "EmailLogIn")
                     }
                 }

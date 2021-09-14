@@ -14,6 +14,7 @@ import androidx.annotation.RequiresApi
 import androidx.browser.customtabs.CustomTabsIntent
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.tracking.GAAction
@@ -361,7 +362,8 @@ open class WVClient(
                 WebpageActivity.start(context, WebpageMeta(
                     title = "",
                     url = uri.toString()
-                ))
+                )
+                )
                 true
             }
         }

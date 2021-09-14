@@ -109,7 +109,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
 
         binding.signUp.onClick {
             SignUpFragment
-                .formEmailLogin()
+                .forEmailLogin()
                 .show(supportFragmentManager, "SignUpFragment")
         }
 

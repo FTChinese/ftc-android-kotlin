@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.webpage
+package com.ft.ftchinese.model.legal
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

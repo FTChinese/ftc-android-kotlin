@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentAcceptServiceDialogBinding
 import com.ft.ftchinese.store.ServiceAcceptance
-import com.ft.ftchinese.ui.webabout.legalPages
+import com.ft.ftchinese.model.legal.legalPages
 import com.ft.ftchinese.ui.webpage.WVViewModel
 import com.ft.ftchinese.ui.webpage.WebpageFragment
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAboutListBinding
+import com.ft.ftchinese.model.legal.legalPages
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
