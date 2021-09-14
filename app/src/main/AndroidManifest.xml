@@ -48,10 +48,6 @@
             android:label="@string/title_about_us"
             android:parentActivityName=".ui.main.MainActivity" />
         <activity
-            android:name=".ui.about.AboutActivity"
-            android:label="@string/title_about_us"
-            android:parentActivityName=".ui.main.MainActivity" />
-        <activity
             android:name=".ui.webpage.WebpageActivity"
             android:parentActivityName=".ui.webabout.AboutListActivity" />
         <activity
