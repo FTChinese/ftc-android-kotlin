@@ -14,7 +14,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.commit
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
@@ -34,7 +33,6 @@ import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.OrderManager
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.about.LegalDetailsFragment
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
@@ -406,11 +404,6 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             SocialShareFragment().show(supportFragmentManager, "TestBottomDialog")
         }
 
-        binding.btnService.setOnClickListener {
-            supportFragmentManager.commit {
-                add(android.R.id.content, LegalDetailsFragment.newInstance())
-            }
-        }
 
         binding.btnLatestOrder.setOnClickListener {
             LatestInvoiceActivity.start(this)
