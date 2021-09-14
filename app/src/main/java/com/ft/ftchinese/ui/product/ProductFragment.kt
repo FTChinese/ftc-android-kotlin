@@ -152,6 +152,7 @@ class ProductFragment : ScopedFragment(),
         override fun onBindViewHolder(holder: PriceItemViewHolder, position: Int) {
             val price = prices[position]
 
+            // Find out the price's applicable offer.
             val checkout = CheckoutItem.newInstance(
                 price = price,
                 m = sessionManager.loadAccount()?.membership ?: Membership(),
@@ -159,13 +160,17 @@ class ProductFragment : ScopedFragment(),
 
             info("Offer description ${checkout.discount?.description}")
 
+            // Display discount's description field.
             holder.setOfferDesc(checkout.discount?.description)
 
+            // Get the formatted price string.
             val priceText = formatPriceButton(requireContext(), checkout)
 
+            // Display price text and handle click event.
             when (price.cycle) {
                 Cycle.YEAR -> {
                     holder.setPrimaryButton(priceText, btnEnabled)
+                    // Handle click on the price button.
                     holder.primaryButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
                         viewModel.priceSelected.value = price
