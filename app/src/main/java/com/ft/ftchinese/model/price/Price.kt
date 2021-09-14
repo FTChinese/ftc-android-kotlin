@@ -53,6 +53,8 @@ data class Price(
             return null
         }
 
+        // Loop over this price's discounts to find out
+        // an applicable one.
         val filtered = offers.filter {
                 it.isValid() && filters.contains(it.kind)
             }
