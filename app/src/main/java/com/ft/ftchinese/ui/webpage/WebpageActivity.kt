@@ -32,7 +32,7 @@ class WebpageActivity : ScopedAppActivity() {
             setDisplayShowTitleEnabled(false)
         }
 
-        pageMeta = intent.getParcelableExtra(EXTRA_URL)
+        pageMeta = intent.getParcelableExtra(EXTRA_WEB_META)
 
         supportFragmentManager.commit {
             replace(R.id.web_view_holder, WebpageFragment.newInstance())
@@ -77,10 +77,10 @@ class WebpageActivity : ScopedAppActivity() {
     }
 
     companion object {
-        private const val EXTRA_URL = "extra_url"
+        private const val EXTRA_WEB_META = "extra_webpage_meta"
         fun start(context: Context, meta: WebpageMeta) {
             val intent = Intent(context, WebpageActivity::class.java).apply {
-                putExtra(EXTRA_URL, meta)
+                putExtra(EXTRA_WEB_META, meta)
 
             }
             context.startActivity(intent)
