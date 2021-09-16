@@ -1,16 +1,18 @@
 package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.model.fetch.Fetch
-import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.iapsubs.Subscription
-import com.ft.ftchinese.model.price.Price
+import com.ft.ftchinese.model.ftcsubs.AliPayIntent
+import com.ft.ftchinese.model.ftcsubs.Order
+import com.ft.ftchinese.model.ftcsubs.VerificationResult
+import com.ft.ftchinese.model.ftcsubs.WxPayIntent
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.request.OrderParams
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-object SubRepo : AnkoLogger {
+object FtcPayClient : AnkoLogger {
 
     fun listOrders(account: Account): List<Order> {
 
@@ -42,7 +44,7 @@ object SubRepo : AnkoLogger {
         }
     }
 
-    fun createWxOrder(account: Account, price: Price): WxPayIntent? {
+    fun createWxOrder(account: Account, params: OrderParams): WxPayIntent? {
 
         val (_, body) = Fetch()
             .post(Endpoint.subsBase(account.isTest) + "/wxpay/app")
@@ -51,9 +53,7 @@ object SubRepo : AnkoLogger {
             .noCache()
             .setClient()
             .setAppId() // Deprecated
-            .sendJson(json.toJsonString(
-                price.edition
-            ))
+            .sendJson(params.toJsonString())
             .endJsonText()
 
         info("Wx order: $body")
@@ -65,7 +65,7 @@ object SubRepo : AnkoLogger {
         }
     }
 
-    fun createAliOrder(account: Account, price: Price): AliPayIntent? {
+    fun createAliOrder(account: Account, params: OrderParams): AliPayIntent? {
 
         val (_, body) = Fetch()
             .post(Endpoint.subsBase(account.isTest) + "/alipay/app")
@@ -73,9 +73,7 @@ object SubRepo : AnkoLogger {
             .addHeaders(account.headers())
             .noCache()
             .setClient()
-            .sendJson(json.toJsonString(
-                price.edition
-            ))
+            .sendJson(params.toJsonString())
             .endJsonText()
 
         return if (body == null) {
