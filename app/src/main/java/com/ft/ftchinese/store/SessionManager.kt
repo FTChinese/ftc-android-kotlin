@@ -10,6 +10,7 @@ import com.ft.ftchinese.model.fetch.formatISODateTime
 import com.ft.ftchinese.model.fetch.formatLocalDate
 import com.ft.ftchinese.model.fetch.parseISODateTime
 import com.ft.ftchinese.model.fetch.parseLocalDate
+import com.ft.ftchinese.model.paywall.PaywallCache
 import com.ft.ftchinese.model.reader.*
 import org.jetbrains.anko.AnkoLogger
 
@@ -213,6 +214,7 @@ class SessionManager private constructor(context: Context) : AnkoLogger {
 
     fun logout() {
         AccountCache.clear()
+        PaywallCache.clear()
         sharedPreferences.edit {
             clear()
         }
