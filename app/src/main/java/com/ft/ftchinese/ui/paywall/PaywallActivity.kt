@@ -28,6 +28,7 @@ import com.ft.ftchinese.ui.product.ProductFragment
 import com.ft.ftchinese.ui.product.ProductViewModel
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.store.AccountCache
 import io.noties.markwon.Markwon
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -98,26 +99,21 @@ class PaywallActivity : ScopedAppActivity(),
         })
         paywallViewModel.isNetworkAvailable.value = isConnected
 
-        /**
-         * When a price button in ProductFragment is clicked,
-         * the selected Plan is passed.
-         */
-        productViewModel.priceSelected.observe(this, Observer {
-
+        productViewModel.checkoutItemSelected.observe(this) {
             val account = sessionManager.loadAccount()
 
             // If user is not logged in, start login.
             if (account == null) {
                 AuthActivity.startForResult(this)
-                return@Observer
+                return@observe
             }
 
             CheckOutActivity.startForResult(
                 activity = this,
                 requestCode = RequestCode.PAYMENT,
-                priceId = it.id
+                item = it,
             )
-        })
+        }
 
         /**
          * Load paywall from cache, and then from server.
@@ -179,7 +175,6 @@ class PaywallActivity : ScopedAppActivity(),
             replace(R.id.frag_customer_service, CustomerServiceFragment.newInstance())
         }
 
-//        markwon.setParsedMarkdown(binding.paymentGuide, markwon.toMarkdown(paywallGuide))
         /**
          * Show login button, or expiration message on the SubStatusFragment.
          */
@@ -189,7 +184,8 @@ class PaywallActivity : ScopedAppActivity(),
     // Load pricing data.
     private fun loadData(isRefreshing: Boolean) {
         // Fetch paywall from cache, then from server.
-        paywallViewModel.loadPaywall(isRefreshing)
+        // TODO: check paywall and build config matches.
+        paywallViewModel.loadPaywall(isRefreshing, AccountCache.get())
         paywallViewModel.refreshStripePrices()
     }
 

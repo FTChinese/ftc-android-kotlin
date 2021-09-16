@@ -21,11 +21,12 @@ fun formatPriceButton(ctx: Context, item: CheckoutItem): Spannable {
         ctx.getString(item.price.cycle.stringRes)
     )
 
-    // Show original price.
+    // Show original price only
     if (item.discount == null) {
         return SpannableString(payableStr)
     }
 
+    // If there's discount, cross the original price.
     val crossed = ctx.getString(
         R.string.formatter_price,
         getCurrencySymbol(item.price.currency),

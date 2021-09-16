@@ -173,14 +173,16 @@ class ProductFragment : ScopedFragment(),
                     // Handle click on the price button.
                     holder.primaryButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
-                        viewModel.priceSelected.value = price
+//                        viewModel.priceSelected.value = price
+                        viewModel.checkoutItemSelected.value = checkout
                     }
                 }
                 Cycle.MONTH -> {
                     holder.setSecondaryButton(priceText, btnEnabled)
                     holder.outlineButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
-                        viewModel.priceSelected.value = price
+//                        viewModel.priceSelected.value = price
+                        viewModel.checkoutItemSelected.value = checkout
                     }
                 }
             }

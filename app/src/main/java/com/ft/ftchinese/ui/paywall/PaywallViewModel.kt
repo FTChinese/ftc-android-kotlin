@@ -4,17 +4,18 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.paywall.FtcPriceCache
+import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.paywall.Paywall
+import com.ft.ftchinese.model.paywall.PaywallCache
 import com.ft.ftchinese.model.paywall.StripePriceCache
 import com.ft.ftchinese.model.price.Price
-import com.ft.ftchinese.model.ftcsubs.*
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.model.fetch.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -37,9 +38,9 @@ class PaywallViewModel(
     // The cached file are versioned therefore whenever a user
     // updates the app, the files retrieves by previous versions
     // will be ignored.
-    private suspend fun getCachedPaywall(): Paywall? {
+    private suspend fun getCachedPaywall(isTest: Boolean): Paywall? {
         return withContext(Dispatchers.IO) {
-            val data = cache.loadText(CacheFileNames.paywall)
+            val data = cache.loadText(CacheFileNames.paywallFile(isTest))
 
             if (!data.isNullOrBlank()) {
                 try {
@@ -54,16 +55,18 @@ class PaywallViewModel(
     }
 
     // Load paywall data from cache and then from server.
-    fun loadPaywall(isRefreshing: Boolean) {
+    fun loadPaywall(isRefreshing: Boolean, account: Account?) {
+        val isTest = account?.isTest ?: false
+
         viewModelScope.launch {
 
             // If not manually refreshing
             if (!isRefreshing) {
-                val pw = getCachedPaywall()
+                val pw = getCachedPaywall(isTest)
                 if (pw != null) {
                     paywallResult.value = FetchResult.Success(pw)
                     // Update the in-memory cache.
-                    FtcPriceCache.update(pw.products)
+                    PaywallCache.update(pw)
                 }
             }
 
@@ -75,37 +78,24 @@ class PaywallViewModel(
 
             try {
                 val paywall = withContext(Dispatchers.IO) {
-                    PaywallClient.retrieve()
+                    PaywallClient.retrieve(account?.isTest ?: false)
                 }
 
                 if (paywall == null) {
                     paywallResult.value = FetchResult.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
-
+                
                 paywallResult.value = FetchResult.Success(paywall.value)
-                FtcPriceCache.update(paywall.value.products)
+                PaywallCache.update(paywall.value)
 
                 withContext(Dispatchers.IO) {
-                    cache.saveText(CacheFileNames.paywall, paywall.raw)
+                    cache.saveText(CacheFileNames.paywallFile(isTest), paywall.raw)
                 }
 
             } catch (e: Exception) {
                 info(e)
                 paywallResult.value = FetchResult.fromException(e)
-            }
-        }
-    }
-
-    // Retrieve ftc pricing plans in background.
-    fun refreshFtcPrices() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val result = PaywallClient.listPrices() ?: return@launch
-                FtcPriceCache.prices = result.value
-                cache.saveText(CacheFileNames.ftcPrices, result.raw)
-            } catch (e: Exception) {
-                info(e)
             }
         }
     }

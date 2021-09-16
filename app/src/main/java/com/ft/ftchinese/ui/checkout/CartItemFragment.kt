@@ -9,8 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentCartItemBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.model.fetch.FetchResult
-import org.jetbrains.anko.support.v4.toast
 
 /**
  * Used to show the an overview of the item user purchased.
@@ -52,16 +50,22 @@ class CartItemFragment : ScopedFragment() {
             ViewModelProvider(this).get(CheckOutViewModel::class.java)
         } ?: throw Exception("Invalid activity")
 
-        checkoutViewModel.counterResult.observe(viewLifecycleOwner) { result: FetchResult<CheckoutCounter> ->
-            when (result) {
-                is FetchResult.LocalizedError -> toast(result.msgId)
-                is FetchResult.Error -> result.exception.message?.let { toast(it) }
-                is FetchResult.Success -> {
 
-                    val counter = result.data
-                    binding.cartItem = CartItem.from(requireContext(), counter.item)
-                }
-            }
+//        checkoutViewModel.counterResult.observe(viewLifecycleOwner) { result: FetchResult<CheckoutCounter> ->
+//            when (result) {
+//                is FetchResult.LocalizedError -> toast(result.msgId)
+//                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+//                is FetchResult.Success -> {
+//
+//                    val counter = result.data
+//                    binding.cartItem = CartItem.from(requireContext(), counter.item)
+//                }
+//            }
+//        }
+
+        // Use the CheckoutItem to display ui.
+        checkoutViewModel.counterLiveData.observe(viewLifecycleOwner) {
+            binding.cartItem = CartItem.from(requireContext(), it.item)
         }
     }
 

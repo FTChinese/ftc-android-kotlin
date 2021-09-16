@@ -8,14 +8,14 @@
     <data>
         <import type="android.view.View"/>
         <variable
-            name="intents"
-            type="com.ft.ftchinese.ui.checkout.CheckoutIntents" />
-        <variable
-            name="payButtonText"
+            name="warning"
             type="String" />
         <variable
-            name="payButtonEnabled"
-            type="Boolean" />
+            name="methodsEnabled"
+            type="com.ft.ftchinese.ui.checkout.PaymentMethodsEnabled" />
+        <variable
+            name="paymentButton"
+            type="com.ft.ftchinese.ui.checkout.PaymentButton" />
         <variable
             name="inProgress"
             type="Boolean" />
@@ -52,7 +52,7 @@
                     style="@style/OrigamiText.Body2.Warning"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@{intents.warning}"
+                    android:text="@{warning}"
                     android:layout_marginLeft="@dimen/space_16"
                     android:layout_marginRight="@dimen/space_16"
                     android:textAlignment="textStart"/>
@@ -81,7 +81,7 @@
                         android:drawablePadding="20dp"
                         android:text="@string/pay_brand_ali"
                         android:textSize="18sp"
-                        android:enabled="@{intents.permitAliPay &amp; !inProgress}"/>
+                        android:enabled="@{methodsEnabled.alipay &amp; !inProgress}"/>
 
                     <RadioButton
                         android:id="@+id/wxpay_btn"
@@ -95,7 +95,7 @@
                         android:drawablePadding="20dp"
                         android:text="@string/pay_brand_wechat"
                         android:textSize="18sp"
-                        android:enabled="@{intents.permitWxPay &amp; !inProgress }"/>
+                        android:enabled="@{methodsEnabled.wechat &amp; !inProgress }"/>
 
                     <!-- NOTE: the transparent background added here
                      is just a hack. It seems when setting button to null, there is a round button flasing in the background when you clicked a radio button. -->
@@ -106,7 +106,7 @@
                         android:paddingTop="16dp"
                         android:paddingBottom="8dp"
                         android:button="@null"
-                        android:enabled="@{intents.permitStripe &amp; !inProgress}"
+                        android:enabled="@{methodsEnabled.stripe &amp; !inProgress}"
                         android:drawableStart="@drawable/stripe"
                         android:drawableEnd="@drawable/btn_radio"
                         android:drawablePadding="20dp"
@@ -123,8 +123,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/AppButton.BottomSticky"
-            android:text="@{payButtonText ?? @string/check_out}"
-            android:enabled="@{payButtonEnabled &amp; !inProgress}"
+            android:text="@{paymentButton.text ?? @string/check_out}"
+            android:enabled="@{paymentButton.enabled &amp; !inProgress}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintVertical_bias="1.0"/>
 

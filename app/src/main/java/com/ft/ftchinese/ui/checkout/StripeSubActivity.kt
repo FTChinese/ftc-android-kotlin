@@ -22,6 +22,7 @@ import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.ui.formatter.formatEdition
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.ft.ftchinese.ui.member.MemberActivity
@@ -34,8 +35,6 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
-
-private const val EXTRA_STRIPE_PRICE_ID = "extra_stripe_price_id"
 
 /**
  * See https://stripe.com/docs/mobile/android/basic
@@ -161,8 +160,8 @@ class StripeSubActivity : ScopedAppActivity(),
 
         val a = sessionManager.loadAccount() ?: return
 
-        intent.getStringExtra(EXTRA_STRIPE_PRICE_ID)?.let { priceId: String ->
-            checkOutViewModel.initStripeCounter(priceId, a.membership)
+        intent.getParcelableExtra<Price>(EXTRA_STRIPE_PRICE)?.let {
+            checkOutViewModel.putIntoStripeCart(it, a.membership)
         }
 
         binding.tvPaymentMethod.setOnClickListener {
@@ -296,8 +295,9 @@ class StripeSubActivity : ScopedAppActivity(),
 
     private fun startSubscribing() {
         val account = sessionManager.loadAccount() ?: return
-        val p = checkOutViewModel.counter?.price ?: return
-        val intent = checkOutViewModel.counter?.intents?.findIntent(PayMethod.STRIPE) ?: return
+        val counter = checkOutViewModel.counterLiveData.value ?: return
+        val p = counter.item.price
+        val intent = counter.intents.findIntent(PayMethod.STRIPE) ?: return
 
         if (account.stripeId == null) {
             toast("You are not a stripe customer yet")
@@ -494,12 +494,12 @@ class StripeSubActivity : ScopedAppActivity(),
             )
         }
 
-        val edition = checkOutViewModel.counter?.price?.let {
+        val edition = checkOutViewModel.counterLiveData.value?.let {
             getString(
                 R.string.order_subscribed_plan,
                 formatEdition(
                     this,
-                    it.edition,
+                    it.item.price.edition,
                 )
             )
         }
@@ -551,12 +551,24 @@ class StripeSubActivity : ScopedAppActivity(),
     }
 
     companion object {
-
+        @Deprecated("")
+        private const val EXTRA_STRIPE_PRICE_ID = "extra_stripe_price_id"
+        private const val EXTRA_STRIPE_PRICE = "extra_stripe_price"
         @JvmStatic
         fun startForResult(activity: Activity, requestCode: Int, priceId: String) {
             activity.startActivityForResult(
                 Intent(activity, StripeSubActivity::class.java).apply {
                     putExtra(EXTRA_STRIPE_PRICE_ID, priceId)
+                },
+                requestCode
+            )
+        }
+
+        @JvmStatic
+        fun startForResult(activity: Activity, requestCode: Int, price: Price) {
+            activity.startActivityForResult(
+                Intent(activity, StripeSubActivity::class.java).apply {
+                    putExtra(EXTRA_STRIPE_PRICE, price)
                 },
                 requestCode
             )

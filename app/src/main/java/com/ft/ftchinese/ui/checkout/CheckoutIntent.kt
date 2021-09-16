@@ -1,31 +1,28 @@
 package com.ft.ftchinese.ui.checkout
 
+import android.content.Context
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.price.Edition
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.model.reader.Membership
-
-data class CheckoutIntent(
-    val orderKind: OrderKind,
-    val payMethods: List<PayMethod>,
-)
+import com.ft.ftchinese.ui.formatter.PriceStringBuilder
 
 data class CheckoutIntents(
     val intents: List<CheckoutIntent>,
     val warning: String,
 ) {
-    val payMethods: List<PayMethod>
+    private val payMethods: List<PayMethod>
         get() = intents.flatMap { it.payMethods }
 
-    val permitAliPay: Boolean
-        get() = payMethods.contains(PayMethod.ALIPAY)
-
-    val permitWxPay: Boolean
-        get() = payMethods.contains(PayMethod.WXPAY)
-
-    val permitStripe: Boolean
-        get() = payMethods.contains(PayMethod.STRIPE)
+    val payMethodsState: PaymentMethodsEnabled
+        get() = PaymentMethodsEnabled(
+            alipay = payMethods.contains(PayMethod.ALIPAY),
+            wechat = payMethods.contains(PayMethod.WXPAY),
+            stripe = payMethods.contains(PayMethod.STRIPE)
+        )
 
     /**
      * Find the intent containing the specified payment method.
@@ -81,7 +78,7 @@ data class CheckoutIntents(
                                     orderKind = OrderKind.Create,
                                     payMethods = listOf(PayMethod.STRIPE)
                                 )),
-                                warning = "* 剩余时间超出允许的最长续订期限，无法继续使用支付宝/微信再次购买；\n可以转为Stripe订阅，当前剩余时间将在新订阅失效后在此启用。",
+                                warning = "* 剩余时间(${m.localizeExpireDate()})超出允许的最长续订期限，无法继续使用支付宝/微信再次购买；\n* 可以转为Stripe订阅，当前剩余时间将在新订阅失效后再此启用。",
                             )
                         }
                         // Ali/Wx member can renew via Ali/Wx, or Stripe with remaining days put to reserved state.
@@ -228,5 +225,62 @@ data class CheckoutIntents(
     }
 }
 
+data class CheckoutIntent(
+    val orderKind: OrderKind,
+    val payMethods: List<PayMethod>,
+)
 
-
+/**
+ * Collects all data required for final payment after
+ * user selected a payment method.
+ */
+data class PaymentIntent (
+    val item: CheckoutItem,
+    val orderKind: OrderKind,
+    val payMethod: PayMethod
+) {
+    fun composeBtnText(ctx: Context): String {
+        return when (payMethod) {
+            PayMethod.ALIPAY, PayMethod.WXPAY -> {
+                // Ali/Wx pay button have two groups:
+                // CREATE/RENEW/UPGRADE: 支付宝支付 ¥258.00 or 微信支付 ¥258.00
+                // ADD_ON: 购买订阅期限
+                if (orderKind == OrderKind.AddOn) {
+                    ctx.getString(orderKind.stringRes)
+                } else {
+                    ctx.getString(
+                        R.string.formatter_check_out,
+                        ctx.getString(payMethod.stringRes),
+                        PriceStringBuilder
+                            .fromPrice(
+                                price = item.price,
+                                discount = item.discount,
+                                withCycle = false
+                            )
+                            .build(ctx),
+                    )
+                }
+            }
+            // Stripe button has three groups:
+            // CREATE: Stripe订阅
+            // RENEW: 转为Stripe订阅
+            // UPGRADE: Stripe订阅高端会员
+            // SwitchCycle: Stripe变更订阅周期
+            PayMethod.STRIPE -> {
+                // if current pay method is not stripe.
+                // If current pay method is stripe.
+                when (orderKind) {
+                    OrderKind.Create -> ctx.getString(payMethod.stringRes)
+                    // Renew is used by alipay/wxpay switching to Stripe.
+                    OrderKind.Renew -> ctx.getString(R.string.switch_to_stripe)
+                    // This might be stripe standard upgrade, or ali/wx standard switching payment method.
+                    OrderKind.Upgrade -> ctx.getString(payMethod.stringRes) + ctx.getString(item.price.tier.stringRes)
+                    OrderKind.SwitchCycle -> ctx.getString(R.string.pay_brand_stripe) + ctx.getString(orderKind.stringRes)
+                    OrderKind.AddOn -> "Stripe订阅不支持一次性购买"
+                }
+            }
+            PayMethod.APPLE -> "无法处理苹果订阅"
+            PayMethod.B2B -> "暂不支持企业订阅"
+        }
+    }
+}

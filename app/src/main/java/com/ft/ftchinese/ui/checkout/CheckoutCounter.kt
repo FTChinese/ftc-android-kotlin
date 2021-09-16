@@ -10,6 +10,7 @@ import org.jetbrains.anko.AnkoLogger
  * CheckoutCounter is used to build the CheckOutActivity based on the
  * price user chosen and current subscription status.
  */
+@Deprecated("")
 class CheckoutCounter(
     val price: Price,
     val member: Membership,
@@ -17,20 +18,47 @@ class CheckoutCounter(
     // Use might enjoy multiple discount at the same moment:
     // promotion offered by FTC, or reward for timely renewal.
 //    private val discounts = mutableListOf<Discount>()
+    @Deprecated("")
     val intents: CheckoutIntents = CheckoutIntents.newInstance(member, price.edition)
     // Get the selected price and optional discount.
+    @Deprecated("")
     val item = CheckoutItem.newInstance(price, member)
+}
 
-    fun payMethodAllowed(method: PayMethod) = intents.payMethods.contains(method)
-
-    fun payButtonParams(method: PayMethod): PayButtonParams? {
+data class PaymentCounter (
+    val item: CheckoutItem,
+    val intents: CheckoutIntents, // Deduced intents.
+) {
+    fun selectPaymentMethod(method: PayMethod): PaymentIntent? {
         return intents.findIntent(method)?.let {
-            PayButtonParams(
-                selectedPayMethod = method,
+            PaymentIntent(
+                item = item,
                 orderKind = it.orderKind,
-                price = price,
-                discount = item.discount
+                payMethod = method
+            )
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun newFtcInstance(item: CheckoutItem, m: Membership): PaymentCounter {
+            return PaymentCounter(
+                item = item,
+                intents = CheckoutIntents.newInstance(m, item.price.edition)
+            )
+        }
+
+        @JvmStatic
+        fun newStripeInstance(price: Price, m: Membership): PaymentCounter {
+            return PaymentCounter(
+                item = CheckoutItem(
+                    price = price,
+                    discount = null,
+                ),
+                intents = CheckoutIntents.newInstance(m, price.edition),
             )
         }
     }
 }
+
+
