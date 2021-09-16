@@ -6,13 +6,11 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.ftcsubs.Order
-import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.iapsubs.IAPSubsResult
 import com.ft.ftchinese.repository.AppleClient
 import com.ft.ftchinese.repository.StripeClient
-import com.ft.ftchinese.repository.SubRepo
-import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.ApiRequest
 import com.ft.ftchinese.model.fetch.FetchResult
@@ -21,8 +19,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
-import java.io.ByteArrayInputStream
-import java.io.InputStream
 
 class AccountViewModel : BaseViewModel(), AnkoLogger {
 
@@ -80,7 +76,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val m = withContext(Dispatchers.IO) {
-                    SubRepo.useAddOn(account)
+                    FtcPayClient.useAddOn(account)
                 }
 
                 addOnResult.value = if (m == null) {
@@ -240,7 +236,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val orders = withContext(Dispatchers.IO) {
-                    SubRepo.listOrders(account)
+                    FtcPayClient.listOrders(account)
                 }
 
                 ordersResult.value = FetchResult.Success(orders)
