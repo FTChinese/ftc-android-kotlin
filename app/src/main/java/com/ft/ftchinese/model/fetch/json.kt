@@ -5,6 +5,7 @@ import com.beust.klaxon.JsonValue
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.enums.*
+import com.ft.ftchinese.model.price.DiscountStatus
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import org.threeten.bp.LocalDate
@@ -45,6 +46,9 @@ annotation class KOrderKind
 
 @Target(AnnotationTarget.FIELD)
 annotation class KOfferKind
+
+@Target(AnnotationTarget.FIELD)
+annotation class KDiscountStatus
 
 @Target(AnnotationTarget.FIELD)
 annotation class KStripeSubStatus
@@ -226,6 +230,26 @@ val offerKindConverter = object : Converter {
     }
 }
 
+val discountStatusConverter = object : Converter {
+    override fun canConvert(cls: Class<*>): Boolean {
+        return cls == DiscountStatus::class.java
+    }
+
+    override fun fromJson(jv: JsonValue): Any? {
+        return jv.string?.let {
+            DiscountStatus.fromString(it)
+        }
+    }
+
+    override fun toJson(value: Any): String {
+        return if (value is DiscountStatus) {
+            """ "$value" """
+        } else {
+            """null"""
+        }
+    }
+}
+
 val payMethodConverter = object : Converter {
     override fun canConvert(cls: Class<*>): Boolean {
         return cls == PayMethod::class.java
@@ -350,3 +374,4 @@ val json = Klaxon()
     .fieldConverter(KPriceSource::class, priceSourceConverter)
     .fieldConverter(KAddOnSource::class, addOnSourceConverter)
     .fieldConverter(KOfferKind::class, offerKindConverter)
+    .fieldConverter(KDiscountStatus::class, discountStatusConverter)
