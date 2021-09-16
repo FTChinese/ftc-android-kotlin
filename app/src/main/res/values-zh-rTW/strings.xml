@@ -189,9 +189,9 @@
     <string name="refresh_paywall">獲取最新產品價格…</string>
     <string name="paywall_updated">資料已更新</string>
     <!-- Example: ¥1,998/年 -->
-    <string name="formatter_price_cycle" translatable="false">%1$s%2$,.0f/%3$s</string>
+    <string name="formatter_price_cycle" translatable="false">%1$s%2$,.2f/%3$s</string>
     <!-- Example: ¥1,998.00 -->
-    <string name="formatter_price">%1$s%2$,.0f</string>
+    <string name="formatter_price">%1$s%2$,.2f</string>
     <!-- Example: 支付宝支付 ¥1,998.00-->
     <string name="formatter_check_out">%1$s %2$s</string>
     <string name="formatter_original_price">原價 %1$s</string>
