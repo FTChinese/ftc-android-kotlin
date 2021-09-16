@@ -11,7 +11,7 @@ object AppleClient {
         val origTxId = account.membership.appleSubsId ?: throw Exception("Not an Apple subscription")
 
         val (_, body) = Fetch()
-            .patch(Endpoint.subsBase(account.isTest) + "/apple/subs/$origTxId")
+            .patch(Endpoint.refreshIAP(account.isTest, origTxId))
             .noCache()
             .endJsonText()
 

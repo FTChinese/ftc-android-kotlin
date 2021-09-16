@@ -1,23 +1,18 @@
 package com.ft.ftchinese.repository
 
 import com.beust.klaxon.Klaxon
-import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.JSONResult
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.stripesubs.SubParams
-import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.StripeCustomer
-import com.ft.ftchinese.model.stripesubs.StripeSetupIntent
+import com.ft.ftchinese.model.stripesubs.StripeSubsResult
+import com.ft.ftchinese.model.stripesubs.SubParams
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
 object StripeClient : AnkoLogger {
-
-    // For stripe pay, we do not distinguish test account.
-    private val baseUrl = Endpoint.subsBase(BuildConfig.DEBUG) + "/stripe"
 
     // Retrieve a list of stripe prices.
     // If use is logged-in and it is a test account, use sandbox
@@ -25,7 +20,7 @@ object StripeClient : AnkoLogger {
     fun listPrices(): JSONResult<List<Price>>? {
 
         val (_, body) = Fetch()
-            .get("$baseUrl/prices")
+            .get(Endpoint.stripePrices)
             .noCache()
             .endJsonText()
 
@@ -43,7 +38,7 @@ object StripeClient : AnkoLogger {
 
     fun createCustomer(account: Account): JSONResult<StripeCustomer>? {
         val (_, body) = Fetch()
-            .post("$baseUrl/customers")
+            .post(Endpoint.stripeCustomers)
             .setUserId(account.id)
             .noCache()
             .sendJson()
@@ -63,7 +58,7 @@ object StripeClient : AnkoLogger {
 
     fun retrieveCustomer(account: Account): JSONResult<StripeCustomer>? {
         val (_, body) = Fetch()
-            .get("$baseUrl/customers/${account.stripeId}")
+            .get("${Endpoint.stripeCustomers}/${account.stripeId}")
             .setUserId(account.id)
             .noCache()
             .endJsonText()
@@ -83,7 +78,7 @@ object StripeClient : AnkoLogger {
     // TODO: define a class for the parameters.
     fun setDefaultPaymentMethod(account: Account, pmId: String): JSONResult<StripeCustomer>? {
         val (_, body) = Fetch()
-            .post("$baseUrl/customers/${account.stripeId}/default-payment-method")
+            .post("${Endpoint.stripeCustomers}/${account.stripeId}/default-payment-method")
             .setUserId(account.id)
             .noCache()
             .sendJson(Klaxon().toJsonString(mapOf(
@@ -109,7 +104,7 @@ object StripeClient : AnkoLogger {
         }
 
         val (_, body) = Fetch()
-            .post("$baseUrl/customers/${account.stripeId}/ephemeral-keys")
+            .post("${Endpoint.stripeCustomers}/${account.stripeId}/ephemeral-keys")
             .setUserId(account.id)
             .query("api_version", apiVersion)
             .noCache()
@@ -122,7 +117,7 @@ object StripeClient : AnkoLogger {
     fun createSubscription(account: Account, params: SubParams): StripeSubsResult? {
 
         val (_, body ) = Fetch()
-            .post("$baseUrl/subs")
+            .post(Endpoint.stripeSubs)
             .setUserId(account.id)
             .noCache()
             .sendJson(json.toJsonString(params))
@@ -141,7 +136,7 @@ object StripeClient : AnkoLogger {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
-            .post("$baseUrl/subs/$subsId/refresh")
+            .post("${Endpoint.stripeSubs}/$subsId/refresh")
             .setUserId(account.id)
             .noCache()
             .sendJson()
@@ -161,7 +156,7 @@ object StripeClient : AnkoLogger {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
-            .post("$baseUrl/subs/$subsId")
+            .post("${Endpoint.stripeSubs}/$subsId")
             .setUserId(account.id)
             .noCache()
             .sendJson(json.toJsonString(params))
@@ -178,7 +173,7 @@ object StripeClient : AnkoLogger {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
-            .post("$baseUrl/subs/$subsId/cancel")
+            .post("${Endpoint.stripeSubs}/$subsId/cancel")
             .setUserId(account.id)
             .noCache()
             .sendJson()
@@ -195,7 +190,7 @@ object StripeClient : AnkoLogger {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
         val (_, body) = Fetch()
-            .post("$baseUrl/subs/$subsId/reactivate")
+            .post("${Endpoint.stripeSubs}/$subsId/reactivate")
             .setUserId(account.id)
             .noCache()
             .sendJson()
