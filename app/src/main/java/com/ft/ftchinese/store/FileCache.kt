@@ -11,11 +11,13 @@ import java.io.FileInputStream
 
 object CacheFileNames {
     const val stripePrices = "subs_stripe_prices.${BuildConfig.VERSION_CODE}.json"
-    const val ftcPrices = "subs_ftc_prices.${BuildConfig.VERSION_CODE}.json"
-    const val paywall = "subs_paywall.${BuildConfig.VERSION_CODE}.json"
     const val stripeCustomer = "account_stripe_customer.${BuildConfig.VERSION_CODE}.json"
     const val wxAvatar = "wx_avatar.jpg"
     const val splashSchedule = "splash_schedule.json"
+
+    fun paywallFile(isTest: Boolean): String {
+        return "subs_paywall.${BuildConfig.VERSION_CODE}.${if (isTest) "test" else "live"}.json"
+    }
 }
 
 val templateCache: MutableMap<String, String> = HashMap()
