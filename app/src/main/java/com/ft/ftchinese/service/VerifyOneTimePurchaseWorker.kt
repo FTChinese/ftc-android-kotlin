@@ -5,7 +5,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.ft.ftchinese.model.ftcsubs.PaymentResult
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.repository.SubRepo
+import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.PaymentManager
 import com.ft.ftchinese.store.SessionManager
@@ -63,7 +63,7 @@ class VerifyOneTimePurchaseWorker(appContext: Context, workerParams: WorkerParam
         }
 
         try {
-            val result = SubRepo.verifyOrder(account, pr.ftcOrderId) ?: return Result.failure()
+            val result = FtcPayClient.verifyOrder(account, pr.ftcOrderId) ?: return Result.failure()
             info(result)
 
             InvoiceStore.getInstance(ctx).savePayResult(result.payment)

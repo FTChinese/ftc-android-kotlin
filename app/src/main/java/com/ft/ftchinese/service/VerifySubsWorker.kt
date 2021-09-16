@@ -15,7 +15,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.repository.AppleClient
 import com.ft.ftchinese.repository.StripeClient
-import com.ft.ftchinese.repository.SubRepo
+import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.PaymentManager
 import com.ft.ftchinese.store.SessionManager
@@ -104,7 +104,7 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
 
     private fun migrateAddOn(account: Account): Result {
         try {
-            val m = SubRepo.useAddOn(account) ?: return Result.retry()
+            val m = FtcPayClient.useAddOn(account) ?: return Result.retry()
             SessionManager.getInstance(ctx).saveMembership(m)
             return Result.success()
         } catch (e: Exception) {
@@ -151,7 +151,7 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         }
 
         try {
-            val result = SubRepo.verifyOrder(account, pr.ftcOrderId) ?: return Result.failure()
+            val result = FtcPayClient.verifyOrder(account, pr.ftcOrderId) ?: return Result.failure()
             info(result)
 
             InvoiceStore.getInstance(ctx).savePayResult(result.payment)
