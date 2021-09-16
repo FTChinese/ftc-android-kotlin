@@ -12,9 +12,10 @@ import com.ft.ftchinese.model.price.Discount
 import com.ft.ftchinese.model.price.Price
 
 /**
- * Produces string like:
- * ¥1,998 by default
- * or ¥1,998/年 if cycle is provided
+ * Build price string user will actually pay.
+ * String like:
+ * ¥1,998 by default or
+ * ¥1,998/年 if cycle is provided
  */
 class PriceStringBuilder(
     val currency: String,
