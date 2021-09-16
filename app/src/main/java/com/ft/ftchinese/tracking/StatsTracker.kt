@@ -99,7 +99,7 @@ class StatsTracker private constructor(context: Context) {
         tracker.send(HitBuilders.EventBuilder()
             .setCategory(GACategory.SUBSCRIPTION)
             .setAction(price.gaAction)
-            .setLabel(PaywallTracker.from?.label)
+            .setLabel(PaywallTracker.from?.label ?: "")
             .build())
     }
 
