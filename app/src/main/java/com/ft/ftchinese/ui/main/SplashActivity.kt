@@ -244,7 +244,7 @@ class SplashActivity : ScopedAppActivity() {
     // If you call is in a non-Main coroutine, it crashes.
     private fun exit(showAd: Boolean = false) {
         Log.i(TAG, "Exiting Splash Activity")
-        showSystemUI()
+//        showSystemUI()
         MainActivity.start(this)
         setupWorker()
         finish()
@@ -259,9 +259,9 @@ class SplashActivity : ScopedAppActivity() {
                 View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
     }
 
-    private fun showSystemUI() {
-        binding.adContainer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-    }
+//    private fun showSystemUI() {
+//        binding.adContainer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+//    }
 
     override fun onResume() {
         super.onResume()

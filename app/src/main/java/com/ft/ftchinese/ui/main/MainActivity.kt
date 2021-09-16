@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.webkit.WebView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.widget.SearchView
@@ -132,6 +133,7 @@ class MainActivity : ScopedAppActivity(),
             wxInfoViewModel.isNetworkAvailable.value = it
         }
 
+        showSystemUI()
         setupViewModel()
 
         // Set ViewPager adapter
@@ -150,6 +152,10 @@ class MainActivity : ScopedAppActivity(),
 
         showTermsAndConditions()
         setupWorker()
+    }
+
+    private fun showSystemUI() {
+        binding.rootContainer.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
     }
 
     private fun setupViewModel() {
