@@ -232,17 +232,25 @@ data class Membership(
             autoRenew
         }
 
+    /**
+     * What kind of offer an existing membership could enjoy
+     * for next round of purchase when using wechat/alipay.
+     * OfferKind.Promotion always applies to anyone.
+     */
     @Json(ignored = true)
     val offerKinds: List<OfferKind>
         get() = when {
+            // For zero membership.
             tier == null -> listOf(
                 OfferKind.Promotion,
                 OfferKind.Introductory,
             )
+            // Actually expired.
             autoRenewOffExpired -> listOf(
                 OfferKind.Promotion,
                 OfferKind.WinBack,
             )
+            // Current valid.
             else -> listOf(
                 OfferKind.Promotion,
                 OfferKind.Retention
