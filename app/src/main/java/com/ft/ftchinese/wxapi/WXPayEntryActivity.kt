@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
-import com.ft.ftchinese.model.paywall.FtcPriceCache
+import com.ft.ftchinese.model.paywall.PaywallCache
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.OrderManager
@@ -113,7 +113,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
                     val order = orderManager?.load()
 
                     if (order != null) {
-                        tracker?.buyFail(FtcPriceCache.find(order.edition))
+                        tracker?.buyFail(PaywallCache.get().findPrice(order.edition))
                     }
                 }
                 // 用户取消
