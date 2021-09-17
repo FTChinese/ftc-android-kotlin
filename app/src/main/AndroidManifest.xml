@@ -10,22 +10,20 @@
             <data android:mimeType="text/plain" />
         </intent>
 
-<!--        https://developers.weixin.qq.com/doc/oplatform/Mobile_App/Access_Guide/Android.html#jump2-->
+        <!-- https://developers.weixin.qq.com/doc/oplatform/Mobile_App/Access_Guide/Android.html#jump2 -->
         <package android:name="com.tencent.mm" />
         <package android:name="com.eg.android.AlipayGphone" />
         <package android:name="hk.alipay.wallet" />
-    </queries>
-
-    <!--  Wxpay actually does not require extra permissions. -->
-
-    <!--  Alipay permission  -->
+    </queries> <!-- Wxpay actually does not require extra permissions. -->
+    <!-- Alipay permission -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- If your app uses scoped storage, it should request storage-related permissions only for devices that run Android 9 (API level 28) or lower. -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
 
     <application
         android:allowBackup="false"
@@ -38,7 +36,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".wxapi.WxBaseActivity" />
+            android:name=".ui.TestComposeActivity"
+            android:exported="true" />
+        <activity android:name=".wxapi.WxBaseActivity" />
         <activity
             android:name=".ui.webabout.AboutListActivity"
             android:label="@string/title_about_us"
@@ -57,9 +57,9 @@
         <activity
             android:name=".ui.main.SplashActivity"
             android:configChanges="orientation"
+            android:exported="true"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.SplashScreen"
-            android:exported="true">
+            android:theme="@style/AppTheme.SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -73,9 +73,9 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".ui.channel.SearchableActivity"
+            android:exported="false"
             android:launchMode="singleTop"
-            android:parentActivityName=".ui.main.MainActivity"
-            android:exported="false">
+            android:parentActivityName=".ui.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
@@ -140,10 +140,10 @@
             android:parentActivityName=".ui.paywall.PaywallActivity" />
         <activity
             android:name=".ui.checkout.StripeSubActivity"
+            android:exported="true"
             android:label="@string/pay_method_stripe"
             android:launchMode="singleTask"
-            android:parentActivityName=".ui.checkout.CheckOutActivity"
-            android:exported="true">
+            android:parentActivityName=".ui.checkout.CheckOutActivity">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
