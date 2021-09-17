@@ -1,10 +1,9 @@
 package com.ft.ftchinese.repository
 
-import com.ft.ftchinese.model.fetch.ServerError
 import com.ft.ftchinese.model.reader.ReadingDuration
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.*
-import kotlin.test.assertTrue
 
 class AuthClientTest {
     @Test fun readingDuration() {
