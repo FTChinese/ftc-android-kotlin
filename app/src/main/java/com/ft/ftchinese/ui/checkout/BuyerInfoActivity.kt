@@ -16,13 +16,12 @@ import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.webpage.ChromeClient
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.webpage.WVClient
-import com.ft.ftchinese.ui.dialog.DialogParams
-import com.ft.ftchinese.ui.dialog.SimpleDialogFragment
+import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.member.MemberActivity
+import com.ft.ftchinese.ui.webpage.ChromeClient
+import com.ft.ftchinese.ui.webpage.WVClient
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -142,10 +141,7 @@ class BuyerInfoActivity : ScopedAppActivity() {
     @JavascriptInterface
     fun wvAlert(msg: String) {
         Log.i(TAG, "Show alert: $msg")
-        SimpleDialogFragment.newInstance(DialogParams(
-            positive = getString(R.string.action_ok),
-            message = msg
-        ))
+        AlertDialogFragment.newMsgInstance(msg)
             .show(supportFragmentManager, "AddressSubmitted")
     }
 

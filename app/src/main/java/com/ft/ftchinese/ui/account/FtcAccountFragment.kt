@@ -17,10 +17,10 @@ import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.ui.dialog.CreateCustomerDialogFragment
 import com.ft.ftchinese.ui.customer.CustomerActivity
 import com.ft.ftchinese.ui.customer.CustomerViewModel
 import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
+import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.lists.TwoLineItemViewHolder
 import com.ft.ftchinese.ui.wxlink.LinkWxDialogFragment
 import com.ft.ftchinese.viewmodel.AccountViewModel
@@ -193,22 +193,24 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
         // CustomerActivity; otherwise pop up a dialog urging
         // user to become a Stripe customer.
         private fun onClickStripe() {
-            if (AccountCache.get()?.stripeId.isNullOrBlank()) {
-                CreateCustomerDialogFragment()
-                    .onPositiveButtonClicked { dialog, _ ->
-                        AccountCache.get()?.let {
-                            toast(R.string.stripe_init)
-                            customerViewModel.createCustomer(it)
-                            dialog.dismiss()
-                        }
-                    }
-                    .onNegativeButtonClicked { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    .show(childFragmentManager, "CreateStripeCustomer")
+            val account = sessionManager.loadAccount() ?: return
+
+            if (!account.stripeId.isNullOrBlank()) {
+                CustomerActivity.start(context)
                 return
             }
-            CustomerActivity.start(context)
+
+            AlertDialogFragment
+                .newStripeCustomer(account.email)
+                .onPositiveButtonClicked { dialog, _ ->
+                    toast(R.string.stripe_init)
+                    customerViewModel.createCustomer(account)
+                    dialog.dismiss()
+                }
+                .onNegativeButtonClicked { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show(childFragmentManager, "CreateStripeCustomer")
         }
 
         // If email-wechat linked, show wechat details;

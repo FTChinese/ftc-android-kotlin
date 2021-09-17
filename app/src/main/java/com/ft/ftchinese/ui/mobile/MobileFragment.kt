@@ -12,14 +12,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentMobileBinding
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.ui.dialog.DialogParams
-import com.ft.ftchinese.ui.dialog.SimpleDialogFragment
+import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.login.SignInFragment
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -164,11 +163,8 @@ class MobileFragment : ScopedFragment(), AnkoLogger {
 
     private fun onSendCodeError(msgId: Int) {
         if (msgId == R.string.mobile_conflict) {
-            SimpleDialogFragment
-                .newInstance(DialogParams(
-                    positive = getString(R.string.action_ok),
-                    message = getString(msgId)
-                ))
+            AlertDialogFragment
+                .newMsgInstance(getString(msgId))
                 .show(childFragmentManager, "AlertMobileCodeError")
         } else {
             toast(msgId)
@@ -179,12 +175,8 @@ class MobileFragment : ScopedFragment(), AnkoLogger {
         when (msgId) {
             R.string.mobile_code_not_found,
             R.string.mobile_already_exists -> {
-                SimpleDialogFragment
-                    .newInstance(
-                        DialogParams(
-                            positive = getString(R.string.action_ok),
-                            message = getString(msgId)
-                    ))
+                AlertDialogFragment
+                    .newMsgInstance(getString(msgId))
                     .show(childFragmentManager, "AlertUpdateMobileError")
             }
             else -> toast(msgId)

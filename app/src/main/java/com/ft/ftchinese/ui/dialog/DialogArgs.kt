@@ -4,8 +4,9 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class DialogParams (
-    val positive: String,
-    val negative: String? = null,
+data class DialogArgs (
     val message: String,
+    val positiveButton: Int,
+    val negativeButton: Int? = null,
+    val title: Int? = null,
 ) : Parcelable

@@ -18,14 +18,15 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.paywall.StripePriceCache
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
 import com.ft.ftchinese.store.*
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.dialog.CreateCustomerDialogFragment
 import com.ft.ftchinese.ui.customer.CustomerViewModel
 import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
+import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.util.RequestCode
@@ -189,6 +190,15 @@ class CheckOutActivity : ScopedAppActivity() {
         }
     }
 
+    private fun showErrDialog(msg: String) {
+        AlertDialogFragment.newErrInstance(msg)
+            .show(supportFragmentManager, "ErrDialog")
+    }
+
+    private fun showErrDialog(msg: Int) {
+        showErrDialog(getString(msg))
+    }
+
     private fun initUI() {
         // Attach cart fragment.
         // The fragment uses view model to wait for a CheckoutCounter instance.
@@ -282,18 +292,7 @@ class CheckOutActivity : ScopedAppActivity() {
                     return
                 }
                 if (account.stripeId.isNullOrBlank()) {
-                    CreateCustomerDialogFragment()
-                        .onPositiveButtonClicked { dialog, _ ->
-                            binding.inProgress = true
-                            customerViewModel.createCustomer(account)
-                            dialog.dismiss()
-                        }
-                        .onNegativeButtonClicked { dialog, _ ->
-                            dialog.dismiss()
-                        }
-                        .show(supportFragmentManager, "createStripeCustomer")
-                    // After user clicked yes button in the dialog,
-                    // it should goes to `customerViewModel.customerCreated`
+                    showCreateCustomerDialog(account)
                     return
                 }
 
@@ -307,6 +306,20 @@ class CheckOutActivity : ScopedAppActivity() {
 
             else -> toast(R.string.toast_no_pay_method)
         }
+    }
+
+    private fun showCreateCustomerDialog(account: Account) {
+        AlertDialogFragment
+            .newStripeCustomer(account.email)
+            .onPositiveButtonClicked { dialog, _ ->
+                binding.inProgress = true
+                customerViewModel.createCustomer(account)
+                dialog.dismiss()
+            }
+            .onNegativeButtonClicked { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show(supportFragmentManager, "createStripeCustomer")
     }
 
     // Open stripe activity if stripe price for current plan is found.

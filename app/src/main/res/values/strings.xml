@@ -64,8 +64,10 @@
     <string name="action_start">开始</string>
     <string name="action_ok">确认</string>
     <string name="action_retry">重试</string>
+    <string name="action_retry_later">请稍后再试</string>
     <string name="yes">是</string>
     <string name="no">否</string>
+    <string name="dialog_title_error">出错了！</string>
 
     <!--  Generic message  -->
     <string name="prompt_saved">保存成功!</string>
@@ -221,6 +223,7 @@
     <string name="mobile_already_exists">该手机号已被使用</string>
 
     <!--  Stripe Customer setting  -->
+    <string name="title_create_stripe_customer">注册Stripe用户</string>
     <string name="stripe_no_payment_selected">请选择或添加支付方式</string>
     <string name="stripe_customer_not_created">创建Stripe用户失败，请重试！</string>
 
@@ -476,8 +479,6 @@
     <string name="exo_download_stopped">下载已停止</string>
     <string name="exo_download_restarting">重新开始下载</string>
 
-
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string-array name="stripe_footnotes">
         <item>* FT中文网的Stripe支付不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</item>
         <item>* 微信登录的用户需要绑定FT中文网账号后才可以使用Stripe订阅</item>
