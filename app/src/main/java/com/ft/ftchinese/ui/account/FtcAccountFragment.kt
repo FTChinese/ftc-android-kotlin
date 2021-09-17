@@ -17,7 +17,7 @@ import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.ui.customer.CreateCustomerDialogFragment
+import com.ft.ftchinese.ui.dialog.CreateCustomerDialogFragment
 import com.ft.ftchinese.ui.customer.CustomerActivity
 import com.ft.ftchinese.ui.customer.CustomerViewModel
 import com.ft.ftchinese.ui.customer.CustomerViewModelFactory

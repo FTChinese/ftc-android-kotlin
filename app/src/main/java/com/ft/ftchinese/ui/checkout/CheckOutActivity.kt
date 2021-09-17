@@ -23,7 +23,7 @@ import com.ft.ftchinese.store.*
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.customer.CreateCustomerDialogFragment
+import com.ft.ftchinese.ui.dialog.CreateCustomerDialogFragment
 import com.ft.ftchinese.ui.customer.CustomerViewModel
 import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
