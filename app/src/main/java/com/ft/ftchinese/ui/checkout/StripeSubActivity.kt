@@ -551,18 +551,7 @@ class StripeSubActivity : ScopedAppActivity(),
     }
 
     companion object {
-        @Deprecated("")
-        private const val EXTRA_STRIPE_PRICE_ID = "extra_stripe_price_id"
         private const val EXTRA_STRIPE_PRICE = "extra_stripe_price"
-        @JvmStatic
-        fun startForResult(activity: Activity, requestCode: Int, priceId: String) {
-            activity.startActivityForResult(
-                Intent(activity, StripeSubActivity::class.java).apply {
-                    putExtra(EXTRA_STRIPE_PRICE_ID, priceId)
-                },
-                requestCode
-            )
-        }
 
         @JvmStatic
         fun startForResult(activity: Activity, requestCode: Int, price: Price) {

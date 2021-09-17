@@ -340,7 +340,7 @@ class CheckOutActivity : ScopedAppActivity() {
         StripeSubActivity.startForResult(
             activity = this,
             requestCode = RequestCode.PAYMENT,
-            priceId = price.id,
+            price = price,
         )
 
         return true
