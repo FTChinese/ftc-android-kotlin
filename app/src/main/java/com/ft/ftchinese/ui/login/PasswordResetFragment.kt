@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentPasswordResetBinding
 import com.ft.ftchinese.model.reader.PwResetBearer
-import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
+import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.model.fetch.FetchResult
 import org.jetbrains.anko.AnkoLogger

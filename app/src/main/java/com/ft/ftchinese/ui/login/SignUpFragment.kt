@@ -15,7 +15,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
+import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.legal.privacyConsentLine

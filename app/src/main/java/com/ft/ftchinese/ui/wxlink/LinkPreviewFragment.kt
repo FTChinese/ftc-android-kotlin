@@ -15,7 +15,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentLinkPreviewBinding
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.ScopedBottomSheetDialogFragment
+import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isConnected
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
