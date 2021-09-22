@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentPermissionDeniedBinding
@@ -13,6 +14,7 @@ import com.ft.ftchinese.model.reader.MemberStatus
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.ui.channel.DenialReason
 import com.ft.ftchinese.ui.login.AuthActivity
+import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -21,12 +23,23 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
  * create an instance of this fragment.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class PermissionDeniedFragment(
-    private val denied: Access,
-    private val cancellable: Boolean = false, // If the bottom sheet is cancellable, user can dismiss it without affecting the parent activity; otherwise the parent activity will be destroyed upon cancellation.
-) : BottomSheetDialogFragment() {
+class PermissionDeniedFragment : BottomSheetDialogFragment() {
+
+    private var access: Access? = null
+    private var cancellable: Boolean = false
 
     private lateinit var binding: FragmentPermissionDeniedBinding
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        arguments?.let {
+            access = it.getParcelable(ARG_ACCESS)
+            cancellable = it.getBoolean(ARG_CANCELLABLE)
+        }
+
+        binding.isLoggedIn = access?.loggedIn ?: false
+    }
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
@@ -49,17 +62,39 @@ class PermissionDeniedFragment(
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.denied = DenialReason.from(requireContext(), denied)
+        val access = access ?: return
+
+        binding.denied = DenialReason.from(requireContext(), access)
 
         binding.loginOrSubscribe.onClick {
-            if (denied.status == MemberStatus.NotLoggedIn) {
+            if (access.status == MemberStatus.NotLoggedIn) {
                 AuthActivity.startForResult(requireActivity())
             } else {
                 PaywallActivity.start(
                     context = requireContext(),
-                    premiumFirst = denied.content == Permission.PREMIUM,
+                    premiumFirst = access.content == Permission.PREMIUM,
                 )
             }
+        }
+
+        binding.showMemberStatus.onClick {
+            MemberActivity.start(context)
+        }
+    }
+
+    companion object {
+        private const val ARG_ACCESS = "arg_access"
+        private const val ARG_CANCELLABLE = "arg_cancellable"
+
+        @JvmStatic
+        fun newInstance(
+            access: Access,
+            cancellable: Boolean = false, // If the bottom sheet is cancellable, user can dismiss it without affecting the parent activity; otherwise the parent activity will be destroyed upon cancellation.
+        ) = PermissionDeniedFragment().apply {
+            arguments = bundleOf(
+                ARG_ACCESS to access,
+                ARG_CANCELLABLE to cancellable,
+            )
         }
     }
 }

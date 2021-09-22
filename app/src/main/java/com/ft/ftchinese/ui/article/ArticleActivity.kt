@@ -186,7 +186,7 @@ class ArticleActivity : ScopedAppActivity(),
             PaywallTracker.fromArticle(teaser)
 
             if (permissionFragment == null) {
-                permissionFragment = PermissionDeniedFragment(it)
+                permissionFragment = PermissionDeniedFragment.newInstance(it)
                 permissionFragment?.show(supportFragmentManager, "PermissionDeniedFragment")
             } else {
                 permissionFragment?.show(supportFragmentManager, "PermissionDeniedFragment")
@@ -464,8 +464,8 @@ class ArticleActivity : ScopedAppActivity(),
 
             t.langVariant = lang
 
-            PermissionDeniedFragment(
-                denied = access,
+            PermissionDeniedFragment.newInstance(
+                access = access,
                 cancellable = true,
             ).show(supportFragmentManager, "PermissionDeniedFragment")
         }
