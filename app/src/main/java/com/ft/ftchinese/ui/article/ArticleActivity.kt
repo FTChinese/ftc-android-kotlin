@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.article
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -42,6 +43,7 @@ import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.share.*
 import com.ft.ftchinese.ui.webpage.WVViewModel
 import com.ft.ftchinese.ui.webpage.WebpageFragment
+import com.ft.ftchinese.util.RequestCode
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -567,6 +569,32 @@ class ArticleActivity : ScopedAppActivity(),
             .build()
 
         WorkManager.getInstance(this).enqueue(lenWorker)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode != Activity.RESULT_OK) {
+            toast("Oops! It seems your data is not updated yet.")
+            return
+        }
+
+        when (requestCode) {
+            RequestCode.SIGN_IN,
+            RequestCode.SIGN_UP -> {
+                toast(R.string.prompt_logged_in)
+                refreshAccess()
+            }
+            RequestCode.MEMBER_REFRESHED -> {
+                refreshAccess()
+            }
+        }
+    }
+
+    private fun refreshAccess() {
+        teaser?.let {
+            articleViewModel.refreshAccess(it)
+        } ?: finish()
     }
 
     companion object {
