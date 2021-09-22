@@ -6,24 +6,24 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentSignInBinding
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.ui.dialog.AlertDialogFragment
+import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.ui.wxlink.WxEmailLink
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
+import com.ft.ftchinese.ui.wxlink.WxEmailLink
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -145,13 +145,12 @@ class SignInFragment(
     private fun handleErrMsgId(id: Int) {
         when (id) {
             R.string.mobile_link_taken -> {
-                AlertDialog.Builder(requireContext())
-                    .setMessage(id)
-                    .setPositiveButton(R.string.action_done) { dialog, _ ->
+                AlertDialogFragment
+                    .newMsgInstance(getString(id))
+                    .onPositiveButtonClicked { dialog, _ ->
                         dialog.dismiss()
                     }
-                    .create()
-                    .show()
+                    .show(childFragmentManager, "MobileLinkError")
             }
             else  -> toast(id)
         }
