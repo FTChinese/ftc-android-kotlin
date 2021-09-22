@@ -37,8 +37,6 @@ class PermissionDeniedFragment : BottomSheetDialogFragment() {
             access = it.getParcelable(ARG_ACCESS)
             cancellable = it.getBoolean(ARG_CANCELLABLE)
         }
-
-        binding.isLoggedIn = access?.loggedIn ?: false
     }
 
     override fun onCancel(dialog: DialogInterface) {
@@ -55,6 +53,7 @@ class PermissionDeniedFragment : BottomSheetDialogFragment() {
     ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_permission_denied, container, false)
 
+        binding.isLoggedIn = access?.loggedIn ?: false
         // Inflate the layout for this fragment
         return binding.root
     }
@@ -67,13 +66,13 @@ class PermissionDeniedFragment : BottomSheetDialogFragment() {
         binding.denied = DenialReason.from(requireContext(), access)
 
         binding.loginOrSubscribe.onClick {
-            if (access.status == MemberStatus.NotLoggedIn) {
-                AuthActivity.startForResult(requireActivity())
-            } else {
+            if (access.loggedIn) {
                 PaywallActivity.start(
                     context = requireContext(),
                     premiumFirst = access.content == Permission.PREMIUM,
                 )
+            } else {
+                AuthActivity.startForResult(requireActivity())
             }
         }
 
