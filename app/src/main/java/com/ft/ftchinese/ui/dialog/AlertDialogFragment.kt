@@ -76,7 +76,7 @@ class AlertDialogFragment : DialogFragment() {
         fun newErrInstance(msg: String) = newInstance(
             params = DialogArgs(
                 message = msg,
-                positiveButton = R.string.action_retry_later,
+                positiveButton = R.string.action_ok,
                 title = R.string.dialog_title_error,
             )
         )
