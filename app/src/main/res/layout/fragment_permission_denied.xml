@@ -3,9 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="android.view.View"/>
         <variable
             name="denied"
             type="com.ft.ftchinese.ui.channel.DenialReason" />
+
+        <variable
+            name="isLoggedIn"
+            type="Boolean" />
     </data>
 
     <LinearLayout
@@ -38,6 +43,16 @@
             android:layout_height="wrap_content"
             android:text="@{denied.prompt}"
             android:layout_marginBottom="@dimen/space_32"/>
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/AppButton.TextButton"
+            android:id="@+id/show_member_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="如果您已经在其他平台购买了会员，请前往会员中心下拉刷新数据"
+            android:visibility="@{isLoggedIn ? View.VISIBLE : View.GONE}"
+            android:layout_marginBottom="@dimen/space_32"
+            android:drawableEnd="@drawable/ic_baseline_arrow_forward_teal_24"/>
 
     </LinearLayout>
 </layout>
