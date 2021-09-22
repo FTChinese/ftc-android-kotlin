@@ -6,16 +6,17 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityPaywallBinding
 import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.paywall.Paywall
 import com.ft.ftchinese.model.paywall.Promo
 import com.ft.ftchinese.model.paywall.defaultPaywall
+import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
@@ -27,8 +28,6 @@ import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.product.ProductFragment
 import com.ft.ftchinese.ui.product.ProductViewModel
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.store.AccountCache
 import io.noties.markwon.Markwon
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -214,6 +213,8 @@ class PaywallActivity : ScopedAppActivity(),
     // Upon payment succeeded, this activity should kill
     // itself so that user won't see it again.
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        // See the terrible new approach:
+        // https://stackoverflow.com/questions/62671106/onactivityresult-method-is-deprecated-what-is-the-alternative
         super.onActivityResult(requestCode, resultCode, data)
 
         info("onActivityResult requestCode: $requestCode, resultCode: $resultCode")
