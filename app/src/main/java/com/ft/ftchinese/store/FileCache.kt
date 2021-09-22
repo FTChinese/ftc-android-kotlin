@@ -16,7 +16,7 @@ object CacheFileNames {
     const val splashSchedule = "splash_schedule.json"
 
     fun paywallFile(isTest: Boolean): String {
-        return "subs_paywall.${BuildConfig.VERSION_CODE}.${if (isTest) "test" else "live"}.json"
+        return "paywall.${BuildConfig.VERSION_CODE}.${if (isTest) "test" else "live"}.json"
     }
 }
 
