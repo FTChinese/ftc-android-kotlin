@@ -180,14 +180,6 @@ class ArticleViewModel(
         }
 
         viewModelScope.launch {
-            // Why this?
-//            if (storyLoadedLiveData.value != null) {
-//                val s = storyLoadedLiveData.value
-//                if (s != null && s.isFrom(teaser)) {
-//                    storyLoaded(s)
-//                    return@launch
-//                }
-//            }
 
             // If cache name exits, and is not refreshing,
             // use cached story.
@@ -386,10 +378,12 @@ class ArticleViewModel(
         }
     }
 
-    // Used by web pages which does not provide structured data
-    // for us to know what kind of content is loaded.
-    // It is only called if teaser does not have JSON api.
     /**
+     * Called after open graph evaluated.
+     * Used by web pages which does not provide structured data
+     * for us to know what kind of content is loaded.
+     * It is only called if teaser does not have JSON api.
+     *
      * OpenGraphMeta(
      * title=一周新闻小测：2021年08月21日 - FT商学院,
      * description=您对本周的全球重大新闻了解如何？来做个小测试吧！,
@@ -433,5 +427,15 @@ class ArticleViewModel(
             contentPerm = contentPerm,
             who = AccountCache.get()
         )
+    }
+
+    fun refreshAccess(teaser: Teaser) {
+        if (!teaser.hasJsAPI()) {
+            checkAccess(teaser.permission())
+        } else {
+            storyLoadedLiveData.value?.let {
+                checkAccess(it.permission())
+            }
+        }
     }
 }
