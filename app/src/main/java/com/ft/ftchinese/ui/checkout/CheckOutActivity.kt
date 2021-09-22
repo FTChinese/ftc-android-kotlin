@@ -181,17 +181,21 @@ class CheckOutActivity : ScopedAppActivity() {
                    paywallViewModel.loadStripePrices()
                }
                is FetchResult.LocalizedError -> {
-                   toast(result.msgId)
+                   showErrDialog(result.msgId)
                }
                 is FetchResult.Error -> {
-                    result.exception.message?.let { toast(it)}
+                    result.exception.message?.let { showErrDialog(it) }
                 }
            }
         }
     }
 
     private fun showErrDialog(msg: String) {
-        AlertDialogFragment.newErrInstance(msg)
+        AlertDialogFragment
+            .newErrInstance(msg)
+            .onPositiveButtonClicked{ dialog, _ ->
+                dialog.dismiss()
+            }
             .show(supportFragmentManager, "ErrDialog")
     }
 
@@ -351,11 +355,11 @@ class CheckOutActivity : ScopedAppActivity() {
 
         when (result) {
             is FetchResult.LocalizedError -> {
-                toast(result.msgId)
+                showErrDialog(result.msgId)
                 tracker.buyFail(checkOutViewModel.counterLiveData.value?.item?.price)
             }
             is FetchResult.Error -> {
-                result.exception.message?.let { toast(it) }
+                result.exception.message?.let { showErrDialog(it) }
                 tracker.buyFail(checkOutViewModel.counterLiveData.value?.item?.price)
             }
             is FetchResult.Success -> {
@@ -448,11 +452,11 @@ class CheckOutActivity : ScopedAppActivity() {
 
         when (result) {
             is FetchResult.LocalizedError -> {
-                toast(result.msgId)
+                showErrDialog(result.msgId)
                 tracker.buyFail(checkOutViewModel.counterLiveData.value?.item?.price)
             }
             is FetchResult.Error -> {
-                result.exception.message?.let { toast(it) }
+                result.exception.message?.let { showErrDialog(it) }
                 tracker.buyFail(checkOutViewModel.counterLiveData.value?.item?.price)
             }
             is FetchResult.Success -> {
