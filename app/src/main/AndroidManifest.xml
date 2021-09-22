@@ -35,9 +35,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity
-            android:name=".ui.TestComposeActivity"
-            android:exported="true" />
         <activity android:name=".wxapi.WxBaseActivity" />
         <activity
             android:name=".ui.webabout.AboutListActivity"
