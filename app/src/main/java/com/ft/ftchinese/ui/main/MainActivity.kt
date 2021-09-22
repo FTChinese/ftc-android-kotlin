@@ -377,6 +377,7 @@ class MainActivity : ScopedAppActivity(),
 
     private fun logout() {
         sessionManager.logout()
+        navHeaderBinding.avatar = null
         cache.deleteFile(WX_AVATAR_NAME)
         CustomerSession.endCustomerSession()
         updateSessionUI()
