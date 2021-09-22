@@ -7,6 +7,7 @@ object RequestCode {
     const val LINK = 4
     const val UNLINK = 5
     const val PASSWORD_RESET = 6
+    const val MEMBER_REFRESHED = 7
     const val SELECT_SOURCE = 55
     const val PERMISSIONS = 1002
 }
