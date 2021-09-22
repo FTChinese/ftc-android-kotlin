@@ -303,5 +303,12 @@ class MemberActivity : ScopedAppActivity(),
         fun start(context: Context?) {
             context?.startActivity(Intent(context, MemberActivity::class.java))
         }
+
+        fun startForResult(activity: Activity?) {
+            activity?.startActivityForResult(
+                Intent(activity, MemberActivity::class.java),
+                RequestCode.MEMBER_REFRESHED
+            )
+        }
     }
 }
