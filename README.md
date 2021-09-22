@@ -207,3 +207,7 @@ See:
 https://medium.com/androiddevelopers/android-data-binding-that-include-thing-1c8791dd6038
 
 https://medium.com/@elia.maracani/android-data-binding-passing-a-variable-to-an-include-d-layout-3567099b58f
+
+## Versions
+
+v5.0.0 -> API v3
