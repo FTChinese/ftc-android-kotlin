@@ -120,6 +120,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
                 // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
                 -2 -> {
                     binding.title = getString(R.string.wxpay_cancelled)
+                    binding.details = ""
                     binding.inProgress = false
                 }
             }
