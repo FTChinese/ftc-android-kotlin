@@ -134,13 +134,26 @@
             app:layout_constraintStart_toStartOf="@id/email_container"
             app:layout_constraintTop_toBottomOf="@id/confirm_password_container" />
 
-        <CheckBox
-            android:id="@+id/privacy_consent"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="@id/email_container"
-            app:layout_constraintEnd_toEndOf="@id/email_container"
-            app:layout_constraintTop_toBottomOf="@id/sign_up_btn"/>
+            app:layout_constraintTop_toBottomOf="@id/sign_up_btn"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/privacy_consent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"/>
+
+            <FrameLayout
+                android:id="@+id/fuck_huawei_policy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"/>
+
+        </LinearLayout>
 
         <include layout="@layout/progress_indicator_circular"
             bind:inProgress="@{inProgress}"/>

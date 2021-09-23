@@ -8,17 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentSignUpBinding
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.legal.privacyConsentLine
+import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import io.noties.markwon.Markwon
@@ -152,9 +152,7 @@ class SignUpFragment(
     }
 
     private fun setupUI() {
-        markwon.setParsedMarkdown(binding.privacyConsent, markwon.toMarkdown(privacyConsentLine))
 
-        binding.privacyConsent.text
         binding.toolbar.bottomSheetToolbar.onClick {
             dismiss()
         }
@@ -178,15 +176,16 @@ class SignUpFragment(
                 binding.passwordInput.requestFocus()
             }
         }
+
+        childFragmentManager.commit {
+            replace(R.id.fuck_huawei_policy, ConsentPrivacyFragment.newInstance())
+        }
     }
 
     fun onSubmit(view: View) {
 
         if (!binding.privacyConsent.isChecked) {
-            toast("您需要同意用户协议和服务政策才能注册")
-            return
-        } else {
-            toast("Success")
+            toast("您需要同意用户协议和隐私政策")
             return
         }
 
