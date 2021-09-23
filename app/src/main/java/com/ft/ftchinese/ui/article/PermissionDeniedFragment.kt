@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentPermissionDeniedBinding
 import com.ft.ftchinese.model.reader.Access
@@ -24,7 +25,8 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class PermissionDeniedFragment : BottomSheetDialogFragment() {
 
-    private var access: Access? = null
+    private lateinit var viewModel: AccessViewModel
+
     private var cancellable: Boolean = false
 
     private lateinit var binding: FragmentPermissionDeniedBinding
@@ -33,7 +35,6 @@ class PermissionDeniedFragment : BottomSheetDialogFragment() {
         super.onCreate(savedInstanceState)
 
         arguments?.let {
-            access = it.getParcelable(ARG_ACCESS)
             cancellable = it.getBoolean(ARG_CANCELLABLE)
         }
     }
@@ -52,16 +53,13 @@ class PermissionDeniedFragment : BottomSheetDialogFragment() {
     ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_permission_denied, container, false)
 
-        binding.isLoggedIn = access?.loggedIn ?: false
         // Inflate the layout for this fragment
         return binding.root
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    private fun setupUI(access: Access) {
 
-        val access = access ?: return
-
+        binding.isLoggedIn = access.loggedIn
         binding.denied = DenialReason.from(requireContext(), access)
 
         binding.loginOrSubscribe.onClick {
@@ -73,6 +71,19 @@ class PermissionDeniedFragment : BottomSheetDialogFragment() {
             } else {
                 AuthActivity.startForResult(requireActivity())
             }
+        }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewModel = activity?.run {
+            ViewModelProvider(this)
+                .get(AccessViewModel::class.java)
+        } ?: throw Exception("Invalid activity")
+
+        viewModel.accessLiveData.observe(viewLifecycleOwner) {
+            setupUI(it)
         }
 
         binding.showMemberStatus.onClick {

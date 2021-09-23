@@ -72,6 +72,7 @@ class ArticleActivity : ScopedAppActivity(),
     private lateinit var shareViewModel: SocialShareViewModel
     private lateinit var wvViewModel: WVViewModel
     private lateinit var screenshotViewModel: ScreenshotViewModel
+    private lateinit var accessViewModel: AccessViewModel
 
     private var permissionFragment: PermissionDeniedFragment? = null
     private var teaser: Teaser? = null
@@ -114,6 +115,9 @@ class ArticleActivity : ScopedAppActivity(),
                 ArticleDb.getInstance(this)
             )
         ).get(ArticleViewModel::class.java)
+
+        accessViewModel = ViewModelProvider(this)
+            .get(AccessViewModel::class.java)
 
         wvViewModel = ViewModelProvider(this)
             .get(WVViewModel::class.java)
@@ -187,10 +191,12 @@ class ArticleActivity : ScopedAppActivity(),
 
             PaywallTracker.fromArticle(teaser)
 
+            accessViewModel.accessLiveData.value = it
+
             if (permissionFragment == null) {
                 permissionFragment = PermissionDeniedFragment.newInstance(it)
-                permissionFragment?.show(supportFragmentManager, "PermissionDeniedFragment")
-            } else {
+            }
+            if (permissionFragment?.isAdded != true) {
                 permissionFragment?.show(supportFragmentManager, "PermissionDeniedFragment")
             }
         }
@@ -574,16 +580,16 @@ class ArticleActivity : ScopedAppActivity(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (resultCode != Activity.RESULT_OK) {
-            toast("Oops! It seems your data is not updated yet.")
-            return
-        }
-
         when (requestCode) {
             RequestCode.SIGN_IN,
             RequestCode.SIGN_UP -> {
-                toast(R.string.prompt_logged_in)
-                refreshAccess()
+                if (resultCode != Activity.RESULT_OK) {
+                    toast("Oops! It seems your data is not updated yet.")
+                    return
+                } else {
+                    toast(R.string.prompt_logged_in)
+                    refreshAccess()
+                }
             }
             RequestCode.MEMBER_REFRESHED -> {
                 refreshAccess()

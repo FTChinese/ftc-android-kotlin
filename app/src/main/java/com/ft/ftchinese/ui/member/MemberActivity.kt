@@ -105,6 +105,7 @@ class MemberActivity : ScopedAppActivity(),
                     toast(R.string.prompt_updated)
                     sessionManager.saveAccount(result.data)
                     subsChanged(result.data.membership)
+                    setResult(Activity.RESULT_OK)
                 }
             }
         }
@@ -119,6 +120,7 @@ class MemberActivity : ScopedAppActivity(),
                     toast(R.string.prompt_updated)
                     sessionManager.saveMembership(result.data)
                     subsChanged(result.data)
+                    setResult(Activity.RESULT_OK)
                 }
             }
         }
@@ -133,6 +135,7 @@ class MemberActivity : ScopedAppActivity(),
                     sessionManager.saveMembership(result.data.membership)
                     toast(R.string.iap_refresh_success)
                     subsChanged(result.data.membership)
+                    setResult(Activity.RESULT_OK)
                 }
             }
         }
@@ -153,6 +156,7 @@ class MemberActivity : ScopedAppActivity(),
                     toast(R.string.stripe_refresh_success)
                     sessionManager.saveMembership(result.data.membership)
                     subsChanged(result.data.membership)
+                    setResult(Activity.RESULT_OK)
                 }
             }
         }
@@ -261,6 +265,7 @@ class MemberActivity : ScopedAppActivity(),
                     return
                 }
 
+                setResult(Activity.RESULT_OK)
                 finish()
             }
         }
@@ -297,6 +302,11 @@ class MemberActivity : ScopedAppActivity(),
             true
         }
         else -> super.onOptionsItemSelected(item)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        setResult(Activity.RESULT_OK)
     }
 
     companion object {
