@@ -127,16 +127,22 @@ class ChannelViewModel(val cache: FileCache) :
 
         Log.i(TAG, "Silent update ${channelSource.path} from $url")
 
-        val content = withContext(Dispatchers.IO) {
-            Fetch()
-                .get(url.toString())
-                .endPlainText()
-        } ?: return
+        try {
+            val content = withContext(Dispatchers.IO) {
+                Fetch()
+                    .get(url.toString())
+                    .endPlainText()
+            } ?: return
 
-        render(content, account)
+            render(content, account)
 
-        channelSource.fileName?.let {
-            cacheChannel(it, content)
+            channelSource.fileName?.let {
+                cacheChannel(it, content)
+            }
+        } catch (e: Exception) {
+            e.message?.let {
+                Log.i(TAG, it)
+            }
         }
     }
 
