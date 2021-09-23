@@ -280,7 +280,6 @@
     <string name="barrier_sync_membership">如果您已经在其他平台购买了会员，请在"会员订阅"中下拉刷新数据</string>
 
 
-
     <!--  Subscription  -->
     <string name="order_kind_create">订阅</string>
     <string name="order_kind_renew">续订</string>
@@ -521,5 +520,7 @@
         <item>sc</item>
         <item>tc</item>
     </string-array>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
