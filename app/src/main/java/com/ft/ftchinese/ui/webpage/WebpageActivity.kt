@@ -57,6 +57,10 @@ class WebpageActivity : ScopedAppActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            android.R.id.home -> {
+                finish()
+                true
+            }
             R.id.open_in_browser -> {
                 openInBrowser()
                 true
