@@ -329,15 +329,17 @@ https://stripe.com/docs/mobile/android
 
 工具类
 
-https://github.com/vinc3m1/RoundedImageView/tree/v2.2.0
+https://github.com/vinc3m1/RoundedImageView/tree/v2.2.0 个人开发者 境外
 
-个人开发者 境外
+A fast ImageView (and Drawable) that supports rounded corners (and ovals or circles) based on the original example from Romain Guy. It supports many additional features including ovals, rounded rectangles, ScaleTypes and TileModes.
+
+只是一个以圆角方式显示图片的控件。
 
 ### Glide
 
 框架类 https://github.com/bumptech/glide 个人开发者 境外
 
-全屏截图预览用
+图片载入工具，全屏截图预览用
 
 #### 权限
 
