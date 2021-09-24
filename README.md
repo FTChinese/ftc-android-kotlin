@@ -211,3 +211,167 @@ https://medium.com/@elia.maracani/android-data-binding-passing-a-variable-to-an-
 ## Versions
 
 v5.0.0 -> API v3
+
+------------------------
+
+## App内使用到的权限
+
+```
+android.permission.INTERNET
+android.permission.ACCESS_NETWORK_STATE
+android.permission.ACCESS_WIFI_STATE
+```
+支付宝要用，但是这些权限似乎是系统默认的，不需要弹窗申请，弹窗申请会崩溃。
+
+```
+android.permission.REQUEST_INSTALL_PACKAGES
+```
+
+App内更新需要。
+
+```
+android.permission.READ_EXTERNAL_STORAGE
+android.permission.WRITE_EXTERNAL_STORAGE
+```
+
+全屏截图分享到微信需要。由于Google限制直接分享文件超过512KB，导致微信SDK不能分享全屏截图。绕开限制的方式是先存储截图到本机相册，微信分享时再读取。
+
+## 3rd party SDK Usage
+
+### ApacheHttp
+
+工具类 https://hc.apache.org/
+
+这应该不是我们app里的东西。Vivo的检测是错误的。我们的确使用到了Apache的一个库，但不是这个，也不需要任何权限，见下。
+
+### BouncyCastle
+
+安全风控类 http://www.bouncycastle.org/documentation.html
+
+没见过，不知道vivo从哪里搞到的。
+
+### Markwon
+
+https://github.com/noties/Markwon
+
+Markwon is a markdown library for Android. It parses markdown following commonmark-spec with the help of amazing commonmark-java library and renders result as Android-native Spannables. No HTML is involved as an intermediate step. No WebView is required. It's extremely fast, feature-rich and extensible.
+
+把纯文本转换成原生控件能显示的字符格式。
+
+### Byte Units
+
+https://github.com/JakeWharton/byteunits
+
+把计算机表示的数字，如1024等，转换成人类易读的格式，如1kb。
+
+### ThreeTen
+
+https://github.com/ThreeTen/threetenbp
+
+计算日期时间的工具。Java 8中日期时间标准库，但是安卓使用的Java版本过于古老，没有此功能，该项目用于为安卓的Java提供同等功能。
+
+### Commons Math
+
+The Apache Commons Mathematics Library
+
+https://commons.apache.org/proper/commons-math/
+
+Commons Math is a library of lightweight, self-contained mathematics and statistics components addressing the most common problems not available in the Java programming language or Commons Lang.
+
+数学计算工具而已。
+
+### Okhttp3
+
+工具类 https://github.com/square/okhttp Square公司 旧金山(美国) 境外
+
+访问网络的工具，它应该不需要权限，这也是Google官方推荐的网络访问库。
+
+### 微信开放平台
+
+支付类
+
+https://open.weixin.qq.com
+
+腾讯科技(深圳)有限公司 深圳市
+
+#### 权限
+
+微信文档 https://developers.weixin.qq.com/doc/oplatform/Mobile_App/Access_Guide/Android.html "在代码中使用开发工具包"：
+
+> 添加必要的权限支持（其中网络权限如果没有使用扫码登录功能非必要；后三个权限，如果没有使用 mta，也非必要，即使有使用 mta，去掉也不影响功能）：
+
+```
+<uses-permission android:name="android.permission.INTERNET" />
+
+<!-- for mta statistics, not necessary-->
+<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+```
+
+根据文档说明，我们用不到这些权限，所以没有添加。
+
+### 设备标识生成库
+
+工具类
+
+https://docs.open.alipay.com/204/105296/
+
+支付宝(中国)网络技术有限公司 上海市
+
+### Stripe
+
+支付类
+
+https://stripe.com/docs/mobile/android
+
+### RoundedImageView
+
+工具类
+
+https://github.com/vinc3m1/RoundedImageView/tree/v2.2.0
+
+个人开发者 境外
+
+### Glide
+
+框架类 https://github.com/bumptech/glide 个人开发者 境外
+
+全屏截图预览用
+
+#### 权限
+
+1 读取联系人(2) 高敏 仅SDK 冗余权限
+
+这个权限我们没申请过也没用过
+
+### 支付宝
+
+支付类
+
+https://www.alipay.com
+
+蚂蚁金服(杭州)网络技术有限公司 杭州市
+
+### 支付宝安全
+
+安全风控类 https://open.alipay.com/ 蚂蚁金服(杭州)网络技术有限公司 杭州市
+
+#### 权限
+
+1 读取外置存储卡(2) 高敏
+2 写入外部存储卡(2) 高敏
+
+文档：https://opendocs.alipay.com/open/204/105296/#%E8%BF%90%E8%A1%8C%E6%9D%83%E9%99%90
+
+```
+android.permission.INTERNET
+android.permission.ACCESS_NETWORK_STATE
+android.permission.ACCESS_WIFI_STATE
+```
+
+系统似乎默认启用这些三个权限，明确申请会崩溃。
+
+### 支付宝客户端支付安全
+
+安全风控类 https://open.alipay.com/ 蚂蚁金服(杭州)网络技术有限公司 杭州市
