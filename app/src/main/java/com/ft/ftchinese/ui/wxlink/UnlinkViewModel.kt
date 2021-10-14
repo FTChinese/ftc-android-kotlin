@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.wxlink
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ServerError
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.UnlinkAnchor
 import com.ft.ftchinese.model.request.WxUnlinkParams
@@ -63,7 +63,7 @@ class UnlinkViewModel : BaseViewModel() {
                     accountLoaded.value = FetchResult.LocalizedError(R.string.loading_failed)
                 }
                 progressLiveData.value = false
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 val msgId = when (e.statusCode) {
                     422 -> if (e.error?.isFieldMissing("anchor") == true) {
                         R.string.api_anchor_missing

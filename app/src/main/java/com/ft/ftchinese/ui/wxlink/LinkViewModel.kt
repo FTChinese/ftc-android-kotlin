@@ -4,7 +4,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ServerError
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.ui.base.BaseViewModel
@@ -78,7 +78,7 @@ class LinkViewModel : BaseViewModel(), AnkoLogger {
                     accountLinked.value = FetchResult.LocalizedError(R.string.loading_failed)
                 }
                 progressLiveData.value = false
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 progressLiveData.value = false
                 handleServerError(e)
             } catch (e: Exception) {
@@ -88,7 +88,7 @@ class LinkViewModel : BaseViewModel(), AnkoLogger {
         }
     }
 
-    private fun handleServerError(e: ServerError) {
+    private fun handleServerError(e: APIError) {
         accountLinked.value = when (e.statusCode) {
             404 -> FetchResult.LocalizedError(R.string.account_not_found)
             422 -> if (e.error == null) {

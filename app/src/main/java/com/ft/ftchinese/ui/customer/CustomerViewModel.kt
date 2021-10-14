@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchError
-import com.ft.ftchinese.model.fetch.ServerError
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.StripeCustomer
@@ -205,7 +205,7 @@ class CustomerViewModel(
 
                 customerCreated.value = FetchResult.Success(result.value)
                 cacheStripeCustomer(result.raw)
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
 
                 progressLiveData.value = false
                 customerCreated.value = if (e.statusCode == 404) {
@@ -249,7 +249,7 @@ class CustomerViewModel(
 
                 paymentMethodUpdated.value = FetchResult.Success(result.value)
                 cacheStripeCustomer(result.raw)
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
 
                 progressLiveData.value = false
                 paymentMethodUpdated.value = if (e.statusCode == 404) {
