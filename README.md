@@ -2,6 +2,10 @@
 
 * As of Android Studio Arctic Fox 2020.3.1 Canary 14, clicking app inspection will crash your app! You need to unplug your device and close kill Android Studio.
 
+## Splash Screen
+
+Android 12 start providing Splash Screens. We implemented our custom one till version 5.1.
+
 ## Logo on ActionBar
 
 Reference: https://developer.android.com/training/multiscreen/screendensities
