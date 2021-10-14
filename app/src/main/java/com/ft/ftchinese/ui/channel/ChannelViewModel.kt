@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.StoryBuilder
+import com.ft.ftchinese.model.content.TemplateBuilder
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
@@ -109,7 +109,7 @@ class ChannelViewModel(val cache: FileCache) :
         }
 
         val html = withContext(Dispatchers.Default) {
-            StoryBuilder(template)
+            TemplateBuilder(template)
                 .withChannel(content)
                 .withUserInfo(account)
                 .render()

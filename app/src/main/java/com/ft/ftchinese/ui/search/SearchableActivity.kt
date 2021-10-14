@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.channel
+package com.ft.ftchinese.ui.search
 
 import android.annotation.SuppressLint
 import android.app.SearchManager
@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivitySearchableBinding
+import com.ft.ftchinese.model.content.TemplateBuilder
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
@@ -29,30 +30,6 @@ class SearchableActivity : AppCompatActivity() {
 
     private var template: String? = null
     private var keyword: String? = null
-
-
-    // An anonymous class overriding onPageFinished method
-    // of WVClient.
-    private val wvClient = object : WVClient(this) {
-        override fun onPageFinished(view: WebView?, url: String?) {
-            if (keyword == null) {
-                toast(R.string.prompt_no_keyword)
-                return
-            }
-
-            // Call JS function after page loaded.
-            // Loaded content is a list of links.
-            // Navigation is handled by analyzing the
-            // content of each url.
-            view?.evaluateJavascript("""
-                    search('$keyword');
-                    """.trimIndent()) {
-                Log.i(TAG, "evaluateJavascript finished")
-            }
-
-            binding.inProgress = false
-        }
-    }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,7 +57,29 @@ class SearchableActivity : AppCompatActivity() {
                     JS_INTERFACE_NAME
             )
 
-            webViewClient = wvClient
+            // Use WVClient and override the onPageFinished method.
+            // The webpage handles pagination itself.
+            webViewClient = object : WVClient(context) {
+                override fun onPageFinished(view: WebView?, url: String?) {
+
+                    if (keyword == null) {
+                        toast(R.string.prompt_no_keyword)
+                        return
+                    }
+
+                    // Call JS function after page loaded.
+                    // Loaded content is a list of links.
+                    // Navigation is handled by analyzing the
+                    // content of each url.
+                    view?.evaluateJavascript("""
+                    search('$keyword');
+                    """.trimIndent()) {
+                        Log.i(TAG, "evaluateJavascript finished")
+                    }
+
+                    binding.inProgress = false
+                }
+            }
         }
 
         // Setup back key behavior.
@@ -106,6 +105,7 @@ class SearchableActivity : AppCompatActivity() {
     private fun handleIntent(intent: Intent) {
         binding.inProgress = true
 
+        // Get the keyword to search from intent.
         if (Intent.ACTION_SEARCH == intent.action) {
             intent.getStringExtra(SearchManager.QUERY)?.also {
                 Log.i(TAG, "Search keyword entered: $it")
@@ -116,6 +116,7 @@ class SearchableActivity : AppCompatActivity() {
         }
     }
 
+    // Load html template and load it into webview
     private fun load(keyword: String) {
 
         if (template == null) {
@@ -125,17 +126,28 @@ class SearchableActivity : AppCompatActivity() {
         supportActionBar?.title = getString(R.string.title_search, keyword)
 
         // Hide the placeholder
-        val tmpl = template?.replace("{search-html}", "") ?: return
+        template?.let {
 
-        // Load empty html template. After the page loaded,
-        // call JS function search() to start loading content.
-        binding.wvSearchResult.loadDataWithBaseURL(
+            // Load empty html template. After the page loaded,
+            // call JS function search() to start loading content.
+            val tmpl = TemplateBuilder(it)
+                .withSearch()
+                .render()
+
+            binding.wvSearchResult.loadDataWithBaseURL(
                 Config.discoverServer(session.loadAccount()),
+
                 tmpl,
+
                 "text/html",
                 null,
                 null
-        )
+            )
+
+            TemplateBuilder(it)
+                .withSearch()
+                .render()
+        }
     }
 
     @JavascriptInterface
@@ -144,6 +156,6 @@ class SearchableActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val TAG = "SearchableActivity"
+        private const val TAG = "SearchableActivity"
     }
 }

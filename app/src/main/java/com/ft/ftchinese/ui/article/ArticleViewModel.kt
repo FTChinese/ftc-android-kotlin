@@ -331,7 +331,7 @@ class ArticleViewModel(
             val template = cache.readStoryTemplate()
 
             val html = withContext(Dispatchers.Default) {
-                StoryBuilder(template)
+                TemplateBuilder(template)
                     .setLanguage(_languageSelected)
                     .withStory(story)
                     .withFollows(tags)

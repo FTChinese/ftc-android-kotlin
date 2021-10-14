@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.checkout
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.content.StoryBuilder
+import com.ft.ftchinese.model.content.TemplateBuilder
 import com.ft.ftchinese.model.enums.PurchaseAction
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.FetchResult
@@ -87,7 +87,7 @@ class BuyerInfoViewModel : BaseViewModel(), AnkoLogger {
         }
 
         return withContext(Dispatchers.Default) {
-            StoryBuilder(template)
+            TemplateBuilder(template)
                 .withUserInfo(account)
                 .withAddress(address)
                 .withChannel(content)

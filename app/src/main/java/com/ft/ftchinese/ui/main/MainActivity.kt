@@ -41,7 +41,7 @@ import com.ft.ftchinese.ui.account.WxInfoViewModel
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.MyftPagerAdapter
-import com.ft.ftchinese.ui.channel.SearchableActivity
+import com.ft.ftchinese.ui.search.SearchableActivity
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment

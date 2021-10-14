@@ -3,7 +3,7 @@ package com.ft.ftchinese.model.content
 import org.junit.Assert.*
 import org.junit.Test
 
-class StoryBuilderTest {
+class TemplateBuilderTest {
     @Test
     fun testReplace() {
         var template = """
