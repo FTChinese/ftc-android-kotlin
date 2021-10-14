@@ -4,7 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.fetch.ServerError
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.model.reader.WxSession
@@ -103,7 +103,7 @@ class WxInfoViewModel : BaseViewModel(), AnkoLogger {
                 }
 
                 progressLiveData.value = false
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 progressLiveData.value = false
                 accountLoaded.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.account_not_found)
