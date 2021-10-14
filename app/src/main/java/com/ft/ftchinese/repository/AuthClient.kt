@@ -2,7 +2,7 @@ package com.ft.ftchinese.repository
 
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.fetch.Fetch
-import com.ft.ftchinese.model.fetch.ServerError
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.request.*
@@ -21,13 +21,13 @@ object AuthClient : AnkoLogger {
 
             // Code below 400
             if (resp.code != 204) {
-                throw ServerError(
+                throw APIError(
                     message = "Unexpected status code ${resp.code}",
                     statusCode = resp.code
                 )
             }
             return true
-        } catch (e: ServerError) {
+        } catch (e: APIError) {
             if (e.statusCode == 404) {
                 return false
             }
@@ -36,7 +36,7 @@ object AuthClient : AnkoLogger {
         }
     }
 
-    fun login(c: Credentials): Account? {
+    fun emailLogin(c: Credentials): Account? {
         val (_, body) = Fetch()
             .post(Endpoint.emailLogin)
             .noCache()
@@ -51,7 +51,7 @@ object AuthClient : AnkoLogger {
         }
     }
 
-    fun signUp(c: Credentials): Account? {
+    fun emailSignUp(c: Credentials): Account? {
 
         val (_, body) = Fetch()
             .post(Endpoint.emailSignUp)
@@ -93,7 +93,7 @@ object AuthClient : AnkoLogger {
         }
     }
 
-    fun mobileLinkEmail(params: MobileLinkParams): Account? {
+    fun mobileLinkExistingEmail(params: MobileLinkParams): Account? {
         val (_, body) = Fetch()
             .post(Endpoint.mobileInitialLink)
             .noCache()
@@ -108,7 +108,10 @@ object AuthClient : AnkoLogger {
         }
     }
 
-    fun mobileSignUp(params: MobileLinkParams): Account? {
+    /**
+     * Create a new account with email derived from phone number.
+     */
+    fun mobileSignUp(params: MobileSignUpParams): Account? {
         val (_, body) = Fetch()
             .post(Endpoint.mobileSignUp)
             .noCache()
