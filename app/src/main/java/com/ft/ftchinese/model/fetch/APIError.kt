@@ -5,7 +5,8 @@ import com.beust.klaxon.Klaxon
 import okhttp3.Response
 import org.jetbrains.anko.AnkoLogger
 
-data class ServerError(
+// API error.
+data class APIError(
     override val message: String,
     val error: Unprocessable? = null,
 
@@ -19,7 +20,7 @@ data class ServerError(
 
     companion object {
         @JvmStatic
-        fun from(resp: Response): ServerError {
+        fun from(resp: Response): APIError {
             /**
              * @throws IOException when turning to string.
              */
@@ -29,7 +30,7 @@ data class ServerError(
             if (body != null) {
                 // Might not return json body
                 if (body.startsWith("<")) {
-                    return ServerError(
+                    return APIError(
                         message = body,
                         statusCode = 500
                     )
@@ -39,21 +40,21 @@ data class ServerError(
                  * Throws JSON parse error.
                  */
                 return try {
-                    Klaxon().parse<ServerError>(body)?.apply {
+                    Klaxon().parse<APIError>(body)?.apply {
                         statusCode = resp.code
-                    } ?: ServerError(
+                    } ?: APIError(
                             message = "Kalxon.parse error",
                             statusCode = 500
                         )
                 } catch (e: Exception) {
-                    ServerError(
+                    APIError(
                         message = e.message ?: "Error parsing JSON",
                         statusCode = 500
                     )
                 }
             }
 
-            return  ServerError(
+            return  APIError(
                 message = "No response from server",
                 statusCode = resp.code
             )

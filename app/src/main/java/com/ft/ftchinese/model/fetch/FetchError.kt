@@ -8,7 +8,7 @@ sealed class FetchError {
 
     companion object {
         @JvmStatic
-        fun fromServerError(e: ServerError): FetchError {
+        fun fromServerError(e: APIError): FetchError {
             return when (e.statusCode) {
                 401 -> ResourceId(R.string.api_unauthorized)
                 429 -> ResourceId(R.string.api_too_many_request)

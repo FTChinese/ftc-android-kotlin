@@ -1,7 +1,6 @@
 package com.ft.ftchinese.model.fetch
 
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.repository.Endpoint
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -194,7 +193,7 @@ class Fetch : AnkoLogger {
             return Pair(resp, resp.body?.string())
         }
 
-        throw ServerError.from(resp)
+        throw APIError.from(resp)
     }
 
     /**
