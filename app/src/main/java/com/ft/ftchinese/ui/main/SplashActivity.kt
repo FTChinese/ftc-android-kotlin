@@ -242,7 +242,7 @@ class SplashActivity : ScopedAppActivity() {
 
     // NOTE: it must be called in the main thread.
     // If you call is in a non-Main coroutine, it crashes.
-    private fun exit(showAd: Boolean = false) {
+    private fun exit() {
         Log.i(TAG, "Exiting Splash Activity")
 //        showSystemUI()
         MainActivity.start(this)
