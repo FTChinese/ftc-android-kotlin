@@ -4,7 +4,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ServerError
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.request.PasswordUpdateParams
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.store.AccountCache
@@ -95,7 +95,7 @@ class PasswordViewModel : BaseViewModel() {
                 progressLiveData.value = false
                 updated.value = FetchResult.Success(done)
                 clear()
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 progressLiveData.value = false
 
                 updated.value = when (e.statusCode) {

@@ -95,6 +95,11 @@ data class Account(
     @Json(ignored = true)
     val isTest: Boolean
         get() = email.endsWith(".test@ftchinese.com")
+
+    @Json(ignored = true)
+    val isMobileEmail: Boolean
+        get() = email.endsWith("@ftchinese.user")
+
     /**
      * Tests whether two accounts are the same one.
      */
