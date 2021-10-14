@@ -69,7 +69,7 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.channel.SearchableActivity"
+            android:name=".ui.search.SearchableActivity"
             android:exported="false"
             android:launchMode="singleTop"
             android:parentActivityName=".ui.main.MainActivity">
