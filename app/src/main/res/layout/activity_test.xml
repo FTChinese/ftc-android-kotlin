@@ -70,6 +70,11 @@
                     android:textAllCaps="false"/>
 
                 <Button
+                    android:id="@+id/mobile_link_existing_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Mobile Link Existing Email"/>
+                <Button
                     android:id="@+id/sign_in"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
