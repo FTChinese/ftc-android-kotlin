@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.validator
 
 import android.util.Patterns
+import com.ft.ftchinese.BuildConfig
 import java.util.regex.Pattern
 
 object Validator {
@@ -53,18 +54,13 @@ object Validator {
         if (str == null) {
             return false
         }
+
+        if (BuildConfig.DEBUG) {
+            return true
+        }
+
         val regExp = "^((13[0-9])|(15[^4])|(18[0,2,3,5-9])|(17[0-8])|(147))\\d{8}$"
         val p: Pattern = Pattern.compile(regExp)
         return p.matcher(str).matches()
-    }
-
-    /**
-     * 香港手机号码8位数，5|6|8|9开头+7位任意数
-     */
-    fun isHKPhone(str: String): Boolean {
-        val regExp = "^(5|6|8|9)\\d{7}$"
-        val p = Pattern.compile(regExp)
-        val m = p.matcher(str)
-        return m.matches()
     }
 }
