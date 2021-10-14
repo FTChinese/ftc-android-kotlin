@@ -23,6 +23,9 @@ import com.google.firebase.messaging.FirebaseMessaging
 
 private const val TAG =  "WVBaseFragment"
 
+/**
+ * A base fragment collects shared functionalities for webview-based page.
+ */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 abstract class WVBaseFragment : ScopedFragment() {
 
