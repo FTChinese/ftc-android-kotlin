@@ -27,6 +27,13 @@ import com.ft.ftchinese.viewmodel.AccountViewModel
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
+/**
+ * Show a user's account details in a recycler list for email/mobile login.
+ * When email is derived from mobile phone, e.g., ending wht @ftchinese.user,
+ * the UI should take it as if the email does not exist. It should not show
+ * 'not verified' message, nor should it alert user to verify the email.
+ * In such case the mobile row should not allow user to open the UpdateActivity to change phone.
+ */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class FtcAccountFragment : ScopedFragment(), AnkoLogger {
 
@@ -150,6 +157,7 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
         }
     }
 
+    // Turns account data to a list of row.
     private fun updateUI() {
         listAdapter.setData(buildAccountRows(requireContext()))
     }
@@ -177,6 +185,17 @@ class FtcAccountFragment : ScopedFragment(), AnkoLogger {
                 when (item.id) {
                     AccountRowType.STRIPE -> onClickStripe()
                     AccountRowType.WECHAT -> onClickWechat()
+                    AccountRowType.MOBILE -> {
+                        // For mobile-created account, forbid user to update mobile to another one.
+                        if (AccountCache.get()?.isMobileEmail == true) {
+                            AlertDialogFragment
+                                .newMsgInstance("手机号创建的账号不允许更改")
+                                .show(childFragmentManager, "PreventModifyMobile")
+                            return@setOnClickListener
+                        }
+
+                        UpdateActivity.start(requireContext(), item.id)
+                    }
                     else -> UpdateActivity.start(requireContext(), item.id)
                 }
             }

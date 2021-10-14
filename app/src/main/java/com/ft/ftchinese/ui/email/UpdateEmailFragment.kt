@@ -65,7 +65,16 @@ class UpdateEmailFragment : ScopedFragment(), AnkoLogger {
 
         setupViewModel()
 
-        binding.currentEmail = AccountCache.get()?.email
+        // Show user current email.
+        // For mobile-created account, treat the email as null.
+        binding.currentEmail = AccountCache.get()?.let {
+            if (it.isMobileEmail) {
+                null
+            } else {
+                it.email
+            }
+        }
+
         binding.emailInput.requestFocus()
     }
 

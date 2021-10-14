@@ -7,6 +7,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpdateAccountBinding
+import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.account.password.PasswordViewModel
 import com.ft.ftchinese.ui.account.password.UpdatePasswordFragment
@@ -85,7 +86,10 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
         when (intent.getSerializableExtra(TARGET_FRAG)) {
             AccountRowType.EMAIL -> {
                 supportActionBar?.setTitle(R.string.title_change_email)
-                if (sessionManager.loadAccount()?.isVerified == false) {
+                val account = AccountCache.get() ?: return
+                // Only show verification button for real emails that are not verified.
+                // Do not show it for mobile-created account since that email address is not usable.
+                if (!account.isMobileEmail && !account.isVerified) {
                     fm.replace(R.id.first_frag, RequestVerificationFragment.newInstance())
                 }
 

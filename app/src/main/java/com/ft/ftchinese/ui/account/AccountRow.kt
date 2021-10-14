@@ -27,11 +27,15 @@ fun buildAccountRows(ctx: Context): List<AccountRow> {
         AccountRow(
             id = AccountRowType.EMAIL,
 
-            primary = if (account.isVerified)
-                ctx.getString(R.string.label_email)
-            else
-                ctx.getString(R.string.email_not_verified),
-            secondary = if (account.email.isNotBlank()) {
+            primary = when {
+                // For mobile-created account, or verified real email
+                account.isMobileEmail ||
+                account.isVerified -> ctx.getString(R.string.label_email)
+                // otherwise show a not verified message.
+                else -> ctx.getString(R.string.email_not_verified)
+            },
+            secondary =
+            if (account.email.isNotBlank() && !account.isMobileEmail) {
                 account.email
             } else {
                 ctx.getString(R.string.default_not_set)
