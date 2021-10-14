@@ -9,7 +9,7 @@ import com.ft.ftchinese.tracking.JSCodes
 
 private const val TAG = "StoryBuilder"
 
-class StoryBuilder(private val template: String) {
+class TemplateBuilder(private val template: String) {
     private val ctx: MutableMap<String, String> = HashMap()
     private var language: Language = Language.CHINESE
     private var shouldHideAd = false
@@ -18,12 +18,12 @@ class StoryBuilder(private val template: String) {
         ctx["{{googletagservices-js}}"] = JSCodes.googletagservices
     }
 
-    fun setLanguage(lang: Language): StoryBuilder {
+    fun setLanguage(lang: Language): TemplateBuilder {
         this.language = lang
         return this
     }
 
-    fun withFollows(follows: Map<String, String>): StoryBuilder {
+    fun withFollows(follows: Map<String, String>): TemplateBuilder {
 
         Log.i(TAG, "$follows")
         follows.forEach { (key, value) ->
@@ -33,7 +33,7 @@ class StoryBuilder(private val template: String) {
         return this
     }
 
-    fun withUserInfo(account: Account?): StoryBuilder {
+    fun withUserInfo(account: Account?): TemplateBuilder {
         if (account == null) {
             return this
         }
@@ -45,7 +45,7 @@ var androidUserInfo = ${account.toJsonString()};
         return this
     }
 
-    fun withAddress(addr: Address): StoryBuilder {
+    fun withAddress(addr: Address): TemplateBuilder {
         ctx["<!-- AndroidUserAddress -->"] = """
 <script>
 var androidUserAddress = ${addr.toJsonString()}
@@ -54,7 +54,7 @@ var androidUserAddress = ${addr.toJsonString()}
         return this
     }
 
-    fun withStory(story: Story): StoryBuilder {
+    fun withStory(story: Story): TemplateBuilder {
         val (shouldHideAd, sponsorTitle) = story.shouldHideAd()
 
         var body = ""
@@ -177,17 +177,13 @@ var androidUserAddress = ${addr.toJsonString()}
         )
     }
 
-    fun withChannel(content: String): StoryBuilder {
+    fun withChannel(content: String): TemplateBuilder {
         ctx["{list-content}"] = content
         return this
     }
 
-    fun renderChannel(): String {
-        var result = template
-        ctx.forEach { (key, value) ->
-            result = result.replace(key, value)
-        }
-
-        return result
+    fun withSearch(): TemplateBuilder {
+        ctx["{search-html}"] = ""
+        return this
     }
 }
