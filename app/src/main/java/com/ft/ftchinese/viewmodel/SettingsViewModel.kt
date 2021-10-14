@@ -8,7 +8,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadingHistoryDao
 import com.ft.ftchinese.model.AppRelease
-import com.ft.ftchinese.model.fetch.ServerError
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.store.FileCache
@@ -146,7 +146,7 @@ class SettingsViewModel(
                     cache.saveText(release.cacheFileName(), raw)
                 }
 
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 releaseResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.release_not_found)
                 } else {

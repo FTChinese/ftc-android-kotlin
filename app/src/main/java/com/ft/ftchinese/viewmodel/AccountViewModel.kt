@@ -6,7 +6,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.ftcsubs.Order
-import com.ft.ftchinese.model.fetch.ServerError
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.iapsubs.IAPSubsResult
 import com.ft.ftchinese.repository.AppleClient
 import com.ft.ftchinese.repository.StripeClient
@@ -84,7 +84,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                 } else {
                     FetchResult.Success(m)
                 }
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 addOnResult.value =  if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
                 } else {
@@ -115,7 +115,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                     FetchResult.Success(stripeSub)
                 }
 
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 info(e)
                 stripeResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
@@ -148,7 +148,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                     FetchResult.Success(stripeSub)
                 }
 
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 info(e)
                 stripeResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
@@ -181,7 +181,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                     FetchResult.Success(stripeSub)
                 }
 
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 info(e)
                 stripeResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
@@ -214,7 +214,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                     FetchResult.Success(iapSubs)
                 }
 
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 iapRefreshResult.value =  if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
                 } else {

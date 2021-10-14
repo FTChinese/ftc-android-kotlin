@@ -9,7 +9,7 @@ import com.ft.ftchinese.model.apicontent.InteractiveStory
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Language
 import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.fetch.ServerError
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.repository.ContentAPIRepo
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.model.fetch.json
@@ -78,7 +78,7 @@ class AudioViewModel(private val cache: FileCache) : ViewModel(), AnkoLogger {
                     storyResult.value = FetchResult.LocalizedError(R.string.loading_failed)
                 }
 
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 info(e)
                 storyResult.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.loading_failed)
