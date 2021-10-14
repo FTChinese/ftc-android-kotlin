@@ -17,7 +17,7 @@ import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.login.WxExpireDialogFragment
+import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.ui.wxlink.UnlinkActivity
 import org.jetbrains.anko.AnkoLogger
