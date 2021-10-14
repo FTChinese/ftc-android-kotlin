@@ -4,7 +4,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ServerError
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.request.PasswordResetParams
 import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.ui.base.BaseViewModel
@@ -95,7 +95,7 @@ class PasswordResetViewModel : BaseViewModel(), AnkoLogger {
 
                 progressLiveData.value = false
                 resetResult.value = FetchResult.Success(ok)
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 progressLiveData.value = false
                 resetResult.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.forgot_password_code_not_found)
