@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -28,15 +29,13 @@ import org.jetbrains.anko.support.v4.toast
 
 /**
  * Popup when user signup required.
- * This dialog might appears in 3 locations:
- * * Email signup
- * * User is trying to login with mobile for the first time, an email account is required.
- * * A wx user is trying to link to a new account.
+ * This dialog might appears in multiple locations:
+ * AuthActivity -> EmailExistsFragment -> SignUpFragment
+ * AuthActivity -> MobileFragment -> SignInFragment -> SignUpFragment
+ * LinkFtcActivity -> SignUpFragment
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class SignUpFragment(
-    private val kind: AuthKind
-) : ScopedBottomSheetDialogFragment(),
+class SignUpFragment() : ScopedBottomSheetDialogFragment(),
         AnkoLogger {
 
     private lateinit var sessionManager: SessionManager
@@ -48,6 +47,8 @@ class SignUpFragment(
 
     private lateinit var binding: FragmentSignUpBinding
     private lateinit var markwon: Markwon
+
+    private var usageKind: AuthKind? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -76,6 +77,10 @@ class SignUpFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        arguments?.let {
+            usageKind = it.getParcelable(ARG_AUTH_KIND)
+        }
 
         // Scoped to parent activity so that it could share data with email fragment.
         emailViewModel = activity?.run {
@@ -113,10 +118,6 @@ class SignUpFragment(
             signUpViewModel.emailLiveData.value = it
         }
 
-        mobileViewModel.mobileLiveData.observe(viewLifecycleOwner) {
-            signUpViewModel.mobileLiveData.value = it
-        }
-
         signUpViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
         }
@@ -131,7 +132,7 @@ class SignUpFragment(
     }
 
     private fun onAccountLoaded(account: Account) {
-        when (kind) {
+        when (usageKind) {
             AuthKind.EmailLogin,
             AuthKind.MobileLink -> {
                 toast(R.string.prompt_signed_up)
@@ -157,7 +158,7 @@ class SignUpFragment(
             dismiss()
         }
 
-        when (kind) {
+        when (usageKind) {
             AuthKind.EmailLogin -> {
                 binding.title = getString(R.string.title_sign_up)
                 binding.guide = getString(R.string.instruct_sign_up)
@@ -166,7 +167,7 @@ class SignUpFragment(
             }
             AuthKind.MobileLink -> {
                 binding.title = "绑定新邮箱"
-                binding.guide = "您的手机号将与新创建的邮箱账号绑定"
+                binding.guide = "手机号${mobileViewModel.mobileLiveData.value}将与新创建的邮箱账号绑定，下次可以直接使用手机号登录"
                 binding.emailInput.requestFocus()
             }
             AuthKind.WechatLink -> {
@@ -189,9 +190,22 @@ class SignUpFragment(
             return
         }
 
-        when (kind) {
-            AuthKind.EmailLogin -> signUpViewModel.emailSignUp(tokenManager.getToken())
-            AuthKind.MobileLink -> signUpViewModel.mobileSignUp(tokenManager.getToken())
+        when (usageKind) {
+            AuthKind.EmailLogin -> {
+                signUpViewModel.emailSignUp(tokenManager.getToken())
+            }
+            AuthKind.MobileLink -> {
+                val mobile = mobileViewModel.mobileLiveData.value
+                if (mobile.isNullOrBlank()) {
+                    toast("Mobile number not set!")
+                    return
+                }
+
+                signUpViewModel.emailSignUp(
+                    deviceToken = tokenManager.getToken(),
+                    mobile = mobile,
+                )
+            }
             AuthKind.WechatLink -> sessionManager
                 .loadAccount()
                 ?.unionId
@@ -206,10 +220,18 @@ class SignUpFragment(
     }
 
     companion object {
+        private const val ARG_AUTH_KIND = "arg_auth_kind"
         @JvmStatic
-        fun forEmailLogin() = SignUpFragment(AuthKind.EmailLogin)
+        fun newInstance(k: AuthKind) = SignUpFragment().apply {
+            arguments = bundleOf(
+                ARG_AUTH_KIND to k
+            )
+        }
 
         @JvmStatic
-        fun forWechatLink() = SignUpFragment(AuthKind.WechatLink)
+        fun forEmailLogin() = newInstance(AuthKind.EmailLogin)
+
+        @JvmStatic
+        fun forWechatLink() = newInstance(AuthKind.WechatLink)
     }
 }

@@ -4,7 +4,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ServerError
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.model.request.MobileLinkParams
@@ -35,10 +35,6 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
             value = enableSubmit()
         }
     }
-
-    // Passed from MobileViewModel when the sign in ui
-    // is launched by mobile login.
-    val mobileLiveData = MutableLiveData("")
 
     init {
         progressLiveData.value = false
@@ -80,7 +76,7 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val account = withContext(Dispatchers.IO) {
-                    AuthClient.login(credentials)
+                    AuthClient.emailLogin(credentials)
                 }
 
                 progressLiveData.value = false
@@ -92,7 +88,7 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
                 }
 
                 accountResult.value = FetchResult.Success(account)
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 progressLiveData.value = false
                 handleLoginError(e)
             } catch (e: Exception) {
@@ -103,7 +99,7 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
     }
 
     // A mobile number is used for the first time for login.
-    fun mobileLinkEmail(deviceToken: String) {
+    fun mobileLinkEmail(mobile: String, deviceToken: String) {
         if (isNetworkAvailable.value == false) {
             accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
@@ -114,14 +110,14 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
         val params = MobileLinkParams(
             email = emailLiveData.value ?: "",
             password = passwordLiveData.value ?: "",
-            mobile = mobileLiveData.value ?: "",
+            mobile = mobile,
             deviceToken = deviceToken
         )
 
         viewModelScope.launch {
             try {
                 val account = withContext(Dispatchers.IO) {
-                    AuthClient.mobileLinkEmail(params)
+                    AuthClient.mobileLinkExistingEmail(params)
                 }
 
                 progressLiveData.value = false
@@ -133,7 +129,7 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
                 }
 
                 accountResult.value = FetchResult.Success(account)
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 progressLiveData.value = false
 
                 handleLoginError(e)
@@ -144,7 +140,7 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
         }
     }
 
-    private fun handleLoginError(e: ServerError) {
+    private fun handleLoginError(e: APIError) {
         if (e.error?.isFieldAlreadyExists("mobile") == true) {
             accountResult.value = FetchResult.LocalizedError(R.string.mobile_link_taken)
             return

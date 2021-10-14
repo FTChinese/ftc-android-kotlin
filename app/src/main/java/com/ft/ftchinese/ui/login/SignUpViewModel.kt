@@ -5,13 +5,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.ServerError
+import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
-import com.ft.ftchinese.model.request.MobileLinkParams
-import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.repository.AuthClient
-import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
@@ -63,8 +62,6 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
         return progressLiveData.value == false && isDirty && formValidator.isValid()
     }
 
-    val mobileLiveData = MutableLiveData("")
-
     init {
         progressLiveData.value = false
     }
@@ -76,8 +73,9 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
     /**
      * Handles both a new user signup, or wechat-logged-in
      * user trying to link to a new account.
+     * @param mobile - only used when a mobile is creating a new email account.
      */
-    fun emailSignUp(deviceToken: String) {
+    fun emailSignUp(deviceToken: String, mobile: String? = null) {
 
         if (isNetworkAvailable.value == false) {
             accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
@@ -89,13 +87,14 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
         val c = Credentials(
             email = emailLiveData.value ?: "",
             password = passwordLiveData.value ?: "",
+            mobile = mobile,
             deviceToken = deviceToken
         )
 
         viewModelScope.launch {
             try {
                 val account = withContext(Dispatchers.IO) {
-                    AuthClient.signUp(c)
+                    AuthClient.emailSignUp(c)
                 }
 
                 progressLiveData.value = false
@@ -105,9 +104,8 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
                     return@launch
                 }
 
-                progressLiveData.value = false
                 accountResult.value = FetchResult.Success(account)
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 progressLiveData.value = false
                 handleSignUpError(e)
             } catch (e: Exception) {
@@ -117,46 +115,7 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
         }
     }
 
-    fun mobileSignUp(deviceToken: String) {
-        if (isNetworkAvailable.value == false) {
-            accountResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        progressLiveData.value = true
-
-        val params = MobileLinkParams(
-            email = emailLiveData.value ?: "",
-            password = passwordLiveData.value ?: "",
-            mobile = mobileLiveData.value ?: "",
-            deviceToken = deviceToken,
-        )
-
-        viewModelScope.launch {
-            try {
-                val account = withContext(Dispatchers.IO) {
-                    AuthClient.mobileSignUp(params)
-                }
-
-                progressLiveData.value = false
-
-                if (account == null) {
-                    accountResult.value = FetchResult.LocalizedError(R.string.loading_failed)
-                    return@launch
-                }
-
-                accountResult.value = FetchResult.Success(account)
-            } catch (e: ServerError) {
-                progressLiveData.value = false
-                handleSignUpError(e)
-            } catch (e: Exception) {
-                progressLiveData.value = false
-                accountResult.value = FetchResult.fromException(e)
-            }
-        }
-    }
-
-    private fun handleSignUpError(e: ServerError) {
+    private fun handleSignUpError(e: APIError) {
         accountResult.value = when (e.statusCode) {
             422 -> {
                 if (e.error == null) {
@@ -201,7 +160,7 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
                 }
 
                 accountResult.value = FetchResult.Success(account)
-            } catch (e: ServerError) {
+            } catch (e: APIError) {
                 info(e)
                 progressLiveData.value = false
                 handleSignUpError(e)

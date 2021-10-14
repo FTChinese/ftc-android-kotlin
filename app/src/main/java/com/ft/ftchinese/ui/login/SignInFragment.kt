@@ -3,10 +3,12 @@ package com.ft.ftchinese.ui.login
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
@@ -24,8 +26,6 @@ import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
 import com.ft.ftchinese.ui.wxlink.WxEmailLink
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
 
@@ -40,9 +40,7 @@ import org.jetbrains.anko.support.v4.toast
  * The loaded account will be used for link preview.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class SignInFragment(
-    private val kind: AuthKind
-) : ScopedBottomSheetDialogFragment(), AnkoLogger {
+class SignInFragment : ScopedBottomSheetDialogFragment() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var tokenManager: TokenManager
@@ -50,6 +48,8 @@ class SignInFragment(
     private lateinit var emailViewModel: EmailViewModel
     private lateinit var mobileViewModel: MobileViewModel
     private lateinit var binding: FragmentSignInBinding
+
+    private var kind: AuthKind? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -76,6 +76,12 @@ class SignInFragment(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        arguments?.let {
+            kind = it.getParcelable(ARG_AUTH_KIND)
+        }
+
+        Log.i(TAG, "Usage kind $kind")
 
         // Used to retrieve email from hosting activity
         emailViewModel = activity?.run {
@@ -124,11 +130,6 @@ class SignInFragment(
             loginViewModel.emailLiveData.value = it
         }
 
-        // Pass mobile number on.
-        mobileViewModel.mobileLiveData.observe(viewLifecycleOwner) {
-            loginViewModel.mobileLiveData.value = it
-        }
-
         loginViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
         }
@@ -171,7 +172,7 @@ class SignInFragment(
                 activity?.finish()
             }
             AuthKind.WechatLink -> {
-                info("Wechat is linking to an existing account $account")
+                Log.i(TAG, "Wechat is linking to an existing account $account")
                 sessionManager.loadAccount()?.let { current ->
                     LinkPreviewFragment(
                         WxEmailLink(
@@ -204,7 +205,7 @@ class SignInFragment(
             }
             AuthKind.MobileLink -> {
                 binding.title = "绑定已有邮箱账号"
-                binding.guide = "首次使用手机号码登录需要绑定邮箱账号，您可以验证已有邮箱账号或创建新账号。\n绑定邮箱后下次可以直接使用手机号码登录"
+                binding.guide = "绑定邮箱后下次可以直接使用手机号${mobileViewModel.mobileLiveData.value}登录该邮箱账号"
                 binding.emailInput.requestFocus()
                 binding.showCreateAccount = true
             }
@@ -222,7 +223,17 @@ class SignInFragment(
         when (kind) {
             AuthKind.EmailLogin,
             AuthKind.WechatLink -> loginViewModel.emailAuth(tokenManager.getToken())
-            AuthKind.MobileLink -> loginViewModel.mobileLinkEmail(tokenManager.getToken())
+            AuthKind.MobileLink -> {
+                val mobile = mobileViewModel.mobileLiveData.value
+                if (mobile.isNullOrBlank()) {
+                    toast("Missing mobile number!")
+                    return
+                }
+                loginViewModel.mobileLinkEmail(
+                    mobile = mobile,
+                    deviceToken = tokenManager.getToken()
+                )
+            }
         }
     }
 
@@ -231,18 +242,31 @@ class SignInFragment(
     }
 
     fun onClickCreateAccount(view: View) {
-        SignUpFragment(kind)
-            .show(childFragmentManager, "SignUpFragment")
+        kind?.let {
+            SignUpFragment
+                .newInstance(it)
+                .show(childFragmentManager, "SignUpFragment")
+        }
     }
 
     companion object {
-        @JvmStatic
-        fun forEmailLogin() = SignInFragment(AuthKind.EmailLogin)
+        private const val TAG = "SignInFragment"
+        private const val ARG_AUTH_KIND = "arg_auth_kind"
 
         @JvmStatic
-        fun forMobileLink() = SignInFragment(AuthKind.MobileLink)
+        fun newInstance(k: AuthKind) = SignInFragment().apply {
+            arguments = bundleOf(
+                ARG_AUTH_KIND to k
+            )
+        }
 
         @JvmStatic
-        fun forWechatLink() = SignInFragment(AuthKind.WechatLink)
+        fun forEmailLogin() = newInstance(AuthKind.EmailLogin)
+
+        @JvmStatic
+        fun forMobileLink() = newInstance(AuthKind.MobileLink)
+
+        @JvmStatic
+        fun forWechatLink() = newInstance(AuthKind.WechatLink)
     }
 }
