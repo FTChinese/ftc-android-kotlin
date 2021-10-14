@@ -209,12 +209,12 @@ open class WVClient(
                 PaywallTracker.from = null
             } else {
                 PaywallTracker.from = PaywallSource(
-                        id = ccode,
-                        type = "promotion",
-                        title = "subscription.html",
-                        category = GACategory.SUBSCRIPTION,
-                        action = GAAction.DISPLAY,
-                        label = "fta/subscription.html"
+                    id = ccode,
+                    type = "promotion",
+                    title = "subscription.html",
+                    category = GACategory.SUBSCRIPTION,
+                    action = GAAction.DISPLAY,
+                    label = "fta/subscription.html"
                 )
             }
 
