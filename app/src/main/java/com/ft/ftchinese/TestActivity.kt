@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
@@ -14,6 +15,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
@@ -37,10 +39,11 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
+import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
-import com.ft.ftchinese.ui.login.WxExpireDialogFragment
+import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.share.SocialShareFragment
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
 import com.ft.ftchinese.ui.wxlink.UnlinkActivity
@@ -48,23 +51,24 @@ import com.ft.ftchinese.ui.wxlink.WxEmailLink
 import com.ft.ftchinese.wxapi.WXEntryActivity
 import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import com.google.firebase.messaging.FirebaseMessaging
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
-import org.jetbrains.anko.info
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
 
+private const val TAG = "TestActivity"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class TestActivity : ScopedAppActivity(), AnkoLogger {
+class TestActivity : ScopedAppActivity() {
 
     private lateinit var binding: ActivityTestBinding
     private lateinit var orderManger: OrderManager
     private lateinit var sessionManager: SessionManager
     private lateinit var workManager: WorkManager
+
+    private lateinit var mobileViewModel: MobileViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +82,8 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         sessionManager = SessionManager.getInstance(this)
         orderManger = OrderManager.getInstance(this)
         workManager = WorkManager.getInstance(this)
+
+        mobileViewModel = ViewModelProvider(this).get(MobileViewModel::class.java)
 
         binding.addressBuy.onClick {
             InvoiceStore.getInstance(this@TestActivity)
@@ -151,24 +157,24 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
         intent.extras?.let {
             for (key in it.keySet()) {
                 val value = intent.extras?.get(key)
-                info("Key: $key Value: $value")
+                Log.i(TAG, "Key: $key Value: $value")
             }
         }
 
         // Subscribe a topic.
         binding.btnSubscribeTopic.setOnClickListener {
-            info("Subscribing to news topic")
+            Log.i(TAG, "Subscribing to news topic")
 
             FirebaseMessaging
-                    .getInstance()
-                    .subscribeToTopic("news")
-                    .addOnCompleteListener {
-                        if (!it.isSuccessful) {
-                            alert(Appcompat, "Subscription failed").show()
-                        } else {
-                            alert(Appcompat, "Subscribed").show()
-                        }
+                .getInstance()
+                .subscribeToTopic("news")
+                .addOnCompleteListener {
+                    if (!it.isSuccessful) {
+                        alert(Appcompat, "Subscription failed").show()
+                    } else {
+                        alert(Appcompat, "Subscribed").show()
                     }
+                }
         }
 
         // Setup bottom bar menu
@@ -177,6 +183,14 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
             onBottomMenuItemClicked(it)
 
             true
+        }
+
+        binding.mobileLinkExistingEmail.setOnClickListener {
+            Log.i(TAG, "Start SignInFragment")
+            mobileViewModel.mobileLiveData.value = "1234567890"
+            SignInFragment
+                .forMobileLink().
+                show(supportFragmentManager, "TestMobileLinkExistingEmail")
         }
 
         binding.btnFreeUser.setOnClickListener {
@@ -695,6 +709,7 @@ class TestActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     companion object {
+
         @JvmStatic
         fun start(context: Context) {
             context.startActivity(Intent(context, TestActivity::class.java))
