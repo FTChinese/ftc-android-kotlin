@@ -38,7 +38,7 @@ class SplashViewModel : BaseViewModel() {
 
     fun startCounting() {
         job = viewModelScope.launch {
-            for (i in 5 downTo 0) {
+            for (i in 5 downTo 1) {
                 counterLiveData.value = i
                 delay(1000)
             }
