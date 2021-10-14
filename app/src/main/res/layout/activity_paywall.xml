@@ -53,6 +53,7 @@
                         android:id="@+id/frag_promo_box"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_16"
                         android:layout_marginBottom="16dp"
                         android:visibility="@{hasPromo ? View.VISIBLE : View.GONE}" />
 
@@ -72,6 +73,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp" />
 
+                    <!-- Promo terms and conditions -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:text="@{promoTerms}"
+                        android:visibility="@{promoTerms == null ? View.GONE : View.VISIBLE}" />
+
                     <!--  Second product card -->
                     <FrameLayout
                         android:id="@+id/product_bottom"
@@ -81,7 +90,6 @@
 
                     <!-- Promo terms and conditions -->
                     <TextView
-                        android:id="@+id/tv_promo_terms"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
