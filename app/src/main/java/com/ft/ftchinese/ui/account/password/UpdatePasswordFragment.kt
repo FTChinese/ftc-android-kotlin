@@ -38,8 +38,7 @@ class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(PasswordViewModel::class.java)
+            ViewModelProvider(this)[PasswordViewModel::class.java]
         } ?: throw Exception("Invalid activity")
 
         binding.viewModel = viewModel
