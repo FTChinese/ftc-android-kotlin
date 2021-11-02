@@ -48,7 +48,7 @@ class PasswordViewModel : BaseViewModel() {
 
     val isFormEnabled = MediatorLiveData<Boolean>().apply {
         addSource(oldPasswordLiveData) {
-            value = progressLiveData.value == false
+            value = enableForm()
         }
         addSource(passwordLiveData) {
             value = enableForm()
@@ -82,8 +82,8 @@ class PasswordViewModel : BaseViewModel() {
         progressLiveData.value = true
         val userId = AccountCache.get()?.id ?: return
         val params = PasswordUpdateParams(
-            oldPassword = oldPasswordLiveData.value?.trim() ?: "",
-            password = passwordLiveData.value?.trim() ?: ""
+            currentPassword = oldPasswordLiveData.value?.trim() ?: "",
+            newPassword = passwordLiveData.value?.trim() ?: ""
         )
 
         viewModelScope.launch {
