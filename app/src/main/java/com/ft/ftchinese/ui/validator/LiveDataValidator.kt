@@ -3,7 +3,6 @@ package com.ft.ftchinese.ui.validator
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 class LiveDataValidator(private val liveData: LiveData<String>) : AnkoLogger {
     private val validationRules = mutableListOf<Predicate>()
