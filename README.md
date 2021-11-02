@@ -247,7 +247,8 @@ https://medium.com/@elia.maracani/android-data-binding-passing-a-variable-to-an-
 
 ## Versions
 
-v5.0.0 -> API v3
+* v5.0.0 -> API v3.0.0. Price could define multiple discounts.
+* v5.2.0 -> API v3.3.0. Account could be deleted.
 
 ------------------------
 
