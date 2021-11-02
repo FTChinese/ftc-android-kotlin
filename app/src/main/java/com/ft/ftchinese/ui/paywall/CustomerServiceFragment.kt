@@ -1,7 +1,5 @@
 package com.ft.ftchinese.ui.paywall
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +7,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentCustomerServiceBinding
+import com.ft.ftchinese.ui.base.IntentsUtil
 import com.ft.ftchinese.ui.base.ScopedFragment
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
@@ -29,10 +28,7 @@ class CustomerServiceFragment : ScopedFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.customerServiceEmail.onClick {
-            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:subscriber.service@ftchinese.com")
-                putExtra(Intent.EXTRA_SUBJECT, "FT中文网会员订阅")
-            }
+            val intent = IntentsUtil.emailCustomerService("FT中文网会员订阅")
 
             activity?.run {
                 if (intent.resolveActivity(packageManager) != null) {
