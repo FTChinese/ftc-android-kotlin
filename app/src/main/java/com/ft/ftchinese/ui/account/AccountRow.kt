@@ -17,7 +17,8 @@ enum class AccountRowType {
     PASSWORD,
     Address,
     STRIPE,
-    WECHAT
+    WECHAT,
+    DELETE
 }
 
 fun buildAccountRows(ctx: Context): List<AccountRow> {

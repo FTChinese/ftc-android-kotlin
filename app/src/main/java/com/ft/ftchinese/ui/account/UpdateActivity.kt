@@ -34,6 +34,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
     private lateinit var nameViewModel: NameViewModel
     private lateinit var passwordViewModel: PasswordViewModel
     private lateinit var mobileViewModel: MobileViewModel
+    private lateinit var deleteViewModel: DeleteAccountViewModel
 
     private lateinit var binding: ActivityUpdateAccountBinding
 
@@ -50,20 +51,17 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
 
         sessionManager = SessionManager.getInstance(this)
 
-        emailViewModel = ViewModelProvider(this)
-            .get(EmailViewModel::class.java)
+        emailViewModel = ViewModelProvider(this)[EmailViewModel::class.java]
 
-        nameViewModel = ViewModelProvider(this)
-            .get(NameViewModel::class.java)
+        nameViewModel = ViewModelProvider(this)[NameViewModel::class.java]
 
-        passwordViewModel = ViewModelProvider(this)
-            .get(PasswordViewModel::class.java)
+        passwordViewModel = ViewModelProvider(this)[PasswordViewModel::class.java]
 
-        addressViewModel = ViewModelProvider(this)
-            .get(AddressViewModel::class.java)
+        addressViewModel = ViewModelProvider(this)[AddressViewModel::class.java]
 
-        mobileViewModel = ViewModelProvider(this)
-            .get(MobileViewModel::class.java)
+        mobileViewModel = ViewModelProvider(this)[MobileViewModel::class.java]
+
+        deleteViewModel = ViewModelProvider(this)[DeleteAccountViewModel::class.java]
 
         connectionLiveData.observe(this) {
             emailViewModel.isNetworkAvailable.value = it
@@ -71,6 +69,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             passwordViewModel.isNetworkAvailable.value = it
             addressViewModel.isNetworkAvailable.value = it
             // MobileViewModel's network is configured in the its fragment.
+            deleteViewModel.isNetworkAvailable.value = it
         }
 
         isConnected.let {
@@ -78,6 +77,7 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
             nameViewModel.isNetworkAvailable.value = it
             passwordViewModel.isNetworkAvailable.value = it
             addressViewModel.isNetworkAvailable.value = it
+            deleteViewModel.isNetworkAvailable.value = it
         }
 
         val fm = supportFragmentManager
@@ -111,6 +111,10 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
                 supportActionBar?.title = "关联手机号码"
                 fm.replace(R.id.first_frag, MobileFragment.newInstanceForUpdate())
             }
+            AccountRowType.DELETE -> {
+                supportActionBar?.setTitle(R.string.title_delete_account)
+                fm.replace(R.id.first_frag, DeleteAccountFragment.newInstance())
+            }
         }
 
         fm.commit()
@@ -133,6 +137,10 @@ class UpdateActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         addressViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
+        deleteViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
         }
     }

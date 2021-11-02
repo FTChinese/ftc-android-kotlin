@@ -41,7 +41,7 @@ object AuthClient : AnkoLogger {
             .post(Endpoint.emailLogin)
             .noCache()
             .setClient()
-            .sendJson(json.toJsonString(c))
+            .sendJson(c.toJsonString())
             .endJsonText()
 
         return if (body == null) {

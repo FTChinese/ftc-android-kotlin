@@ -4,9 +4,7 @@ import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.*
-import com.ft.ftchinese.model.request.MobileFormParams
-import com.ft.ftchinese.model.request.PasswordUpdateParams
-import com.ft.ftchinese.model.request.SMSCodeParams
+import com.ft.ftchinese.model.request.*
 
 object AccountRepo {
     fun loadFtcAccount(ftcId: String): Account? {
@@ -87,11 +85,12 @@ object AccountRepo {
     }
 
     fun updatePassword(ftcId: String, params: PasswordUpdateParams): Boolean {
-        val(resp, _) = Fetch().patch(Endpoint.passwordUpdate)
-                .noCache()
-                .setUserId(ftcId)
-                .sendJson(params.toJsonString())
-                .endJsonText()
+        val(resp, _) = Fetch()
+            .patch(Endpoint.passwordUpdate)
+            .noCache()
+            .setUserId(ftcId)
+            .sendJson(params.toJsonString())
+            .endJsonText()
 
         return resp.code == 204
     }
@@ -182,6 +181,17 @@ object AccountRepo {
             .setUserId(ftcId)
             .noCache()
             .sendJson(json.toJsonString(address))
+            .endJsonText()
+
+        return resp.code == 204
+    }
+
+    fun deleteAccount(ftcId: String, params: EmailPasswordParams): Boolean {
+        val (resp, _) = Fetch()
+            .delete(Endpoint.ftcAccount)
+            .noCache()
+            .setUserId(ftcId)
+            .sendJson(params.toJsonString())
             .endJsonText()
 
         return resp.code == 204

@@ -23,8 +23,7 @@ object ContentApi {
     val INTERACTIVE = "$BASE/interactive/contents"
 }
 
-//private const val devIP = "http://192.168.10.115"
-private const val devIP = "http://192.168.1.52"
+private const val devIP = "http://192.168.1.26"
 object Endpoint {
 
     val accessToken = if (BuildConfig.DEBUG) {
