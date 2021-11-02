@@ -1,24 +1,106 @@
-## Problems with Android Studio
-
-* As of Android Studio Arctic Fox 2020.3.1 Canary 14, clicking app inspection will crash your app! You need to unplug your device and close kill Android Studio.
+# Product Design
 
 ## Splash Screen
 
 Android 12 start providing Splash Screens. We implemented our custom one till version 5.1.
 
-## Logo on ActionBar
+## Login
 
-Reference: https://developer.android.com/training/multiscreen/screendensities
+### Wechat Login Process
 
-* xhdpi：2.0
-* hdpi：1.5
-* mdpi：1.0（基准）
+#### Step 1: Launch Wechat
 
-Reference: https://stackoverflow.com/questions/15248207/actionbar-logo-size
+In the `SignInOrUpFragment`, declare a property `private var wxApi: IWXAPI? = null`. Initialize wechat api in `onCreate`:
 
-* drawable-mdpi/ic_logo_wide.png (75 x 32 px)
-* drawable-hdpi/ic_logo_wide.png (112 x 48 px)
-* drawable-xhdpi/ic_logo_wide.png (149 x 64 px)
+```kotlin
+wxApi = WXAPIFactory.createWXAPI(context, your_app_id)
+wxApi?.registerApp(your_app_id)
+```
+
+Respond to click on wechat login button:
+```kotlin
+wechat_sign_in_button.setOnClickListener {
+    val nonce = generateNonce(5)
+    val req = SendAuth.Req()
+    req.scope = "snsapi_userinfo"
+    req.state = nonce
+    wxApi?.sendReq(req)
+}
+```
+
+Then user will be redirected to wechat app.
+
+#### Step 2: Get Code in WxEntryActivity
+
+Wechat will redirect user back to the `WxEntryActivity` in your app after user clicked `确认登陆` button.
+
+You should handle the response in `onResp()` function.
+```kotlin
+override fun onResp(resp: BaseResp?) {
+    when (resp?.type) {
+        ConstantsAPI.COMMAND_SENDAUTH -> {
+            info("Wx auth")
+            // process login here
+        }
+        ConstantsAPI.COMMAND_SENDMESSAGE_TO_WX -> {
+            finish()
+        }
+        else -> {
+            finish()
+        }
+    }
+}
+```
+
+In such case, the `resp` is type `SendAuth.Resp` -- the actual meaning of `SDK通过SendAuth的Resp返回数据给调用方` in Wechat's official documentation.
+
+Then you need to distinguish the response's `ErrCode` first:
+
+* `ERR_OK = 0`(用户同意)
+* `ERR_AUTH_DENIED = -4`（用户拒绝授权）
+* `ERR_USER_CANCEL = -2`（用户取消）
+
+In case `ERR_OK = 0`, cast the `BaseResp` into `SendAuth.Resp`. Only with `SendAuth.Resp` could you get the `code`, `state`, `lang` and `country` fields.
+
+#### Step 3: Ask API for Access Token
+
+Post the `code` to API, and API uses the code to ask for Wechat API for access token.
+
+Access token, refresh token should not be saved by client.
+
+#### Step 4: Use `unionid` to Get User Data
+
+## Delete Account
+
+* Placed on the app bar menu of AccountActivity;
+* When clicked, pop up a dialog to warn user;
+* After confirmed, show a new page to verify password;
+* If password verified and no errors returned, the account is deleted;
+* If errors returned and the errors is subscription_already_exists, it indicates a valid membership exists under this account. User should contact customer service.
+* In such case a dialog is shown with option to send a pre-composed email containing user's email or phone.
+* For mobile-only user, we cannot verify its email; thus contains only mobile number.
+
+## Payment
+
+### Barrier
+
+If a non-logged-in, or non-subscribed user clicked a article behind paywall, a bottom sheet dialog is shown blocking the content. This dialog provides links to login or payment.
+
+### Paywall
+
+### Alipay
+
+Alipay has a Maven repository `implementation 'com.alipay.sdk:alipay-sdk-java:3.3.49.ALL'`. It's the server-side SDK. DO NOT USE IT for Android!
+
+### Wechat
+
+TODO
+
+### Stripe
+
+TODO
+
+# Development Issues
 
 ## Data Binding
 
@@ -90,6 +172,24 @@ storeFile="......."
 
 Add `google-service.json` to the `app` directory.
 
+## Logo on ActionBar
+
+Reference: https://developer.android.com/training/multiscreen/screendensities
+
+* xhdpi：2.0
+* hdpi：1.5
+* mdpi：1.0（基准）
+
+Reference: https://stackoverflow.com/questions/15248207/actionbar-logo-size
+
+* drawable-mdpi/ic_logo_wide.png (75 x 32 px)
+* drawable-hdpi/ic_logo_wide.png (112 x 48 px)
+* drawable-xhdpi/ic_logo_wide.png (149 x 64 px)
+
+## Problems with Android Studio
+
+* As of Android Studio Arctic Fox 2020.3.1 Canary 14, clicking app inspection will crash your app! You need to unplug your device and close kill Android Studio.
+
 ## WebView
 
 User:
@@ -122,73 +222,6 @@ var androidUserInfo = {
 ```
 
 See `model/content/StoryBuilder#withUserInfo` method.
-
-## Wechat Login Process
-
-### Step 1: Launch Wechat
-In the `SignInOrUpFragment`, declare a property `private var wxApi: IWXAPI? = null`. Initialize wechat api in `onCreate`:
-
-```kotlin
-wxApi = WXAPIFactory.createWXAPI(context, your_app_id)
-wxApi?.registerApp(your_app_id)
-```
-
-Respond to click on wechat login button:
-```kotlin
-wechat_sign_in_button.setOnClickListener {
-    val nonce = generateNonce(5)
-    val req = SendAuth.Req()
-    req.scope = "snsapi_userinfo"
-    req.state = nonce
-    wxApi?.sendReq(req)
-}
-```
-
-Then user will be redirected to wechat app.
-
-### Step 2: Get Code in WxEntryActivity
-
-Wechat will redirect user back to the `WxEntryActivity` in your app after user clicked `确认登陆` button.
-
-You should handle the response in `onResp()` function.
-```kotlin
-override fun onResp(resp: BaseResp?) {
-    when (resp?.type) {
-        ConstantsAPI.COMMAND_SENDAUTH -> {
-            info("Wx auth")
-            // process login here
-        }
-        ConstantsAPI.COMMAND_SENDMESSAGE_TO_WX -> {
-            finish()
-        }
-        else -> {
-            finish()
-        }
-    }
-}
-```
-
-In such case, the `resp` is type `SendAuth.Resp` -- the actual meaning of `SDK通过SendAuth的Resp返回数据给调用方` in Wechat's official documentation.
-
-Then you need to distinguish the response's `ErrCode` first:
-
-* `ERR_OK = 0`(用户同意) 
-* `ERR_AUTH_DENIED = -4`（用户拒绝授权） 
-* `ERR_USER_CANCEL = -2`（用户取消）
-
-In case `ERR_OK = 0`, cast the `BaseResp` into `SendAuth.Resp`. Only with `SendAuth.Resp` could you get the `code`, `state`, `lang` and `country` fields.
-
-### Step 3: Ask API for Access Token
-
-Post the `code` to API, and API uses the code to ask for Wechat API for access token.
-
-Access token, refresh token should not be saved by client.
-
-### Step 4: Use `unionid` to Get User Data
- 
-## Knowledge base
-
-Alipay has a Maven repository `implementation 'com.alipay.sdk:alipay-sdk-java:3.3.49.ALL'`. It's the server-side SDK. DO NOT USE IT for Android!
 
 ### Webview
 
