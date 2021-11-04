@@ -43,15 +43,6 @@ data class Price(
     val namedKey: String
         get() = "${tier}_${cycle}"
 
-    val gaAction: String
-        get() = when (tier) {
-            Tier.STANDARD -> when (cycle) {
-                Cycle.YEAR -> GAAction.BUY_STANDARD_YEAR
-                Cycle.MONTH -> GAAction.BUY_STANDARD_MONTH
-            }
-            Tier.PREMIUM -> GAAction.BUY_PREMIUM
-        }
-
     /**
      * Find out the most applicable discount a membership
      * could enjoy among this price's offers.

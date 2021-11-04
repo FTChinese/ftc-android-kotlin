@@ -52,11 +52,18 @@ data class Order(
             cycle = cycle,
         )
 
+    // Checks if an order has confirmedAt field set.
     fun isConfirmed(): Boolean {
         return confirmedAt != null
     }
 
-    fun confirmed(at: ZonedDateTime, start: LocalDate?, end: LocalDate?): Order {
+    // Confirm this order is paid.
+    // Used to build new order in ConfirmationResult.
+    fun confirmed(
+        at: ZonedDateTime,
+        start: LocalDate?,
+        end: LocalDate?
+    ): Order {
         confirmedAt = at
         startDate = start
         endDate = end
