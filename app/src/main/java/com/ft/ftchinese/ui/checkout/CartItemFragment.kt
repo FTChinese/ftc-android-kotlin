@@ -47,21 +47,8 @@ class CartItemFragment : ScopedFragment() {
     private fun setupViewModel() {
 
         checkoutViewModel = activity?.run {
-            ViewModelProvider(this).get(CheckOutViewModel::class.java)
+            ViewModelProvider(this)[CheckOutViewModel::class.java]
         } ?: throw Exception("Invalid activity")
-
-
-//        checkoutViewModel.counterResult.observe(viewLifecycleOwner) { result: FetchResult<CheckoutCounter> ->
-//            when (result) {
-//                is FetchResult.LocalizedError -> toast(result.msgId)
-//                is FetchResult.Error -> result.exception.message?.let { toast(it) }
-//                is FetchResult.Success -> {
-//
-//                    val counter = result.data
-//                    binding.cartItem = CartItem.from(requireContext(), counter.item)
-//                }
-//            }
-//        }
 
         // Use the CheckoutItem to display ui.
         checkoutViewModel.counterLiveData.observe(viewLifecycleOwner) {
