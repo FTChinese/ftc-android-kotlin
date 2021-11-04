@@ -146,7 +146,7 @@ object AccountRepo {
             .setAppId()
             .setTimeout(30)
             .sendJson(Klaxon().toJsonString(mapOf(
-                    "sessionId" to wxSession.sessionId
+                "sessionId" to wxSession.sessionId
             )))
             .endJsonText()
 
