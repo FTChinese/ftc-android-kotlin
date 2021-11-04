@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.wxlink
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
@@ -15,11 +16,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+private const val TAG = "UnlinkViewModel"
+
 class UnlinkViewModel : BaseViewModel() {
 
     private val anchorSelected = MutableLiveData<UnlinkAnchor>()
 
     fun selectAnchor(anchor: UnlinkAnchor) {
+        Log.i(TAG, "$anchor")
         anchorSelected.value = anchor
     }
 
@@ -49,6 +53,8 @@ class UnlinkViewModel : BaseViewModel() {
             ftcId = account.id,
             anchor = anchor,
         )
+
+        Log.i(TAG, "$params")
 
         progressLiveData.value = true
         viewModelScope.launch {
