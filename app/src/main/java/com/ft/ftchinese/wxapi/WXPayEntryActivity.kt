@@ -8,10 +8,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
+import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.model.paywall.PaywallCache
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
 import com.ft.ftchinese.store.InvoiceStore
-import com.ft.ftchinese.store.OrderManager
+import com.ft.ftchinese.store.LastOrderStore
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.checkout.CheckOutViewModel
@@ -37,7 +38,7 @@ private const val EXTRA_UI_TEST = "extra_ui_test"
 @ExperimentalCoroutinesApi
 class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
 
-    private var orderManager: OrderManager? = null
+    private var orderManager: LastOrderStore? = null
     private var tracker: StatsTracker? = null
 
     private lateinit var accountViewModel: AccountViewModel
@@ -50,7 +51,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
         binding.details = "请稍后..."
         binding.inProgress = true
 
-        orderManager = OrderManager.getInstance(this)
+        orderManager = LastOrderStore.getInstance(this)
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
         checkoutViewModel = ViewModelProvider(this)
@@ -93,6 +94,8 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
     override fun onResp(resp: BaseResp?) {
         Log.i(TAG, "onPayFinish, errCode = ${resp?.errCode}")
 
+        val order = orderManager?.load()
+
         if (resp?.type == ConstantsAPI.COMMAND_PAY_BY_WX) {
 
             when (resp.errCode) {
@@ -101,7 +104,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
                 0 -> {
                     Log.i(TAG, "Start querying order")
 //                    isPaymentSuccess = true
-                    confirmSubscription()
+                    confirmSubscription(order)
                 }
                 // 错误
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
@@ -110,10 +113,13 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
                     binding.details = "Error code: ${resp.errStr}"
                     binding.inProgress = false
 
-                    val order = orderManager?.load()
-
-                    if (order != null) {
-                        tracker?.buyFail(PaywallCache.get().findPrice(order.edition))
+                    // Tracking failure
+                    order?.let {
+                        tracker?.buyFail(
+                            PaywallCache
+                                .get()
+                                .findPrice(it.edition)
+                        )
                     }
                 }
                 // 用户取消
@@ -128,15 +134,17 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
     }
 
 
-    private fun confirmSubscription() {
+    private fun confirmSubscription(order: Order?) {
 
         // Load current membership
         val account = sessionManager.loadAccount() ?: return
         val member = account.membership
 
-        // Confirm the order locally sand save it.
-        val order = orderManager?.load() ?: return
+        if (order == null) {
+            return
+        }
 
+        // Confirm the order locally sand save it.
         val confirmed = ConfirmationParams(
             order = order,
             member = member,
@@ -152,6 +160,8 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
         binding.inProgress = false
 
         verifyPayment()
+
+        tracker?.oneTimePurchaseSuccess(order)
     }
 
     private fun verifyPayment() {
