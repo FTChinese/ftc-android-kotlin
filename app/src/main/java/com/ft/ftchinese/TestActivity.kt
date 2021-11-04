@@ -554,7 +554,7 @@ class TestActivity : ScopedAppActivity() {
     class AccountBuilder {
 
         private val ftcId = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a"
-        private val unionId = "0lwxee2KvHdym1FPhj1HdgIN7nW1"
+        private val unionId = "XiBumZN8QoFl4gO_gQS0ieqgjRU2"
         private val stripeCusId = "cus_Fo3kC8njfCdo"
         private val stripeSubId = "sub_65gBB0LBU3uD"
         private val iapTxId = "1000000799792245"
