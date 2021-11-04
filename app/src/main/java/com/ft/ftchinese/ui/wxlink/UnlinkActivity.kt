@@ -21,7 +21,7 @@ import org.jetbrains.anko.toast
 class UnlinkActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var linkViewModel: UnlinkViewModel
+    private lateinit var unlinkViewModel: UnlinkViewModel
     private lateinit var binding: ActivityUnlinkBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,14 +39,13 @@ class UnlinkActivity : ScopedAppActivity() {
 
         sessionManager = SessionManager.getInstance(this)
 
-        linkViewModel = ViewModelProvider(this)
-            .get(UnlinkViewModel::class.java)
+        unlinkViewModel = ViewModelProvider(this)[UnlinkViewModel::class.java]
 
         connectionLiveData.observe(this) {
-            linkViewModel.isNetworkAvailable.value = it
+            unlinkViewModel.isNetworkAvailable.value = it
         }
         isConnected.let {
-            linkViewModel.isNetworkAvailable.value = it
+            unlinkViewModel.isNetworkAvailable.value = it
         }
 
         binding.handler = this
@@ -55,11 +54,11 @@ class UnlinkActivity : ScopedAppActivity() {
     }
 
     private fun setupViewModel() {
-        linkViewModel.progressLiveData.observe(this) {
+        unlinkViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
         }
 
-        linkViewModel.accountLoaded.observe(this) {
+        unlinkViewModel.accountLoaded.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
@@ -74,6 +73,7 @@ class UnlinkActivity : ScopedAppActivity() {
     }
 
     private fun initUI() {
+
         val account = sessionManager.loadAccount() ?: return
 
         binding.unlinkFtcAccount.text = arrayOf(getString(R.string.label_ftc_account), account.email)
@@ -93,11 +93,13 @@ class UnlinkActivity : ScopedAppActivity() {
 
     fun onSubmit(view: View) {
         sessionManager.loadAccount()?.let {
-            linkViewModel.unlink(it)
+            unlinkViewModel.unlink(it)
         }
     }
 
     companion object {
+        private const val TAG = "UnlinkActivity"
+
         fun startForResult(activity: Activity?) {
             activity?.startActivityForResult(
                     Intent(activity, UnlinkActivity::class.java),
