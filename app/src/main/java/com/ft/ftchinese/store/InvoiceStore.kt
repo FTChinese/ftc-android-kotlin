@@ -13,6 +13,14 @@ import com.ft.ftchinese.model.reader.Membership
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
+/**
+ * InvoiceStore saves all related data after an order is paid:
+ * * the confirmed order;
+ * * the update membership;
+ * * the membership prior to purchase;
+ * * the order's invoice and an optional invoice caused by carry-over.
+ * * the type of purchase action
+ */
 class InvoiceStore private constructor(ctx: Context) : AnkoLogger {
     private val sharedPref = ctx.getSharedPreferences(FILE_NAME_INVOICE, Context.MODE_PRIVATE)
 
