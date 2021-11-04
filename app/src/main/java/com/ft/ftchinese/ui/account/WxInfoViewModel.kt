@@ -1,10 +1,11 @@
 package com.ft.ftchinese.ui.account
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.APIError
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.model.reader.WxSession
@@ -16,12 +17,12 @@ import com.ft.ftchinese.ui.data.ApiRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import java.io.ByteArrayInputStream
 import java.io.InputStream
 
-class WxInfoViewModel : BaseViewModel(), AnkoLogger {
+private const val TAG = "WxInfoViewModel"
+
+class WxInfoViewModel : BaseViewModel() {
 
     val accountLoaded: MutableLiveData<FetchResult<Account>> by lazy {
         MutableLiveData<FetchResult<Account>>()
@@ -40,7 +41,7 @@ class WxInfoViewModel : BaseViewModel(), AnkoLogger {
     fun loadAvatar(wechat: Wechat, cache: FileCache) {
         wechat.avatarUrl ?: return
 
-        info("Start loading wechat avatar: ${wechat.avatarUrl}")
+        Log.i(TAG, "Start loading wechat avatar: ${wechat.avatarUrl}")
 
 
         viewModelScope.launch {
@@ -50,7 +51,7 @@ class WxInfoViewModel : BaseViewModel(), AnkoLogger {
                 }
 
                 if (fis != null) {
-                    info("Wx avatar loaded from cache")
+                    Log.i(TAG, "Wx avatar loaded from cache")
                     avatarLoaded.value = FetchResult.Success(fis)
                     return@launch
                 }
@@ -64,7 +65,7 @@ class WxInfoViewModel : BaseViewModel(), AnkoLogger {
                     AccountRepo.loadWxAvatar(wechat.avatarUrl)
                 } ?: return@launch
 
-                info("Avatar loaded from server")
+                Log.i(TAG, "Avatar loaded from server")
                 avatarLoaded.value = FetchResult.Success(ByteArrayInputStream(bytes))
 
                 withContext(Dispatchers.IO) {
@@ -105,12 +106,14 @@ class WxInfoViewModel : BaseViewModel(), AnkoLogger {
                 progressLiveData.value = false
             } catch (e: APIError) {
                 progressLiveData.value = false
+                Log.i(TAG, "$e")
                 accountLoaded.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.account_not_found)
                     // TODO: handle 422?
                     else -> FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
+                Log.i(TAG, "$e")
                 progressLiveData.value = false
                 accountLoaded.value = FetchResult.fromException(e)
             }
