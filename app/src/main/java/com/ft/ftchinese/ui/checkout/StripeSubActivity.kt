@@ -23,6 +23,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.price.Price
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.formatter.formatEdition
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.ft.ftchinese.ui.member.MemberActivity
@@ -54,6 +55,7 @@ class StripeSubActivity : ScopedAppActivity(),
     private lateinit var stripe: Stripe
     private lateinit var paymentSession: PaymentSession
     private lateinit var idempotency: Idempotency
+    private lateinit var tracker: StatsTracker
 
     private var paymentMethod: PaymentMethod? = null
 
@@ -70,6 +72,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
         sessionManager = SessionManager.getInstance(this)
         fileCache = FileCache(this)
+        tracker = StatsTracker.getInstance(this)
 
         // Initialize Stripe.
         PaymentConfiguration.init(this, BuildConfig.STRIPE_KEY)
@@ -106,14 +109,11 @@ class StripeSubActivity : ScopedAppActivity(),
     }
 
     private fun setupViewModel() {
-        checkOutViewModel = ViewModelProvider(this)
-            .get(CheckOutViewModel::class.java)
+        checkOutViewModel = ViewModelProvider(this)[CheckOutViewModel::class.java]
 
-        accountViewModel = ViewModelProvider(this)
-            .get(AccountViewModel::class.java)
+        accountViewModel = ViewModelProvider(this)[AccountViewModel::class.java]
 
-        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))
-            .get(PaywallViewModel::class.java)
+        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))[PaywallViewModel::class.java]
 
         // Monitoring network status.
         connectionLiveData.observe(this, {
@@ -479,6 +479,10 @@ class StripeSubActivity : ScopedAppActivity(),
         sessionManager.saveMembership(result.membership)
 
         showDoneBtn()
+
+        checkOutViewModel.counterLiveData.value?.let {
+            tracker.buyStripeSuccess(it.item.price)
+        }
     }
 
     private fun buildRows(sub: Subscription?): List<String> {

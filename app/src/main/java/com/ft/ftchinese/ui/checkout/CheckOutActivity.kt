@@ -50,7 +50,7 @@ class CheckOutActivity : ScopedAppActivity() {
 
     private lateinit var fileCache: FileCache
 
-    private lateinit var orderManager: OrderManager
+    private lateinit var orderManager: LastOrderStore
     private lateinit var sessionManager: SessionManager
     private lateinit var invoiceStore: InvoiceStore
 
@@ -77,7 +77,7 @@ class CheckOutActivity : ScopedAppActivity() {
         }
 
         sessionManager = SessionManager.getInstance(this)
-        orderManager = OrderManager.getInstance(this)
+        orderManager = LastOrderStore.getInstance(this)
         invoiceStore = InvoiceStore.getInstance(this)
 
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
@@ -95,17 +95,13 @@ class CheckOutActivity : ScopedAppActivity() {
     }
 
     private fun setupViewModel() {
-        checkOutViewModel = ViewModelProvider(this)
-            .get(CheckOutViewModel::class.java)
+        checkOutViewModel = ViewModelProvider(this)[CheckOutViewModel::class.java]
 
-        accountViewModel = ViewModelProvider(this)
-            .get(AccountViewModel::class.java)
+        accountViewModel = ViewModelProvider(this)[AccountViewModel::class.java]
 
-        customerViewModel = ViewModelProvider(this, CustomerViewModelFactory(fileCache))
-            .get(CustomerViewModel::class.java)
+        customerViewModel = ViewModelProvider(this, CustomerViewModelFactory(fileCache))[CustomerViewModel::class.java]
 
-        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))
-            .get(PaywallViewModel::class.java)
+        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))[PaywallViewModel::class.java]
 
         connectionLiveData.observe(this, {
             checkOutViewModel.isNetworkAvailable.value = it
@@ -215,7 +211,9 @@ class CheckOutActivity : ScopedAppActivity() {
 
         val a = sessionManager.loadAccount() ?: return
 
-        intent.getParcelableExtra<CheckoutItem>(EXTRA_CHECKOUT_ITEM)?.let {
+        // Get checkout item.
+        intent.getParcelableExtra<CheckoutItem>(EXTRA_CHECKOUT_ITEM)
+            ?.let {
             // Broadcast the selected checkout item to CartItemFragment.
             if (!it.verify(a.isTest)) {
                 toast("价格数据与当前账号环境不一致")
@@ -350,17 +348,23 @@ class CheckOutActivity : ScopedAppActivity() {
         return true
     }
 
+    // After order created on ftc server and the order returned.
     private fun onAliPayIntent(result: FetchResult<AliPayIntent>) {
         binding.inProgress = false
 
         when (result) {
             is FetchResult.LocalizedError -> {
                 showErrDialog(result.msgId)
-                tracker.buyFail(checkOutViewModel.counterLiveData.value?.item?.price)
+                checkOutViewModel.counterLiveData.value?.let {
+                    tracker.buyFail(it.item.price)
+                }
             }
             is FetchResult.Error -> {
                 result.exception.message?.let { showErrDialog(it) }
-                tracker.buyFail(checkOutViewModel.counterLiveData.value?.item?.price)
+                checkOutViewModel.counterLiveData.value?.let {
+                    tracker.buyFail(it.item.price)
+                }
+
             }
             is FetchResult.Success -> {
                 binding.payBtn.isEnabled = false
@@ -372,6 +376,7 @@ class CheckOutActivity : ScopedAppActivity() {
 
     private fun launchAliPay(aliPayIntent: AliPayIntent) {
 
+        // Save the yet-to-be-confirmed order.
         orderManager.save(aliPayIntent.order)
 
         launch {
@@ -397,30 +402,34 @@ class CheckOutActivity : ScopedAppActivity() {
                 toast(msg)
                 binding.payBtn.isEnabled = true
 
-                tracker.buyFail(checkOutViewModel.counterLiveData.value?.item?.price)
+                checkOutViewModel.counterLiveData.value?.let {
+                    tracker.buyFail(it.item?.price)
+                }
 
                 return@launch
             }
 
-            tracker.buySuccess(checkOutViewModel.counterLiveData.value?.item, checkOutViewModel.paymentMethod)
-
-            confirmAliSubscription()
+            confirmAliSubscription(aliPayIntent.order)
+            tracker.oneTimePurchaseSuccess(aliPayIntent.order)
         }
     }
 
-    private fun confirmAliSubscription() {
+    private fun confirmAliSubscription(order: Order) {
         val account = sessionManager.loadAccount() ?: return
         val member = account.membership
 
-        val order = orderManager.load() ?: return
-
+        // Build confirmation result locally
         val confirmed = ConfirmationParams(
             order = order,
             member = member
         ).buildResult()
 
+        // Save this confirmed order.
         orderManager.save(confirmed.order)
+        // Update membership.
         sessionManager.saveMembership(confirmed.membership)
+
+        // Save this purchase session's confirmation data.
         invoiceStore.save(confirmed)
         Log.i(TAG, "New membership: ${confirmed.membership}")
 
@@ -436,6 +445,7 @@ class CheckOutActivity : ScopedAppActivity() {
         finish()
     }
 
+    // Verify payment after alipay succeeded.
     private fun verifyPayment() {
         // Schedule VerifySubsWorker
         val verifyRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifyOneTimePurchaseWorker>()
