@@ -32,7 +32,7 @@ import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.model.stripesubs.Idempotency
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.InvoiceStore
-import com.ft.ftchinese.store.OrderManager
+import com.ft.ftchinese.store.LastOrderStore
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.article.ArticleActivity
@@ -64,7 +64,7 @@ private const val TAG = "TestActivity"
 class TestActivity : ScopedAppActivity() {
 
     private lateinit var binding: ActivityTestBinding
-    private lateinit var orderManger: OrderManager
+    private lateinit var orderManger: LastOrderStore
     private lateinit var sessionManager: SessionManager
     private lateinit var workManager: WorkManager
 
@@ -80,7 +80,7 @@ class TestActivity : ScopedAppActivity() {
         }
 
         sessionManager = SessionManager.getInstance(this)
-        orderManger = OrderManager.getInstance(this)
+        orderManger = LastOrderStore.getInstance(this)
         workManager = WorkManager.getInstance(this)
 
         mobileViewModel = ViewModelProvider(this).get(MobileViewModel::class.java)
