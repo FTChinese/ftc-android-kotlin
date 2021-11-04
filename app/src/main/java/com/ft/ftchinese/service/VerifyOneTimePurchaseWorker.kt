@@ -3,11 +3,9 @@ package com.ft.ftchinese.service
 import android.content.Context
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.ft.ftchinese.model.ftcsubs.PaymentResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.store.InvoiceStore
-import com.ft.ftchinese.store.PaymentManager
 import com.ft.ftchinese.store.SessionManager
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -25,32 +23,12 @@ class VerifyOneTimePurchaseWorker(appContext: Context, workerParams: WorkerParam
         return verifyFtcPay(account)
     }
 
-    // Compatibility.
-    private fun loadPayResult(): PaymentResult? {
-        val invoiceStore = InvoiceStore.getInstance(ctx)
-        val pr = invoiceStore.loadPayResult()
-
-        if (pr != null) {
-            return pr
-        }
-
-        val orderId = PaymentManager.getInstance(ctx)
-            .loadOrderId() ?: return null
-
-        return PaymentResult(
-            paymentState = "",
-            paymentStateDesc = "",
-            totalFee = 0,
-            transactionId = "",
-            ftcOrderId = orderId,
-            paidAt = null,
-            payMethod = null,
-        )
-    }
-
     private fun verifyFtcPay(account: Account): Result {
 
-        val pr = loadPayResult() ?: return Result.failure()
+        val pr = InvoiceStore
+            .getInstance(ctx)
+            .loadPayResult()
+            ?: return Result.failure()
 
         if (pr.isVerified()) {
             info("Order already paid. Stop verification")

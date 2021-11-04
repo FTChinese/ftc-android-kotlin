@@ -10,22 +10,26 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.ftcsubs.PaymentResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.repository.AppleClient
-import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.repository.FtcPayClient
+import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.InvoiceStore
-import com.ft.ftchinese.store.PaymentManager
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.member.MemberActivity
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
+/**
+ * Verify subscription status each time the app launches.
+ */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
-    Worker(appContext, workerParams), AnkoLogger {
+class VerifySubsWorker(
+    appContext: Context,
+    workerParams:
+    WorkerParameters
+): Worker(appContext, workerParams), AnkoLogger {
 
     private val ctx = appContext
 
@@ -102,6 +106,8 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         }
     }
 
+    // If current membership is expired and there are addons,
+    // ask server to migrate addons to extend expiration date.
     private fun migrateAddOn(account: Account): Result {
         try {
             val m = FtcPayClient.useAddOn(account) ?: return Result.retry()
@@ -113,32 +119,15 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         }
     }
 
-    // Compatibility.
-    private fun loadPayResult(): PaymentResult? {
-        val invoiceStore = InvoiceStore.getInstance(ctx)
-        val pr = invoiceStore.loadPayResult()
-
-        if (pr != null) {
-            return pr
-        }
-
-        val orderId = PaymentManager.getInstance(ctx)
-            .loadOrderId() ?: return null
-
-        return PaymentResult(
-            paymentState = "",
-            paymentStateDesc = "",
-            totalFee = 0,
-            transactionId = "",
-            ftcOrderId = orderId,
-            paidAt = null,
-            payMethod = null,
-        )
-    }
-
+    // Verify ftc order payment if current account's
+    // membership comes from alipay or wechat pay.
     private fun verifyFtcPay(account: Account): Result {
 
-        val pr = loadPayResult() ?: return Result.failure()
+        val invStore = InvoiceStore.getInstance(ctx)
+
+        val pr = invStore
+            .loadPayResult()
+            ?: return Result.failure()
 
         if (pr.isVerified()) {
             info("Order already paid. Stop verification")
@@ -151,16 +140,20 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         }
 
         try {
-            val result = FtcPayClient.verifyOrder(account, pr.ftcOrderId) ?: return Result.failure()
+            val result = FtcPayClient
+                .verifyOrder(account, pr.ftcOrderId)
+                ?: return Result.failure()
             info(result)
 
-            InvoiceStore.getInstance(ctx).savePayResult(result.payment)
+            invStore.savePayResult(result.payment)
 
             if (!result.payment.isVerified()) {
                 return Result.success()
             }
 
-            SessionManager.getInstance(ctx).saveMembership(result.membership)
+            SessionManager
+                .getInstance(ctx)
+                .saveMembership(result.membership)
 
             return Result.success()
         } catch (e: Exception) {
@@ -169,11 +162,17 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         }
     }
 
+    // Refresh Apple in-app purchase in background
+    // in case current membership payment method is apple.
     private fun refreshIAP(account: Account): Result {
         try {
-            val result = AppleClient.refreshIAP(account) ?: return Result.failure()
+            val result = AppleClient
+                .refreshIAP(account)
+                ?: return Result.failure()
 
-            SessionManager.getInstance(ctx).saveMembership(result.membership)
+            SessionManager
+                .getInstance(ctx)
+                .saveMembership(result.membership)
 
             return Result.success()
         } catch (e: Exception) {
@@ -182,11 +181,16 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
         }
     }
 
+    // Refresh stripe subscription for current user in background.
     private fun refreshStripe(account: Account): Result {
         try {
-            val result = StripeClient.refreshSub(account) ?: return Result.failure()
+            val result = StripeClient
+                .refreshSub(account)
+                ?: return Result.failure()
 
-            SessionManager.getInstance(ctx).saveMembership(result.membership)
+            SessionManager
+                .getInstance(ctx)
+                .saveMembership(result.membership)
 
             return Result.success()
         } catch (e: Exception) {
@@ -194,5 +198,4 @@ class VerifySubsWorker(appContext: Context, workerParams: WorkerParameters):
             return Result.failure()
         }
     }
-
 }
