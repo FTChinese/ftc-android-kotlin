@@ -60,7 +60,6 @@ object Endpoint {
         // When account is test, always use sandbox url, which might be local or online
         if (BuildConfig.DEBUG) {
             "$devIP:8203"
-//        BuildConfig.API_SUBS_SANDBOX
         } else {
             BuildConfig.API_SUBS_SANDBOX
         }
@@ -68,7 +67,6 @@ object Endpoint {
         // When account is not test, always use live url, which might be local or online
         if (BuildConfig.DEBUG) {
             "$devIP:8203"
-//        BuildConfig.API_SUBS_LIVE
         } else {
             BuildConfig.API_SUBS_LIVE
         }
@@ -118,9 +116,9 @@ object Endpoint {
     val passwordResetLetter = "${passwordReset}/letter"
     val passwordResetCodes = "${passwordReset}/codes"
 
-    private val authWxBase = "$apiBase/auth"
-    val wxLogin = "${authWxBase}/wx/login"
-    val wxRefresh = "${authWxBase}/wx/refresh"
+    private val authWxBase = "$apiBase/auth/wx"
+    val wxLogin = "${authWxBase}/login"
+    val wxRefresh = "${authWxBase}/refresh"
 
     val ftcAccount = "$apiBase/account"
     val email = "${ftcAccount}/email"
