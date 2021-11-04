@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.wxlink
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,24 +38,31 @@ class UnlinkAnchorFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(UnlinkViewModel::class.java)
+            ViewModelProvider(this)[UnlinkViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
         binding.btnAnchorFtc.setOnClickListener {
+            Log.i(TAG, "Clicked FTC button")
             viewModel.selectAnchor(UnlinkAnchor.FTC)
         }
 
         binding.btnAnchorWx.setOnClickListener {
+            Log.i(TAG, "Clicked Wx button")
             viewModel.selectAnchor(UnlinkAnchor.WECHAT)
         }
 
-        binding.isStripe = AccountCache.get()?.let {
+        val isStripe = AccountCache.get()?.let {
             it.membership.payMethod == PayMethod.STRIPE
         } ?: false
+        binding.isStripe = isStripe
+        if (isStripe) {
+            viewModel.selectAnchor(UnlinkAnchor.FTC)
+        }
     }
 
     companion object {
+        private const val TAG = "UnlinkAnchorFragment"
+
         @JvmStatic
         fun newInstance() = UnlinkAnchorFragment()
     }
