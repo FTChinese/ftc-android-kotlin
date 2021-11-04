@@ -4,27 +4,11 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.reader.Membership
-import org.jetbrains.anko.AnkoLogger
 
 /**
- * CheckoutCounter is used to build the CheckOutActivity based on the
+ * PaymentCounter is used to build the CheckOutActivity based on the
  * price user chosen and current subscription status.
  */
-@Deprecated("")
-class CheckoutCounter(
-    val price: Price,
-    val member: Membership,
-) : AnkoLogger {
-    // Use might enjoy multiple discount at the same moment:
-    // promotion offered by FTC, or reward for timely renewal.
-//    private val discounts = mutableListOf<Discount>()
-    @Deprecated("")
-    val intents: CheckoutIntents = CheckoutIntents.newInstance(member, price.edition)
-    // Get the selected price and optional discount.
-    @Deprecated("")
-    val item = CheckoutItem.newInstance(price, member)
-}
-
 data class PaymentCounter (
     val item: CheckoutItem,
     val intents: CheckoutIntents, // Deduced intents.
