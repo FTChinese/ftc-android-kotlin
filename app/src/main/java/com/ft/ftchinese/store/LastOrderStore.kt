@@ -38,11 +38,16 @@ fun SharedPreferences.getDouble(key: String, default: Double) =
         java.lang.Double.longBitsToDouble(getLong(key, java.lang.Double.doubleToRawLongBits(default)))
 
 /**
- * Save and load subscription detail to share preferences.
+ * Persist last order user created.
  */
-class OrderManager private constructor(context: Context) {
+class LastOrderStore private constructor(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(PREF_FILE_NAME, Context.MODE_PRIVATE)
 
+    // Saves latest order user created.
+    // The order is created on the server side after user
+    // clicked the Pay button and before payment is actually done.
+    // The user, however, might choose to not pay it.
+    // If user actually paid, then the order will be re-saved.
     fun save(order: Order) {
         sharedPreferences.edit {
             clear()
@@ -109,44 +114,11 @@ class OrderManager private constructor(context: Context) {
     }
 
     companion object {
-        private var instance: OrderManager? = null
+        private var instance: LastOrderStore? = null
 
-        @Synchronized fun getInstance(ctx: Context): OrderManager {
+        @Synchronized fun getInstance(ctx: Context): LastOrderStore {
             if (instance == null) {
-                instance = OrderManager(ctx)
-            }
-
-            return instance!!
-        }
-    }
-}
-
-
-/**
- * PaymentManager is used to save the last successful payment.
- * This differs from OrderManager in that OrderManager always saves the last order user created,
- * which might not be paid.
- * @Deprecated
- */
-class PaymentManager private constructor(ctx: Context) {
-    private val sharedPreferences = ctx.getSharedPreferences(PREF_FILE_PAYMENT_RESULT, Context.MODE_PRIVATE)
-
-    // Upon successful payment, we save the order id so that later we know which order updated
-    // current membership and use it to perform verification.
-
-    // Kept for backward compatibility.
-    fun loadOrderId(): String? {
-        return sharedPreferences.getString(PREF_ORDER_ID, null)
-    }
-
-    companion object {
-        private const val PREF_FILE_PAYMENT_RESULT = "com.ft.ftchinese.last_paid_order"
-
-        private var instance: PaymentManager? = null
-
-        @Synchronized fun getInstance(ctx: Context): PaymentManager {
-            if (instance == null) {
-                instance = PaymentManager(ctx)
+                instance = LastOrderStore(ctx)
             }
 
             return instance!!
