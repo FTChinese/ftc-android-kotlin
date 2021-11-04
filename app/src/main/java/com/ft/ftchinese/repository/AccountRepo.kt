@@ -157,8 +157,8 @@ object AccountRepo {
     fun loadWxAvatar(url: String): ByteArray? {
 
         return Fetch()
-                .get(url)
-                .download()
+            .get(url)
+            .download()
     }
 
     fun loadAddress(ftcId: String): Address? {
