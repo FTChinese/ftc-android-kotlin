@@ -1,5 +1,9 @@
 package com.ft.ftchinese.tracking
 
+import com.ft.ftchinese.model.enums.Cycle
+import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.price.Edition
+
 /**
  * Custom parameter name used for Firebase
  */
@@ -42,4 +46,14 @@ object GAAction {
     const val LAUNCH_AD_SUCCESS = "Sent"
     const val LAUNCH_AD_FAIL = "Fail"
     const val LAUNCH_AD_CLICK = "Click"
+
+    fun get(e: Edition): String {
+        return when (e.tier) {
+            Tier.STANDARD -> when (e.cycle) {
+                Cycle.YEAR -> BUY_STANDARD_YEAR
+                Cycle.MONTH -> BUY_STANDARD_MONTH
+            }
+            Tier.PREMIUM -> BUY_PREMIUM
+        }
+    }
 }
