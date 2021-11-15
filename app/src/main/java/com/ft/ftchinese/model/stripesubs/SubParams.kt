@@ -7,9 +7,9 @@ import com.ft.ftchinese.model.fetch.KTier
 
 data class SubParams(
     @KTier
-        val tier: Tier,
+    val tier: Tier,
     @KCycle
-        val cycle: Cycle,
+    val cycle: Cycle,
     val priceId: String,
     val customer: String, // Deprecated
     val coupon: String? = null,
