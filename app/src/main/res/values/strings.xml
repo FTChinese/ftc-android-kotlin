@@ -112,7 +112,7 @@
     <string name="ftc_account_linked">账号 %1$s 已经绑定了其他微信账号。一个FT中文网账号只能绑定一个微信账号。</string>
     <string name="wx_account_linked">微信账号 %1$s 已经绑定了其他FT中文网账号。一个FT中文网账号只能绑定一个微信账号。</string>
     <string name="accounts_member_valid">您的微信账号和FT中文网的账号均购买了会员服务，两个会员均未到期。合并账号会删除其中一个账号的会员信息。为保障您的权益，暂不支持绑定两个会员未过期的账号。您可以寻求客服帮助。</string>
-    <string name="unlink_footnote">* Stripe订阅信息只能保留在FT中文网账号下</string>
+    <string name="unlink_footnote">* Stripe、苹果内购或企业订阅信息只能保留在FT中文网账号下</string>
     <string name="prompt_linked">账号已绑定</string>
     <string name="prompt_unlinked">账号已解除绑定</string>
 

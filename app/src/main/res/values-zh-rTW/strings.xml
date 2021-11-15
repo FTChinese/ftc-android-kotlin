@@ -151,7 +151,7 @@
     <string name="ftc_account_linked">帳號 %1$s 已經綁定了其他微信帳號。一个FT 中文網帳號只能綁定一个微信帳號。</string>
     <string name="wx_account_linked">微信帳號 %1$s 已經綁定了其他FT中文網帳號。一个FT 中文網帳號只能綁定一个微信帳號。</string>
     <string name="accounts_member_valid">您的微信帳號和FT中文網的帳號均購買了會員服务，两个會員均未到期。合並帳號会删除其中一个帳號的會員信息。为保障您的權益，暂不支持綁定两个會員未过期的帳號。您可以寻求客服幫助。</string>
-    <string name="unlink_footnote">* Stripe訂閱信息只能保留在FT中文網帳號下</string>
+    <string name="unlink_footnote">* Stripe、苹果内购或企业訂閱信息只能保留在FT中文網帳號下</string>
 
     <!-- Link accounts -->
     <string name="unlink_guide">解除如下帳號关联？</string>
