@@ -99,6 +99,10 @@ class Fetch : AnkoLogger {
         headers["Authorization"] = "Bearer ${Endpoint.accessToken}"
     }
 
+    private fun setUserAgent(ua: String) = apply {
+        headers["User-Agent"] = ua
+    }
+
     // X-Client-Type: android
     // X-Client-Version: 2.0.0-google
     fun setClient() = apply {
