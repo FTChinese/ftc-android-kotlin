@@ -51,11 +51,11 @@ class UnlinkAnchorFragment : Fragment() {
             viewModel.selectAnchor(UnlinkAnchor.WECHAT)
         }
 
-        val isStripe = AccountCache.get()?.let {
-            it.membership.payMethod == PayMethod.STRIPE
+        val isFtcSideOnly = AccountCache.get()?.let {
+            arrayOf(PayMethod.STRIPE, PayMethod.APPLE, PayMethod.B2B).contains(it.membership.payMethod)
         } ?: false
-        binding.isStripe = isStripe
-        if (isStripe) {
+        binding.isFtcSideOnly = isFtcSideOnly
+        if (isFtcSideOnly) {
             viewModel.selectAnchor(UnlinkAnchor.FTC)
         }
     }
