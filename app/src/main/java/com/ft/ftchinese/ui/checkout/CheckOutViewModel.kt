@@ -4,14 +4,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.APIError
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
-import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.model.ftcsubs.WxPayIntent
-import com.ft.ftchinese.model.price.Price
+import com.ft.ftchinese.model.paywall.CheckoutPrice
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.request.OrderParams
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.stripesubs.SubParams
 import com.ft.ftchinese.repository.FtcPayClient
@@ -34,25 +34,27 @@ class CheckOutViewModel : BaseViewModel(), AnkoLogger {
      * When the UI is created, use price, optional discount and
      * membership to build PaymentCounter.
      */
-    fun putIntoFtcCart(item: CheckoutItem, m: Membership) {
-        counterLiveData.value = PaymentCounter.newFtcInstance(item, m)
+    fun putIntoFtcCart(cop: CheckoutPrice, m: Membership) {
+        counterLiveData.value = PaymentCounter.newFtcInstance(cop, m)
     }
 
     /**
      * When the UI is created, use the price and current
      * membership to build PaymentCounter.
      */
-    fun putIntoStripeCart(price: Price, m: Membership) {
+    fun putIntoStripeCart(price: CheckoutPrice, m: Membership) {
         counterLiveData.value = PaymentCounter.newStripeInstance(price, m)
     }
 
     val paymentMethod: PayMethod?
         get() = payMethodSelected.value?.payMethod
 
+    // When user selected a payment method, trigger ui change.
     val payMethodSelected: MutableLiveData<PaymentIntent> by lazy {
         MutableLiveData<PaymentIntent>()
     }
 
+    // When user selected a payment method, narrow down the payment intent.
     fun selectPayMethod(method: PayMethod) {
         counterLiveData.value?.selectPaymentMethod(method)?.let {
             payMethodSelected.value = it
@@ -71,40 +73,14 @@ class CheckOutViewModel : BaseViewModel(), AnkoLogger {
         MutableLiveData<FetchResult<StripeSubsResult>>()
     }
 
-    // Create CheckoutCounter instance and tell CartItemFragment to update ui.
-//    fun initFtcCounter(priceId: String, m: Membership) {
-//        val price = FtcPriceCache.find(priceId)
-//        if (price != null) {
-//            priceSelected.value = price
-//            val c = CheckoutCounter(price, m)
-//            _checkoutCounter = c
-//            counterResult.value = FetchResult.Success(c)
-//        } else {
-//            counterResult.value = FetchResult.Error(Exception("Price not found"))
-//        }
-//    }
-
-//    @Deprecated("", replaceWith = ReplaceWith("putIntoStripeCart"))
-//    fun initStripeCounter(priceId: String, m: Membership) {
-//        val price = StripePriceCache.find(priceId)
-//        if (price != null) {
-//            priceSelected.value = price
-//            val c = CheckoutCounter(price, m)
-//            _checkoutCounter = c
-//            counterResult.value = FetchResult.Success(c)
-//        } else {
-//            counterResult.value = FetchResult.Error(Exception("Price not found"))
-//        }
-//    }
-
     fun createWxOrder(account: Account) {
         if (isNetworkAvailable.value == false) {
             wxPayIntentResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
             return
         }
 
-        val item = counterLiveData.value?.item
-        if (item == null) {
+        val price = counterLiveData.value?.price
+        if (price == null) {
             wxPayIntentResult.value = FetchResult.Error(Exception("Price not found"))
             return
         }
@@ -112,7 +88,10 @@ class CheckOutViewModel : BaseViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val wxOrder = withContext(Dispatchers.IO) {
-                    FtcPayClient.createWxOrder(account, item.reqParams)
+                    FtcPayClient.createWxOrder(account, OrderParams(
+                        priceId = price.regular.id,
+                        discountId = price.favour?.ftcDiscountId,
+                    ))
                 }
 
                 if (wxOrder == null) {
@@ -139,8 +118,8 @@ class CheckOutViewModel : BaseViewModel(), AnkoLogger {
             return
         }
 
-        val item = counterLiveData.value?.item
-        if (item == null) {
+        val price = counterLiveData.value?.price
+        if (price == null) {
             aliPayIntentResult.value = FetchResult.Error(Exception("Price not found"))
             return
         }
@@ -148,7 +127,10 @@ class CheckOutViewModel : BaseViewModel(), AnkoLogger {
         viewModelScope.launch {
             try {
                 val aliOrder = withContext(Dispatchers.IO) {
-                    FtcPayClient.createAliOrder(account, item.reqParams)
+                    FtcPayClient.createAliOrder(account, OrderParams(
+                        priceId = price.regular.id,
+                        discountId = price.favour?.ftcDiscountId,
+                    ))
                 }
 
                 if (aliOrder == null) {
