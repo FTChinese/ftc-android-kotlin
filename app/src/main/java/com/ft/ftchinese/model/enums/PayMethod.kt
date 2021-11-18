@@ -9,6 +9,7 @@ enum class PayMethod(val symbol: String) {
     APPLE("apple"),
     B2B("b2b");
 
+    @Deprecated("")
     val stringRes: Int
         get() = when (this) {
             ALIPAY -> R.string.pay_method_ali

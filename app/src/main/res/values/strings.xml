@@ -279,15 +279,26 @@
     <string name="title_subscription">会员订阅</string>
     <string name="refresh_paywall">获取最新产品价格…</string>
     <string name="paywall_updated">数据已更新</string>
-    <!-- Example: ¥1,998/年 -->
-    <string name="formatter_price_cycle" translatable="false">%1$s%2$,.2f/%3$s</string>
     <!-- Example: ¥1,998.00 -->
+    <!-- Deprecated   -->
     <string name="formatter_price">%1$s%2$,.2f</string>
-    <!-- Example: 支付宝支付 ¥1,998.00-->
+    <!-- Example: 支付宝支付 ¥1,998.00 Deprecated-->
     <string name="formatter_check_out">%1$s %2$s</string>
+    <!-- Deprecated.   -->
     <string name="formatter_original_price">原价 %1$s</string>
+    <string name="first_week">首周试用</string>
+    <string name="first_month">首月试用</string>
+    <string name="first_year">首年试用</string>
+    <string name="initial_days">前%1$d天试用</string>
+    <string name="initial_weeks">前%1$d周试用</string>
+    <string name="initial_months">前%1$d个月试用</string>
+    <string name="formatter_money">%1$,.2f</string>
+    <string name="prefix_original_price">原价 </string>
+    <string name="auto_renew_after_trial">试用结束后自动续订</string>
+    <string name="stripe_trial_message">Stripe订阅%1$s仅%2$s</string>
 
     <!-- Example: 标准会员/年-->
+    <!-- Deprecated -->
     <string name="formatter_edition">%1$s/%2$s</string>
     <string name="formatter_month_date">%1$d月%2$d日</string>
     <string name="formatter_date">%1$d日</string>
@@ -418,7 +429,7 @@
 
     <string name="sub_status_incomplete">等待支付</string>
     <string name="sub_status_incomplete_expired">支付已过期</string>
-    <string name="sub_status_trialing">试用</string>
+    <string name="sub_status_trialing">试用期</string>
     <string name="sub_status_past_due">自动续费失败</string>
     <string name="sub_status_canceled">已取消</string>
     <string name="sub_status_unpaid">未支付</string>
