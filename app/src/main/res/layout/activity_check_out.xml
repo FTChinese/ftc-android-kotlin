@@ -17,6 +17,9 @@
             name="paymentButton"
             type="com.ft.ftchinese.ui.checkout.PaymentButton" />
         <variable
+            name="stripeTrialMessage"
+            type="String" />
+        <variable
             name="inProgress"
             type="Boolean" />
     </data>
@@ -115,6 +118,15 @@
 
                 </RadioGroup>
 
+                <TextView
+                    style="@style/OrigamiText.Body2.Warning"
+                    android:textAlignment="textStart"
+                    android:id="@+id/tv_stripe_trial_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/space_16"
+                    android:layout_marginRight="@dimen/space_16"
+                    android:text="@{stripeTrialMessage}"/>
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
