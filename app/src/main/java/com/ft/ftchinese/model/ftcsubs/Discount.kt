@@ -1,7 +1,6 @@
-package com.ft.ftchinese.model.price
+package com.ft.ftchinese.model.ftcsubs
 
 import android.os.Parcelable
-import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.enums.OfferKind
 import com.ft.ftchinese.model.fetch.KDateTime
 import com.ft.ftchinese.model.fetch.KDiscountStatus
@@ -31,7 +30,7 @@ data class Discount(
 
     // isValid checks whether a discount exists and whether it is in valid period.
     fun isValid(): Boolean {
-        if (BuildConfig.DEBUG)
+
         if (priceOff == null || priceOff <= 0) {
             return false
         }
@@ -47,5 +46,9 @@ data class Discount(
         }
 
         return true
+    }
+
+    fun isIntroductory(): Boolean {
+        return kind == OfferKind.Introductory
     }
 }

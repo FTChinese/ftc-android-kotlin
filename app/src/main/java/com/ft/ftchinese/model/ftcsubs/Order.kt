@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.*
-import com.ft.ftchinese.model.price.Edition
+import com.ft.ftchinese.model.enums.Edition
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
 

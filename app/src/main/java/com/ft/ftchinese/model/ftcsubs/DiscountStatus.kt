@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.price
+package com.ft.ftchinese.model.ftcsubs
 
 import com.ft.ftchinese.model.enums.OfferKind
 

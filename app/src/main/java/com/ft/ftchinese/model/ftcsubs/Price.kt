@@ -1,47 +1,48 @@
-package com.ft.ftchinese.model.price
+package com.ft.ftchinese.model.ftcsubs
 
-import android.os.Parcelable
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.OfferKind
-import com.ft.ftchinese.model.enums.PriceSource
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KCycle
-import com.ft.ftchinese.model.fetch.KPriceSource
 import com.ft.ftchinese.model.fetch.KTier
-import com.ft.ftchinese.tracking.GAAction
-import kotlinx.parcelize.Parcelize
+import com.ft.ftchinese.model.enums.Edition
 
 /**
  * Price contains data of a product's price.
  * It unifies both ftc and Stripe product.
  */
-@Parcelize
 data class Price(
     val id: String,
     @KTier
-    val tier: Tier,
+    override val tier: Tier,
     @KCycle
-    val cycle: Cycle,
+    override val cycle: Cycle,
     val active: Boolean = true,
     val currency: String = "cny",
     val description: String? = null,
     val liveMode: Boolean,
     val nickname: String? = null,
     val productId: String,
-    @KPriceSource
-    val source: PriceSource? = null,
     val unitAmount: Double,
+    val stripePriceId: String,
     val offers: List<Discount> = listOf(),
-) : Parcelable {
+) : Edition(
+    tier = tier,
+    cycle = cycle,
+) {
 
-    val edition: Edition
-        get() = Edition(
-            tier = tier,
-            cycle = cycle,
-        )
-
-    val namedKey: String
-        get() = "${tier}_${cycle}"
+    fun dailyPrice(): DailyPrice {
+        return when (cycle) {
+            Cycle.YEAR -> DailyPrice(
+                holder = "{{dailyAverageOfYear}}",
+                replacer = "${unitAmount.div(365)}"
+            )
+            Cycle.MONTH -> DailyPrice(
+                holder = "{{dailyAverageOfMonth}}",
+                replacer = "${unitAmount.div(30)}"
+            )
+        }
+    }
 
     /**
      * Find out the most applicable discount a membership
@@ -68,4 +69,5 @@ data class Price(
 
         return filtered[0]
     }
+
 }
