@@ -4,8 +4,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ftcsubs.Order
-import com.ft.ftchinese.ui.formatter.formatEdition
-import com.ft.ftchinese.ui.formatter.getCurrencySymbol
+import com.ft.ftchinese.ui.formatter.FormatHelper
 import org.threeten.bp.format.DateTimeFormatter
 
 class OrderAdapter(private var orders: List<Order>) : RecyclerView.Adapter<OrderViewHolder>() {
@@ -25,13 +24,13 @@ class OrderAdapter(private var orders: List<Order>) : RecyclerView.Adapter<Order
                 order.id)
             holder.planView.text = it.getString(
                 R.string.order_subscribed_plan,
-                formatEdition(it, order.edition),
+                FormatHelper.formatEdition(it, order.edition),
             )
             holder.amountView.text = it.getString(
                 R.string.order_price,
                 it.getString(
                     R.string.formatter_price,
-                    getCurrencySymbol(order.currency),
+                    FormatHelper.currencySymbol(order.currency),
                     order.amount
                 ),
             )
