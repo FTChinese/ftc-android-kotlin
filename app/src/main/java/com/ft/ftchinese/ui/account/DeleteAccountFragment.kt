@@ -11,14 +11,14 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentDeleteAccountBinding
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.price.Edition
+import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.IntentsUtil
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.dialog.DialogArgs
-import com.ft.ftchinese.ui.formatter.formatEdition
+import com.ft.ftchinese.ui.formatter.FormatHelper
 import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
@@ -135,7 +135,7 @@ class DeleteAccountFragment : ScopedFragment() {
             return null
         }
 
-        val edition = formatEdition(
+        val edition = FormatHelper.formatEdition(
             requireContext(),
             Edition(
                 tier = a.membership.tier,
