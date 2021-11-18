@@ -156,13 +156,13 @@ class ArticleActivity : ScopedAppActivity(),
             isRefreshing = false,
         )
 
+        binding.inProgress = true
         // Check access rights.
         Log.i(TAG, "Checking access of teaser $teaser")
     }
 
     private fun setupViewModel() {
 
-        // Show/Hide progress indicator which should be controlled by child fragment.
         articleViewModel.progressLiveData.observe(this) {
             Log.i(TAG, "Loading article progress $it")
             binding.inProgress = it
@@ -210,7 +210,7 @@ class ArticleActivity : ScopedAppActivity(),
 
         // If article view model render the complete html locally, load it into webview as a string.
         articleViewModel.htmlResult.observe(this) { result ->
-
+            binding.inProgress = false
             when (result) {
                 is FetchResult.LocalizedError -> {
                     toast(result.msgId)
@@ -219,6 +219,7 @@ class ArticleActivity : ScopedAppActivity(),
                     result.exception.message?.let { toast(it) }
                 }
                 is FetchResult.Success -> {
+                    // Pass html string to webview.
                     Log.i(TAG, "Loading web page content")
                     wvViewModel.htmlReceived.value = result.data
                 }
@@ -274,7 +275,8 @@ class ArticleActivity : ScopedAppActivity(),
         // However, this is not of much use since the it waits all
         // static loaded.
         wvViewModel.pageFinished.observe(this) {
-            articleViewModel.progressLiveData.value = !it
+            Log.i(TAG, "Webpage finished loading")
+            binding.inProgress = !it
         }
 
         // Pass the share app selected share component to article view model.

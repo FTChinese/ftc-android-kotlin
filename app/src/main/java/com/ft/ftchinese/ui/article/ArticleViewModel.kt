@@ -77,7 +77,6 @@ class ArticleViewModel(
      * otherwise loading url directly.
      */
     fun loadStory(teaser: Teaser, isRefreshing: Boolean) {
-        progressLiveData.value = !isRefreshing
         // If this article does not have JSON API, loading it directly from url.
         if (!teaser.hasJsAPI()) {
             checkAccess(teaser.permission())
@@ -93,12 +92,6 @@ class ArticleViewModel(
      */
     private fun crawlHtml(teaser: Teaser, isRefreshing: Boolean) {
         Log.i(TAG, "Start crawling webpage $teaser")
-
-        // Show progress indicator only when user is not
-        // manually refreshing.
-        if (!isRefreshing) {
-            progressLiveData.value = true
-        }
 
         viewModelScope.launch {
 
@@ -173,12 +166,7 @@ class ArticleViewModel(
      * or from server.
      */
     private fun loadJson(teaser: Teaser, isRefreshing: Boolean) {
-
-        // Show progress indicator only when user is not
-        // manually refreshing.
-        if (!isRefreshing) {
-            progressLiveData.value = true
-        }
+        Log.i(TAG, "Loading JSON story ${teaser.id}")
 
         viewModelScope.launch {
 
@@ -196,6 +184,7 @@ class ArticleViewModel(
                 is FetchResult.Success -> {
                     storyLoaded(result.data)
                 }
+                // In case there's any error, this is the final step so we notify the htmlResult.
                 is FetchResult.LocalizedError -> {
                     htmlResult.value = FetchResult.LocalizedError(result.msgId)
                 }
@@ -271,7 +260,7 @@ class ArticleViewModel(
     private suspend fun webpageLoaded(teaser: Teaser) {
         Log.i(TAG, "Webpage loaded")
 
-        progressLiveData.value = false
+//        progressLiveData.value = false
         val isStarring = withContext(Dispatchers.IO) {
             db.starredDao().exists(teaser.id, teaser.type.toString())
         }
@@ -287,14 +276,16 @@ class ArticleViewModel(
     // Read history is not updated here since it might derived
     // from open graph, or might not need to be recorded if
     // loaded from cache which indicates user already read it.
+    /**
+     * Story data in JSON format is loaded.
+     * Please note the this is fare from the end of the whole workflow.
+     * After the structured data loaded, we have to compile it into HTML.
+     */
     private suspend fun storyLoaded(story: Story) {
         checkAccess(story.permission())
 
         storyLoadedLiveData.value = story
         audioFoundLiveData.value = story.hasAudio(_languageSelected)
-        // After story loaded, turn off progress indicator
-        // even if this is refreshing since it can do no harm.
-        progressLiveData.value = false
 
         val isStarring = withContext(Dispatchers.IO) {
             db.starredDao().exists(story.id, story.teaser?.type.toString())
