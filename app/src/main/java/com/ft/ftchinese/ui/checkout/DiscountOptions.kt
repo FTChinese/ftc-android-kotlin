@@ -1,6 +1,6 @@
 package com.ft.ftchinese.ui.checkout
 
-import com.ft.ftchinese.model.price.Discount
+import com.ft.ftchinese.model.ftcsubs.Discount
 
 data class DiscountOptions(
     val discounts: List<Discount> = listOf(),
