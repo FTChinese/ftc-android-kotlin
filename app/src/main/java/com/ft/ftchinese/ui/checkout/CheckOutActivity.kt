@@ -338,7 +338,13 @@ class CheckOutActivity : ScopedAppActivity() {
             .counterLiveData
             .value
             ?.price
-            ?: return false
+
+        Log.i(TAG, "ftc price $ftcPrice")
+
+        if (ftcPrice == null) {
+            Log.i(TAG, "Ftc price missing")
+            return false
+        }
 
         if (ftcPrice.regular.stripePriceId.isEmpty()) {
             toast("Missing stripe price id!")
@@ -352,7 +358,13 @@ class CheckOutActivity : ScopedAppActivity() {
                 ?.membership
                 ?.isZero
                 ?: true,
-        ) ?: return false
+        )
+
+        Log.i(TAG, "Stripe pride $stripePrice")
+        if (stripePrice == null) {
+            Log.i(TAG, "Stripe price not found for ${ftcPrice.regular.stripePriceId}")
+            return false
+        }
 
         Log.i(TAG, "Start stripe subscription activity...")
         StripeSubActivity.startForResult(
