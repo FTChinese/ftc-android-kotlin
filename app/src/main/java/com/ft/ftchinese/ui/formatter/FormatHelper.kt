@@ -42,6 +42,10 @@ object FormatHelper {
         }
     }
 
+    fun getCycleN(ctx: Context, cycle: Cycle, n: Int): String {
+        return "${n}${getCycle(ctx, cycle)}"
+    }
+
     fun getPayMethod(ctx: Context, pm: PayMethod): String {
         return when (pm) {
             PayMethod.ALIPAY -> ctx.getString(R.string.pay_method_ali)
@@ -76,7 +80,7 @@ object FormatHelper {
         )
     }
 
-    private fun formatPrice(ctx: Context, currency: String, amount: Double): String {
+    fun formatPrice(ctx: Context, currency: String, amount: Double): String {
         return "${currencySymbol(currency)}${formatMoney(ctx, amount)}"
     }
 

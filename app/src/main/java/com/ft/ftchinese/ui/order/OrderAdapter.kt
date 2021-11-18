@@ -28,11 +28,7 @@ class OrderAdapter(private var orders: List<Order>) : RecyclerView.Adapter<Order
             )
             holder.amountView.text = it.getString(
                 R.string.order_price,
-                it.getString(
-                    R.string.formatter_price,
-                    FormatHelper.currencySymbol(order.currency),
-                    order.amount
-                ),
+                FormatHelper.formatPrice(it, order.currency, order.amount),
             )
             holder.payMethodView.text = it.getString(
                 R.string.order_pay_method,

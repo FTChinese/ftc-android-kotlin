@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityLatestInvoiceBinding
+import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.store.InvoiceStore
@@ -74,25 +75,21 @@ class LatestInvoiceActivity : ScopedAppActivity(), AnkoLogger {
             ),
             Pair(
                 "支付金额",
-                getString(
-                    R.string.formatter_price,
-                    FormatHelper.currencySymbol(inv.currency),
-                    inv.paidAmount,
-                ),
+                FormatHelper.formatPrice(this, inv.currency, inv.paidAmount),
             ),
             Pair(
                 "支付方式",
-                inv.payMethod?.stringRes?.let {
-                      getString(it)
-                } ?: inv.payMethod.toString(),
+                inv.payMethod?.let {
+                    FormatHelper.getPayMethod(this, it)
+                } ?: "",
             ),
             Pair(
                 "订阅期限",
                 if (inv.orderKind == OrderKind.AddOn) {
                     when {
-                        inv.years > 0 -> "${inv.years}${getString(inv.cycle.stringRes)}"
-                        inv.months > 0 -> "${inv.months}${getString(inv.cycle.stringRes)}"
-                        else -> "1${getString(inv.cycle.stringRes)}"
+                        inv.years > 0 -> FormatHelper.getCycleN(this, Cycle.YEAR, inv.years)
+                        inv.months > 0 -> FormatHelper.getCycleN(this, Cycle.MONTH, inv.months)
+                        else -> FormatHelper.getCycleN(this, inv.cycle, 1)
                     } + "(当前订阅过期后启用)"
                 } else {
                     "${inv.startUtc?.toLocalDate()} 至 ${inv.endUtc?.toLocalDate()}"
