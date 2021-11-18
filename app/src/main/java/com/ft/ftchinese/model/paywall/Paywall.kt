@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.paywall
 
-import com.ft.ftchinese.model.price.Edition
-import com.ft.ftchinese.model.price.Price
+import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.ftcsubs.Price
 
 data class Paywall(
     val banner: Banner,
@@ -9,7 +9,7 @@ data class Paywall(
     val products: List<Product>,
     val liveMode: Boolean = true,
 ) {
-    val activePrices: List<Price>
+    private val activePrices: List<Price>
         get() = products.flatMap { it.prices }
 
     fun findPrice(e: Edition): Price? {
