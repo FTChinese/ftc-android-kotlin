@@ -35,11 +35,11 @@ data class Price(
         return when (cycle) {
             Cycle.YEAR -> DailyPrice(
                 holder = "{{dailyAverageOfYear}}",
-                replacer = "${unitAmount.div(365)}"
+                replacer = "%.2f".format(unitAmount.div(365))
             )
             Cycle.MONTH -> DailyPrice(
                 holder = "{{dailyAverageOfMonth}}",
-                replacer = "${unitAmount.div(30)}"
+                replacer = "%.2f".format(unitAmount.div(30))
             )
         }
     }
