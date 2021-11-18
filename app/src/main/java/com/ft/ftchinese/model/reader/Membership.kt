@@ -186,15 +186,6 @@ data class Membership(
         }
 
     @Json(ignored = true)
-    val tierStringRes: Int
-        get() = when {
-            vip -> R.string.tier_vip
-            tier != null -> tier
-                    .stringRes
-            else -> R.string.tier_free
-        }
-
-    @Json(ignored = true)
     val autoRenewMoment: AutoRenewMoment?
         get() = if (autoRenew && expireDate != null && cycle != null) {
             AutoRenewMoment(
@@ -224,6 +215,9 @@ data class Membership(
     val isInvalidStripe: Boolean
         get() = isStripe && status?.isInvalid() == true
 
+    val isTrialing: Boolean
+        get() = status == StripeSubStatus.Trialing
+
     @Json(ignored = true)
     val canCancelStripe: Boolean
         get() = if (payMethod != PayMethod.STRIPE) {
@@ -231,6 +225,10 @@ data class Membership(
         } else {
             autoRenew
         }
+
+    @Json(ignored = true)
+    val isZero: Boolean
+        get() = tier == null
 
     /**
      * What kind of offer an existing membership could enjoy
@@ -270,15 +268,14 @@ data class Membership(
      * This should only be available if current membership
      * is purchased via ali or wx.
      */
-    fun withinAliWxRenewalPeriod(): Boolean {
+    fun beyondMaxRenewalPeriod(): Boolean {
         if (expireDate == null) {
             return true
         }
 
-        val today = LocalDate.now()
-        val threeYearsLater = today.plusYears(3)
+        val threeYearsLater = LocalDate.now().plusYears(3)
 
-        return expireDate.isBefore(threeYearsLater) && expireDate.isAfter(today)
+        return expireDate.isAfter(threeYearsLater)
     }
 
     // Tests if the expiration date is before today.
