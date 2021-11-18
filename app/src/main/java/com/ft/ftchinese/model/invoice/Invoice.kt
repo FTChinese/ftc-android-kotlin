@@ -3,7 +3,7 @@ package com.ft.ftchinese.model.invoice
 import com.beust.klaxon.Json
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
-import com.ft.ftchinese.model.price.Edition
+import com.ft.ftchinese.model.enums.Edition
 import org.threeten.bp.ZonedDateTime
 
 data class Invoice(
