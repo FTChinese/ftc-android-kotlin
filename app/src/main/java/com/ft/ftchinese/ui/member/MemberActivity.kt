@@ -179,6 +179,7 @@ class MemberActivity : ScopedAppActivity(),
         }
     }
 
+    // Update membership status ui.
     private fun subsChanged(m: Membership) {
 
         if (m.hasAddOn) {
