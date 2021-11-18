@@ -14,9 +14,7 @@ import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
 /**
- * A simple [Fragment] subclass.
- * Use the [MembershipFragment.newInstance] factory method to
- * create an instance of this fragment.
+ * UI to show current membership's status.
  */
 class MembershipFragment : Fragment(), AnkoLogger {
 
