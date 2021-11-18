@@ -1,15 +1,31 @@
 package com.ft.ftchinese.ui.checkout
 
-import android.content.Context
-import com.ft.ftchinese.R
-import com.ft.ftchinese.model.price.Edition
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.ftcsubs.CheckoutItem
+import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.ui.formatter.PriceStringBuilder
 
+/**
+ * Tells for a specific order intention, what kind of
+ * payment methods are allowed.
+ * If payMethod is empty, it means user is not allowed
+ * to purchase in such a way.
+ */
+data class CheckoutIntent(
+    val orderKind: OrderKind,
+    val payMethods: List<PayMethod>,
+)
+
+/**
+ * CheckoutIntents enumerates all allowed CheckoutIntent,
+ * and provides an optional message to remind user.
+ * A user might be able to create order of different purpose
+ * depending on its current membership status.
+ * For example, a one-time purchase user could either continue
+ * to purchase another cycle, or switch to Stripe for auto-renewal.
+ * In such case different order creation intents uses different payment method.
+ */
 data class CheckoutIntents(
     val intents: List<CheckoutIntent>,
     val warning: String,
@@ -36,8 +52,14 @@ data class CheckoutIntents(
     }
 
     companion object {
+        /**
+         * Create a new checkout intents for current membership
+         * based on the edition selected.
+         */
         @JvmStatic
         fun newInstance(m: Membership, e: Edition): CheckoutIntents {
+            // VIP user cannot create order and
+            // no payment method is allowed.
             if (m.vip) {
                 return CheckoutIntents(
                     intents = listOf(),
@@ -45,6 +67,8 @@ data class CheckoutIntents(
                 )
             }
 
+            // If membership does not exist, or expired,
+            // treat user as new and any methods are allowed.
             if (m.expired) {
                 return CheckoutIntents(
                     intents = listOf(CheckoutIntent(
@@ -72,7 +96,7 @@ data class CheckoutIntents(
                     if (m.tier == e.tier) {
                         // For alipay and wxpay, allow user to renew if
                         // remaining days not exceeding 3 years.
-                        if (!m.withinAliWxRenewalPeriod()) {
+                        if (m.beyondMaxRenewalPeriod()) {
                             return CheckoutIntents(
                                 intents = listOf(CheckoutIntent(
                                     orderKind = OrderKind.Create,
@@ -225,62 +249,6 @@ data class CheckoutIntents(
     }
 }
 
-data class CheckoutIntent(
-    val orderKind: OrderKind,
-    val payMethods: List<PayMethod>,
-)
 
-/**
- * Collects all data required for final payment after
- * user selected a payment method.
- */
-data class PaymentIntent (
-    val item: CheckoutItem,
-    val orderKind: OrderKind,
-    val payMethod: PayMethod
-) {
-    fun composeBtnText(ctx: Context): String {
-        return when (payMethod) {
-            PayMethod.ALIPAY, PayMethod.WXPAY -> {
-                // Ali/Wx pay button have two groups:
-                // CREATE/RENEW/UPGRADE: 支付宝支付 ¥258.00 or 微信支付 ¥258.00
-                // ADD_ON: 购买订阅期限
-                if (orderKind == OrderKind.AddOn) {
-                    ctx.getString(orderKind.stringRes)
-                } else {
-                    ctx.getString(
-                        R.string.formatter_check_out,
-                        ctx.getString(payMethod.stringRes),
-                        PriceStringBuilder
-                            .fromPrice(
-                                price = item.price,
-                                discount = item.discount,
-                                withCycle = false
-                            )
-                            .build(ctx),
-                    )
-                }
-            }
-            // Stripe button has three groups:
-            // CREATE: Stripe订阅
-            // RENEW: 转为Stripe订阅
-            // UPGRADE: Stripe订阅高端会员
-            // SwitchCycle: Stripe变更订阅周期
-            PayMethod.STRIPE -> {
-                // if current pay method is not stripe.
-                // If current pay method is stripe.
-                when (orderKind) {
-                    OrderKind.Create -> ctx.getString(payMethod.stringRes)
-                    // Renew is used by alipay/wxpay switching to Stripe.
-                    OrderKind.Renew -> ctx.getString(R.string.switch_to_stripe)
-                    // This might be stripe standard upgrade, or ali/wx standard switching payment method.
-                    OrderKind.Upgrade -> ctx.getString(payMethod.stringRes) + ctx.getString(item.price.tier.stringRes)
-                    OrderKind.SwitchCycle -> ctx.getString(R.string.pay_brand_stripe) + ctx.getString(orderKind.stringRes)
-                    OrderKind.AddOn -> "Stripe订阅不支持一次性购买"
-                }
-            }
-            PayMethod.APPLE -> "无法处理苹果订阅"
-            PayMethod.B2B -> "暂不支持企业订阅"
-        }
-    }
-}
+
+
