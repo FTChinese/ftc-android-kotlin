@@ -4,9 +4,9 @@ import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.JSONResult
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.StripeCustomer
+import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.stripesubs.SubParams
 import org.jetbrains.anko.AnkoLogger
@@ -17,7 +17,7 @@ object StripeClient : AnkoLogger {
     // Retrieve a list of stripe prices.
     // If use is logged-in and it is a test account, use sandbox
     // api to get test prices; otherwise retrieve prices from live mode.
-    fun listPrices(): JSONResult<List<Price>>? {
+    fun listPrices(): JSONResult<List<StripePrice>>? {
 
         val (_, body) = Fetch()
             .get(Endpoint.stripePrices)
@@ -28,7 +28,7 @@ object StripeClient : AnkoLogger {
             return null
         }
 
-        val prices = json.parseArray<Price>(body)
+        val prices = json.parseArray<StripePrice>(body)
         return if (prices == null) {
             null
         } else {
@@ -120,7 +120,7 @@ object StripeClient : AnkoLogger {
             .post(Endpoint.stripeSubs)
             .setUserId(account.id)
             .noCache()
-            .sendJson(json.toJsonString(params))
+            .sendJson(params.toJsonString())
             .endJsonText()
 
         return if (body == null) {
