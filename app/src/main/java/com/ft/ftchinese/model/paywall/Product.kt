@@ -2,7 +2,7 @@ package com.ft.ftchinese.model.paywall
 
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KTier
-import com.ft.ftchinese.model.price.Price
+import com.ft.ftchinese.model.ftcsubs.Price
 
 /**
  * Defines the data to present product on paywall.
@@ -13,7 +13,21 @@ data class Product(
     @KTier
     val tier: Tier,
     val heading: String,
-    val description: String?,
+    val description: String,
     val smallPrint: String?,
     val prices: List<Price>,
-)
+) {
+    fun descWithDailyCost(): String {
+        if (description.isEmpty()) {
+            return ""
+        }
+
+        var desc = description
+        prices.map { it.dailyPrice() }
+            .forEach {
+                desc = desc.replace(it.holder, it.replacer)
+            }
+
+        return desc
+    }
+}
