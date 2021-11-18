@@ -77,6 +77,7 @@ class ArticleViewModel(
      * otherwise loading url directly.
      */
     fun loadStory(teaser: Teaser, isRefreshing: Boolean) {
+        progressLiveData.value = !isRefreshing
         // If this article does not have JSON API, loading it directly from url.
         if (!teaser.hasJsAPI()) {
             checkAccess(teaser.permission())

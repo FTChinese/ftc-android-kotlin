@@ -114,19 +114,15 @@ class ArticleActivity : ScopedAppActivity(),
                 FileCache(this),
                 ArticleDb.getInstance(this)
             )
-        ).get(ArticleViewModel::class.java)
+        )[ArticleViewModel::class.java]
 
-        accessViewModel = ViewModelProvider(this)
-            .get(AccessViewModel::class.java)
+        accessViewModel = ViewModelProvider(this)[AccessViewModel::class.java]
 
-        wvViewModel = ViewModelProvider(this)
-            .get(WVViewModel::class.java)
+        wvViewModel = ViewModelProvider(this)[WVViewModel::class.java]
 
-        shareViewModel = ViewModelProvider(this)
-            .get(SocialShareViewModel::class.java)
+        shareViewModel = ViewModelProvider(this)[SocialShareViewModel::class.java]
 
-        screenshotViewModel = ViewModelProvider(this)
-            .get(ScreenshotViewModel::class.java)
+        screenshotViewModel = ViewModelProvider(this)[ScreenshotViewModel::class.java]
 
         connectionLiveData.observe(this) {
             articleViewModel.isNetworkAvailable.value = it
@@ -168,6 +164,7 @@ class ArticleActivity : ScopedAppActivity(),
 
         // Show/Hide progress indicator which should be controlled by child fragment.
         articleViewModel.progressLiveData.observe(this) {
+            Log.i(TAG, "Loading article progress $it")
             binding.inProgress = it
             if (!it) {
                 binding.articleRefresh.isRefreshing = it
