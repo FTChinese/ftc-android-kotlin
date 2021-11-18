@@ -18,17 +18,17 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentProductBinding
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.ftcsubs.CheckoutItem
+import com.ft.ftchinese.model.paywall.CheckoutPrice
 import com.ft.ftchinese.model.paywall.Product
 import com.ft.ftchinese.model.paywall.defaultPaywall
-import com.ft.ftchinese.model.price.Price
+import com.ft.ftchinese.model.ftcsubs.Price
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ProductFragment : ScopedFragment(),
@@ -57,9 +57,6 @@ class ProductFragment : ScopedFragment(),
         arguments?.getParcelable<Tier>(ARG_TIER)?.let {
             tier = it
         }
-
-        // Find the product this fragment is using.
-//        product = defaultPaywall.products.find { tier == it.tier }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -74,6 +71,7 @@ class ProductFragment : ScopedFragment(),
             adapter = priceListAdapter
         }
 
+        // RecyclerView to show the the product description.
         binding.rvProdDesc.apply {
             layoutManager = LinearLayoutManager(context).apply {
                 orientation = LinearLayoutManager.VERTICAL
@@ -114,19 +112,24 @@ class ProductFragment : ScopedFragment(),
             initUI(product)
         }
 
+        // Use default paywall first.
+        // After data loaded form cache, it will be updated,
+        // then updated again after server data fetched.
         viewModel.productsReceived.value = defaultPaywall.products
     }
 
+    // Set/Change product description and price buttons.
     private fun initUI(product: Product?) {
         binding.product = product
 
         // Update data of list adapter.
-        product?.description
+        product?.descWithDailyCost()
             ?.split("\n")
             ?.let {
                 descListAdapter.setData(it)
             }
 
+        // Update price buttons.
         product?.prices?.let {
             priceListAdapter.setData(it)
         }
@@ -153,18 +156,17 @@ class ProductFragment : ScopedFragment(),
             val price = prices[position]
 
             // Find out the price's applicable offer.
-            val checkout = CheckoutItem.newInstance(
+            val checkout = CheckoutPrice.fromFtc(
                 price = price,
                 m = sessionManager.loadAccount()?.membership ?: Membership(),
             )
 
-            info("Offer description ${checkout.discount?.description}")
-
             // Display discount's description field.
-            holder.setOfferDesc(checkout.discount?.description)
+            holder.setOfferDesc(checkout.favour?.offerDesc)
 
             // Get the formatted price string.
-            val priceText = formatPriceButton(requireContext(), checkout)
+            val priceText =
+                FormatHelper.priceButton(requireContext(), checkout)
 
             // Display price text and handle click event.
             when (price.cycle) {
