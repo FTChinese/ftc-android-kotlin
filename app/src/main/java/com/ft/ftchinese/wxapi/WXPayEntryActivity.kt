@@ -115,11 +115,12 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
 
                     // Tracking failure
                     order?.let {
-                        tracker?.buyFail(
-                            PaywallCache
-                                .get()
-                                .findPrice(it.edition)
-                        )
+                        PaywallCache
+                            .get()
+                            .findPrice(it.edition)
+                            ?.let { p ->
+                                tracker?.buyFail(p)
+                            }
                     }
                 }
                 // 用户取消
