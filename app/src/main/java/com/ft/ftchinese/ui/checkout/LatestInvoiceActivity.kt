@@ -13,8 +13,7 @@ import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.formatter.formatEdition
-import com.ft.ftchinese.ui.formatter.getCurrencySymbol
+import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.lists.TwoColItemViewHolder
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -71,13 +70,13 @@ class LatestInvoiceActivity : ScopedAppActivity(), AnkoLogger {
             ),
             Pair(
                 "订阅方案",
-                formatEdition(this, inv.edition),
+                FormatHelper.formatEdition(this, inv.edition),
             ),
             Pair(
                 "支付金额",
                 getString(
                     R.string.formatter_price,
-                    getCurrencySymbol(inv.currency),
+                    FormatHelper.currencySymbol(inv.currency),
                     inv.paidAmount,
                 ),
             ),
