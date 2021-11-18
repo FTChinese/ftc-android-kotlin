@@ -9,9 +9,9 @@ import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.paywall.Paywall
 import com.ft.ftchinese.model.paywall.PaywallCache
-import com.ft.ftchinese.model.paywall.StripePriceCache
-import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.stripesubs.StripePrice
+import com.ft.ftchinese.model.stripesubs.StripePriceStore
 import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
@@ -31,8 +31,8 @@ class PaywallViewModel(
         MutableLiveData<FetchResult<Paywall>>()
     }
 
-    val stripePrices: MutableLiveData<FetchResult<List<Price>>> by lazy {
-        MutableLiveData<FetchResult<List<Price>>>()
+    val stripePrices: MutableLiveData<FetchResult<List<StripePrice>>> by lazy {
+        MutableLiveData<FetchResult<List<StripePrice>>>()
     }
 
     // The cached file are versioned therefore whenever a user
@@ -107,7 +107,7 @@ class PaywallViewModel(
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val result = StripeClient.listPrices() ?: return@launch
-                StripePriceCache.prices = result.value
+                StripePriceStore.add(result.value)
                 cache.saveText(CacheFileNames.stripePrices, result.raw)
                 info("Stripe prices cached...")
             } catch (e: Exception) {
@@ -116,7 +116,7 @@ class PaywallViewModel(
         }
     }
 
-    private suspend fun stripeCachedPrices(): List<Price>? {
+    private suspend fun stripeCachedPrices(): List<StripePrice>? {
         info("Loading stripe prices from cache...")
         return withContext(Dispatchers.IO) {
             val data = cache.loadText(CacheFileNames.stripePrices)
