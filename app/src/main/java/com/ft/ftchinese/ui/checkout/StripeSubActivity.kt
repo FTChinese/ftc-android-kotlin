@@ -14,17 +14,16 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityStripeSubBinding
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.ftcsubs.*
-import com.ft.ftchinese.model.paywall.StripePriceCache
+import com.ft.ftchinese.model.paywall.CheckoutPrice
 import com.ft.ftchinese.model.stripesubs.*
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.price.Price
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.formatter.formatEdition
+import com.ft.ftchinese.ui.base.*
+import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
@@ -142,7 +141,7 @@ class StripeSubActivity : ScopedAppActivity(),
                     result.exception.message?.let { toast(it) }
                 }
                 is FetchResult.Success -> {
-                    StripePriceCache.prices = result.data
+                    StripePriceStore.add(result.data)
                     initUI()
                 }
             }
@@ -160,7 +159,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
         val a = sessionManager.loadAccount() ?: return
 
-        intent.getParcelableExtra<Price>(EXTRA_STRIPE_PRICE)?.let {
+        intent.getParcelableExtra<CheckoutPrice>(EXTRA_CHECKOUT_PRICE)?.let {
             checkOutViewModel.putIntoStripeCart(it, a.membership)
         }
 
@@ -296,7 +295,7 @@ class StripeSubActivity : ScopedAppActivity(),
     private fun startSubscribing() {
         val account = sessionManager.loadAccount() ?: return
         val counter = checkOutViewModel.counterLiveData.value ?: return
-        val p = counter.item.price
+        val price = counter.price
         val intent = counter.intents.findIntent(PayMethod.STRIPE) ?: return
 
         if (account.stripeId == null) {
@@ -317,10 +316,8 @@ class StripeSubActivity : ScopedAppActivity(),
                 toast(R.string.creating_subscription)
 
                 checkOutViewModel.createStripeSub(account, SubParams(
-                    tier = p.tier,
-                    cycle = p.cycle,
-                    priceId = p.id,
-                    customer = account.stripeId,
+                    priceId = price.regular.id,
+                    introductoryPriceId = price.favour?.id,
                     defaultPaymentMethod = pm.id,
                     idempotency = idempotency.retrieveKey()
                 ))
@@ -330,10 +327,8 @@ class StripeSubActivity : ScopedAppActivity(),
                 idempotency.clear()
 
                 checkOutViewModel.upgradeStripeSub(account, SubParams(
-                    tier = p.tier,
-                    cycle = p.cycle,
-                    priceId = p.id,
-                    customer = account.stripeId,
+                    priceId = price.regular.id,
+                    introductoryPriceId = price.favour?.id,
                     defaultPaymentMethod = pm.id,
                     idempotency = idempotency.retrieveKey()
                 ))
@@ -481,7 +476,7 @@ class StripeSubActivity : ScopedAppActivity(),
         showDoneBtn()
 
         checkOutViewModel.counterLiveData.value?.let {
-            tracker.buyStripeSuccess(it.item.price)
+            tracker.buyStripeSuccess(it.price.regular)
         }
     }
 
@@ -498,12 +493,13 @@ class StripeSubActivity : ScopedAppActivity(),
             )
         }
 
+        // TODO: show both trial and subscription.
         val edition = checkOutViewModel.counterLiveData.value?.let {
             getString(
                 R.string.order_subscribed_plan,
-                formatEdition(
+                FormatHelper.formatEdition(
                     this,
-                    it.item.price.edition,
+                    it.price.regular,
                 )
             )
         }
@@ -555,13 +551,13 @@ class StripeSubActivity : ScopedAppActivity(),
     }
 
     companion object {
-        private const val EXTRA_STRIPE_PRICE = "extra_stripe_price"
+        private const val EXTRA_CHECKOUT_PRICE = "extra_checkout_price"
 
         @JvmStatic
-        fun startForResult(activity: Activity, requestCode: Int, price: Price) {
+        fun startForResult(activity: Activity, requestCode: Int, price: CheckoutPrice) {
             activity.startActivityForResult(
                 Intent(activity, StripeSubActivity::class.java).apply {
-                    putExtra(EXTRA_STRIPE_PRICE, price)
+                    putExtra(EXTRA_CHECKOUT_PRICE, price)
                 },
                 requestCode
             )
