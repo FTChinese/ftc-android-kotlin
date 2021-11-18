@@ -3,8 +3,10 @@ package com.ft.ftchinese.ui.checkout
 import android.content.Context
 import android.text.Spannable
 import android.text.SpannableString
-import com.ft.ftchinese.model.ftcsubs.CheckoutItem
-import com.ft.ftchinese.ui.formatter.PriceStringBuilder
+import com.ft.ftchinese.R
+import com.ft.ftchinese.model.enums.PriceSource
+import com.ft.ftchinese.model.paywall.CheckoutPrice
+import com.ft.ftchinese.ui.formatter.CartFormatter
 
 /**
  * Converts the CheckoutItem to human-readable content.
@@ -12,29 +14,31 @@ import com.ft.ftchinese.ui.formatter.PriceStringBuilder
 data class CartItem(
     val productName: String, // The name of the product user selected.
     val payable: Spannable = SpannableString(""),  // The actually charged amount with highlight.
-    val original: Spannable? = null, // The original price if discount exists. It is always crossed over.
+    val smallPrint: Spannable? = null, // The original price if discount exists. It is always crossed over.
 ) {
     companion object {
         @JvmStatic
-        fun from(ctx: Context, item: CheckoutItem): CartItem {
+        fun newInstance(ctx: Context, price: CheckoutPrice): CartItem {
             return CartItem(
-                productName = ctx.getString(item.price.tier.stringRes),
-                payable = PriceStringBuilder
-                    .fromPrice(
-                        price = item.price,
-                        discount = item.discount
-                    )
+                productName = ctx.getString(price.regular.tier.stringRes),
+                payable = CartFormatter
+                    .newInstance(price.favour ?: price.regular)
                     .withScale()
-                    .build(ctx),
-                original = if (item.discount != null) {
-                    PriceStringBuilder
-                        .fromPrice(
-                            price = item.price
-                        )
-                        .withOriginal()
-                        .withStrikeThrough()
-                        .build(ctx)
-                } else null
+                    .format(ctx),
+                smallPrint = price.favour?.let {
+                    if (it.source == PriceSource.Ftc) {
+                        CartFormatter
+                            .newInstance(price.regular)
+                            .withPrefix(ctx.getString(R.string.prefix_original_price))
+                            .withStrikeThrough()
+                            .format(ctx)
+                    } else {
+                        CartFormatter
+                            .newInstance(price.regular)
+                            .withPrefix(ctx.getString(R.string.auto_renew_after_trial))
+                            .format(ctx)
+                    }
+                }
             )
         }
     }
