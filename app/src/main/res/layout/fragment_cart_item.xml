@@ -46,8 +46,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="@{cartItem.original == null ? View.GONE : View.VISIBLE}"
-                android:text="@{cartItem.original}"
+                android:visibility="@{cartItem.smallPrint == null ? View.GONE : View.VISIBLE}"
+                android:text="@{cartItem.smallPrint}"
                 android:textAlignment="center"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
