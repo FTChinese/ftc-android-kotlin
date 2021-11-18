@@ -17,8 +17,9 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.*
-import com.ft.ftchinese.model.paywall.StripePriceCache
+import com.ft.ftchinese.model.paywall.CheckoutPrice
 import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.stripesubs.StripePriceStore
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
 import com.ft.ftchinese.store.*
 import com.ft.ftchinese.tracking.StatsTracker
@@ -27,6 +28,7 @@ import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.customer.CustomerViewModel
 import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
 import com.ft.ftchinese.ui.dialog.AlertDialogFragment
+import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.util.RequestCode
@@ -119,6 +121,22 @@ class CheckOutActivity : ScopedAppActivity() {
         checkOutViewModel.counterLiveData.observe(this) {
             binding.warning = it.intents.warning
             binding.methodsEnabled = it.intents.payMethodsState
+
+            val isNewMember = sessionManager.loadAccount()?.membership?.isZero ?: true
+
+            if (!isNewMember) {
+                return@observe
+            }
+
+            CheckoutPrice.fromStripe(
+                priceId = it.price.regular.stripePriceId,
+                introEligible = true
+            )
+                ?.favour
+                ?.let { p ->
+                    binding.stripeTrialMessage = FormatHelper
+                        .stripeTrialMessage(this, p)
+                }
         }
 
         checkOutViewModel.payMethodSelected.observe(this) {
@@ -150,7 +168,7 @@ class CheckOutActivity : ScopedAppActivity() {
                     result.exception.message?.let { toast(it) }
                 }
                 is FetchResult.Success -> {
-                    StripePriceCache.prices = result.data
+                    StripePriceStore.add(result.data)
                     gotoStripe()
                 }
             }
@@ -186,19 +204,6 @@ class CheckOutActivity : ScopedAppActivity() {
         }
     }
 
-    private fun showErrDialog(msg: String) {
-        AlertDialogFragment
-            .newErrInstance(msg)
-            .onPositiveButtonClicked{ dialog, _ ->
-                dialog.dismiss()
-            }
-            .show(supportFragmentManager, "ErrDialog")
-    }
-
-    private fun showErrDialog(msg: Int) {
-        showErrDialog(getString(msg))
-    }
-
     private fun initUI() {
         // Attach cart fragment.
         // The fragment uses view model to wait for a CheckoutCounter instance.
@@ -212,21 +217,22 @@ class CheckOutActivity : ScopedAppActivity() {
         val a = sessionManager.loadAccount() ?: return
 
         // Get checkout item.
-        intent.getParcelableExtra<CheckoutItem>(EXTRA_CHECKOUT_ITEM)
+        intent.getParcelableExtra<CheckoutPrice>(EXTRA_CHECKOUT_ITEM)
             ?.let {
             // Broadcast the selected checkout item to CartItemFragment.
-            if (!it.verify(a.isTest)) {
+            if (!it.validateLiveMode(a.isTest)) {
                 toast("价格数据与当前账号环境不一致")
                 return@let
             }
 
             checkOutViewModel.putIntoFtcCart(it, a.membership)
+
             // Tracking
-            tracker.addCart(it.price)
+            tracker.addCart(it.regular)
         }
 
         // Ask permission.
-//        requestPermission()
+        // requestPermission()
 
         // If user clicked payment method ali
         binding.alipayBtn.setOnClickListener {
@@ -262,7 +268,7 @@ class CheckOutActivity : ScopedAppActivity() {
             PayMethod.ALIPAY -> {
                 toast(R.string.toast_creating_order)
                 checkOutViewModel.counterLiveData.value?.let {
-                    tracker.checkOut(it.item, pm)
+                    tracker.beginCheckout(it.price, pm)
                 }
 
                 binding.inProgress = true
@@ -280,7 +286,7 @@ class CheckOutActivity : ScopedAppActivity() {
 
                 toast(R.string.toast_creating_order)
                 checkOutViewModel.counterLiveData.value?.let {
-                    tracker.checkOut(it.item, pm)
+                    tracker.beginCheckout(it.price, pm)
                 }
                 binding.inProgress = true
                 checkOutViewModel.createWxOrder(account)
@@ -331,18 +337,28 @@ class CheckOutActivity : ScopedAppActivity() {
         val ftcPrice = checkOutViewModel
             .counterLiveData
             .value
-            ?.item
-            ?.price ?: return false
-
-        val price = StripePriceCache
-            .find(ftcPrice.edition)
+            ?.price
             ?: return false
+
+        if (ftcPrice.regular.stripePriceId.isEmpty()) {
+            toast("Missing stripe price id!")
+            return false
+        }
+
+        val stripePrice = CheckoutPrice.fromStripe(
+            priceId = ftcPrice.regular.stripePriceId,
+            introEligible = sessionManager
+                .loadAccount()
+                ?.membership
+                ?.isZero
+                ?: true,
+        ) ?: return false
 
         Log.i(TAG, "Start stripe subscription activity...")
         StripeSubActivity.startForResult(
             activity = this,
             requestCode = RequestCode.PAYMENT,
-            price = price,
+            price = stripePrice,
         )
 
         return true
@@ -356,13 +372,13 @@ class CheckOutActivity : ScopedAppActivity() {
             is FetchResult.LocalizedError -> {
                 showErrDialog(result.msgId)
                 checkOutViewModel.counterLiveData.value?.let {
-                    tracker.buyFail(it.item.price)
+                    tracker.buyFail(it.price.regular)
                 }
             }
             is FetchResult.Error -> {
                 result.exception.message?.let { showErrDialog(it) }
                 checkOutViewModel.counterLiveData.value?.let {
-                    tracker.buyFail(it.item.price)
+                    tracker.buyFail(it.price.regular)
                 }
 
             }
@@ -403,7 +419,7 @@ class CheckOutActivity : ScopedAppActivity() {
                 binding.payBtn.isEnabled = true
 
                 checkOutViewModel.counterLiveData.value?.let {
-                    tracker.buyFail(it.item?.price)
+                    tracker.buyFail(it.price.regular)
                 }
 
                 return@launch
@@ -463,11 +479,15 @@ class CheckOutActivity : ScopedAppActivity() {
         when (result) {
             is FetchResult.LocalizedError -> {
                 showErrDialog(result.msgId)
-                tracker.buyFail(checkOutViewModel.counterLiveData.value?.item?.price)
+                checkOutViewModel.counterLiveData.value?.let {
+                    tracker.buyFail(it.price.regular)
+                }
             }
             is FetchResult.Error -> {
                 result.exception.message?.let { showErrDialog(it) }
-                tracker.buyFail(checkOutViewModel.counterLiveData.value?.item?.price)
+                checkOutViewModel.counterLiveData.value?.let {
+                    tracker.buyFail(it.price.regular)
+                }
             }
             is FetchResult.Success -> {
                 binding.payBtn.isEnabled = false
@@ -525,12 +545,25 @@ class CheckOutActivity : ScopedAppActivity() {
         }
     }
 
+    private fun showErrDialog(msg: String) {
+        AlertDialogFragment
+            .newErrInstance(msg)
+            .onPositiveButtonClicked{ dialog, _ ->
+                dialog.dismiss()
+            }
+            .show(supportFragmentManager, "ErrDialog")
+    }
+
+    private fun showErrDialog(msg: Int) {
+        showErrDialog(getString(msg))
+    }
+
     companion object {
         private const val TAG = "CheckoutActivity"
         const val EXTRA_CHECKOUT_ITEM = "extra_checkout_item"
 
         @JvmStatic
-        fun startForResult(activity: Activity?, requestCode: Int, item: CheckoutItem) {
+        fun startForResult(activity: Activity?, requestCode: Int, item: CheckoutPrice) {
             val intent = Intent(activity, CheckOutActivity::class.java).apply {
                 putExtra(EXTRA_CHECKOUT_ITEM, item)
             }
