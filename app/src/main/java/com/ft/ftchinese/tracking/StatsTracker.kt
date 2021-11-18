@@ -7,10 +7,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.ftcsubs.CheckoutItem
 import com.ft.ftchinese.model.ftcsubs.Order
-import com.ft.ftchinese.model.price.Edition
-import com.ft.ftchinese.model.price.Price
+import com.ft.ftchinese.model.paywall.CheckoutPrice
+import com.ft.ftchinese.model.paywall.UnifiedPrice
+import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.splash.ScreenAd
 import com.google.android.gms.analytics.GoogleAnalytics
 import com.google.android.gms.analytics.HitBuilders
@@ -47,7 +47,7 @@ class StatsTracker private constructor(context: Context) {
                 .build())
     }
 
-    fun addCart(price: Price) {
+    fun addCart(price: UnifiedPrice) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle().apply {
             putString(FirebaseAnalytics.Param.ITEM_ID, price.id)
             putString(FirebaseAnalytics.Param.ITEM_NAME, price.namedKey)
@@ -57,30 +57,38 @@ class StatsTracker private constructor(context: Context) {
 
         tracker.send(HitBuilders.EventBuilder()
                 .setCategory(GACategory.SUBSCRIPTION)
-                .setAction(GAAction.get(price.edition))
+                .setAction(GAAction.get(price))
                 .setLabel(PaywallTracker.from?.label ?: "")
                 .build())
     }
 
-    fun checkOut(price: Double, payMethod: PayMethod) {
+    fun checkOut(price: UnifiedPrice, payMethod: PayMethod) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
-            putDouble(FirebaseAnalytics.Param.VALUE, price)
-            putString(FirebaseAnalytics.Param.CURRENCY, "CNY")
+            putDouble(FirebaseAnalytics.Param.VALUE, price.unitAmount)
+            putString(FirebaseAnalytics.Param.CURRENCY, price.currency)
             putString(FirebaseAnalytics.Param.METHOD, payMethod.toString())
         })
     }
 
-    fun checkOut(item: CheckoutItem, payMethod: PayMethod) {
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
-            putDouble(FirebaseAnalytics.Param.VALUE, item.payableAmount)
-            putString(FirebaseAnalytics.Param.CURRENCY, item.price.currency)
-            putString(FirebaseAnalytics.Param.METHOD, payMethod.toString())
-        })
+    fun beginCheckout(price: CheckoutPrice, payMethod: PayMethod) {
+        if (price.favour == null) {
+            checkOut(price.regular, payMethod)
+            return
+        }
+
+        if (payMethod != PayMethod.STRIPE) {
+            checkOut(price.favour, payMethod)
+            return
+        }
+
+        // For stripe we need to log two events.
+        checkOut(price.regular, payMethod)
+        checkOut(price.favour, payMethod)
     }
 
-    fun buyStripeSuccess(price: Price) {
+    fun buyStripeSuccess(price: UnifiedPrice) {
         purchaseSucceed(
-            edition = price.edition,
+            edition = price,
             currency = price.currency,
             amountPaid = price.unitAmount,
             paymentMethod = PayMethod.STRIPE,
@@ -115,14 +123,10 @@ class StatsTracker private constructor(context: Context) {
             .build())
     }
 
-    fun buyFail(price: Price?) {
-        if (price == null) {
-            return
-        }
-
+    fun buyFail(edition: Edition) {
         tracker.send(HitBuilders.EventBuilder()
             .setCategory(GACategory.SUBSCRIPTION)
-            .setAction(GAAction.get(price.edition))
+            .setAction(GAAction.get(edition))
             .setLabel(PaywallTracker.from?.label ?: "")
             .build())
     }

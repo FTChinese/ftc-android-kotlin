@@ -2,7 +2,7 @@ package com.ft.ftchinese.tracking
 
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.price.Edition
+import com.ft.ftchinese.model.enums.Edition
 
 /**
  * Custom parameter name used for Firebase
