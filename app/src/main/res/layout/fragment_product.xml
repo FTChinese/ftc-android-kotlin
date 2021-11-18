@@ -30,6 +30,7 @@
                 android:text="@{product.heading}"
                 android:background="@drawable/bottom_border_teal" />
 
+            <!-- Show a list of price button under this product -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_prod_price"
                 android:layout_width="match_parent"
