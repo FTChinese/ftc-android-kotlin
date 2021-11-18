@@ -52,7 +52,7 @@ class CartItemFragment : ScopedFragment() {
 
         // Use the CheckoutItem to display ui.
         checkoutViewModel.counterLiveData.observe(viewLifecycleOwner) {
-            binding.cartItem = CartItem.from(requireContext(), it.item)
+            binding.cartItem = CartItem.newInstance(requireContext(), it.price)
         }
     }
 
