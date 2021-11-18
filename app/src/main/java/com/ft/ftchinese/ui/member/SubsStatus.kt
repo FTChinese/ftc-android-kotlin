@@ -5,6 +5,8 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.AutoRenewMoment
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.ui.formatter.FormatHelper
+import com.ft.ftchinese.ui.formatter.FormatSubs
 
 /**
  * SubsStatus shows an overview of user's current membership.
@@ -30,21 +32,29 @@ data class SubsStatus(
         // The membership should be the normalized version.
         @JvmStatic
         fun newInstance(ctx: Context, m: Membership): SubsStatus {
+            if (m.tier == null) {
+                return SubsStatus(
+                    productName = ctx.getString(R.string.tier_free),
+                    details = listOf(),
+                    addOns = listOf()
+                )
+            }
+
             if (m.vip) {
                 return SubsStatus(
                     productName = ctx.getString(R.string.tier_vip),
                     details = listOf(
-                        Pair(ctx.getString(R.string.label_expiration_date), ctx.getString(R.string.vip_no_expiration))
+                        FormatSubs.rowExpiration(ctx, m.localizeExpireDate())
                     ),
                     addOns = listOf(),
                 )
             }
 
-            val productTitle = ctx.getString(m.tierStringRes)
+            val productTitle = FormatHelper.getTier(ctx, m.tier)
 
             // List addon
             val addOns = m.addOns.map {
-                Pair(ctx.getString(it.first.stringRes), "${it.second}天")
+                Pair(FormatHelper.getTier(ctx, it.first), "${it.second}天")
             }
 
             return when (m.payMethod) {
@@ -60,16 +70,17 @@ data class SubsStatus(
                             }
                         },
                         productName = productTitle,
-                        details = listOf(Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate())),
+                        details = listOf(FormatSubs.rowExpiration(ctx, m.localizeExpireDate())),
                         addOns = addOns,
                     )
                 }
                 PayMethod.STRIPE, PayMethod.APPLE -> {
-                    val brand = ctx.getString(m.payMethod.stringRes)
+
                     val expired = m.expired
                     val reminder =  when {
                         expired -> ctx.getString(R.string.member_has_expired)
                         m.status?.isInvalid() == true -> ctx.getString(R.string.member_status_invalid)
+                        m.isTrialing -> ctx.getString(R.string.sub_status_trialing)
                         else -> null
                     }
 
@@ -78,10 +89,8 @@ data class SubsStatus(
                             reminder = reminder,
                             productName = productTitle,
                             details = listOf(
-                                Pair(ctx.getString(R.string.label_subs_source), brand),
-                                Pair("自动续订", m.autoRenewMoment?.let {
-                                    formatAutoRenewDate(ctx, it)
-                                } ?: ""),
+                                FormatSubs.rowSubsSource(ctx, m.payMethod),
+                                FormatSubs.rowAutoRenewOn(ctx, m.autoRenewMoment),
                             ),
                             addOns = addOns,
                         )
@@ -90,9 +99,9 @@ data class SubsStatus(
                             reminder = reminder,
                             productName = productTitle,
                             details = listOf(
-                                Pair(ctx.getString(R.string.label_subs_source), brand),
-                                Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate()),
-                                Pair(ctx.getString(R.string.label_auto_renew), ctx.getString(R.string.auto_renew_off)),
+                                FormatSubs.rowSubsSource(ctx, m.payMethod),
+                                FormatSubs.rowExpiration(ctx, m.localizeExpireDate()),
+                                FormatSubs.rowAutoRenewOff(ctx),
                             ),
                             reactivateStripe = m.payMethod == PayMethod.STRIPE && !expired,
                             addOns = addOns,
@@ -103,8 +112,8 @@ data class SubsStatus(
                     reminder = "企业订阅续订或升级请联系所属机构的管理人员",
                     productName = productTitle,
                     details = listOf(
-                        Pair(ctx.getString(R.string.label_subs_source), ctx.getString(R.string.pay_brand_b2b)),
-                        Pair(ctx.getString(R.string.label_expiration_date), m.localizeExpireDate())
+                        FormatSubs.rowSubsSource(ctx, m.payMethod),
+                        FormatSubs.rowExpiration(ctx, m.localizeExpireDate())
                     ),
                     addOns = addOns,
                 )
