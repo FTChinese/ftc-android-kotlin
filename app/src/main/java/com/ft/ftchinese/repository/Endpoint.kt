@@ -59,46 +59,18 @@ object Endpoint {
     fun subsBase(isTest: Boolean = false) = if (isTest) {
         // When account is test, always use sandbox url, which might be local or online
         if (BuildConfig.DEBUG) {
-            "$devIP:8203"
+            "$devIP:8204"
         } else {
             BuildConfig.API_SUBS_SANDBOX
         }
     } else {
         // When account is not test, always use live url, which might be local or online
         if (BuildConfig.DEBUG) {
-            "$devIP:8203"
+            "$devIP:8204"
         } else {
             BuildConfig.API_SUBS_LIVE
         }
     }
-
-    /**
-     * For Stripe, however, things are quite different since a live/test key is involved
-     * in client app. For DEBUG app we are using testing key and production key otherwise.
-     * This means the account type does not matter. The mode is always determined by app's
-     * DEBUG configuration. Test account is meaningless here.
-     * In such case simply pass DEBUG as the isTest
-     * parameter.
-     */
-    private val apiBase = if (BuildConfig.DEBUG) {
-        "$devIP:8203"
-//        BuildConfig.API_SUBS_SANDBOX
-    } else {
-        BuildConfig.API_SUBS_LIVE
-    }
-
-    // We cannot use production sandbox server for stripe
-    // since the it is impossible to determine the url dynamically
-    // for release version of the app, due to the fact that
-    // the api key is initialized upon app start.
-    // So release version is always using the the live key,
-    // which makes it impossible to send request to production sandbox server
-    // as the request will eventually denies by Stripe.
-    // Thus, to test stripe, use dubug version.
-    private val stripeBase = "${apiBase}/stripe"
-    val stripePrices = "${stripeBase}/prices"
-    val stripeCustomers = "${stripeBase}/customers"
-    val stripeSubs = "${stripeBase}/subs"
 
     private val paywallBase = "${subsBase()}/paywall"
 
@@ -110,25 +82,38 @@ object Endpoint {
         return "${subsBase(isTest)}/apple/subs/$origTxID"
     }
 
-    private val authEmailBase = "$apiBase/auth/email"
+    // We cannot use production sandbox server for stripe
+    // since the it is impossible to determine the url dynamically
+    // for release version of the app, due to the fact that
+    // the api key is initialized upon app start.
+    // So release version is always using the the live key,
+    // which makes it impossible to send request to production sandbox server
+    // as the request will eventually denies by Stripe.
+    // Thus, to test stripe, use debug version.
+    private val stripeBase = "${subsBase()}/stripe"
+    val stripePrices = "${stripeBase}/prices"
+    val stripeCustomers = "${stripeBase}/customers"
+    val stripeSubs = "${stripeBase}/subs"
+
+    private val authEmailBase = "${subsBase()}/auth/email"
     val emailExists = "${authEmailBase}/exists"
     val emailLogin = "${authEmailBase}/login"
     val emailSignUp = "${authEmailBase}/signup"
 
-    private val authMobileBase = "$apiBase/auth/mobile"
+    private val authMobileBase = "${subsBase()}/auth/mobile"
     val mobileVerificationCode = "${authMobileBase}/verification"
     val mobileInitialLink = "${authMobileBase}/link"
     val mobileSignUp = "${authMobileBase}/signup"
 
-    val passwordReset = "$apiBase/auth/password-reset"
+    val passwordReset = "${subsBase()}/auth/password-reset"
     val passwordResetLetter = "${passwordReset}/letter"
     val passwordResetCodes = "${passwordReset}/codes"
 
-    private val authWxBase = "$apiBase/auth/wx"
+    private val authWxBase = "${subsBase()}/auth/wx"
     val wxLogin = "${authWxBase}/login"
     val wxRefresh = "${authWxBase}/refresh"
 
-    val ftcAccount = "$apiBase/account"
+    val ftcAccount = "${subsBase()}/account"
     val email = "${ftcAccount}/email"
     val emailVrfLetter = "${ftcAccount}/email/request-verification"
 
