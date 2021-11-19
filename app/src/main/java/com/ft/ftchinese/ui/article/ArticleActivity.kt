@@ -141,6 +141,7 @@ class ArticleActivity : ScopedAppActivity(),
         val t = teaser ?: return
 
         binding.inProgress = true
+
         if (t.subType == "mbagym") {
             supportFragmentManager.commit {
                 replace(R.id.content_container, WebpageFragment.newInstance())
