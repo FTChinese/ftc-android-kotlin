@@ -17,13 +17,6 @@ data class CheckoutPrice(
     val favour: UnifiedPrice?
 ): Parcelable {
 
-    /**
-     * Ensure live mode cannot be used by test user.
-     */
-    fun validateLiveMode(isTest: Boolean): Boolean {
-        return regular.liveMode != isTest
-    }
-
     companion object {
         @JvmStatic
         fun fromFtc(price: Price, m: Membership): CheckoutPrice {
