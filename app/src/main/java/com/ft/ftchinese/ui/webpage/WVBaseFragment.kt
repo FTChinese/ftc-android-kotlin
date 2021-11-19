@@ -42,13 +42,11 @@ abstract class WVBaseFragment : ScopedFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         wvViewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(WVViewModel::class.java)
+            ViewModelProvider(this)[WVViewModel::class.java]
         } ?: throw Exception("Invalid activity")
 
         screenshotViewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(ScreenshotViewModel::class.java)
+            ViewModelProvider(this)[ScreenshotViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
     }
 
