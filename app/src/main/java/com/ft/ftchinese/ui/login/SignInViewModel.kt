@@ -1,24 +1,26 @@
 package com.ft.ftchinese.ui.login
 
+import android.util.Log
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.model.request.MobileLinkParams
 import com.ft.ftchinese.repository.AuthClient
 import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.Validator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
 
-class SignInViewModel : BaseViewModel(), AnkoLogger {
+private const val TAG = "SignInViewModel"
+
+class SignInViewModel : BaseViewModel() {
 
     val emailLiveData = MutableLiveData("")
 
@@ -89,9 +91,11 @@ class SignInViewModel : BaseViewModel(), AnkoLogger {
 
                 accountResult.value = FetchResult.Success(account)
             } catch (e: APIError) {
+                Log.i(TAG, e.message)
                 progressLiveData.value = false
                 handleLoginError(e)
             } catch (e: Exception) {
+                Log.i(TAG, e.message ?: "")
                 progressLiveData.value = false
                 accountResult.value = FetchResult.fromException(e)
             }
