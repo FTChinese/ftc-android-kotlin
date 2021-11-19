@@ -87,6 +87,14 @@ object Endpoint {
         BuildConfig.API_SUBS_LIVE
     }
 
+    // We cannot use production sandbox server for stripe
+    // since the it is impossible to determine the url dynamically
+    // for release version of the app, due to the fact that
+    // the api key is initialized upon app start.
+    // So release version is always using the the live key,
+    // which makes it impossible to send request to production sandbox server
+    // as the request will eventually denies by Stripe.
+    // Thus, to test stripe, use dubug version.
     private val stripeBase = "${apiBase}/stripe"
     val stripePrices = "${stripeBase}/prices"
     val stripeCustomers = "${stripeBase}/customers"
