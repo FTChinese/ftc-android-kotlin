@@ -140,6 +140,7 @@ class ArticleActivity : ScopedAppActivity(),
 
         val t = teaser ?: return
 
+        binding.inProgress = true
         if (t.subType == "mbagym") {
             supportFragmentManager.commit {
                 replace(R.id.content_container, WebpageFragment.newInstance())
@@ -156,20 +157,11 @@ class ArticleActivity : ScopedAppActivity(),
             isRefreshing = false,
         )
 
-        binding.inProgress = true
         // Check access rights.
         Log.i(TAG, "Checking access of teaser $teaser")
     }
 
     private fun setupViewModel() {
-
-        articleViewModel.progressLiveData.observe(this) {
-            Log.i(TAG, "Loading article progress $it")
-            binding.inProgress = it
-            if (!it) {
-                binding.articleRefresh.isRefreshing = it
-            }
-        }
 
         screenshotViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
@@ -210,7 +202,8 @@ class ArticleActivity : ScopedAppActivity(),
 
         // If article view model render the complete html locally, load it into webview as a string.
         articleViewModel.htmlResult.observe(this) { result ->
-            binding.inProgress = false
+            binding.progressBar.visibility = View.GONE
+            binding.articleRefresh.isRefreshing = false
             when (result) {
                 is FetchResult.LocalizedError -> {
                     toast(result.msgId)
