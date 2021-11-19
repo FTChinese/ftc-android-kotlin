@@ -217,14 +217,9 @@ class CheckOutActivity : ScopedAppActivity() {
         val a = sessionManager.loadAccount() ?: return
 
         // Get checkout item.
-        intent.getParcelableExtra<CheckoutPrice>(EXTRA_CHECKOUT_ITEM)
-            ?.let {
-            // Broadcast the selected checkout item to CartItemFragment.
-            if (!it.validateLiveMode(a.isTest)) {
-                toast("价格数据与当前账号环境不一致")
-                return@let
-            }
+        intent.getParcelableExtra<CheckoutPrice>(EXTRA_CHECKOUT_ITEM)?.let {
 
+            binding.isTesting = !it.regular.liveMode
             checkOutViewModel.putIntoFtcCart(it, a.membership)
 
             // Tracking
