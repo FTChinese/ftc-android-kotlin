@@ -279,3 +279,10 @@ task copy(type: Copy, group: "Archive", description: "Copies sources to the dest
     into "/Volumes/Zion/department/Tech/android-release"
 }
 
+task template(type: Copy, group: "Archive", description: "Copies html template files") {
+    from("../../NewFTCApp-iOS/page/FTChinese") {
+        include("gym.html", "list.html", "search.html", "story.html")
+    }
+    into "./src/main/res/raw"
+}
+
