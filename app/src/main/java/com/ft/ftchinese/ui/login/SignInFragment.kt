@@ -136,25 +136,20 @@ class SignInFragment : ScopedBottomSheetDialogFragment() {
 
         loginViewModel.accountResult.observe(this) {
             when (it) {
-                is FetchResult.LocalizedError -> handleErrMsgId(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.LocalizedError -> alertError(getString(it.msgId))
+                is FetchResult.Error -> it.exception.message?.let { msg -> alertError(msg) }
                 is FetchResult.Success -> onAccountLoaded(it.data)
             }
         }
     }
 
-    private fun handleErrMsgId(id: Int) {
-        when (id) {
-            R.string.mobile_link_taken -> {
-                AlertDialogFragment
-                    .newMsgInstance(getString(id))
-                    .onPositiveButtonClicked { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    .show(childFragmentManager, "MobileLinkError")
+    private fun alertError(msg: String) {
+        AlertDialogFragment
+            .newMsgInstance(msg)
+            .onPositiveButtonClicked { dialog, _ ->
+                dialog.dismiss()
             }
-            else  -> toast(id)
-        }
+            .show(childFragmentManager, "LoginError")
     }
 
     private fun onAccountLoaded(account: Account) {
