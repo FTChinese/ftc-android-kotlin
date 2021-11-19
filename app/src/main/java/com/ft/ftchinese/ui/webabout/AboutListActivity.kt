@@ -15,6 +15,7 @@ import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@ExperimentalCoroutinesApi
 class AboutListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAboutListBinding
 
@@ -43,7 +44,7 @@ class AboutListActivity : AppCompatActivity() {
             return SingleLineItemViewHolder.create(parent)
         }
 
-        @ExperimentalCoroutinesApi
+
         override fun onBindViewHolder(holder: SingleLineItemViewHolder, position: Int) {
             holder.setLeadingIcon(null)
             val item = legalPages[position]
