@@ -170,7 +170,7 @@ android {
 //}
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.6.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.31"
     def room_version = '2.2.5'
     def lifecycle_version = "2.2.0"
     def work_version = "2.7.1"
