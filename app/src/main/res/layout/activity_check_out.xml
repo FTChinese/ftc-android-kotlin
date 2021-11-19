@@ -22,6 +22,9 @@
         <variable
             name="inProgress"
             type="Boolean" />
+        <variable
+            name="isTesting"
+            type="Boolean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -43,6 +46,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorClaret80"
+                    android:padding="@dimen/space_8"
+                    android:text="Using test price"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="@color/colorWhite"
+                    android:textSize="20sp"
+                    android:visibility="@{isTesting ? View.VISIBLE : View.GONE}" />
 
                 <FrameLayout
                     android:id="@+id/product_in_cart"
@@ -127,6 +142,8 @@
                     android:layout_marginLeft="@dimen/space_16"
                     android:layout_marginRight="@dimen/space_16"
                     android:text="@{stripeTrialMessage}"/>
+
+
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
