@@ -135,10 +135,10 @@ object FormatHelper {
     }
 
     fun payButton(ctx: Context, pm: PayMethod, price: UnifiedPrice): String {
-        val pm = getPayMethod(ctx, pm)
+        val pmStr = getPayMethod(ctx, pm)
         val priceStr = formatPrice(ctx, price)
 
-        return "$pm $priceStr"
+        return "$pmStr $priceStr"
     }
 
     fun stripeTrialMessage(ctx: Context, price: UnifiedPrice): String {
