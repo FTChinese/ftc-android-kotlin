@@ -15,6 +15,7 @@ data class Product(
     val heading: String,
     val description: String,
     val smallPrint: String?,
+    val introductory: Introductory,
     val prices: List<Price>,
 ) {
     fun descWithDailyCost(): String {
