@@ -7,7 +7,7 @@ data class Paywall(
     val id: Int,
     val banner: Banner,
     val promo: Promo,
-    val products: List<Product>,
+    val products: List<PaywallProduct>,
     val liveMode: Boolean = true,
 ) {
     private val activePrices: List<Price>

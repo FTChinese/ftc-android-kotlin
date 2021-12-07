@@ -30,7 +30,7 @@ val defaultPaywall = Paywall(
         endUtc = null
     ),
     products = listOf(
-        Product(
+        PaywallProduct(
             id = "prod_9xrJdHFq0wmq",
             tier = Tier.STANDARD,
             heading = "标准会员",
@@ -98,7 +98,7 @@ val defaultPaywall = Paywall(
                 ),
             )
         ),
-        Product(
+        PaywallProduct(
             id = "prod_zSgOTS6DWLmu",
             tier = Tier.PREMIUM,
             heading = "高端会员",

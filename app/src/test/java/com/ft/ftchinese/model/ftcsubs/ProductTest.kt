@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.ftcsubs
 
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.paywall.Product
+import com.ft.ftchinese.model.paywall.PaywallProduct
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -79,7 +79,7 @@ private const val products = """
 class ProductTest {
     @Test
     fun parseProducts() {
-        val products = json.parseArray<Product>(products)
+        val products = json.parseArray<PaywallProduct>(products)
 
         assertNotNull(products)
     }
