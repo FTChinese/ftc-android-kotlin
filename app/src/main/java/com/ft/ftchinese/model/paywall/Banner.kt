@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.paywall
 
 data class Banner(
-    val id: Int,
+    val id: String,
     val heading: String,
     val subHeading: String? = null,
     val coverUrl: String? = null,
