@@ -10,20 +10,9 @@ object StripePriceStore {
     /**
      * Find a price form a list of stripe prices by id.
      */
-    fun findById(priceId: String): StripePrice? {
+    fun find(priceId: String): StripePrice? {
         return prices.find {
             it.id == priceId
-        }
-    }
-
-    /**
-     * Find introductory offer belong to a specified product.
-     * Server-side setting should ensure that there is only
-     * one introductory price under a specific product.
-     */
-    fun findIntroductory(productId: String): StripePrice? {
-        return prices.find {
-            it.product == productId && it.isIntroductory && it.metadata.isValid()
         }
     }
 }
