@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.product
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ft.ftchinese.model.paywall.CheckoutPrice
-import com.ft.ftchinese.model.paywall.Product
+import com.ft.ftchinese.model.paywall.PaywallProduct
 import com.ft.ftchinese.model.paywall.Promo
 import com.ft.ftchinese.model.reader.Account
 import org.jetbrains.anko.AnkoLogger
@@ -27,8 +27,8 @@ class ProductViewModel : ViewModel(), AnkoLogger {
     }
 
     // When host activity retrieved paywall data, pass the raw products to ProductFragment.
-    val productsReceived: MutableLiveData<List<Product>> by lazy {
-        MutableLiveData<List<Product>>()
+    val productsReceived: MutableLiveData<List<PaywallProduct>> by lazy {
+        MutableLiveData<List<PaywallProduct>>()
     }
 
     // When the host activity retrieved paywall data, convert the promo field to PromoUI
