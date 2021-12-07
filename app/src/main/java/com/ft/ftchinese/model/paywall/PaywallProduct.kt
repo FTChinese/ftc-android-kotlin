@@ -31,4 +31,19 @@ data class Product(
 
         return desc
     }
+
+    /**
+     * Compose information required by price buttons on ui.
+     */
+    fun checkoutPrices(m: Membership): List<CheckoutPrice> {
+        return prices.map {
+            CheckoutPrice(
+                introductory = introductory,
+                regular = UnifiedPrice.fromFtc(it, null),
+                favour = it.applicableOffer(m.offerKinds)?.let { discount ->
+                    UnifiedPrice.fromFtc(it, discount)
+                }
+            )
+        }
+    }
 }
