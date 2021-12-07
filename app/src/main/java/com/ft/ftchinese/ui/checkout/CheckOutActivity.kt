@@ -128,10 +128,7 @@ class CheckOutActivity : ScopedAppActivity() {
                 return@observe
             }
 
-            CheckoutPrice.fromStripe(
-                priceId = it.price.regular.stripePriceId,
-                introEligible = true
-            )
+            it.price.ofStripe()
                 ?.favour
                 ?.let { p ->
                     binding.stripeTrialMessage = FormatHelper
@@ -346,17 +343,11 @@ class CheckOutActivity : ScopedAppActivity() {
             return false
         }
 
-        val stripePrice = CheckoutPrice.fromStripe(
-            priceId = ftcPrice.regular.stripePriceId,
-            introEligible = sessionManager
-                .loadAccount()
-                ?.membership
-                ?.isZero
-                ?: true,
-        )
 
-        Log.i(TAG, "Stripe pride $stripePrice")
-        if (stripePrice == null) {
+        val stripeCheckout = ftcPrice.ofStripe()
+
+        Log.i(TAG, "Stripe pride $stripeCheckout")
+        if (stripeCheckout == null) {
             Log.i(TAG, "Stripe price not found for ${ftcPrice.regular.stripePriceId}")
             return false
         }
@@ -365,7 +356,7 @@ class CheckOutActivity : ScopedAppActivity() {
         StripeSubActivity.startForResult(
             activity = this,
             requestCode = RequestCode.PAYMENT,
-            price = stripePrice,
+            price = stripeCheckout,
         )
 
         return true
