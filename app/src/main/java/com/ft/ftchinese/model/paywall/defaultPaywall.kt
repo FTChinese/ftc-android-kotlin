@@ -11,8 +11,9 @@ import com.ft.ftchinese.model.ftcsubs.Price
  * A hard-coded paywall data used when server is not available.
  */
 val defaultPaywall = Paywall(
+    id = 2,
     banner = Banner(
-        id = 1,
+        id = "banner_m22KbtGLRP90",
         heading = "FT中文网会员订阅服务",
         subHeading = "欢迎您！",
         coverUrl = "http://www.ftacademy.cn/subscription.jpg",
@@ -35,6 +36,9 @@ val defaultPaywall = Paywall(
             heading = "标准会员",
             description = "专享订阅内容每日仅需{{dailyAverageOfYear}}元(或按月订阅每日{{dailyAverageOfMonth}}元)\n精选深度分析\n中英双语内容\n金融英语速读训练\n英语电台\n阅读1日前历史文章（近9万篇）",
             smallPrint = null,
+            introductory = Introductory(
+                stripePriceId = null,
+            ),
             prices = listOf(
                 Price(
                     id = "plan_RKy1IuKSXyua",
@@ -100,6 +104,9 @@ val defaultPaywall = Paywall(
             heading = "高端会员",
             description = "专享订阅内容每日仅需{{dailyAverageOfYear}}元\n享受“标准会员”所有权益\n编辑精选，总编/各版块主编每周五为您推荐本周必读资讯，分享他们的思考与观点\nFT商学院高端专享\nFT中文网2022年度论坛门票2张",
             smallPrint = "注：所有活动门票不可折算现金、不能转让、不含差旅与食宿",
+            introductory = Introductory(
+                stripePriceId = null,
+            ),
             prices = listOf(
                 Price(
                     id = "plan_rLIy6LJYW8LV",
