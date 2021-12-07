@@ -88,7 +88,7 @@ object FtcPayClient : AnkoLogger {
     // Request api to add add-on to expiration date.
     fun useAddOn(account: Account): Membership? {
         val (_, body) = Fetch()
-            .post(Endpoint.subsBase(account.isTest) + "/addon")
+            .post(Endpoint.subsBase(account.isTest) + "/membership/addons")
             .addHeaders(account.headers())
             .noCache()
             .sendJson()
