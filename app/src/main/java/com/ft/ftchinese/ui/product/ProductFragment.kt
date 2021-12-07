@@ -18,10 +18,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentProductBinding
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.paywall.CheckoutPrice
-import com.ft.ftchinese.model.paywall.Product
-import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.ftcsubs.Price
+import com.ft.ftchinese.model.paywall.CheckoutPrice
+import com.ft.ftchinese.model.paywall.PaywallProduct
+import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
@@ -119,7 +119,7 @@ class ProductFragment : ScopedFragment(),
     }
 
     // Set/Change product description and price buttons.
-    private fun initUI(product: Product?) {
+    private fun initUI(product: PaywallProduct?) {
         binding.product = product
 
         // Update data of list adapter.
@@ -129,9 +129,13 @@ class ProductFragment : ScopedFragment(),
                 descListAdapter.setData(it)
             }
 
-        // Update price buttons.
-        product?.prices?.let {
-            priceListAdapter.setData(it)
+        val member = sessionManager
+            .loadAccount()
+            ?.membership
+            ?: Membership()
+
+        product?.let {
+            priceListAdapter.setData(it.checkoutPrices(member))
         }
     }
 
@@ -145,7 +149,9 @@ class ProductFragment : ScopedFragment(),
 
     inner class PriceListAdapter : RecyclerView.Adapter<PriceItemViewHolder>() {
 
+        @Deprecated("")
         private var prices = listOf<Price>()
+        private var checkoutPrices = listOf<CheckoutPrice>()
         private var btnEnabled = true
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PriceItemViewHolder {
@@ -153,13 +159,7 @@ class ProductFragment : ScopedFragment(),
         }
 
         override fun onBindViewHolder(holder: PriceItemViewHolder, position: Int) {
-            val price = prices[position]
-
-            // Find out the price's applicable offer.
-            val checkout = CheckoutPrice.fromFtc(
-                price = price,
-                m = sessionManager.loadAccount()?.membership ?: Membership(),
-            )
+            val checkout = checkoutPrices[position]
 
             // Display discount's description field.
             holder.setOfferDesc(checkout.favour?.offerDesc)
@@ -169,13 +169,12 @@ class ProductFragment : ScopedFragment(),
                 FormatHelper.priceButton(requireContext(), checkout)
 
             // Display price text and handle click event.
-            when (price.cycle) {
+            when (checkout.regular.cycle) {
                 Cycle.YEAR -> {
                     holder.setPrimaryButton(priceText, btnEnabled)
                     // Handle click on the price button.
                     holder.primaryButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
-//                        viewModel.priceSelected.value = price
                         viewModel.checkoutItemSelected.value = checkout
                     }
                 }
@@ -183,7 +182,6 @@ class ProductFragment : ScopedFragment(),
                     holder.setSecondaryButton(priceText, btnEnabled)
                     holder.outlineButton.setOnClickListener {
                         viewModel.inputEnabled.value = false
-//                        viewModel.priceSelected.value = price
                         viewModel.checkoutItemSelected.value = checkout
                     }
                 }
@@ -192,9 +190,9 @@ class ProductFragment : ScopedFragment(),
 
         override fun getItemCount() = prices.size
 
-        fun setData(plans: List<Price>) {
-            this.prices = plans
-            notifyDataSetChanged()
+        fun setData(checkout: List<CheckoutPrice>) {
+            this.checkoutPrices = checkout
+            notifyItemRangeInserted(0, checkout.size)
         }
 
         fun enabledBtn(enable: Boolean) {
