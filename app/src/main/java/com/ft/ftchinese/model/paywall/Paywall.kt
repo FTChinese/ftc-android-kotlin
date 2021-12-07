@@ -4,6 +4,7 @@ import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.ftcsubs.Price
 
 data class Paywall(
+    val id: Int,
     val banner: Banner,
     val promo: Promo,
     val products: List<Product>,
