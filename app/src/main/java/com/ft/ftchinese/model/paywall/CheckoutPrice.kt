@@ -1,8 +1,6 @@
 package com.ft.ftchinese.model.paywall
 
 import android.os.Parcelable
-import com.ft.ftchinese.model.ftcsubs.Price
-import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.StripePriceStore
 import kotlinx.parcelize.Parcelize
 
@@ -18,36 +16,26 @@ data class CheckoutPrice(
     val favour: UnifiedPrice?
 ): Parcelable {
 
-    companion object {
-        @JvmStatic
-        fun fromFtc(price: Price, m: Membership): CheckoutPrice {
-            val discount = price.applicableOffer(m.offerKinds)
+    /**
+     * Compose stripe checkout price based on ftc price setting.
+     */
+    fun ofStripe(): CheckoutPrice? {
+        val price = StripePriceStore
+            .find(regular.stripePriceId)
+            ?: return null
 
-            return CheckoutPrice(
-                regular = UnifiedPrice.fromFtc(price, null),
-                // If there's discount available for this price and this user
-                favour = discount?.let {
-                    UnifiedPrice.fromFtc(price, it)
-                },
-            )
+        val intro = if (favour != null && favour.isIntroductory && !introductory.stripePriceId.isNullOrEmpty()) {
+            StripePriceStore.find(introductory.stripePriceId)
+        } else {
+            null
         }
 
-        @JvmStatic
-        fun fromStripe(priceId: String, introEligible: Boolean): CheckoutPrice? {
-            val price = StripePriceStore.findById(priceId) ?: return null
-
-            val intro = if (introEligible) {
-                StripePriceStore.findIntroductory(price.product)
-            } else {
-                null
-            }
-
-            return CheckoutPrice(
-                regular = UnifiedPrice.fromStripe(price),
-                favour = intro?.let{
-                    UnifiedPrice.fromStripe(it)
-                },
-            )
-        }
+        return CheckoutPrice(
+            introductory = introductory,
+            regular = UnifiedPrice.fromStripe(price),
+            favour = intro?.let{
+                UnifiedPrice.fromStripe(it)
+            },
+        )
     }
 }
