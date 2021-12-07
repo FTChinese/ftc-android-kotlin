@@ -23,12 +23,12 @@ object ContentApi {
     val INTERACTIVE = "$BASE/interactive/contents"
 }
 
-private const val devIP = "http://192.168.1.47"
+private const val devIP = "http://192.168.1.42"
+private const val devPort = "8205"
 object Endpoint {
 
     val accessToken = if (BuildConfig.DEBUG) {
         BuildConfig.ACCESS_TOKEN_TEST
-//        BuildConfig.ACCESS_TOKEN_LIVE
     } else {
         BuildConfig.ACCESS_TOKEN_LIVE
     }
@@ -59,23 +59,21 @@ object Endpoint {
     fun subsBase(isTest: Boolean = false) = if (isTest) {
         // When account is test, always use sandbox url, which might be local or online
         if (BuildConfig.DEBUG) {
-            "$devIP:8204"
+            "$devIP:${devPort}"
         } else {
             BuildConfig.API_SUBS_SANDBOX
         }
     } else {
         // When account is not test, always use live url, which might be local or online
         if (BuildConfig.DEBUG) {
-            "$devIP:8204"
+            "$devIP:${devPort}"
         } else {
             BuildConfig.API_SUBS_LIVE
         }
     }
 
-    private val paywallBase = "${subsBase()}/paywall"
-
     fun paywall(isTest: Boolean): String {
-        return "$paywallBase?live=${!isTest}"
+        return "${subsBase(isTest)}/paywall"
     }
 
     fun refreshIAP(isTest: Boolean, origTxID: String): String {
