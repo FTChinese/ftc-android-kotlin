@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
@@ -21,6 +20,8 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.ChannelActivity
+import com.ft.ftchinese.ui.share.ShareUtils
+import com.ft.ftchinese.ui.webpage.UrlHandler
 import kotlinx.coroutines.*
 
 private const val EXTRA_MESSAGE_TYPE = "content_type"
@@ -224,19 +225,27 @@ class SplashActivity : ScopedAppActivity() {
         // Stop counting and exit
         splashViewModel.stopCounting()
         splashViewModel.adLoaded.value?.let {
+
+            val url = Uri.parse(it.linkUrl)
+
+            if (ShareUtils.containWxMiniProgram(url)) {
+                val params = ShareUtils.wxMiniProgramParams(url)
+                if (params != null) {
+                    ShareUtils.createWxApi(this)
+                        .sendReq(
+                            ShareUtils.wxMiniProgramReq(params)
+                        )
+                    return@let
+                }
+            }
+
             // Chrome web opened on top of this activity to show ad.
             // After user exited from ad, the onResume method is called and if customTabsOpened is true, it will
             // call exit().
             customTabsOpened = true
             statsTracker.adClicked(it)
 
-            CustomTabsIntent
-                .Builder()
-                .build()
-                .launchUrl(
-                    this,
-                    Uri.parse(it.linkUrl)
-                )
+            UrlHandler.openInCustomTabs(this, url)
         }
     }
 
