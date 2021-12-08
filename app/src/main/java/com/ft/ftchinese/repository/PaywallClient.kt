@@ -21,11 +21,6 @@ object PaywallClient {
         return if (pw == null) {
             null
         } else {
-            // If liveMode is true and isTest is true, or liveMode is false and isTes is false,
-            // environment mismatches.
-            if (pw.liveMode == isTest) {
-                throw Exception("Data environment mismatch: liveMode: ${pw.liveMode}, isTest: $isTest")
-            }
             JSONResult(pw, body)
         }
     }
