@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.paywall
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +22,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+
+private const val TAG = "PaywallViewModel"
 
 class PaywallViewModel(
     private val cache: FileCache
@@ -64,6 +67,7 @@ class PaywallViewModel(
             if (!isRefreshing) {
                 val pw = getCachedPaywall(isTest)
                 if (pw != null) {
+                    Log.i(TAG, "Paywall data loaded from local cached file")
                     paywallResult.value = FetchResult.Success(pw)
                     // Update the in-memory cache.
                     PaywallCache.update(pw)
@@ -81,20 +85,27 @@ class PaywallViewModel(
                     PaywallClient.retrieve(account?.isTest ?: false)
                 }
 
+                Log.i(TAG, "Loading paywall from server finished")
+                Log.i(TAG, "Raw paywall data from server ${paywall?.raw}")
+                Log.i(TAG, "Parsed paywall data ${paywall?.value}")
+
                 if (paywall == null) {
                     paywallResult.value = FetchResult.LocalizedError(R.string.api_server_error)
                     return@launch
                 }
-                
+
+                Log.i(TAG, "Set paywall data to view model")
                 paywallResult.value = FetchResult.Success(paywall.value)
+                Log.i(TAG, "Update paywall cache")
                 PaywallCache.update(paywall.value)
 
                 withContext(Dispatchers.IO) {
+                    Log.i(TAG, "Caching paywall data to file")
                     cache.saveText(CacheFileNames.paywallFile(isTest), paywall.raw)
                 }
 
             } catch (e: Exception) {
-                info(e)
+                e.message?.let { Log.i(TAG, "Error loading paywall data from server: $it") }
                 paywallResult.value = FetchResult.fromException(e)
             }
         }
