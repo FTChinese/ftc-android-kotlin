@@ -11,7 +11,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
-import androidx.browser.customtabs.CustomTabsIntent
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.legal.WebpageMeta
@@ -25,6 +24,7 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.paywall.PaywallActivity
+import com.ft.ftchinese.ui.share.ShareUtils
 import org.jetbrains.anko.toast
 
 private const val TAG = "WVClient"
@@ -143,6 +143,21 @@ open class WVClient(
         val uri = request?.url ?: return true
 
         Log.i(TAG, "shouldOverrideUrlLoading: $uri")
+
+        if (ShareUtils.containWxMiniProgram(uri)) {
+            val params = ShareUtils.wxMiniProgramParams(uri)
+            if (params != null) {
+                Log.i(TAG, "Open in wechat mini program $params")
+                ShareUtils
+                    .createWxApi(context)
+                    .sendReq(
+                        ShareUtils.wxMiniProgramReq(params)
+                    )
+
+                return true
+            }
+            // otherwise fallthrough.
+        }
 
         // At the comment section of story page there is a login form.
         // Handle login in web view.
@@ -388,10 +403,7 @@ open class WVClient(
     }
 
     private fun handleExternalLink(uri: Uri): Boolean {
-        // This opens an external browser
-        val customTabsInt = CustomTabsIntent.Builder().build()
-        customTabsInt.launchUrl(context, uri)
-
+        UrlHandler.openInCustomTabs(context, uri)
 
         return true
     }
