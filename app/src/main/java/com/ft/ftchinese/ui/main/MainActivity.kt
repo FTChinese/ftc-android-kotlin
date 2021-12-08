@@ -309,6 +309,7 @@ class MainActivity : ScopedAppActivity(),
 
         binding.drawerNav.apply {
             addHeaderView(navHeaderBinding.root)
+            // Hide test section
             menu.setGroupVisible(R.id.drawer_group3, BuildConfig.DEBUG)
         }
 
