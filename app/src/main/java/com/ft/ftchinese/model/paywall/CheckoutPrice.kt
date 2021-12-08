@@ -6,7 +6,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class CheckoutPrice(
-    val introductory: Introductory, // Use this to find stripe introductory offer only when favour is an introductory price.
+    val introductory: Introductory, // Use this to find stripe introductory offer. Only exists when FTC product has it set and has an introductory kind discount.
     // Always the price you should usually charge user.
     val regular: UnifiedPrice,
     // A discounted price for ftc, or introductory price for stripe.
