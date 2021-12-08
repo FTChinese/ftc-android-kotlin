@@ -41,7 +41,7 @@ class PromoBoxFragment : Fragment(), AnkoLogger {
             ViewModelProvider(this).get(ProductViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        productViewModel.promoCreated.observe(viewLifecycleOwner, {
+        productViewModel.promoReceived.observe(viewLifecycleOwner, {
             info(it)
             binding.promo = it
         })

@@ -18,10 +18,8 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentProductBinding
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.ftcsubs.Price
 import com.ft.ftchinese.model.paywall.CheckoutPrice
 import com.ft.ftchinese.model.paywall.PaywallProduct
-import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
@@ -111,11 +109,6 @@ class ProductFragment : ScopedFragment(),
             // Don't forget this step!
             initUI(product)
         }
-
-        // Use default paywall first.
-        // After data loaded form cache, it will be updated,
-        // then updated again after server data fetched.
-        viewModel.productsReceived.value = defaultPaywall.products
     }
 
     // Set/Change product description and price buttons.
@@ -149,8 +142,6 @@ class ProductFragment : ScopedFragment(),
 
     inner class PriceListAdapter : RecyclerView.Adapter<PriceItemViewHolder>() {
 
-        @Deprecated("")
-        private var prices = listOf<Price>()
         private var checkoutPrices = listOf<CheckoutPrice>()
         private var btnEnabled = true
 
@@ -188,11 +179,11 @@ class ProductFragment : ScopedFragment(),
             }
         }
 
-        override fun getItemCount() = prices.size
+        override fun getItemCount() = checkoutPrices.size
 
         fun setData(checkout: List<CheckoutPrice>) {
             this.checkoutPrices = checkout
-            notifyItemRangeInserted(0, checkout.size)
+            notifyDataSetChanged()
         }
 
         fun enabledBtn(enable: Boolean) {
