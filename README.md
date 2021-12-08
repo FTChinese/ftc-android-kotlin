@@ -102,6 +102,16 @@ TODO
 
 # Development Issues
 
+## Protobuf
+
+Usage guide on protobuf is scattered on the web. The official documentation failed to includes any working configuration.
+
+You have to refer to:
+
+* https://medium.com/supercharges-mobile-product-guide/new-way-of-storing-data-in-android-jetpack-datastore-a1073d09393d
+* https://github.com/google/protobuf-gradle-plugin
+
+
 ## Data Binding
 
 ### Nested Layout
