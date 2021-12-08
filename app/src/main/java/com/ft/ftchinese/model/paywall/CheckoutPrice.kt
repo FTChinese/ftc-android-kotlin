@@ -24,10 +24,10 @@ data class CheckoutPrice(
             .find(regular.stripePriceId)
             ?: return null
 
-        val intro = if (favour != null && favour.isIntroductory && !introductory.stripePriceId.isNullOrEmpty()) {
-            StripePriceStore.find(introductory.stripePriceId)
-        } else {
+        val intro = if (introductory.stripePriceId.isNullOrEmpty()) {
             null
+        } else {
+            StripePriceStore.find(introductory.stripePriceId)
         }
 
         return CheckoutPrice(
