@@ -11,20 +11,20 @@ import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Account
 import java.util.*
 
-const val HOST_FTC = "www.ftchinese.com"
-const val HOST_FTA = "www.ftacademy.cn"
-
-private const val urlScheme = "https://"
-
-val internalHost = listOf(
-    HOST_FTC,
-    BuildConfig.BASE_URL_FALLBACK.removePrefix(urlScheme),
-    BuildConfig.BASE_URL_STANDARD.removePrefix(urlScheme),
-    BuildConfig.BASE_URL_PREMIUM.removePrefix(urlScheme),
-    BuildConfig.BASE_URL_B2B.removePrefix(urlScheme)
-)
-
 object Config {
+
+    const val HOST_FTC = "www.ftchinese.com"
+    private const val HOST_FTA = "www.ftacademy.cn"
+
+    private const val urlScheme = "https://"
+
+    private val internalHost = listOf(
+        HOST_FTC,
+        BuildConfig.BASE_URL_FALLBACK.removePrefix(urlScheme),
+        BuildConfig.BASE_URL_STANDARD.removePrefix(urlScheme),
+        BuildConfig.BASE_URL_PREMIUM.removePrefix(urlScheme),
+        BuildConfig.BASE_URL_B2B.removePrefix(urlScheme)
+    )
 
     fun isInternalLink(host: String): Boolean {
         return internalHost.contains(host)
