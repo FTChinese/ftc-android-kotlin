@@ -14,7 +14,6 @@ import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.paywall.Paywall
-import com.ft.ftchinese.model.paywall.Promo
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
@@ -74,7 +73,6 @@ class PaywallActivity : ScopedAppActivity(),
 
         setupViewModel()
         initUI()
-        setUpPromo(defaultPaywall.promo)
         loadData(false)
 
         tracker = StatsTracker.getInstance(this)
@@ -83,14 +81,11 @@ class PaywallActivity : ScopedAppActivity(),
 
     private fun setupViewModel() {
         // Init viewmodels
-        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(cache))
-            .get(PaywallViewModel::class.java)
+        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(cache))[PaywallViewModel::class.java]
 
-        productViewModel = ViewModelProvider(this)
-            .get(ProductViewModel::class.java)
+        productViewModel = ViewModelProvider(this)[ProductViewModel::class.java]
 
-        checkoutViewModel = ViewModelProvider(this)
-            .get(CheckOutViewModel::class.java)
+        checkoutViewModel = ViewModelProvider(this)[CheckOutViewModel::class.java]
 
         // Setup network
         connectionLiveData.observe(this, {
@@ -135,10 +130,8 @@ class PaywallActivity : ScopedAppActivity(),
                     }
                 }
                 is FetchResult.Success -> {
-                    info("Paywall data ${result.data}")
 
-                    setUpPromo(result.data.promo)
-                    productViewModel.productsReceived.value = result.data.products
+                    setPaywallData(result.data)
 
                     if (isManual) {
                         toast(R.string.paywall_updated)
@@ -178,6 +171,28 @@ class PaywallActivity : ScopedAppActivity(),
          * Show login button, or expiration message on the SubStatusFragment.
          */
         productViewModel.accountChanged.value = sessionManager.loadAccount()
+
+        setPaywallData(defaultPaywall)
+    }
+
+    private fun setPaywallData(pw: Paywall) {
+        productViewModel.productsReceived.value = pw.products
+        if (!pw.isPromoValid()) {
+            binding.hasPromo = false
+            return
+        }
+
+        // Display promo fragment container
+        binding.hasPromo = true
+        // Show promotion legal notice at bottom
+        binding.promoTerms = if (pw.promo.terms != null) {
+            markwon.toMarkdown(pw.promo.terms)
+        } else {
+            null
+        }
+
+        // Tell promo box to render.
+        productViewModel.promoReceived.value = pw.promo
     }
 
     // Load pricing data.
@@ -186,23 +201,6 @@ class PaywallActivity : ScopedAppActivity(),
         // TODO: check paywall and build config matches.
         paywallViewModel.loadPaywall(isRefreshing, AccountCache.get())
         paywallViewModel.refreshStripePrices()
-    }
-
-    // Convert Promo to PromoUI if it is valid.
-    private fun setUpPromo(p: Promo) {
-        if (!p.isValid()) {
-            binding.hasPromo = false
-            return
-        }
-
-        binding.hasPromo = true
-
-        binding.promoTerms = if (p.terms != null) {
-            markwon.toMarkdown(p.terms)
-        } else {
-            null
-        }
-        productViewModel.promoCreated.value = p
     }
 
     override fun onRefresh() {
