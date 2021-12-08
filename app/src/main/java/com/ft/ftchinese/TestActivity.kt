@@ -25,6 +25,7 @@ import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.Order
+import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
@@ -45,6 +46,7 @@ import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.share.SocialShareFragment
+import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
 import com.ft.ftchinese.ui.wxlink.UnlinkActivity
 import com.ft.ftchinese.ui.wxlink.WxEmailLink
@@ -84,6 +86,13 @@ class TestActivity : ScopedAppActivity() {
         workManager = WorkManager.getInstance(this)
 
         mobileViewModel = ViewModelProvider(this).get(MobileViewModel::class.java)
+
+        binding.wxMini.onClick {
+            WebpageActivity.start(this@TestActivity, WebpageMeta(
+                title = "Test",
+                url = "http://192.168.1.42:8080"
+            ))
+        }
 
         binding.addressBuy.onClick {
             InvoiceStore.getInstance(this@TestActivity)

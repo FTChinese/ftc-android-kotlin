@@ -47,6 +47,11 @@
                 android:paddingEnd="8dp">
 
                 <Button
+                    android:id="@+id/wx_mini"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Test Wechat Mini Program"/>
+                <Button
                     android:id="@+id/address_buy"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
