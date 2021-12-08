@@ -2,16 +2,15 @@ package com.ft.ftchinese.model.paywall
 
 import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.ftcsubs.Price
+import org.threeten.bp.ZonedDateTime
 
 data class Paywall(
     val id: Int,
     val banner: Banner,
-    val promo: Promo,
+    val promo: Banner,
     val products: List<PaywallProduct>,
     val liveMode: Boolean = true,
 ) {
-    private val activePrices: List<Price>
-        get() = products.flatMap { it.prices }
 
     fun findPrice(e: Edition): Price? {
         return products
@@ -20,8 +19,18 @@ data class Paywall(
             ?.find { it.cycle == e.cycle }
     }
 
-    fun findPrice(id: String): Price? {
-        return activePrices.find { it.id == id }
+    fun isPromoValid(): Boolean {
+        if (promo.id.isEmpty()) {
+            return false
+        }
+
+        if (promo.startUtc == null || promo.endUtc == null) {
+            return false
+        }
+
+        val now = ZonedDateTime.now()
+
+        return !now.isBefore(promo.startUtc) && !now.isAfter(promo.endUtc)
     }
 }
 
