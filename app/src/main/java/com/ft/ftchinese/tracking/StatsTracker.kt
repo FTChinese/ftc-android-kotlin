@@ -11,6 +11,7 @@ import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.model.paywall.CheckoutPrice
 import com.ft.ftchinese.model.paywall.UnifiedPrice
 import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.request.WxMiniParams
 import com.ft.ftchinese.model.splash.ScreenAd
 import com.google.android.gms.analytics.GoogleAnalytics
 import com.google.android.gms.analytics.HitBuilders
@@ -186,18 +187,18 @@ class StatsTracker private constructor(context: Context) {
         val now = ZonedDateTime.now().format(DateTimeFormatter.ISO_INSTANT)
 
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, bundleOf(
-                FirebaseAnalytics.Param.SUCCESS to now
+            FirebaseAnalytics.Param.SUCCESS to now
         ))
 
         tracker.send(HitBuilders.EventBuilder()
-                .setCategory(GACategory.APP_LAUNCH)
-                .setAction(GAAction.SUCCESS)
-                .build())
+            .setCategory(GACategory.APP_LAUNCH)
+            .setAction(GAAction.SUCCESS)
+            .build())
     }
 
     fun tabSelected(title: String) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM_LIST, bundleOf(
-                FirebaseAnalytics.Param.ITEM_CATEGORY to title
+            FirebaseAnalytics.Param.ITEM_CATEGORY to title
         ))
     }
 
@@ -210,20 +211,29 @@ class StatsTracker private constructor(context: Context) {
 
     fun storyViewed(a: ReadArticle) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.VIEW_ITEM, bundleOf(
-                FirebaseAnalytics.Param.ITEM_ID to a.id,
-                FirebaseAnalytics.Param.ITEM_NAME to a.title,
-                FirebaseAnalytics.Param.ITEM_CATEGORY to a.type
+            FirebaseAnalytics.Param.ITEM_ID to a.id,
+            FirebaseAnalytics.Param.ITEM_NAME to a.title,
+            FirebaseAnalytics.Param.ITEM_CATEGORY to a.type
         ))
     }
 
     fun sharedToWx(article: ReadArticle) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SHARE, bundleOf(
-                FirebaseAnalytics.Param.CONTENT_TYPE to article.type,
-                FirebaseAnalytics.Param.ITEM_ID to article.id,
-                FirebaseAnalytics.Param.METHOD to "wechat"
+            FirebaseAnalytics.Param.CONTENT_TYPE to article.type,
+            FirebaseAnalytics.Param.ITEM_ID to article.id,
+            FirebaseAnalytics.Param.METHOD to "wechat"
         ))
     }
 
+    fun openedInWxMini(p: WxMiniParams) {
+        tracker.send(
+            HitBuilders.EventBuilder()
+                .setCategory(GACategory.WxMini)
+                .setAction(GAAction.CLICK)
+                .setLabel(p.id)
+                .build()
+        )
+    }
 
     companion object {
         private var instance: StatsTracker? = null

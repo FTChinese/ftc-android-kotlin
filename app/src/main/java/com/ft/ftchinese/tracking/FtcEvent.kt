@@ -29,6 +29,7 @@ object GACategory {
     const val APP_LAUNCH = "Android App Launch"
     const val SUBSCRIPTION = "Android Privileges"
     const val LAUNCH_AD = "Android Launch Ad"
+    const val WxMini = "WXMiniProgram"
 }
 
 object GAAction {
@@ -46,6 +47,7 @@ object GAAction {
     const val LAUNCH_AD_SUCCESS = "Sent"
     const val LAUNCH_AD_FAIL = "Fail"
     const val LAUNCH_AD_CLICK = "Click"
+    const val CLICK = "click"
 
     fun get(e: Edition): String {
         return when (e.tier) {
