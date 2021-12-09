@@ -235,6 +235,7 @@ class SplashActivity : ScopedAppActivity() {
                         .sendReq(
                             ShareUtils.wxMiniProgramReq(params)
                         )
+                    StatsTracker.getInstance(this).openedInWxMini(params)
                     return@let
                 }
             }

@@ -16,10 +16,7 @@ import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
-import com.ft.ftchinese.tracking.GAAction
-import com.ft.ftchinese.tracking.GACategory
-import com.ft.ftchinese.tracking.PaywallSource
-import com.ft.ftchinese.tracking.PaywallTracker
+import com.ft.ftchinese.tracking.*
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.login.AuthActivity
@@ -153,7 +150,7 @@ open class WVClient(
                     .sendReq(
                         ShareUtils.wxMiniProgramReq(params)
                     )
-
+                StatsTracker.getInstance(context).openedInWxMini(params)
                 return true
             }
             // otherwise fallthrough.
