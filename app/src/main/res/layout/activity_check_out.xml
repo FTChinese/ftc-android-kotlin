@@ -8,16 +8,16 @@
     <data>
         <import type="android.view.View"/>
         <variable
-            name="warning"
+            name="choices"
+            type="com.ft.ftchinese.model.paywall.PaymentChoices" />
+        <variable
+            name="payBtnText"
             type="String" />
         <variable
-            name="methodsEnabled"
-            type="com.ft.ftchinese.ui.checkout.PaymentMethodsEnabled" />
-        <variable
-            name="paymentButton"
-            type="com.ft.ftchinese.ui.checkout.PaymentButton" />
-        <variable
             name="stripeTrialMessage"
+            type="String" />
+        <variable
+            name="stripePriceSelected"
             type="String" />
         <variable
             name="inProgress"
@@ -25,6 +25,9 @@
         <variable
             name="isTesting"
             type="Boolean" />
+        <variable
+            name="viewModel"
+            type="com.ft.ftchinese.ui.checkout.CheckOutViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -70,7 +73,8 @@
                     style="@style/OrigamiText.Body2.Warning"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@{warning}"
+                    android:text="@{choices.warning}"
+                    android:visibility="@{choices.warning == null ? View.GONE : View.VISIBLE}"
                     android:layout_marginLeft="@dimen/space_16"
                     android:layout_marginRight="@dimen/space_16"
                     android:textAlignment="textStart"/>
@@ -92,28 +96,40 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingTop="16dp"
-                        android:paddingBottom="16dp"
+                        android:paddingBottom="@dimen/space_16"
                         android:button="@null"
                         android:drawableStart="@drawable/alipay"
                         android:drawableEnd="@drawable/btn_radio"
                         android:drawablePadding="20dp"
                         android:text="@string/pay_brand_ali"
                         android:textSize="18sp"
-                        android:enabled="@{methodsEnabled.alipay &amp; !inProgress}"/>
+                        android:enabled="@{viewModel.isAliPayEnabled}"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@{choices.aliPay.message}"
+                        android:visibility="@{choices.aliPay.message == null ? View.GONE : View.VISIBLE}"/>
 
                     <RadioButton
                         android:id="@+id/wxpay_btn"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingTop="16dp"
-                        android:paddingBottom="16dp"
+                        android:paddingTop="@dimen/space_16"
+                        android:paddingBottom="@dimen/space_16"
                         android:button="@null"
                         android:drawableStart="@drawable/wechat_pay"
                         android:drawableEnd="@drawable/btn_radio"
                         android:drawablePadding="20dp"
                         android:text="@string/pay_brand_wechat"
                         android:textSize="18sp"
-                        android:enabled="@{methodsEnabled.wechat &amp; !inProgress }"/>
+                        android:enabled="@{viewModel.isWxPayEnabled}"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@{choices.wxPay.message}"
+                        android:visibility="@{choices.wxPay.message == null ? View.GONE : View.VISIBLE}"/>
 
                     <!-- NOTE: the transparent background added here
                      is just a hack. It seems when setting button to null, there is a round button flasing in the background when you clicked a radio button. -->
@@ -121,28 +137,42 @@
                         android:id="@+id/stripe_btn"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingTop="16dp"
-                        android:paddingBottom="8dp"
+                        android:paddingTop="@dimen/space_16"
+                        android:paddingBottom="@dimen/space_16"
                         android:button="@null"
-                        android:enabled="@{methodsEnabled.stripe &amp; !inProgress}"
+                        android:enabled="@{viewModel.isStripeEnabled}"
                         android:drawableStart="@drawable/stripe"
                         android:drawableEnd="@drawable/btn_radio"
                         android:drawablePadding="20dp"
                         android:text="@string/pay_brand_stripe"
                         android:textSize="18sp"/>
 
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@{choices.stripe.message}"
+                        android:visibility="@{choices.stripe.message == null ? View.GONE : View.VISIBLE}"/>
                 </RadioGroup>
 
                 <TextView
-                    style="@style/OrigamiText.Body2.Warning"
-                    android:textAlignment="textStart"
                     android:id="@+id/tv_stripe_trial_message"
+                    android:textColor="@color/colorClaret80"
+                    android:textAlignment="textStart"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/space_16"
                     android:layout_marginRight="@dimen/space_16"
+                    android:visibility="@{stripeTrialMessage == null ? View.GONE : View.VISIBLE}"
                     android:text="@{stripeTrialMessage}"/>
 
+                <TextView
+                    android:id="@+id/tv_stripe_price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/space_16"
+                    android:layout_marginRight="@dimen/space_16"
+                    android:visibility="@{stripePriceSelected == null ? View.GONE : View.VISIBLE}"
+                    android:text="@{stripePriceSelected}"/>
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
@@ -152,8 +182,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/AppButton.BottomSticky"
-            android:text="@{paymentButton.text ?? @string/check_out}"
-            android:enabled="@{paymentButton.enabled &amp; !inProgress}"
+            android:text="@{payBtnText ?? @string/check_out}"
+            android:enabled="@{viewModel.isFormEnabled}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintVertical_bias="1.0"/>
 
