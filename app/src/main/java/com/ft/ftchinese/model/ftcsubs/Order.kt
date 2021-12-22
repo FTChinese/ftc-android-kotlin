@@ -23,9 +23,10 @@ data class Order(
     val price: Double? = null,
     @KTier
     val tier: Tier,
+    @Deprecated("")
     @KCycle
     val cycle: Cycle,
-    var amount: Double, // Why this is var?
+    val amount: Double, // Why this is var?
     val currency: String = "cny", // Not included when getting order list.
     @KOrderKind
     val kind: OrderKind,
