@@ -2,10 +2,9 @@ package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
 import com.beust.klaxon.Json
-import com.ft.ftchinese.R
-import com.ft.ftchinese.model.invoice.AddOn
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
+import com.ft.ftchinese.model.invoice.AddOn
 import com.ft.ftchinese.model.invoice.Invoice
 import kotlinx.parcelize.Parcelize
 import org.threeten.bp.LocalDate
