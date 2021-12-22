@@ -104,7 +104,7 @@
             android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".ui.customer.CustomerActivity"
-            android:label="@string/title_stripe_setting"
+            android:label="@string/stripe_setting"
             android:parentActivityName=".ui.account.AccountActivity" />
         <activity
             android:name=".ui.wxlink.LinkFtcActivity"
