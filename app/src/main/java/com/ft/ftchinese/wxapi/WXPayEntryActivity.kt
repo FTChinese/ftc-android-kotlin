@@ -119,7 +119,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
                             .get()
                             .findPrice(it.edition)
                             ?.let { p ->
-                                tracker?.buyFail(p)
+                                tracker?.buyFail(p.edition)
                             }
                     }
                 }
