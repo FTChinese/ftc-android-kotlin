@@ -2,7 +2,6 @@ package com.ft.ftchinese.ui.paywall
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
@@ -10,13 +9,14 @@ import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.paywall.Paywall
 import com.ft.ftchinese.model.paywall.PaywallCache
+import com.ft.ftchinese.model.paywall.StripePriceStore
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.StripePrice
-import com.ft.ftchinese.model.stripesubs.StripePriceStore
 import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.ui.base.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,8 +27,7 @@ private const val TAG = "PaywallViewModel"
 
 class PaywallViewModel(
     private val cache: FileCache
-) : ViewModel(), AnkoLogger {
-    val isNetworkAvailable = MutableLiveData<Boolean>()
+) : BaseViewModel(), AnkoLogger {
 
     val paywallResult: MutableLiveData<FetchResult<Paywall>> by lazy {
         MutableLiveData<FetchResult<Paywall>>()
@@ -152,9 +151,12 @@ class PaywallViewModel(
     // loaded into memory.
     fun loadStripePrices() {
         info("Loading stripe prices...")
+        progressLiveData.value = true
+
         viewModelScope.launch {
             val prices = stripeCachedPrices()
             if (prices != null) {
+                progressLiveData.value = false
                 stripePrices.value = FetchResult.Success(prices)
                 return@launch
             }
@@ -167,6 +169,7 @@ class PaywallViewModel(
                 }
 
                 info("Stripe prices retrieval failed")
+                progressLiveData.value = false
                 if (result == null) {
                     stripePrices.value = FetchResult.LocalizedError(R.string.api_server_error)
                     return@launch
@@ -180,6 +183,7 @@ class PaywallViewModel(
                 }
             }
             catch (e: Exception) {
+                progressLiveData.value = false
                 info(e)
                 stripePrices.value = FetchResult.fromException(e)
             }
