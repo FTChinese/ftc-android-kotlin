@@ -10,8 +10,8 @@
             name="inProgress"
             type="Boolean" />
         <variable
-            name="enableInput"
-            type="Boolean" />
+            name="viewModel"
+            type="com.ft.ftchinese.ui.checkout.StripeSubViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -36,12 +36,12 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:padding="16dp"
-            android:enabled="@{enableInput}"
+            android:enabled="@{viewModel.isPayMethodEnabled}"
             app:layout_constraintTop_toBottomOf="@id/product_in_cart"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:background="@color/colorBlack5"
-            android:text="@string/select_or_add_card"
+            android:text="@string/stripe_select_or_add_card"
             app:drawableEndCompat="@drawable/ic_keyboard_arrow_right_gray_24dp" />
 
         <TextView
@@ -70,7 +70,7 @@
             android:layout_height="wrap_content"
             style="@style/AppButton.BottomSticky"
             android:text="@string/order_kind_create"
-            android:enabled="@{enableInput}"
+            android:enabled="@{viewModel.isSubmitEnabled}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintVertical_bias="1.0"/>
 
