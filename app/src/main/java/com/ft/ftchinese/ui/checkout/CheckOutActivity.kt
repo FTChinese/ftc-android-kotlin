@@ -46,7 +46,7 @@ import org.jetbrains.anko.toast
 class CheckOutActivity : ScopedAppActivity() {
 
     private lateinit var checkOutViewModel: CheckOutViewModel
-    private lateinit var accountViewModel: AccountViewModel
+    private lateinit var cartViewModel: ShoppingCartViewModel
     private lateinit var customerViewModel: CustomerViewModel
     private lateinit var paywallViewModel: PaywallViewModel
 
