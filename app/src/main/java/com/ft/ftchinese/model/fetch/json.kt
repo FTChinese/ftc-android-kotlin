@@ -59,6 +59,9 @@ annotation class KPaymentIntentStatus
 @Target(AnnotationTarget.FIELD)
 annotation class KArticleType
 
+@Target(AnnotationTarget.FIELD)
+annotation class KPriceKind
+
 val dateConverter = object : Converter {
     override fun canConvert(cls: Class<*>): Boolean {
         return cls == LocalDate::class.java
@@ -203,6 +206,26 @@ val orderKindConverter = object : Converter {
 
     override fun toJson(value: Any): String {
         return if (value is OrderKind) {
+            """ "$value" """
+        } else {
+            """null"""
+        }
+    }
+}
+
+val priceKindConverter = object : Converter {
+    override fun canConvert(cls: Class<*>): Boolean {
+        return cls == PriceKind::class.java
+    }
+
+    override fun fromJson(jv: JsonValue): Any? {
+        return jv.string?.let {
+            PriceKind.fromString(it)
+        }
+    }
+
+    override fun toJson(value: Any): String {
+        return if (value is PriceKind) {
             """ "$value" """
         } else {
             """null"""
@@ -375,3 +398,4 @@ val json = Klaxon()
     .fieldConverter(KAddOnSource::class, addOnSourceConverter)
     .fieldConverter(KOfferKind::class, offerKindConverter)
     .fieldConverter(KDiscountStatus::class, discountStatusConverter)
+    .fieldConverter(KPriceKind::class, priceKindConverter)
