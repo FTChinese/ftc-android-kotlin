@@ -85,21 +85,18 @@ class SignInFragment : ScopedBottomSheetDialogFragment() {
 
         // Used to retrieve email from hosting activity
         emailViewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(EmailViewModel::class.java)
+            ViewModelProvider(this)[EmailViewModel::class.java]
         } ?: throw Exception("Invalid activity")
 
         // Used to retrieve mobile from hosting activity.
         mobileViewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(MobileViewModel::class.java)
+            ViewModelProvider(this)[MobileViewModel::class.java]
         } ?: throw Exception("Invalid activity")
 
         // Scoped to parent activity so that when used
         // for wechat link, the preview fragment could
         // retrieve the loaded account.
-        loginViewModel = ViewModelProvider(this)
-            .get(SignInViewModel::class.java)
+        loginViewModel = ViewModelProvider(this)[SignInViewModel::class.java]
 
         connectionLiveData.observe(this) {
             loginViewModel.isNetworkAvailable.value = it
