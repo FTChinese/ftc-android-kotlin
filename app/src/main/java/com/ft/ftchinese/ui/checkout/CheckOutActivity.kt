@@ -17,22 +17,25 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.*
-import com.ft.ftchinese.model.paywall.CheckoutPrice
+import com.ft.ftchinese.model.paywall.FtcCheckout
+import com.ft.ftchinese.model.paywall.StripePriceStore
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.stripesubs.StripePriceStore
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
 import com.ft.ftchinese.store.*
+import com.ft.ftchinese.tracking.CartParams
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.customer.CustomerViewModel
 import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
 import com.ft.ftchinese.ui.dialog.AlertDialogFragment
+import com.ft.ftchinese.ui.dialog.SingleChoiceArgs
+import com.ft.ftchinese.ui.dialog.SingleChoiceDialogFragment
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
+import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.modelpay.PayReq
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -62,10 +65,13 @@ class CheckOutActivity : ScopedAppActivity() {
     private lateinit var binding: ActivityCheckOutBinding
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> onBackPressed()
+        return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
-        return super.onOptionsItemSelected(item)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
