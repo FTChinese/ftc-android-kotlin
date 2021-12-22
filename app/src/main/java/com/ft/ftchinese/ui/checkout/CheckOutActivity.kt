@@ -116,9 +116,20 @@ class CheckOutActivity : ScopedAppActivity() {
             customerViewModel.isNetworkAvailable.value = it
         }
 
-        checkOutViewModel.counterLiveData.observe(this) {
-            binding.warning = it.intents.warning
-            binding.methodsEnabled = it.intents.payMethodsState
+        binding.viewModel = checkOutViewModel
+        binding.lifecycleOwner = this
+
+        checkOutViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
+        checkOutViewModel.messageLiveData.observe(this) {
+            toast(it)
+        }
+
+        checkOutViewModel.counterLiveData.observe(this) { item ->
+            // Build cart item ui.
+            cartViewModel.itemLiveData.value = CartItem.ofFtc(this, item)
 
             val isNewMember = sessionManager.loadAccount()?.membership?.isZero ?: true
 
