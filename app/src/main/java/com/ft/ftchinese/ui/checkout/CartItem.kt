@@ -4,9 +4,10 @@ import android.content.Context
 import android.text.Spannable
 import android.text.SpannableString
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.enums.PriceSource
-import com.ft.ftchinese.model.paywall.CheckoutPrice
-import com.ft.ftchinese.ui.formatter.CartFormatter
+import com.ft.ftchinese.model.paywall.FtcCheckout
+import com.ft.ftchinese.model.paywall.StripeCounter
+import com.ft.ftchinese.ui.formatter.CartPriceFormatter
+import com.ft.ftchinese.ui.formatter.FormatHelper
 
 /**
  * Converts the CheckoutItem to human-readable content.
@@ -18,28 +19,85 @@ data class CartItem(
 ) {
     companion object {
         @JvmStatic
-        fun newInstance(ctx: Context, price: CheckoutPrice): CartItem {
+        fun ofStripe(ctx: Context, counter: StripeCounter): CartItem {
+            if (counter.trialPrice == null) {
+                return CartItem(
+                    productName = FormatHelper.getTier(ctx, counter.recurringPrice.tier),
+                    payable = CartPriceFormatter(
+                        currency = counter.recurringPrice.currency,
+                        amount = counter.recurringPrice.moneyAmount,
+                        period = counter.recurringPrice.periodCount,
+                        isIntroductory = false,
+                    )
+                        .scaleAmount()
+                        .format(ctx),
+                    smallPrint = null,
+                )
+            }
+
             return CartItem(
-                productName = ctx.getString(price.regular.tier.stringRes),
-                payable = CartFormatter
-                    .newInstance(price.favour ?: price.regular)
-                    .withScale()
+                productName = FormatHelper.getTier(ctx, counter.recurringPrice.tier),
+                payable = CartPriceFormatter(
+                    currency = counter.trialPrice.currency,
+                    amount = counter.trialPrice.moneyAmount,
+                    period = counter.trialPrice.periodCount,
+                    isIntroductory = true,
+                )
+                    .scaleAmount()
                     .format(ctx),
-                smallPrint = price.favour?.let {
-                    if (it.source == PriceSource.Ftc) {
-                        CartFormatter
-                            .newInstance(price.regular)
-                            .withPrefix(ctx.getString(R.string.prefix_original_price))
-                            .withStrikeThrough()
-                            .format(ctx)
-                    } else {
-                        CartFormatter
-                            .newInstance(price.regular)
-                            .withPrefix(ctx.getString(R.string.auto_renew_after_trial))
-                            .format(ctx)
-                    }
-                }
+                smallPrint = SpannableString(
+                    FormatHelper.stripeAutoRenewalMessage(
+                        ctx = ctx,
+                        price = counter.recurringPrice,
+                        isTrial = true
+                    )
+                )
             )
         }
+
+        @JvmStatic
+        fun ofFtc(ctx: Context, item: FtcCheckout): CartItem {
+            if (item.discount == null) {
+                return CartItem(
+                    productName = FormatHelper.getTier(ctx, item.price.tier),
+                    payable = CartPriceFormatter(
+                        currency = item.price.currency,
+                        amount = item.price.unitAmount,
+                        isIntroductory = item.isIntroductory,
+                        period = item.price.normalizeYMD(),
+                    )
+                        .scaleAmount()
+                        .format(ctx),
+                    smallPrint = if (item.isIntroductory) {
+                        SpannableString(item.price.title)
+                    } else {
+                        null
+                    }
+                )
+            }
+
+            // If discount exists, it must not be introductory.
+            return CartItem(
+                productName = FormatHelper.getTier(ctx, item.price.tier),
+                payable = CartPriceFormatter(
+                    currency = item.price.currency,
+                    amount = item.payableAmount(),
+                    isIntroductory = item.isIntroductory,
+                    period = item.price.normalizeYMD(),
+                )
+                    .scaleAmount()
+                    .format(ctx),
+                smallPrint = CartPriceFormatter(
+                    currency = item.price.currency,
+                    amount = item.price.unitAmount,
+                    isIntroductory = false,
+                    period = item.price.normalizeYMD()
+                )
+                    .withPrefix(ctx.getString(R.string.prefix_original_price))
+                    .withStrikeThrough()
+                    .format(ctx)
+            )
+        }
+
     }
 }
