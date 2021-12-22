@@ -61,7 +61,7 @@
                 android:layout_gravity="end"
                 android:layout_marginTop="@dimen/space_8"
                 android:visibility="@{status.reactivateStripe ? View.VISIBLE : View.GONE}"
-                android:text="@string/reactivate_auto_renew"/>
+                android:text="@string/stripe_reactivate_auto_renew"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
