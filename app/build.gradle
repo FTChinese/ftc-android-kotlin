@@ -191,7 +191,7 @@ dependencies {
 //    implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
-    implementation 'com.google.android.gms:play-services-analytics:17.0.1'
+    implementation 'com.google.android.gms:play-services-analytics:18.0.0'
     // Payment
     implementation(name: 'alipaysdk-15.8.03.210428205839', ext: 'aar')
     implementation 'com.stripe:stripe-android:16.1.1'
