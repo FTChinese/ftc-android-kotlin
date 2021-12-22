@@ -46,7 +46,7 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class CheckOutActivity : ScopedAppActivity() {
+class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listener {
 
     private lateinit var checkOutViewModel: CheckOutViewModel
     private lateinit var cartViewModel: ShoppingCartViewModel
@@ -137,19 +137,51 @@ class CheckOutActivity : ScopedAppActivity() {
                 return@observe
             }
 
-            it.price.ofStripe()
-                ?.favour
-                ?.let { p ->
-                    binding.stripeTrialMessage = FormatHelper
-                        .stripeTrialMessage(this, p)
+            // For introductory price, show a tip under stripe pay.
+            item.stripeTrialId()?.let { trialId ->
+                StripePriceStore.find(trialId)?.let { sp ->
+                    binding.stripeTrialMessage = FormatHelper.stripeTrialMessage(this, sp)
                 }
+            }
         }
 
-        checkOutViewModel.payMethodSelected.observe(this) {
-            binding.paymentButton = PaymentButton(
-                text = it.composeBtnText(this),
-                enabled = true,
-            )
+        checkOutViewModel.paymentChoices.observe(this) {
+            binding.choices = it
+        }
+
+        // Change pay button state.
+        checkOutViewModel.paymentIntent.observe(this) {
+            binding.payBtnText = FormatHelper.payButton(this, it)
+        }
+
+        // When user selected a stripe payment method, update
+        // message about how stripe will charge.
+        checkOutViewModel.stripePriceLiveData.observe(this) { priceId ->
+            // Show a message telling about auto renewal after trial expired.
+            Log.i(TAG, "Show stripe price $priceId")
+            StripePriceStore.find(priceId)?.let {
+                binding.stripePriceSelected = FormatHelper.stripeAutoRenewalMessage(
+                    ctx = this,
+                    price = it,
+                    isTrial = checkOutViewModel.isTrial)
+            }
+        }
+
+        // Show a dialog to let user to select recurring prices
+        // to which a trial price is attached.
+        checkOutViewModel.stripeRecurringChoicesLiveData.observe(this) { ids ->
+            SingleChoiceDialogFragment
+                .newInstance(SingleChoiceArgs(
+                    title = getString(R.string.title_post_trial_renewal),
+                    choices = StripePriceStore
+                        .select(ids)
+                        .map {
+                             FormatHelper
+                                 .stripePricePeriod(this, it)
+                        }
+                        .toTypedArray(),
+                ))
+                .show(supportFragmentManager, "StripeCycleSelection")
         }
 
         // After wxpay order returned from server
@@ -160,6 +192,10 @@ class CheckOutActivity : ScopedAppActivity() {
         // After alipay order returned from server.
         checkOutViewModel.aliPayIntentResult.observe(this) {
             onAliPayIntent(it)
+        }
+
+        paywallViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
         }
 
         // After stripe prices fetched from server,
@@ -196,8 +232,6 @@ class CheckOutActivity : ScopedAppActivity() {
                        return@observe
                    }
 
-                   // Retrieve stripe prices if not loaded yet.
-                   binding.inProgress = true
                    paywallViewModel.loadStripePrices()
                }
                is FetchResult.LocalizedError -> {
@@ -208,6 +242,10 @@ class CheckOutActivity : ScopedAppActivity() {
                 }
            }
         }
+    }
+
+    override fun onSelectSingleChoiceItem(id: Int) {
+        checkOutViewModel.selectStripeRecurring(id)
     }
 
     private fun initUI() {
@@ -223,17 +261,14 @@ class CheckOutActivity : ScopedAppActivity() {
         val a = sessionManager.loadAccount() ?: return
 
         // Get checkout item.
-        intent.getParcelableExtra<CheckoutPrice>(EXTRA_CHECKOUT_ITEM)?.let {
+        intent.getParcelableExtra<FtcCheckout>(EXTRA_CHECKOUT_ITEM)?.let {
 
-            binding.isTesting = !it.regular.liveMode
-            checkOutViewModel.putIntoFtcCart(it, a.membership)
+            binding.isTesting = !it.price.liveMode
+            checkOutViewModel.putIntoCart(it, a.membership)
 
             // Tracking
-            tracker.addCart(it.regular)
+            tracker.addCart(CartParams.ofFtc(it.price))
         }
-
-        // Ask permission.
-        // requestPermission()
 
         // If user clicked payment method ali
         binding.alipayBtn.setOnClickListener {
@@ -259,21 +294,17 @@ class CheckOutActivity : ScopedAppActivity() {
     private fun onPayButtonClicked() {
         val account = sessionManager.loadAccount() ?: return
 
-        val pm = checkOutViewModel.paymentMethod
-        if (pm == null) {
+        val pi = checkOutViewModel.paymentIntent.value
+        if (pi == null) {
             toast(R.string.toast_no_pay_method)
             return
         }
 
-        when (pm) {
-            PayMethod.ALIPAY -> {
-                toast(R.string.toast_creating_order)
-                checkOutViewModel.counterLiveData.value?.let {
-                    tracker.beginCheckout(it.price, pm)
-                }
+        tracker.checkoutFtc(pi)
 
-                binding.inProgress = true
-                checkOutViewModel.createAliOrder(account)
+        when (pi.payMethod) {
+            PayMethod.ALIPAY -> {
+                checkOutViewModel.createOrder(account, pi)
             }
 
             PayMethod.WXPAY -> {
@@ -281,22 +312,15 @@ class CheckOutActivity : ScopedAppActivity() {
                 if (supportedApi < Build.PAY_SUPPORTED_SDK_INT) {
 
                     toast(R.string.wxpay_not_supported)
-                    binding.inProgress = false
                     return
                 }
 
-                toast(R.string.toast_creating_order)
-                checkOutViewModel.counterLiveData.value?.let {
-                    tracker.beginCheckout(it.price, pm)
-                }
-                binding.inProgress = true
-                checkOutViewModel.createWxOrder(account)
+                checkOutViewModel.createOrder(account, pi)
             }
 
             PayMethod.STRIPE -> {
                 if (account.isWxOnly) {
-                    EmailRequiredDialogFragment()
-                        .show(supportFragmentManager, "linkEmail")
+                    showEmailRequiredDialog()
                     // Next goes to `onActivityResult`.
                     return
                 }
@@ -308,8 +332,7 @@ class CheckOutActivity : ScopedAppActivity() {
                 if (gotoStripe()) {
                     return
                 }
-                // Retrieve stripe prices if not loaded yet.
-                binding.inProgress = true
+
                 paywallViewModel.loadStripePrices()
             }
 
@@ -317,11 +340,22 @@ class CheckOutActivity : ScopedAppActivity() {
         }
     }
 
+    private fun showEmailRequiredDialog() {
+        AlertDialogFragment.newStripeRequireEmail()
+            .onPositiveButtonClicked { dialog, _ ->
+                LinkFtcActivity.startForResult(this)
+                dialog.dismiss()
+            }
+            .onNegativeButtonClicked { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show(supportFragmentManager, "StripeEmailRequired")
+    }
+
     private fun showCreateCustomerDialog(account: Account) {
         AlertDialogFragment
             .newStripeCustomer(account.email)
             .onPositiveButtonClicked { dialog, _ ->
-                binding.inProgress = true
                 customerViewModel.createCustomer(account)
                 dialog.dismiss()
             }
@@ -335,29 +369,11 @@ class CheckOutActivity : ScopedAppActivity() {
     // Return false if price not found and the caller should
     // start retrieving prices from server.
     private fun gotoStripe(): Boolean {
-        val ftcPrice = checkOutViewModel
-            .counterLiveData
-            .value
-            ?.price
+        val stripeCheckout = checkOutViewModel.stripeCheckout()
 
-        Log.i(TAG, "ftc price $ftcPrice")
-
-        if (ftcPrice == null) {
-            Log.i(TAG, "Ftc price missing")
-            return false
-        }
-
-        if (ftcPrice.regular.stripePriceId.isEmpty()) {
-            toast("Missing stripe price id!")
-            return false
-        }
-
-
-        val stripeCheckout = ftcPrice.ofStripe()
-
-        Log.i(TAG, "Stripe pride $stripeCheckout")
+        Log.i(TAG, "Stripe price id $stripeCheckout")
         if (stripeCheckout == null) {
-            Log.i(TAG, "Stripe price not found for ${ftcPrice.regular.stripePriceId}")
+            Log.i(TAG, "Stripe price not found")
             return false
         }
 
@@ -365,7 +381,7 @@ class CheckOutActivity : ScopedAppActivity() {
         StripeSubActivity.startForResult(
             activity = this,
             requestCode = RequestCode.PAYMENT,
-            price = stripeCheckout,
+            items = stripeCheckout,
         )
 
         return true
@@ -373,19 +389,18 @@ class CheckOutActivity : ScopedAppActivity() {
 
     // After order created on ftc server and the order returned.
     private fun onAliPayIntent(result: FetchResult<AliPayIntent>) {
-        binding.inProgress = false
 
         when (result) {
             is FetchResult.LocalizedError -> {
                 showErrDialog(result.msgId)
                 checkOutViewModel.counterLiveData.value?.let {
-                    tracker.buyFail(it.price.regular)
+                    tracker.buyFail(it.price.edition)
                 }
             }
             is FetchResult.Error -> {
                 result.exception.message?.let { showErrDialog(it) }
                 checkOutViewModel.counterLiveData.value?.let {
-                    tracker.buyFail(it.price.regular)
+                    tracker.buyFail(it.price.edition)
                 }
 
             }
@@ -426,7 +441,7 @@ class CheckOutActivity : ScopedAppActivity() {
                 binding.payBtn.isEnabled = true
 
                 checkOutViewModel.counterLiveData.value?.let {
-                    tracker.buyFail(it.price.regular)
+                    tracker.buyFail(it.price.edition)
                 }
 
                 return@launch
@@ -487,13 +502,13 @@ class CheckOutActivity : ScopedAppActivity() {
             is FetchResult.LocalizedError -> {
                 showErrDialog(result.msgId)
                 checkOutViewModel.counterLiveData.value?.let {
-                    tracker.buyFail(it.price.regular)
+                    tracker.buyFail(it.price.edition)
                 }
             }
             is FetchResult.Error -> {
                 result.exception.message?.let { showErrDialog(it) }
                 checkOutViewModel.counterLiveData.value?.let {
-                    tracker.buyFail(it.price.regular)
+                    tracker.buyFail(it.price.edition)
                 }
             }
             is FetchResult.Success -> {
@@ -570,7 +585,7 @@ class CheckOutActivity : ScopedAppActivity() {
         const val EXTRA_CHECKOUT_ITEM = "extra_checkout_item"
 
         @JvmStatic
-        fun startForResult(activity: Activity?, requestCode: Int, item: CheckoutPrice) {
+        fun startForResult(activity: Activity?, requestCode: Int, item: FtcCheckout) {
             val intent = Intent(activity, CheckOutActivity::class.java).apply {
                 putExtra(EXTRA_CHECKOUT_ITEM, item)
             }

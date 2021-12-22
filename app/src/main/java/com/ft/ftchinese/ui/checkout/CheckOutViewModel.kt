@@ -1,5 +1,7 @@
 package com.ft.ftchinese.ui.checkout
 
+import android.util.Log
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
@@ -8,14 +10,11 @@ import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.ftcsubs.WxPayIntent
-import com.ft.ftchinese.model.paywall.CheckoutPrice
+import com.ft.ftchinese.model.paywall.*
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.request.OrderParams
-import com.ft.ftchinese.model.stripesubs.StripeSubsResult
-import com.ft.ftchinese.model.stripesubs.SubParams
 import com.ft.ftchinese.repository.FtcPayClient
-import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.viewmodel.*
 import kotlinx.coroutines.Dispatchers
@@ -24,42 +23,37 @@ import kotlinx.coroutines.withContext
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
+private const val TAG = "CheckOutViewModel"
+
 class CheckOutViewModel : BaseViewModel(), AnkoLogger {
 
-    val counterLiveData: MutableLiveData<PaymentCounter> by lazy {
-        MutableLiveData<PaymentCounter>()
+    val messageLiveData: MutableLiveData<Int> by lazy {
+        MutableLiveData<Int>()
     }
 
-    /**
-     * When the UI is created, use price, optional discount and
-     * membership to build PaymentCounter.
-     */
-    fun putIntoFtcCart(cop: CheckoutPrice, m: Membership) {
-        counterLiveData.value = PaymentCounter.newFtcInstance(cop, m)
+    val counterLiveData: MutableLiveData<FtcCheckout> by lazy {
+        MutableLiveData<FtcCheckout>()
     }
 
-    /**
-     * When the UI is created, use the price and current
-     * membership to build PaymentCounter.
-     */
-    fun putIntoStripeCart(price: CheckoutPrice, m: Membership) {
-        counterLiveData.value = PaymentCounter.newStripeInstance(price, m)
+    val isTrial: Boolean
+        get() = counterLiveData.value?.isIntroductory ?: false
+
+    // A list of payment methods
+    val paymentChoices: MutableLiveData<PaymentChoices> by lazy {
+        MutableLiveData<PaymentChoices>()
     }
 
-    val paymentMethod: PayMethod?
-        get() = payMethodSelected.value?.payMethod
+    // For intro price, let user to select; otherwise
+    // set it automatically.
+    val stripePriceLiveData = MutableLiveData<String>()
+
+    // The recurring prices a stripe trial attached to.
+    val stripeRecurringChoicesLiveData: MutableLiveData<Array<String>> by lazy {
+        MutableLiveData<Array<String>>()
+    }
 
     // When user selected a payment method, trigger ui change.
-    val payMethodSelected: MutableLiveData<PaymentIntent> by lazy {
-        MutableLiveData<PaymentIntent>()
-    }
-
-    // When user selected a payment method, narrow down the payment intent.
-    fun selectPayMethod(method: PayMethod) {
-        counterLiveData.value?.selectPaymentMethod(method)?.let {
-            payMethodSelected.value = it
-        }
-    }
+    val paymentIntent = MutableLiveData<PaymentIntent>()
 
     val wxPayIntentResult: MutableLiveData<FetchResult<WxPayIntent>> by lazy {
         MutableLiveData<FetchResult<WxPayIntent>>()
@@ -69,76 +63,224 @@ class CheckOutViewModel : BaseViewModel(), AnkoLogger {
         MutableLiveData<FetchResult<AliPayIntent>>()
     }
 
-    val stripeSubsResult: MutableLiveData<FetchResult<StripeSubsResult>> by lazy {
-        MutableLiveData<FetchResult<StripeSubsResult>>()
+    val isAliPayEnabled = MediatorLiveData<Boolean>().apply {
+        addSource(progressLiveData) {
+            value = enablePayMethod(PayMethod.ALIPAY)
+        }
+        addSource(paymentChoices) {
+            value = enablePayMethod(PayMethod.ALIPAY)
+        }
     }
 
-    fun createWxOrder(account: Account) {
+    val isWxPayEnabled = MediatorLiveData<Boolean>().apply {
+        addSource(progressLiveData) {
+            value = enablePayMethod(PayMethod.WXPAY)
+        }
+        addSource(paymentChoices) {
+            value = enablePayMethod(PayMethod.WXPAY)
+        }
+    }
+
+    val isStripeEnabled = MediatorLiveData<Boolean>().apply {
+        addSource(progressLiveData) {
+            value = enablePayMethod(PayMethod.STRIPE)
+        }
+        addSource(paymentChoices) {
+            value = enablePayMethod(PayMethod.STRIPE)
+        }
+    }
+
+    private fun enablePayMethod(m: PayMethod): Boolean {
+        if (progressLiveData.value == true) {
+            return false
+        }
+
+        return paymentChoices.value?.isPayMethodEnabled(m) ?: false
+    }
+
+    // Please not that you must put those getter methods after
+    // the source variable declarations.
+    val isFormEnabled = MediatorLiveData<Boolean>().apply {
+        addSource(progressLiveData) {
+            value = enableSubmit()
+        }
+        addSource(paymentIntent) {
+            value = enableSubmit()
+        }
+        addSource(stripePriceLiveData) {
+            value = enableSubmit()
+        }
+    }
+
+    private fun enableSubmit(): Boolean {
+        if (progressLiveData.value == true) {
+            return false
+        }
+
+        if (paymentIntent.value == null) {
+            return false
+        }
+
+        // As long as user selected alipay/wxpay, the check is over here.
+        if (paymentIntent.value?.payMethod != PayMethod.STRIPE) {
+            return true
+        }
+
+        // When user wants to pay via stripe, we have to ensure
+        // stripe price id is chosen.
+        if (stripePriceLiveData.value == null) {
+            return false
+        }
+
+        return true
+    }
+
+    /**
+     * When the UI is created, use price, optional discount and
+     * membership to build PaymentCounter.
+     */
+    fun putIntoCart(checkout: FtcCheckout, m: Membership) {
+        Log.i(TAG, "Checkout item $checkout")
+        counterLiveData.value = checkout
+        paymentChoices.value = PaymentChoices.newInstance(m, checkout.price.edition)
+        if (!checkout.isIntroductory) {
+            stripePriceLiveData.value = checkout.price.stripePriceId
+        }
+    }
+
+    /**
+     * Select a payment method and compose PaymentIntent
+     * based on user selection.
+     */
+    fun selectPayMethod(method: PayMethod) {
+        Log.i(TAG, "Selecting payment method $method")
+        counterLiveData.value?.let { item ->
+
+            paymentChoices.value?.findOrderIntent(method)?.kind?.let {
+                paymentIntent.value = PaymentIntent(
+                    item = item,
+                    orderKind = it,
+                    payMethod = method,
+                )
+            }
+
+            if (method != PayMethod.STRIPE) {
+                return@let
+            }
+
+            // When the item is an introductory, then we don't
+            // know which recurring prices is being used.
+            // Find the recurring prices and
+            // ask user to select.
+            // The observer will show a single choice dialog.
+            if (item.isIntroductory && item.stripeTrialParents.size > 1) {
+                stripeRecurringChoicesLiveData.value = item
+                    .stripeTrialParents
+                    .toTypedArray()
+            }
+        }
+    }
+
+    /**
+     * Callback to handle stripe recurring price selection.
+     * @param index the selected item index in a single choice list.
+     */
+    fun selectStripeRecurring(index: Int) {
+        stripeRecurringChoicesLiveData.value?.let {
+            if (index > it.size) {
+                return@let
+            }
+
+            stripePriceLiveData.value = it[index]
+        }
+    }
+
+    fun stripeCheckout(): StripeCheckout? {
+        val orderKind = paymentChoices.value
+            ?.findOrderIntent(PayMethod.STRIPE)
+            ?.kind
+            ?: return null
+
+        return stripePriceLiveData.value?.let {
+            StripeCheckout(
+                orderKind = orderKind,
+                recurringPriceId = it,
+                trialPriceId = counterLiveData.value?.stripeTrialId()
+            )
+        }
+    }
+
+    fun createOrder(account: Account, pi: PaymentIntent) {
         if (isNetworkAvailable.value == false) {
-            wxPayIntentResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
+            messageLiveData.value = R.string.prompt_no_network
             return
         }
 
-        val price = counterLiveData.value?.price
-        if (price == null) {
-            wxPayIntentResult.value = FetchResult.Error(Exception("Price not found"))
-            return
-        }
+        messageLiveData.value = R.string.toast_creating_order
+        progressLiveData.value = true
 
+        val params = OrderParams(
+            priceId = pi.item.price.id,
+            discountId = pi.item.discount?.id,
+        )
+
+        when (pi.payMethod) {
+            PayMethod.ALIPAY -> createAliOrder(account, params)
+            PayMethod.WXPAY -> createWxOrder(account, params)
+            else -> {
+                messageLiveData.value = R.string.toast_no_pay_method
+                progressLiveData.value = false
+            }
+        }
+    }
+
+    private fun createWxOrder(account: Account, params: OrderParams) {
+
+        Log.i(TAG, "Creating wx order $params")
         viewModelScope.launch {
             try {
                 val wxOrder = withContext(Dispatchers.IO) {
-                    FtcPayClient.createWxOrder(account, OrderParams(
-                        priceId = price.regular.id,
-                        discountId = price.favour?.ftcDiscountId,
-                    ))
+                    FtcPayClient.createWxOrder(account, params)
                 }
 
+                progressLiveData.value = false
                 if (wxOrder == null) {
                     wxPayIntentResult.value = FetchResult.LocalizedError(R.string.toast_order_failed)
                     return@launch
                 }
                 wxPayIntentResult.value = FetchResult.Success(wxOrder)
             } catch (e: APIError) {
-
+                progressLiveData.value = false
                 wxPayIntentResult.value = if (e.statusCode == 403) {
                     FetchResult.LocalizedError(R.string.duplicate_purchase)
                 } else {
                     FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
+                progressLiveData.value = false
                 wxPayIntentResult.value = FetchResult.fromException(e)
             }
         }
     }
 
-    fun createAliOrder(account: Account) {
-        if (isNetworkAvailable.value == false) {
-            aliPayIntentResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
+    private fun createAliOrder(account: Account, params: OrderParams) {
 
-        val price = counterLiveData.value?.price
-        if (price == null) {
-            aliPayIntentResult.value = FetchResult.Error(Exception("Price not found"))
-            return
-        }
+        Log.i(TAG, "Creating alipay order $params")
 
         viewModelScope.launch {
             try {
                 val aliOrder = withContext(Dispatchers.IO) {
-                    FtcPayClient.createAliOrder(account, OrderParams(
-                        priceId = price.regular.id,
-                        discountId = price.favour?.ftcDiscountId,
-                    ))
+                    FtcPayClient.createAliOrder(account, params)
                 }
 
+                progressLiveData.value = false
                 if (aliOrder == null) {
                     aliPayIntentResult.value = FetchResult.LocalizedError(R.string.toast_order_failed)
                     return@launch
                 }
                 aliPayIntentResult.value = FetchResult.Success(aliOrder)
             } catch (e: APIError) {
+                progressLiveData.value = false
                 info(e)
                 val msgId = if (e.statusCode == 403) {
                     R.string.duplicate_purchase
@@ -152,65 +294,9 @@ class CheckOutViewModel : BaseViewModel(), AnkoLogger {
                     FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
+                progressLiveData.value = false
                 info(e)
                 aliPayIntentResult.value = FetchResult.fromException(e)
-            }
-        }
-    }
-
-    fun createStripeSub(account: Account, params: SubParams) {
-        if (isNetworkAvailable.value == false) {
-            stripeSubsResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val sub = withContext(Dispatchers.IO) {
-                    StripeClient.createSubscription(account, params)
-                }
-
-                if (sub == null) {
-                    stripeSubsResult.value = FetchResult.LocalizedError(R.string.error_unknown)
-                    return@launch
-                }
-
-                stripeSubsResult.value = FetchResult.Success(sub)
-
-            } catch (e: APIError) {
-                stripeSubsResult.value = if (e.type == "idempotency_error") {
-                    FetchResult.Error(IdempotencyError())
-                } else {
-                    FetchResult.fromServerError(e)
-                }
-
-            } catch (e: Exception) {
-                stripeSubsResult.value = FetchResult.fromException(e)
-            }
-        }
-    }
-
-    fun upgradeStripeSub(account: Account, params: SubParams) {
-        if (isNetworkAvailable.value == false) {
-            stripeSubsResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val sub = withContext(Dispatchers.IO) {
-                    StripeClient.updateSubs(account, params)
-                }
-
-                if (sub == null) {
-                    stripeSubsResult.value = FetchResult.LocalizedError(R.string.error_unknown)
-                    return@launch
-                }
-
-                stripeSubsResult.value = FetchResult.Success(sub)
-
-            } catch (e: Exception) {
-                stripeSubsResult.value = FetchResult.fromException(e)
             }
         }
     }
