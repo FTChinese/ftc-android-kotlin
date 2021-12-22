@@ -99,8 +99,7 @@ class CheckOutActivity : ScopedAppActivity() {
 
     private fun setupViewModel() {
         checkOutViewModel = ViewModelProvider(this)[CheckOutViewModel::class.java]
-
-        accountViewModel = ViewModelProvider(this)[AccountViewModel::class.java]
+        cartViewModel = ViewModelProvider(this)[ShoppingCartViewModel::class.java]
 
         customerViewModel = ViewModelProvider(this, CustomerViewModelFactory(fileCache))[CustomerViewModel::class.java]
 
@@ -108,13 +107,11 @@ class CheckOutActivity : ScopedAppActivity() {
 
         connectionLiveData.observe(this, {
             checkOutViewModel.isNetworkAvailable.value = it
-            accountViewModel.isNetworkAvailable.value = it
             paywallViewModel.isNetworkAvailable.value = it
             customerViewModel.isNetworkAvailable.value = it
         })
         isConnected.let {
             checkOutViewModel.isNetworkAvailable.value = it
-            accountViewModel.isNetworkAvailable.value = it
             paywallViewModel.isNetworkAvailable.value = it
             customerViewModel.isNetworkAvailable.value = it
         }
