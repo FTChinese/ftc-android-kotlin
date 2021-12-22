@@ -17,7 +17,7 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 class CartItemFragment : ScopedFragment() {
 
     private lateinit var binding: FragmentCartItemBinding
-    private lateinit var checkoutViewModel: CheckOutViewModel
+    private lateinit var cartViewModel: ShoppingCartViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,7 +35,7 @@ class CartItemFragment : ScopedFragment() {
         binding.cartItem = CartItem(
             productName = "",
         )
-        binding.hasDiscount = false
+
         return binding.root
     }
 
@@ -46,13 +46,13 @@ class CartItemFragment : ScopedFragment() {
 
     private fun setupViewModel() {
 
-        checkoutViewModel = activity?.run {
-            ViewModelProvider(this)[CheckOutViewModel::class.java]
+        cartViewModel = activity?.run {
+            ViewModelProvider(this)[ShoppingCartViewModel::class.java]
         } ?: throw Exception("Invalid activity")
 
-        // Use the CheckoutItem to display ui.
-        checkoutViewModel.counterLiveData.observe(viewLifecycleOwner) {
-            binding.cartItem = CartItem.newInstance(requireContext(), it.price)
+
+        cartViewModel.itemLiveData.observe(viewLifecycleOwner) {
+            binding.cartItem = it
         }
     }
 
