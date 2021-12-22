@@ -9,9 +9,6 @@
         <variable
             name="cartItem"
             type="com.ft.ftchinese.ui.checkout.CartItem" />
-        <variable
-            name="hasDiscount"
-            type="Boolean" />
     </data>
 
     <androidx.cardview.widget.CardView
