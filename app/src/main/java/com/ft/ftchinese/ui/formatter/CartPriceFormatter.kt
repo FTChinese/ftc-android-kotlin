@@ -6,18 +6,16 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.RelativeSizeSpan
 import android.text.style.StrikethroughSpan
-import com.ft.ftchinese.model.enums.Cycle
-import com.ft.ftchinese.model.enums.PriceSource
-import com.ft.ftchinese.model.paywall.UnifiedPrice
+import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 
 /**
  * Format the price string put into a cart.
  */
-data class CartFormatter(
+data class CartPriceFormatter(
     val currency: String,
     val amount: Double,
-    val cycle: Cycle? = null,
-    val trialDays: Int? = null,
+    val isIntroductory: Boolean, // Determine whether format period with trial messages.
+    val period: YearMonthDay? = null,
 ) {
     private var amountScaleProportion: Float = 0f
     private var strikeThrough: Boolean = false
@@ -38,16 +36,20 @@ data class CartFormatter(
      * or empty string if neither cycle nor periodDays set.
      */
     private fun formatPeriod(ctx: Context): String {
-        return when {
-            cycle != null -> FormatHelper.getCycle(ctx, cycle)
-            trialDays != null -> FormatHelper.trialPeriod(ctx, trialDays)
-            else -> null
+        return if (period != null) {
+            if (isIntroductory) {
+                FormatHelper.formatTrialPeriod(ctx, period)
+            } else {
+                FormatHelper.formatRegularPeriod(ctx, period)
+            }
+        } else {
+            null
         }?.let {
             "/$it"
         } ?: ""
     }
 
-    fun withPrefix(prefix: String): CartFormatter {
+    fun withPrefix(prefix: String): CartPriceFormatter {
         this.prefix = prefix
         return this
     }
@@ -55,7 +57,7 @@ data class CartFormatter(
     /**
      * Cross over the original price if there's a discount.
      */
-    fun withStrikeThrough(strike: Boolean = true): CartFormatter {
+    fun withStrikeThrough(strike: Boolean = true): CartPriceFormatter {
         strikeThrough = strike
         return this
     }
@@ -63,7 +65,7 @@ data class CartFormatter(
     /**
      * Scale the price part. Keep currency untouched.
      */
-    fun withScale(proportion: Float = 2f): CartFormatter {
+    fun scaleAmount(proportion: Float = 2f): CartPriceFormatter {
         amountScaleProportion = proportion
         return this
     }
@@ -76,12 +78,12 @@ data class CartFormatter(
         val str = "${prefix}$currSymbol${amountStr}${period}"
 
         return SpannableString(str).apply {
-            // Cross over the currency symbol and price amount.
+            // Cross over the currency symbol, amount and period.
             if (strikeThrough) {
                 setSpan(
                     StrikethroughSpan(),
                     prefix.length,
-                    length - period.length,
+                    length,
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
                 )
             }
@@ -95,37 +97,6 @@ data class CartFormatter(
                     Spanned.SPAN_EXCLUSIVE_EXCLUSIVE,
                 )
             }
-        }
-    }
-
-    companion object {
-
-        fun newInstance(price: UnifiedPrice): CartFormatter {
-            when (price.source) {
-                PriceSource.Ftc -> {
-                    return CartFormatter(
-                        currency = price.currency,
-                        amount = price.unitAmount,
-                        cycle =  price.cycle
-                    )
-                }
-                PriceSource.Stripe -> {
-                    return if (price.isIntroductory) {
-                        CartFormatter(
-                            currency = price.currency,
-                            amount = price.unitAmount,
-                            trialDays = price.periodDays
-                        )
-                    } else {
-                        CartFormatter(
-                            currency = price.currency,
-                            amount = price.unitAmount,
-                            cycle =  price.cycle
-                        )
-                    }
-                }
-            }
-
         }
     }
 }
