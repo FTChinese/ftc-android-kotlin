@@ -93,11 +93,6 @@ class CheckOutActivity : ScopedAppActivity() {
         fileCache = FileCache(this)
         tracker = StatsTracker.getInstance(this)
 
-        binding.paymentButton = PaymentButton(
-            text = getString(R.string.check_out),
-            enabled = false
-        )
-
         setupViewModel()
         initUI()
     }
