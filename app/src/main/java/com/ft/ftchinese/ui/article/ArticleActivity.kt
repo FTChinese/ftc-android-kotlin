@@ -534,6 +534,10 @@ class ArticleActivity : ScopedAppActivity(),
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            android.R.id.home -> {
+                onBackPressed()
+                true
+            }
             R.id.menu_audio -> {
                 AiAudioFragment().show(supportFragmentManager, "PlayAudioDialog")
                 true
