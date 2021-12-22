@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.product
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ft.ftchinese.model.paywall.Banner
-import com.ft.ftchinese.model.paywall.CheckoutPrice
+import com.ft.ftchinese.model.paywall.FtcCheckout
 import com.ft.ftchinese.model.paywall.PaywallProduct
 import com.ft.ftchinese.model.reader.Account
 import org.jetbrains.anko.AnkoLogger
@@ -14,12 +14,8 @@ import org.jetbrains.anko.AnkoLogger
  */
 class ProductViewModel : ViewModel(), AnkoLogger {
 
-    val checkoutItemSelected: MutableLiveData<CheckoutPrice> by lazy {
-        MutableLiveData<CheckoutPrice>()
-    }
-
-    val inputEnabled: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>()
+    val checkoutItemSelected: MutableLiveData<FtcCheckout> by lazy {
+        MutableLiveData<FtcCheckout>()
     }
 
     val accountChanged: MutableLiveData<Account?> by lazy {
