@@ -250,16 +250,16 @@
     <string name="order_period">訂閱周期: %1$s ~ %2$s</string>
 
     <!-- Stripe payment -->
-    <string name="title_stripe_setting">Stripe設置</string>
+    <string name="stripe_setting">Stripe設置</string>
     <string name="stripe_cancel">取消Stripe訂閱</string>
-    <string name="retrieve_customer">查詢Stripe帳號…</string>
+    <string name="stripe_retrieve_customer">查詢Stripe帳號…</string>
     <string name="stripe_customer_not_created">創建Stripe使用者失敗，請重试！</string>
     <string name="card_brand_last4">%1$s (尾号%2$s)</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
     <string name="stripe_in_pounds">* 使用Stripe訂閱FT中文網會員以英镑计价</string>
-    <string name="select_or_add_card">選擇或添加银行卡</string>
+    <string name="stripe_select_or_add_card">選擇或添加银行卡</string>
     <string name="stripe_init">設置Stripe支付</string>
-    <string name="default_bank_brand">我的銀行卡</string>
+    <string name="stripe_default_bank_brand">我的銀行卡</string>
     <string name="add_or_select_payment_method">點擊添加银行卡或選擇默認支付方式</string>
     <string name="set_default_payment_method">设为默認支付方式</string>
     <string name="stripe_customer_not_found">Stripe 使用者不存在，請檢查帳號或者重新登入</string>
@@ -455,7 +455,7 @@
     <string name="formatter_month_date">%1$d月%2$d日</string>
     <string name="formatter_date">%1$d日</string>
     <string name="switch_to_stripe">转为Stripe訂閱</string>
-    <string name="reactivate_auto_renew">打開自動續訂</string>
+    <string name="stripe_reactivate_auto_renew">打開自動續訂</string>
     <string name="label_subs_source">訂閱方式</string>
     <string name="auto_renew_off">已關閉</string>
     <string name="error_too_short">過短</string>
