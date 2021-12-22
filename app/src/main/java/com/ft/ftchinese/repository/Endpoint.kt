@@ -2,8 +2,8 @@ package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.BuildConfig
 
-private const val devIP = "http://192.168.1.42"
-private const val devPort = "8205"
+private const val devIP = "http://192.168.1.36"
+private const val devPort = "8206"
 
 object NextApi {
     private val readerBase = if (BuildConfig.DEBUG) {
