@@ -10,6 +10,9 @@
         <variable
             name="product"
             type="com.ft.ftchinese.model.paywall.PaywallProduct" />
+        <variable
+            name="introPrice"
+            type="com.ft.ftchinese.model.ftcsubs.Price" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -28,14 +31,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@{product.heading}"
-                android:background="@drawable/bottom_border_teal" />
+                android:background="@drawable/bottom_border_teal"
+                android:layout_marginBottom="@dimen/space_16"/>
+
+            <Button
+                android:id="@+id/btn_intro"
+                style="@style/AppButton.InlineText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:visibility="@{introPrice == null ? View.GONE : View.VISIBLE}"
+                android:text="@{introPrice.title}"
+                android:drawableEnd="@drawable/ic_baseline_arrow_forward_teal_24"/>
 
             <!-- Show a list of price button under this product -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_prod_price"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"/>
+                android:layout_height="wrap_content"/>
 
             <!-- Show a list of text describing this product. -->
             <androidx.recyclerview.widget.RecyclerView
