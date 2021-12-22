@@ -164,7 +164,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         // Let stripe to retrieve customer.
-        toast(R.string.retrieve_customer)
+        toast(R.string.stripe_retrieve_customer)
         customerViewModel.customerSessionProgress.value = true
         CustomerSession
             .getInstance()
@@ -226,7 +226,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
         binding.card = if (card == null) {
             UIBankCard(
-                brand = getString(R.string.default_bank_brand),
+                brand = getString(R.string.stripe_default_bank_brand),
                 number = getString(R.string.bank_card_number, "****")
             )
         } else {
