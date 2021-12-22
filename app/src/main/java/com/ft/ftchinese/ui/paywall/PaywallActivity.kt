@@ -22,7 +22,6 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.checkout.CheckOutActivity
-import com.ft.ftchinese.ui.checkout.CheckOutViewModel
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.product.ProductFragment
 import com.ft.ftchinese.ui.product.ProductViewModel
@@ -43,7 +42,6 @@ class PaywallActivity : ScopedAppActivity(),
     private lateinit var cache: FileCache
     private lateinit var tracker: StatsTracker
     private lateinit var sessionManager: SessionManager
-    private lateinit var checkoutViewModel: CheckOutViewModel
     private lateinit var productViewModel: ProductViewModel
     private lateinit var paywallViewModel: PaywallViewModel
     private lateinit var binding: ActivityPaywallBinding
@@ -84,8 +82,6 @@ class PaywallActivity : ScopedAppActivity(),
         paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(cache))[PaywallViewModel::class.java]
 
         productViewModel = ViewModelProvider(this)[ProductViewModel::class.java]
-
-        checkoutViewModel = ViewModelProvider(this)[CheckOutViewModel::class.java]
 
         // Setup network
         connectionLiveData.observe(this, {
