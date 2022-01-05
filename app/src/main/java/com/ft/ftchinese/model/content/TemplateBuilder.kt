@@ -81,7 +81,7 @@ var androidUserAddress = ${addr.toJsonString()}
         // todo
         ctx["{{story-css}}"] = ""
         ctx["{story-tag}"] = story.tag
-        ctx["{story-author}"] = story.authorCN
+        ctx["{story-author}"] = story.authorCN ?: ""
         ctx["{story-genre}"] = story.genre
         ctx["{story-area}"] = story.area
         ctx["{story-industry}"] = story.industry

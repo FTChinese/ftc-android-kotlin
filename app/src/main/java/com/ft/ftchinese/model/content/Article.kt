@@ -74,7 +74,7 @@ class Story (
     val orgCN: String,
 
     @Json(name = "cauthor")
-    val authorCN: String,
+    val authorCN: String? = "",
 
     @Json(name = "cbyline_status")
     val locationCN: String,
