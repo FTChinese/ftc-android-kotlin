@@ -62,7 +62,7 @@ android {
         // See https://open.weixin.qq.com/cgi-bin/announce?action=getannouncement&key=11600155960jI9EY&version=&lang=zh_CN&token=
         targetSdkVersion 31
         versionCode 83
-        versionName "6.0.0"
+        versionName "5.4.1"
 
         setProperty("archivesBaseName", "ftchinese-v$versionName")
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -171,7 +171,7 @@ android {
 
 dependencies {
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.31"
-    def room_version = '2.4.0'
+    def room_version = '2.2.5'
     def lifecycle_version = "2.2.0"
     def work_version = "2.7.1"
 
@@ -191,7 +191,7 @@ dependencies {
 //    implementation 'com.google.firebase:firebase-crashlytics-ktx'
     implementation 'com.google.firebase:firebase-analytics-ktx'
 
-    implementation 'com.google.android.gms:play-services-analytics:18.0.0'
+    implementation 'com.google.android.gms:play-services-analytics:17.0.1'
     // Payment
     implementation(name: 'alipaysdk-15.8.03.210428205839', ext: 'aar')
     implementation 'com.stripe:stripe-android:16.1.1'
@@ -238,7 +238,7 @@ dependencies {
     implementation 'com.beust:klaxon:5.5'
 
     //  ORM
-    implementation "androidx.room:room-runtime:$room_version"
+    implementation "androidx.room:room-runtime:2.3.0"
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-coroutines:2.1.0-alpha04"
 
@@ -259,7 +259,7 @@ dependencies {
     testImplementation 'org.hamcrest:hamcrest-junit:2.0.0.0'
     testImplementation 'org.mockito:mockito-core:3.1.0'
     testImplementation 'org.robolectric:robolectric:4.5'
-    testImplementation "androidx.room:room-testing:$room_version"
+    testImplementation "androidx.room:room-testing:2.3.0"
     // optional - Test helpers for LiveData
     testImplementation "androidx.arch.core:core-testing:2.1.0"
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
