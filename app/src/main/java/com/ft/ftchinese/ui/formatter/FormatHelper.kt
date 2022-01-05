@@ -55,7 +55,7 @@ object FormatHelper {
         }
     }
 
-    fun getOrderKind(ctx: Context, k: OrderKind): String {
+    private fun getOrderKind(ctx: Context, k: OrderKind): String {
         return when (k) {
             OrderKind.Create -> ctx.getString(R.string.order_kind_create)
             OrderKind.Renew -> ctx.getString(R.string.order_kind_renew)
