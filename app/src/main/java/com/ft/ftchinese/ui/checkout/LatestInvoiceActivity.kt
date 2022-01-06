@@ -71,7 +71,7 @@ class LatestInvoiceActivity : ScopedAppActivity(), AnkoLogger {
             ),
             Pair(
                 "订阅方案",
-                FormatHelper.formatEdition(this, inv.edition),
+                FormatHelper.getTier(this, inv.tier),
             ),
             Pair(
                 "支付金额",
