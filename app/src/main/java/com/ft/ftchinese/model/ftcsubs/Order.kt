@@ -1,12 +1,9 @@
 package com.ft.ftchinese.model.ftcsubs
 
-import com.beust.klaxon.Json
-import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.*
-import com.ft.ftchinese.model.enums.Edition
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
 
@@ -18,20 +15,17 @@ data class Order(
     val id: String,
     val ftcId: String? = null,
     val unionId: String? = null,
-    val priceId: String? = null,
-    val discountId: String? = null,
-    val price: Double? = null,
     @KTier
     val tier: Tier,
-    @Deprecated("")
-    @KCycle
-    val cycle: Cycle,
-    val amount: Double, // Why this is var?
-    val currency: String = "cny", // Not included when getting order list.
     @KOrderKind
     val kind: OrderKind,
+    val originalPrice: Double? = null,
+    val payableAmount: Double,
     @KPayMethod
     val payMethod: PayMethod,
+    val yearsCount: Int,
+    val monthsCount: Int,
+    val daysCount: Int,
     @KDateTime
     val createdAt: ZonedDateTime = ZonedDateTime.now(),
     @KDateTime
@@ -39,18 +33,19 @@ data class Order(
     @KDate
     var startDate: LocalDate? = null,
     @KDate
-    var endDate: LocalDate? = null
+    var endDate: LocalDate? = null,
+    val currency: String = "cny", // Not included when getting order list.
 ) {
 
     fun toJsonString(): String {
         return json.toJsonString(this)
     }
 
-    @Json(ignored = true)
-    val edition: Edition
-        get() = Edition(
-            tier = tier,
-            cycle = cycle,
+    val period: YearMonthDay
+        get() = YearMonthDay(
+            years = yearsCount,
+            months = monthsCount,
+            days = daysCount
         )
 
     // Checks if an order has confirmedAt field set.
