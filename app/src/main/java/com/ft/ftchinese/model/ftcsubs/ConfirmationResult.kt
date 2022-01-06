@@ -41,32 +41,31 @@ data class ConfirmationParams(
             else -> null
         }
 
-        val period = order.cycle.period
+        val ymd = order.period
 
         return Invoice(
             id = "",
             compoundId = "",
             tier = order.tier,
-            cycle = order.cycle,
-            years = period.years,
-            months = period.months,
-            days = period.days,
+            cycle = ymd.toCycle(),
+            years = ymd.years,
+            months = ymd.months,
+            days = ymd.days,
             addOnSource = if (order.kind == OrderKind.AddOn) {
                 AddOnSource.UserPurchase
             } else null,
             appleTxId = null,
             orderId = order.id,
             orderKind = order.kind,
-            paidAmount = order.amount,
+            paidAmount = order.payableAmount,
             payMethod = order.payMethod,
-            priceId = order.priceId,
             stripeSubsId = null,
             createdUtc = ZonedDateTime.now(),
             consumedUtc = if (order.kind != OrderKind.AddOn) {
                 ZonedDateTime.now()
             } else null,
             startUtc = startDateTime,
-            endUtc = startDateTime?.plus(period),
+            endUtc = startDateTime?.plus(ymd.period()),
             carriedOverUtc = null,
         )
     }
