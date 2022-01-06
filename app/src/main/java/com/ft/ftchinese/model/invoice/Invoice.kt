@@ -3,7 +3,7 @@ package com.ft.ftchinese.model.invoice
 import com.beust.klaxon.Json
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
-import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import org.threeten.bp.ZonedDateTime
 
 data class Invoice(
@@ -11,6 +11,7 @@ data class Invoice(
     val compoundId: String,
     @KTier
     val tier: Tier,
+    @Deprecated("Use YearMonthDay")
     @KCycle
     val cycle: Cycle,
     val years: Int = 0,
@@ -45,9 +46,12 @@ data class Invoice(
         return json.toJsonString(this)
     }
 
-    @Json(ignored = true)
-    val edition: Edition
-        get() = Edition(tier, cycle)
+    val period: YearMonthDay
+        get() = YearMonthDay(
+            years = years,
+            months = months,
+            days = days,
+        )
 
     fun withOrderId(id: String): Invoice {
         orderId = id
