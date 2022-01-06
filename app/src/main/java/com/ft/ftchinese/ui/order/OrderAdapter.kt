@@ -24,11 +24,14 @@ class OrderAdapter(private var orders: List<Order>) : RecyclerView.Adapter<Order
                 order.id)
             holder.planView.text = it.getString(
                 R.string.order_subscribed_plan,
-                FormatHelper.formatEdition(it, order.edition),
+                FormatHelper.getTier(
+                    ctx = it,
+                    tier = order.tier,
+                ),
             )
             holder.amountView.text = it.getString(
                 R.string.order_price,
-                FormatHelper.formatPrice(it, order.currency, order.amount),
+                FormatHelper.formatPrice(it, order.currency, order.payableAmount),
             )
             holder.payMethodView.text = it.getString(
                 R.string.order_pay_method,
