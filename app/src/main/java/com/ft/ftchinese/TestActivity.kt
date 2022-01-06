@@ -25,17 +25,16 @@ import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.Order
+import com.ft.ftchinese.model.ftcsubs.PayIntent
 import com.ft.ftchinese.model.legal.WebpageMeta
+import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.model.stripesubs.Idempotency
 import com.ft.ftchinese.service.VerifySubsWorker
-import com.ft.ftchinese.store.InvoiceStore
-import com.ft.ftchinese.store.LastOrderStore
-import com.ft.ftchinese.store.ServiceAcceptance
-import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.store.*
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
@@ -58,7 +57,6 @@ import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
-import org.threeten.bp.ZonedDateTime
 
 private const val TAG = "TestActivity"
 
@@ -66,7 +64,7 @@ private const val TAG = "TestActivity"
 class TestActivity : ScopedAppActivity() {
 
     private lateinit var binding: ActivityTestBinding
-    private lateinit var orderManger: LastOrderStore
+    private lateinit var payIntentStore: PayIntentStore
     private lateinit var sessionManager: SessionManager
     private lateinit var workManager: WorkManager
 
@@ -82,7 +80,7 @@ class TestActivity : ScopedAppActivity() {
         }
 
         sessionManager = SessionManager.getInstance(this)
-        orderManger = LastOrderStore.getInstance(this)
+        payIntentStore = PayIntentStore.getInstance(this)
         workManager = WorkManager.getInstance(this)
 
         mobileViewModel = ViewModelProvider(this).get(MobileViewModel::class.java)
@@ -358,15 +356,14 @@ class TestActivity : ScopedAppActivity() {
                         id = "order-id",
                         ftcId = "ftc-user-id",
                         unionId = null,
-                        priceId = "price-id",
-                        discountId = null,
-                        price = 298.0,
+                        originalPrice = 298.0,
                         tier = Tier.STANDARD,
-                        cycle = Cycle.YEAR,
-                        amount = 298.0,
+                        payableAmount = 298.0,
                         kind = OrderKind.Create,
                         payMethod = PayMethod.ALIPAY,
-                        createdAt = ZonedDateTime.now(),
+                        yearsCount = 1,
+                        monthsCount = 0,
+                        daysCount = 0,
                         confirmedAt = null,
                         startDate = null,
                         endDate =  null
@@ -385,15 +382,14 @@ class TestActivity : ScopedAppActivity() {
                         id = "order-id",
                         ftcId = "ftc-user-id",
                         unionId = null,
-                        priceId = "standard-price-id",
-                        discountId = null,
-                        price = 1998.0,
+                        originalPrice = 1998.0,
                         tier = Tier.PREMIUM,
-                        cycle = Cycle.YEAR,
-                        amount = 1998.0,
+                        payableAmount = 1998.0,
                         kind = OrderKind.Upgrade,
                         payMethod = PayMethod.ALIPAY,
-                        createdAt = ZonedDateTime.now(),
+                        yearsCount = 1,
+                        monthsCount = 0,
+                        daysCount = 0,
                         confirmedAt = null,
                         startDate = null,
                         endDate =  null
@@ -492,15 +488,21 @@ class TestActivity : ScopedAppActivity() {
                 // This order actually exists, since you
                 // Wechat does not provide a fake test
                 // mechanism.
-                orderManger.save(Order(
-                        id = "FTEFD5E11FDFA709E0",
-                        tier = Tier.PREMIUM,
-                        cycle = Cycle.YEAR,
-                        amount = 1998.00,
-                        kind = OrderKind.Create,
-                        payMethod = PayMethod.WXPAY,
-                        createdAt = ZonedDateTime.now()
-                ))
+                payIntentStore.save(
+                    PayIntent(
+                        price = defaultPaywall.products[0].prices[0],
+                        Order(
+                            id = "FTEFD5E11FDFA709E0",
+                            tier = Tier.PREMIUM,
+                            payableAmount = 1998.00,
+                            kind = OrderKind.Create,
+                            payMethod = PayMethod.WXPAY,
+                            yearsCount = 1,
+                            monthsCount = 0,
+                            daysCount = 0,
+                        )
+                    )
+                )
                 WXPayEntryActivity.start(this)
             }
             R.id.menu_wx_oauth -> {
