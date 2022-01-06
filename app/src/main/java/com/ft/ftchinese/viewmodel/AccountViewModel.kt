@@ -169,12 +169,15 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
             return
         }
 
+        progressLiveData.value = true
+
         viewModelScope.launch {
             try {
                 val stripeSub = withContext(Dispatchers.IO) {
                     StripeClient.reactivateSub(account)
                 }
 
+                progressLiveData.value = false
                 stripeResult.value = if (stripeSub == null) {
                     FetchResult.LocalizedError(R.string.stripe_refresh_failed)
                 } else {
@@ -182,6 +185,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                 }
 
             } catch (e: APIError) {
+                progressLiveData.value = false
                 info(e)
                 stripeResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
@@ -190,6 +194,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                 }
 
             } catch (e: Exception) {
+                progressLiveData.value = false
                 info(e)
                 stripeResult.value = FetchResult.fromException(e)
             }
