@@ -10,7 +10,7 @@ object ReleaseRepo : AnkoLogger {
     fun getRelease(versionName: String): Pair<AppRelease?, String>? {
         val (_, body) = Fetch()
                 .setAppId()
-                .get("${NextApi.releaseOf}/${normalizeVersionName(versionName)}")
+                .get("${Endpoint.releaseOf}/${normalizeVersionName(versionName)}")
                 .endJsonText()
 
         return if (body == null) {
@@ -23,7 +23,7 @@ object ReleaseRepo : AnkoLogger {
     fun getLatest(): Pair<AppRelease?, String>? {
         val (_, body) = Fetch()
             .setAppId()
-            .get(NextApi.latestRelease)
+            .get(Endpoint.latestRelease)
             .endJsonText()
 
         return if (body == null) {

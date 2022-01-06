@@ -17,7 +17,7 @@ object FtcPayClient : AnkoLogger {
     fun listOrders(account: Account): List<Order> {
 
         val (_, body) = Fetch()
-            .get(NextApi.ORDERS)
+            .get(Endpoint.subsBase(account.isTest) + "/orders")
             .addHeaders(account.headers())
             .noCache()
             .endJsonText()

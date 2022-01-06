@@ -5,20 +5,6 @@ import com.ft.ftchinese.BuildConfig
 private const val devIP = "http://192.168.1.65"
 private const val devPort = "8206"
 
-object NextApi {
-    private val readerBase = if (BuildConfig.DEBUG) {
-        "$devIP:8000"
-    } else {
-        BuildConfig.API_READER_LIVE
-    }
-
-    @Deprecated("Deprecated since 4.2.2")
-    val ORDERS = "$readerBase/user/orders"
-
-    val latestRelease = "$readerBase/apps/android/latest"
-    val releaseOf = "$readerBase/apps/android/releases"
-}
-
 object ContentApi {
     private val BASE = Endpoint.contentBase
 
@@ -80,6 +66,10 @@ object Endpoint {
     fun refreshIAP(isTest: Boolean, origTxID: String): String {
         return "${subsBase(isTest)}/apple/subs/$origTxID"
     }
+
+
+    val latestRelease = "${subsBase()}/apps/android/latest"
+    val releaseOf = "${subsBase()}/apps/android/releases"
 
     // We cannot use production sandbox server for stripe
     // since the it is impossible to determine the url dynamically
