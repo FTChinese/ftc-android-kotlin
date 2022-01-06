@@ -2,10 +2,7 @@ package com.ft.ftchinese.model.ftcsubs
 
 import android.os.Parcelable
 import com.ft.ftchinese.model.enums.*
-import com.ft.ftchinese.model.fetch.KCycle
-import com.ft.ftchinese.model.fetch.KDateTime
-import com.ft.ftchinese.model.fetch.KPriceKind
-import com.ft.ftchinese.model.fetch.KTier
+import com.ft.ftchinese.model.fetch.*
 import kotlinx.parcelize.Parcelize
 import org.threeten.bp.ZonedDateTime
 
@@ -37,6 +34,10 @@ data class Price(
     val endUtc: ZonedDateTime? = null,
     val offers: List<Discount> = listOf(), // Does not exist when used as introductory price.
 ) : Parcelable {
+
+    fun toJsonString(): String {
+        return json.toJsonString(this)
+    }
 
     fun isAnnual(): Boolean {
         return periodCount.years > 0
