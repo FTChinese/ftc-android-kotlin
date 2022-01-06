@@ -8,12 +8,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMyOrdersBinding
-import com.ft.ftchinese.model.ftcsubs.Order
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.model.fetch.FetchResult
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
@@ -46,39 +45,34 @@ class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
             adapter = viewAdapter
         }
 
-        viewModel = ViewModelProvider(this)
-                .get(AccountViewModel::class.java)
+        viewModel = ViewModelProvider(this)[AccountViewModel::class.java]
 
-        viewModel.ordersResult.observe(this) {
-            onOrdersFetch(it)
+        connectionLiveData.observe(this) {
+            viewModel.isNetworkAvailable.value = it
+        }
+        viewModel.isNetworkAvailable.value = isConnected
+
+        viewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
         }
 
-        if (!isConnected) {
-
-            toast(R.string.prompt_no_network)
-            return
+        viewModel.ordersResult.observe(this) { result ->
+            when (result) {
+                is FetchResult.LocalizedError -> {
+                    toast(result.msgId)
+                }
+                is FetchResult.Error -> {
+                    result.exception.message?.let { toast(it) }
+                }
+                is FetchResult.Success -> {
+                    viewAdapter.setData(result.data)
+                    viewAdapter.notifyDataSetChanged()
+                }
+            }
         }
 
-        val acnt = sessionManager.loadAccount() ?: return
-        binding.inProgress = true
-
-        viewModel.fetchOrders(acnt)
-    }
-
-    private fun onOrdersFetch(result: FetchResult<List<Order>>) {
-        binding.inProgress = false
-
-        when (result) {
-            is FetchResult.LocalizedError -> {
-                toast(result.msgId)
-            }
-            is FetchResult.Error -> {
-                result.exception.message?.let { toast(it) }
-            }
-            is FetchResult.Success -> {
-                viewAdapter.setData(result.data)
-                viewAdapter.notifyDataSetChanged()
-            }
+        sessionManager.loadAccount()?.let {
+            viewModel.fetchOrders(it)
         }
     }
 
