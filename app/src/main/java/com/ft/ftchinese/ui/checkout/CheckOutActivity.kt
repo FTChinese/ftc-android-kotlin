@@ -416,7 +416,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
 
         payIntentStore.save(aliPayIntent)
 
-        val params = aliPayIntent.param.appSdk
+        val params = aliPayIntent.params.app
         if (params.isNullOrEmpty()) {
             toast("Alipay params should not be null")
             return
@@ -525,7 +525,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
     private fun launchWxPay(wxPayIntent: WxPayIntent) {
         val req = PayReq()
 
-        val params = wxPayIntent.params.appSdk
+        val params = wxPayIntent.params.app
         if (params == null) {
             toast("Wxpay params should not be null")
             return

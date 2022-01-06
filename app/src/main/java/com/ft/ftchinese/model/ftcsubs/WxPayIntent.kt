@@ -11,7 +11,7 @@ data class WxPayIntent(
 )
 
 data class WxPaySDKParams(
-    val appSdk: WxAppPayParams?
+    val app: WxAppPayParams?
 )
 
 data class WxAppPayParams(
