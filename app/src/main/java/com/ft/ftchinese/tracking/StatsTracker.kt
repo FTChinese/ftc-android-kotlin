@@ -8,7 +8,7 @@ import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.ftcsubs.Order
+import com.ft.ftchinese.model.ftcsubs.PayIntent
 import com.ft.ftchinese.model.paywall.PaymentIntent
 import com.ft.ftchinese.model.request.WxMiniParams
 import com.ft.ftchinese.model.splash.ScreenAd
@@ -84,16 +84,16 @@ class StatsTracker private constructor(context: Context) {
         )
     }
 
-    fun oneTimePurchaseSuccess(order: Order) {
+    fun oneTimePurchaseSuccess(pi: PayIntent) {
         purchaseSucceed(
-            edition = order.edition,
+            edition = pi.price.edition,
             currency = "cny",
-            amountPaid = order.amount,
-            paymentMethod = order.payMethod
+            amountPaid = pi.order.payableAmount,
+            paymentMethod = pi.order.payMethod
         )
     }
 
-    fun purchaseSucceed(
+    private fun purchaseSucceed(
         edition: Edition,
         currency: String,
         amountPaid: Double,
