@@ -8,11 +8,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
-import com.ft.ftchinese.model.ftcsubs.Order
-import com.ft.ftchinese.model.paywall.PaywallCache
+import com.ft.ftchinese.model.ftcsubs.PayIntent
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
 import com.ft.ftchinese.store.InvoiceStore
-import com.ft.ftchinese.store.LastOrderStore
+import com.ft.ftchinese.store.PayIntentStore
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.checkout.CheckOutViewModel
@@ -38,7 +37,7 @@ private const val EXTRA_UI_TEST = "extra_ui_test"
 @ExperimentalCoroutinesApi
 class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
 
-    private var orderManager: LastOrderStore? = null
+    private var payIntentStore: PayIntentStore? = null
     private var tracker: StatsTracker? = null
 
     private lateinit var accountViewModel: AccountViewModel
@@ -48,10 +47,10 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
         super.onCreate(savedInstanceState)
 
         binding.title = getString(R.string.wxpay_query_order)
-        binding.details = "请稍后..."
+        binding.details = "请稍候..."
         binding.inProgress = true
 
-        orderManager = LastOrderStore.getInstance(this)
+        payIntentStore = PayIntentStore.getInstance(this)
         accountViewModel = ViewModelProvider(this)
                 .get(AccountViewModel::class.java)
         checkoutViewModel = ViewModelProvider(this)
@@ -94,7 +93,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
     override fun onResp(resp: BaseResp?) {
         Log.i(TAG, "onPayFinish, errCode = ${resp?.errCode}")
 
-        val order = orderManager?.load()
+        val pi = payIntentStore?.load()
 
         if (resp?.type == ConstantsAPI.COMMAND_PAY_BY_WX) {
 
@@ -104,7 +103,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
                 0 -> {
                     Log.i(TAG, "Start querying order")
 //                    isPaymentSuccess = true
-                    confirmSubscription(order)
+                    confirmSubscription(pi)
                 }
                 // 错误
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
@@ -114,13 +113,8 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
                     binding.inProgress = false
 
                     // Tracking failure
-                    order?.let {
-                        PaywallCache
-                            .get()
-                            .findPrice(it.edition)
-                            ?.let { p ->
-                                tracker?.buyFail(p.edition)
-                            }
+                    pi?.let {
+                        tracker?.buyFail(it.price.edition)
                     }
                 }
                 // 用户取消
@@ -135,23 +129,23 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
     }
 
 
-    private fun confirmSubscription(order: Order?) {
+    private fun confirmSubscription(pi: PayIntent?) {
 
         // Load current membership
         val account = sessionManager.loadAccount() ?: return
         val member = account.membership
 
-        if (order == null) {
+        if (pi == null) {
             return
         }
 
         // Confirm the order locally sand save it.
         val confirmed = ConfirmationParams(
-            order = order,
+            order = pi.order,
             member = member,
         ).buildResult()
 
-        orderManager?.save(confirmed.order)
+        payIntentStore?.save(pi.withConfirmed(confirmed.order))
         sessionManager.saveMembership(confirmed.membership)
         InvoiceStore.getInstance(this).save(confirmed)
 
@@ -162,7 +156,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
 
         verifyPayment()
 
-        tracker?.oneTimePurchaseSuccess(order)
+        tracker?.oneTimePurchaseSuccess(pi)
     }
 
     private fun verifyPayment() {
@@ -183,14 +177,14 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
      */
     private fun onClickDone() {
 
-        val order = orderManager?.load()
+        val pi = payIntentStore?.load()
 
-        if (order == null) {
+        if (pi == null) {
             finish()
             return
         }
 
-        if (order.isConfirmed()) {
+        if (pi.order.isConfirmed()) {
             LatestInvoiceActivity.start(this)
         } else {
             PaywallTracker.from = null

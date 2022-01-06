@@ -55,7 +55,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
 
     private lateinit var fileCache: FileCache
 
-    private lateinit var orderManager: LastOrderStore
+    private lateinit var payIntentStore: PayIntentStore
     private lateinit var sessionManager: SessionManager
     private lateinit var invoiceStore: InvoiceStore
 
@@ -85,7 +85,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
         }
 
         sessionManager = SessionManager.getInstance(this)
-        orderManager = LastOrderStore.getInstance(this)
+        payIntentStore = PayIntentStore.getInstance(this)
         invoiceStore = InvoiceStore.getInstance(this)
 
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
@@ -414,8 +414,13 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
 
     private fun launchAliPay(aliPayIntent: AliPayIntent) {
 
-        // Save the yet-to-be-confirmed order.
-        orderManager.save(aliPayIntent.order)
+        payIntentStore.save(aliPayIntent)
+
+        val params = aliPayIntent.param.appSdk
+        if (params.isNullOrEmpty()) {
+            toast("Alipay params should not be null")
+            return
+        }
 
         launch {
             /**
@@ -427,7 +432,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
              * You could only use it as a string
              */
             val payResult = withContext(Dispatchers.IO) {
-                PayTask(this@CheckOutActivity).payV2(aliPayIntent.param, true)
+                PayTask(this@CheckOutActivity).payV2(params, true)
             }
 
             Log.i(TAG, "Alipay result: $payResult")
@@ -447,28 +452,27 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
                 return@launch
             }
 
-            confirmAliSubscription(aliPayIntent.order)
-            tracker.oneTimePurchaseSuccess(aliPayIntent.order)
+            confirmAliSubscription(aliPayIntent)
+            tracker.oneTimePurchaseSuccess(aliPayIntent)
         }
     }
 
-    private fun confirmAliSubscription(order: Order) {
+    private fun confirmAliSubscription(pi: PayIntent) {
         val account = sessionManager.loadAccount() ?: return
         val member = account.membership
 
         // Build confirmation result locally
         val confirmed = ConfirmationParams(
-            order = order,
+            order = pi.order,
             member = member
         ).buildResult()
 
-        // Save this confirmed order.
-        orderManager.save(confirmed.order)
         // Update membership.
         sessionManager.saveMembership(confirmed.membership)
 
         // Save this purchase session's confirmation data.
         invoiceStore.save(confirmed)
+        payIntentStore.save(pi.withConfirmed(confirmed.order))
         Log.i(TAG, "New membership: ${confirmed.membership}")
 
         toast(R.string.subs_success)
@@ -520,20 +524,25 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
 
     private fun launchWxPay(wxPayIntent: WxPayIntent) {
         val req = PayReq()
-        req.appId = wxPayIntent.params.appId
-        req.partnerId = wxPayIntent.params.partnerId
-        req.prepayId = wxPayIntent.params.prepayId
-        req.nonceStr = wxPayIntent.params.nonce
-        req.timeStamp = wxPayIntent.params.timestamp
-        req.packageValue = wxPayIntent.params.pkg
-        req.sign = wxPayIntent.params.signature
+
+        val params = wxPayIntent.params.appSdk
+        if (params == null) {
+            toast("Wxpay params should not be null")
+            return
+        }
+
+        req.appId = params.appId
+        req.partnerId = params.partnerId
+        req.prepayId = params.prepayId
+        req.nonceStr = params.nonce
+        req.timeStamp = params.timestamp
+        req.packageValue = params.pkg
+        req.sign = params.signature
 
         val result = wxApi.sendReq(req)
 
         if (result) {
-
-            // Save subscription details to shared preference so that we could use it in WXPayEntryActivity
-            orderManager.save(wxPayIntent.order)
+            payIntentStore.save(wxPayIntent)
         }
 
         setResult(Activity.RESULT_OK)
