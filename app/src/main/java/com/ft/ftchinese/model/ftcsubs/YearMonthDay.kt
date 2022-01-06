@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.ft.ftchinese.model.enums.Cycle
 import kotlinx.parcelize.Parcelize
 import org.threeten.bp.LocalDate
+import org.threeten.bp.Period
 
 @Parcelize
 data class YearMonthDay(
@@ -34,6 +35,10 @@ data class YearMonthDay(
         } else {
             Cycle.MONTH
         }
+    }
+
+    fun period(): Period {
+        return Period.of(years, months, days + 1)
     }
 
     fun totalDays(): Int {
