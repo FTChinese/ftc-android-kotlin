@@ -1,7 +1,5 @@
 package com.ft.ftchinese.model.ftcsubs
 
-import com.ft.ftchinese.model.enums.Cycle
-
 /**
  * DailyPrice is used to replace placeholder in product description.
  */
