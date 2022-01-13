@@ -79,17 +79,15 @@ data class Price(
     }
 
     fun dailyPrice(): DailyPrice {
-        val ymd = normalizeYMD()
-        val c = ymd.toCycle()
-        val days = if (ymd.isZero()) {
+        val days = if (periodCount.isZero()) {
             1
         } else {
-            ymd.totalDays()
+            periodCount.totalDays()
         }
 
         val avg = unitAmount.div(days)
 
-        return when (c) {
+        return when (periodCount.toCycle()) {
             Cycle.YEAR -> DailyPrice.ofYear(avg)
             Cycle.MONTH -> DailyPrice.ofMonth(avg)
         }
