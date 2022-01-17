@@ -10,6 +10,7 @@ enum class OrderKind(val code: String) : Parcelable {
     Renew("renew"),
     Upgrade("upgrade"),
     AddOn("add_on"),
+    Downgrade("downgrade"),
     SwitchCycle("switch_cycle"); // Not from server. Use only locally for Stripe.
 
     override fun toString(): String {
