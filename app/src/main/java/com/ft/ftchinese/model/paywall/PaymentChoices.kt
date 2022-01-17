@@ -193,6 +193,32 @@ data class PaymentChoices(
             )
         }
 
+        /**
+         * When a stripe premium user is trying to buy a
+         * standard product.
+         */
+        @JvmStatic
+        private fun ofStripePrm2Std(): PaymentChoices {
+            return PaymentChoices(
+                warning = null,
+                aliPay = OrderIntent(
+                    kind = OrderKind.AddOn,
+                    message = autoRenewAddOn,
+                ),
+                wxPay = OrderIntent(
+                    kind = OrderKind.AddOn,
+                    message = autoRenewAddOn,
+                ),
+                stripe = OrderIntent(
+                    kind = OrderKind.Downgrade,
+                    message = "降级为标准版订阅",
+                )
+            )
+        }
+
+        /**
+         * Switch cycle of the same tier.
+         */
         @JvmStatic
         private fun ofStripeSwitchCycle(): PaymentChoices {
             return PaymentChoices(
@@ -289,30 +315,30 @@ data class PaymentChoices(
                         }
                     }
                 }
+
                 PayMethod.STRIPE -> {
                     // This includes 3 cases:
                     // Premium to Premium
                     // Standard Monthly to Standard Monthly
                     // Standard Yearly to Standard Yearly
                     // For same edition, Stripe is not allowed to use again.
-                    if (m.tier == e.tier && m.cycle == e.cycle) {
-                        return ofStripeSameEdition()
-                    }
-
-                    // If current subscription is Stripe standard edition,
-                    // we have to handle some edge cases
-                    // depending on selected target.
-                    if (m.tier == Tier.STANDARD) {
-                        return when (e.tier) {
-                            // If selected premium, this is upgrade.
-                            // It could only use Stripe for upgrade.
-                            Tier.PREMIUM -> ofStripeStd2Prm()
-                            // If selected standard, the billing cycle
-                            // must be different.
-                            Tier.STANDARD -> ofStripeSwitchCycle()
+                    if (m.tier == e.tier) {
+                        return if (m.cycle == e.cycle) {
+                            ofStripeSameEdition()
+                        } else {
+                            ofStripeSwitchCycle()
                         }
                     }
+
+                    return when (e.tier) {
+                        // If selected premium, this is upgrade.
+                        // It could only use Stripe for upgrade.
+                        Tier.PREMIUM -> ofStripeStd2Prm()
+                        // Premium -> standard
+                        Tier.STANDARD -> ofStripePrm2Std()
+                    }
                 }
+
                 PayMethod.APPLE -> {
                     // Current standard is trying to upgrade to premium.
                     return if (m.tier == Tier.STANDARD && e.tier == Tier.PREMIUM) {
