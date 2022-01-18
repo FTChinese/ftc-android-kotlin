@@ -60,6 +60,7 @@ object FormatHelper {
             OrderKind.Create -> ctx.getString(R.string.order_kind_create)
             OrderKind.Renew -> ctx.getString(R.string.order_kind_renew)
             OrderKind.Upgrade -> ctx.getString(R.string.order_kind_upgrade)
+            OrderKind.Downgrade -> "降级"
             OrderKind.AddOn -> ctx.getString(R.string.order_kind_addon)
             OrderKind.SwitchCycle -> ctx.getString(R.string.order_kind_switch_cycle)
         }
@@ -267,6 +268,7 @@ object FormatHelper {
                         intent.orderKind
                     )
                     OrderKind.AddOn -> "Stripe订阅不支持一次性购买"
+                    OrderKind.Downgrade -> "Stripe订阅不支持降级"
                 }
             }
             PayMethod.APPLE -> "无法处理苹果订阅"
