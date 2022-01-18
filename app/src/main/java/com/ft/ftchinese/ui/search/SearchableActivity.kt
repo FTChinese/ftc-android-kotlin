@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.search
 import android.annotation.SuppressLint
 import android.app.SearchManager
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -60,23 +61,28 @@ class SearchableActivity : AppCompatActivity() {
             // Use WVClient and override the onPageFinished method.
             // The webpage handles pagination itself.
             webViewClient = object : WVClient(context) {
-                override fun onPageFinished(view: WebView?, url: String?) {
-
+                // Don't use onPageFinished because it'll wait for all the resources to be loaded.
+                // Some resources might be blocked by the Chinese government.
+                // Evaluate the javascript as soon the HTML is loaded.
+                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                     if (keyword == null) {
                         toast(R.string.prompt_no_keyword)
                         return
                     }
-
-                    // Call JS function after page loaded.
+                    // Call JS function in a very short timeout
+                    // (you can actually set the timeout to zero, but let's be safe here)
+                    // so you don't have to wait for page loaded
+                    // and search result comes out almost instantly.
                     // Loaded content is a list of links.
                     // Navigation is handled by analyzing the
                     // content of each url.
                     view?.evaluateJavascript("""
-                    search('$keyword');
+                        setTimeout(function(){
+                            search('$keyword');
+                        }, 80);
                     """.trimIndent()) {
                         Log.i(TAG, "evaluateJavascript finished")
                     }
-
                     binding.inProgress = false
                 }
             }
