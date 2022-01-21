@@ -3,7 +3,6 @@ package com.ft.ftchinese.model.reader
 import android.os.Parcelable
 import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import org.jetbrains.anko.AnkoLogger
 
 /**
  * Example Wechat avatar url:
@@ -13,7 +12,7 @@ import org.jetbrains.anko.AnkoLogger
 data class Wechat(
     val nickname: String? = null,
     val avatarUrl: String? = null
-): Parcelable, AnkoLogger {
+): Parcelable {
 
     @IgnoredOnParcel
     val isEmpty: Boolean
