@@ -14,18 +14,30 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class Account(
+    @Json(name = "id")
     override val id: String,
+    @Json(name = "unionId")
     override val unionId: String? = null,
+    @Json(name = "stripeId")
     override val stripeId: String? = null,
+    @Json(name = "userName")
     override val userName: String? = null,
+    @Json(name = "email")
     override val email: String,
+    @Json(name = "mobile")
     override val mobile: String? = null,
+    @Json(name = "isVerified")
     override val isVerified: Boolean = false,
+    @Json(name = "avatarUrl")
     override val avatarUrl: String? = null,
+    @Json(name = "campaignCode")
     override val campaignCode: String? = null,
+    @Json(name = "loginMethod")
     @KLoginMethod
     val loginMethod: LoginMethod? = null,
+    @Json(name = "wechat")
     val wechat: Wechat,
+    @Json(name = "membership")
     val membership: Membership
 ) : BaseAccount(
     id = id,

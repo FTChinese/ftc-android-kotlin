@@ -14,25 +14,37 @@ import org.threeten.bp.temporal.ChronoUnit
 
 @Parcelize
 data class Membership(
+    @Json(name = "tier")
     @KTier
     val tier: Tier? = null,
+    @Json(name = "cycle")
     @KCycle
     val cycle: Cycle? = null,
 
     // ISO8601 format. Example: 2019-08-05
+    @Json(name = "expireDate")
     @KDate
     val expireDate: LocalDate? = null,
+    @Json(name = "payMethod")
     @KPayMethod
     val payMethod: PayMethod? = null,
+    @Json("stripeSubsId")
     val stripeSubsId: String? = null,
     // If autoRenew is true, ignore expireDate.
+    @Json(name = "autoRenew")
     val autoRenew: Boolean = false,
+    @Json(name = "status")
     @KStripeSubStatus
     val status: StripeSubStatus? = null,
+    @Json(name = "appleSubsId")
     val appleSubsId: String? = null,
+    @Json(name = "b2bLicenceId")
     val b2bLicenceId: String? = null,
+    @Json(name = "standardAddOn")
     val standardAddOn: Long = 0,
+    @Json(name = "premiumAddOn")
     val premiumAddOn: Long = 0,
+    @Json(name = "vip")
     val vip: Boolean = false,
 ) : Parcelable {
 

@@ -1,7 +1,8 @@
 package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
-import kotlinx.android.parcel.IgnoredOnParcel
+import com.beust.klaxon.Json
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -10,10 +11,13 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 data class Wechat(
+    @Json("nickname")
     val nickname: String? = null,
+    @Json("avatarUrl")
     val avatarUrl: String? = null
 ): Parcelable {
 
+    @Json(ignored = true)
     @IgnoredOnParcel
     val isEmpty: Boolean
         get() = nickname.isNullOrBlank() && avatarUrl.isNullOrBlank()
