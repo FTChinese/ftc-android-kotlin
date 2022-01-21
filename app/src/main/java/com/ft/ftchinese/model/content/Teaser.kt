@@ -6,8 +6,6 @@ import com.beust.klaxon.Json
 import com.ft.ftchinese.model.fetch.KArticleType
 import com.ft.ftchinese.model.reader.Permission
 import kotlinx.parcelize.Parcelize
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import java.util.*
 
 /**
@@ -107,7 +105,7 @@ data class Teaser(
     var channelPerm: Permission? = null,
     @Json(ignored = true)
     var channelMeta: ChannelMeta? = null,
-) : Parcelable, AnkoLogger {
+) : Parcelable {
 
     // Only stories have api.
     fun hasJsAPI(): Boolean {
@@ -228,7 +226,6 @@ data class Teaser(
         }
 
         if (type == ArticleType.Interactive) {
-            info("An interactive")
             return when (subType) {
                 SUB_TYPE_RADIO,
                 SUB_TYPE_SPEED_READING -> Permission.STANDARD

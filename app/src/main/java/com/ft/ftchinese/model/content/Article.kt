@@ -5,7 +5,6 @@ import com.beust.klaxon.Json
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.tracking.*
-import org.jetbrains.anko.AnkoLogger
 import java.util.*
 
 data class Bilingual(
@@ -109,7 +108,7 @@ class Story (
     @Json(name = "relative_story")
     val relatedStory: List<RelatedStory> = listOf(),
     val whitelist: Int = 0,
-) : AnkoLogger {
+) {
 
     fun isFrom(t: Teaser): Boolean {
         return id == t.id &&  teaser?.type == t.type

@@ -4,7 +4,6 @@ import android.os.Parcelable
 import com.ft.ftchinese.model.reader.Permission
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import org.jetbrains.anko.AnkoLogger
 
 const val HTML_TYPE_FRAGMENT = 1
 const val HTML_TYPE_COMPLETE = 2
@@ -24,7 +23,7 @@ data class ChannelSource (
     val htmlType: Int, // Flag used to tell whether the webUrl should be loaded directly
     val permission: Permission? = null // A predefined permission that overrides individual Teaser's permission.
 
-) : Parcelable, AnkoLogger {
+) : Parcelable {
 
     fun withParentPerm(p: Permission?): ChannelSource {
         if (p == null) {
