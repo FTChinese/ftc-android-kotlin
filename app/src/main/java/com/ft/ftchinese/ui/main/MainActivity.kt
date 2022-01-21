@@ -11,6 +11,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -28,6 +29,7 @@ import com.ft.ftchinese.TestActivity
 import com.ft.ftchinese.databinding.ActivityMainBinding
 import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.repository.TabPages
@@ -50,6 +52,7 @@ import com.ft.ftchinese.ui.paywall.PaywallActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.ui.webabout.AboutListActivity
 import com.ft.ftchinese.ui.webpage.WVViewModel
+import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.ft.ftchinese.util.RequestCode
 import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession
@@ -58,8 +61,6 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 /**
@@ -67,14 +68,14 @@ import org.jetbrains.anko.toast
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class MainActivity : ScopedAppActivity(),
-        TabLayout.OnTabSelectedListener,
-        AnkoLogger {
+        TabLayout.OnTabSelectedListener {
 
     private var mBackKeyPressed = false
     private var pagerAdapter: TabPagerAdapter? = null
 
     private lateinit var logoutViewModel: LogoutViewModel
     private lateinit var wxInfoViewModel: WxInfoViewModel
+    private lateinit var conversionViewModel: ConversionViewModel
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navHeaderBinding: DrawerNavHeaderBinding
@@ -117,14 +118,13 @@ class MainActivity : ScopedAppActivity(),
         tokenManager = TokenManager.getInstance(this)
         workManager = WorkManager.getInstance(this)
 
-        logoutViewModel = ViewModelProvider(this)
-            .get(LogoutViewModel::class.java)
+        logoutViewModel = ViewModelProvider(this)[LogoutViewModel::class.java]
 
-        wvViewModel = ViewModelProvider(this)
-            .get(WVViewModel::class.java)
+        wvViewModel = ViewModelProvider(this)[WVViewModel::class.java]
 
-        wxInfoViewModel = ViewModelProvider(this)
-            .get(WxInfoViewModel::class.java)
+        wxInfoViewModel = ViewModelProvider(this)[WxInfoViewModel::class.java]
+
+        conversionViewModel = ViewModelProvider(this)[ConversionViewModel::class.java]
 
         connectionLiveData.observe(this) {
             wxInfoViewModel.isNetworkAvailable.value = it
@@ -161,8 +161,8 @@ class MainActivity : ScopedAppActivity(),
     private fun setupViewModel() {
         wxInfoViewModel.avatarLoaded.observe(this) {
             when (it) {
-                is FetchResult.LocalizedError -> info(getString(it.msgId))
-                is FetchResult.Error -> info(it.exception)
+                is FetchResult.LocalizedError -> Log.i(TAG, getString(it.msgId))
+                is FetchResult.Error -> it.exception.message?.let { msg -> Log.i(TAG, msg) }
                 is FetchResult.Success -> {
                     navHeaderBinding.avatar = Drawable.createFromStream(
                         it.data,
@@ -175,10 +175,24 @@ class MainActivity : ScopedAppActivity(),
         logoutViewModel.loggedOutLiveData.observe(this) {
             logout()
         }
+
+        // Open conversion tracking page.
+        conversionViewModel.campaignLiveData.observe(this) {
+            WebpageActivity.start(
+                context = this,
+                meta = WebpageMeta(
+                    title = "",
+                    url = it.url,
+                    showMenu = false,
+                )
+            )
+        }
+
+        conversionViewModel.launchTask(3, 30, 7)
     }
 
     private fun showTermsAndConditions() {
-        info("Service accepted ${acceptance.isAccepted()}")
+        Log.i(TAG, "Service accepted ${acceptance.isAccepted()}")
         if (acceptance.isAccepted()) {
             return
         }
@@ -219,7 +233,7 @@ class MainActivity : ScopedAppActivity(),
         workManager.enqueueUniqueWork("verifySubscription", ExistingWorkPolicy.REPLACE, verifyWork)
 
         workManager.getWorkInfoByIdLiveData(verifyWork.id).observe(this) { workInfo ->
-            info("verifyWork state ${workInfo.state}")
+            Log.i(TAG, "verifyWork state ${workInfo.state}")
         }
 
         val upgradeWork = OneTimeWorkRequestBuilder<LatestReleaseWorker>()
@@ -231,7 +245,7 @@ class MainActivity : ScopedAppActivity(),
 
     private fun setupBottomNav() {
         binding.bottomNav.setOnItemSelectedListener {
-            info("Selected bottom nav item ${it.title}")
+            Log.i(TAG, "Selected bottom nav item ${it.title}")
 
             when (it.itemId) {
                 R.id.nav_news -> {
@@ -424,7 +438,7 @@ class MainActivity : ScopedAppActivity(),
     override fun onStart() {
         super.onStart()
         if (BuildConfig.DEBUG) {
-            info("onStart finished")
+            Log.i(TAG, "onStart finished")
         }
 
         updateSessionUI()
@@ -440,7 +454,7 @@ class MainActivity : ScopedAppActivity(),
         super.onActivityResult(requestCode, resultCode, data)
 
         if (BuildConfig.DEBUG) {
-            info("onActivityResult: requestCode $requestCode, resultCode $resultCode")
+            Log.i(TAG, "onActivityResult: requestCode $requestCode, resultCode $resultCode")
         }
 
         when (requestCode) {
@@ -537,14 +551,14 @@ class MainActivity : ScopedAppActivity(),
      */
     override fun onTabSelected(tab: TabLayout.Tab?) {
         if (BuildConfig.DEBUG) {
-            info("Tab selected: ${tab?.position}")
+            Log.i(TAG, "Tab selected: ${tab?.position}")
         }
 
         val position = tab?.position ?: return
         val title = pagerAdapter?.getPageTitle(position) ?: return
 
         if (BuildConfig.DEBUG) {
-            info("View item list event: $title")
+            Log.i(TAG, "View item list event: $title")
         }
 
         statsTracker.tabSelected(title.toString())
@@ -552,13 +566,13 @@ class MainActivity : ScopedAppActivity(),
 
     override fun onTabReselected(tab: TabLayout.Tab?) {
         if (BuildConfig.DEBUG) {
-            info("Tab reselected: ${tab?.position}")
+            Log.i(TAG, "Tab reselected: ${tab?.position}")
         }
     }
 
     override fun onTabUnselected(tab: TabLayout.Tab?) {
         if (BuildConfig.DEBUG) {
-            info("Tab unselected: ${tab?.position}")
+            Log.i(TAG, "Tab unselected: ${tab?.position}")
         }
     }
 
@@ -576,6 +590,8 @@ class MainActivity : ScopedAppActivity(),
     }
 
     companion object {
+        private const val TAG = "MainActivity"
+
         @JvmStatic
         fun start(context: Context) {
             context.startActivity(Intent(context, MainActivity::class.java))
