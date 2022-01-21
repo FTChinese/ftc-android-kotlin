@@ -26,6 +26,14 @@ object Endpoint {
         BuildConfig.API_CONTENT_LIVE
     }
 
+    val conversionTracking = if (BuildConfig.DEBUG) {
+        "https://www.chineseft.com/index.php/jsapi/deeplinkcampaigntestdata"
+    } else {
+        "https://www.googleadservices.com/pagead/conversion/app/1.0"
+    }
+
+    val ftcCampaign = "https://www.chineseft.com/index.php/jsapi/deeplinkcampaign"
+
     /**
      * Base url for subscription api.
      * @isTest indicates whether the current user is a test account.

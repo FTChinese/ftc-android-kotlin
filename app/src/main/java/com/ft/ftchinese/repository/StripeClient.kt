@@ -2,100 +2,54 @@ package com.ft.ftchinese.repository
 
 import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.fetch.Fetch
-import com.ft.ftchinese.model.fetch.JSONResult
+import com.ft.ftchinese.model.fetch.HttpResp
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.StripeCustomer
 import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.stripesubs.SubParams
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-object StripeClient : AnkoLogger {
+object StripeClient {
+
+    const val TAG = "StripeClient"
 
     // Retrieve a list of stripe prices.
     // If use is logged-in and it is a test account, use sandbox
     // api to get test prices; otherwise retrieve prices from live mode.
-    fun listPrices(): JSONResult<List<StripePrice>>? {
-
-        val (_, body) = Fetch()
+    fun listPrices(): HttpResp<List<StripePrice>> {
+        return Fetch()
             .get(Endpoint.stripePrices)
             .noCache()
-            .endJsonText()
-
-        if (body == null) {
-            return null
-        }
-
-        val prices = json.parseArray<StripePrice>(body)
-        return if (prices == null) {
-            null
-        } else {
-            JSONResult(prices, body)
-        }
+            .endApiJson()
     }
 
-    fun createCustomer(account: Account): JSONResult<StripeCustomer>? {
-        val (_, body) = Fetch()
+    fun createCustomer(account: Account): HttpResp<StripeCustomer> {
+        return Fetch()
             .post(Endpoint.stripeCustomers)
             .setUserId(account.id)
             .noCache()
             .sendJson()
-            .endJsonText()
-
-        if (body == null) {
-            return null
-        }
-
-        val c = json.parse<StripeCustomer>(body)
-        return if (c == null) {
-            null
-        } else {
-            JSONResult(c, body)
-        }
+            .endApiJson()
     }
 
-    fun retrieveCustomer(account: Account): JSONResult<StripeCustomer>? {
-        val (_, body) = Fetch()
+    fun retrieveCustomer(account: Account): HttpResp<StripeCustomer> {
+        return Fetch()
             .get("${Endpoint.stripeCustomers}/${account.stripeId}")
             .setUserId(account.id)
             .noCache()
-            .endJsonText()
-
-        if (body == null) {
-            return null
-        }
-
-        val c = json.parse<StripeCustomer>(body)
-        return if (c == null) {
-            null
-        } else {
-            JSONResult(c, body)
-        }
+            .endApiJson()
     }
 
-    // TODO: define a class for the parameters.
-    fun setDefaultPaymentMethod(account: Account, pmId: String): JSONResult<StripeCustomer>? {
-        val (_, body) = Fetch()
+    fun setDefaultPaymentMethod(account: Account, pmId: String): HttpResp<StripeCustomer> {
+        return Fetch()
             .post("${Endpoint.stripeCustomers}/${account.stripeId}/default-payment-method")
             .setUserId(account.id)
             .noCache()
             .sendJson(Klaxon().toJsonString(mapOf(
                 "defaultPaymentMethod" to pmId
             )))
-            .endJsonText()
-
-        if (body == null) {
-            return null
-        }
-
-        val c = json.parse<StripeCustomer>(body)
-        return if (c == null) {
-            null
-        } else {
-            JSONResult(c, body)
-        }
+            .endApiJson()
     }
 
     fun createEphemeralKey(account: Account, apiVersion: String): String? {
@@ -103,31 +57,25 @@ object StripeClient : AnkoLogger {
             return null
         }
 
-        val (_, body) = Fetch()
+        return Fetch()
             .post("${Endpoint.stripeCustomers}/${account.stripeId}/ephemeral-keys")
             .setUserId(account.id)
-            .query("api_version", apiVersion)
+            .addQuery("api_version", apiVersion)
             .noCache()
             .sendJson()
-            .endJsonText()
-
-        return body
+            .endApiText()
+            .body
     }
 
     fun createSubscription(account: Account, params: SubParams): StripeSubsResult? {
 
-        val (_, body ) = Fetch()
+        return Fetch()
             .post(Endpoint.stripeSubs)
             .setUserId(account.id)
             .noCache()
             .sendJson(params.toJsonString())
-            .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<StripeSubsResult>(body)
-        }
+            .endApiJson<StripeSubsResult>()
+            .body
     }
 
     // Ask API to update user's Stripe subscription data.
@@ -135,71 +83,49 @@ object StripeClient : AnkoLogger {
 
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
-        val (_, body) = Fetch()
+        return Fetch()
             .post("${Endpoint.stripeSubs}/$subsId/refresh")
             .setUserId(account.id)
             .noCache()
             .sendJson()
-            .endJsonText()
-
-        info(body)
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse(body)
-        }
+            .endApiJson<StripeSubsResult>()
+            .body
     }
 
     fun updateSubs(account: Account, params: SubParams): StripeSubsResult? {
 
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
-        val (_, body) = Fetch()
+        return Fetch()
             .post("${Endpoint.stripeSubs}/$subsId")
             .setUserId(account.id)
             .noCache()
             .sendJson(json.toJsonString(params))
-            .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse(body)
-        }
+            .endApiJson<StripeSubsResult>()
+            .body
     }
 
     fun cancelSub(account: Account): StripeSubsResult? {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
-        val (_, body) = Fetch()
+        return Fetch()
             .post("${Endpoint.stripeSubs}/$subsId/cancel")
             .setUserId(account.id)
             .noCache()
             .sendJson()
-            .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse(body)
-        }
+            .endApiJson<StripeSubsResult>()
+            .body
     }
 
     fun reactivateSub(account: Account): StripeSubsResult? {
         val subsId = account.membership.stripeSubsId ?: throw Exception("Not a stripe subscription")
 
-        val (_, body) = Fetch()
+        return Fetch()
             .post("${Endpoint.stripeSubs}/$subsId/reactivate")
             .setUserId(account.id)
             .noCache()
             .sendJson()
-            .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse(body)
-        }
+            .endApiJson<StripeSubsResult>()
+            .body
     }
 }

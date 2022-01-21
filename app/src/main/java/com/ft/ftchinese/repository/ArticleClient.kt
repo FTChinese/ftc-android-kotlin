@@ -4,8 +4,7 @@ import android.util.Log
 import com.ft.ftchinese.model.content.Story
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.fetch.Fetch
-import com.ft.ftchinese.model.fetch.JSONResult
-import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.fetch.HttpResp
 
 object ArticleClient {
     private const val TAG = "ArticleClient"
@@ -15,31 +14,25 @@ object ArticleClient {
      * is returned together with the parsed doc so that
      * we don't need to re-serialize the parsed JSON.
      */
-    fun fetchStory(teaser: Teaser, baseUrl: String): JSONResult<Story>? {
+    fun fetchStory(teaser: Teaser, baseUrl: String): HttpResp<Story> {
         val url = teaser.articleUrl(baseUrl)
 
         Log.i(TAG, "Loading article data from $url")
 
-        val body = Fetch()
+        val resp = Fetch()
             .get(url)
-            .endPlainText()
+            .endJson<Story>()
 
-        if (body.isNullOrBlank()) {
-            return null
-        }
 
-        val s = json.parse<Story>(body)
-        return if (s == null) {
-            null
-        } else {
-            s.teaser = teaser
-            JSONResult(s, body)
-        }
+        resp.body?.teaser = teaser
+
+        return resp
     }
 
     fun crawlHtml(url: String): String? {
         return Fetch()
             .get(url)
-            .endPlainText()
+            .endText()
+            .body
     }
 }

@@ -2,35 +2,22 @@ package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.model.fetch.Fetch
-import com.ft.ftchinese.model.fetch.json
-import org.jetbrains.anko.AnkoLogger
+import com.ft.ftchinese.model.fetch.HttpResp
 
-object ReleaseRepo : AnkoLogger {
+object ReleaseRepo {
 
-    fun getRelease(versionName: String): Pair<AppRelease?, String>? {
-        val (_, body) = Fetch()
-                .setAppId()
-                .get("${Endpoint.releaseOf}/${normalizeVersionName(versionName)}")
-                .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            Pair(json.parse(body), body)
-        }
+    fun getRelease(versionName: String): HttpResp<AppRelease> {
+        return Fetch()
+            .setAppId()
+            .get("${Endpoint.releaseOf}/${normalizeVersionName(versionName)}")
+            .endApiJson(withRaw = true)
     }
 
-    fun getLatest(): Pair<AppRelease?, String>? {
-        val (_, body) = Fetch()
+    fun getLatest(): HttpResp<AppRelease> {
+        return Fetch()
             .setAppId()
             .get(Endpoint.latestRelease)
-            .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            Pair(json.parse(body), body)
-        }
+            .endApiJson(withRaw = true)
     }
 
     private fun normalizeVersionName(versionName: String): String {

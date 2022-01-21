@@ -2,8 +2,7 @@ package com.ft.ftchinese.repository
 
 import android.net.Uri
 import com.ft.ftchinese.model.fetch.Fetch
-import com.ft.ftchinese.model.fetch.JSONResult
-import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.fetch.HttpResp
 import com.ft.ftchinese.model.splash.Schedule
 import java.util.*
 
@@ -17,20 +16,12 @@ object AdClient {
             .build()
             .toString()
 
-        Fetch().get(bustedUrl).endPlainText()
+        Fetch().get(bustedUrl).endText()
     }
 
-    fun fetchSchedule(url: String): JSONResult<Schedule>? {
-        val body = Fetch()
+    fun fetchSchedule(url: String): HttpResp<Schedule> {
+        return Fetch()
             .get(url)
-            .endPlainText()
-
-        if (body.isNullOrBlank()) {
-            return null
-        }
-
-        return json.parse<Schedule>(body)?.let {
-            JSONResult(it, body)
-        }
+            .endJson(withRaw = true)
     }
 }

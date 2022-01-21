@@ -8,16 +8,12 @@ import com.ft.ftchinese.model.request.*
 
 object AccountRepo {
     fun loadFtcAccount(ftcId: String): Account? {
-        val(_, body) = Fetch().get(Endpoint.ftcAccount)
-                .noCache()
-                .setUserId(ftcId)
-                .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<Account>(body)
-        }
+        return Fetch()
+            .get(Endpoint.ftcAccount)
+            .noCache()
+            .setUserId(ftcId)
+            .endApiJson<Account>()
+            .body
     }
 
     /**
@@ -29,17 +25,12 @@ object AccountRepo {
      * WxSession never actually exists.
      */
     fun loadWxAccount(unionId: String): Account? {
-        val (_, body) = Fetch()
-                .get(Endpoint.wxAccount)
-                .setUnionId(unionId)
-                .noCache()
-                .endJsonText()
-
-        return if (body == null) {
-            return null
-        } else {
-            json.parse<Account>(body)
-        }
+        return Fetch()
+            .get(Endpoint.wxAccount)
+            .setUnionId(unionId)
+            .noCache()
+            .endApiJson<Account>()
+            .body
     }
 
     fun refresh(account: Account): Account? {
@@ -57,90 +48,75 @@ object AccountRepo {
     }
 
     fun updateEmail(ftcId: String, email: String): BaseAccount? {
-        val (_, body) = Fetch().patch(Endpoint.email)
-                .noCache()
-                .setUserId(ftcId)
-                .sendJson(json.toJsonString(mapOf("email" to email)))
-                .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<BaseAccount>(body)
-        }
+        return Fetch().patch(Endpoint.email)
+            .noCache()
+            .setUserId(ftcId)
+            .sendJson(json.toJsonString(mapOf("email" to email)))
+            .endApiJson<BaseAccount>()
+            .body
     }
 
     fun updateUserName(ftcId: String, name: String): BaseAccount? {
-        val (_, body) = Fetch().patch(Endpoint.userName)
-                .noCache()
-                .setUserId(ftcId)
-                .sendJson(json.toJsonString(mapOf("userName" to name)))
-                .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<BaseAccount>(body)
-        }
+        return Fetch().patch(Endpoint.userName)
+            .noCache()
+            .setUserId(ftcId)
+            .sendJson(json.toJsonString(mapOf("userName" to name)))
+            .endApiJson<BaseAccount>()
+            .body
     }
 
     fun updatePassword(ftcId: String, params: PasswordUpdateParams): Boolean {
-        val(resp, _) = Fetch()
+        val resp =  Fetch()
             .patch(Endpoint.passwordUpdate)
             .noCache()
             .setUserId(ftcId)
             .sendJson(params.toJsonString())
-            .endJsonText()
+            .endApiText()
 
         return resp.code == 204
     }
 
     fun requestVerification(ftcId: String): Boolean {
-        val (resp, _) = Fetch()
-                .post(Endpoint.emailVrfLetter)
-                .setTimeout(30)
-                .noCache()
-                .setClient()
-                .setUserId(ftcId)
-                .sendJson()
-                .endJsonText()
+        val resp = Fetch()
+            .post(Endpoint.emailVrfLetter)
+            .setTimeout(30)
+            .noCache()
+            .setClient()
+            .setUserId(ftcId)
+            .sendJson()
+            .endApiText()
 
         return resp.code == 204
     }
 
     fun requestSMSCode(account: Account, params: SMSCodeParams): Boolean {
-        val (resp, _) = Fetch()
+        val resp = Fetch()
             .put("${Endpoint.subsBase(account.isTest)}/account/mobile/verification")
             .noCache()
             .setClient()
             .setUserId(account.id)
             .sendJson(params.toJsonString())
-            .endJsonText()
+            .endApiText()
 
         return resp.code == 204
     }
 
     fun updateMobile(account: Account, params: MobileFormParams): BaseAccount? {
-        val (_, body) = Fetch()
+        return Fetch()
             .patch("${Endpoint.subsBase(account.isTest)}/account/mobile")
             .noCache()
             .setClient()
             .setUserId(account.id)
             .sendJson(params.toJsonString())
-            .endJsonText()
-
-        return if (body == null) {
-            null
-        } else {
-            json.parse<BaseAccount>(body)
-        }
+            .endApiJson<BaseAccount>()
+            .body
     }
 
     /**
      * Asks the API to refresh current wechat user's access token and information.
      */
     fun refreshWxInfo(wxSession: WxSession): Boolean {
-        val (resp, _) = Fetch()
+        val resp = Fetch()
             .post(Endpoint.wxRefresh)
             .noCache()
             .setAppId()
@@ -148,51 +124,45 @@ object AccountRepo {
             .sendJson(Klaxon().toJsonString(mapOf(
                 "sessionId" to wxSession.sessionId
             )))
-            .endJsonText()
+            .endApiText()
 
         // The server API might change and return data in the future.
         return resp.code == 204 || resp.code == 200
     }
 
     fun loadWxAvatar(url: String): ByteArray? {
-
         return Fetch()
             .get(url)
             .download()
     }
 
     fun loadAddress(ftcId: String): Address? {
-        val (_, body) = Fetch()
-            .get(Endpoint.address)
-            .setUserId(ftcId)
-            .noCache()
-            .endJsonText()
-
-        return if (body == null) {
-            return null
-        } else {
-            json.parse<Address>(body)
-        }
+       return Fetch()
+           .get(Endpoint.address)
+           .setUserId(ftcId)
+           .noCache()
+           .endApiJson<Address>()
+           .body
     }
 
     fun updateAddress(ftcId: String, address: Address): Boolean {
-        val (resp, _) = Fetch()
+        val resp = Fetch()
             .patch(Endpoint.address)
             .setUserId(ftcId)
             .noCache()
             .sendJson(json.toJsonString(address))
-            .endJsonText()
+            .endApiText()
 
         return resp.code == 204
     }
 
     fun deleteAccount(ftcId: String, params: EmailPasswordParams): Boolean {
-        val (resp, _) = Fetch()
+        val resp =  Fetch()
             .delete(Endpoint.ftcAccount)
             .noCache()
             .setUserId(ftcId)
             .sendJson(params.toJsonString())
-            .endJsonText()
+            .endApiText()
 
         return resp.code == 204
     }
