@@ -80,6 +80,9 @@ android {
         buildConfigField "String", "ACCESS_TOKEN_LIVE", props.getProperty("access_token.live")
         buildConfigField "String", "ACCESS_TOKEN_TEST", props.getProperty("access_token.test")
 
+        buildConfigField "String", "CONVERSION_DEV_TOKEN", props.getProperty("conversion.dev_token")
+        buildConfigField "String", "CONVERSION_LINK_ID", props.getProperty("conversion.link_id")
+
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++11"
