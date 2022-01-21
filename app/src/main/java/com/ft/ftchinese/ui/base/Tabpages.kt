@@ -1,4 +1,4 @@
-package com.ft.ftchinese.repository
+package com.ft.ftchinese.ui.base
 
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.HTML_TYPE_COMPLETE
