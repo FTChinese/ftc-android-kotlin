@@ -1,13 +1,12 @@
 package com.ft.ftchinese.model.fetch
 
+import android.util.Log
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.repository.Endpoint
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -15,7 +14,7 @@ import java.util.concurrent.TimeUnit
  * To use okhttp, you need to build url first using `HttpUrl.Builder`;
  * next build request using `Request.Builder`.
  */
-class Fetch : AnkoLogger {
+class Fetch {
 
     private var urlBuilder = HttpUrl.Builder()
     private var method: String = "GET"
@@ -28,36 +27,41 @@ class Fetch : AnkoLogger {
     private var disableCache = false
 
     fun get(url: String) = apply {
-        info("GET $url")
+        Log.i(TAG, "GET $url")
         urlBuilder = url.toHttpUrl().newBuilder()
     }
 
     fun post(url: String) = apply {
-        info("POST $url")
         urlBuilder = url.toHttpUrl().newBuilder()
         method = "POST"
     }
 
     fun put(url: String) = apply {
-        info("PUT $url")
+        Log.i(TAG, "PUT $url")
         urlBuilder = url.toHttpUrl().newBuilder()
         method = "PUT"
     }
 
     fun patch(url: String) = apply {
-        info("PATCH $url")
+        Log.i(TAG, "PATCH $url")
         urlBuilder = url.toHttpUrl().newBuilder()
         method = "PATCH"
     }
 
     fun delete(url: String) = apply {
-        info("DELETE $url")
+        Log.i(TAG, "DELETE $url")
         urlBuilder = url.toHttpUrl().newBuilder()
         method = "DELETE"
     }
 
-    fun query(name: String, value: String?) = apply {
+    fun addQuery(name: String, value: String?) = apply {
         urlBuilder.addQueryParameter(name, value)
+    }
+
+    fun addParams(p: Map<String, String>) = apply {
+        for (item in p) {
+            urlBuilder.addQueryParameter(item.key, item.value)
+        }
     }
 
     fun setTest(yes: Boolean) = apply {
@@ -95,7 +99,7 @@ class Fetch : AnkoLogger {
     }
 
     // Authorization: Bearer xxxxxxx
-    private fun setAccessKey() = apply {
+    fun setAccessKey() = apply {
         headers["Authorization"] = "Bearer ${Endpoint.accessToken}"
     }
 
@@ -132,12 +136,8 @@ class Fetch : AnkoLogger {
      * @body - the data to send. If omitted, default to `{}`
      * to prevent server returns EOF error.
      */
-    fun sendJson(body: String = "{}") = apply {
+    fun sendJson(body: String = "") = apply {
         val contentType = "application/json; charset=utf-8".toMediaTypeOrNull()
-
-        if (contentType == null) {
-            headers["Content-Type"] = "application/json; charset=utf-8"
-        }
 
         reqBody = body.toRequestBody(contentType)
     }
@@ -172,19 +172,42 @@ class Fetch : AnkoLogger {
         return end().body?.bytes()
     }
 
-    fun endPlainText(): String? {
+    fun endText(): HttpResp<String> {
         val resp = end()
 
-        return resp.body?.string()
+        return HttpResp(
+            message = resp.message,
+            code = resp.code,
+            body = resp.body?.string()
+        )
     }
 
-    /**
-     * Used for next-api and subscription-api.
-     * For successful response (HTTP code 200 - 300),
-     * return the json string.
-     * For client error response (HTTP code > 400)
-     */
-    fun endJsonText(): Pair<Response, String?> {
+    inline fun <reified T> endJson(withRaw: Boolean = false): HttpResp<T> {
+        val resp = end()
+
+        /**
+         * @throws IOException when reading body.
+         */
+        return resp.body?.string()?.let {
+            HttpResp(
+                message = resp.message,
+                code = resp.code,
+                body = json.parse<T>(it),
+                raw = if (withRaw) {
+                    it
+                } else {
+                    ""
+                }
+            )
+        } ?: HttpResp(
+            message = resp.message,
+            code = resp.code,
+            body = null,
+            raw = "",
+        )
+    }
+
+    inline fun <reified T> endApiJson(withRaw: Boolean = false): HttpResp<T> {
         setAccessKey()
 
         val resp = end()
@@ -194,7 +217,43 @@ class Fetch : AnkoLogger {
          * @throws IOException when reading body.
          */
         if (resp.code in 200 until 400) {
-            return Pair(resp, resp.body?.string())
+            return resp.body?.string()?.let {
+                HttpResp(
+                    message = resp.message,
+                    code = resp.code,
+                    body = json.parse<T>(it),
+                    raw = if (withRaw) {
+                        it
+                    } else {
+                        ""
+                    }
+                )
+            } ?: HttpResp(
+                message = resp.message,
+                code = resp.code,
+                body = null,
+                raw = "",
+            )
+        }
+
+        throw APIError.from(resp)
+    }
+
+    fun endApiText(): HttpResp<String> {
+        setAccessKey()
+
+        val resp = end()
+
+        /**
+         * Success response.
+         * @throws IOException when reading body.
+         */
+        if (resp.code in 200 until 400) {
+            return HttpResp(
+                message = resp.message,
+                code = resp.code,
+                body = resp.body?.string()
+            )
         }
 
         throw APIError.from(resp)
@@ -203,7 +262,7 @@ class Fetch : AnkoLogger {
     /**
      * @return okhttp3.Response
      */
-    private fun end(): Response {
+    fun end(): Response {
         val reqBuilder = Request.Builder()
             .url(urlBuilder.build())
             .headers(headers.build())
@@ -218,7 +277,10 @@ class Fetch : AnkoLogger {
 
         /**
          * @throws NullPointerException if method is null, or request url is null.
-         * @throws IllegalStateException if method is empty, if body exists for GET method, or if body not exists for POST, PATCH, PUT method.
+         * @throws IllegalStateException
+         * if method is empty,
+         * if body exists for GET method, or
+         * if body not exists for POST, PATCH, PUT method.
          */
         val req = reqBuilder
                 .method(method, reqBody)
@@ -249,6 +311,7 @@ class Fetch : AnkoLogger {
     }
 
     companion object {
+        private const val TAG = "Fetch"
         private val client = OkHttpClient()
     }
 }
