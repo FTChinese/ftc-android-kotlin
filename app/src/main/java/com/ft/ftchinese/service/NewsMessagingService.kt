@@ -2,6 +2,7 @@ package com.ft.ftchinese.service
 
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.ft.ftchinese.R
@@ -11,26 +12,26 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
+
+private const val TAG = "NewsMessagingService"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class NewsMessagingService : FirebaseMessagingService(), AnkoLogger {
+class NewsMessagingService : FirebaseMessagingService() {
     // Handle messages when app is in foreground.
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        info("From: ${remoteMessage.from}")
+        Log.i(TAG, "From: ${remoteMessage.from}")
 
         // This are the custom data.
         // {action=story, pageId=001084989}
         // The data structure is identical for Topic message.
         remoteMessage.data.isNotEmpty().let {
-            info("Message data payload: " + remoteMessage.data)
+            Log.i(TAG, "Message data payload: " + remoteMessage.data)
         }
 
         remoteMessage.notification?.let {
-            info("Title: ${it.title}, Body: ${it.body}")
+            Log.i(TAG, "Title: ${it.title}, Body: ${it.body}")
         }
 
         handleNow(remoteMessage.notification, remoteMessage.data)
@@ -39,7 +40,7 @@ class NewsMessagingService : FirebaseMessagingService(), AnkoLogger {
     override fun onNewToken(token: String) {
         super.onNewToken(token)
 
-        info("onNewToken: $token")
+        Log.i(TAG, "onNewToken: $token")
 
         sendRegistrationToServer(token)
     }
@@ -107,6 +108,6 @@ class NewsMessagingService : FirebaseMessagingService(), AnkoLogger {
     }
 
     private fun sendRegistrationToServer(token: String?) {
-        info("Sending new token to server: $token")
+        Log.i(TAG, "Sending new token to server: $token")
     }
 }

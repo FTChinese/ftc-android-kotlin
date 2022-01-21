@@ -1,16 +1,15 @@
 package com.ft.ftchinese.service
 
 import android.content.Context
+import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.SessionManager
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-class VerifyOneTimePurchaseWorker(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams), AnkoLogger {
+class VerifyOneTimePurchaseWorker(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams) {
 
     private val ctx = appContext
 
@@ -31,18 +30,18 @@ class VerifyOneTimePurchaseWorker(appContext: Context, workerParams: WorkerParam
             ?: return Result.failure()
 
         if (pr.isVerified()) {
-            info("Order already paid. Stop verification")
+            Log.i(TAG, "Order already paid. Stop verification")
             return Result.success()
         }
 
         if (pr.ftcOrderId.isEmpty()) {
-            info("Order id not found")
+            Log.i(TAG, "Order id not found")
             return Result.success()
         }
 
         try {
             val result = FtcPayClient.verifyOrder(account, pr.ftcOrderId) ?: return Result.failure()
-            info(result)
+            Log.i(TAG, "$result")
 
             InvoiceStore.getInstance(ctx).savePayResult(result.payment)
 
@@ -54,8 +53,12 @@ class VerifyOneTimePurchaseWorker(appContext: Context, workerParams: WorkerParam
 
             return Result.success()
         } catch (e: Exception) {
-            info(e)
+            Log.i(TAG, "$e")
             return Result.failure()
         }
+    }
+
+    companion object {
+        private const val TAG = "VerifyOneTimePurchase"
     }
 }

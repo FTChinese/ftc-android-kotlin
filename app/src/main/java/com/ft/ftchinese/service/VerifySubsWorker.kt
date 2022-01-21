@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.work.Worker
@@ -18,8 +19,6 @@ import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.member.MemberActivity
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 /**
  * Verify subscription status each time the app launches.
@@ -29,12 +28,12 @@ class VerifySubsWorker(
     appContext: Context,
     workerParams:
     WorkerParameters
-): Worker(appContext, workerParams), AnkoLogger {
+): Worker(appContext, workerParams) {
 
     private val ctx = appContext
 
     override fun doWork(): Result {
-        info("Run subscription verification work")
+        Log.i(TAG, "Run subscription verification work")
 
         val account = SessionManager
             .getInstance(ctx)
@@ -51,15 +50,15 @@ class VerifySubsWorker(
 
        when (account.membership.payMethod) {
             PayMethod.ALIPAY, PayMethod.WXPAY -> {
-                info("Verify ftc pay...")
+                Log.i(TAG, "Verify ftc pay...")
                 return verifyFtcPay(account)
             }
             PayMethod.APPLE -> {
-                info("Refresh IAP...")
+                Log.i(TAG, "Refresh IAP...")
                 return refreshIAP(account)
             }
             PayMethod.STRIPE -> {
-                info("Refresh Stripe...")
+                Log.i(TAG, "Refresh Stripe...")
                 return refreshStripe(account)
             }
            else -> {
@@ -74,7 +73,7 @@ class VerifySubsWorker(
         }
 
         val remains = m.remainingDays()
-        info("Membership remaining days $remains")
+        Log.i(TAG, "Membership remaining days $remains")
 
         if (remains == null || remains > 10) {
             return
@@ -114,7 +113,7 @@ class VerifySubsWorker(
             SessionManager.getInstance(ctx).saveMembership(m)
             return Result.success()
         } catch (e: Exception) {
-            info(e)
+            Log.i(TAG, "$e")
             return Result.failure()
         }
     }
@@ -130,12 +129,12 @@ class VerifySubsWorker(
             ?: return Result.failure()
 
         if (pr.isVerified()) {
-            info("Order already paid. Stop verification")
+            Log.i(TAG, "Order already paid. Stop verification")
             return Result.success()
         }
 
         if (pr.ftcOrderId.isEmpty()) {
-            info("Order id not found")
+            Log.i(TAG, "Order id not found")
             return Result.success()
         }
 
@@ -143,7 +142,7 @@ class VerifySubsWorker(
             val result = FtcPayClient
                 .verifyOrder(account, pr.ftcOrderId)
                 ?: return Result.failure()
-            info(result)
+            Log.i(TAG, "$result")
 
             invStore.savePayResult(result.payment)
 
@@ -157,7 +156,7 @@ class VerifySubsWorker(
 
             return Result.success()
         } catch (e: Exception) {
-            info(e)
+            Log.i(TAG, "$e")
             return Result.failure()
         }
     }
@@ -176,7 +175,7 @@ class VerifySubsWorker(
 
             return Result.success()
         } catch (e: Exception) {
-            info(e)
+            Log.i(TAG, "$e")
             return Result.failure()
         }
     }
@@ -186,6 +185,7 @@ class VerifySubsWorker(
         try {
             val result = StripeClient
                 .refreshSub(account)
+
                 ?: return Result.failure()
 
             SessionManager
@@ -194,8 +194,12 @@ class VerifySubsWorker(
 
             return Result.success()
         } catch (e: Exception) {
-            info(e)
+            Log.i(TAG, "$e")
             return Result.failure()
         }
+    }
+
+    companion object {
+        private const val TAG = "VerifySubsWorker"
     }
 }

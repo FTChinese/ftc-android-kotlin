@@ -2,6 +2,7 @@ package com.ft.ftchinese.service
 
 import android.app.PendingIntent
 import android.content.Context
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
@@ -10,13 +11,11 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
+import com.ft.ftchinese.model.fetch.formatISODateTime
+import com.ft.ftchinese.model.fetch.parseISODateTime
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.settings.UpdateAppActivity
-import com.ft.ftchinese.model.fetch.formatISODateTime
-import com.ft.ftchinese.model.fetch.parseISODateTime
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.threeten.bp.ZonedDateTime
 
 private const val PREF_APK_UPDATER = "com.ft.ftchinese.apk_update_checker"
@@ -31,37 +30,37 @@ private const val PREF_LAST_CHECKED_AT = "last_checked_at"
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
-    Worker(appContext, workerParams), AnkoLogger {
+    Worker(appContext, workerParams) {
 
     private val ctx = appContext
 
     override fun doWork(): Result {
-        info("Start LatestReleaseWorker")
+        Log.i(TAG, "Start LatestReleaseWorker")
 
         if (!meetMinInterval()) {
-            info("Last checked within an hour")
+            Log.i(TAG, "Last checked within an hour")
             return Result.success()
         }
 
         try {
-            val (release, raw) = ReleaseRepo.getLatest() ?: return Result.failure()
+            val resp = ReleaseRepo.getLatest() ?: return Result.failure()
 
-            info("Latest release $release")
+            Log.i(TAG, "Latest release ${resp.body}")
 
-            if (release == null) {
+            if (resp.body == null) {
                 return Result.failure()
             }
 
-            if (!release.isNew) {
-                info("No latest realse found")
+            if (!resp.body.isNew) {
+                Log.i(TAG, "No latest release found")
                 return Result.success()
             }
 
-            cacheNewRelease(release, raw)
+            cacheNewRelease(resp.body, resp.raw)
 
-            urgeUpdate(release)
+            urgeUpdate(resp.body)
         } catch (e: Exception) {
-            info(e)
+            e.message?.let { Log.i(TAG, it) }
             return Result.failure()
         }
 
@@ -77,13 +76,13 @@ class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
     }
 
     private fun cacheNewRelease(release: AppRelease, data: String) {
-        info("Cache latest release")
+        Log.i(TAG, "Cache latest release")
         FileCache(ctx).saveText(release.cacheFileName(), data)
     }
 
     private fun urgeUpdate(release: AppRelease) {
 
-        info("Send notification for latest release")
+        Log.i(TAG, "Send notification for latest release")
 
         val intent = UpdateAppActivity.newIntent(ctx, release.cacheFileName())
 
@@ -116,6 +115,10 @@ class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
         ctx.getSharedPreferences(PREF_APK_UPDATER, Context.MODE_PRIVATE).edit {
             putString(PREF_LAST_CHECKED_AT, formatISODateTime(ZonedDateTime.now()))
         }
+    }
+
+    companion object {
+        const val TAG = "LatestReleaseWorker"
     }
 }
 

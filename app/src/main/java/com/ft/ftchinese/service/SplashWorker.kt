@@ -73,14 +73,17 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
 
         Log.i(TAG,"Start download splash schedule")
         try {
-            val result = AdClient.fetchSchedule(url) ?: return null
+            val resp = AdClient.fetchSchedule(url)
 
             Log.i(TAG, "Splash schedule downloaded. Cache it.")
-            cache.saveText(
-                CacheFileNames.splashSchedule,
-                result.raw,
-            )
-            return result.value
+            if (resp.raw.isNotEmpty()) {
+                cache.saveText(
+                    CacheFileNames.splashSchedule,
+                    resp.raw,
+                )
+            }
+
+            return resp.body
         } catch (e: Exception) {
             e.message?.let { Log.i(TAG, it) }
             return null

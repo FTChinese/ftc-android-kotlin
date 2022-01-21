@@ -1,23 +1,24 @@
 package com.ft.ftchinese.service
 
+import android.util.Log
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.model.fetch.APIError
 import com.stripe.android.EphemeralKeyProvider
 import com.stripe.android.EphemeralKeyUpdateListener
 import kotlinx.coroutines.*
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
+
+private const val TAG = "EphemeralKeyProvider"
 
 class StripeEphemeralKeyProvider(
         private val account: Account
-) : EphemeralKeyProvider, AnkoLogger {
+) : EphemeralKeyProvider {
 
     private var job: Job? = null
 
     override fun createEphemeralKey(apiVersion: String, keyUpdateListener: EphemeralKeyUpdateListener) {
 
-        info("API version: $apiVersion")
+        Log.i(TAG, "API version: $apiVersion")
 
         job = GlobalScope.launch(Dispatchers.Main) {
             try {
@@ -58,7 +59,7 @@ class StripeEphemeralKeyProvider(
                 // code=resource_missing,
                 // param=customer,
                 // type=invalid_request_error)
-                info(e)
+                Log.i(TAG, "$e")
                 if (e.code == "resource_missing" && e.param == "customer") {
                     keyUpdateListener.onKeyUpdateFailure(e.statusCode, "Error: Stripe customer not found!")
                 } else {
@@ -66,7 +67,7 @@ class StripeEphemeralKeyProvider(
                 }
 
             } catch (e: Exception) {
-                info(e)
+                Log.i(TAG, "$e")
                 keyUpdateListener.onKeyUpdateFailure(500, e.localizedMessage ?: "")
             }
         }
