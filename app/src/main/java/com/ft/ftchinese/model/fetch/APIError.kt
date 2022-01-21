@@ -1,22 +1,20 @@
 package com.ft.ftchinese.model.fetch
 
 import com.beust.klaxon.Json
-import com.beust.klaxon.Klaxon
 import okhttp3.Response
-import org.jetbrains.anko.AnkoLogger
 
 // API error.
 data class APIError(
     override val message: String,
-    val error: Unprocessable? = null,
-
     @Json(ignored = true)
     var statusCode: Int = 400, // HTTP status code
+
+    val error: Unprocessable? = null,
 
     val code: String? = null,
     val param: String? = null,
     val type: String? = null
-) : Exception(message), AnkoLogger {
+) : Exception(message) {
 
     companion object {
         @JvmStatic
@@ -40,10 +38,10 @@ data class APIError(
                  * Throws JSON parse error.
                  */
                 return try {
-                    Klaxon().parse<APIError>(body)?.apply {
+                    json.parse<APIError>(body)?.apply {
                         statusCode = resp.code
                     } ?: APIError(
-                            message = "Kalxon.parse error",
+                            message = "Error parsing JSON",
                             statusCode = 500
                         )
                 } catch (e: Exception) {
