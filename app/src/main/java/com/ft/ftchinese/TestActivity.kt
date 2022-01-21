@@ -23,6 +23,7 @@ import com.ft.ftchinese.databinding.ActivityTestBinding
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
+import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.model.ftcsubs.PayIntent
@@ -32,6 +33,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
+import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.model.stripesubs.Idempotency
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.*
@@ -90,6 +92,16 @@ class TestActivity : ScopedAppActivity() {
                 title = "Test",
                 url = "http://192.168.1.42:8080"
             ))
+        }
+
+        binding.logJson.onClick {
+            val s = json.toJsonString(Credentials(
+                email = "abc@example.org",
+                password = "12345678",
+                deviceToken = ""
+            ))
+
+            Log.i(TAG, s)
         }
 
         binding.addressBuy.onClick {
