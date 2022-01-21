@@ -91,11 +91,11 @@ class SignInViewModel : BaseViewModel() {
 
                 accountResult.value = FetchResult.Success(account)
             } catch (e: APIError) {
-                Log.i(TAG, e.message)
+                Log.i(TAG, "$e")
                 progressLiveData.value = false
                 handleLoginError(e)
             } catch (e: Exception) {
-                Log.i(TAG, e.message ?: "")
+                Log.i(TAG, "$e")
                 progressLiveData.value = false
                 accountResult.value = FetchResult.fromException(e)
             }
