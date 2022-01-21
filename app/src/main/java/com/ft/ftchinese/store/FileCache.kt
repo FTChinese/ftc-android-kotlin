@@ -1,11 +1,10 @@
 package com.ft.ftchinese.store
 
 import android.content.Context
+import android.util.Log
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.jakewharton.byteunits.BinaryByteUnit
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import java.io.File
 import java.io.FileInputStream
 
@@ -22,13 +21,15 @@ object CacheFileNames {
 
 val templateCache: MutableMap<String, String> = HashMap()
 
-class FileCache (private val context: Context) : AnkoLogger {
+private const val TAG = "FileCache"
+
+class FileCache (private val context: Context) {
 
     fun saveText(name: String, text: String) {
         try {
             File(context.filesDir, name).writeText(text)
         } catch (e: Exception) {
-           info("Failed to save file $name due to ${e.message}")
+           Log.i(TAG, "Failed to save file $name due to ${e.message}")
         }
     }
 
@@ -42,7 +43,7 @@ class FileCache (private val context: Context) : AnkoLogger {
                     .bufferedReader()
                     .readText()
         } catch (e: Exception) {
-            info("Cannot open file $name due to: ${e.message}")
+            Log.i(TAG, "Cannot open file $name due to: ${e.message}")
             null
         }
     }
@@ -51,7 +52,7 @@ class FileCache (private val context: Context) : AnkoLogger {
         try {
             File(context.filesDir, name).writeBytes(array)
         } catch (e: Exception) {
-            info("Failed to save binary file $name due to ${e.message}")
+            Log.i(TAG, "Failed to save binary file $name due to ${e.message}")
         }
     }
 
@@ -105,7 +106,7 @@ class FileCache (private val context: Context) : AnkoLogger {
         try {
             context.deleteFile(name)
         } catch (e: Exception) {
-            info(e)
+            Log.i(TAG, "$e")
         }
     }
 
@@ -115,7 +116,7 @@ class FileCache (private val context: Context) : AnkoLogger {
     private fun readRaw(name: String, resId: Int): String {
         val cached = templateCache[name]
         if (cached != null) {
-            info("Using cached template: $name")
+            Log.i(TAG, "Using cached template: $name")
 
             return cached
         }
