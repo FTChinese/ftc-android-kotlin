@@ -5,7 +5,7 @@ import com.ft.ftchinese.model.stripesubs.StripePrice
 object StripePriceStore {
     private var prices = listOf<StripePrice>()
 
-    fun add(p: List<StripePrice>) {
+    fun set(p: List<StripePrice>) {
         prices = p
     }
 
