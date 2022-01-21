@@ -32,7 +32,7 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
-import com.ft.ftchinese.repository.TabPages
+import com.ft.ftchinese.ui.base.TabPages
 import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.*
