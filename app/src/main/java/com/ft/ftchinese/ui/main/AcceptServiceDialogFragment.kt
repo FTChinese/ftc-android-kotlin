@@ -18,13 +18,12 @@ import com.ft.ftchinese.model.legal.legalPages
 import com.ft.ftchinese.ui.webpage.WVViewModel
 import com.ft.ftchinese.ui.webpage.WebpageFragment
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.jetbrains.anko.AnkoLogger
 
 /**
  * https://developer.android.com/guide/topics/ui/dialogs#FullscreenDialog
  */
 @ExperimentalCoroutinesApi
-class AcceptServiceDialogFragment : DialogFragment(), AnkoLogger {
+class AcceptServiceDialogFragment : DialogFragment() {
 
     private lateinit var acceptance: ServiceAcceptance
     private lateinit var binding: FragmentAcceptServiceDialogBinding
