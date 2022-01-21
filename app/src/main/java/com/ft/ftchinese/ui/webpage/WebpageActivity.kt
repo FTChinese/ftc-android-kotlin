@@ -19,7 +19,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 @ExperimentalCoroutinesApi
 class WebpageActivity : ScopedAppActivity() {
 
-    private lateinit var wvViewView: WVViewModel
+    private lateinit var wvViewModel: WVViewModel
     private lateinit var binding: ActivityWebpageBinding
     private var pageMeta: WebpageMeta? = null
 
@@ -39,12 +39,11 @@ class WebpageActivity : ScopedAppActivity() {
             replace(R.id.web_view_holder, WebpageFragment.newInstance())
         }
 
-        wvViewView = ViewModelProvider(this)
-            .get(WVViewModel::class.java)
+        wvViewModel = ViewModelProvider(this)[WVViewModel::class.java]
 
         pageMeta?.let {
             supportActionBar?.title = it.title
-            wvViewView.urlLiveData.value = it.url
+            wvViewModel.urlLiveData.value = it.url
         }
     }
 

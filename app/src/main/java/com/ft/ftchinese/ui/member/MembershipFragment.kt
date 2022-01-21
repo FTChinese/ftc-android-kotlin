@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.member
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,13 +11,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentMembershipBinding
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 /**
  * UI to show current membership's status.
  */
-class MembershipFragment : Fragment(), AnkoLogger {
+class MembershipFragment : Fragment() {
 
     private lateinit var binding: FragmentMembershipBinding
     private lateinit var viewModel: SubsStatusViewModel
@@ -61,7 +60,7 @@ class MembershipFragment : Fragment(), AnkoLogger {
     private fun setupViewModel() {
         viewModel.statusChanged.observe(viewLifecycleOwner) {
 
-            info(it)
+            Log.i(TAG, "$it")
             binding.status = it
 
             // Set data to recycler view.
@@ -70,6 +69,7 @@ class MembershipFragment : Fragment(), AnkoLogger {
     }
 
     companion object {
+        private const val TAG = "MembershipFragment"
         /**
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.

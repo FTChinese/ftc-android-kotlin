@@ -24,7 +24,6 @@ import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.lists.TwoLineItemViewHolder
 import com.ft.ftchinese.ui.wxlink.LinkWxDialogFragment
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
 /**
@@ -35,7 +34,7 @@ import org.jetbrains.anko.support.v4.toast
  * In such case the mobile row should not allow user to open the UpdateActivity to change phone.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class FtcAccountFragment : ScopedFragment(), AnkoLogger {
+class FtcAccountFragment : ScopedFragment() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel

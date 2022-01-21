@@ -13,10 +13,9 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
-import org.jetbrains.anko.AnkoLogger
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class WxInfoActivity : ScopedAppActivity(), AnkoLogger {
+class WxInfoActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: ActivityAccountBinding

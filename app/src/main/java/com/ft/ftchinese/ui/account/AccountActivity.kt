@@ -23,7 +23,6 @@ import com.ft.ftchinese.ui.dialog.DialogArgs
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import org.jetbrains.anko.AnkoLogger
 
 /**
  * Show user's account details.
@@ -33,8 +32,7 @@ import org.jetbrains.anko.AnkoLogger
  * If user logged in with wechat account and it is bound to an FTC account, show FtcAccountFragment.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class AccountActivity : ScopedAppActivity(),
-        AnkoLogger {
+class AccountActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel

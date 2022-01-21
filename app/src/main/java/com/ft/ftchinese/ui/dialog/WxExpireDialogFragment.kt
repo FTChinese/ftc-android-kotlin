@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.dialog
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.DialogFragment
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
@@ -13,10 +14,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-class WxExpireDialogFragment : DialogFragment(), AnkoLogger {
+class WxExpireDialogFragment : DialogFragment() {
 
     private lateinit var wxApi: IWXAPI
     private lateinit var sessionManager: SessionManager
@@ -50,7 +49,7 @@ class WxExpireDialogFragment : DialogFragment(), AnkoLogger {
                         dialog.dismiss()
                     }
                     .setNegativeButton(R.string.action_cancel){ dialog, id ->
-                        info("Cancel button pressed")
+                        Log.i(TAG, "Cancel button pressed")
                     }
                     .create()
 
@@ -59,12 +58,16 @@ class WxExpireDialogFragment : DialogFragment(), AnkoLogger {
 
     private fun authorize() {
         val nonce = WxOAuth.generateStateCode(WxOAuthIntent.LOGIN)
-        info("Wechat oauth state: $nonce")
+        Log.i(TAG, "Wechat oauth state: $nonce")
 
         val req = SendAuth.Req()
         req.scope = WxOAuth.SCOPE
         req.state = nonce
 
         wxApi.sendReq(req)
+    }
+
+    companion object {
+        private const val TAG = "WxExpireDialogFragment"
     }
 }

@@ -22,10 +22,9 @@ import com.ft.ftchinese.ui.mobile.MobileFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.account.name.NameViewModel
 import com.ft.ftchinese.ui.account.name.UpdateNameFragment
-import org.jetbrains.anko.AnkoLogger
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class UpdateActivity : ScopedAppActivity(), AnkoLogger {
+class UpdateActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
 

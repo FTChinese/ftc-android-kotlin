@@ -15,9 +15,8 @@ import com.ft.ftchinese.ui.validator.Validator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
 
-class PasswordResetViewModel : BaseViewModel(), AnkoLogger {
+class PasswordResetViewModel : BaseViewModel() {
     val passwordLiveData = MutableLiveData("")
     val passwordValidator = LiveDataValidator(passwordLiveData).apply {
         addRule("密码不能为空", Validator::notEmpty)

@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.checkout
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
@@ -14,10 +15,8 @@ import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.BaseViewModel
 import kotlinx.coroutines.*
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-class BuyerInfoViewModel : BaseViewModel(), AnkoLogger {
+class BuyerInfoViewModel : BaseViewModel() {
 
     val htmlRendered = MutableLiveData<FetchResult<String>>()
 
@@ -31,12 +30,12 @@ class BuyerInfoViewModel : BaseViewModel(), AnkoLogger {
 
         val uri = Config.buildSubsConfirmUrl(account, action)
         if (uri == null) {
-            info("Address url is empty")
+            Log.i(TAG, "Address url is empty")
             htmlRendered.value = FetchResult.LocalizedError(R.string.loading_failed)
             return
         }
 
-        info("Fetching address page from ${uri.toString()}")
+        Log.i(TAG, "Fetching address page from ${uri.toString()}")
 
         progressLiveData.value = true
         viewModelScope.launch {
@@ -45,10 +44,11 @@ class BuyerInfoViewModel : BaseViewModel(), AnkoLogger {
                 val webContentAsync = async(Dispatchers.IO) {
                     Fetch()
                         .get(uri.toString())
-                        .endPlainText()
+                        .endText()
+                        .body
                 }
                 val addressAsync = async(Dispatchers.IO) {
-                    info("Fetching address...")
+                    Log.i(TAG, "Fetching address...")
                     if (account.isFtcOnly) {
                         AccountRepo.loadAddress(account.id)
                     } else {
@@ -74,7 +74,7 @@ class BuyerInfoViewModel : BaseViewModel(), AnkoLogger {
 
                 htmlRendered.value = FetchResult.Success(html)
             } catch (e: Exception) {
-                info(e)
+                e.message?.let { Log.i(TAG, it) }
                 progressLiveData.value = false
                 htmlRendered.value = FetchResult.fromException(e)
             }
@@ -93,5 +93,9 @@ class BuyerInfoViewModel : BaseViewModel(), AnkoLogger {
                 .withChannel(content)
                 .render()
         }
+    }
+
+    companion object {
+        private const val TAG = "BuyerInfoViewModel"
     }
 }

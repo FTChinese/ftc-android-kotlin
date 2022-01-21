@@ -2,9 +2,8 @@ package com.ft.ftchinese.ui.validator
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import org.jetbrains.anko.AnkoLogger
 
-class LiveDataValidator(private val liveData: LiveData<String>) : AnkoLogger {
+class LiveDataValidator(private val liveData: LiveData<String>) {
     private val validationRules = mutableListOf<Predicate>()
     private val errorMessages = mutableListOf<String>()
 

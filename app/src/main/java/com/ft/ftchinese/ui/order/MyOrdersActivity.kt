@@ -13,11 +13,10 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class MyOrdersActivity : ScopedAppActivity(), AnkoLogger {
+class MyOrdersActivity : ScopedAppActivity() {
 
     private lateinit var viewAdapter: OrderAdapter
     private lateinit var sessionManager: SessionManager

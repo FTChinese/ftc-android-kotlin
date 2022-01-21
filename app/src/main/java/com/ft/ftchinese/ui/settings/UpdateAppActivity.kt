@@ -27,10 +27,8 @@ import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.viewmodel.SettingsViewModel
 import com.ft.ftchinese.viewmodel.SettingsViewModelFactory
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
-import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 import java.io.File
 
@@ -39,7 +37,7 @@ private const val PREF_DOWNLOAD_ID = "download_id"
 private const val EXTRA_CACHE_FILENAME = "extra_cache_filename"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
+class UpdateAppActivity : ScopedAppActivity() {
 
     private lateinit var settingsViewModel: SettingsViewModel
 
@@ -201,7 +199,6 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
                 result.exception.message?.let { toast(it) }
             }
             is FetchResult.Success -> {
-                info("Latest release ${result.data}")
                 release = result.data
 
                 if (!result.data.isNew) {
@@ -271,8 +268,6 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
         val parsedUri = Uri.parse(release.apkUrl)
         val fileName = parsedUri.lastPathSegment
 
-        info("File name $fileName")
-
         if (fileName == null) {
             toast(R.string.download_not_found)
             return
@@ -323,11 +318,7 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
             return
         }
 
-        info("Raw file path $localUri")
-
-
         val filePath = localUri.path
-        info("File path: $filePath")
 
         if (filePath == null) {
             toast("Download file uri cannot be parsed")
@@ -335,8 +326,6 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         val downloadedFile = File(filePath)
-
-        info("Downloaded file: $downloadedFile")
 
         try {
             install(downloadedFile)
@@ -368,8 +357,6 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
         return try {
             val localUri = c.getString(c.getColumnIndexOrThrow(DownloadManager.COLUMN_LOCAL_URI)) ?: return null
 
-            info("Downloaded file $localUri")
-
             Uri.parse(localUri)
         } catch (e: Exception) {
             null
@@ -380,8 +367,6 @@ class UpdateAppActivity : ScopedAppActivity(), AnkoLogger {
 
     private fun install(file: File) {
         val contentUri = getContentUri(file)
-
-        info("file $contentUri")
 
         // Do not use ACTION_VIEW you found on most
         // stack overflow answers. It's too old.

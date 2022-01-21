@@ -15,10 +15,8 @@ import com.ft.ftchinese.ui.validator.Validator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-class AddressViewModel : BaseViewModel(), AnkoLogger {
+class AddressViewModel : BaseViewModel() {
 
     private var current = Address()
     private val updated: Address
@@ -90,7 +88,6 @@ class AddressViewModel : BaseViewModel(), AnkoLogger {
     }
 
     private fun enableForm(): Boolean {
-        info("should enable form")
         if (progressLiveData.value == true) {
             return false
         }
@@ -152,10 +149,8 @@ class AddressViewModel : BaseViewModel(), AnkoLogger {
     }
 
     fun updateAddress(account: Account) {
-        info("Start updating address $updated")
 
         if (!hasChanged()) {
-            info("Address not changed.")
             addressUpdated.value = FetchResult.Success(true)
             return
         }

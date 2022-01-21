@@ -10,8 +10,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentPromoBoxBinding
 import com.ft.ftchinese.ui.product.ProductViewModel
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 
 /**
@@ -19,7 +17,7 @@ import org.jetbrains.anko.info
  * Use the [PromoBoxFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class PromoBoxFragment : Fragment(), AnkoLogger {
+class PromoBoxFragment : Fragment() {
 
     private lateinit var productViewModel: ProductViewModel
     private lateinit var binding: FragmentPromoBoxBinding
@@ -42,7 +40,6 @@ class PromoBoxFragment : Fragment(), AnkoLogger {
         } ?: throw Exception("Invalid Activity")
 
         productViewModel.promoReceived.observe(viewLifecycleOwner, {
-            info(it)
             binding.promo = it
         })
     }

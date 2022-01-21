@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.data
 
+import android.util.Log
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.FetchResult
@@ -7,10 +8,9 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.AccountRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-object ApiRequest : AnkoLogger {
+object ApiRequest {
+    private const val TAG = "ApiRequest"
     // Refresh a user's account data, regardless of logged in
     // via email or wecaht.
     suspend fun asyncRefreshAccount(account: Account): FetchResult<Account> {
@@ -23,7 +23,7 @@ object ApiRequest : AnkoLogger {
             return FetchResult.Success(updatedAccount)
         } catch (e: APIError) {
 
-            info("Refresh account api error $e")
+            Log.i(TAG, "Refresh account api error $e")
 
             return if (e.statusCode == 404) {
                 FetchResult.LocalizedError(R.string.account_not_found)
@@ -31,7 +31,7 @@ object ApiRequest : AnkoLogger {
                 FetchResult.fromServerError(e)
             }
         } catch (e: Exception) {
-            info("Refresh account exception $e")
+            Log.i(TAG, "Refresh account exception $e")
             return FetchResult.fromException(e)
         }
     }

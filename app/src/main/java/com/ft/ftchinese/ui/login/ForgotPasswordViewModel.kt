@@ -18,9 +18,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
 
-class ForgotPasswordViewModel : BaseViewModel(), AnkoLogger {
+class ForgotPasswordViewModel : BaseViewModel() {
     val emailLiveData = MutableLiveData("")
     val emailValidator = LiveDataValidator(emailLiveData).apply {
         addRule("请输入正确的邮箱", Validator::isEmail)

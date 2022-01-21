@@ -20,10 +20,8 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.iid.FirebaseInstanceId
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-class FCMActivity : AppCompatActivity(), AnkoLogger {
+class FCMActivity : AppCompatActivity() {
 
     private var errorDialog: Dialog? = null
     private var listAdapter: ListAdapter? = null
@@ -128,7 +126,6 @@ class FCMActivity : AppCompatActivity(), AnkoLogger {
                 .instanceId
                 .addOnCompleteListener(OnCompleteListener {
                     if (!it.isSuccessful) {
-                        info("getInstanceId failed", it.exception)
 
                         listAdapter?.add(buildTokenText(false))
 
@@ -137,8 +134,6 @@ class FCMActivity : AppCompatActivity(), AnkoLogger {
                     }
 
                     val token = it.result?.token
-
-                    info("Token $token")
 
                     listAdapter?.add(buildTokenText(true))
                     binding.inProgress = false

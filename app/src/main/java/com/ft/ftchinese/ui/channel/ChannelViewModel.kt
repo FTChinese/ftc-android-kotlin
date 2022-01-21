@@ -131,7 +131,8 @@ class ChannelViewModel(val cache: FileCache) :
             val content = withContext(Dispatchers.IO) {
                 Fetch()
                     .get(url.toString())
-                    .endPlainText()
+                    .endText()
+                    .body
             } ?: return
 
             render(content, account)
@@ -164,7 +165,8 @@ class ChannelViewModel(val cache: FileCache) :
             val content = withContext(Dispatchers.IO) {
                 Fetch()
                     .get(url.toString())
-                    .endPlainText()
+                    .endText()
+                    .body
             }
 
             if (content.isNullOrBlank()) {

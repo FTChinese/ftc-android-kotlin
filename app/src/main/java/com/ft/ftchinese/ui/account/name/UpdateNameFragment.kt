@@ -14,11 +14,10 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.ft.ftchinese.model.fetch.FetchResult
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class UpdateNameFragment : ScopedFragment(), AnkoLogger {
+class UpdateNameFragment : ScopedFragment() {
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: FragmentUpdateUsernameBinding
     private lateinit var viewModel: NameViewModel

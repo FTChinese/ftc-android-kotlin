@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.login
 
+import android.util.Log
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,10 +18,8 @@ import com.ft.ftchinese.ui.validator.Validator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-class SignUpViewModel : ViewModel(), AnkoLogger {
+class SignUpViewModel : ViewModel() {
     val progressLiveData = MutableLiveData<Boolean>()
     val isNetworkAvailable = MutableLiveData<Boolean>()
 
@@ -161,13 +160,17 @@ class SignUpViewModel : ViewModel(), AnkoLogger {
 
                 accountResult.value = FetchResult.Success(account)
             } catch (e: APIError) {
-                info(e)
+                Log.i(TAG, e.message)
                 progressLiveData.value = false
                 handleSignUpError(e)
             } catch (e: Exception) {
-                info(e)
+                e.message?.let { Log.i(TAG, it) }
                 accountResult.value = FetchResult.fromException(e)
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "SignUpViewModel"
     }
 }

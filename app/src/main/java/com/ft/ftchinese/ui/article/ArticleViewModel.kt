@@ -226,9 +226,9 @@ class ArticleViewModel(
 
         try {
 
-            val jsonResult = withContext(Dispatchers.IO) {
+            val storyResp = withContext(Dispatchers.IO) {
                 ArticleClient.fetchStory(teaser, Config.discoverServer(AccountCache.get()))
-            } ?: return FetchResult.LocalizedError(R.string.api_server_error)
+            }
 
             // After JSON is fetched, it should handle:
             // * Check any errors
@@ -238,13 +238,18 @@ class ArticleViewModel(
             // * Check bookmark icon
             // * Reading history
 
-            jsonResult.value.teaser = teaser
             // Cache the downloaded data.
-            viewModelScope.launch(Dispatchers.IO) {
-                cache.saveText(teaser.cacheNameJson(), jsonResult.raw)
+            if (storyResp.raw.isNotEmpty()) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    cache.saveText(teaser.cacheNameJson(), storyResp.raw)
+                }
             }
 
-            return FetchResult.Success(jsonResult.value)
+            return if (storyResp.body == null) {
+                FetchResult.LocalizedError(R.string.api_server_error)
+            } else {
+                FetchResult.Success(storyResp.body)
+            }
         } catch (e: Exception) {
             e.message?.let { msg -> Log.i(TAG, msg)}
             return FetchResult.fromException(e)

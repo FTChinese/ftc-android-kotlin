@@ -23,7 +23,6 @@ import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import io.noties.markwon.Markwon
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
 
@@ -35,8 +34,7 @@ import org.jetbrains.anko.support.v4.toast
  * LinkFtcActivity -> SignUpFragment
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class SignUpFragment() : ScopedBottomSheetDialogFragment(),
-        AnkoLogger {
+class SignUpFragment : ScopedBottomSheetDialogFragment() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var tokenManager: TokenManager

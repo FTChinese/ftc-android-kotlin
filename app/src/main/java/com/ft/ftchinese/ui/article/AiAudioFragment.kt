@@ -18,10 +18,9 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.jetbrains.anko.AnkoLogger
 
 @ExperimentalCoroutinesApi
-class AiAudioFragment : BottomSheetDialogFragment(), AnkoLogger {
+class AiAudioFragment : BottomSheetDialogFragment() {
 
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var binding: FragmentAiAudioBinding
@@ -121,6 +120,8 @@ class AiAudioFragment : BottomSheetDialogFragment(), AnkoLogger {
     }
 
     companion object {
+        private const val TAG = "AiAudioFragment"
+
         /**
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.

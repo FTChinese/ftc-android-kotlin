@@ -1,5 +1,6 @@
 package com.ft.ftchinese.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,12 +18,10 @@ import com.ft.ftchinese.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 class SettingsViewModel(
     private val cache: FileCache
-) : ViewModel(), AnkoLogger {
+) : ViewModel() {
 
     val isNetworkAvailable = MutableLiveData<Boolean>()
 
@@ -75,7 +74,7 @@ class SettingsViewModel(
                 readDao.vacuumDb(SimpleSQLiteQuery("VACUUM"))
             }
 
-            info("Truncated $result")
+            Log.i(TAG, "Truncated $result")
 
             articlesClearedResult.value = true
             articlesReadResult.value = 0
@@ -120,7 +119,7 @@ class SettingsViewModel(
 
         viewModelScope.launch {
             try {
-                val respData = withContext(Dispatchers.IO) {
+                val resp = withContext(Dispatchers.IO) {
                     if (current) {
                         ReleaseRepo.getRelease(BuildConfig.VERSION_NAME)
                     } else {
@@ -128,24 +127,19 @@ class SettingsViewModel(
                     }
                 }
 
-                if (respData == null) {
+                if (resp.body == null) {
                     releaseResult.value = FetchResult.LocalizedError(R.string.release_not_found)
 
                     return@launch
                 }
 
-                val (release, raw) = respData
-                if (release == null) {
-                    releaseResult.value = FetchResult.LocalizedError(R.string.release_not_found)
-                    return@launch
+                releaseResult.value = FetchResult.Success(resp.body)
+
+                if (resp.raw.isEmpty()) {
+                    withContext(Dispatchers.IO) {
+                        cache.saveText(resp.body.cacheFileName(), resp.raw)
+                    }
                 }
-
-                releaseResult.value = FetchResult.Success(release)
-
-                withContext(Dispatchers.IO) {
-                    cache.saveText(release.cacheFileName(), raw)
-                }
-
             } catch (e: APIError) {
                 releaseResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.release_not_found)
@@ -157,5 +151,9 @@ class SettingsViewModel(
                 releaseResult.value = FetchResult.fromException(e)
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "SettingsViewModel"
     }
 }

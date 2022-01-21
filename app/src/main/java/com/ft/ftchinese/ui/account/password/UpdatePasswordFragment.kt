@@ -13,11 +13,10 @@ import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.login.ForgotPasswordActivity
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class UpdatePasswordFragment : ScopedFragment(), AnkoLogger {
+class UpdatePasswordFragment : ScopedFragment() {
 
     private lateinit var binding: FragmentUpdatePasswordBinding
     private lateinit var viewModel: PasswordViewModel

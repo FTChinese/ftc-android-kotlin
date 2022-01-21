@@ -9,11 +9,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentEmailExistsBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
-import org.jetbrains.anko.AnkoLogger
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class EmailExistsFragment : ScopedFragment(),
-        AnkoLogger {
+class EmailExistsFragment : ScopedFragment() {
 
     private lateinit var emailViewModel: EmailViewModel
     private lateinit var binding: FragmentEmailExistsBinding

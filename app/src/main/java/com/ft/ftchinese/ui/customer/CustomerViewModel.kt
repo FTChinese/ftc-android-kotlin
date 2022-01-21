@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.customer
 
+import android.util.Log
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -18,19 +19,28 @@ import com.stripe.android.model.PaymentMethod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 class CustomerViewModel(
     private val fileCache: FileCache
-) : BaseViewModel(), AnkoLogger {
+) : BaseViewModel() {
 
+    // Determines whether payment method control should be enabled.
     val customerLoaded: MutableLiveData<StripeCustomer> by lazy {
         MutableLiveData<StripeCustomer>()
     }
 
     val errorLiveData: MutableLiveData<FetchError> by lazy {
         MutableLiveData<FetchError>()
+    }
+
+    // When a customer is created.
+    val customerCreated: MutableLiveData<FetchResult<StripeCustomer>> by lazy {
+        MutableLiveData<FetchResult<StripeCustomer>>()
+    }
+
+    // When the default payment method is set.
+    val paymentMethodUpdated: MutableLiveData<FetchResult<StripeCustomer>> by lazy {
+        MutableLiveData<FetchResult<StripeCustomer>>()
     }
 
     // Use when letting user to choose default payment method.
@@ -113,16 +123,6 @@ class CustomerViewModel(
         return customerLoaded.value?.defaultPaymentMethod == paymentMethodSelected.value?.id
     }
 
-    // When a customer is created.
-    val customerCreated: MutableLiveData<FetchResult<StripeCustomer>> by lazy {
-        MutableLiveData<FetchResult<StripeCustomer>>()
-    }
-
-    // When the default payment method is set.
-    val paymentMethodUpdated: MutableLiveData<FetchResult<StripeCustomer>> by lazy {
-        MutableLiveData<FetchResult<StripeCustomer>>()
-    }
-
     // Load stripe customer.
     fun loadCustomer(account: Account) {
         if (isNetworkAvailable.value == false) {
@@ -160,21 +160,19 @@ class CustomerViewModel(
             }
 
             try {
-                val result = withContext(Dispatchers.IO) {
+                val resp = withContext(Dispatchers.IO) {
                     StripeClient.retrieveCustomer(account)
                 }
 
                 progressLiveData.value = false
-                if (result == null) {
+                if (resp.body == null) {
                     errorLiveData.value = FetchError.ResourceId(R.string.stripe_customer_not_found)
                     return@launch
                 }
 
-                customerLoaded.value = result.value
+                customerLoaded.value = resp.body
 
-                withContext(Dispatchers.IO) {
-                    fileCache.saveText(CacheFileNames.stripeCustomer, result.raw)
-                }
+                cacheStripeCustomer(resp.raw)
             } catch (e: Exception) {
                 progressLiveData.value = false
                 errorLiveData.value = FetchError.fromException(e)
@@ -192,19 +190,19 @@ class CustomerViewModel(
         progressLiveData.value = true
         viewModelScope.launch {
             try {
-                val result = withContext(Dispatchers.IO) {
+                val resp = withContext(Dispatchers.IO) {
                     StripeClient.createCustomer(account)
                 }
 
                 progressLiveData.value = false
 
-                if (result == null) {
+                if (resp.body == null) {
                     customerCreated.value = FetchResult.LocalizedError(R.string.stripe_customer_not_created)
                     return@launch
                 }
 
-                customerCreated.value = FetchResult.Success(result.value)
-                cacheStripeCustomer(result.raw)
+                customerCreated.value = FetchResult.Success(resp.body)
+                cacheStripeCustomer(resp.raw)
             } catch (e: APIError) {
 
                 progressLiveData.value = false
@@ -236,19 +234,20 @@ class CustomerViewModel(
         progressLiveData.value = true
         viewModelScope.launch {
             try {
-                val result = withContext(Dispatchers.IO) {
+                val resp = withContext(Dispatchers.IO) {
                     StripeClient.setDefaultPaymentMethod(account, pmId)
                 }
 
                 progressLiveData.value = false
 
-                if (result == null) {
+                if (resp.body == null) {
                     paymentMethodUpdated.value = FetchResult.LocalizedError(R.string.stripe_customer_not_found)
                     return@launch
                 }
 
-                paymentMethodUpdated.value = FetchResult.Success(result.value)
-                cacheStripeCustomer(result.raw)
+                paymentMethodUpdated.value = FetchResult.Success(resp.body)
+                customerLoaded.value = resp.body
+                cacheStripeCustomer(resp.raw)
             } catch (e: APIError) {
 
                 progressLiveData.value = false
@@ -258,7 +257,7 @@ class CustomerViewModel(
                     FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
-                info(e)
+                Log.i(TAG, "$e")
                 progressLiveData.value = false
                 paymentMethodUpdated.value = FetchResult.fromException(e)
             }
@@ -266,8 +265,16 @@ class CustomerViewModel(
     }
 
     private suspend fun cacheStripeCustomer(rawJson: String) {
+        if (rawJson.isEmpty()) {
+            return
+        }
+
         withContext(Dispatchers.IO) {
             fileCache.saveText(CacheFileNames.stripeCustomer, rawJson)
         }
+    }
+
+    companion object {
+        private const val TAG = "CustomerViewModel"
     }
 }

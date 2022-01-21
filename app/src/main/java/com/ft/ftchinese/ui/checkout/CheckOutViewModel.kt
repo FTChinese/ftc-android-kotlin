@@ -20,12 +20,10 @@ import com.ft.ftchinese.viewmodel.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 private const val TAG = "CheckOutViewModel"
 
-class CheckOutViewModel : BaseViewModel(), AnkoLogger {
+class CheckOutViewModel : BaseViewModel() {
 
     val messageLiveData: MutableLiveData<Int> by lazy {
         MutableLiveData<Int>()
@@ -281,7 +279,7 @@ class CheckOutViewModel : BaseViewModel(), AnkoLogger {
                 aliPayIntentResult.value = FetchResult.Success(aliOrder)
             } catch (e: APIError) {
                 progressLiveData.value = false
-                info(e)
+                Log.i(TAG, "$e")
                 val msgId = if (e.statusCode == 403) {
                     R.string.duplicate_purchase
                 } else {
@@ -295,7 +293,7 @@ class CheckOutViewModel : BaseViewModel(), AnkoLogger {
                 }
             } catch (e: Exception) {
                 progressLiveData.value = false
-                info(e)
+                Log.i(TAG, "$e")
                 aliPayIntentResult.value = FetchResult.fromException(e)
             }
         }

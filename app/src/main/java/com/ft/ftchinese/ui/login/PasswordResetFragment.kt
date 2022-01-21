@@ -14,14 +14,13 @@ import com.ft.ftchinese.model.reader.PwResetBearer
 import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.model.fetch.FetchResult
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class PasswordResetFragment(
     private val tokenBearer: PwResetBearer,
-) : ScopedBottomSheetDialogFragment(), AnkoLogger {
+) : ScopedBottomSheetDialogFragment() {
 
     private lateinit var viewModel: PasswordResetViewModel
     private lateinit var binding: FragmentPasswordResetBinding

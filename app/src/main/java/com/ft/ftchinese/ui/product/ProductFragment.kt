@@ -26,12 +26,10 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class ProductFragment : ScopedFragment(),
-        AnkoLogger {
+class ProductFragment : ScopedFragment() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: ProductViewModel

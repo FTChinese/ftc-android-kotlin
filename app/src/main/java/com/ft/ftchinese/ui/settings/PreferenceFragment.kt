@@ -15,13 +15,11 @@ import com.ft.ftchinese.viewmodel.SettingsViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class PreferenceFragment : PreferenceFragmentCompat(),
-        CoroutineScope by MainScope(),
-        AnkoLogger {
+        CoroutineScope by MainScope() {
 
     private var prefClearCache: Preference? = null
     private var prefClearHistory: Preference? = null

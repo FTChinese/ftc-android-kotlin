@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.channel
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,19 +17,16 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.lists.CardItemViewHolder
 import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.viewmodel.StarArticleViewModel
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class StarredArticleFragment : ScopedFragment(),
-        AnkoLogger {
+class StarredArticleFragment : ScopedFragment() {
 
     private lateinit var starViewModel: StarArticleViewModel
     private lateinit var viewAdapter: ListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        info("onCreate")
+        Log.i(TAG, "onCreate")
 
         starViewModel = ViewModelProvider(this).get(StarArticleViewModel::class.java)
 
@@ -101,6 +99,8 @@ class StarredArticleFragment : ScopedFragment(),
     }
 
     companion object {
+        private const val TAG = "StarredArticleFragment"
+
         @JvmStatic
         fun newInstance() = StarredArticleFragment()
     }

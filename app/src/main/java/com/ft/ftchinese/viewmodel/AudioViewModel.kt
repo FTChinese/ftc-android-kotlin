@@ -1,5 +1,6 @@
 package com.ft.ftchinese.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,10 +18,9 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 
-class AudioViewModel(private val cache: FileCache) : ViewModel(), AnkoLogger {
+class AudioViewModel(private val cache: FileCache) : ViewModel() {
 
     val isNetworkAvailable = MutableLiveData<Boolean>()
 
@@ -49,12 +49,12 @@ class AudioViewModel(private val cache: FileCache) : ViewModel(), AnkoLogger {
                     }
                 } catch (e: Exception) {
                     // If error, fall to server data.
-                    info("Error loading cached story: $e")
+                    Log.i(TAG, "Error loading cached story: $e")
                 }
             }
 
             if (isNetworkAvailable.value != true) {
-                info("Network not available")
+                Log.i(TAG, "Network not available")
                 storyResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
                 return@launch
             }
@@ -79,13 +79,13 @@ class AudioViewModel(private val cache: FileCache) : ViewModel(), AnkoLogger {
                 }
 
             } catch (e: APIError) {
-                info(e)
+                Log.i(TAG,  e.message)
                 storyResult.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.loading_failed)
                     else -> FetchResult.fromServerError(e)
                 }
             } catch (e: Exception) {
-                info(e)
+                e.message?.let { Log.i(TAG, it) }
                 // Notify error to any of storyResult or interactiveResult works since they are both observing
                 // in the same activity.
                 // Do not notify all of them which whill
@@ -122,5 +122,9 @@ class AudioViewModel(private val cache: FileCache) : ViewModel(), AnkoLogger {
 
             else -> return false
         }
+    }
+
+    companion object {
+        private const val TAG = "AudioViewModel"
     }
 }

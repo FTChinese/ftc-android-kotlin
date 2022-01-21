@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.checkout
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
@@ -40,8 +41,7 @@ import org.threeten.bp.format.DateTimeFormatter
  * See https://stripe.com/docs/mobile/android/basic
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class StripeSubActivity : ScopedAppActivity(),
-        AnkoLogger {
+class StripeSubActivity : ScopedAppActivity() {
 
     private lateinit var binding: ActivityStripeSubBinding
     private lateinit var sessionManager: SessionManager
@@ -146,13 +146,13 @@ class StripeSubActivity : ScopedAppActivity(),
                     result.exception.message?.let { toast(it) }
                 }
                 is FetchResult.Success -> {
-                    StripePriceStore.add(result.data)
+                    StripePriceStore.set(result.data)
                     initUI()
                 }
             }
         }
 
-        info("Initialize customer session...")
+        Log.i(TAG, "Initialize customer session...")
         // Generate idempotency key.
         idempotency = Idempotency.getInstance(this)
 
@@ -204,7 +204,7 @@ class StripeSubActivity : ScopedAppActivity(),
     // and uses that key to manage retrieving and updating the Customer’s payment methods on your behalf.
     // https://stripe.com/docs/mobile/android/basic#set-up-customer-session
     private fun setupCustomerSession() {
-        info("Setup customer session")
+        Log.i(TAG, "Setup customer session")
         if (!isConnected) {
             toast(R.string.prompt_no_network)
             return
@@ -215,9 +215,9 @@ class StripeSubActivity : ScopedAppActivity(),
         // Try to initialize customer session.
         try {
             CustomerSession.getInstance()
-            info("CustomerSession already instantiated")
+            Log.i(TAG, "CustomerSession already instantiated")
         } catch (e: Exception) {
-            info(e)
+            e.message?.let { Log.i(TAG, it) }
             // Pass ftc user id to subscription api,
             // which retrieves stripe's customer id and use
             // the id to change for a ephemeral key.
@@ -236,13 +236,13 @@ class StripeSubActivity : ScopedAppActivity(),
 
     private val customerRetrievalListener = object : CustomerSession.CustomerRetrievalListener {
         override fun onCustomerRetrieved(customer: Customer) {
-            info("Customer retrieved.")
+            Log.i(TAG, "Customer retrieved.")
             subsViewModel.customerLiveData.value = customer
         }
 
         override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
-            info("customer retrieval error: $errorMessage")
-            info(stripeError)
+            Log.i(TAG, "customer retrieval error: $errorMessage")
+            Log.i(TAG, "$stripeError")
 
             runOnUiThread {
                 toast(errorMessage)
@@ -263,7 +263,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
         // If use changed payment method.
         override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
-            info(data)
+            Log.i(TAG, "$data")
 
             val pm = data.paymentMethod ?: return
 
@@ -295,7 +295,7 @@ class StripeSubActivity : ScopedAppActivity(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        info("requestCode: $requestCode, resultCode: $resultCode")
+        Log.i(TAG, "requestCode: $requestCode, resultCode: $resultCode")
 
         if (data != null) {
             paymentSession.handlePaymentData(requestCode, resultCode, data)
@@ -325,7 +325,7 @@ class StripeSubActivity : ScopedAppActivity(),
 
         setInProgress(false)
 
-        info("Subscription response: $result")
+        Log.i(TAG, "Subscription response: $result")
 
         when (result) {
             is FetchResult.LocalizedError -> {
@@ -353,7 +353,7 @@ class StripeSubActivity : ScopedAppActivity(),
                 return
             }
             is FetchResult.Success -> {
-                info("Subscription result: ${result.data}")
+                Log.i(TAG, "Subscription result: ${result.data}")
 
                 // If no further action required.
                 if (result.data.subs.paymentIntent?.requiresAction == false) {
@@ -524,7 +524,8 @@ class StripeSubActivity : ScopedAppActivity(),
     }
 
     companion object {
-        private const val EXTRA_CHECKOUT_PRICE = "extra_checkout_price"
+        private const val TAG = "StripeSubActivity"
+
         private const val EXTRA_CHECKOUT_ITEM = "extra_checkout_item"
 
         @JvmStatic

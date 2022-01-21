@@ -14,10 +14,8 @@ import com.ft.ftchinese.model.request.WxLinkParams
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-class LinkViewModel : BaseViewModel(), AnkoLogger {
+class LinkViewModel : BaseViewModel() {
 
     // The linked account calculcated on user device.
     val linkableLiveData = MutableLiveData<Account>()
@@ -33,7 +31,6 @@ class LinkViewModel : BaseViewModel(), AnkoLogger {
 
     private fun enableSubmit(): Boolean {
         if (progressLiveData.value == true) {
-            info("")
             return false
         }
 

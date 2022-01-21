@@ -1,5 +1,6 @@
 package com.ft.ftchinese.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
@@ -17,10 +18,10 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-class AccountViewModel : BaseViewModel(), AnkoLogger {
+private const val TAG = "AccountViewModel"
+
+class AccountViewModel : BaseViewModel() {
 
     val uiSwitched: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
@@ -58,7 +59,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
             progressLiveData.value = true
         }
         viewModelScope.launch {
-            info("Start refreshing account")
+            Log.i(TAG, "Start refreshing account")
 
             accountRefreshed.value = ApiRequest
                 .asyncRefreshAccount(account)
@@ -116,7 +117,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                 }
 
             } catch (e: APIError) {
-                info(e)
+                Log.i(TAG, "$e")
                 stripeResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
                 } else {
@@ -124,7 +125,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                 }
 
             } catch (e: Exception) {
-                info(e)
+                Log.i(TAG, "$e")
                 stripeResult.value = FetchResult.fromException(e)
             }
         }
@@ -149,7 +150,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                 }
 
             } catch (e: APIError) {
-                info(e)
+                Log.i(TAG, "$e")
                 stripeResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
                 } else {
@@ -157,7 +158,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
                 }
 
             } catch (e: Exception) {
-                info(e)
+                Log.i(TAG, "$e")
                 stripeResult.value = FetchResult.fromException(e)
             }
         }
@@ -186,7 +187,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
 
             } catch (e: APIError) {
                 progressLiveData.value = false
-                info(e)
+                Log.i(TAG, "$e")
                 stripeResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
                 } else {
@@ -195,7 +196,7 @@ class AccountViewModel : BaseViewModel(), AnkoLogger {
 
             } catch (e: Exception) {
                 progressLiveData.value = false
-                info(e)
+                Log.i(TAG, "$e")
                 stripeResult.value = FetchResult.fromException(e)
             }
         }

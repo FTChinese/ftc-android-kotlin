@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -22,8 +23,6 @@ import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.util.RequestCode
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 private val tabs = listOf(
@@ -33,7 +32,7 @@ private val tabs = listOf(
 )
 
 @ExperimentalCoroutinesApi
-class AuthActivity : ScopedAppActivity(), AnkoLogger {
+class AuthActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
 
@@ -57,7 +56,7 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
 
         TabLayoutMediator(binding.authTabLayout, binding.authViewPager) { tab, position ->
             tab.text = tabs[position]
-            info("Tab title ${tab.text}, position $position")
+            Log.i(TAG, "Tab title ${tab.text}, position $position")
         }.attach()
 
         sessionManager = SessionManager.getInstance(this)
@@ -137,6 +136,8 @@ class AuthActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     companion object {
+        private const val TAG = "AuthActivity"
+
         @JvmStatic
         fun start(context: Context) {
             context.startActivity(Intent(context, AuthActivity::class.java))

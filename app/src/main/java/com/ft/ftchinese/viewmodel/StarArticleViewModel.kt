@@ -11,11 +11,10 @@ import com.ft.ftchinese.model.fetch.formatSQLDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
 import org.threeten.bp.LocalDateTime
 
 class StarArticleViewModel(application: Application) :
-        AndroidViewModel(application), AnkoLogger {
+        AndroidViewModel(application) {
 
     private var starredDao = ArticleDb.getInstance(application).starredDao()
 

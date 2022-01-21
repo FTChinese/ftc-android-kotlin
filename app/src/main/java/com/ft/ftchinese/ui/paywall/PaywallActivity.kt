@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -27,8 +28,6 @@ import com.ft.ftchinese.ui.product.ProductFragment
 import com.ft.ftchinese.ui.product.ProductViewModel
 import com.ft.ftchinese.util.RequestCode
 import io.noties.markwon.Markwon
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 /**
@@ -36,8 +35,7 @@ import org.jetbrains.anko.toast
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class PaywallActivity : ScopedAppActivity(),
-    SwipeRefreshLayout.OnRefreshListener,
-    AnkoLogger {
+    SwipeRefreshLayout.OnRefreshListener {
 
     private lateinit var cache: FileCache
     private lateinit var tracker: StatsTracker
@@ -141,7 +139,7 @@ class PaywallActivity : ScopedAppActivity(),
         binding.premiumFirst = premiumFirst
 
         if (premiumFirst) {
-            info("Should show premium card on top")
+            Log.i(TAG, "Should show premium card on top")
         }
 
         supportFragmentManager.commit {
@@ -211,7 +209,7 @@ class PaywallActivity : ScopedAppActivity(),
         // https://stackoverflow.com/questions/62671106/onactivityresult-method-is-deprecated-what-is-the-alternative
         super.onActivityResult(requestCode, resultCode, data)
 
-        info("onActivityResult requestCode: $requestCode, resultCode: $resultCode")
+        Log.i(TAG, "onActivityResult requestCode: $requestCode, resultCode: $resultCode")
 
         when (requestCode) {
             RequestCode.PAYMENT -> {
@@ -236,6 +234,8 @@ class PaywallActivity : ScopedAppActivity(),
 
     companion object {
         private const val EXTRA_PREMIUM_FIRST = "extra_premium_first"
+        private const val TAG = "PaywallActivity"
+
         /**
          * @param premiumFirst determines whether put the premium card on top.
          */

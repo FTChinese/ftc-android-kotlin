@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.customer
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -28,7 +29,7 @@ import org.jetbrains.anko.*
  * https://stripe.com/docs/api/setup_intents
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class CustomerActivity : ScopedAppActivity(), AnkoLogger {
+class CustomerActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var fileCache: FileCache
@@ -91,7 +92,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         }
 
         customerViewModel.customerLoaded.observe(this) {
-            info("Stripe customer loaded form API: $it")
+            Log.i(TAG, "Stripe customer loaded form API: $it")
         }
 
         customerViewModel.isFormEnabled.observe(this) {
@@ -108,7 +109,6 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
                     toast(R.string.prompt_updated)
-                    customerViewModel.customerLoaded.value = it.data
                 }
             }
         }
@@ -148,10 +148,10 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
         try {
             CustomerSession.getInstance()
-            info("CustomerSession already instantiated")
+            Log.i(TAG, "CustomerSession already instantiated")
         } catch (e: Exception) {
-            info("CustomerSession not instantiated.")
-            info(e)
+            Log.i(TAG, "CustomerSession not instantiated.")
+            e.message?.let { Log.i(TAG, it) }
             // Pass ftc user id to subscription api,
             // which retrieves stripe's customer id and use
             // the id to change for a ephemeral key.
@@ -173,7 +173,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
     private val customerRetrievalListener = object : CustomerSession.CustomerRetrievalListener {
         override fun onCustomerRetrieved(customer: Customer) {
-            info("Customer $customer")
+            Log.i(TAG, "Customer $customer")
             customerViewModel.customerSessionProgress.value = false
             customer.email?.let {
                 binding.customerEmail = "Stripe账号 $it"
@@ -199,9 +199,9 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
         override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
             customerViewModel.customerSessionProgress.value = isCommunicating
             if (isCommunicating) {
-                info("Payment session communicating...")
+                Log.i(TAG, "Payment session communicating...")
             } else {
-                info("Payment session stop communication")
+                Log.i(TAG, "Payment session stop communication")
             }
         }
 
@@ -211,7 +211,7 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
 
         // Is  this used to handle payment method selection?
         override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
-            info("Payment session data changed: $data")
+            Log.i(TAG, "Payment session data changed: $data")
             data.paymentMethod?.let {
                 customerViewModel.paymentMethodSelected.value = it
 
@@ -258,6 +258,8 @@ class CustomerActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     companion object {
+        private const val TAG = "CustomerActivity"
+
         @JvmStatic
         fun start(context: Context?) {
             context?.startActivity(Intent(context, CustomerActivity::class.java))

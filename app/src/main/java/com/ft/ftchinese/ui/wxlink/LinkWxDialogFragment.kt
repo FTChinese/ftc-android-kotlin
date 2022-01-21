@@ -3,10 +3,7 @@ package com.ft.ftchinese.ui.wxlink
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
+import android.util.Log
 import androidx.fragment.app.DialogFragment
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
@@ -17,13 +14,11 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 /**
  * Show a wechat authorization dialog for a ftc-only user
  */
-class LinkWxDialogFragment : DialogFragment(), AnkoLogger {
+class LinkWxDialogFragment : DialogFragment() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var wxApi: IWXAPI
@@ -52,7 +47,7 @@ class LinkWxDialogFragment : DialogFragment(), AnkoLogger {
                     dialog.dismiss()
                 }
                 .setNegativeButton(R.string.action_cancel){ dialog, id ->
-                    info("Cancel button pressed")
+                    Log.i(TAG, "Cancel button pressed")
                 }
                 .create()
         } ?: throw IllegalStateException("Activity cannot be null")
@@ -70,5 +65,9 @@ class LinkWxDialogFragment : DialogFragment(), AnkoLogger {
         req.state = stateCode
 
         wxApi.sendReq(req)
+    }
+
+    companion object {
+        private const val TAG = "LinkWxDialogFragment"
     }
 }

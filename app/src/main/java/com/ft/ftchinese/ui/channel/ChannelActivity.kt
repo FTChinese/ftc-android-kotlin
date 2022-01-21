@@ -11,7 +11,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityChannelBinding
 import com.ft.ftchinese.model.content.ChannelSource
 import com.google.firebase.analytics.FirebaseAnalytics
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
 private const val EXTRA_CHANNEL_SOURCE = "extra_channel_source"
@@ -22,7 +21,7 @@ private const val EXTRA_CHANNEL_SOURCE = "extra_channel_source"
  * Use cases: column channel, editor's choice, archive list.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class ChannelActivity : AppCompatActivity(), AnkoLogger {
+class ChannelActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityChannelBinding
 

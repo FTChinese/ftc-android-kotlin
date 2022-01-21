@@ -5,8 +5,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentStatePagerAdapter
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.content.ChannelSource
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 /**
  * A [FragmentStatePagerAdapter] that returns a fragment corresponding to
@@ -19,12 +17,9 @@ class TabPagerAdapter(
 ) : FragmentStatePagerAdapter(
         fm,
         BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
-), AnkoLogger {
+) {
 
     override fun getItem(position: Int): Fragment {
-        if (BuildConfig.DEBUG) {
-            info("TabPagerAdapter getItem $position. Data passed to ChannelFragment: ${pages[position]}")
-        }
 
         return ChannelFragment.newInstance(pages[position])
     }

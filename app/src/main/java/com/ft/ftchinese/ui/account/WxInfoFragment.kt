@@ -20,15 +20,13 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.ui.wxlink.UnlinkActivity
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
 /**
  * Contained both by [AccountActivity] and [WxInfoActivity]
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class WxInfoFragment : ScopedFragment(), SwipeRefreshLayout.OnRefreshListener,
-        AnkoLogger {
+class WxInfoFragment : ScopedFragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var cache: FileCache

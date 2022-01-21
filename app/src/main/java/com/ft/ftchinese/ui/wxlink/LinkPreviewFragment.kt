@@ -17,7 +17,6 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isConnected
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
 
@@ -31,7 +30,7 @@ import org.jetbrains.anko.support.v4.toast
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class LinkPreviewFragment(
     private val params: WxEmailLink
-) : ScopedBottomSheetDialogFragment(), AnkoLogger {
+) : ScopedBottomSheetDialogFragment() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: FragmentLinkPreviewBinding

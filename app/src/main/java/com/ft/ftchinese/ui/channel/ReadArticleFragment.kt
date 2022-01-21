@@ -14,11 +14,9 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.lists.CardItemViewHolder
 import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.viewmodel.ReadArticleViewModel
-import org.jetbrains.anko.AnkoLogger
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class ReadArticleFragment : ScopedFragment(),
-        AnkoLogger {
+class ReadArticleFragment : ScopedFragment() {
 
     private lateinit var model: ReadArticleViewModel
     private lateinit var viewAdapter: ListAdapter

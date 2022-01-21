@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.mobile
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,8 +21,6 @@ import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.dialog.DialogArgs
 import com.ft.ftchinese.ui.login.SignInFragment
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.support.v4.toast
 
 /**
@@ -36,7 +35,7 @@ import org.jetbrains.anko.support.v4.toast
  * [com.ft.ftchinese.ui.login.SignUpFragment].
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class MobileFragment : ScopedFragment(), AnkoLogger {
+class MobileFragment : ScopedFragment() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: FragmentMobileBinding
@@ -211,7 +210,7 @@ class MobileFragment : ScopedFragment(), AnkoLogger {
     }
 
     fun onClickRequestCode(view: View) {
-        info("Request code button clicked")
+        Log.i(TAG, "Request code button clicked")
 
         when (usage) {
             USAGE_AUTH -> {
@@ -257,6 +256,8 @@ class MobileFragment : ScopedFragment(), AnkoLogger {
         private const val ARG_USAGE = "arg_usage"
         private const val USAGE_AUTH = 1
         private const val USAGE_UPDATE = 2
+
+        private const val TAG = "MobileFragment"
 
         @JvmStatic
         fun newInstanceForAuth() = MobileFragment().apply {

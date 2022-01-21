@@ -1,6 +1,7 @@
 package com.ft.ftchinese.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
@@ -9,15 +10,15 @@ import com.ft.ftchinese.database.ReadArticle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
+
+private const val TAG = "ReadArticleViewModel"
 
 class ReadArticleViewModel(application: Application) :
-        AndroidViewModel(application), AnkoLogger {
+        AndroidViewModel(application) {
     private var readDao = ArticleDb.getInstance(application).readDao()
 
     fun getAllRead(): LiveData<List<ReadArticle>> {
-        info("List all read articles")
+        Log.i(TAG, "List all read articles")
         return readDao.getAll()
     }
 
@@ -28,7 +29,7 @@ class ReadArticleViewModel(application: Application) :
 
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                info("Adding a read article")
+                Log.i(TAG, "Adding a read article")
                 readDao.insertOne(article)
             }
         }

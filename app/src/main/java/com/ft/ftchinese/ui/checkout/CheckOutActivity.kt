@@ -210,7 +210,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
                     result.exception.message?.let { toast(it) }
                 }
                 is FetchResult.Success -> {
-                    StripePriceStore.add(result.data)
+                    StripePriceStore.set(result.data)
                     gotoStripe()
                 }
             }

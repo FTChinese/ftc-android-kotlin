@@ -6,13 +6,12 @@ import com.ft.ftchinese.model.paywall.Banner
 import com.ft.ftchinese.model.paywall.FtcCheckout
 import com.ft.ftchinese.model.paywall.PaywallProduct
 import com.ft.ftchinese.model.reader.Account
-import org.jetbrains.anko.AnkoLogger
 
 /**
  * Used by ProductFragment to pass information to host
  * activity which product is selected.
  */
-class ProductViewModel : ViewModel(), AnkoLogger {
+class ProductViewModel : ViewModel() {
 
     val checkoutItemSelected: MutableLiveData<FtcCheckout> by lazy {
         MutableLiveData<FtcCheckout>()

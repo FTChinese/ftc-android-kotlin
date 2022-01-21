@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.databinding.DataBindingUtil
@@ -28,16 +29,13 @@ import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.paywall.SubsRuleFragment
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
-import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class MemberActivity : ScopedAppActivity(),
-        SwipeRefreshLayout.OnRefreshListener,
-        AnkoLogger {
+        SwipeRefreshLayout.OnRefreshListener {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
@@ -258,7 +256,7 @@ class MemberActivity : ScopedAppActivity(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        info("onActivityResult requestCode: $requestCode, resultCode: $resultCode")
+        Log.i(TAG, "onActivityResult requestCode: $requestCode, resultCode: $resultCode")
 
         when (requestCode) {
             RequestCode.PAYMENT -> {
@@ -311,6 +309,9 @@ class MemberActivity : ScopedAppActivity(),
     }
 
     companion object {
+
+        private const val TAG = "MemberActivity"
+
         fun start(context: Context?) {
             context?.startActivity(Intent(context, MemberActivity::class.java))
         }

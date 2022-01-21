@@ -14,7 +14,6 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.model.fetch.FetchResult
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.support.v4.toast
 
 /**
@@ -23,7 +22,7 @@ import org.jetbrains.anko.support.v4.toast
  * create an instance of this fragment.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class UpdateAddressFragment : ScopedFragment(), AnkoLogger {
+class UpdateAddressFragment : ScopedFragment() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: AddressViewModel

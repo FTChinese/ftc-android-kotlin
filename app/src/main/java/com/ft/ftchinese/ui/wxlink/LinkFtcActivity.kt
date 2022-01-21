@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.wxlink
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -16,15 +17,13 @@ import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.email.EmailExistsFragment
 import com.ft.ftchinese.ui.login.*
 import com.ft.ftchinese.util.RequestCode
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.toast
 
 /**
  * UI for a wx-only user to link to an email account.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
+class LinkFtcActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var emailViewModel: EmailViewModel
@@ -98,7 +97,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        info("onActivityResult: requestCode $requestCode, $resultCode")
+        Log.i(TAG, "onActivityResult: requestCode $requestCode, $resultCode")
 
         if (requestCode != RequestCode.LINK) {
             return
@@ -109,7 +108,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
             return
         }
 
-        info("Bound to an existing ftc account")
+        Log.i(TAG, "Bound to an existing ftc account")
         /**
          * Pass data back to [AccountActivity]
          */
@@ -118,6 +117,7 @@ class LinkFtcActivity : ScopedAppActivity(), AnkoLogger {
     }
 
     companion object {
+        private const val TAG = "LinkFtcActivity"
         @JvmStatic
         fun startForResult(activity: Activity?) {
             activity?.startActivityForResult(

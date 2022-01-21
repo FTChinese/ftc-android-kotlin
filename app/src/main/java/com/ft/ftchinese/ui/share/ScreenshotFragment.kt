@@ -17,7 +17,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentScreenshotBinding
 import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
 /**
@@ -26,7 +25,7 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
  * create an instance of this fragment.
  */
 @ExperimentalCoroutinesApi
-class ScreenshotFragment : ScopedBottomSheetDialogFragment(), AnkoLogger {
+class ScreenshotFragment : ScopedBottomSheetDialogFragment() {
 
     private lateinit var binding: FragmentScreenshotBinding
     private lateinit var viewModel: ScreenshotViewModel

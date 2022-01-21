@@ -1,5 +1,6 @@
 package com.ft.ftchinese.wxapi
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
@@ -14,10 +15,8 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
-class WxOAuthViewModel : BaseViewModel(), AnkoLogger {
+class WxOAuthViewModel : BaseViewModel() {
 
     // Wechat OAuth result.
     val wxSessionResult: MutableLiveData<FetchResult<WxSession>> by lazy {
@@ -52,7 +51,7 @@ class WxOAuthViewModel : BaseViewModel(), AnkoLogger {
         )
         viewModelScope.launch {
             try {
-                info("Start requesting wechat oauth session data")
+                Log.i(TAG, "Start requesting wechat oauth session data")
                 val sess = withContext(Dispatchers.IO) {
                     AuthClient.wxLogin(params)
                 }
@@ -62,7 +61,7 @@ class WxOAuthViewModel : BaseViewModel(), AnkoLogger {
                 // to fetch account data.
                 if (sess == null) {
                     progressLiveData.value = false
-                    info("Wechat oauth session is null")
+                    Log.i(TAG, "Wechat oauth session is null")
                     wxSessionResult.value = FetchResult.LocalizedError(R.string.loading_failed)
                     return@launch
                 }
@@ -76,7 +75,7 @@ class WxOAuthViewModel : BaseViewModel(), AnkoLogger {
                 // We cannot make sure the exact meaning of each error, just
                 // show user API's error message.
 
-                info(e)
+                Log.i(TAG, "$e")
                 progressLiveData.value = false
                 wxSessionResult.value = FetchResult.fromException(e)
             }
@@ -107,11 +106,11 @@ class WxOAuthViewModel : BaseViewModel(), AnkoLogger {
                 return
             }
 
-            info("Loaded wechat account: $account")
+            Log.i(TAG, "Loaded wechat account: $account")
 
             accountResult.value = FetchResult.Success(account)
         } catch (e: APIError) {
-            info("Retrieving wechat account error $e")
+            Log.i(TAG, "Retrieving wechat account error $e")
             progressLiveData.value = false
             accountResult.value = if (e.statusCode == 404) {
                 FetchResult.LocalizedError(R.string.loading_failed)
@@ -121,8 +120,12 @@ class WxOAuthViewModel : BaseViewModel(), AnkoLogger {
 
         } catch (e: Exception) {
             progressLiveData.value = false
-            info(e)
+            Log.i(TAG, "$e")
             accountResult.value = FetchResult.fromException(e)
         }
+    }
+
+    companion object {
+        private const val TAG = "WxOAuthViewModel"
     }
 }

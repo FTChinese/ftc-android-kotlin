@@ -14,10 +14,9 @@ import com.ft.ftchinese.model.content.Following
 import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.ui.lists.CardItemViewHolder
 import com.ft.ftchinese.ui.lists.MarginGridDecoration
-import org.jetbrains.anko.AnkoLogger
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class FollowingFragment : Fragment(), AnkoLogger {
+class FollowingFragment : Fragment() {
 
     private lateinit var viewAdapter: Adapter
     private lateinit var followingManager: FollowingManager

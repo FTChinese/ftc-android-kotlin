@@ -11,12 +11,11 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentLinkTargetBinding
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.fetch.formatLocalDate
-import org.jetbrains.anko.AnkoLogger
 
 /**
  * account-to-be-merged.
  */
-class LinkTargetFragment : Fragment(), AnkoLogger {
+class LinkTargetFragment : Fragment() {
 
     private var membership: Membership? = null
     private var heading: String? = null

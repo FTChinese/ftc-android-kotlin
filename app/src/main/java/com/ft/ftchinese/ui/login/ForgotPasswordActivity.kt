@@ -13,12 +13,10 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.model.fetch.FetchResult
-import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class ForgotPasswordActivity : ScopedAppActivity(),
-        AnkoLogger {
+class ForgotPasswordActivity : ScopedAppActivity() {
 
     private lateinit var letterViewModel: ForgotPasswordViewModel
     private lateinit var binding: ActivityForgotPasswordBinding

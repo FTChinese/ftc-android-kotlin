@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.checkout
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,15 +17,13 @@ import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.lists.TwoColItemViewHolder
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
 /**
  * [LatestInvoiceActivity] shows the payment result of alipay of wxpay.
  */
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class LatestInvoiceActivity : ScopedAppActivity(), AnkoLogger {
+class LatestInvoiceActivity : ScopedAppActivity() {
 
     private lateinit var binding: ActivityLatestInvoiceBinding
     private lateinit var listAdapter: ListAdapter
@@ -114,13 +113,15 @@ class LatestInvoiceActivity : ScopedAppActivity(), AnkoLogger {
         override fun getItemCount() = rows.size
 
         fun setData(pairs: List<Pair<String, String>>) {
-            info("Recycle view data $pairs")
+            Log.i(TAG, "Recycle view data $pairs")
             this.rows = pairs
             notifyDataSetChanged()
         }
     }
 
     companion object {
+        private const val TAG = "LatestInvoiceActivity"
+
         @JvmStatic
         fun start(context: Context) {
             context.startActivity(Intent(context, LatestInvoiceActivity::class.java))

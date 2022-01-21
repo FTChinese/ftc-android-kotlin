@@ -16,9 +16,8 @@ import com.ft.ftchinese.ui.validator.Validator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jetbrains.anko.AnkoLogger
 
-class EmailViewModel : BaseViewModel(), AnkoLogger{
+class EmailViewModel : BaseViewModel() {
 
     val emailLiveData = MutableLiveData("")
     val emailValidator = LiveDataValidator(emailLiveData).apply {
