@@ -24,6 +24,9 @@
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
+    <!-- Required by Google advertising -->
+    <!--  https://developers.google.com/android/reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.Info  -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
     <application
         android:allowBackup="false"
