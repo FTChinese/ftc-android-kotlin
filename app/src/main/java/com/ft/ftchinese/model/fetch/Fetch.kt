@@ -32,6 +32,7 @@ class Fetch {
     }
 
     fun post(url: String) = apply {
+        Log.i(TAG, "GET $url")
         urlBuilder = url.toHttpUrl().newBuilder()
         method = "POST"
     }
@@ -218,6 +219,7 @@ class Fetch {
          */
         if (resp.code in 200 until 400) {
             return resp.body?.string()?.let {
+                Log.i(TAG, it)
                 HttpResp(
                     message = resp.message,
                     code = resp.code,
@@ -311,7 +313,7 @@ class Fetch {
     }
 
     companion object {
-        private const val TAG = "Fetch"
+        const val TAG = "Fetch"
         private val client = OkHttpClient()
     }
 }
