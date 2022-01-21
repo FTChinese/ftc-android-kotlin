@@ -2,12 +2,11 @@ package com.ft.ftchinese.store
 
 import android.content.Context
 import com.ft.ftchinese.util.generateNonce
-import org.jetbrains.anko.AnkoLogger
 
 private const val TOKEN_PREF_NAME = "device_token"
 private const val PREF_TOKEN = "token"
 
-class TokenManager private constructor(context: Context) : AnkoLogger {
+class TokenManager private constructor(context: Context) {
     private val sharePreferences = context.getSharedPreferences(TOKEN_PREF_NAME, Context.MODE_PRIVATE)
     private val editor = sharePreferences.edit()
 

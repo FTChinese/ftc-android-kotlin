@@ -1,6 +1,7 @@
 package com.ft.ftchinese.store
 
 import android.content.Context
+import android.util.Log
 import androidx.core.content.edit
 import com.ft.ftchinese.model.enums.PurchaseAction
 import com.ft.ftchinese.model.fetch.json
@@ -10,8 +11,6 @@ import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.model.ftcsubs.PaymentResult
 import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.model.reader.Membership
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 
 /**
  * InvoiceStore saves all related data after an order is paid:
@@ -21,7 +20,7 @@ import org.jetbrains.anko.info
  * * the order's invoice and an optional invoice caused by carry-over.
  * * the type of purchase action
  */
-class InvoiceStore private constructor(ctx: Context) : AnkoLogger {
+class InvoiceStore private constructor(ctx: Context) {
     private val sharedPref = ctx.getSharedPreferences(FILE_NAME_INVOICE, Context.MODE_PRIVATE)
 
     fun save(result: ConfirmationResult) {
@@ -87,7 +86,7 @@ class InvoiceStore private constructor(ctx: Context) : AnkoLogger {
     // Only for testing
     fun saveInvoices(inv: Invoices) {
 
-        info("Save invoices")
+        Log.i(TAG, "Save invoices")
         sharedPref.edit(commit = true) {
             putString(KEY_PURCHASED, inv.purchased.toJsonString())
             putString(KEY_CARRIED_OVER, inv.carriedOver?.toJsonString())
@@ -95,12 +94,12 @@ class InvoiceStore private constructor(ctx: Context) : AnkoLogger {
     }
 
     fun loadInvoices(): Invoices? {
-        info("Loading invoices")
+        Log.i(TAG, "Loading invoices")
         val purchased = sharedPref.getString(KEY_PURCHASED, null)?.let {
             try {
                 json.parse<Invoice>(it)
             } catch (e: Exception) {
-                info(e)
+                Log.i(TAG, "$e")
                 null
             }
         } ?: return null
@@ -111,7 +110,7 @@ class InvoiceStore private constructor(ctx: Context) : AnkoLogger {
                 try {
                     json.parse(it)
                 } catch (e: Exception) {
-                    info(e)
+                    Log.i(TAG, "$e")
                     null
                 }
             }
@@ -166,6 +165,8 @@ class InvoiceStore private constructor(ctx: Context) : AnkoLogger {
     }
 
     companion object {
+        private const val TAG = "InvoiceStore"
+
         const val FILE_NAME_INVOICE = "com.ft.ftchinese.latest_invoices"
         const val KEY_CONFIRMED_ORDER = "confirmed_order"
         const val KEY_MEMBER_SNAPSHOT = "member_snapshot"

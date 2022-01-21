@@ -12,7 +12,6 @@ import com.ft.ftchinese.model.fetch.parseISODateTime
 import com.ft.ftchinese.model.fetch.parseLocalDate
 import com.ft.ftchinese.model.paywall.PaywallCache
 import com.ft.ftchinese.model.reader.*
-import org.jetbrains.anko.AnkoLogger
 
 private const val SESSION_PREF_NAME = "account"
 private const val PREF_USER_ID = "id"
@@ -47,7 +46,7 @@ private const val PREF_WX_SESSION_ID = "wx_session_id"
 private const val PREF_WX_UNION_ID = "wx_union_id"
 private const val PREF_WX_OAUTH_TIME = "wx_oauth_time"
 
-class SessionManager private constructor(context: Context) : AnkoLogger {
+class SessionManager private constructor(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(SESSION_PREF_NAME, Context.MODE_PRIVATE)
 
     fun saveAccount(account: Account) {

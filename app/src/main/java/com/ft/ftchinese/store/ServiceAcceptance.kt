@@ -2,12 +2,11 @@ package com.ft.ftchinese.store
 
 import android.content.Context
 import androidx.core.content.edit
-import org.jetbrains.anko.AnkoLogger
 
 private const val SESSION_PREF_NAME = "ftc_service_acceptance"
 private const val PREF_IS_ACCEPTED = "is_accepted"
 
-class ServiceAcceptance private constructor(context: Context) : AnkoLogger {
+class ServiceAcceptance private constructor(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(SESSION_PREF_NAME, Context.MODE_PRIVATE)
 
     fun isAccepted(): Boolean {
