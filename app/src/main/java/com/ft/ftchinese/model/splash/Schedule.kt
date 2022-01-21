@@ -1,11 +1,12 @@
 package com.ft.ftchinese.model.splash
 
+import android.util.Log
 import com.beust.klaxon.Json
 import com.ft.ftchinese.model.enums.Tier
-import org.jetbrains.anko.AnkoLogger
-import org.jetbrains.anko.info
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
+
+private const val TAG = "Schedule"
 
 data class ScheduleMeta(
 
@@ -24,7 +25,7 @@ data class ScheduleMeta(
 class Schedule(
         val meta: ScheduleMeta,
         val sections: Array<ScreenAd>
-) : AnkoLogger {
+)  {
 
     /**
      * Filter schedules ad list and keep those set on today.
@@ -52,7 +53,7 @@ class Schedule(
 
                         today.isEqual(date)
                     } catch (e: Exception) {
-                        info(e.message)
+                        e.message?.let { msg -> Log.i(TAG, msg) }
                         false
                     }
                 }

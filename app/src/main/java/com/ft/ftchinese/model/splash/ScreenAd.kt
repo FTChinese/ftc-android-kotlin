@@ -2,7 +2,6 @@ package com.ft.ftchinese.model.splash
 
 import android.net.Uri
 import com.beust.klaxon.Json
-import org.jetbrains.anko.AnkoLogger
 import org.threeten.bp.LocalDate
 
 data class ScreenAd(
@@ -36,7 +35,7 @@ data class ScreenAd(
         val dates: String,
         // weight actually means https://en.wikipedia.org/wiki/Probability_distribution#Discrete_probability_distribution
         val weight: String
-) : AnkoLogger {
+) {
     val scheduledOn: List<String>
         get() = dates.split(",")
 

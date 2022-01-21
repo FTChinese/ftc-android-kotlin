@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.core.content.edit
 import com.ft.ftchinese.model.fetch.formatLocalDate
 import com.ft.ftchinese.model.fetch.parseLocalDate
-import org.jetbrains.anko.AnkoLogger
 
 private const val SPLASH_AD_PREF_NAME = "splash_ad"
 private const val PREF_TYPE = "type"
@@ -19,7 +18,7 @@ private const val PREF_SCHEDULED_ON = "scheduled_on"
 private const val PREF_WEIGHT = "weight"
 private const val PREF_DATE = "date"
 
-class SplashScreenManager(context: Context) : AnkoLogger {
+class SplashScreenManager(context: Context) {
 //    private val filesDir = context.filesDir
     private val sharedPreferences = context.getSharedPreferences(SPLASH_AD_PREF_NAME, Context.MODE_PRIVATE)
 
