@@ -1,6 +1,7 @@
 package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.model.fetch.Fetch
+import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.model.ftcsubs.VerificationResult
@@ -40,7 +41,7 @@ object FtcPayClient {
             .noCache()
             .setClient()
             .setAppId() // Deprecated
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .endApiJson<WxPayIntent>()
             .body
     }
@@ -53,7 +54,7 @@ object FtcPayClient {
             .addHeaders(account.headers())
             .noCache()
             .setClient()
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .endApiJson<AliPayIntent>()
             .body
     }

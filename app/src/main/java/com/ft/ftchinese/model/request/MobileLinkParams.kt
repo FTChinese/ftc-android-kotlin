@@ -9,8 +9,4 @@ data class MobileLinkParams(
     val password: String,
     val mobile: String,
     val deviceToken: String,
-) {
-    fun toJsonString(): String {
-        return json.toJsonString(this)
-    }
-}
+)

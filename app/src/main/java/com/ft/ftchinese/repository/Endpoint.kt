@@ -2,7 +2,7 @@ package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.BuildConfig
 
-private const val devIP = "http://192.168.1.65"
+private const val devIP = "http://192.168.1.36"
 private const val devPort = "8206"
 
 object ContentApi {
@@ -32,7 +32,7 @@ object Endpoint {
         "https://www.googleadservices.com/pagead/conversion/app/1.0"
     }
 
-    val ftcCampaign = "https://www.chineseft.com/index.php/jsapi/deeplinkcampaign"
+    const val ftcCampaign = "https://www.chineseft.com/index.php/jsapi/deeplinkcampaign"
 
     /**
      * Base url for subscription api.

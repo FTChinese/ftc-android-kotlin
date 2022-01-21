@@ -4,8 +4,4 @@ import com.ft.ftchinese.model.fetch.json
 
 data class WxLinkParams(
     val ftcId: String
-) {
-    fun toJsonString(): String {
-        return json.toJsonString(this)
-    }
-}
+)

@@ -40,7 +40,7 @@ object AuthClient {
             .post(Endpoint.emailLogin)
             .noCache()
             .setClient()
-            .sendJson(c.toJsonString())
+            .sendJson(json.toJsonString(c))
             .endApiJson<Account>()
             .body
     }
@@ -50,7 +50,7 @@ object AuthClient {
             .post(Endpoint.emailSignUp)
             .noCache()
             .setClient()
-            .sendJson(c.toJsonString())
+            .sendJson(json.toJsonString(c))
             .endApiJson<Account>()
             .body
     }
@@ -60,7 +60,7 @@ object AuthClient {
             .put(Endpoint.mobileVerificationCode)
             .noCache()
             .setClient()
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .endApiText()
 
         return resp.code == 204
@@ -71,7 +71,7 @@ object AuthClient {
             .post(Endpoint.mobileVerificationCode)
             .noCache()
             .setClient()
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .endApiJson<UserFound>()
             .body
     }
@@ -81,7 +81,7 @@ object AuthClient {
             .post(Endpoint.mobileInitialLink)
             .noCache()
             .setClient()
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .endApiJson<Account>()
             .body
     }
@@ -94,7 +94,7 @@ object AuthClient {
             .post(Endpoint.mobileSignUp)
             .noCache()
             .setClient()
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .endApiJson<Account>()
             .body
     }
@@ -143,7 +143,7 @@ object AuthClient {
             .setAppId()
             .noCache()
             .setTimeout(30)
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .endApiJson<WxSession>()
             .body
     }

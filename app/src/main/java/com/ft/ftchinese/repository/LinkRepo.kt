@@ -16,7 +16,7 @@ object LinkRepo {
             .post(Endpoint.wxLink)
             .setUnionId(unionId)
             .noCache()
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .endApiText()
             .code == 204
     }
@@ -39,7 +39,7 @@ object LinkRepo {
         return Fetch()
             .post(Endpoint.wxUnlink)
             .setUnionId(unionId)
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .noCache()
             .endApiText()
             .code == 204

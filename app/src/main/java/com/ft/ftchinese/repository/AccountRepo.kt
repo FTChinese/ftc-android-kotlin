@@ -70,7 +70,7 @@ object AccountRepo {
             .patch(Endpoint.passwordUpdate)
             .noCache()
             .setUserId(ftcId)
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .endApiText()
 
         return resp.code == 204
@@ -95,7 +95,7 @@ object AccountRepo {
             .noCache()
             .setClient()
             .setUserId(account.id)
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .endApiText()
 
         return resp.code == 204
@@ -107,7 +107,7 @@ object AccountRepo {
             .noCache()
             .setClient()
             .setUserId(account.id)
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .endApiJson<BaseAccount>()
             .body
     }
@@ -161,7 +161,7 @@ object AccountRepo {
             .delete(Endpoint.ftcAccount)
             .noCache()
             .setUserId(ftcId)
-            .sendJson(params.toJsonString())
+            .sendJson(json.toJsonString(params))
             .endApiText()
 
         return resp.code == 204
