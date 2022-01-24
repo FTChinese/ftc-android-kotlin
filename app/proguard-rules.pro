@@ -42,8 +42,12 @@
 -keep class kotlin.Metadata { *; }
 
 # data models
--keep class com.ft.ftchinese.model.** { *; }
--keep class com.ft.ftchinese.repository.** { *; }
+-keep class com.ft.ftchinese.model.** {
+    *;
+}
+-keep class com.ft.ftchinese.repository.** {
+    *;
+}
 
 # okhttp
 -dontwarn okhttp3.**
