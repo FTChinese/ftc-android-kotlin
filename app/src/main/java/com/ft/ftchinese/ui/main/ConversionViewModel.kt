@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.model.conversion.FtcCampaignItem
 import com.ft.ftchinese.repository.ConversionClient
+import com.ft.ftchinese.store.ConversionStore
 import com.ft.ftchinese.tracking.ConversionTracker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,6 +20,10 @@ class ConversionViewModel(app: Application): AndroidViewModel(app) {
     }
 
     fun launchTask(retries: Int, timeout: Int, lookBackWindow: Long) {
+        if (ConversionStore.exists(getApplication())) {
+            return
+        }
+
         viewModelScope.launch {
             val adEvent = withContext(Dispatchers.IO) {
 
@@ -47,6 +52,8 @@ class ConversionViewModel(app: Application): AndroidViewModel(app) {
             }
 
             campaignLiveData.value = campaign
+
+            ConversionStore.save(getApplication(), adEvent.campaignId)
         }
     }
 
