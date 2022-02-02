@@ -20,8 +20,8 @@ fun teaserFromUri(uri: Uri): Teaser {
 
 fun teaserFromFtcSchema(uri: Uri): Teaser {
     var subType: String? = null
-    if (uri.pathSegments.size > 0 && uri.pathSegments[0] == "bilingual") {
-        subType = uri.pathSegments[0]
+    if (uri.host == "bilingual") {
+        subType = uri.host
     }
     return Teaser(
         id = uri.lastPathSegment ?: "",
