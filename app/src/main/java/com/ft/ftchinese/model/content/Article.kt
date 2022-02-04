@@ -368,7 +368,50 @@ class Story (
 
     // HTML for the {related-topics}
     fun htmlForRelatedTopics(): String {
-        return tags.mapIndexed { index, s ->
+        val reserved = arrayOf(
+            "去广告",
+            "单页",
+            "透明",
+            "置顶",
+            "白底",
+            "靠右",
+            "沉底",
+            "资料",
+            "突发",
+            "插图",
+            "高清",
+            "interactive_search",
+            "高清",
+            "科技",
+            "QuizPlus",
+            "单选题",
+            "SurveyPlus",
+            "置顶",
+            "低调",
+            "精华",
+            "小测",
+            "生活时尚",
+            "测试",
+            "视频",
+            "新闻",
+            "FTLifeOfASong",
+            "Podcast",
+            "播音员朗读",
+            "AI合成",
+            "科技",
+            "双语阅读",
+            "高端专享",
+            "订户专享",
+            "会员专享",
+            "双语电台",
+            "NoCopyrightCover",
+            "AITranslation",
+            "FTArticle",
+            "IsEdited"
+        )
+        return tags
+            .filter { s -> s !in reserved }
+            .mapIndexed { index, s ->
             """
             <li class="story-theme mp${index+1}">
                 <a target="_blank" href="/tag/$s\">$s</a>
