@@ -628,7 +628,7 @@ object TabPages {
             title = "最新",
             name = "fta_latest",
             path = "/m/corp/preview.html",
-            query = "pageid=mbastory",
+            query = "pageid=mba",
             htmlType = HTML_TYPE_FRAGMENT,
         ),
         ChannelSource(

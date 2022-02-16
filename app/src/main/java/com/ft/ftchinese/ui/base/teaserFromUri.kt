@@ -19,10 +19,14 @@ fun teaserFromUri(uri: Uri): Teaser {
 }
 
 fun teaserFromFtcSchema(uri: Uri): Teaser {
+    var subType: String? = null
+    if (uri.host == "bilingual") {
+        subType = uri.host
+    }
     return Teaser(
         id = uri.lastPathSegment ?: "",
         type = ArticleType.Interactive,
-        subType = null,
+        subType = subType,
         title = "",
         audioUrl = uri.getQueryParameter("audio"),
         radioUrl = null,
