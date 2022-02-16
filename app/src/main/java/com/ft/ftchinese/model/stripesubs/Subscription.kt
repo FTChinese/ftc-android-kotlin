@@ -26,18 +26,18 @@ data class Subscription(
     val currentPeriodStart: ZonedDateTime,
     val customerId: String,
     val defaultPaymentMethod: String? = null,
-    val subsItemId: String,
-    val priceId: String,
+//    val subsItemId: String,
+//    val priceId: String,
     val latestInvoiceId: String,
     val liveMode: Boolean,
     @KDateTime
     val startDateUtc: ZonedDateTime? = null,
     @KDateTime
     val endedUtc: ZonedDateTime? = null,
-    @KDateTime
-    val createdUtc: ZonedDateTime? = null,
-    @KDateTime
-    val updatedUtc: ZonedDateTime? = null,
+//    @KDateTime
+//    val createdUtc: ZonedDateTime? = null,
+//    @KDateTime
+//    val updatedUtc: ZonedDateTime? = null,
     @KStripeSubStatus
     val status: StripeSubStatus? = null,
     val ftcUserId: String? = null,

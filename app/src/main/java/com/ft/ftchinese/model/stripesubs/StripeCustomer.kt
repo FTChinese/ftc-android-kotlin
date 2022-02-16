@@ -9,6 +9,3 @@ data class StripeCustomer(
     val liveMode: Boolean = true
 )
 
-data class StripeSetupIntent(
-    val clientSecret: String
-)
