@@ -46,7 +46,7 @@
                 app:layout_constraintBottom_toBottomOf="@id/decline_btn"
                 app:layout_constraintStart_toEndOf="@id/decline_btn"
                 app:layout_constraintEnd_toEndOf="parent"
-                android:text="@string/btn_accept"/>
+                android:text="@string/btn_agree"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
