@@ -208,6 +208,9 @@ class Fetch {
         )
     }
 
+    /**
+     * NOTE: this only parse json object, not array.
+     */
     inline fun <reified T> endApiJson(withRaw: Boolean = false): HttpResp<T> {
         setAccessKey()
 
@@ -219,11 +222,42 @@ class Fetch {
          */
         if (resp.code in 200 until 400) {
             return resp.body?.string()?.let {
-                Log.i(TAG, it)
                 HttpResp(
                     message = resp.message,
                     code = resp.code,
                     body = json.parse<T>(it),
+                    raw = if (withRaw) {
+                        it
+                    } else {
+                        ""
+                    }
+                )
+            } ?: HttpResp(
+                message = resp.message,
+                code = resp.code,
+                body = null,
+                raw = "",
+            )
+        }
+
+        throw APIError.from(resp)
+    }
+
+    inline fun <reified T> endApiArray(withRaw: Boolean = false): HttpResp<List<T>> {
+        setAccessKey()
+
+        val resp = end()
+
+        /**
+         * Success response.
+         * @throws IOException when reading body.
+         */
+        if (resp.code in 200 until 400) {
+            return resp.body?.string()?.let {
+                HttpResp(
+                    message = resp.message,
+                    code = resp.code,
+                    body = json.parseArray(it),
                     raw = if (withRaw) {
                         it
                     } else {
