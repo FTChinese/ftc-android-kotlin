@@ -73,9 +73,9 @@ class CustomerActivity : ScopedAppActivity() {
 
         binding.handler = this
 
-        connectionLiveData.observe(this, {
+        connectionLiveData.observe(this) {
             customerViewModel.isNetworkAvailable.value = it
-        })
+        }
         isNetworkConnected().let {
             customerViewModel.isNetworkAvailable.value = it
         }
