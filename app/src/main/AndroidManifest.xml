@@ -23,10 +23,9 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> <!-- If your app uses scoped storage, it should request storage-related permissions only for devices that run Android 9 (API level 28) or lower. -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28" />
-    <!-- Required by Google advertising -->
-    <!--  https://developers.google.com/android/reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.Info  -->
-    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+        android:maxSdkVersion="28" /> <!-- Required by Google advertising -->
+    <!-- https://developers.google.com/android/reference/com/google/android/gms/ads/identifier/AdvertisingIdClient.Info -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
     <application
         android:allowBackup="false"
