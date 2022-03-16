@@ -7,8 +7,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.paywall.StripeCheckout
-import com.ft.ftchinese.model.paywall.StripeCounter
+import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.stripesubs.SubParams
@@ -21,12 +20,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class StripeSubViewModel : BaseViewModel() {
-    val stateMessageLiveData: MutableLiveData<Int> by lazy {
+    val messageLiveData: MutableLiveData<Int> by lazy {
         MutableLiveData<Int>()
     }
 
-    val counterLiveData: MutableLiveData<StripeCounter> by lazy {
-        MutableLiveData<StripeCounter>()
+    val itemLiveData: MutableLiveData<CartItemStripe> by lazy {
+        MutableLiveData<CartItemStripe>()
     }
 
     val customerLiveData: MutableLiveData<Customer> by lazy {
@@ -34,7 +33,7 @@ class StripeSubViewModel : BaseViewModel() {
     }
 
     val orderKind: OrderKind?
-        get() = counterLiveData.value?.orderKind
+        get() = itemLiveData.value?.orderKind
 
     val subsResult: MutableLiveData<FetchResult<StripeSubsResult>> by lazy {
         MutableLiveData<FetchResult<StripeSubsResult>>()
@@ -49,7 +48,7 @@ class StripeSubViewModel : BaseViewModel() {
             return false
         }
 
-        if (counterLiveData.value == null) {
+        if (itemLiveData.value == null) {
             return false
         }
 
@@ -69,7 +68,7 @@ class StripeSubViewModel : BaseViewModel() {
             return false
         }
 
-        if (counterLiveData.value == null) {
+        if (itemLiveData.value == null) {
             return false
         }
 
@@ -84,7 +83,7 @@ class StripeSubViewModel : BaseViewModel() {
         addSource(progressLiveData) {
             value = enablePayMethod()
         }
-        addSource(counterLiveData) {
+        addSource(itemLiveData) {
             value = enablePayMethod()
         }
         addSource(customerLiveData) {
@@ -96,7 +95,7 @@ class StripeSubViewModel : BaseViewModel() {
         addSource(progressLiveData) {
             value = enableSubmit()
         }
-        addSource(counterLiveData) {
+        addSource(itemLiveData) {
             value = enableSubmit()
         }
         addSource(customerLiveData) {
@@ -111,8 +110,8 @@ class StripeSubViewModel : BaseViewModel() {
      * When the UI is created, use the price and current
      * membership to build PaymentCounter.
      */
-    fun putIntoCart(item: StripeCheckout) {
-        counterLiveData.value = item.counter()
+    fun putIntoCart(item: CartItemStripe) {
+        itemLiveData.value = item
     }
 
     fun subscribe(account: Account, idemKey: String) {
@@ -121,7 +120,7 @@ class StripeSubViewModel : BaseViewModel() {
             return
         }
 
-        val params = counterLiveData.value?.let {
+        val params = itemLiveData.value?.let {
             SubParams(
                 priceId = it.recurringPrice.id,
                 introductoryPriceId = it.trialPrice?.id,
@@ -132,13 +131,13 @@ class StripeSubViewModel : BaseViewModel() {
 
         progressLiveData.value = true
 
-        when (counterLiveData.value?.orderKind) {
+        when (itemLiveData.value?.orderKind) {
             OrderKind.Create -> {
-                stateMessageLiveData.value = R.string.creating_subscription
+                messageLiveData.value = R.string.creating_subscription
                 createStripeSub(account, params)
             }
             OrderKind.Upgrade -> {
-                stateMessageLiveData.value = R.string.confirm_upgrade
+                messageLiveData.value = R.string.confirm_upgrade
                 upgradeStripeSub(account, params)
             }
             else -> {

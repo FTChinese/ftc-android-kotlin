@@ -17,7 +17,7 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.*
-import com.ft.ftchinese.model.paywall.FtcCheckout
+import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.StripePriceStore
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
@@ -94,6 +94,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
         tracker = StatsTracker.getInstance(this)
 
         setupViewModel()
+        paywallViewModel.ensureStripePrices()
         initUI()
     }
 
@@ -105,11 +106,11 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
 
         paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))[PaywallViewModel::class.java]
 
-        connectionLiveData.observe(this, {
+        connectionLiveData.observe(this) {
             checkOutViewModel.isNetworkAvailable.value = it
             paywallViewModel.isNetworkAvailable.value = it
             customerViewModel.isNetworkAvailable.value = it
-        })
+        }
         isConnected.let {
             checkOutViewModel.isNetworkAvailable.value = it
             paywallViewModel.isNetworkAvailable.value = it
@@ -119,6 +120,11 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
         binding.viewModel = checkOutViewModel
         binding.lifecycleOwner = this
 
+        // In case stripe prices is not loaded yet.
+        paywallViewModel.progressLiveData.observe(this) {
+            checkOutViewModel.progressLiveData.value = it
+        }
+
         checkOutViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
         }
@@ -127,7 +133,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
             toast(it)
         }
 
-        checkOutViewModel.counterLiveData.observe(this) { item ->
+        checkOutViewModel.ftcItemLiveData.observe(this) { item ->
             // Build cart item ui.
             cartViewModel.itemLiveData.value = CartItem.ofFtc(this, item)
 
@@ -156,7 +162,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
 
         // When user selected a stripe payment method, update
         // message about how stripe will charge.
-        checkOutViewModel.stripePriceLiveData.observe(this) { priceId ->
+        checkOutViewModel.stripePriceIdLiveData.observe(this) { priceId ->
             // Show a message telling about auto renewal after trial expired.
             Log.i(TAG, "Show stripe price $priceId")
             StripePriceStore.find(priceId)?.let {
@@ -198,8 +204,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
             binding.inProgress = it
         }
 
-        // After stripe prices fetched from server,
-        // show a ui dedicated to stripe pay.
+        // After stripe prices fetched from server, re-render UI.
         paywallViewModel.stripePrices.observe(this) { result ->
             binding.inProgress = false
             when (result) {
@@ -210,8 +215,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
                     result.exception.message?.let { toast(it) }
                 }
                 is FetchResult.Success -> {
-                    StripePriceStore.set(result.data)
-                    gotoStripe()
+                    initUI()
                 }
             }
         }
@@ -227,12 +231,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
             when (result) {
                is FetchResult.Success -> {
                    sessionManager.saveStripeId(result.data.id)
-
-                   if (gotoStripe()) {
-                       return@observe
-                   }
-
-                   paywallViewModel.loadStripePrices()
+                   gotoStripe()
                }
                is FetchResult.LocalizedError -> {
                    showErrDialog(result.msgId)
@@ -261,7 +260,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
         val a = sessionManager.loadAccount() ?: return
 
         // Get checkout item.
-        intent.getParcelableExtra<FtcCheckout>(EXTRA_CHECKOUT_ITEM)?.let {
+        intent.getParcelableExtra<CartItemFtc>(EXTRA_CHECKOUT_ITEM)?.let {
 
             binding.isTesting = !it.price.liveMode
             checkOutViewModel.putIntoCart(it, a.membership)
@@ -332,8 +331,6 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
                 if (gotoStripe()) {
                     return
                 }
-
-                paywallViewModel.loadStripePrices()
             }
 
             else -> toast(R.string.toast_no_pay_method)
@@ -369,10 +366,10 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
     // Return false if price not found and the caller should
     // start retrieving prices from server.
     private fun gotoStripe(): Boolean {
-        val stripeCheckout = checkOutViewModel.stripeCheckout()
+        val priceIDs = checkOutViewModel.collectStripePriceIDs()
 
-        Log.i(TAG, "Stripe price id $stripeCheckout")
-        if (stripeCheckout == null) {
+        Log.i(TAG, "Stripe price id $priceIDs")
+        if (priceIDs == null) {
             Log.i(TAG, "Stripe price not found")
             return false
         }
@@ -381,7 +378,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
         StripeSubActivity.startForResult(
             activity = this,
             requestCode = RequestCode.PAYMENT,
-            items = stripeCheckout,
+            items = priceIDs,
         )
 
         return true
@@ -393,13 +390,13 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
         when (result) {
             is FetchResult.LocalizedError -> {
                 showErrDialog(result.msgId)
-                checkOutViewModel.counterLiveData.value?.let {
+                checkOutViewModel.ftcItemLiveData.value?.let {
                     tracker.buyFail(it.price.edition)
                 }
             }
             is FetchResult.Error -> {
                 result.exception.message?.let { showErrDialog(it) }
-                checkOutViewModel.counterLiveData.value?.let {
+                checkOutViewModel.ftcItemLiveData.value?.let {
                     tracker.buyFail(it.price.edition)
                 }
 
@@ -445,7 +442,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
                 toast(msg)
                 binding.payBtn.isEnabled = true
 
-                checkOutViewModel.counterLiveData.value?.let {
+                checkOutViewModel.ftcItemLiveData.value?.let {
                     tracker.buyFail(it.price.edition)
                 }
 
@@ -505,13 +502,13 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
         when (result) {
             is FetchResult.LocalizedError -> {
                 showErrDialog(result.msgId)
-                checkOutViewModel.counterLiveData.value?.let {
+                checkOutViewModel.ftcItemLiveData.value?.let {
                     tracker.buyFail(it.price.edition)
                 }
             }
             is FetchResult.Error -> {
                 result.exception.message?.let { showErrDialog(it) }
-                checkOutViewModel.counterLiveData.value?.let {
+                checkOutViewModel.ftcItemLiveData.value?.let {
                     tracker.buyFail(it.price.edition)
                 }
             }
@@ -594,7 +591,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
         const val EXTRA_CHECKOUT_ITEM = "extra_checkout_item"
 
         @JvmStatic
-        fun startForResult(activity: Activity?, requestCode: Int, item: FtcCheckout) {
+        fun startForResult(activity: Activity?, requestCode: Int, item: CartItemFtc) {
             val intent = Intent(activity, CheckOutActivity::class.java).apply {
                 putExtra(EXTRA_CHECKOUT_ITEM, item)
             }

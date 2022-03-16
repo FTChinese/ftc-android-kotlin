@@ -15,25 +15,29 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityStripeSubBinding
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.ftcsubs.*
-import com.ft.ftchinese.model.paywall.StripeCheckout
+import com.ft.ftchinese.model.paywall.StripePriceIDs
 import com.ft.ftchinese.model.paywall.StripePriceStore
-import com.ft.ftchinese.model.stripesubs.*
+import com.ft.ftchinese.model.stripesubs.Idempotency
+import com.ft.ftchinese.model.stripesubs.StripeSubsResult
+import com.ft.ftchinese.model.stripesubs.Subscription
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.base.*
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
-import com.ft.ftchinese.viewmodel.*
+import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.stripe.android.*
-import com.stripe.android.model.*
-import org.jetbrains.anko.*
+import com.stripe.android.model.Customer
+import com.stripe.android.model.PaymentMethod
+import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
+import org.jetbrains.anko.toast
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 
@@ -47,8 +51,6 @@ class StripeSubActivity : ScopedAppActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var fileCache: FileCache
 
-//    @Deprecated("")
-//    private lateinit var checkOutViewModel: CheckOutViewModel
     private lateinit var subsViewModel: StripeSubViewModel
     private lateinit var cartViewModel: ShoppingCartViewModel
     private lateinit var accountViewModel: AccountViewModel
@@ -101,17 +103,15 @@ class StripeSubActivity : ScopedAppActivity() {
     private fun setupViewModel() {
         subsViewModel = ViewModelProvider(this)[StripeSubViewModel::class.java]
         cartViewModel = ViewModelProvider(this)[ShoppingCartViewModel::class.java]
-
+        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))[PaywallViewModel::class.java]
         accountViewModel = ViewModelProvider(this)[AccountViewModel::class.java]
 
-        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))[PaywallViewModel::class.java]
-
         // Monitoring network status.
-        connectionLiveData.observe(this, {
+        connectionLiveData.observe(this) {
             subsViewModel.isNetworkAvailable.value = it
             accountViewModel.isNetworkAvailable.value = it
             paywallViewModel.isNetworkAvailable.value = it
-        })
+        }
         isConnected.let {
             subsViewModel.isNetworkAvailable.value = it
             accountViewModel.isNetworkAvailable.value = it
@@ -121,35 +121,18 @@ class StripeSubActivity : ScopedAppActivity() {
         binding.viewModel = subsViewModel
         binding.lifecycleOwner = this
 
-        subsViewModel.stateMessageLiveData.observe(this) {
+        subsViewModel.messageLiveData.observe(this) {
             toast(it)
         }
 
         // When we know what is being put into shopping cart.
-        subsViewModel.counterLiveData.observe(this) {
+        subsViewModel.itemLiveData.observe(this) {
             cartViewModel.itemLiveData.value = CartItem.ofStripe(this, it)
         }
 
         // Upon subscription created.
         subsViewModel.subsResult.observe(this) {
             onSubsResult(it)
-        }
-
-        // In case the price we need is missing on clien side.
-        paywallViewModel.stripePrices.observe(this) { result ->
-            setInProgress(false)
-            when (result) {
-                is FetchResult.LocalizedError -> {
-                    toast(result.msgId)
-                }
-                is FetchResult.Error -> {
-                    result.exception.message?.let { toast(it) }
-                }
-                is FetchResult.Success -> {
-                    StripePriceStore.set(result.data)
-                    initUI()
-                }
-            }
         }
 
         Log.i(TAG, "Initialize customer session...")
@@ -171,6 +154,8 @@ class StripeSubActivity : ScopedAppActivity() {
 
         // Attached PaymentSessionListener
         paymentSession.init(paymentSessionListener)
+
+        paywallViewModel.ensureStripePrices()
     }
 
     private fun initUI() {
@@ -184,9 +169,19 @@ class StripeSubActivity : ScopedAppActivity() {
             )
         }
 
-        intent.getParcelableExtra<StripeCheckout>(EXTRA_CHECKOUT_ITEM)
+        intent.getParcelableExtra<StripePriceIDs>(EXTRA_CHECKOUT_ITEM)
             ?.let {
-                subsViewModel.putIntoCart(it)
+                if (StripePriceStore.isEmpty) {
+                    toast("Stripe pricing data missing")
+                    return@let
+                }
+
+                val item = StripePriceStore.checkoutItem(it)
+                if (item == null) {
+                    toast("Failed to build checkout item for price ${it.recurring}")
+                    return@let
+                }
+                subsViewModel.putIntoCart(item)
             }
 
         // Show stripe payment method selection.
@@ -459,7 +454,7 @@ class StripeSubActivity : ScopedAppActivity() {
             finish()
         }
 
-        subsViewModel.counterLiveData.value?.let {
+        subsViewModel.itemLiveData.value?.let {
             tracker.buyStripeSuccess(it.recurringPrice)
         }
     }
@@ -477,7 +472,7 @@ class StripeSubActivity : ScopedAppActivity() {
             )
         }
 
-        val edition = subsViewModel.counterLiveData.value?.let {
+        val edition = subsViewModel.itemLiveData.value?.let {
             getString(
                 R.string.order_subscribed_plan,
                 FormatHelper.formatEdition(
@@ -529,7 +524,7 @@ class StripeSubActivity : ScopedAppActivity() {
         private const val EXTRA_CHECKOUT_ITEM = "extra_checkout_item"
 
         @JvmStatic
-        fun startForResult(activity: Activity, requestCode: Int, items: StripeCheckout) {
+        fun startForResult(activity: Activity, requestCode: Int, items: StripePriceIDs) {
             activity.startActivityForResult(
                 Intent(activity, StripeSubActivity::class.java).apply {
                     putExtra(EXTRA_CHECKOUT_ITEM, items)

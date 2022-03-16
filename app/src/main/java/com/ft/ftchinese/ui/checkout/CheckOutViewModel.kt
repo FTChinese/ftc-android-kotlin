@@ -16,7 +16,6 @@ import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.request.OrderParams
 import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.viewmodel.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,12 +28,12 @@ class CheckOutViewModel : BaseViewModel() {
         MutableLiveData<Int>()
     }
 
-    val counterLiveData: MutableLiveData<FtcCheckout> by lazy {
-        MutableLiveData<FtcCheckout>()
+    val ftcItemLiveData: MutableLiveData<CartItemFtc> by lazy {
+        MutableLiveData<CartItemFtc>()
     }
 
     val isTrial: Boolean
-        get() = counterLiveData.value?.isIntroductory ?: false
+        get() = ftcItemLiveData.value?.isIntro ?: false
 
     // A list of payment methods
     val paymentChoices: MutableLiveData<PaymentChoices> by lazy {
@@ -43,7 +42,7 @@ class CheckOutViewModel : BaseViewModel() {
 
     // For intro price, let user to select; otherwise
     // set it automatically.
-    val stripePriceLiveData = MutableLiveData<String>()
+    val stripePriceIdLiveData = MutableLiveData<String>()
 
     // The recurring prices a stripe trial attached to.
     val stripeRecurringChoicesLiveData: MutableLiveData<Array<String>> by lazy {
@@ -105,7 +104,7 @@ class CheckOutViewModel : BaseViewModel() {
         addSource(paymentIntent) {
             value = enableSubmit()
         }
-        addSource(stripePriceLiveData) {
+        addSource(stripePriceIdLiveData) {
             value = enableSubmit()
         }
     }
@@ -126,7 +125,7 @@ class CheckOutViewModel : BaseViewModel() {
 
         // When user wants to pay via stripe, we have to ensure
         // stripe price id is chosen.
-        if (stripePriceLiveData.value == null) {
+        if (stripePriceIdLiveData.value == null) {
             return false
         }
 
@@ -137,12 +136,11 @@ class CheckOutViewModel : BaseViewModel() {
      * When the UI is created, use price, optional discount and
      * membership to build PaymentCounter.
      */
-    fun putIntoCart(checkout: FtcCheckout, m: Membership) {
-        Log.i(TAG, "Checkout item $checkout")
-        counterLiveData.value = checkout
-        paymentChoices.value = PaymentChoices.newInstance(m, checkout.price.edition)
-        if (!checkout.isIntroductory) {
-            stripePriceLiveData.value = checkout.price.stripePriceId
+    fun putIntoCart(item: CartItemFtc, m: Membership) {
+        ftcItemLiveData.value = item
+        paymentChoices.value = PaymentChoices.newInstance(m, item.price.edition)
+        if (!item.isIntro) {
+            stripePriceIdLiveData.value = item.price.stripePriceId
         }
     }
 
@@ -152,7 +150,7 @@ class CheckOutViewModel : BaseViewModel() {
      */
     fun selectPayMethod(method: PayMethod) {
         Log.i(TAG, "Selecting payment method $method")
-        counterLiveData.value?.let { item ->
+        ftcItemLiveData.value?.let { item ->
 
             paymentChoices.value?.findOrderIntent(method)?.kind?.let {
                 paymentIntent.value = PaymentIntent(
@@ -171,7 +169,7 @@ class CheckOutViewModel : BaseViewModel() {
             // Find the recurring prices and
             // ask user to select.
             // The observer will show a single choice dialog.
-            if (item.isIntroductory && item.stripeTrialParents.size > 1) {
+            if (item.isIntro && item.stripeTrialParents.size > 1) {
                 stripeRecurringChoicesLiveData.value = item
                     .stripeTrialParents
                     .toTypedArray()
@@ -189,21 +187,21 @@ class CheckOutViewModel : BaseViewModel() {
                 return@let
             }
 
-            stripePriceLiveData.value = it[index]
+            stripePriceIdLiveData.value = it[index]
         }
     }
 
-    fun stripeCheckout(): StripeCheckout? {
+    fun collectStripePriceIDs(): StripePriceIDs? {
         val orderKind = paymentChoices.value
             ?.findOrderIntent(PayMethod.STRIPE)
             ?.kind
             ?: return null
 
-        return stripePriceLiveData.value?.let {
-            StripeCheckout(
+        return stripePriceIdLiveData.value?.let {
+            StripePriceIDs(
                 orderKind = orderKind,
-                recurringPriceId = it,
-                trialPriceId = counterLiveData.value?.stripeTrialId()
+                recurring = it,
+                trial = ftcItemLiveData.value?.stripeTrialId()
             )
         }
     }

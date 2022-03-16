@@ -4,8 +4,8 @@ import android.content.Context
 import android.text.Spannable
 import android.text.SpannableString
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.paywall.FtcCheckout
-import com.ft.ftchinese.model.paywall.StripeCounter
+import com.ft.ftchinese.model.paywall.CartItemFtc
+import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.ui.formatter.CartPriceFormatter
 import com.ft.ftchinese.ui.formatter.FormatHelper
 
@@ -19,14 +19,14 @@ data class CartItem(
 ) {
     companion object {
         @JvmStatic
-        fun ofStripe(ctx: Context, counter: StripeCounter): CartItem {
-            if (counter.trialPrice == null) {
+        fun ofStripe(ctx: Context, checkoutItem: CartItemStripe): CartItem {
+            if (checkoutItem.trialPrice == null) {
                 return CartItem(
-                    productName = FormatHelper.getTier(ctx, counter.recurringPrice.tier),
+                    productName = FormatHelper.getTier(ctx, checkoutItem.recurringPrice.tier),
                     payable = CartPriceFormatter(
-                        currency = counter.recurringPrice.currency,
-                        amount = counter.recurringPrice.moneyAmount,
-                        period = counter.recurringPrice.periodCount,
+                        currency = checkoutItem.recurringPrice.currency,
+                        amount = checkoutItem.recurringPrice.moneyAmount,
+                        period = checkoutItem.recurringPrice.periodCount,
                         isIntroductory = false,
                     )
                         .scaleAmount()
@@ -36,11 +36,11 @@ data class CartItem(
             }
 
             return CartItem(
-                productName = FormatHelper.getTier(ctx, counter.recurringPrice.tier),
+                productName = FormatHelper.getTier(ctx, checkoutItem.recurringPrice.tier),
                 payable = CartPriceFormatter(
-                    currency = counter.trialPrice.currency,
-                    amount = counter.trialPrice.moneyAmount,
-                    period = counter.trialPrice.periodCount,
+                    currency = checkoutItem.trialPrice.currency,
+                    amount = checkoutItem.trialPrice.moneyAmount,
+                    period = checkoutItem.trialPrice.periodCount,
                     isIntroductory = true,
                 )
                     .scaleAmount()
@@ -48,7 +48,7 @@ data class CartItem(
                 smallPrint = SpannableString(
                     FormatHelper.stripeAutoRenewalMessage(
                         ctx = ctx,
-                        price = counter.recurringPrice,
+                        price = checkoutItem.recurringPrice,
                         isTrial = true
                     )
                 )
@@ -56,19 +56,19 @@ data class CartItem(
         }
 
         @JvmStatic
-        fun ofFtc(ctx: Context, item: FtcCheckout): CartItem {
+        fun ofFtc(ctx: Context, item: CartItemFtc): CartItem {
             if (item.discount == null) {
                 return CartItem(
                     productName = FormatHelper.getTier(ctx, item.price.tier),
                     payable = CartPriceFormatter(
                         currency = item.price.currency,
                         amount = item.price.unitAmount,
-                        isIntroductory = item.isIntroductory,
+                        isIntroductory = item.isIntro,
                         period = item.price.normalizeYMD(),
                     )
                         .scaleAmount()
                         .format(ctx),
-                    smallPrint = if (item.isIntroductory) {
+                    smallPrint = if (item.isIntro) {
                         SpannableString(item.price.title)
                     } else {
                         null
@@ -82,7 +82,7 @@ data class CartItem(
                 payable = CartPriceFormatter(
                     currency = item.price.currency,
                     amount = item.payableAmount(),
-                    isIntroductory = item.isIntroductory,
+                    isIntroductory = item.isIntro,
                     period = item.price.normalizeYMD(),
                 )
                     .scaleAmount()
