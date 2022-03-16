@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentProductBinding
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.paywall.FtcCheckout
+import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.PaywallProduct
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.store.SessionManager
@@ -138,7 +138,7 @@ class ProductFragment : ScopedFragment() {
 
     inner class PriceListAdapter : RecyclerView.Adapter<PriceItemViewHolder>() {
 
-        private var checkoutPrices = listOf<FtcCheckout>()
+        private var checkoutPrices = listOf<CartItemFtc>()
         private var btnEnabled = true
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PriceItemViewHolder {
@@ -178,7 +178,7 @@ class ProductFragment : ScopedFragment() {
 
         override fun getItemCount() = checkoutPrices.size
 
-        fun setData(checkout: List<FtcCheckout>) {
+        fun setData(checkout: List<CartItemFtc>) {
             this.checkoutPrices = checkout
             notifyDataSetChanged()
         }

@@ -8,7 +8,7 @@ import android.text.style.StrikethroughSpan
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
-import com.ft.ftchinese.model.paywall.FtcCheckout
+import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.PaymentIntent
 import com.ft.ftchinese.model.stripesubs.StripePrice
 import java.util.*
@@ -207,7 +207,7 @@ object FormatHelper {
     /**
      * The text shown on paywall.
      */
-    fun productPriceButton(ctx: Context, cop: FtcCheckout): Spannable {
+    fun productPriceButton(ctx: Context, cop: CartItemFtc): Spannable {
 
         val regularPrice = formatPrice(ctx, cop.price.currency, cop.price.unitAmount)
         val period = formatRegularPeriod(ctx, cop.price.periodCount)
@@ -225,7 +225,7 @@ object FormatHelper {
         }
     }
 
-    private fun formatCheckoutPrice(ctx: Context, item: FtcCheckout): String {
+    private fun formatCheckoutPrice(ctx: Context, item: CartItemFtc): String {
         return formatPrice(
             ctx,
             item.price.currency,

@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.product
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.ft.ftchinese.model.paywall.Banner
-import com.ft.ftchinese.model.paywall.FtcCheckout
+import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.PaywallProduct
 import com.ft.ftchinese.model.reader.Account
 
@@ -13,8 +13,8 @@ import com.ft.ftchinese.model.reader.Account
  */
 class ProductViewModel : ViewModel() {
 
-    val checkoutItemSelected: MutableLiveData<FtcCheckout> by lazy {
-        MutableLiveData<FtcCheckout>()
+    val checkoutItemSelected: MutableLiveData<CartItemFtc> by lazy {
+        MutableLiveData<CartItemFtc>()
     }
 
     val accountChanged: MutableLiveData<Account?> by lazy {
