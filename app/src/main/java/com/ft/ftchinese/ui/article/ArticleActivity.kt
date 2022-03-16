@@ -523,7 +523,7 @@ class ArticleActivity : ScopedAppActivity(),
     /**
      * Setup share button and audio button.
      */
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
 
         menuInflater.inflate(R.menu.article_top_menu, menu)
 

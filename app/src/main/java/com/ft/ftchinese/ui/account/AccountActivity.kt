@@ -111,7 +111,7 @@ class AccountActivity : ScopedAppActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val a = sessionManager.loadAccount()
 
         if (a?.loginMethod != LoginMethod.WECHAT) {

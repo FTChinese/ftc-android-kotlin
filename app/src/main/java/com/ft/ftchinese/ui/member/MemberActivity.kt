@@ -271,11 +271,11 @@ class MemberActivity : ScopedAppActivity(),
     }
 
     // Create menus
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val m = sessionManager.loadAccount()?.membership
 
         menuInflater.inflate(R.menu.activity_member_menu, menu)
-        menu?.findItem(R.id.action_cancel_stripe)?.isVisible = m?.canCancelStripe ?: false
+        menu.findItem(R.id.action_cancel_stripe)?.isVisible = m?.canCancelStripe ?: false
         return true
     }
 

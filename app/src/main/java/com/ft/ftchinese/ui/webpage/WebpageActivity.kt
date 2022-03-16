@@ -47,7 +47,7 @@ class WebpageActivity : ScopedAppActivity() {
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         if (pageMeta?.showMenu == true) {
             menuInflater.inflate(R.menu.webpage_menu, menu)
         }
