@@ -18,7 +18,7 @@ object FtcPayClient {
             .get(Endpoint.subsBase(account.isTest) + "/orders")
             .addHeaders(account.headers())
             .noCache()
-            .endApiJson<List<Order>>()
+            .endApiArray<Order>()
             .body
             ?: listOf()
     }

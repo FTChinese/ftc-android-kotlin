@@ -6,7 +6,6 @@ import com.ft.ftchinese.model.fetch.HttpResp
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.StripeCustomer
-import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.stripesubs.SubParams
 
@@ -17,11 +16,11 @@ object StripeClient {
     // Retrieve a list of stripe prices.
     // If use is logged-in and it is a test account, use sandbox
     // api to get test prices; otherwise retrieve prices from live mode.
-    fun listPrices(): HttpResp<List<StripePrice>> {
+    fun listPrices(): HttpResp<String> {
         return Fetch()
             .get(Endpoint.stripePrices)
             .noCache()
-            .endApiJson()
+            .endApiText()
     }
 
     fun createCustomer(account: Account): HttpResp<StripeCustomer> {
