@@ -13,7 +13,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityPaywallBinding
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.ftcsubs.*
 import com.ft.ftchinese.model.paywall.Paywall
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.store.AccountCache
@@ -69,10 +68,17 @@ class PaywallActivity : ScopedAppActivity(),
 
         setupViewModel()
         initUI()
-        loadData(false)
+        loadData()
 
         tracker = StatsTracker.getInstance(this)
         tracker.displayPaywall()
+    }
+
+    // Load pricing data.
+    private fun loadData() {
+        // Fetch paywall from cache, then from server.
+        paywallViewModel.loadPaywall(AccountCache.get()?.isTest ?: false)
+        paywallViewModel.loadStripePrices()
     }
 
     private fun setupViewModel() {
@@ -82,9 +88,9 @@ class PaywallActivity : ScopedAppActivity(),
         productViewModel = ViewModelProvider(this)[ProductViewModel::class.java]
 
         // Setup network
-        connectionLiveData.observe(this, {
+        connectionLiveData.observe(this) {
             paywallViewModel.isNetworkAvailable.value = it
-        })
+        }
         paywallViewModel.isNetworkAvailable.value = isConnected
 
         productViewModel.checkoutItemSelected.observe(this) {
@@ -106,7 +112,7 @@ class PaywallActivity : ScopedAppActivity(),
         /**
          * Load paywall from cache, and then from server.
          */
-        paywallViewModel.paywallResult.observe(this, { result: FetchResult<Paywall> ->
+        paywallViewModel.paywallResult.observe(this) { result: FetchResult<Paywall> ->
             // For manual refreshing, show a toast after completion.
             val isManual = binding.swipeRefresh.isRefreshing
 
@@ -132,7 +138,7 @@ class PaywallActivity : ScopedAppActivity(),
                     }
                 }
             }
-        })
+        }
     }
 
     private fun initUI() {
@@ -189,17 +195,10 @@ class PaywallActivity : ScopedAppActivity(),
         productViewModel.promoReceived.value = pw.promo
     }
 
-    // Load pricing data.
-    private fun loadData(isRefreshing: Boolean) {
-        // Fetch paywall from cache, then from server.
-        // TODO: check paywall and build config matches.
-        paywallViewModel.loadPaywall(isRefreshing, AccountCache.get())
-        paywallViewModel.refreshStripePrices()
-    }
-
     override fun onRefresh() {
         toast(R.string.refresh_paywall)
-        loadData(true)
+        paywallViewModel.refreshFtcPrice(AccountCache.get()?.isTest ?: false)
+        paywallViewModel.refreshStripePrices()
     }
 
     // Upon payment succeeded, this activity should kill
