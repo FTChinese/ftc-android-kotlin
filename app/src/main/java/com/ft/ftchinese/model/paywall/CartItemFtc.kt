@@ -6,10 +6,10 @@ import com.ft.ftchinese.model.ftcsubs.Price
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class FtcCheckout(
+data class CartItemFtc(
     val price: Price,
-    val discount: Discount?,
-    val isIntroductory: Boolean = false,
+    val discount: Discount?, // Introductory price does not have a discount.
+    val isIntro: Boolean = false,
     val stripeTrialParents: List<String>,
 ): Parcelable {
 
@@ -18,7 +18,7 @@ data class FtcCheckout(
     }
 
     fun stripeTrialId(): String? {
-        if (!isIntroductory) {
+        if (!isIntro) {
             return null
         }
 

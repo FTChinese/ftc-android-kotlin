@@ -8,7 +8,7 @@ import com.ft.ftchinese.model.enums.PayMethod
  * user selected a payment method.
  */
 data class PaymentIntent (
-    val item: FtcCheckout,
+    val item: CartItemFtc,
     val orderKind: OrderKind,
     val payMethod: PayMethod
 )
