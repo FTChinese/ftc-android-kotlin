@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.product
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +19,7 @@ import com.ft.ftchinese.model.paywall.defaultPaywall
 fun ProductCard(prod: PaywallProduct) {
     Column {
         Row(
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -26,6 +28,8 @@ fun ProductCard(prod: PaywallProduct) {
                 style = MaterialTheme.typography.subtitle1,
             )
         }
+
+        Divider()
 
         Spacer(modifier = Modifier.height(16.dp))
 
