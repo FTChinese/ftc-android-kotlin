@@ -11,6 +11,7 @@ data class OrderIntent(
     val message: String?
 )
 
+@Deprecated("")
 data class PaymentChoices(
     val warning: String? = null,
     val aliPay: OrderIntent,

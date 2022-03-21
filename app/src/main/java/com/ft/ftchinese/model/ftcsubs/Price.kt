@@ -97,7 +97,7 @@ data class Price(
      * Find out the most applicable discount a membership
      * could enjoy among this price's offers.
      */
-    fun applicableOffer(filters: List<OfferKind>): Discount? {
+    fun filterOffer(by: List<OfferKind>): Discount? {
         if (offers.isEmpty()) {
             return null
         }
@@ -107,7 +107,7 @@ data class Price(
         // the one with the biggest price off.
         // Ignore introductory discount which is no longer used.
         val filtered = offers.filter {
-                it.kind != OfferKind.Introductory && it.isValid() && filters.contains(it.kind)
+                it.kind != OfferKind.Introductory && it.isValid() && by.contains(it.kind)
             }
             .sortedByDescending {
                 it.priceOff

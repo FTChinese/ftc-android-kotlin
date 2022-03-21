@@ -1,17 +1,27 @@
 package com.ft.ftchinese.model.paywall
 
-object PaywallCache {
-    private var paywall = defaultPaywall
+import com.ft.ftchinese.model.stripesubs.StripePrice
 
-    fun update(p: Paywall) {
-        paywall = p
+object PaywallCache {
+    private var ftc = defaultPaywall
+    private var stripe: MutableMap<String, StripePrice> = mutableMapOf()
+
+    fun setFtc(p: Paywall) {
+        ftc = p
     }
 
-    fun get(): Paywall {
-        return paywall
+    fun setStripe(prices: List<StripePrice>) {
+        prices.forEach {
+            stripe[it.id] = it
+        }
+    }
+
+    fun getFtc(): Paywall {
+        return ftc
     }
 
     fun clear() {
-        paywall = defaultPaywall
+        ftc = defaultPaywall
+        stripe.clear()
     }
 }

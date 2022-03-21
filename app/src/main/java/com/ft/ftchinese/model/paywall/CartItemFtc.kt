@@ -25,3 +25,10 @@ data class CartItemFtc(
         return price.stripePriceId
     }
 }
+
+data class CartItemFtcV2(
+    val intent: CheckoutIntent,
+    val price: Price,
+    val discount:  Discount? = null,
+    val isIntro: Boolean
+)

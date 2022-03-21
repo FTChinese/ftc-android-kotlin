@@ -43,7 +43,7 @@ class PaywallViewModel(
             if (!data.isNullOrBlank()) {
                 try {
                     json.parse<Paywall>(data)?.let {
-                        PaywallCache.update(it)
+                        PaywallCache.setFtc(it)
                         it
                     }
                 } catch (e: Exception) {
@@ -81,7 +81,7 @@ class PaywallViewModel(
                 }
             }
 
-            PaywallCache.update(pwResp.body)
+            PaywallCache.setFtc(pwResp.body)
 
             return FetchResult.Success(pwResp.body)
         } catch (e: Exception) {

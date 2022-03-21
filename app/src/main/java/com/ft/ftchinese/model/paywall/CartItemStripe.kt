@@ -8,3 +8,9 @@ data class CartItemStripe(
     val recurringPrice: StripePrice,
     val trialPrice: StripePrice?,
 )
+
+data class CartItemStripeV2(
+    val intent: CheckoutIntent,
+    val recurring: StripePrice,
+    val trial: StripePrice?,
+)
