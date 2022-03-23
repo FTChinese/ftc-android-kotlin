@@ -19,6 +19,7 @@ data class Discount(
     val startUtc: ZonedDateTime? = null,
     @KDateTime
     val endUtc: ZonedDateTime? = null,
+    val overridePeriod: YearMonthDay = YearMonthDay(), // Override the period specified in price if present.
     val priceOff: Double? = null,
     val percent: Int? = null,
     val priceId: String = "",
