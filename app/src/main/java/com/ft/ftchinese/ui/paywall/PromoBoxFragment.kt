@@ -17,6 +17,7 @@ import com.ft.ftchinese.ui.product.ProductViewModel
  * Use the [PromoBoxFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+@Deprecated("")
 class PromoBoxFragment : Fragment() {
 
     private lateinit var productViewModel: ProductViewModel
@@ -39,9 +40,9 @@ class PromoBoxFragment : Fragment() {
             ViewModelProvider(this).get(ProductViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        productViewModel.promoReceived.observe(viewLifecycleOwner, {
+        productViewModel.promoReceived.observe(viewLifecycleOwner) {
             binding.promo = it
-        })
+        }
     }
 
 

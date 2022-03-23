@@ -10,6 +10,7 @@ import android.widget.TextView
 import com.ft.ftchinese.R
 import io.noties.markwon.Markwon
 
+@Deprecated("")
 class SubsRuleFragment : Fragment() {
 
     private lateinit var markwon: Markwon
