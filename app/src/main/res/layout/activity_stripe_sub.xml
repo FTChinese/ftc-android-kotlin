@@ -53,7 +53,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/rv_stripe_sub"
-            android:text="@string/stripe_in_pounds"/>
+            android:text="@string/stripe_requirement"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_stripe_sub"
