@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 
+@Deprecated("")
 class PriceItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     val text: TextView = view.findViewById(R.id.tv_offer_desc)

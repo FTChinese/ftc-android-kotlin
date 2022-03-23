@@ -28,6 +28,7 @@ import com.ft.ftchinese.ui.lists.MarginItemDecoration
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
+@Deprecated("")
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class ProductFragment : ScopedFragment() {
 
