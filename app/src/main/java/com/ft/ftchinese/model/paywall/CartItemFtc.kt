@@ -3,6 +3,7 @@ package com.ft.ftchinese.model.paywall
 import android.os.Parcelable
 import com.ft.ftchinese.model.ftcsubs.Discount
 import com.ft.ftchinese.model.ftcsubs.Price
+import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -31,4 +32,16 @@ data class CartItemFtcV2(
     val price: Price,
     val discount:  Discount? = null,
     val isIntro: Boolean
-)
+) {
+    fun normalizePeriod(): YearMonthDay {
+        if (discount != null && !discount.overridePeriod.isZero()) {
+            return discount.overridePeriod
+        }
+
+        return price.periodCount
+    }
+
+    fun payableAmount(): Double {
+        return price.unitAmount - (discount?.priceOff ?: 0.0)
+    }
+}
