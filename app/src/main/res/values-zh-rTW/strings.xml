@@ -256,7 +256,7 @@
     <string name="stripe_customer_not_created">創建Stripe使用者失敗，請重试！</string>
     <string name="card_brand_last4">%1$s (尾号%2$s)</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
-    <string name="stripe_in_pounds">* 使用Stripe訂閱FT中文網會員以英镑计价</string>
+    <string name="stripe_requirement">* 使用Stripe訂閱FT中文網會員以英镑计价</string>
     <string name="stripe_select_or_add_card">選擇或添加银行卡</string>
     <string name="stripe_init">設置Stripe支付</string>
     <string name="stripe_default_bank_brand">我的銀行卡</string>
