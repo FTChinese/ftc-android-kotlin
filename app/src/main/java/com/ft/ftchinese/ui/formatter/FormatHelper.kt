@@ -41,6 +41,10 @@ object FormatHelper {
         }
     }
 
+    fun cycleOfYMD(ctx: Context, ymd: YearMonthDay): String {
+        return getCycle(ctx, ymd.toCycle())
+    }
+
     fun getCycleN(ctx: Context, cycle: Cycle, n: Int): String {
         return "${n}${getCycle(ctx, cycle)}"
     }
@@ -97,6 +101,7 @@ object FormatHelper {
         )
     }
 
+    @Deprecated("")
     fun formatPrice(ctx: Context, currency: String, amount: Double): String {
         return "${currencySymbol(currency)}${formatMoney(ctx, amount)}"
     }
@@ -109,6 +114,7 @@ object FormatHelper {
      * - 3个月14天
      * The year, month, day should have at least 2 fields larger than 0.
      */
+    @Deprecated("")
     private fun formatYMD(ctx: Context, ymd: YearMonthDay): String {
         val sb = StringBuilder()
 
