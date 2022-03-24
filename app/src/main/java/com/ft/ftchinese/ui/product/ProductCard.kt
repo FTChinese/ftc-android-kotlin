@@ -40,8 +40,8 @@ fun ProductHeading(text: String) {
             style = MaterialTheme.typography.h5,
         )
     }
-    Divider()
-    Spacer(modifier = Modifier.height(Dimens.dp8))
+    Divider(color = OColor.teal)
+    Spacer(modifier = Modifier.height(Dimens.dp16))
 }
 
 @OptIn(ExperimentalFoundationApi::class, androidx.compose.material.ExperimentalMaterialApi::class)
