@@ -10,7 +10,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,14 +17,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.paywall.PaywallProduct
-import com.ft.ftchinese.model.paywall.StripePriceIDsOfProduct
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
-import com.ft.ftchinese.ui.theme.OTheme
 import org.threeten.bp.LocalDate
 
 @Composable
@@ -47,39 +42,20 @@ fun ProductHeading(text: String) {
 @OptIn(ExperimentalFoundationApi::class, androidx.compose.material.ExperimentalMaterialApi::class)
 @Composable
 fun ProductCard(
-    product: PaywallProduct,
-    stripePrices: Map<String, StripePrice>,
-    membership: Membership,
+    heading: String,
+    description: String,
+    smallPrint: String?,
+    priceContent: @Composable () -> Unit,
 ) {
-
-    val ftcItems = product.listShoppingItems(membership)
-
-    val stripeItems = StripePriceIDsOfProduct
-        .newInstance(ftcItems)
-        .listShoppingItems(stripePrices, membership)
 
     Card {
         Column(
             modifier = Modifier
                 .padding(Dimens.dp16),
         ) {
-            ProductHeading(text = product.heading)
+            ProductHeading(text = heading)
 
-            ftcItems.forEach { cartItem ->
-                PriceCard(
-                    params = PriceCardParams
-                        .ofFtc(LocalContext.current, cartItem),
-                    onClick = {}
-                )
-            }
-
-            stripeItems.forEach { cartItem ->
-                PriceCard(
-                    params = PriceCardParams
-                        .ofStripe(LocalContext.current, cartItem),
-                    onClick = {},
-                )
-            }
+            priceContent()
 
             Text(
                 text = stringResource(id = R.string.stripe_requirement),
@@ -89,13 +65,15 @@ fun ProductCard(
 
             Spacer(modifier = Modifier.height(Dimens.dp16))
 
-            product.descWithDailyCost().split("\n").forEach { line ->
-                ProductDescRow(text = line)
-            }
+            description
+                .split("\n")
+                .forEach { line ->
+                    ProductDescRow(text = line)
+                }
 
             Spacer(modifier = Modifier.height(Dimens.dp8))
 
-            product.smallPrint?.let {
+            smallPrint?.let {
                 Text(
                     text = it,
                     style = MaterialTheme.typography.body2,
@@ -128,16 +106,30 @@ fun ProductDescRow(text: String) {
 @Preview
 @Composable
 fun PreviewProductCard() {
-    OTheme {
-        ProductCard(
-            product = defaultPaywall.products[0],
-            stripePrices = mapOf(),
-            membership = Membership(
-                tier = Tier.STANDARD,
-                cycle = Cycle.YEAR,
-                expireDate = LocalDate.now().plusMonths(6),
-                payMethod = PayMethod.ALIPAY,
+    val product = defaultPaywall.products[0]
+    val ftcItems = product
+        .listShoppingItems(Membership(
+            tier = Tier.STANDARD,
+            cycle = Cycle.YEAR,
+            expireDate = LocalDate.now().plusMonths(6),
+            payMethod = PayMethod.ALIPAY,
+        ))
+
+    ProductCard(
+        heading = product.heading,
+        description = product.description,
+        smallPrint = product.smallPrint,
+        priceContent = {
+            PriceList(
+                ftcCartItems = ftcItems,
+                stripeCartItems = listOf(),
+                onFtcPay = { item ->
+
+                },
+                onStripePay = { item ->
+
+                }
             )
-        )
-    }
+        }
+    )
 }

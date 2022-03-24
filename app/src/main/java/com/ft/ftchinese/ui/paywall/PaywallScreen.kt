@@ -13,9 +13,11 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.paywall.Paywall
+import com.ft.ftchinese.model.paywall.StripePriceIDsOfProduct
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.StripePrice
+import com.ft.ftchinese.ui.product.PriceList
 import com.ft.ftchinese.ui.product.ProductCard
 import com.ft.ftchinese.ui.theme.Dimens
 import org.threeten.bp.LocalDate
@@ -48,10 +50,22 @@ fun PaywallContent(
         }
 
         paywall.products.forEach { product ->
+            val ftcItems = product.listShoppingItems(membership)
+
             ProductCard(
-                product = product,
-                stripePrices = stripePrices,
-                membership = membership,
+                heading = product.heading,
+                description = product.descWithDailyCost(),
+                smallPrint = product.smallPrint,
+                priceContent = {
+                    PriceList(
+                        ftcCartItems = ftcItems,
+                        stripeCartItems = StripePriceIDsOfProduct
+                            .newInstance(ftcItems)
+                            .listShoppingItems(stripePrices, membership),
+                        onFtcPay = {},
+                        onStripePay = {}
+                    )
+                }
             )
             Spacer(modifier = Modifier.height(Dimens.dp16))
         }
