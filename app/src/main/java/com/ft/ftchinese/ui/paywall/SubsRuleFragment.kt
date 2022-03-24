@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.paywall.paywallGuide
 import io.noties.markwon.Markwon
 
 @Deprecated("")

@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.paywall
+package com.ft.ftchinese.model.paywall
 
 const val paywallGuide = """
 ## 订阅规则说明
