@@ -3,6 +3,9 @@ package com.ft.ftchinese.ui.paywall
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -12,13 +15,34 @@ import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.paywall.Paywall
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.ui.product.ProductCard
-import com.ft.ftchinese.ui.theme.Space
+import com.ft.ftchinese.ui.theme.Dimens
 import org.threeten.bp.LocalDate
 
 @Composable
-fun PaywallScreen(paywall: Paywall, membership: Membership) {
-    Column {
+fun PaywallScreen(
+    vm: PaywallViewModel,
+    membership: Membership = Membership(),
+) {
+    PaywallContent(
+        paywall = vm.paywallState,
+        stripePrices = vm.stripeState,
+        membership = membership,
+    )
+}
+
+@Composable
+fun PaywallContent(
+    paywall: Paywall,
+    stripePrices: Map<String, StripePrice>,
+    membership: Membership = Membership(),
+) {
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(Dimens.dp8)
+    ) {
         if (paywall.isPromoValid()) {
             PromoBox(banner = paywall.promo)
         }
@@ -26,21 +50,24 @@ fun PaywallScreen(paywall: Paywall, membership: Membership) {
         paywall.products.forEach { product ->
             ProductCard(
                 product = product,
+                stripePrices = stripePrices,
                 membership = membership,
             )
+            Spacer(modifier = Modifier.height(Dimens.dp16))
         }
 
-        Spacer(modifier = Modifier.height(Space.dp16))
-
         SubsRuleContent()
+
+        Spacer(modifier = Modifier.height(Dimens.dp16))
     }
 }
 
 @Preview
 @Composable
-fun PreviewPaywallScreen() {
-    PaywallScreen(
+fun PreviewPaywallContent() {
+    PaywallContent(
         paywall = defaultPaywall,
+        stripePrices = mapOf(),
         membership = Membership(
             tier = Tier.STANDARD,
             cycle = Cycle.YEAR,

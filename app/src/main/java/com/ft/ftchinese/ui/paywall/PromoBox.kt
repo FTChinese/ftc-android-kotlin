@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.model.paywall.Banner
-import com.ft.ftchinese.ui.theme.Space
+import com.ft.ftchinese.ui.theme.Dimens
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import org.threeten.bp.ZonedDateTime
 
@@ -25,7 +25,7 @@ fun PromoBox(
                 style = MaterialTheme.typography.h5
             )
 
-            Spacer(modifier = Modifier.height(Space.dp8))
+            Spacer(modifier = Modifier.height(Dimens.dp8))
 
             banner.subHeading?.let {
                 Text(
@@ -34,7 +34,7 @@ fun PromoBox(
                 )
             }
 
-            Spacer(modifier = Modifier.height(Space.dp16))
+            Spacer(modifier = Modifier.height(Dimens.dp16))
 
             banner.terms?.let {
                 MarkdownText(
@@ -42,7 +42,7 @@ fun PromoBox(
                 )
             }
 
-            Spacer(modifier = Modifier.height(Space.dp16))
+            Spacer(modifier = Modifier.height(Dimens.dp16))
         }
     }
 }

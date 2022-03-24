@@ -1,6 +1,9 @@
 package com.ft.ftchinese.ui.paywall
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
@@ -9,6 +12,7 @@ import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.paywall.Paywall
 import com.ft.ftchinese.model.paywall.PaywallCache
 import com.ft.ftchinese.model.paywall.StripePriceStore
+import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
@@ -24,6 +28,17 @@ private const val TAG = "PaywallViewModel"
 class PaywallViewModel(
     private val cache: FileCache
 ) : BaseViewModel() {
+
+    var paywallState by mutableStateOf(defaultPaywall)
+        private set
+
+    var stripeState by mutableStateOf(mapOf<String, StripePrice>())
+
+    var msgId by mutableStateOf<Int?>(null)
+        private set
+
+    var errMsg by mutableStateOf<String?>(null)
+        private set
 
     val paywallResult: MutableLiveData<FetchResult<Paywall>> by lazy {
         MutableLiveData<FetchResult<Paywall>>()
@@ -105,10 +120,25 @@ class PaywallViewModel(
             if (pw != null) {
                 Log.i(TAG, "Paywall data loaded from local cached file")
                 paywallResult.value = FetchResult.Success(pw)
+                paywallState = pw
             }
 
             val result = loadRemotePaywall(isTest)
             paywallResult.value = result
+            if (result is FetchResult.Success) {
+                paywallState = result.data
+            }
+            when (result) {
+                is FetchResult.Success -> {
+                    paywallState = result.data
+                }
+                is FetchResult.LocalizedError -> {
+                    msgId = result.msgId
+                }
+                is FetchResult.Error -> {
+                    errMsg = result.exception.message
+                }
+            }
         }
     }
 
@@ -194,6 +224,20 @@ class PaywallViewModel(
             val result = loadRemoteStripe()
             stripePrices.value = result
             progressLiveData.value = false
+
+            when (result) {
+                is FetchResult.Success -> {
+                    stripeState = result.data.associateBy {
+                        it.id
+                    }
+                }
+                is FetchResult.LocalizedError -> {
+                    msgId = result.msgId
+                }
+                is FetchResult.Error -> {
+                    errMsg = result.exception.message
+                }
+            }
         }
     }
 
