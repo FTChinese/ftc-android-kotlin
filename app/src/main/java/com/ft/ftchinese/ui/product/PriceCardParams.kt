@@ -53,7 +53,7 @@ data class PriceCardParams(
 
             return PriceCardParams(
                 heading = heading,
-                title = item.price.title,
+                title = null,
                 payable = PriceParts(
                     symbol = currencySymbol,
                     amount = FormatHelper.formatMoney(ctx, item.price.unitAmount),
@@ -100,7 +100,7 @@ data class PriceCardParams(
 
             return PriceCardParams(
                 heading = heading,
-                title = "",
+                title = null,
                 payable = PriceParts(
                     symbol = currencySymbol,
                     amount = FormatHelper.formatMoney(ctx, item.recurring.moneyAmount),

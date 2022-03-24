@@ -3,9 +3,6 @@ package com.ft.ftchinese.ui.product
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -22,11 +19,13 @@ import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.paywall.PaywallProduct
+import com.ft.ftchinese.model.paywall.StripePriceIDsOfProduct
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.stripesubs.StripePrice
+import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.ui.theme.Space
 import org.threeten.bp.LocalDate
 
 @Composable
@@ -42,63 +41,70 @@ fun ProductHeading(text: String) {
         )
     }
     Divider()
-    Spacer(modifier = Modifier.height(Space.dp8))
+    Spacer(modifier = Modifier.height(Dimens.dp8))
 }
 
 @OptIn(ExperimentalFoundationApi::class, androidx.compose.material.ExperimentalMaterialApi::class)
 @Composable
 fun ProductCard(
     product: PaywallProduct,
+    stripePrices: Map<String, StripePrice>,
     membership: Membership,
 ) {
 
     val ftcItems = product.listShoppingItems(membership)
 
-    Column {
-        ProductHeading(text = product.heading)
+    val stripeItems = StripePriceIDsOfProduct
+        .newInstance(ftcItems)
+        .listShoppingItems(stripePrices, membership)
 
-        LazyVerticalGrid(
-            cells = GridCells.Fixed(2),
-            contentPadding = PaddingValues(Space.dp4),
-            horizontalArrangement = Arrangement.spacedBy(Space.dp4),
-            verticalArrangement = Arrangement.spacedBy(Space.dp4)
+    Card {
+        Column(
+            modifier = Modifier
+                .padding(Dimens.dp16),
         ) {
-            items(ftcItems) { cartItem ->
-                Card(
-                    onClick = {  },
-                    modifier = Modifier.fillMaxHeight()
-                ) {
-                    PriceCard(
-                        params = PriceCardParams.ofFtc(LocalContext.current, cartItem)
-                    )
-                }
+            ProductHeading(text = product.heading)
 
+            ftcItems.forEach { cartItem ->
+                PriceCard(
+                    params = PriceCardParams
+                        .ofFtc(LocalContext.current, cartItem),
+                    onClick = {}
+                )
             }
-        }
 
-        Text(
-            text = stringResource(id = R.string.stripe_requirement),
-            style = MaterialTheme.typography.body2,
-            color = OColor.black50,
-        )
+            stripeItems.forEach { cartItem ->
+                PriceCard(
+                    params = PriceCardParams
+                        .ofStripe(LocalContext.current, cartItem),
+                    onClick = {},
+                )
+            }
 
-        Spacer(modifier = Modifier.height(Space.dp16))
-
-        product.descWithDailyCost().split("\n").forEach { line ->
-            ProductDescRow(text = line)
-        }
-
-        Spacer(modifier = Modifier.height(Space.dp8))
-
-        product.smallPrint?.let {
             Text(
-                text = it,
+                text = stringResource(id = R.string.stripe_requirement),
                 style = MaterialTheme.typography.body2,
                 color = OColor.black50,
             )
-        }
 
-        Spacer(modifier = Modifier.height(Space.dp16))
+            Spacer(modifier = Modifier.height(Dimens.dp16))
+
+            product.descWithDailyCost().split("\n").forEach { line ->
+                ProductDescRow(text = line)
+            }
+
+            Spacer(modifier = Modifier.height(Dimens.dp8))
+
+            product.smallPrint?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.body2,
+                    color = OColor.black50,
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Dimens.dp16))
+        }
     }
 }
 
@@ -110,7 +116,7 @@ fun ProductDescRow(text: String) {
            contentDescription = null,
        )
 
-        Spacer(modifier = Modifier.width(Space.dp4))
+        Spacer(modifier = Modifier.width(Dimens.dp4))
 
         Text(
             text = text,
@@ -125,6 +131,7 @@ fun PreviewProductCard() {
     OTheme {
         ProductCard(
             product = defaultPaywall.products[0],
+            stripePrices = mapOf(),
             membership = Membership(
                 tier = Tier.STANDARD,
                 cycle = Cycle.YEAR,
