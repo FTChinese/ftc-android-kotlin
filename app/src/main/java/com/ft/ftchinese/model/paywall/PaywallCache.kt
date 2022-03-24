@@ -4,16 +4,14 @@ import com.ft.ftchinese.model.stripesubs.StripePrice
 
 object PaywallCache {
     private var ftc = defaultPaywall
-    private var stripe: MutableMap<String, StripePrice> = mutableMapOf()
+    private var stripe: Map<String, StripePrice> = mapOf()
 
     fun setFtc(p: Paywall) {
         ftc = p
     }
 
     fun setStripe(prices: List<StripePrice>) {
-        prices.forEach {
-            stripe[it.id] = it
-        }
+        stripe = prices.associateBy { it.id }
     }
 
     fun getFtc(): Paywall {
@@ -22,6 +20,6 @@ object PaywallCache {
 
     fun clear() {
         ftc = defaultPaywall
-        stripe.clear()
+        stripe = mapOf()
     }
 }
