@@ -9,54 +9,50 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
-import android.view.MenuItem
-import androidx.appcompat.app.AlertDialog
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.Button
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.ui.Modifier
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkRequest
-import com.ft.ftchinese.databinding.ActivityTestBinding
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
-import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.Order
-import com.ft.ftchinese.model.ftcsubs.PayIntent
 import com.ft.ftchinese.model.legal.WebpageMeta
-import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
-import com.ft.ftchinese.model.request.Credentials
-import com.ft.ftchinese.model.stripesubs.Idempotency
 import com.ft.ftchinese.service.VerifySubsWorker
-import com.ft.ftchinese.store.*
+import com.ft.ftchinese.store.InvoiceStore
+import com.ft.ftchinese.store.PayIntentStore
+import com.ft.ftchinese.store.ServiceAcceptance
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
-import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment
+import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.ui.share.SocialShareFragment
+import com.ft.ftchinese.ui.paywall.PaywallActivityV2
+import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.WebpageActivity
-import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
-import com.ft.ftchinese.ui.wxlink.UnlinkActivity
-import com.ft.ftchinese.ui.wxlink.WxEmailLink
-import com.ft.ftchinese.wxapi.WXEntryActivity
-import com.ft.ftchinese.wxapi.WXPayEntryActivity
 import com.google.firebase.messaging.FirebaseMessaging
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
-import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 import org.threeten.bp.LocalDate
 
@@ -65,7 +61,6 @@ private const val TAG = "TestActivity"
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class TestActivity : ScopedAppActivity() {
 
-    private lateinit var binding: ActivityTestBinding
     private lateinit var payIntentStore: PayIntentStore
     private lateinit var sessionManager: SessionManager
     private lateinit var workManager: WorkManager
@@ -74,103 +69,337 @@ class TestActivity : ScopedAppActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_test)
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowTitleEnabled(true)
-        }
 
         sessionManager = SessionManager.getInstance(this)
         payIntentStore = PayIntentStore.getInstance(this)
         workManager = WorkManager.getInstance(this)
 
-        mobileViewModel = ViewModelProvider(this).get(MobileViewModel::class.java)
-
-        binding.wxMini.onClick {
-            WebpageActivity.start(this@TestActivity, WebpageMeta(
-                title = "Test",
-                url = "http://192.168.1.42:8080"
-            ))
-        }
-
-        binding.logJson.onClick {
-            val s = json.toJsonString(Credentials(
-                email = "abc@example.org",
-                password = "12345678",
-                deviceToken = ""
-            ))
-
-            Log.i(TAG, s)
-        }
-
-        binding.addressBuy.onClick {
-            InvoiceStore.getInstance(this@TestActivity)
-                .savePurchaseAction(PurchaseAction.BUY)
-            BuyerInfoActivity.start(this@TestActivity)
-        }
-
-        binding.addressRenew.onClick {
-            InvoiceStore.getInstance(this@TestActivity)
-                .savePurchaseAction(PurchaseAction.RENEW)
-            BuyerInfoActivity.start(this@TestActivity)
-        }
-
-        binding.addressWinback.onClick {
-            InvoiceStore.getInstance(this@TestActivity)
-                .savePurchaseAction(PurchaseAction.WIN_BACK)
-            BuyerInfoActivity.start(this@TestActivity)
-        }
-
-        binding.signInUp.onClick {
-            AuthActivity.start(this@TestActivity)
-        }
-
-        binding.signIn.onClick {
-            SignInFragment
-                .forEmailLogin()
-                .show(supportFragmentManager, "SignInFragment")
-        }
-
-        binding.signUp.onClick {
-            SignUpFragment
-                .forEmailLogin()
-                .show(supportFragmentManager, "SignUpFragment")
-        }
-
-        binding.oneTimeWorkManager.setOnClickListener {
-            val request = OneTimeWorkRequestBuilder<VerifySubsWorker>().build()
-            workManager.enqueue(request)
-        }
+        mobileViewModel = ViewModelProvider(this)[MobileViewModel::class.java]
 
         val uploadWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifySubsWorker>()
             .build()
-
         WorkManager.getInstance(this).enqueue(uploadWorkRequest)
 
-        binding.createChannel.setOnClickListener {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val channelId = getString(R.string.news_notification_channel_id)
-                val channelName = getString(R.string.news_notification_channel_name)
-                val channelDesc = getString(R.string.news_notification_channel_description)
+        setContent {
+            OTheme {
+                Scaffold(
+                    topBar = {
+                        Toolbar(
+                            barTitle = "Test",
+                            onBack = {
+                                finish()
+                            }
+                        )
+                    }
+                ) {
+                    Column {
+                        Button(onClick = {
+                            PaywallActivityV2.start(this@TestActivity)
+                        }) {
+                            Text(text = "Compose Paywall")
+                        }
 
-                val channel = NotificationChannel(
-                        channelId,
-                        channelName,
-                        NotificationManager.IMPORTANCE_DEFAULT
-                ).apply {
-                    description = channelDesc
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            onClick = {
+                                WebpageActivity.start(this@TestActivity, WebpageMeta(
+                                    title = "Test",
+                                    url = "http://192.168.1.42:8080"
+                                ))
+                            },
+                        ) {
+                            Text(text = "Test Wechat Mini Program")
+                        }
+
+                        Button(onClick = {
+                            InvoiceStore.getInstance(this@TestActivity)
+                                .savePurchaseAction(PurchaseAction.BUY)
+                            BuyerInfoActivity.start(this@TestActivity)
+                        }) {
+                            Text(text = "Address - Buy")
+                        }
+
+                        Button(onClick = {
+                            AuthActivity.start(this@TestActivity)
+                        }) {
+                            Text(text = "Sign In/Up Activity")
+                        }
+
+                        Button(onClick = {
+                            SignInFragment
+                                .forEmailLogin()
+                                .show(supportFragmentManager, "SignInFragment")
+                        }) {
+                            Text(text = "Login")
+                        }
+
+                        Button(onClick = {
+                            SignUpFragment
+                                .forEmailLogin()
+                                .show(supportFragmentManager, "SignUpFragment")
+                        }) {
+                            Text(text = "Sign Up")
+                        }
+                        
+                        Button(onClick = {
+                            mobileViewModel.mobileLiveData.value = "1234567890"
+                            SignInFragment
+                                .forMobileLink().
+                                show(supportFragmentManager, "TestMobileLinkExistingEmail")
+                        }) {
+                            Text(text = "Mobile Link Existing Email")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(AccountBuilder()
+                                .withTier(null)
+                                .build())
+                        }) {
+                            Text(text = "Free User")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(AccountBuilder()
+                                .withAccountKind(LoginMethod.WECHAT)
+                                .withTier(null)
+                                .build())
+                        }) {
+                            Text(text = "Wx-only Free User")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(AccountBuilder()
+                                .build())
+                        }) {
+                            Text(text = "Standard User")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(
+                                AccountBuilder()
+                                    .withTier(Tier.PREMIUM)
+                                    .build()
+                            )
+                        }) {
+                            Text(text = "Premium User")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(
+                                AccountBuilder()
+                                    .withVip(true)
+                                    .build()
+                            )
+                        }) {
+                            Text(text = "VIP User")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(
+                                AccountBuilder()
+                                    .withTier(Tier.STANDARD)
+                                    .withPayMethod(PayMethod.STRIPE)
+                                    .withAutoRenewal(true)
+                                    .build())
+                        }) {
+                            Text(text = "Stripe Standard Year")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(
+                                AccountBuilder()
+                                    .withPayMethod(PayMethod.STRIPE)
+                                    .withAutoRenewal(true)
+                                    .withCycle(Cycle.MONTH)
+                                    .build()
+                            )
+                        }) {
+                            Text(text = "Stripe Standard Month")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(
+                                AccountBuilder()
+                                    .withPayMethod(PayMethod.STRIPE)
+                                    .withAutoRenewal(true)
+                                    .withTier(Tier.PREMIUM)
+                                    .build()
+                            )
+                        }) {
+                            Text(text = "Stripe Premium")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(
+                                AccountBuilder()
+                                    .withPayMethod(PayMethod.STRIPE)
+                                    .withAutoRenewal(false)
+                                    .build()
+                            )
+                        }) {
+                            Text(text = "Stripe Auto Renew Off")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(
+                                AccountBuilder()
+                                    .withPayMethod(PayMethod.STRIPE)
+                                    .withAutoRenewal(true)
+                                    .withStdAddOn(30)
+                                    .withPrmAddOn(366)
+                                    .build()
+                            )
+                        }) {
+                            Text(text = "Stripe Auto Renew Off with Add-on")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(
+                                AccountBuilder()
+                                    .withPayMethod(PayMethod.APPLE)
+                                    .withAutoRenewal(true)
+                                    .build()
+                            )
+                        }) {
+                            Text(text = "IAP Premium")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(
+                                AccountBuilder()
+                                    .withPayMethod(PayMethod.APPLE)
+                                    .withAutoRenewal(false)
+                                    .build()
+                            )
+                        }) {
+                            Text(text = "IAP Standard")
+                        }
+                        
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(
+                                AccountBuilder()
+                                    .withPayMethod(PayMethod.APPLE)
+                                    .withAutoRenewal(false)
+                                    .build()
+                            )
+                        }) {
+                            Text(text = "IAP Auto Renew Off")
+                        }
+
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(
+                                AccountBuilder()
+                                    .withPayMethod(PayMethod.APPLE)
+                                    .withAutoRenewal(true)
+                                    .withStdAddOn(31)
+                                    .withPrmAddOn(366)
+                                    .build()
+                            )
+                        }) {
+                            Text(text = "IAP AddOn")
+                        }
+
+                        Button(onClick = {
+                            sessionManager.logout()
+                            sessionManager.saveAccount(
+                                AccountBuilder()
+                                    .withPayMethod(PayMethod.APPLE)
+                                    .withAutoRenewal(false)
+                                    .withExpired(true)
+                                    .withStdAddOn(31)
+                                    .withPrmAddOn(366)
+                                    .build()
+                            )
+                        }) {
+                            Text(text = "IAP Expired with AddOn")
+                        }
+
+                        Button(onClick = {
+                            Log.i(TAG, "Subscribing to news topic")
+
+                            FirebaseMessaging
+                                .getInstance()
+                                .subscribeToTopic("news")
+                                .addOnCompleteListener {
+                                    if (!it.isSuccessful) {
+                                        alert(Appcompat, "Subscription failed").show()
+                                    } else {
+                                        alert(Appcompat, "Subscribed").show()
+                                    }
+                                }
+                        }) {
+                            Text(text = "FCM Subscribe a Topic")
+                        }
+
+                        Button(onClick = {
+                            createPaymentReuslt()
+                            LatestInvoiceActivity.start(this@TestActivity)
+                        }) {
+                            Text(text = "Show Payment Result")
+                        }
+                        
+                        Button(onClick = {
+                            createUpgrdeResult()
+                            LatestInvoiceActivity.start(this@TestActivity)
+                        }) {
+                            Text(text = "Show Upgrade Result")
+                        }
+
+                        Button(onClick = { /*TODO*/ }) {
+                            Text(text = "Service Acceptance")
+                        }
+                        
+                        Button(onClick = {
+                            ServiceAcceptance
+                                .getInstance(this@TestActivity)
+                                .clear()
+                        }) {
+                            Text(text = "Clear Service Acceptance")
+                        }
+
+                        Button(onClick = {
+                            val request = OneTimeWorkRequestBuilder<VerifySubsWorker>()
+                                .build()
+                            workManager.enqueue(request)
+                        }) {
+                            Text(text = "One Time Work Manager")
+                        }
+
+                        Button(onClick = {
+                            LatestInvoiceActivity
+                                .start(this@TestActivity)
+                        }) {
+                            Text(text = "Latest Order Activity")
+                        }
+
+                        Button(onClick = {
+                            createNotiChannel()
+                        }) {
+                            Text(text = "Create Notification Channel")
+                        }
+                        
+                        Button(onClick = {
+                            createNotification()
+                        }) {
+                            Text(text = "Create Local Notification")
+                        }
+                    }
                 }
-
-                val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notificationManager.createNotificationChannel(channel)
-
-                toast("$channelName created")
             }
-        }
-
-        binding.createNotification.setOnClickListener {
-            createNotification()
         }
 
         intent.extras?.let {
@@ -179,216 +408,38 @@ class TestActivity : ScopedAppActivity() {
                 Log.i(TAG, "Key: $key Value: $value")
             }
         }
+    }
 
-        // Subscribe a topic.
-        binding.btnSubscribeTopic.setOnClickListener {
-            Log.i(TAG, "Subscribing to news topic")
+    private fun createPaymentReuslt() {
+        InvoiceStore.
+        getInstance(this@TestActivity).
+        saveInvoices(
+            ConfirmationParams(
+                order = Order(
+                    id = "order-id",
+                    ftcId = "ftc-user-id",
+                    unionId = null,
+                    originalPrice = 298.0,
+                    tier = Tier.STANDARD,
+                    payableAmount = 298.0,
+                    kind = OrderKind.Create,
+                    payMethod = PayMethod.ALIPAY,
+                    yearsCount = 1,
+                    monthsCount = 0,
+                    daysCount = 0,
+                    confirmedAt = null,
+                    startDate = null,
+                    endDate =  null
+                ),
+                member = Membership()
+            ).invoices
+        )
+    }
 
-            FirebaseMessaging
-                .getInstance()
-                .subscribeToTopic("news")
-                .addOnCompleteListener {
-                    if (!it.isSuccessful) {
-                        alert(Appcompat, "Subscription failed").show()
-                    } else {
-                        alert(Appcompat, "Subscribed").show()
-                    }
-                }
-        }
-
-        // Setup bottom bar menu
-        binding.bottomBar.replaceMenu(R.menu.activity_test_menu)
-        binding.bottomBar.setOnMenuItemClickListener {
-            onBottomMenuItemClicked(it)
-
-            true
-        }
-
-        binding.mobileLinkExistingEmail.setOnClickListener {
-            Log.i(TAG, "Start SignInFragment")
-            mobileViewModel.mobileLiveData.value = "1234567890"
-            SignInFragment
-                .forMobileLink().
-                show(supportFragmentManager, "TestMobileLinkExistingEmail")
-        }
-
-        binding.btnFreeUser.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(AccountBuilder()
-                .withTier(null)
-                .build())
-        }
-
-        binding.btnWxonlyUser.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(AccountBuilder()
-                .withAccountKind(LoginMethod.WECHAT)
-                .withTier(null)
-                .build())
-        }
-
-        binding.btnStandardUser.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(AccountBuilder()
-                .build())
-        }
-
-        binding.btnPremiumUser.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withTier(Tier.PREMIUM)
-                    .build()
-            )
-        }
-
-        binding.btnVipUser.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withVip(true)
-                    .build()
-            )
-        }
-
-        binding.btnStripeStdYear.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withTier(Tier.STANDARD)
-                    .withPayMethod(PayMethod.STRIPE)
-                    .withAutoRenewal(true)
-                    .build()
-            )
-        }
-
-        binding.btnStripeStdMonth.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.STRIPE)
-                    .withAutoRenewal(true)
-                    .withCycle(Cycle.MONTH)
-                    .build()
-            )
-        }
-
-        binding.btnStripePremium.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.STRIPE)
-                    .withAutoRenewal(true)
-                    .withTier(Tier.PREMIUM)
-                    .build()
-            )
-        }
-
-        binding.btnStripeAutoRenewOff.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.STRIPE)
-                    .withAutoRenewal(false)
-                    .build()
-            )
-        }
-
-        binding.btnStripeWithAddon.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.STRIPE)
-                    .withAutoRenewal(true)
-                    .withStdAddOn(30)
-                    .withPrmAddOn(366)
-                    .build()
-            )
-        }
-
-        binding.btnIapStandard.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.APPLE)
-                    .withAutoRenewal(true)
-                    .build()
-            )
-        }
-
-        binding.btnIapPremium.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withTier(Tier.PREMIUM)
-                    .withPayMethod(PayMethod.APPLE)
-                    .withAutoRenewal(true)
-                    .build()
-            )
-        }
-
-        binding.btnIapAutoRenewOff.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.APPLE)
-                    .withAutoRenewal(false)
-                    .build()
-            )
-        }
-
-        binding.btnIapAddon.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.APPLE)
-                    .withAutoRenewal(true)
-                    .withStdAddOn(31)
-                    .withPrmAddOn(366)
-                    .build()
-            )
-        }
-
-        binding.btnIapExpiredAddon.setOnClickListener {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.APPLE)
-                    .withAutoRenewal(false)
-                    .withExpired(true)
-                    .withStdAddOn(31)
-                    .withPrmAddOn(366)
-                    .build()
-            )
-        }
-        binding.btnPaymentResult.setOnClickListener {
-            InvoiceStore.getInstance(this).saveInvoices(
-                ConfirmationParams(
-                    order = Order(
-                        id = "order-id",
-                        ftcId = "ftc-user-id",
-                        unionId = null,
-                        originalPrice = 298.0,
-                        tier = Tier.STANDARD,
-                        payableAmount = 298.0,
-                        kind = OrderKind.Create,
-                        payMethod = PayMethod.ALIPAY,
-                        yearsCount = 1,
-                        monthsCount = 0,
-                        daysCount = 0,
-                        confirmedAt = null,
-                        startDate = null,
-                        endDate =  null
-                    ),
-                    member = Membership()
-                ).invoices
-            )
-
-            LatestInvoiceActivity.start(this)
-        }
-
-        binding.btnUpgradeResult.setOnClickListener {
-            InvoiceStore.getInstance(this).saveInvoices(
+    private fun createUpgrdeResult() {
+        InvoiceStore
+            .getInstance(this@TestActivity)
+            .saveInvoices(
                 ConfirmationParams(
                     order = Order(
                         id = "order-id",
@@ -414,34 +465,26 @@ class TestActivity : ScopedAppActivity() {
                     )
                 ).invoices
             )
+    }
 
-            LatestInvoiceActivity.start(this)
-        }
+    private fun createNotiChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelId = getString(R.string.news_notification_channel_id)
+            val channelName = getString(R.string.news_notification_channel_name)
+            val channelDesc = getString(R.string.news_notification_channel_description)
 
-        binding.btnMessageDialog.onClick {
-//            MessageDialogFragment("This is a message dialog that can do nothing")
-//                .show(supportFragmentManager, "TestMessageDialog")
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = channelDesc
+            }
 
-            AlertDialog.Builder(this@TestActivity)
-                .setMessage(R.string.mobile_link_taken)
-                .setPositiveButton(R.string.action_done) { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .create()
-                .show()
-        }
+            val notificationManager: NotificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
 
-        binding.bottomDialog.setOnClickListener {
-            SocialShareFragment().show(supportFragmentManager, "TestBottomDialog")
-        }
-
-
-        binding.btnLatestOrder.setOnClickListener {
-            LatestInvoiceActivity.start(this)
-        }
-
-        binding.clearServiceAccepted.setOnClickListener {
-            ServiceAcceptance.getInstance(this).clear()
+            toast("$channelName created")
         }
     }
 
@@ -473,97 +516,6 @@ class TestActivity : ScopedAppActivity() {
 
         with(NotificationManagerCompat.from(this)) {
             notify(1, builder.build())
-        }
-    }
-
-    private fun onBottomMenuItemClicked(item: MenuItem) {
-        when (item.itemId) {
-            R.id.menu_test_wechat_expired -> {
-                WxExpireDialogFragment().show(supportFragmentManager, "WxExpiredDialog")
-            }
-            R.id.menu_test_anko_alert -> {
-                alert(Appcompat,"Anko alert", "Test") {
-                    positiveButton("OK") {
-
-                    }
-                    negativeButton("Cancel") {
-
-                    }
-                }.show()
-
-            }
-            R.id.menu_show_unlink_activity -> {
-                UnlinkActivity.startForResult(this)
-            }
-            R.id.menu_wxpay_activity -> {
-                // Create a mock order.
-                // This order actually exists, since you
-                // Wechat does not provide a fake test
-                // mechanism.
-                payIntentStore.save(
-                    PayIntent(
-                        price = defaultPaywall.products[0].prices[0],
-                        Order(
-                            id = "FTEFD5E11FDFA709E0",
-                            tier = Tier.PREMIUM,
-                            payableAmount = 1998.00,
-                            kind = OrderKind.Create,
-                            payMethod = PayMethod.WXPAY,
-                            yearsCount = 1,
-                            monthsCount = 0,
-                            daysCount = 0,
-                        )
-                    )
-                )
-                WXPayEntryActivity.start(this)
-            }
-            R.id.menu_wx_oauth -> {
-                WXEntryActivity.start(this)
-            }
-            R.id.menu_link_preview -> {
-                val current = sessionManager.loadAccount()
-                if (current == null) {
-                    toast("Not logged in yet")
-                    return
-                }
-                LinkPreviewFragment(
-                    WxEmailLink(
-                        ftc = current,
-                        wx = Account(
-                            id = "",
-                            unionId = "AgqiTngwsasF6r8m83jOdhZRolJ9",
-                            stripeId = null,
-                            userName = null,
-                            email = "",
-                            isVerified = false,
-                            avatarUrl = null,
-                            loginMethod = LoginMethod.WECHAT,
-                            wechat = Wechat(
-                                nickname = "aliquam_quas_minima",
-                                avatarUrl = "https://randomuser.me/api/portraits/thumb/men/17.jpg"
-                            ),
-                            membership = Membership(
-                                tier = Tier.STANDARD,
-                                cycle = Cycle.YEAR,
-                                expireDate = LocalDate.now().plusDays(30),
-                                payMethod = PayMethod.WXPAY,
-                                autoRenew = false,
-                                status = null,
-                                vip =  false
-                            )
-                        ),
-                        loginMethod = LoginMethod.EMAIL,
-                    )
-                )
-            }
-            R.id.menu_clear_idempotency -> {
-                Idempotency.getInstance(this).clear()
-                toast("Cleared")
-            }
-            R.id.menu_stripe_subscription -> {
-
-//                StripeSubActivity.startTest(this, findPlan(Tier.STANDARD, Cycle.YEAR))
-            }
         }
     }
 
