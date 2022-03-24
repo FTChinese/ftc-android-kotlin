@@ -7,17 +7,11 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 
 private val LightColors = lightColors(
-    primary = OColor.black60,
-    primaryVariant = OColor.black30,
-    secondary = OColor.claret,
-    onSecondary = OColor.white,
     background = OColor.paper,
 )
 
 private val DarkColors = darkColors(
-    primary = OColor.white60,
-    primaryVariant = OColor.white20,
-    background = OColor.black90,
+    background = OColor.black80,
 )
 
 @Composable
@@ -26,7 +20,7 @@ fun OTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colors = if (darkTheme) DarkColors else LightColors,
+        colors = LightColors,
         content = content
     )
 }

@@ -1,9 +1,8 @@
 package com.ft.ftchinese.ui.theme
 
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 
-object Space {
+object Dimens {
     val zero = 0.dp
     val dp4 = 4.dp
     val dp8 = 8.dp
