@@ -37,6 +37,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
+        <activity
+            android:name=".ui.paywall.PaywallActivityV2"
+            android:exported="false" />
         <activity android:name=".wxapi.WxBaseActivity" />
         <activity
             android:name=".ui.webabout.AboutListActivity"
