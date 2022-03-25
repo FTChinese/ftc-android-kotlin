@@ -12,9 +12,9 @@ import android.view.Menu
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Button
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.ui.Modifier
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -42,7 +42,6 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
-import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
@@ -84,10 +83,14 @@ class TestActivity : ScopedAppActivity() {
             OTheme {
                 Scaffold(
                     topBar = {
-                        Toolbar(
-                            barTitle = "Test",
-                            onBack = {
-                                finish()
+                        TopAppBar(
+                            title = { Text(text = "Test")},
+                            navigationIcon = {
+                                IconButton(onClick = {
+                                    finish()
+                                }) {
+                                    Icon(Icons.Filled.ArrowBack, "")
+                                }
                             }
                         )
                     }
