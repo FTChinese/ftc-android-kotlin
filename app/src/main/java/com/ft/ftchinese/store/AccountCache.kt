@@ -3,6 +3,7 @@ package com.ft.ftchinese.store
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 
+@Deprecated("Removed after migration to single activity")
 object AccountCache {
     private var account: Account? = null
 
