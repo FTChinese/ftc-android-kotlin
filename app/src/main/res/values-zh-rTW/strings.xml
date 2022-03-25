@@ -194,7 +194,7 @@
     <string name="cycle_year">年</string>
     <string name="cycle_month">月</string>
 
-    <string name="heading_customer_service">聯繫客服</string>
+    <string name="title_customer_service">聯繫客服</string>
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
 
     <!--  Subscription  -->

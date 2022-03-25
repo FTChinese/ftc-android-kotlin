@@ -304,7 +304,7 @@
     <string name="cycle_month">月</string>
     <string name="cycle_day">天</string>
 
-    <string name="heading_customer_service">联系客服</string>
+    <string name="title_customer_service">联系客服</string>
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
     <string name="barrier_title">购买会员服务，阅读FT独家内容</string>
     <string name="barrier_sync_membership">如果您已经在其他平台购买了会员，请在"会员订阅"中下拉刷新数据</string>
