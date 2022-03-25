@@ -6,15 +6,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.paywall.Paywall
-import com.ft.ftchinese.model.paywall.StripePriceIDsOfProduct
-import com.ft.ftchinese.model.paywall.defaultPaywall
+import com.ft.ftchinese.model.paywall.*
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.ui.product.PriceList
@@ -25,20 +26,45 @@ import org.threeten.bp.LocalDate
 @Composable
 fun PaywallScreen(
     vm: PaywallViewModel,
-    membership: Membership = Membership(),
+    account: Account,
+    scaffoldState: ScaffoldState,
+    onFtcPay: (item: CartItemFtcV2) -> Unit,
+    onStripePay: (item: CartItemStripeV2) -> Unit,
 ) {
-    PaywallContent(
+
+    vm.loadPaywall(account.isTest)
+    vm.loadStripePrices()
+
+    vm.msgId?.let {
+        Toast(
+            scaffoldState = scaffoldState,
+            message = stringResource(id = it),
+        )
+    }
+
+    vm.errMsg?.let {
+        Toast(
+            scaffoldState = scaffoldState,
+            message = it,
+        )
+    }
+
+    PaywallBody(
         paywall = vm.paywallState,
         stripePrices = vm.stripeState,
-        membership = membership,
+        membership = account.membership,
+        onFtcPay = onFtcPay,
+        onStripePay = onStripePay
     )
 }
 
 @Composable
-fun PaywallContent(
+fun PaywallBody(
     paywall: Paywall,
     stripePrices: Map<String, StripePrice>,
-    membership: Membership = Membership(),
+    membership: Membership,
+    onFtcPay: (item: CartItemFtcV2) -> Unit,
+    onStripePay: (item: CartItemStripeV2) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -62,8 +88,8 @@ fun PaywallContent(
                         stripeCartItems = StripePriceIDsOfProduct
                             .newInstance(ftcItems)
                             .listShoppingItems(stripePrices, membership),
-                        onFtcPay = {},
-                        onStripePay = {}
+                        onFtcPay = onFtcPay,
+                        onStripePay = onStripePay
                     )
                 }
             )
@@ -79,7 +105,7 @@ fun PaywallContent(
 @Preview
 @Composable
 fun PreviewPaywallContent() {
-    PaywallContent(
+    PaywallBody(
         paywall = defaultPaywall,
         stripePrices = mapOf(),
         membership = Membership(
@@ -87,6 +113,8 @@ fun PreviewPaywallContent() {
             cycle = Cycle.YEAR,
             expireDate = LocalDate.now().plusMonths(6),
             payMethod = PayMethod.ALIPAY,
-        )
+        ),
+        onFtcPay = {},
+        onStripePay = {},
     )
 }
