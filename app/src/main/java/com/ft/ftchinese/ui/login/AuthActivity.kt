@@ -31,7 +31,6 @@ private val tabs = listOf(
     "微信",
 )
 
-@ExperimentalCoroutinesApi
 class AuthActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
