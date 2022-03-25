@@ -7,18 +7,23 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun Toolbar(
-    barTitle: String,
     onBack: () -> Unit,
+    currentScreen: SubsScreen,
     isMenu: Boolean = false,
 ) {
     TopAppBar(
-        title = { Text(text = barTitle) },
+        title = {
+            Text(
+                text = stringResource(id = currentScreen.titleId)
+            )
+        },
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(
@@ -36,10 +41,8 @@ fun Toolbar(
 @Composable
 fun PreviewToolbar() {
     Toolbar(
-        barTitle = "Test",
-        onBack = {
-
-        },
+        currentScreen = SubsScreen.FtcPay,
+        onBack = {},
     )
 }
 
