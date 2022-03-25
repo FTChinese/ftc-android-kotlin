@@ -10,7 +10,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,12 +18,13 @@ import androidx.navigation.compose.rememberNavController
 import com.ft.ftchinese.model.paywall.CartItemFtcV2
 import com.ft.ftchinese.model.paywall.CartItemStripeV2
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedComponentActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.components.SubsScreen
 import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.viewmodel.AuthViewModel
 
 class PaywallActivityV2 : ScopedComponentActivity() {
 
@@ -38,6 +38,8 @@ class PaywallActivityV2 : ScopedComponentActivity() {
             PaywallViewModelFactory(cache)
         )[PaywallViewModel::class.java]
 
+        val authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
+
         connectionLiveData.observe(this) {
             paywallViewModel.isNetworkAvailable.value = it
         }
@@ -46,7 +48,11 @@ class PaywallActivityV2 : ScopedComponentActivity() {
         setContent {
             SubscriptionApp(
                 paywallViewModel = paywallViewModel,
-                onExit = { finish() }
+                authViewModel = authViewModel,
+                onExit = { finish() },
+                onLogin = {
+                    AuthActivity.startForResult(this)
+                }
             )
         }
     }
@@ -62,15 +68,15 @@ class PaywallActivityV2 : ScopedComponentActivity() {
 @Composable
 fun SubscriptionApp(
     paywallViewModel: PaywallViewModel,
+    authViewModel: AuthViewModel,
     onExit: () -> Unit,
+    onLogin: () -> Unit,
 ) {
-    val account = SessionManager
-        .getInstance(LocalContext.current)
-        .loadAccount()
-        ?: return
+
+    val scaffoldState = rememberScaffoldState()
 
     OTheme {
-        val scaffoldState = rememberScaffoldState()
+
         val navController = rememberNavController()
         val backstackEntry = navController.currentBackStackEntryAsState()
         val currentScreen = SubsScreen.fromRoute(
@@ -97,15 +103,16 @@ fun SubscriptionApp(
             ) {
                 composable(SubsScreen.Paywall.name) {
                     PaywallScreen(
-                        vm = paywallViewModel,
-                        account = account,
+                        paywallViewModel = paywallViewModel,
+                        authViewModel = authViewModel,
                         scaffoldState = scaffoldState,
                         onFtcPay = { item: CartItemFtcV2 ->
                             navController.navigate(SubsScreen.FtcPay.name)
                         },
                         onStripePay = { item: CartItemStripeV2 ->
                             navController.navigate(SubsScreen.StripePay.name)
-                        }
+                        },
+                        onClickLogin = onLogin,
                     )
                 }
 
