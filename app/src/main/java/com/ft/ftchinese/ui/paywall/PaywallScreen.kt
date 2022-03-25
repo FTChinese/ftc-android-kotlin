@@ -63,9 +63,7 @@ fun PaywallScreen(
             PaywallLogin(onClick = onClickLogin)
         },
         emailContent = {
-            CustomerService(onError = { msg ->
-
-            })
+            CustomerService()
         }
     )
 }
@@ -181,7 +179,7 @@ fun PreviewPaywallContent() {
             }
         },
         emailContent = {
-            CustomerService(onError = {})
+            CustomerService()
         }
     )
 }

@@ -1,23 +1,22 @@
 package com.ft.ftchinese.ui.components
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.IntentsUtil
 import com.ft.ftchinese.ui.theme.OColor
+import kotlinx.coroutines.launch
 
 @Composable
-fun CustomerService(
-    onError: (String) -> Unit,
-) {
+fun CustomerService() {
     val context = LocalContext.current
+    val scaffoldState = rememberScaffoldState()
+    val scope = rememberCoroutineScope()
 
     Column {
         Text(
@@ -30,7 +29,9 @@ fun CustomerService(
             if (intent.resolveActivity(context.packageManager) != null) {
                 context.startActivity(intent)
             } else {
-                onError(context.getString(R.string.prompt_no_email_app))
+                scope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(context.getString(R.string.prompt_no_email_app))
+                }
             }
         }) {
             Text(text = stringResource(id = R.string.customer_service_email))
@@ -41,7 +42,5 @@ fun CustomerService(
 @Preview
 @Composable
 fun PreviewCustomerService() {
-    CustomerService(
-        onError = { }
-    )
+    CustomerService()
 }
