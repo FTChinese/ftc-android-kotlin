@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.paywall
+package com.ft.ftchinese.ui.components
 
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
