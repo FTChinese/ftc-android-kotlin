@@ -12,7 +12,7 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
+@Deprecated("Use compose ui")
 class CustomerServiceFragment : ScopedFragment() {
 
     private lateinit var binding: FragmentCustomerServiceBinding

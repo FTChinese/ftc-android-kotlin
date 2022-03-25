@@ -21,6 +21,7 @@ import com.ft.ftchinese.ui.product.ProductViewModel
  * Use the [SubsStatusFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+@Deprecated("Use comppose ui")
 class SubsStatusFragment : Fragment() {
 
     private lateinit var productViewModel: ProductViewModel

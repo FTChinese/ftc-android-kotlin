@@ -32,7 +32,7 @@ import org.jetbrains.anko.toast
 /**
  * Paywall of products.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
+@Deprecated("Use compose ui")
 class PaywallActivity : ScopedAppActivity(),
     SwipeRefreshLayout.OnRefreshListener {
 
