@@ -24,7 +24,7 @@ class ReadArticleFragment : ScopedFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        model = ViewModelProvider(this).get(ReadArticleViewModel::class.java)
+        model = ViewModelProvider(this)[ReadArticleViewModel::class.java]
 
         viewAdapter = ListAdapter(listOf())
 
