@@ -9,6 +9,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.compose.rememberNavController
 import com.ft.ftchinese.R
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
@@ -40,6 +41,7 @@ class PaywallActivityV2 : ScopedComponentActivity() {
         setContent {
             OTheme {
                 val scaffoldState = rememberScaffoldState()
+                val navController = rememberNavController()
 
                 Scaffold(
                     topBar = {

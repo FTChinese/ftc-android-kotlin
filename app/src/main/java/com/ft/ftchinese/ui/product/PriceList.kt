@@ -1,12 +1,10 @@
-package com.ft.ftchinese.ui.paywall
+package com.ft.ftchinese.ui.product
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.paywall.CartItemFtcV2
 import com.ft.ftchinese.model.paywall.CartItemStripeV2
-import com.ft.ftchinese.ui.product.PriceCard
-import com.ft.ftchinese.ui.product.PriceCardParams
 
 @Composable
 fun PriceList(
