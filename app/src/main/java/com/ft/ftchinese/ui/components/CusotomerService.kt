@@ -13,10 +13,10 @@ import com.ft.ftchinese.ui.theme.OColor
 import kotlinx.coroutines.launch
 
 @Composable
-fun CustomerService() {
+fun CustomerService(
+    onError: (String) -> Unit,
+) {
     val context = LocalContext.current
-    val scaffoldState = rememberScaffoldState()
-    val scope = rememberCoroutineScope()
 
     Column {
         Text(
@@ -29,9 +29,7 @@ fun CustomerService() {
             if (intent.resolveActivity(context.packageManager) != null) {
                 context.startActivity(intent)
             } else {
-                scope.launch {
-                    scaffoldState.snackbarHostState.showSnackbar(context.getString(R.string.prompt_no_email_app))
-                }
+                onError(context.getString(R.string.prompt_no_email_app))
             }
         }) {
             Text(text = stringResource(id = R.string.customer_service_email))
@@ -42,5 +40,7 @@ fun CustomerService() {
 @Preview
 @Composable
 fun PreviewCustomerService() {
-    CustomerService()
+    CustomerService(
+        onError = { }
+    )
 }

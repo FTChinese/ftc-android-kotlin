@@ -9,6 +9,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
@@ -25,6 +26,7 @@ import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.AuthViewModel
+import kotlinx.coroutines.launch
 
 class PaywallActivityV2 : ScopedComponentActivity() {
 
@@ -74,6 +76,7 @@ fun SubscriptionApp(
 ) {
 
     val scaffoldState = rememberScaffoldState()
+    val scope = rememberCoroutineScope()
 
     OTheme {
 
@@ -105,7 +108,6 @@ fun SubscriptionApp(
                     PaywallScreen(
                         paywallViewModel = paywallViewModel,
                         authViewModel = authViewModel,
-                        scaffoldState = scaffoldState,
                         onFtcPay = { item: CartItemFtcV2 ->
                             navController.navigate(SubsScreen.FtcPay.name)
                         },
@@ -113,6 +115,11 @@ fun SubscriptionApp(
                             navController.navigate(SubsScreen.StripePay.name)
                         },
                         onClickLogin = onLogin,
+                        onError = { msg ->
+                            scope.launch {
+                                scaffoldState.snackbarHostState.showSnackbar(msg)
+                            }
+                        }
                     )
                 }
 

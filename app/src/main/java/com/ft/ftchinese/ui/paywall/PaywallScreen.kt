@@ -3,7 +3,9 @@ package com.ft.ftchinese.ui.paywall
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -16,7 +18,6 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.ui.components.CustomerService
-import com.ft.ftchinese.ui.components.Toast
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.product.PriceList
 import com.ft.ftchinese.ui.product.ProductCard
@@ -28,29 +29,31 @@ import dev.jeziellago.compose.markdowntext.MarkdownText
 fun PaywallScreen(
     paywallViewModel: PaywallViewModel,
     authViewModel: AuthViewModel,
-    scaffoldState: ScaffoldState,
     onFtcPay: (item: CartItemFtcV2) -> Unit,
     onStripePay: (item: CartItemStripeV2) -> Unit,
     onClickLogin: () -> Unit,
+    onError: (String) -> Unit,
 ) {
 
+    val context = LocalContext.current
+
     LaunchedEffect(key1 = Unit) {
-        paywallViewModel.loadPaywall(authViewModel.account?.isTest ?: false)
+        paywallViewModel.loadPaywall(
+            authViewModel.account?.isTest ?: false
+        )
         paywallViewModel.loadStripePrices()
     }
 
-    paywallViewModel.msgId?.let {
-        Toast(
-            scaffoldState = scaffoldState,
-            message = stringResource(id = it),
-        )
+    LaunchedEffect(key1 = paywallViewModel.msgId) {
+        paywallViewModel.msgId?.let {
+            onError(context.getString(it))
+        }
     }
 
-    paywallViewModel.errMsg?.let {
-        Toast(
-            scaffoldState = scaffoldState,
-            message = it,
-        )
+    LaunchedEffect(key1 = paywallViewModel.errMsg) {
+        paywallViewModel.errMsg?.let {
+            onError(it)
+        }
     }
 
     PaywallBody(
@@ -63,7 +66,7 @@ fun PaywallScreen(
             PaywallLogin(onClick = onClickLogin)
         },
         emailContent = {
-            CustomerService()
+            CustomerService(onError = onError)
         }
     )
 }
@@ -179,7 +182,7 @@ fun PreviewPaywallContent() {
             }
         },
         emailContent = {
-            CustomerService()
+            CustomerService(onError = {})
         }
     )
 }
