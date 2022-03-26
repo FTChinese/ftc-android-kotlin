@@ -3,6 +3,7 @@ package com.ft.ftchinese.ui.ftcpay
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -24,9 +25,12 @@ fun FtcPayBody(
     cartItem: CartItemFtcV2,
 ) {
     Column {
-        PriceCard(
-            params = PriceCardParams.ofFtc(LocalContext.current, cartItem)
-        )
+        Card {
+            PriceCard(
+                params = PriceCardParams.ofFtc(LocalContext.current, cartItem)
+            )
+
+        }
 
         Text(
             text = cartItem.intent.message,
