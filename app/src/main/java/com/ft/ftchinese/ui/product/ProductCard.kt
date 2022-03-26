@@ -24,7 +24,7 @@ import com.ft.ftchinese.ui.theme.OColor
 import org.threeten.bp.LocalDate
 
 @Composable
-fun ProductHeading(text: String) {
+private fun ProductHeading(text: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
@@ -87,7 +87,7 @@ fun ProductCard(
 }
 
 @Composable
-fun ProductDescRow(text: String) {
+private fun ProductDescRow(text: String) {
     Row {
        Image(
            painter = painterResource(id = R.drawable.ic_done_gray_24dp),
