@@ -15,7 +15,7 @@ import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
-fun PricePayable(parts: PriceParts) {
+private fun PricePayable(parts: PriceParts) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
@@ -34,7 +34,7 @@ fun PricePayable(parts: PriceParts) {
 }
 
 @Composable
-fun PriceOriginal(parts: PriceParts, crossed: Boolean = true) {
+private fun PriceOriginal(parts: PriceParts, crossed: Boolean = true) {
     
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -59,7 +59,7 @@ fun PriceOriginal(parts: PriceParts, crossed: Boolean = true) {
 }
 
 @Composable
-fun PriceHeading(text: String) {
+private fun PriceHeading(text: String) {
     Row(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -73,7 +73,7 @@ fun PriceHeading(text: String) {
 }
 
 @Composable
-fun PriceTitle(text: String) {
+private fun PriceTitle(text: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
@@ -88,7 +88,7 @@ fun PriceTitle(text: String) {
 }
 
 @Composable
-fun PriceSmallPrint(text: String) {
+private fun PriceSmallPrint(text: String) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center
@@ -101,47 +101,37 @@ fun PriceSmallPrint(text: String) {
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PriceCard(
     params: PriceCardParams,
-    onClick: () -> Unit = {},
 ) {
-    Card(
-        onClick = onClick,
-        backgroundColor = OColor.wheat,
-        elevation = Dimens.dp4
+    Column(
+        modifier = Modifier.padding(Dimens.dp8),
     ) {
-        Column(
-            modifier = Modifier.padding(Dimens.dp8),
-        ) {
 
-            PriceHeading(text = params.heading)
+        PriceHeading(text = params.heading)
 
-            params.title?.let {
-                PriceTitle(text = params.title)
-            }
-
-            PricePayable(
-                parts = params.payable,
-            )
-
-            params.original?.let {
-                PriceOriginal(
-                    parts = params.original,
-                    crossed = !params.isAutoRenew
-                )
-            }
-
-            Spacer(modifier = Modifier.height(Dimens.dp16))
-
-            PriceSmallPrint(text = params.smallPrint ?: "")
-
-            Spacer(modifier = Modifier.height(Dimens.dp16))
+        params.title?.let {
+            PriceTitle(text = params.title)
         }
-    }
 
-    Spacer(modifier = Modifier.height(Dimens.dp16))
+        PricePayable(
+            parts = params.payable,
+        )
+
+        params.original?.let {
+            PriceOriginal(
+                parts = params.original,
+                crossed = !params.isAutoRenew
+            )
+        }
+
+        Spacer(modifier = Modifier.height(Dimens.dp16))
+
+        PriceSmallPrint(text = params.smallPrint ?: "")
+
+        Spacer(modifier = Modifier.height(Dimens.dp16))
+    }
 }
 
 @Preview
@@ -165,6 +155,5 @@ fun PreviewDiscountPrice() {
             isAutoRenew = false,
             smallPrint = "* 仅限支付宝或微信支付"
         ),
-        onClick = { }
     )
 }
