@@ -105,7 +105,7 @@ fun PriceSmallPrint(text: String) {
 @Composable
 fun PriceCard(
     params: PriceCardParams,
-    onClick: () -> Unit,
+    onClick: () -> Unit = {},
 ) {
     Card(
         onClick = onClick,
