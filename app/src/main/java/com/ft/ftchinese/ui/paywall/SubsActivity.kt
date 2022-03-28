@@ -28,7 +28,7 @@ import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
-class PaywallActivityV2 : ScopedComponentActivity() {
+class SubsActivity : ScopedComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +62,7 @@ class PaywallActivityV2 : ScopedComponentActivity() {
     companion object {
         @JvmStatic
         fun start(context: Context?) {
-            context?.startActivity(Intent(context, PaywallActivityV2::class.java))
+            context?.startActivity(Intent(context, SubsActivity::class.java))
         }
     }
 }

@@ -46,7 +46,7 @@ import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.ui.paywall.PaywallActivityV2
+import com.ft.ftchinese.ui.paywall.SubsActivity
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.firebase.messaging.FirebaseMessaging
@@ -97,7 +97,7 @@ class TestActivity : ScopedAppActivity() {
                 ) {
                     Column {
                         Button(onClick = {
-                            PaywallActivityV2.start(this@TestActivity)
+                            SubsActivity.start(this@TestActivity)
                         }) {
                             Text(text = "Compose Paywall")
                         }
