@@ -189,7 +189,7 @@ dependencies {
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.anko:anko:0.10.8"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
 
     // See https://firebase.google.com/support/release-notes/android
     // on how to install firebase as of 2021.04
@@ -261,6 +261,8 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1'
     // Integration with observables
     implementation 'androidx.compose.runtime:runtime-livedata:1.1.1'
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0"
+    implementation "com.google.accompanist:accompanist-swiperefresh:0.24.5-alpha"
 
     // UI Tests
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.1.1'
