@@ -34,7 +34,6 @@ import org.jetbrains.anko.support.v4.toast
  * [com.ft.ftchinese.ui.login.SignInFragment] and then go to
  * [com.ft.ftchinese.ui.login.SignUpFragment].
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class MobileFragment : ScopedFragment() {
 
     private lateinit var sessionManager: SessionManager
@@ -175,7 +174,7 @@ class MobileFragment : ScopedFragment() {
                 is FetchResult.LocalizedError -> onUpdateError(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
-                    toast(R.string.prompt_updated)
+                    toast(R.string.refresh_success)
                     sessionManager
                         .loadAccount()
                         ?.withBaseAccount(it.data)
