@@ -10,7 +10,6 @@ import com.ft.ftchinese.model.fetch.formatISODateTime
 import com.ft.ftchinese.model.fetch.formatLocalDate
 import com.ft.ftchinese.model.fetch.parseISODateTime
 import com.ft.ftchinese.model.fetch.parseLocalDate
-import com.ft.ftchinese.model.paywall.PaywallCache
 import com.ft.ftchinese.model.reader.*
 
 private const val SESSION_PREF_NAME = "account"
