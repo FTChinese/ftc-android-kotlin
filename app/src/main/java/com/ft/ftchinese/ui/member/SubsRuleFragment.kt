@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.paywall
+package com.ft.ftchinese.ui.member
 
 import android.content.Context
 import android.os.Bundle

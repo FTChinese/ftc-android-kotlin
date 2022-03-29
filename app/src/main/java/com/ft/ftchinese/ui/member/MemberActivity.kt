@@ -14,6 +14,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityMemberBinding
 import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.iapsubs.IAPSubsResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
@@ -23,17 +24,13 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.checkout.CheckOutActivity
 import com.ft.ftchinese.ui.order.MyOrdersActivity
-import com.ft.ftchinese.ui.paywall.CustomerServiceFragment
-import com.ft.ftchinese.ui.paywall.PaywallActivity
+import com.ft.ftchinese.ui.paywall.SubsActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.ui.paywall.SubsRuleFragment
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.jetbrains.anko.toast
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class MemberActivity : ScopedAppActivity(),
         SwipeRefreshLayout.OnRefreshListener {
 
@@ -100,7 +97,7 @@ class MemberActivity : ScopedAppActivity(),
                 is FetchResult.LocalizedError -> toast(result.msgId)
                 is FetchResult.Error -> result.exception.message?.let { toast(it) }
                 is FetchResult.Success -> {
-                    toast(R.string.prompt_updated)
+                    toast(R.string.refresh_success)
                     sessionManager.saveAccount(result.data)
                     subsChanged(result.data.membership)
                     setResult(Activity.RESULT_OK)
@@ -115,7 +112,7 @@ class MemberActivity : ScopedAppActivity(),
                 is FetchResult.LocalizedError -> toast(result.msgId)
                 is FetchResult.Error -> result.exception.message?.let { toast(it) }
                 is FetchResult.Success -> {
-                    toast(R.string.prompt_updated)
+                    toast(R.string.refresh_success)
                     sessionManager.saveMembership(result.data)
                     subsChanged(result.data)
                     setResult(Activity.RESULT_OK)
@@ -169,7 +166,7 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         binding.subsUpdate.setOnClickListener {
-            PaywallActivity.start(this)
+            SubsActivity.start(this)
         }
 
         sessionManager.loadAccount()?.membership?.let {
