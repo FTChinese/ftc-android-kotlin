@@ -66,11 +66,11 @@ data class PaywallProduct(
     fun listShoppingItems(m: Membership): List<CartItemFtcV2> {
         val offerKinds = m.offerKinds
 
-        val recurringItems = prices.map {
+        val recurringItems = prices.map { price ->
             CartItemFtcV2(
-                intent = CheckoutIntent.ofOneTimePurchase(m, it),
-                price = it,
-                discount = it.filterOffer(offerKinds),
+                intent = price.checkoutIntent(m),
+                price = price,
+                discount = price.filterOffer(offerKinds),
                 isIntro = false,
             )
         }
