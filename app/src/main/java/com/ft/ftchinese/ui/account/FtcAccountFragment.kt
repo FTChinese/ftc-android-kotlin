@@ -127,7 +127,7 @@ class FtcAccountFragment : ScopedFragment() {
     // If still linked after refreshing, only update the ui data;
     // If unlinked after refreshing, we need to switch to wechat UI.
     private fun onAccountRefreshed(account: Account) {
-        toast(R.string.prompt_updated)
+        toast(R.string.refresh_success)
         sessionManager.saveAccount(account)
 
         if (account.isWxOnly) {

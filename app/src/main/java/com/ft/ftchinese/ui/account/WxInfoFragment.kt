@@ -114,7 +114,7 @@ class WxInfoFragment : ScopedFragment(), SwipeRefreshLayout.OnRefreshListener {
     // Since we only allow refreshing for wechat-logged in user,
     // there is not need to worry about UI switching to FtcAccountFragment.
     private fun onAccountRefreshed(account: Account) {
-        toast(R.string.prompt_updated)
+        toast(R.string.refresh_success)
 
         sessionManager.saveAccount(account)
         infoViewModel.refreshAvatar(account.wechat, cache)

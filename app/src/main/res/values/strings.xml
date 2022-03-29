@@ -73,7 +73,7 @@
 
     <!--  Generic message  -->
     <string name="prompt_saved">保存成功!</string>
-    <string name="prompt_updated">更新成功!</string>
+    <string name="refresh_success">更新成功!</string>
 
     <!--  Account  -->
     <string name="title_login">登录FT中文网</string>

@@ -131,7 +131,7 @@
     <string name="prompt_not_logged_in">您尚未登入，登入後可以查看</string>
     <string name="prompt_no_email_app">您的設備上沒有安裝信件程式，無法發送反饋信件</string>
     <string name="prompt_saved">保存成功!</string>
-    <string name="prompt_updated">更新成功!</string>
+    <string name="refresh_success">更新成功!</string>
 
     <string name="prompt_linked">帳號已绑定</string>
     <string name="prompt_unlinked">帳號已解除綁定</string>
