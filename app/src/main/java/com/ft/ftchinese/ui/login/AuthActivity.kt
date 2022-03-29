@@ -12,17 +12,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAuthBinding
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.email.EmailExistsFragment
+import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.util.RequestCode
 import com.google.android.material.tabs.TabLayoutMediator
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.toast
 
 private val tabs = listOf(
@@ -149,6 +148,9 @@ class AuthActivity : ScopedAppActivity() {
                 RequestCode.SIGN_IN
             )
         }
+
+        @JvmStatic
+        fun intent(context: Context) = Intent(context, AuthActivity::class.java)
     }
 }
 

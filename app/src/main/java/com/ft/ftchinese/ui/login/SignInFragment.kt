@@ -39,7 +39,6 @@ import org.jetbrains.anko.support.v4.toast
  * 3. A wx user is trying to link to an existing account.
  * The loaded account will be used for link preview.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class SignInFragment : ScopedBottomSheetDialogFragment() {
 
     private lateinit var sessionManager: SessionManager

@@ -83,7 +83,7 @@ class UpdateEmailFragment : ScopedFragment() {
                 is FetchResult.LocalizedError -> alertErrorMsg(it.msgId)
                 is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
                 is FetchResult.Success -> {
-                    toast(R.string.prompt_updated)
+                    toast(R.string.refresh_success)
                     sessionManager
                         .loadAccount()
                         ?.withBaseAccount(it.data)

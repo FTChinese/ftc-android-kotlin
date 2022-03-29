@@ -17,13 +17,12 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.checkout.CheckOutViewModel
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.member.MemberActivity
-import com.ft.ftchinese.ui.paywall.PaywallActivity
+import com.ft.ftchinese.ui.paywall.SubsActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 private const val EXTRA_UI_TEST = "extra_ui_test"
 
@@ -34,7 +33,6 @@ private const val EXTRA_UI_TEST = "extra_ui_test"
  * to wechat sdk, which will call Wechat. After you paid inside wechat app, you will be redirected
  * to this page.
  */
-@ExperimentalCoroutinesApi
 class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
 
     private var payIntentStore: PayIntentStore? = null
@@ -172,7 +170,6 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
     /**
      * After user paid by wechat, show the done button
      * which starts [MemberActivity] if the updated
-     * membership is valid or [PaywallActivity]
      * if membership is still invalid.
      */
     private fun onClickDone() {
@@ -188,7 +185,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
             LatestInvoiceActivity.start(this)
         } else {
             PaywallTracker.from = null
-            PaywallActivity.start(this)
+            SubsActivity.start(this)
         }
 
         finish()

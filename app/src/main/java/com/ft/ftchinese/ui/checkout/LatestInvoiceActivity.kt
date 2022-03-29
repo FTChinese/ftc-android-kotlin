@@ -22,7 +22,6 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
 /**
  * [LatestInvoiceActivity] shows the payment result of alipay of wxpay.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class LatestInvoiceActivity : ScopedAppActivity() {
 
     private lateinit var binding: ActivityLatestInvoiceBinding

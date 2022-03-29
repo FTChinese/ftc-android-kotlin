@@ -45,7 +45,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.anko.toast
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listener {
 
     private lateinit var checkOutViewModel: CheckOutViewModel

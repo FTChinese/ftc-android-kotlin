@@ -33,7 +33,6 @@ import org.jetbrains.anko.support.v4.toast
  * AuthActivity -> MobileFragment -> SignInFragment -> SignUpFragment
  * LinkFtcActivity -> SignUpFragment
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class SignUpFragment : ScopedBottomSheetDialogFragment() {
 
     private lateinit var sessionManager: SessionManager

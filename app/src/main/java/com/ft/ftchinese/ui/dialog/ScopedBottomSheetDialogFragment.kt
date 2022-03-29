@@ -13,7 +13,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 abstract class ScopedBottomSheetDialogFragment : BottomSheetDialogFragment(), CoroutineScope by MainScope(){
 
     protected lateinit var connectionLiveData: ConnectionLiveData

@@ -10,7 +10,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentEmailExistsBinding
 import com.ft.ftchinese.ui.base.ScopedFragment
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class EmailExistsFragment : ScopedFragment() {
 
     private lateinit var emailViewModel: EmailViewModel
