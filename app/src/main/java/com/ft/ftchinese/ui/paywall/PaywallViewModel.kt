@@ -10,7 +10,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.paywall.Paywall
-import com.ft.ftchinese.model.paywall.PaywallCache
+import com.ft.ftchinese.store.PaywallCache
 import com.ft.ftchinese.model.paywall.StripePriceStore
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.stripesubs.StripePrice
@@ -19,15 +19,15 @@ import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.BaseViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
 private const val TAG = "PaywallViewModel"
 
 class PaywallViewModel(
     private val cache: FileCache
 ) : BaseViewModel() {
+
+    private var premiumOnTop = false
 
     var paywallState by mutableStateOf(defaultPaywall)
         private set
@@ -40,12 +40,26 @@ class PaywallViewModel(
     var errMsg by mutableStateOf<String?>(null)
         private set
 
+    var isRefreshing by mutableStateOf(false)
+        private set
+
+    @Deprecated("")
     val paywallResult: MutableLiveData<FetchResult<Paywall>> by lazy {
         MutableLiveData<FetchResult<Paywall>>()
     }
 
+    @Deprecated("")
     val stripePrices: MutableLiveData<FetchResult<List<StripePrice>>> by lazy {
         MutableLiveData<FetchResult<List<StripePrice>>>()
+    }
+
+    fun putPremiumOnTop(onTop: Boolean) {
+        if (onTop == premiumOnTop) {
+            return
+        }
+
+        premiumOnTop = onTop
+        paywallState = paywallState.reOrderProducts(premiumOnTop = onTop)
     }
 
     // The cached file are versioned therefore whenever a user
@@ -96,8 +110,6 @@ class PaywallViewModel(
                 }
             }
 
-            PaywallCache.setFtc(pwResp.body)
-
             return FetchResult.Success(pwResp.body)
         } catch (e: Exception) {
             e.message?.let { Log.i(TAG, it) }
@@ -105,10 +117,18 @@ class PaywallViewModel(
         }
     }
 
-    fun refreshFtcPrice(isTest: Boolean) {
-        viewModelScope.launch {
-            val result = loadRemotePaywall(isTest)
-            paywallResult.value = result
+    private fun setFtcPrice(result: FetchResult<Paywall>) {
+        when (result) {
+            is FetchResult.Success -> {
+                paywallState = result.data.reOrderProducts(premiumOnTop)
+                PaywallCache.setFtc(result.data)
+            }
+            is FetchResult.LocalizedError -> {
+                msgId = result.msgId
+            }
+            is FetchResult.Error -> {
+                errMsg = result.exception.message
+            }
         }
     }
 
@@ -119,26 +139,12 @@ class PaywallViewModel(
             val pw = loadCachedPaywall(isTest)
             if (pw != null) {
                 Log.i(TAG, "Paywall data loaded from local cached file")
-                paywallResult.value = FetchResult.Success(pw)
-                paywallState = pw
+                setFtcPrice(FetchResult.Success(pw))
             }
 
             val result = loadRemotePaywall(isTest)
-            paywallResult.value = result
-            if (result is FetchResult.Success) {
-                paywallState = result.data
-            }
-            when (result) {
-                is FetchResult.Success -> {
-                    paywallState = result.data
-                }
-                is FetchResult.LocalizedError -> {
-                    msgId = result.msgId
-                }
-                is FetchResult.Error -> {
-                    errMsg = result.exception.message
-                }
-            }
+
+            setFtcPrice(result)
         }
     }
 
@@ -198,11 +204,19 @@ class PaywallViewModel(
         }
     }
 
-    fun refreshStripePrices() {
-        viewModelScope.launch {
-            val result = loadRemoteStripe()
-            stripePrices.value = result
-            progressLiveData.value = false
+    private fun setStripePrice(result: FetchResult<List<StripePrice>>) {
+        when (result) {
+            is FetchResult.Success -> {
+                stripeState = result.data.associateBy {
+                    it.id
+                }
+            }
+            is FetchResult.LocalizedError -> {
+                msgId = result.msgId
+            }
+            is FetchResult.Error -> {
+                errMsg = result.exception.message
+            }
         }
     }
 
@@ -211,33 +225,53 @@ class PaywallViewModel(
     // This works as a backup in case stripe prices is not yet
     // loaded into memory.
     fun loadStripePrices() {
-        Log.i(TAG, "Loading stripe prices...")
         progressLiveData.value = true
 
         viewModelScope.launch {
             val prices = loadCachedStripe()
             if (prices != null) {
-                stripePrices.value = FetchResult.Success(prices)
                 progressLiveData.value = false
+                setStripePrice(FetchResult.Success(prices))
             }
 
             val result = loadRemoteStripe()
+            progressLiveData.value = false
+            setStripePrice(result)
+        }
+    }
+
+    @Deprecated("")
+    fun refreshFtcPrice(isTest: Boolean) {
+        viewModelScope.launch {
+            val result = loadRemotePaywall(isTest)
+            paywallResult.value = result
+        }
+    }
+
+    @Deprecated("")
+    fun refreshStripePrices() {
+        viewModelScope.launch {
+            val result = loadRemoteStripe()
             stripePrices.value = result
             progressLiveData.value = false
+        }
+    }
 
-            when (result) {
-                is FetchResult.Success -> {
-                    stripeState = result.data.associateBy {
-                        it.id
-                    }
-                }
-                is FetchResult.LocalizedError -> {
-                    msgId = result.msgId
-                }
-                is FetchResult.Error -> {
-                    errMsg = result.exception.message
-                }
-            }
+    fun refresh() {
+        isRefreshing = true
+
+        viewModelScope.launch {
+            val ftcDeferred = async { loadRemotePaywall(false) }
+            val stripeDeferred = async { loadRemoteStripe() }
+
+            val ftcRes = ftcDeferred.await()
+            val stripeRes = stripeDeferred.await()
+
+            setFtcPrice(ftcRes)
+            setStripePrice(stripeRes)
+
+            isRefreshing = false
+            msgId = R.string.refresh_success
         }
     }
 
