@@ -12,10 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.ft.ftchinese.model.paywall.CartItemFtcV2
 import com.ft.ftchinese.model.paywall.CartItemStripeV2
 import com.ft.ftchinese.store.FileCache
@@ -23,9 +26,8 @@ import com.ft.ftchinese.ui.base.ScopedComponentActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.components.SubsScreen
 import com.ft.ftchinese.ui.components.Toolbar
-import com.ft.ftchinese.ui.login.AuthActivity
+import com.ft.ftchinese.ui.ftcpay.FtcPayScreen
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
 class SubsActivity : ScopedComponentActivity() {
@@ -40,29 +42,34 @@ class SubsActivity : ScopedComponentActivity() {
             PaywallViewModelFactory(cache)
         )[PaywallViewModel::class.java]
 
-        val authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
-
         connectionLiveData.observe(this) {
             paywallViewModel.isNetworkAvailable.value = it
         }
         paywallViewModel.isNetworkAvailable.value = isConnected
 
+        val premiumFirst = intent.getBooleanExtra(EXTRA_PREMIUM_FIRST, false)
+
+        paywallViewModel.putPremiumOnTop(premiumFirst)
+
         setContent {
             SubscriptionApp(
                 paywallViewModel = paywallViewModel,
-                authViewModel = authViewModel,
                 onExit = { finish() },
-                onLogin = {
-                    AuthActivity.startForResult(this)
-                }
             )
         }
     }
 
     companion object {
+
+        private const val EXTRA_PREMIUM_FIRST = "extra_premium_first"
+
         @JvmStatic
-        fun start(context: Context?) {
-            context?.startActivity(Intent(context, SubsActivity::class.java))
+        fun start(context: Context?, premiumFirst: Boolean = false) {
+            context?.startActivity(
+                Intent(context, SubsActivity::class.java).apply {
+                    putExtra(EXTRA_PREMIUM_FIRST, premiumFirst)
+                }
+            )
         }
     }
 }
@@ -70,9 +77,7 @@ class SubsActivity : ScopedComponentActivity() {
 @Composable
 fun SubscriptionApp(
     paywallViewModel: PaywallViewModel,
-    authViewModel: AuthViewModel,
     onExit: () -> Unit,
-    onLogin: () -> Unit,
 ) {
 
     val scaffoldState = rememberScaffoldState()
@@ -104,17 +109,24 @@ fun SubscriptionApp(
                 startDestination = SubsScreen.Paywall.name,
                 modifier = Modifier.padding(innerPadding)
             ) {
-                composable(SubsScreen.Paywall.name) {
+                composable(
+                    SubsScreen.Paywall.name
+                ) {
                     PaywallScreen(
                         paywallViewModel = paywallViewModel,
-                        authViewModel = authViewModel,
                         onFtcPay = { item: CartItemFtcV2 ->
-                            navController.navigate(SubsScreen.FtcPay.name)
+                            navigateToFtcPay(
+                                navController = navController,
+                                priceId = item.price.id,
+                            )
                         },
                         onStripePay = { item: CartItemStripeV2 ->
-                            navController.navigate(SubsScreen.StripePay.name)
+                            navigateToStripePay(
+                                navController = navController,
+                                priceId = item.recurring.id,
+                                trialId = item.trial?.id,
+                            )
                         },
-                        onClickLogin = onLogin,
                         onError = { msg ->
                             scope.launch {
                                 scaffoldState.snackbarHostState.showSnackbar(msg)
@@ -123,14 +135,59 @@ fun SubscriptionApp(
                     )
                 }
 
-                composable(SubsScreen.FtcPay.name) {
-                    Text(text = SubsScreen.FtcPay.name)
+                composable(
+                    route = "${SubsScreen.FtcPay.name}/{priceId}",
+                    arguments = listOf(
+                        navArgument("priceId") {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { entry ->
+                    val priceId = entry.arguments?.getString("priceId")
+
+                    FtcPayScreen(
+                        priceId = priceId,
+                        showSnackBar = { msg ->
+                            scope.launch {
+                                scaffoldState.snackbarHostState.showSnackbar(msg)
+                            }
+                        }
+                    )
                 }
 
-                composable(SubsScreen.StripePay.name) {
+                composable(
+                    route = "${SubsScreen.StripePay.name}/{priceId}?trialId={trialId}",
+                    arguments = listOf(
+                        navArgument("priceId") {
+                            type = NavType.StringType
+                        },
+                        navArgument("trialId") {
+                            type = NavType.StringType
+                            nullable = true
+                        }
+                    )
+                ) { entry ->
+                    val priceId = entry.arguments?.getString("priceId")
+                    val trialId = entry.arguments?.getString("trialId")
                     Text(text = SubsScreen.StripePay.name)
+                    Text(text = "Price id $priceId. Trial id $trialId")
                 }
             }
         }
     }
+}
+
+private fun navigateToFtcPay(
+    navController: NavHostController,
+    priceId: String,
+) {
+    navController.navigate("${SubsScreen.FtcPay.name}/$priceId")
+}
+
+private fun navigateToStripePay(
+    navController: NavHostController,
+    priceId: String,
+    trialId: String?
+) {
+    navController.navigate("${SubsScreen.StripePay}/$priceId?trialId=${trialId}")
 }
