@@ -15,7 +15,7 @@ import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.ui.channel.DenialReason
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.member.MemberActivity
-import com.ft.ftchinese.ui.paywall.PaywallActivity
+import com.ft.ftchinese.ui.paywall.SubsActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
@@ -64,7 +64,7 @@ class PermissionDeniedFragment : BottomSheetDialogFragment() {
 
         binding.loginOrSubscribe.onClick {
             if (access.loggedIn) {
-                PaywallActivity.start(
+                SubsActivity.start(
                     context = requireContext(),
                     premiumFirst = access.content == Permission.PREMIUM,
                 )
