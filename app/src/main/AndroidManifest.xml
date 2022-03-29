@@ -132,14 +132,10 @@
             android:label="@string/title_my_subs"
             android:parentActivityName=".ui.main.MainActivity" />
         <activity
-            android:name=".ui.paywall.PaywallActivity"
-            android:label="@string/title_subscription"
-            android:parentActivityName=".ui.main.MainActivity" />
-        <activity
             android:name=".ui.checkout.CheckOutActivity"
             android:label="@string/check_out"
             android:launchMode="singleTop"
-            android:parentActivityName=".ui.paywall.PaywallActivity" />
+            android:parentActivityName=".ui.paywall.SubsActivity" />
         <activity
             android:name=".ui.checkout.StripeSubActivity"
             android:exported="true"
