@@ -9,6 +9,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentCustomerServiceBinding
 import com.ft.ftchinese.ui.base.IntentsUtil
 import com.ft.ftchinese.ui.base.ScopedFragment
+import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 
 @Deprecated("Use compose ui")
