@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.wxlink
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -22,7 +23,6 @@ import org.jetbrains.anko.toast
 /**
  * UI for a wx-only user to link to an email account.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class LinkFtcActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
@@ -126,5 +126,8 @@ class LinkFtcActivity : ScopedAppActivity() {
             )
 
         }
+
+        @JvmStatic
+        fun intent(context: Context) = Intent(context, LinkFtcActivity::class.java)
     }
 }

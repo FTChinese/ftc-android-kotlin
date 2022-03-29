@@ -20,7 +20,7 @@ import com.ft.ftchinese.tracking.*
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.login.AuthActivity
-import com.ft.ftchinese.ui.paywall.PaywallActivity
+import com.ft.ftchinese.ui.paywall.SubsActivity
 import com.ft.ftchinese.ui.share.ShareUtils
 import org.jetbrains.anko.toast
 
@@ -40,7 +40,6 @@ private const val TYPE_ARCHIVE = "archiver"
  * WVClient is use mostly to handle webUrl clicks loaded into
  * ViewPagerFragment.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 open class WVClient(
         private val context: Context,
         private val viewModel: WVViewModel? = null
@@ -230,7 +229,7 @@ open class WVClient(
                 )
             }
 
-            PaywallActivity.start(context = context)
+            SubsActivity.start(context = context)
         }
 
         return true
