@@ -16,7 +16,6 @@ import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 class WebpageActivity : ScopedAppActivity() {
 
     private lateinit var wvViewModel: WVViewModel

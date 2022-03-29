@@ -9,7 +9,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivitySettingsBinding
 
 // Reference: https://developer.android.com/guide/topics/ui/settings
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class SettingsActivity : AppCompatActivity() {
 
     lateinit var binding: ActivitySettingsBinding

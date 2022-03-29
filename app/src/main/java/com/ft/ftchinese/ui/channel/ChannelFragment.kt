@@ -46,7 +46,6 @@ import kotlin.properties.Delegates
  * Hosted inside [TabPagerAdapter] or [ChannelActivity]
  * when used to handle pagination.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class ChannelFragment : ScopedFragment(),
     SwipeRefreshLayout.OnRefreshListener {
 

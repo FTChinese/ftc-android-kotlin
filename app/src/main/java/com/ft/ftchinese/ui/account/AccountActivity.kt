@@ -31,7 +31,6 @@ import com.ft.ftchinese.viewmodel.AccountViewModel
  * If user logged in with wechat account and it is not bound to an FTC account, show WxAccountFragment;
  * If user logged in with wechat account and it is bound to an FTC account, show FtcAccountFragment.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class AccountActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
@@ -80,9 +79,9 @@ class AccountActivity : ScopedAppActivity() {
     }
 
     private fun setupViewModel() {
-        accountViewModel.progressLiveData.observe(this, {
+        accountViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
-        })
+        }
 
         customerViewModel.progressLiveData.observe(this) {
             binding.inProgress = it

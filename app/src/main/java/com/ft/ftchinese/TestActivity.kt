@@ -57,7 +57,6 @@ import org.threeten.bp.LocalDate
 
 private const val TAG = "TestActivity"
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class TestActivity : ScopedAppActivity() {
 
     private lateinit var payIntentStore: PayIntentStore

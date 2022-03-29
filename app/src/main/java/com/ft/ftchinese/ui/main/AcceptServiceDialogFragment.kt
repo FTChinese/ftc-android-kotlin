@@ -22,7 +22,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 /**
  * https://developer.android.com/guide/topics/ui/dialogs#FullscreenDialog
  */
-@ExperimentalCoroutinesApi
 class AcceptServiceDialogFragment : DialogFragment() {
 
     private lateinit var acceptance: ServiceAcceptance

@@ -28,7 +28,6 @@ private const val PREF_LAST_CHECKED_AT = "last_checked_at"
  * When user clicked the notification, show the UpdateAppActivity, together with intent data carrying
  * the cached file name so that the activity use the data directly instead of fetching from server.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
     Worker(appContext, workerParams) {
 

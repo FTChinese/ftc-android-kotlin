@@ -32,7 +32,6 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
-import com.ft.ftchinese.ui.base.TabPages
 import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.*
@@ -41,14 +40,15 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.account.WxInfoViewModel
 import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.TabPages
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.MyftPagerAdapter
-import com.ft.ftchinese.ui.search.SearchableActivity
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
-import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment
+import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.member.MemberActivity
-import com.ft.ftchinese.ui.paywall.PaywallActivity
+import com.ft.ftchinese.ui.paywall.SubsActivity
+import com.ft.ftchinese.ui.search.SearchableActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.ui.webabout.AboutListActivity
 import com.ft.ftchinese.ui.webpage.WVViewModel
@@ -66,7 +66,6 @@ import org.jetbrains.anko.toast
 /**
  * MainActivity implements ChannelFragment.OnFragmentInteractionListener to interact with TabLayout.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class MainActivity : ScopedAppActivity(),
         TabLayout.OnTabSelectedListener {
 
@@ -335,7 +334,7 @@ class MainActivity : ScopedAppActivity(),
                 R.id.action_paywall -> {
                     // Tracking
                     PaywallTracker.fromDrawer()
-                    PaywallActivity.start(this)
+                    SubsActivity.start(this)
                 }
                 R.id.action_my_subs -> MemberActivity.start(this)
                 R.id.action_feedback -> feedbackEmail()

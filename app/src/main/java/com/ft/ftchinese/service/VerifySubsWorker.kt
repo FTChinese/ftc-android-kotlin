@@ -23,7 +23,6 @@ import com.ft.ftchinese.ui.member.MemberActivity
 /**
  * Verify subscription status each time the app launches.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class VerifySubsWorker(
     appContext: Context,
     workerParams:

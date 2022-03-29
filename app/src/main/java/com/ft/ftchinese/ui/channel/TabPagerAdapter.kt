@@ -10,7 +10,6 @@ import com.ft.ftchinese.model.content.ChannelSource
  * A [FragmentStatePagerAdapter] that returns a fragment corresponding to
  * one of the sections/tabs/mPages.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class TabPagerAdapter(
         private var pages: List<ChannelSource>,
         fm: FragmentManager
