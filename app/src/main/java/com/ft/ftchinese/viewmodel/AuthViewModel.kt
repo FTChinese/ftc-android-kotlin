@@ -19,6 +19,15 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         account = session.loadAccount(raw = true)
     }
 
+    val isLoggedIn: Boolean
+        get() = account != null
+
+    val isStripeCustomer: Boolean
+        get() = !account?.stripeId.isNullOrBlank()
+
+    val isWxOnly: Boolean
+        get() = account?.isWxOnly == true
+
     fun load() {
         account = session.loadAccount(raw = true)
     }
