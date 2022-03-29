@@ -44,11 +44,6 @@ class PaywallViewModel(
         private set
 
     @Deprecated("")
-    val paywallResult: MutableLiveData<FetchResult<Paywall>> by lazy {
-        MutableLiveData<FetchResult<Paywall>>()
-    }
-
-    @Deprecated("")
     val stripePrices: MutableLiveData<FetchResult<List<StripePrice>>> by lazy {
         MutableLiveData<FetchResult<List<StripePrice>>>()
     }
@@ -237,23 +232,6 @@ class PaywallViewModel(
             val result = loadRemoteStripe()
             progressLiveData.value = false
             setStripePrice(result)
-        }
-    }
-
-    @Deprecated("")
-    fun refreshFtcPrice(isTest: Boolean) {
-        viewModelScope.launch {
-            val result = loadRemotePaywall(isTest)
-            paywallResult.value = result
-        }
-    }
-
-    @Deprecated("")
-    fun refreshStripePrices() {
-        viewModelScope.launch {
-            val result = loadRemoteStripe()
-            stripePrices.value = result
-            progressLiveData.value = false
         }
     }
 
