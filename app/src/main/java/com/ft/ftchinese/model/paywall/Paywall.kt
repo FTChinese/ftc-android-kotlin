@@ -9,7 +9,6 @@ data class Paywall(
     val products: List<PaywallProduct>,
     val liveMode: Boolean = true,
 ) {
-
     fun isPromoValid(): Boolean {
         if (promo.id.isEmpty()) {
             return false
@@ -22,6 +21,20 @@ data class Paywall(
         val now = ZonedDateTime.now()
 
         return !now.isBefore(promo.startUtc) && !now.isAfter(promo.endUtc)
+    }
+
+    fun reOrderProducts(premiumOnTop: Boolean): Paywall {
+        return Paywall(
+            id = id,
+            banner = banner,
+            promo = promo,
+            products = if (premiumOnTop) {
+                products.sortedByDescending { it.tier.ordinal }
+            } else {
+                products.sortedBy { it.tier.ordinal }
+            },
+            liveMode = liveMode,
+        )
     }
 }
 
