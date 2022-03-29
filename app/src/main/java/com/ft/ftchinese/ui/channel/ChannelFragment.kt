@@ -135,7 +135,7 @@ class ChannelFragment : ScopedFragment(),
 
         channelViewModel.swipingLiveData.observe(viewLifecycleOwner) {
             binding.swipeRefresh.isRefreshing = it
-            toast(R.string.prompt_updated)
+            toast(R.string.refresh_success)
         }
 
         channelViewModel.htmlRendered.observe(viewLifecycleOwner) {
@@ -234,7 +234,7 @@ class ChannelFragment : ScopedFragment(),
                 Log.i(TAG, "initLoading: web page on $url")
                 binding.webView.loadUrl(url.toString())
                 if (binding.swipeRefresh.isRefreshing) {
-                    toast(R.string.prompt_updated)
+                    toast(R.string.refresh_success)
                     binding.swipeRefresh.isRefreshing = false
                 }
             }
