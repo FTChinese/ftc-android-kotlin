@@ -10,11 +10,11 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentUpdateEmailBinding
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.base.isNetworkConnected
-import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.ui.base.isConnected
 import org.jetbrains.anko.support.v4.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -53,8 +53,7 @@ class UpdateEmailFragment : ScopedFragment() {
         connectionLiveData.observe(viewLifecycleOwner) {
             emailViewModel.isNetworkAvailable.value = it
         }
-
-        activity?.isNetworkConnected()?.let {
+        context?.isConnected?.let {
             emailViewModel.isNetworkAvailable.value = it
         }
 
