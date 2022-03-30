@@ -3,7 +3,10 @@ package com.ft.ftchinese.ui.ftcpay
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,11 +21,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.model.paywall.CartItemFtcV2
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.paywall.defaultPaywall
+import com.ft.ftchinese.ui.components.ErrorDialog
 import com.ft.ftchinese.ui.components.PrimaryButton
+import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.product.PriceCard
 import com.ft.ftchinese.ui.product.PriceCardParams
@@ -30,6 +36,8 @@ import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.theme.OFont
 import com.ft.ftchinese.viewmodel.AuthViewModel
+import com.tencent.mm.opensdk.constants.Build
+import com.tencent.mm.opensdk.openapi.IWXAPI
 
 data class PayMethodRes(
     val image: Int,
@@ -51,12 +59,26 @@ var payMethodResources = mapOf(
 fun FtcPayScreen(
     authViewModel: AuthViewModel = viewModel(),
     payViewModel: FtcPayViewModel = viewModel(),
+    wxApi: IWXAPI,
     priceId: String?,
     showSnackBar: (String) -> Unit,
 ) {
+    val context = LocalContext.current
+    val (loading, setLoading) = remember {
+        mutableStateOf(false)
+    }
+
     if (priceId.isNullOrBlank()) {
         showSnackBar("Missing price id")
         return
+    }
+
+    payViewModel.stringResState?.let {
+        showSnackBar(context.getString(it))
+    }
+
+    payViewModel.messageState?.let {
+        showSnackBar(it)
     }
 
     val account = authViewModel.account
@@ -70,9 +92,45 @@ fun FtcPayScreen(
         account = account,
     )
 
+    val uiState = payViewModel.fetchState
+    when (uiState) {
+        is FetchUi.Progress -> {
+            setLoading(uiState.loading)
+        }
+        is FetchUi.ResMsg -> {
+            setLoading(false)
+            ErrorDialog(
+                text = context.getString(uiState.strId)
+            ) {
+                payViewModel.clearPaymentError()
+            }
+        }
+        is FetchUi.TextMsg -> {
+            setLoading(false)
+            ErrorDialog(
+                text = uiState.text
+            ) {
+                payViewModel.clearPaymentError()
+            }
+        }
+    }
+
     payViewModel.cartItemState?.let { cartItem ->
         FtcPayBody(
-            cartItem = cartItem
+            cartItem = cartItem,
+            loading = loading,
+            onClickPay = { payMethod ->
+                if (payMethod == PayMethod.WXPAY && wxApi.wxAppSupportAPI < Build.PAY_SUPPORTED_SDK_INT) {
+                    showSnackBar(context.getString(R.string.wxpay_not_supported))
+                    return@FtcPayBody
+                }
+
+                payViewModel.createOrder(
+                    account = account,
+                    cartItem = cartItem,
+                    payMethod = payMethod
+                )
+            }
         )
     }
 }
@@ -80,6 +138,8 @@ fun FtcPayScreen(
 @Composable
 fun FtcPayBody(
     cartItem: CartItemFtcV2,
+    loading: Boolean,
+    onClickPay: (PayMethod) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -88,65 +148,73 @@ fun FtcPayBody(
         mutableStateOf<PayMethod?>(null)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxHeight()
-            .fillMaxWidth(),
-        verticalArrangement = Arrangement.SpaceBetween,
+    ProgressLayout(
+        loading = loading,
     ) {
         Column(
             modifier = Modifier
-                .padding(all = Dimens.dp8)
+                .fillMaxHeight()
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.SpaceBetween,
         ) {
-
-            Text(
-                text = FormatHelper.getTier(context, cartItem.price.tier),
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = Dimens.dp8),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.h5,
-            )
-
-            Card(
-                elevation = Dimens.dp4,
+                    .padding(all = Dimens.dp8)
             ) {
-                PriceCard(
-                    params = PriceCardParams.ofFtc(context, cartItem)
-                )
-            }
 
-            if (cartItem.intent.message.isNotBlank()) {
+
+
                 Text(
-                    text = cartItem.intent.message,
-                    style = MaterialTheme.typography.body2,
-                    color = OColor.claret,
+                    text = FormatHelper.getTier(context, cartItem.price.tier),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = Dimens.dp8),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.h5,
                 )
+
+                Card(
+                    elevation = Dimens.dp4,
+                ) {
+                    PriceCard(
+                        params = PriceCardParams.ofFtc(context, cartItem)
+                    )
+                }
+
+                if (cartItem.intent.message.isNotBlank()) {
+                    Text(
+                        text = cartItem.intent.message,
+                        style = MaterialTheme.typography.body2,
+                        color = OColor.claret,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(Dimens.dp16))
+
+                radioOptions.forEach { payMethod ->
+                    PayMethodRow(
+                        method = payMethod,
+                        selected = (payMethod == selectOption),
+                        enabled = (cartItem.intent.kind == IntentKind.Forbidden),
+                        onSelect = onOptionSelected,
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(Dimens.dp16))
-
-            radioOptions.forEach { payMethod ->
-                PayMethodRow(
-                    method = payMethod,
-                    selected = (payMethod == selectOption),
-                    enabled = (cartItem.intent.kind == IntentKind.Forbidden),
-                    onSelect = onOptionSelected,
+            PrimaryButton(
+                onClick = {
+                    selectOption?.let{
+                        onClickPay(it)
+                    }
+                },
+                enabled = (selectOption != null && !loading),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(id = R.string.check_out),
+                    fontSize = OFont.blockButton,
                 )
             }
-        }
-
-        PrimaryButton(
-            onClick = {
-
-            },
-            enabled = (selectOption != null),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(id = R.string.check_out),
-                fontSize = OFont.blockButton,
-            )
         }
     }
 }
@@ -203,13 +271,17 @@ private fun PayMethodRow(
 @Preview(showBackground = true)
 @Composable
 fun PreviewFtcPayBody() {
-    FtcPayBody(cartItem = CartItemFtcV2(
-        intent = CheckoutIntent(
-            kind = IntentKind.Create,
-            message = "",
+    FtcPayBody(
+        cartItem = CartItemFtcV2(
+            intent = CheckoutIntent(
+                kind = IntentKind.Create,
+                message = "",
+            ),
+            price = defaultPaywall.products[0].prices[0],
+            discount = null,
+            isIntro = false,
         ),
-        price = defaultPaywall.products[0].prices[0],
-        discount = null,
-        isIntro = false,
-    ))
+        loading = true,
+        onClickPay = {}
+    )
 }
