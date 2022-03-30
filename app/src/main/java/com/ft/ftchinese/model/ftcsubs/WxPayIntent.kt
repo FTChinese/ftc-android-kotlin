@@ -1,5 +1,7 @@
 package com.ft.ftchinese.model.ftcsubs
 
+import com.tencent.mm.opensdk.modelpay.PayReq
+
 // This is user's payment intent.
 data class WxPayIntent(
     override val price: Price,
@@ -22,4 +24,17 @@ data class WxAppPayParams(
     val nonce: String,
     val pkg: String,
     val signature: String,
-)
+) {
+    fun buildReq(): PayReq {
+        val req = PayReq()
+        req.appId = appId
+        req.partnerId = partnerId
+        req.prepayId = prepayId
+        req.nonceStr = nonce
+        req.timeStamp = timestamp
+        req.packageValue = pkg
+        req.sign = signature
+
+        return req
+    }
+}
