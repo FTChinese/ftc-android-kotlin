@@ -13,7 +13,6 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 /**
  * Used to show the an overview of the item user purchased.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class CartItemFragment : ScopedFragment() {
 
     private lateinit var binding: FragmentCartItemBinding

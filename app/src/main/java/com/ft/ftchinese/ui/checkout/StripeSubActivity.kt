@@ -44,7 +44,6 @@ import org.threeten.bp.format.DateTimeFormatter
 /**
  * See https://stripe.com/docs/mobile/android/basic
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class StripeSubActivity : ScopedAppActivity() {
 
     private lateinit var binding: ActivityStripeSubBinding
