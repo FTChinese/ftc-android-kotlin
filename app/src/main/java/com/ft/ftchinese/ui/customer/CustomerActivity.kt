@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCustomerBinding
-import com.ft.ftchinese.model.fetch.FetchError
+import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.FileCache
@@ -18,7 +18,6 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.account.UIBankCard
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.base.isNetworkConnected
 import com.stripe.android.*
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
@@ -76,9 +75,7 @@ class CustomerActivity : ScopedAppActivity() {
         connectionLiveData.observe(this) {
             customerViewModel.isNetworkAvailable.value = it
         }
-        isNetworkConnected().let {
-            customerViewModel.isNetworkAvailable.value = it
-        }
+        customerViewModel.isNetworkAvailable.value = isConnected
 
         customerViewModel.progressMediatorLiveData.observe(this) {
             binding.inProgress = it
@@ -86,8 +83,8 @@ class CustomerActivity : ScopedAppActivity() {
 
         customerViewModel.errorLiveData.observe(this) {
             when (it) {
-                is FetchError.ResourceId -> toast(it.resId)
-                is FetchError.PlainText -> toast(it.message)
+                is FetchUi.ResMsg -> toast(it.strId)
+                is FetchUi.TextMsg -> toast(it.text)
             }
         }
 

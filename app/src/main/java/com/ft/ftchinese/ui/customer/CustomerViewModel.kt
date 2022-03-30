@@ -5,7 +5,7 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.FetchError
+import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Account
@@ -29,8 +29,8 @@ class CustomerViewModel(
         MutableLiveData<StripeCustomer>()
     }
 
-    val errorLiveData: MutableLiveData<FetchError> by lazy {
-        MutableLiveData<FetchError>()
+    val errorLiveData: MutableLiveData<FetchUi> by lazy {
+        MutableLiveData<FetchUi>()
     }
 
     // When a customer is created.
@@ -126,7 +126,7 @@ class CustomerViewModel(
     // Load stripe customer.
     fun loadCustomer(account: Account) {
         if (isNetworkAvailable.value == false) {
-            errorLiveData.value = FetchError.ResourceId(R.string.prompt_no_network)
+            errorLiveData.value = FetchUi.ResMsg(R.string.prompt_no_network)
             return
         }
 
@@ -154,7 +154,7 @@ class CustomerViewModel(
             }
 
             if (isNetworkAvailable.value != true) {
-                errorLiveData.value = FetchError.ResourceId(R.string.api_network_failure)
+                errorLiveData.value = FetchUi.ResMsg(R.string.api_network_failure)
                 progressLiveData.value = false
                 return@launch
             }
@@ -166,7 +166,7 @@ class CustomerViewModel(
 
                 progressLiveData.value = false
                 if (resp.body == null) {
-                    errorLiveData.value = FetchError.ResourceId(R.string.stripe_customer_not_found)
+                    errorLiveData.value = FetchUi.ResMsg(R.string.stripe_customer_not_found)
                     return@launch
                 }
 
@@ -175,7 +175,7 @@ class CustomerViewModel(
                 cacheStripeCustomer(resp.raw)
             } catch (e: Exception) {
                 progressLiveData.value = false
-                errorLiveData.value = FetchError.fromException(e)
+                errorLiveData.value = FetchUi.fromException(e)
             }
         }
     }
