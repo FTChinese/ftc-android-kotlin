@@ -25,7 +25,5 @@ enum class SubsScreen(
                 else -> throw IllegalArgumentException("Route $route is not recognized")
             }
 
-        val routeFtcPay = "${Paywall.name}/${FtcPay.name}"
-        val routeStripePay = "${Paywall.name}/${StripePay.name}"
     }
 }
