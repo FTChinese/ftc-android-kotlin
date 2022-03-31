@@ -17,7 +17,7 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.checkout.CheckOutViewModel
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.member.MemberActivity
-import com.ft.ftchinese.ui.paywall.SubsActivity
+import com.ft.ftchinese.ui.subsactivity.SubsActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
