@@ -15,14 +15,13 @@ import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.ui.channel.DenialReason
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.member.MemberActivity
-import com.ft.ftchinese.ui.paywall.SubsActivity
+import com.ft.ftchinese.ui.subsactivity.SubsActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
 /**
  * create an instance of this fragment.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class PermissionDeniedFragment : BottomSheetDialogFragment() {
 
     private lateinit var viewModel: AccessViewModel
