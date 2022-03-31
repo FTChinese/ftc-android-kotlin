@@ -1,14 +1,11 @@
 package com.ft.ftchinese.ui.formatter
 
 import android.content.Context
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.style.StrikethroughSpan
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.paywall.CartItemFtc
+import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.paywall.PaymentIntent
 import com.ft.ftchinese.model.stripesubs.StripePrice
 import java.util.*
@@ -61,12 +58,12 @@ object FormatHelper {
 
     private fun getOrderKind(ctx: Context, k: OrderKind): String {
         return when (k) {
-            OrderKind.Create -> ctx.getString(R.string.order_kind_create)
-            OrderKind.Renew -> ctx.getString(R.string.order_kind_renew)
-            OrderKind.Upgrade -> ctx.getString(R.string.order_kind_upgrade)
+            OrderKind.Create -> ctx.getString(R.string.subs_create)
+            OrderKind.Renew -> ctx.getString(R.string.subs_renew)
+            OrderKind.Upgrade -> ctx.getString(R.string.subs_upgrade)
             OrderKind.Downgrade -> "降级"
-            OrderKind.AddOn -> ctx.getString(R.string.order_kind_addon)
-            OrderKind.SwitchCycle -> ctx.getString(R.string.order_kind_switch_cycle)
+            OrderKind.AddOn -> ctx.getString(R.string.subs_addon)
+            OrderKind.SwitchCycle -> ctx.getString(R.string.stripe_switch_cycle)
         }
     }
 
@@ -210,27 +207,6 @@ object FormatHelper {
         return formatYMD(ctx, ymd)
     }
 
-    /**
-     * The text shown on paywall.
-     */
-    fun productPriceButton(ctx: Context, cop: CartItemFtc): Spannable {
-
-        val regularPrice = formatPrice(ctx, cop.price.currency, cop.price.unitAmount)
-        val period = formatRegularPeriod(ctx, cop.price.periodCount)
-
-        // If no discount, use regular price.
-        if (cop.discount == null) {
-            return SpannableString("$regularPrice/$period")
-        }
-
-        // If there's discount, regular price is crossed.
-        val discountedPrice = formatPrice(ctx, cop.price.currency, cop.payableAmount())
-
-        return SpannableString("$regularPrice $discountedPrice/$period").apply {
-            setSpan(StrikethroughSpan(), 0, regularPrice.length, Spanned.SPAN_INCLUSIVE_INCLUSIVE)
-        }
-    }
-
     private fun formatCheckoutPrice(ctx: Context, item: CartItemFtc): String {
         return formatPrice(
             ctx,
@@ -309,5 +285,14 @@ object FormatHelper {
         } else {
             ""
         } + ctx.getString(R.string.auto_renewal_message, pricePeriod)
+    }
+
+    fun stripeIntentText(ctx: Context, kind: IntentKind): String {
+        return when (kind) {
+            IntentKind.SwitchInterval -> ctx.getString(R.string.stripe_switch_cycle)
+            IntentKind.Upgrade -> ctx.getString(R.string.stripe_upgrade)
+            IntentKind.Downgrade -> ctx.getString(R.string.stripe_downgrade)
+            else -> ctx.getString(R.string.subs_create)
+        }
     }
 }
