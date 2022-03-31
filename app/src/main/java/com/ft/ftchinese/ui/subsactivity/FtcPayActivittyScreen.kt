@@ -20,7 +20,7 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 @Composable
 fun FtcPayActivityScreen(
     userViewModel: UserViewModel = viewModel(),
-    payViewModel: FtcPayViewModel = viewModel(),
+    payViewModel: FtcPayViewModel,
     pwViewModel: PaywallViewModel,
     priceId: String?,
     wxApi: IWXAPI,

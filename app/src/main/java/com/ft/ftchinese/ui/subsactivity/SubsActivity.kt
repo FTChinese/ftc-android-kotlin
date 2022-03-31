@@ -79,26 +79,29 @@ class SubsActivity : ScopedComponentActivity() {
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
         wxApi.registerApp(BuildConfig.WX_SUBS_APPID)
 
+        ftcPayViewModel.orderLiveData.observe(this) { orderResult ->
+            when (orderResult) {
+                is OrderResult.WxPay -> {
+                    Log.i(TAG, "Wx order ${orderResult.order}")
+                    launchWxPay(orderResult.order)
+                }
+                is OrderResult.AliPay -> {
+                    Log.i(TAG, "Ali order ${orderResult.order}")
+                    launchAliPay(orderResult.order)
+                }
+            }
+        }
+
         setContent {
             SubsApp(
                 paywallViewModel = paywallViewModel,
+                ftcPayViewModel = ftcPayViewModel,
                 onExit = { finish() },
                 wxApi = wxApi,
             )
         }
 
         tracker = StatsTracker.getInstance(this)
-
-        ftcPayViewModel.orderLiveData.observe(this) { orderResult ->
-            when (orderResult) {
-                is OrderResult.WxPay -> {
-                    launchWxPay(orderResult.order)
-                }
-                is OrderResult.AliPay -> {
-                    launchAliPay(orderResult.order)
-                }
-            }
-        }
     }
 
     private fun launchWxPay(wxPayIntent: WxPayIntent) {
@@ -206,6 +209,7 @@ class SubsActivity : ScopedComponentActivity() {
 @Composable
 fun SubsApp(
     paywallViewModel: PaywallViewModel,
+    ftcPayViewModel: FtcPayViewModel,
     wxApi: IWXAPI,
     onExit: () -> Unit,
 ) {
@@ -276,6 +280,7 @@ fun SubsApp(
                 ) { entry ->
                     val priceId = entry.arguments?.getString("priceId")
                     FtcPayActivityScreen(
+                        payViewModel = ftcPayViewModel,
                         pwViewModel = paywallViewModel,
                         wxApi = wxApi,
                         priceId = priceId,
