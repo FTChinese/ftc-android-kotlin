@@ -11,9 +11,8 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.paywall.Paywall
-import com.ft.ftchinese.model.paywall.StripePriceStore
-import com.ft.ftchinese.model.paywall.defaultPaywall
+import com.ft.ftchinese.model.paywall.*
+import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
@@ -36,18 +35,19 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
     val progressLiveData = MutableLiveData(false)
     val refreshingLiveData = MutableLiveData(false)
 
-    var paywallState by mutableStateOf(defaultPaywall)
-        private set
+    val ftcPriceLiveData: MutableLiveData<Paywall> by lazy {
+        MutableLiveData<Paywall>(defaultPaywall)
+    }
 
-    var stripeState by mutableStateOf(mapOf<String, StripePrice>())
+    val stripePriceLiveData: MutableLiveData<Map<String, StripePrice>> by lazy {
+        MutableLiveData<Map<String, StripePrice>>()
+    }
 
     var msgId by mutableStateOf<Int?>(null)
         private set
 
     var errMsg by mutableStateOf<String?>(null)
         private set
-
-
 
     @Deprecated("")
     val stripePrices: MutableLiveData<FetchResult<List<StripePrice>>> by lazy {
@@ -60,7 +60,28 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         }
 
         premiumOnTop = onTop
-        paywallState = paywallState.reOrderProducts(premiumOnTop = onTop)
+        ftcPriceLiveData.value?.let {
+            ftcPriceLiveData.value = it.reOrderProducts(onTop)
+        }
+    }
+
+    fun ftcCheckoutItem(priceId: String, m: Membership): CartItemFtcV2? {
+        val price = ftcPriceLiveData.value?.products
+            ?.flatMap { it.prices }
+            ?.findLast { it.id == priceId }
+            ?: return null
+
+        return price.buildCartItem(m)
+    }
+
+    fun stripeCheckoutItem(priceId:  String, trialId: String?, m: Membership): CartItemStripeV2? {
+        val price = stripePriceLiveData.value?.get(priceId) ?: return null
+
+        return CartItemStripeV2(
+            intent = price.checkoutIntent(m),
+            recurring = price,
+            trial = trialId?.let { stripePriceLiveData.value?.get(it) }
+        )
     }
 
     // The cached file are versioned therefore whenever a user
@@ -121,7 +142,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
     private fun setFtcPrice(result: FetchResult<Paywall>) {
         when (result) {
             is FetchResult.Success -> {
-                paywallState = result.data.reOrderProducts(premiumOnTop)
+                ftcPriceLiveData.value = result.data.reOrderProducts(premiumOnTop)
                 PaywallCache.setFtc(result.data)
             }
             is FetchResult.LocalizedError -> {
@@ -208,8 +229,11 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
     private fun setStripePrice(result: FetchResult<List<StripePrice>>) {
         when (result) {
             is FetchResult.Success -> {
-                stripeState = result.data.associateBy {
+                result.data.associateBy {
                     it.id
+                }.let {
+                    stripePriceLiveData.value = it
+                    PaywallCache.setStripe(it)
                 }
             }
             is FetchResult.LocalizedError -> {
@@ -242,6 +266,11 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun refresh() {
+        if (isNetworkAvailable.value != true) {
+            msgId = R.string.prompt_no_network
+            return
+        }
+
         refreshingLiveData.value = true
 
         viewModelScope.launch {
