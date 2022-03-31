@@ -9,11 +9,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.fetch.FetchUi
-import com.ft.ftchinese.ui.checkout.ShoppingCart
-import com.ft.ftchinese.ui.checkout.ShoppingCartViewModel
 import com.ft.ftchinese.ui.components.ErrorDialog
 import com.ft.ftchinese.ui.ftcpay.FtcPayScreen
 import com.ft.ftchinese.ui.ftcpay.FtcPayViewModel
+import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.tencent.mm.opensdk.constants.Build
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -21,8 +20,9 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 @Composable
 fun FtcPayActivityScreen(
     userViewModel: UserViewModel = viewModel(),
-    cartViewModel: ShoppingCartViewModel = viewModel(),
     payViewModel: FtcPayViewModel = viewModel(),
+    pwViewModel: PaywallViewModel,
+    priceId: String?,
     wxApi: IWXAPI,
     showSnackBar: (String) -> Unit,
 ) {
@@ -32,7 +32,6 @@ fun FtcPayActivityScreen(
     }
 
     val fetchState = payViewModel.progressLiveData.observeAsState(FetchUi.Progress(false))
-
 
     when (val s = fetchState.value) {
         is FetchUi.Progress -> {
@@ -62,8 +61,17 @@ fun FtcPayActivityScreen(
         return
     }
 
-    if (cartViewModel.cart is ShoppingCart.Ftc) {
-        val item = cartViewModel.cart.item
+    if (priceId.isNullOrBlank()) {
+        showSnackBar("Price id not passed in")
+        return
+    }
+
+    val item = pwViewModel.ftcCheckoutItem(
+        priceId = priceId,
+        m = account.membership.normalize(),
+    )
+
+    if (item != null) {
 
         FtcPayScreen(
             cartItem = item,
@@ -81,5 +89,7 @@ fun FtcPayActivityScreen(
                 )
             }
         )
+    } else {
+        showSnackBar("Empty shopping cart")
     }
 }

@@ -8,18 +8,18 @@ import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.work.*
 import com.alipay.sdk.app.PayTask
 import com.ft.ftchinese.BuildConfig
@@ -35,7 +35,6 @@ import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedComponentActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
-import com.ft.ftchinese.ui.checkout.ShoppingCartViewModel
 import com.ft.ftchinese.ui.components.SubsScreen
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.ftcpay.FtcPayViewModel
@@ -54,13 +53,13 @@ class SubsActivity : ScopedComponentActivity() {
     private lateinit var wxApi: IWXAPI
     private lateinit var tracker: StatsTracker
     private lateinit var ftcPayViewModel: FtcPayViewModel
+    private lateinit var paywallViewModel: PaywallViewModel
     private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val paywallViewModel = ViewModelProvider(this)[PaywallViewModel::class.java]
-
+        paywallViewModel = ViewModelProvider(this)[PaywallViewModel::class.java]
         ftcPayViewModel = ViewModelProvider(this)[FtcPayViewModel::class.java]
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
@@ -206,8 +205,7 @@ class SubsActivity : ScopedComponentActivity() {
 
 @Composable
 fun SubsApp(
-    paywallViewModel: PaywallViewModel = viewModel(),
-    cartViewModel: ShoppingCartViewModel = viewModel(),
+    paywallViewModel: PaywallViewModel,
     wxApi: IWXAPI,
     onExit: () -> Unit,
 ) {
@@ -222,6 +220,7 @@ fun SubsApp(
         val currentScreen = SubsScreen.fromRoute(
             backstackEntry.value?.destination?.route
         )
+
         Scaffold(
             topBar = {
                 Toolbar(
@@ -245,16 +244,18 @@ fun SubsApp(
                     route = SubsScreen.Paywall.name
                 ) {
                     PaywallActivityScreen(
+                        paywallViewModel = paywallViewModel,
                         onFtcPay = { item: CartItemFtcV2 ->
-                            cartViewModel.putFtcItem(item)
                             navigateToFtcPay(
                                 navController = navController,
+                                priceId = item.price.id,
                             )
                         },
                         onStripePay = { item: CartItemStripeV2 ->
-                            cartViewModel.putStripeItem(item)
                             navigateToStripePay(
                                 navController = navController,
+                                priceId = item.recurring.id,
+                                trialId = item.trial?.id,
                             )
                         },
                         onError = { msg ->
@@ -266,10 +267,18 @@ fun SubsApp(
                 }
 
                 composable(
-                    route = SubsScreen.routeFtcPay,
-                ) {
+                    route = "${SubsScreen.FtcPay.name}/{priceId}",
+                    arguments = listOf(
+                        navArgument("priceId") {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { entry ->
+                    val priceId = entry.arguments?.getString("priceId")
                     FtcPayActivityScreen(
+                        pwViewModel = paywallViewModel,
                         wxApi = wxApi,
+                        priceId = priceId,
                         showSnackBar = { msg ->
                             scope.launch {
                                 scaffoldState.snackbarHostState.showSnackbar(msg)
@@ -279,25 +288,48 @@ fun SubsApp(
                 }
 
                 composable(
-                    route = SubsScreen.routeStripePay,
-                ) {
-                    Text(text = SubsScreen.StripePay.name)
+                    route = "${SubsScreen.StripePay.name}/{priceId}?trialId={trialId}",
+                    arguments = listOf(
+                        navArgument("priceId") {
+                            type = NavType.StringType
+                        },
+                        navArgument("trialId") {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { entry ->
+                    val priceId = entry.arguments?.getString("priceId")
+                    val trialId = entry.arguments?.getString("trialId")
+                    StripePayActivityScreen(
+                        pwViewModel = paywallViewModel,
+                        priceId = priceId,
+                        trialId = trialId,
+                        showSnackBar = { msg ->
+                            scope.launch {
+                                scaffoldState.snackbarHostState.showSnackbar(msg)
+                            }
+                        }
+                    )
                 }
             }
         }
     }
 }
 
+
 private fun navigateToFtcPay(
     navController: NavHostController,
+    priceId: String,
 ) {
-    navController.navigate(SubsScreen.routeFtcPay)
+    navController.navigate("${SubsScreen.FtcPay.name}/$priceId")
 }
 
 private fun navigateToStripePay(
-    navController: NavHostController
+    navController: NavHostController,
+    priceId: String,
+    trialId: String?,
 ) {
-    navController.navigate(SubsScreen.routeStripePay)
+    navController.navigate("${SubsScreen.StripePay.name}/$priceId?trialId=${trialId}")
 }
 
 
