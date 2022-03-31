@@ -20,7 +20,7 @@ import com.ft.ftchinese.tracking.*
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.login.AuthActivity
-import com.ft.ftchinese.ui.paywall.SubsActivity
+import com.ft.ftchinese.ui.subsactivity.SubsActivity
 import com.ft.ftchinese.ui.share.ShareUtils
 import org.jetbrains.anko.toast
 
