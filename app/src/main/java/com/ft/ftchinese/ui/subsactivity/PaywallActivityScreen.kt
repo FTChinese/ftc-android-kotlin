@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.model.paywall.CartItemFtcV2
 import com.ft.ftchinese.model.paywall.CartItemStripeV2
+import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.paywall.LinkEmailDialog
 import com.ft.ftchinese.ui.paywall.PaywallScreen
@@ -49,6 +50,8 @@ fun PaywallActivityScreen(
 
     val context = LocalContext.current
     val isRefreshing by paywallViewModel.refreshingLiveData.observeAsState(false)
+    val ftcPaywall by paywallViewModel.ftcPriceLiveData.observeAsState(defaultPaywall)
+    val stripePrices by paywallViewModel.stripePriceLiveData.observeAsState(mapOf())
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -106,8 +109,8 @@ fun PaywallActivityScreen(
         onRefresh = { paywallViewModel.refresh() },
     ) {
         PaywallScreen(
-            paywall = paywallViewModel.paywallState,
-            stripePrices = paywallViewModel.stripeState,
+            paywall = ftcPaywall,
+            stripePrices = stripePrices,
             account = userViewModel.account,
             onFtcPay = {
                 if (!userViewModel.isLoggedIn) {
