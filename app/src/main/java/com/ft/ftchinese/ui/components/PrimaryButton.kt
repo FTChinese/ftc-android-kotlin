@@ -1,7 +1,6 @@
 package com.ft.ftchinese.ui.components
 
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
@@ -21,7 +20,6 @@ fun PrimaryButton(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
-        shape = RoundedCornerShape(0),
         colors = ButtonDefaults.buttonColors(
             backgroundColor = OColor.teal,
             contentColor = OColor.white,
