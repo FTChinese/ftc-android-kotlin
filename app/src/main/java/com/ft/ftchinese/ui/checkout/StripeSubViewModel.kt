@@ -4,10 +4,10 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.paywall.CartItemStripe
+import com.ft.ftchinese.model.paywall.CartItemStripeV2
+import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.stripesubs.SubParams
@@ -24,16 +24,16 @@ class StripeSubViewModel : BaseViewModel() {
         MutableLiveData<Int>()
     }
 
-    val itemLiveData: MutableLiveData<CartItemStripe> by lazy {
-        MutableLiveData<CartItemStripe>()
+    val itemLiveData: MutableLiveData<CartItemStripeV2> by lazy {
+        MutableLiveData<CartItemStripeV2>()
     }
 
     val customerLiveData: MutableLiveData<Customer> by lazy {
         MutableLiveData<Customer>()
     }
 
-    val orderKind: OrderKind?
-        get() = itemLiveData.value?.orderKind
+    val isUpdate: Boolean
+        get() = itemLiveData.value?.intent?.kind == IntentKind.Upgrade
 
     val subsResult: MutableLiveData<FetchResult<StripeSubsResult>> by lazy {
         MutableLiveData<FetchResult<StripeSubsResult>>()
@@ -110,7 +110,7 @@ class StripeSubViewModel : BaseViewModel() {
      * When the UI is created, use the price and current
      * membership to build PaymentCounter.
      */
-    fun putIntoCart(item: CartItemStripe) {
+    fun putIntoCart(item: CartItemStripeV2) {
         itemLiveData.value = item
     }
 
@@ -120,23 +120,22 @@ class StripeSubViewModel : BaseViewModel() {
             return
         }
 
-        val params = itemLiveData.value?.let {
-            SubParams(
-                priceId = it.recurringPrice.id,
-                introductoryPriceId = it.trialPrice?.id,
-                defaultPaymentMethod = paymentMethodLiveData.value?.id,
-                idempotency = idemKey,
-            )
-        } ?: return
+        val item = itemLiveData.value ?: return
+        val params = SubParams(
+            priceId = item.recurring.id,
+            introductoryPriceId = item.trial?.id,
+            defaultPaymentMethod = paymentMethodLiveData.value?.id,
+            idempotency = idemKey,
+        )
 
         progressLiveData.value = true
 
-        when (itemLiveData.value?.orderKind) {
-            OrderKind.Create -> {
+        when (item.intent.kind) {
+            IntentKind.Create -> {
                 messageLiveData.value = R.string.creating_subscription
                 createStripeSub(account, params)
             }
-            OrderKind.Upgrade -> {
+            IntentKind.Upgrade, IntentKind.Downgrade -> {
                 messageLiveData.value = R.string.confirm_upgrade
                 upgradeStripeSub(account, params)
             }
@@ -147,7 +146,7 @@ class StripeSubViewModel : BaseViewModel() {
         }
     }
 
-    fun createStripeSub(account: Account, params: SubParams) {
+    private fun createStripeSub(account: Account, params: SubParams) {
         val pm = paymentMethodLiveData.value
         if (pm == null) {
             subsResult.value = FetchResult.LocalizedError(R.string.toast_no_pay_method)
@@ -184,7 +183,7 @@ class StripeSubViewModel : BaseViewModel() {
         }
     }
 
-    fun upgradeStripeSub(account: Account, params: SubParams) {
+    private fun upgradeStripeSub(account: Account, params: SubParams) {
 
         viewModelScope.launch {
             try {

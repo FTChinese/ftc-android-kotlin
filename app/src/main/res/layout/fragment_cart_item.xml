@@ -8,7 +8,7 @@
         <import type="android.view.View"/>
         <variable
             name="cartItem"
-            type="com.ft.ftchinese.ui.checkout.CartItem" />
+            type="com.ft.ftchinese.ui.product.PriceCardParams" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -31,14 +31,14 @@
                 style="@style/OrigamiText.Heading3.Center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{cartItem.productName}"
+                android:text="@{cartItem.heading}"
                 android:textAlignment="center" />
 
             <TextView
                 style="@style/OrigamiText.Body1.Center"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{cartItem.payable}"/>
+                android:text="@{cartItem.payable.string()}"/>
 
             <TextView
                 android:layout_width="match_parent"

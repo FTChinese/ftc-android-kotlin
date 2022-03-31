@@ -132,8 +132,6 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
         }
 
         checkOutViewModel.ftcItemLiveData.observe(this) { item ->
-            // Build cart item ui.
-            cartViewModel.itemLiveData.value = CartItem.ofFtc(this, item)
 
             val isNewMember = sessionManager.loadAccount()?.membership?.isZero ?: true
 
@@ -371,13 +369,6 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
             Log.i(TAG, "Stripe price not found")
             return false
         }
-
-        Log.i(TAG, "Start stripe subscription activity...")
-        StripeSubActivity.startForResult(
-            activity = this,
-            requestCode = RequestCode.PAYMENT,
-            items = priceIDs,
-        )
 
         return true
     }

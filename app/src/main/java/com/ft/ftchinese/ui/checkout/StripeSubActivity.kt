@@ -13,10 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityStripeSubBinding
-import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.paywall.StripePriceIDs
-import com.ft.ftchinese.model.paywall.StripePriceStore
+import com.ft.ftchinese.model.paywall.CartItemStripeV2
 import com.ft.ftchinese.model.stripesubs.Idempotency
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.model.stripesubs.Subscription
@@ -30,6 +28,7 @@ import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
+import com.ft.ftchinese.ui.product.PriceCardParams
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.stripe.android.*
 import com.stripe.android.model.Customer
@@ -123,11 +122,6 @@ class StripeSubActivity : ScopedAppActivity() {
             toast(it)
         }
 
-        // When we know what is being put into shopping cart.
-        subsViewModel.itemLiveData.observe(this) {
-            cartViewModel.itemLiveData.value = CartItem.ofStripe(this, it)
-        }
-
         // Upon subscription created.
         subsViewModel.subsResult.observe(this) {
             onSubsResult(it)
@@ -152,8 +146,6 @@ class StripeSubActivity : ScopedAppActivity() {
 
         // Attached PaymentSessionListener
         paymentSession.init(paymentSessionListener)
-
-        paywallViewModel.ensureStripePrices()
     }
 
     private fun initUI() {
@@ -167,19 +159,10 @@ class StripeSubActivity : ScopedAppActivity() {
             )
         }
 
-        intent.getParcelableExtra<StripePriceIDs>(EXTRA_CHECKOUT_ITEM)
+        intent.getParcelableExtra<CartItemStripeV2>(EXTRA_CHECKOUT_ITEM)
             ?.let {
-                if (StripePriceStore.isEmpty) {
-                    toast("Stripe pricing data missing")
-                    return@let
-                }
-
-                val item = StripePriceStore.checkoutItem(it)
-                if (item == null) {
-                    toast("Failed to build checkout item for price ${it.recurring}")
-                    return@let
-                }
-                subsViewModel.putIntoCart(item)
+                subsViewModel.putIntoCart(it)
+                cartViewModel.itemLiveData.value = PriceCardParams.ofStripe(this, it)
             }
 
         // Show stripe payment method selection.
@@ -304,7 +287,7 @@ class StripeSubActivity : ScopedAppActivity() {
             return
         }
 
-        if (subsViewModel.orderKind == OrderKind.Upgrade) {
+        if (subsViewModel.isUpdate) {
             idempotency.clear()
         }
 
@@ -453,7 +436,7 @@ class StripeSubActivity : ScopedAppActivity() {
         }
 
         subsViewModel.itemLiveData.value?.let {
-            tracker.buyStripeSuccess(it.recurringPrice)
+            tracker.buyStripeSuccess(it.recurring)
         }
     }
 
@@ -475,8 +458,8 @@ class StripeSubActivity : ScopedAppActivity() {
                 R.string.order_subscribed_plan,
                 FormatHelper.formatEdition(
                     this,
-                    it.recurringPrice.tier,
-                    it.recurringPrice.periodCount
+                    it.recurring.tier,
+                    it.recurring.periodCount
                 )
             )
         }
@@ -522,12 +505,12 @@ class StripeSubActivity : ScopedAppActivity() {
         private const val EXTRA_CHECKOUT_ITEM = "extra_checkout_item"
 
         @JvmStatic
-        fun startForResult(activity: Activity, requestCode: Int, items: StripePriceIDs) {
+        fun startForResult(activity: Activity, requestCode: Int, item: CartItemStripeV2) {
             activity.startActivityForResult(
                 Intent(activity, StripeSubActivity::class.java).apply {
-                    putExtra(EXTRA_CHECKOUT_ITEM, items)
+                    putExtra(EXTRA_CHECKOUT_ITEM, item)
                 },
-                requestCode
+                requestCode,
             )
         }
     }

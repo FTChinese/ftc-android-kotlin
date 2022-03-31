@@ -1,12 +1,16 @@
 package com.ft.ftchinese.model.paywall
 
+import android.os.Parcelable
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Membership
+import kotlinx.parcelize.Parcelize
 
+// TODO: remove parcelize
+@Parcelize
 data class CheckoutIntent(
     val kind: IntentKind,
     val message: String,
-) {
+) : Parcelable {
     companion object {
         val vip = CheckoutIntent(
             kind = IntentKind.Forbidden,

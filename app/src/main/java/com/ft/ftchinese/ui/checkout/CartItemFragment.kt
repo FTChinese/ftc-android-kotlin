@@ -31,10 +31,6 @@ class CartItemFragment : ScopedFragment() {
             false
         )
 
-        binding.cartItem = CartItem(
-            productName = "",
-        )
-
         return binding.root
     }
 
