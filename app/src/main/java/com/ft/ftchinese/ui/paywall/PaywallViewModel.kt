@@ -30,11 +30,11 @@ private const val TAG = "PaywallViewModel"
 class PaywallViewModel(application: Application) : AndroidViewModel(application) {
 
     private val cache = FileCache(application)
+    private var premiumOnTop = false
 
     val isNetworkAvailable = MutableLiveData<Boolean>()
-    val progressLiveData = MutableLiveData<Boolean>()
-
-    private var premiumOnTop = false
+    val progressLiveData = MutableLiveData(false)
+    val refreshingLiveData = MutableLiveData(false)
 
     var paywallState by mutableStateOf(defaultPaywall)
         private set
@@ -47,8 +47,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
     var errMsg by mutableStateOf<String?>(null)
         private set
 
-    var isRefreshing by mutableStateOf(false)
-        private set
+
 
     @Deprecated("")
     val stripePrices: MutableLiveData<FetchResult<List<StripePrice>>> by lazy {
@@ -243,7 +242,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun refresh() {
-        isRefreshing = true
+        refreshingLiveData.value = true
 
         viewModelScope.launch {
             val ftcDeferred = async { loadRemotePaywall(false) }
@@ -255,11 +254,12 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
             setFtcPrice(ftcRes)
             setStripePrice(stripeRes)
 
-            isRefreshing = false
+            refreshingLiveData.value = false
             msgId = R.string.refresh_success
         }
     }
 
+    @Deprecated("")
     fun ensureStripePrices() {
         if (!StripePriceStore.isEmpty) {
             return

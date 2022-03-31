@@ -7,10 +7,8 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.model.paywall.CartItemFtcV2
@@ -50,6 +48,7 @@ fun PaywallActivityScreen(
 ) {
 
     val context = LocalContext.current
+    val isRefreshing by paywallViewModel.refreshingLiveData.observeAsState(false)
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -102,7 +101,7 @@ fun PaywallActivityScreen(
 
     SwipeRefresh(
         state = rememberSwipeRefreshState(
-            isRefreshing = paywallViewModel.isRefreshing,
+            isRefreshing = isRefreshing,
         ),
         onRefresh = { paywallViewModel.refresh() },
     ) {
