@@ -6,13 +6,12 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.reader.Account
 
 @Composable
 fun CreateCustomerDialog(
-    account: Account,
+    email: String,
     onDismiss: () -> Unit,
-    onSuccess: () -> Unit,
+    onConfirm: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = {  },
@@ -21,12 +20,12 @@ fun CreateCustomerDialog(
         },
         text = {
             Text(
-                text = "Stripe支付要求提供邮箱地址，是否使用当前邮箱注册(${account.email})？"
+                text = "Stripe支付要求提供邮箱地址，是否使用当前邮箱注册(${email})？"
             )
         },
         confirmButton = {
             TextButton(
-                onClick = onSuccess
+                onClick = onConfirm
             ) {
                 Text(text = stringResource(id = R.string.yes))
             }
