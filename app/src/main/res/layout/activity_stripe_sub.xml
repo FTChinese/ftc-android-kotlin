@@ -41,7 +41,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:background="@color/colorBlack5"
-            android:text="@string/stripe_select_or_add_card"
+            android:text="@string/stripe_payment_method"
             app:drawableEndCompat="@drawable/ic_keyboard_arrow_right_gray_24dp" />
 
         <TextView
