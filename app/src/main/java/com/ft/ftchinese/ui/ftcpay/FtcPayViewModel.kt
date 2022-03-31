@@ -94,12 +94,14 @@ class FtcPayViewModel(application: Application) : AndroidViewModel(application) 
                     return@launch
                 }
 
-                withContext(Dispatchers.IO) {
-                    payIntentStore.save(wxOrder)
-                }
+
 
                 _progress.value = FetchUi.Progress(false)
                 orderLiveData.value = OrderResult.WxPay(wxOrder)
+
+                withContext(Dispatchers.IO) {
+                    payIntentStore.save(wxOrder)
+                }
             } catch (e: APIError) {
                 _progress.value = if (e.statusCode == 403) {
                     FetchUi.ResMsg(R.string.duplicate_purchase)
@@ -127,12 +129,12 @@ class FtcPayViewModel(application: Application) : AndroidViewModel(application) 
                     return@launch
                 }
 
+                _progress.value = FetchUi.Progress(false)
+                orderLiveData.value = OrderResult.AliPay(aliOrder)
+
                 withContext(Dispatchers.IO) {
                     payIntentStore.save(aliOrder)
                 }
-
-                _progress.value = FetchUi.Progress(false)
-                orderLiveData.value = OrderResult.AliPay(aliOrder)
             } catch (e: APIError) {
                 Log.i(TAG, "$e")
                 val msgId = if (e.statusCode == 403) {
