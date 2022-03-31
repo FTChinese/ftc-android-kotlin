@@ -37,7 +37,7 @@ data class StripePriceIDsOfProduct(
             val price = prices[id]
             if (price != null) {
                 items.add(CartItemStripeV2(
-                    intent = CheckoutIntent.ofStripe(m, price),
+                    intent = price.checkoutIntent(m),
                     recurring = price,
                     trial = trialPrice
                 ))

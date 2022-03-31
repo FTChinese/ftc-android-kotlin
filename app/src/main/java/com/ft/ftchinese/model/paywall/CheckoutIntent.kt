@@ -1,9 +1,7 @@
 package com.ft.ftchinese.model.paywall
 
-import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.stripesubs.StripePrice
 
 data class CheckoutIntent(
     val kind: IntentKind,
@@ -61,61 +59,5 @@ data class CheckoutIntent(
             kind = IntentKind.AddOn,
             message = "当前订阅来自企业版授权，个人购买的订阅时长将在授权取消或过期后启用",
         )
-
-        @JvmStatic
-        fun ofStripe(m: Membership, p: StripePrice): CheckoutIntent {
-            if (m.vip) {
-                return vip
-            }
-
-            if (m.isZero) {
-                return newMember
-            }
-
-            return when (m.normalizedPayMethod) {
-                PayMethod.ALIPAY,
-                PayMethod.WXPAY -> CheckoutIntent(
-                    kind = IntentKind.OneTimeToAutoRenew,
-                    message = "使用Stripe转为自动续订，当前剩余时间将在新订阅失效后再次启用"
-                )
-
-                PayMethod.STRIPE -> if (m.tier == p.tier) {
-                    if (m.cycle == p.periodCount.toCycle()) {
-                        CheckoutIntent(
-                            kind = IntentKind.Forbidden,
-                            message = "自动续订不能重复订阅"
-                        )
-                    }  else {
-                        CheckoutIntent(
-                            kind = IntentKind.SwitchInterval,
-                            message = "更改Stripe自动扣款周期，建议您订阅年度版更划算"
-                        )
-                    }
-                } else {
-                    when (p.tier) {
-                        Tier.PREMIUM -> CheckoutIntent(
-                            kind = IntentKind.Upgrade,
-                            message = "升级高端会员，Stripe将自动调整您的扣款额度"
-                        )
-                        Tier.STANDARD -> CheckoutIntent(
-                            kind = IntentKind.Downgrade,
-                            message = "降级为标准版会员， Stripe将自动调整您的扣款额度"
-                        )
-                    }
-                }
-
-                PayMethod.APPLE -> CheckoutIntent(
-                    kind = IntentKind.Forbidden,
-                    message = "为避免重复订阅，苹果自动续订不能使用Stripe自动续订"
-                )
-
-                PayMethod.B2B -> CheckoutIntent(
-                    kind = IntentKind.Forbidden,
-                    message = "为避免重复订阅，企业版授权订阅不能使用Stripe自动续订"
-                )
-
-                else -> intentUnknown
-            }
-        }
     }
 }
