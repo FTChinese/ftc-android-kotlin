@@ -258,7 +258,7 @@ fun SubsApp(
                                 trialId = item.trial?.id,
                             )
                         },
-                        onError = { msg ->
+                        showSnackBar = { msg ->
                             scope.launch {
                                 scaffoldState.snackbarHostState.showSnackbar(msg)
                             }
