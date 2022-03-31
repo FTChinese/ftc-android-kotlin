@@ -1,16 +1,17 @@
 package com.ft.ftchinese.ui.paywall
 
+import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.paywall.Paywall
-import com.ft.ftchinese.store.PaywallCache
 import com.ft.ftchinese.model.paywall.StripePriceStore
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.stripesubs.StripePrice
@@ -18,14 +19,20 @@ import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.ui.base.BaseViewModel
-import kotlinx.coroutines.*
+import com.ft.ftchinese.store.PaywallCache
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val TAG = "PaywallViewModel"
 
-class PaywallViewModel(
-    private val cache: FileCache
-) : BaseViewModel() {
+class PaywallViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val cache = FileCache(application)
+
+    val isNetworkAvailable = MutableLiveData<Boolean>()
+    val progressLiveData = MutableLiveData<Boolean>()
 
     private var premiumOnTop = false
 
