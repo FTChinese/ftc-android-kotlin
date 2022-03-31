@@ -2,12 +2,16 @@ package com.ft.ftchinese.model.stripesubs
 
 import android.os.Parcelable
 import com.ft.ftchinese.model.enums.Edition
+import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.PriceKind
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.fetch.KDateTime
 import com.ft.ftchinese.model.fetch.KPriceKind
 import com.ft.ftchinese.model.fetch.KTier
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
+import com.ft.ftchinese.model.paywall.CheckoutIntent
+import com.ft.ftchinese.model.paywall.IntentKind
+import com.ft.ftchinese.model.reader.Membership
 import kotlinx.parcelize.Parcelize
 import org.threeten.bp.ZonedDateTime
 
@@ -38,6 +42,7 @@ data class StripePrice(
             tier = tier,
             cycle = periodCount.toCycle()
         )
+
     fun isValid(): Boolean {
         if (kind == PriceKind.Recurring) {
             return true
@@ -55,6 +60,7 @@ data class StripePrice(
 
         return true
     }
+
     val moneyAmount: Double
         get() = unitAmount
             .toBigDecimal()
@@ -63,4 +69,58 @@ data class StripePrice(
             )
             .toDouble()
 
+    fun checkoutIntent(m: Membership): CheckoutIntent {
+        if (m.vip) {
+            return CheckoutIntent.vip
+        }
+
+        if (m.isZero) {
+            return CheckoutIntent.newMember
+        }
+
+        return when (m.normalizedPayMethod) {
+            PayMethod.ALIPAY,
+            PayMethod.WXPAY -> CheckoutIntent(
+                kind = IntentKind.OneTimeToAutoRenew,
+                message = "使用Stripe转为自动续订，当前剩余时间将在新订阅失效后再次启用"
+            )
+
+            PayMethod.STRIPE -> if (m.tier == tier) {
+                if (m.cycle == periodCount.toCycle()) {
+                    CheckoutIntent(
+                        kind = IntentKind.Forbidden,
+                        message = "自动续订不能重复订阅"
+                    )
+                }  else {
+                    CheckoutIntent(
+                        kind = IntentKind.SwitchInterval,
+                        message = "更改Stripe自动扣款周期，建议您订阅年度版更划算"
+                    )
+                }
+            } else {
+                when (tier) {
+                    Tier.PREMIUM -> CheckoutIntent(
+                        kind = IntentKind.Upgrade,
+                        message = "升级高端会员，Stripe将自动调整您的扣款额度"
+                    )
+                    Tier.STANDARD -> CheckoutIntent(
+                        kind = IntentKind.Downgrade,
+                        message = "降级为标准版会员， Stripe将自动调整您的扣款额度"
+                    )
+                }
+            }
+
+            PayMethod.APPLE -> CheckoutIntent(
+                kind = IntentKind.Forbidden,
+                message = "为避免重复订阅，苹果自动续订不能使用Stripe自动续订"
+            )
+
+            PayMethod.B2B -> CheckoutIntent(
+                kind = IntentKind.Forbidden,
+                message = "为避免重复订阅，企业版授权订阅不能使用Stripe自动续订"
+            )
+
+            else -> CheckoutIntent.intentUnknown
+        }
+    }
 }
