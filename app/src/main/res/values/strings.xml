@@ -311,11 +311,13 @@
 
 
     <!--  Subscription  -->
-    <string name="order_kind_create">订阅</string>
-    <string name="order_kind_renew">续订</string>
-    <string name="order_kind_upgrade">升级</string>
-    <string name="order_kind_addon">购买订阅期限</string>
-    <string name="order_kind_switch_cycle">更改订阅周期</string>
+    <string name="subs_create">订阅</string>
+    <string name="subs_renew">续订</string>
+    <string name="subs_upgrade">升级</string>
+    <string name="subs_addon">购买订阅期限</string>
+    <string name="stripe_switch_cycle">更改订阅周期</string>
+    <string name="stripe_upgrade">转为高端会员</string>
+    <string name="stripe_downgrade">转为标准会员</string>
     <string name="pay_brand_ali">支付宝</string>
     <string name="pay_brand_wechat">微信支付</string>
     <string name="pay_brand_stripe">Stripe</string>

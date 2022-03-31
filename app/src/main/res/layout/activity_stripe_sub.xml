@@ -69,7 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/AppButton.BottomSticky"
-            android:text="@string/order_kind_create"
+            android:text="@string/subs_create"
             android:enabled="@{viewModel.isSubmitEnabled}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintVertical_bias="1.0"/>

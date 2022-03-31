@@ -198,11 +198,11 @@
     <string name="customer_service_email">subscriber.service@ftchinese.com</string>
 
     <!--  Subscription  -->
-    <string name="order_kind_create">訂閱</string>
-    <string name="order_kind_renew">續訂</string>
-    <string name="order_kind_upgrade">升级</string>
-    <string name="order_kind_addon">購買訂閱期限</string>
-    <string name="order_kind_switch_cycle">更改訂閱週期</string>
+    <string name="subs_create">訂閱</string>
+    <string name="subs_renew">續訂</string>
+    <string name="subs_upgrade">升级</string>
+    <string name="subs_addon">購買訂閱期限</string>
+    <string name="stripe_switch_cycle">更改訂閱週期</string>
     <string name="pay_brand_ali">支付寶</string>
     <string name="pay_brand_wechat">微信支付</string>
     <string name="pay_brand_stripe">Stripe</string>
