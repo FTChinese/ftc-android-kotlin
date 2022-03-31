@@ -2,14 +2,12 @@ package com.ft.ftchinese.ui.paywall
 
 import android.app.Application
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.paywall.*
 import com.ft.ftchinese.model.reader.Membership
@@ -43,11 +41,9 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         MutableLiveData<Map<String, StripePrice>>()
     }
 
-    var msgId by mutableStateOf<Int?>(null)
-        private set
-
-    var errMsg by mutableStateOf<String?>(null)
-        private set
+    val toastLiveData: MutableLiveData<FetchUi> by lazy {
+        MutableLiveData<FetchUi>()
+    }
 
     @Deprecated("")
     val stripePrices: MutableLiveData<FetchResult<List<StripePrice>>> by lazy {
@@ -146,10 +142,10 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
                 PaywallCache.setFtc(result.data)
             }
             is FetchResult.LocalizedError -> {
-                msgId = result.msgId
+                toastLiveData.value = FetchUi.ResMsg(result.msgId)
             }
             is FetchResult.Error -> {
-                errMsg = result.exception.message
+                toastLiveData.value = FetchUi.fromException(result.exception)
             }
         }
     }
@@ -237,10 +233,10 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
             is FetchResult.LocalizedError -> {
-                msgId = result.msgId
+                toastLiveData.value = FetchUi.ResMsg(result.msgId)
             }
             is FetchResult.Error -> {
-                errMsg = result.exception.message
+                toastLiveData.value = FetchUi.fromException(result.exception)
             }
         }
     }
@@ -267,7 +263,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
 
     fun refresh() {
         if (isNetworkAvailable.value != true) {
-            msgId = R.string.prompt_no_network
+            toastLiveData.value = FetchUi.ResMsg(R.string.prompt_no_network)
             return
         }
 
@@ -284,7 +280,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
             setStripePrice(stripeRes)
 
             refreshingLiveData.value = false
-            msgId = R.string.refresh_success
+            toastLiveData.value = FetchUi.ResMsg(R.string.refresh_success)
         }
     }
 

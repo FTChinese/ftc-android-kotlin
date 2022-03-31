@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.model.paywall.CartItemFtcV2
 import com.ft.ftchinese.model.paywall.CartItemStripeV2
 import com.ft.ftchinese.model.paywall.defaultPaywall
@@ -45,13 +46,14 @@ fun PaywallActivityScreen(
     userViewModel: UserViewModel = viewModel(),
     onFtcPay: (item: CartItemFtcV2) -> Unit,
     onStripePay: (item: CartItemStripeV2) -> Unit,
-    onError: (String) -> Unit,
+    showSnackBar: (String) -> Unit,
 ) {
 
     val context = LocalContext.current
     val isRefreshing by paywallViewModel.refreshingLiveData.observeAsState(false)
     val ftcPaywall by paywallViewModel.ftcPriceLiveData.observeAsState(defaultPaywall)
     val stripePrices by paywallViewModel.stripePriceLiveData.observeAsState(mapOf())
+    val messageState = paywallViewModel.toastLiveData.observeAsState()
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -71,23 +73,14 @@ fun PaywallActivityScreen(
         mutableStateOf(false)
     }
 
-    LaunchedEffect(key1 = Unit) {
-        paywallViewModel.loadPaywall(
-            userViewModel.account?.isTest ?: false
-        )
-        paywallViewModel.loadStripePrices()
-    }
-
-    LaunchedEffect(key1 = paywallViewModel.msgId) {
-        paywallViewModel.msgId?.let {
-            onError(context.getString(it))
+    when (val s = messageState.value) {
+        is FetchUi.ResMsg -> {
+            showSnackBar(context.getString(s.strId))
         }
-    }
-
-    LaunchedEffect(key1 = paywallViewModel.errMsg) {
-        paywallViewModel.errMsg?.let {
-            onError(it)
+        is FetchUi.TextMsg -> {
+            showSnackBar(s.text)
         }
+        else -> {}
     }
 
     if (openDialog ) {
@@ -124,13 +117,13 @@ fun PaywallActivityScreen(
                     launchLoginActivity(launcher, context)
                     return@PaywallScreen
                 }
-                if (!userViewModel.isWxOnly) {
+                if (userViewModel.isWxOnly) {
                     setOpenDialog(true)
                     return@PaywallScreen
                 }
                 onStripePay(it)
             },
-            onError = onError,
+            onError = showSnackBar,
             onLoginRequest = {
                 launchLoginActivity(launcher, context)
             },
