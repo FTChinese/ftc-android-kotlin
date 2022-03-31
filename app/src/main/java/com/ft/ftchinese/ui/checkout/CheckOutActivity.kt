@@ -33,7 +33,6 @@ import com.ft.ftchinese.ui.dialog.SingleChoiceArgs
 import com.ft.ftchinese.ui.dialog.SingleChoiceDialogFragment
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
-import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.util.RequestCode
 import com.tencent.mm.opensdk.constants.Build
@@ -103,7 +102,7 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
 
         customerViewModel = ViewModelProvider(this, CustomerViewModelFactory(fileCache))[CustomerViewModel::class.java]
 
-        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))[PaywallViewModel::class.java]
+        paywallViewModel = ViewModelProvider(this)[PaywallViewModel::class.java]
 
         connectionLiveData.observe(this) {
             checkOutViewModel.isNetworkAvailable.value = it

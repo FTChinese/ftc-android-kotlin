@@ -30,7 +30,6 @@ import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.lists.SingleLineItemViewHolder
 import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
-import com.ft.ftchinese.ui.paywall.PaywallViewModelFactory
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.stripe.android.*
 import com.stripe.android.model.Customer
@@ -102,7 +101,7 @@ class StripeSubActivity : ScopedAppActivity() {
     private fun setupViewModel() {
         subsViewModel = ViewModelProvider(this)[StripeSubViewModel::class.java]
         cartViewModel = ViewModelProvider(this)[ShoppingCartViewModel::class.java]
-        paywallViewModel = ViewModelProvider(this, PaywallViewModelFactory(fileCache))[PaywallViewModel::class.java]
+        paywallViewModel = ViewModelProvider(this)[PaywallViewModel::class.java]
         accountViewModel = ViewModelProvider(this)[AccountViewModel::class.java]
 
         // Monitoring network status.
