@@ -24,7 +24,7 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.checkout.CheckOutActivity
 import com.ft.ftchinese.ui.order.MyOrdersActivity
-import com.ft.ftchinese.ui.paywall.SubsActivity
+import com.ft.ftchinese.ui.subsactivity.SubsActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import org.jetbrains.anko.alert
