@@ -58,7 +58,6 @@ fun PaywallActivityScreen(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
-
         when (result.resultCode) {
             Activity.RESULT_OK -> {
                 userViewModel.load()
@@ -93,6 +92,13 @@ fun PaywallActivityScreen(
                 setOpenDialog(false)
             }
         )
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        paywallViewModel.loadPaywall(
+            userViewModel.account?.isTest ?: false
+        )
+        paywallViewModel.loadStripePrices()
     }
 
     SwipeRefresh(
