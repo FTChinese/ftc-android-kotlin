@@ -226,7 +226,7 @@ fun SubsApp(
                 Toolbar(
                     currentScreen = currentScreen,
                     onBack = {
-                         val ok = navController.popBackStack()
+                        val ok = navController.popBackStack()
                         if (!ok) {
                             onExit()
                         }
@@ -308,6 +308,9 @@ fun SubsApp(
                             scope.launch {
                                 scaffoldState.snackbarHostState.showSnackbar(msg)
                             }
+                        },
+                        onExit = {
+                            navController.popBackStack()
                         }
                     )
                 }
