@@ -9,7 +9,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.store.SessionManager
 
-class AuthViewModel(application: Application) : AndroidViewModel(application) {
+class UserViewModel(application: Application) : AndroidViewModel(application) {
     private val session = SessionManager.getInstance(application)
 
     var account by mutableStateOf<Account?>(null)
