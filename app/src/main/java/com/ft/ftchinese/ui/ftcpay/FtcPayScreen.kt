@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -24,12 +23,12 @@ import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.ui.components.CheckoutHeader
+import com.ft.ftchinese.ui.components.CheckoutMessage
 import com.ft.ftchinese.ui.components.PrimaryButton
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.product.PriceCard
 import com.ft.ftchinese.ui.product.PriceCardParams
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.theme.OFont
 
 data class PayMethodRes(
@@ -85,13 +84,7 @@ fun FtcPayScreen(
                     )
                 }
 
-                if (cartItem.intent.message.isNotBlank()) {
-                    Text(
-                        text = cartItem.intent.message,
-                        style = MaterialTheme.typography.body2,
-                        color = OColor.claret,
-                    )
-                }
+                CheckoutMessage(text = cartItem.intent.message)
 
                 Spacer(modifier = Modifier.height(Dimens.dp16))
 
@@ -112,7 +105,9 @@ fun FtcPayScreen(
                     }
                 },
                 enabled = (selectOption != null && !loading),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .padding(Dimens.dp16)
+                    .fillMaxWidth()
             ) {
                 Text(
                     text = stringResource(id = R.string.check_out),
