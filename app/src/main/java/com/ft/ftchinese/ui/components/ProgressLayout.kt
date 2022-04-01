@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun ProgressLayout(
@@ -16,7 +17,7 @@ fun ProgressLayout(
         content()
 
         if (loading) {
-            LinearProgressIndicator()
+            LinearProgressIndicator(color = OColor.claret)
         }
     }
 }
