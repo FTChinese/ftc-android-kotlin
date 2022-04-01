@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.stripepay
+package com.ft.ftchinese.ui.components
 
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Text

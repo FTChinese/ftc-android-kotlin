@@ -10,7 +10,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
-import com.ft.ftchinese.ui.stripepay.CreateCustomerDialog
+import com.ft.ftchinese.ui.components.CreateCustomerDialog
 import com.ft.ftchinese.ui.stripepay.StripePayScreen
 import com.ft.ftchinese.ui.stripepay.StripePayViewModel
 import com.ft.ftchinese.viewmodel.UserViewModel
