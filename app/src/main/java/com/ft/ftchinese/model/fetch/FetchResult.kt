@@ -10,23 +10,27 @@ sealed class FetchResult<out T : Any> {
 
     data class Success<out T : Any>(val data: T) : FetchResult<T>()
     data class LocalizedError(val msgId: Int) : FetchResult<Nothing>()
+    @Deprecated("")
     data class Error(val exception: Exception) : FetchResult<Nothing>()
+    data class TextError(val text: String) : FetchResult<Nothing>()
 
     override fun toString(): String {
         return when (this) {
             is Success<*> -> "Success[data=$data]"
             is LocalizedError -> "LocalizedError[msgId=$msgId"
             is Error -> "Error[exception=$exception]"
+            is TextError -> "Error[exception=$text]"
         }
     }
 
     companion object {
         @JvmStatic
-        fun fromServerError(e: APIError): FetchResult<Nothing> {
+        fun fromApi(e: APIError): FetchResult<Nothing> {
             return when (e.statusCode) {
                 401 -> LocalizedError(R.string.api_unauthorized)
                 429 -> LocalizedError(R.string.api_too_many_request)
-                else -> Error(e)
+                500 -> LocalizedError(R.string.api_server_error)
+                else -> TextError(e.message)
             }
         }
 
@@ -36,7 +40,7 @@ sealed class FetchResult<out T : Any> {
                     LocalizedError(R.string.api_empty_url)
                 }
                 else -> {
-                    Error(e)
+                    TextError(e.message ?: "")
                 }
             }
         }
