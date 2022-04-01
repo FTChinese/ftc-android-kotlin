@@ -29,6 +29,7 @@ import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
+import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
 class MemberActivity : ScopedAppActivity(),
@@ -95,7 +96,7 @@ class MemberActivity : ScopedAppActivity(),
 
             when (result) {
                 is FetchResult.LocalizedError -> toast(result.msgId)
-                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+                is FetchResult.TextError -> toast(result.text)
                 is FetchResult.Success -> {
                     toast(R.string.refresh_success)
                     sessionManager.saveAccount(result.data)
@@ -110,7 +111,7 @@ class MemberActivity : ScopedAppActivity(),
 
             when (result) {
                 is FetchResult.LocalizedError -> toast(result.msgId)
-                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+                is FetchResult.TextError -> toast(result.text)
                 is FetchResult.Success -> {
                     toast(R.string.refresh_success)
                     sessionManager.saveMembership(result.data)
@@ -125,7 +126,7 @@ class MemberActivity : ScopedAppActivity(),
         accountViewModel.iapRefreshResult.observe(this) { result: FetchResult<IAPSubsResult> ->
             when (result) {
                 is FetchResult.LocalizedError -> toast(result.msgId)
-                is FetchResult.Error -> result.exception.message?.let { toast(it) }
+                is FetchResult.TextError -> toast(result.text)
                 is FetchResult.Success -> {
                     sessionManager.saveMembership(result.data.membership)
                     toast(R.string.iap_refresh_success)
@@ -144,8 +145,8 @@ class MemberActivity : ScopedAppActivity(),
                 is FetchResult.LocalizedError -> {
                     toast(result.msgId)
                 }
-                is FetchResult.Error -> {
-                    result.exception.message?.let { toast(it) }
+                is FetchResult.TextError -> {
+                    toast(result.text)
                 }
                 is FetchResult.Success -> {
                     toast(R.string.stripe_refresh_success)

@@ -207,8 +207,8 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
                 is FetchResult.LocalizedError -> {
                     toast(result.msgId)
                 }
-                is FetchResult.Error -> {
-                    result.exception.message?.let { toast(it) }
+                is FetchResult.TextError -> {
+                    toast(result.text)
                 }
                 is FetchResult.Success -> {
                     initUI()
@@ -232,8 +232,8 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
                is FetchResult.LocalizedError -> {
                    showErrDialog(result.msgId)
                }
-                is FetchResult.Error -> {
-                    result.exception.message?.let { showErrDialog(it) }
+                is FetchResult.TextError -> {
+                    showErrDialog(result.text)
                 }
            }
         }
@@ -383,8 +383,8 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
                     tracker.buyFail(it.price.edition)
                 }
             }
-            is FetchResult.Error -> {
-                result.exception.message?.let { showErrDialog(it) }
+            is FetchResult.TextError -> {
+                showErrDialog(result.text)
                 checkOutViewModel.ftcItemLiveData.value?.let {
                     tracker.buyFail(it.price.edition)
                 }
@@ -495,8 +495,8 @@ class CheckOutActivity : ScopedAppActivity(), SingleChoiceDialogFragment.Listene
                     tracker.buyFail(it.price.edition)
                 }
             }
-            is FetchResult.Error -> {
-                result.exception.message?.let { showErrDialog(it) }
+            is FetchResult.TextError -> {
+                showErrDialog(result.text)
                 checkOutViewModel.ftcItemLiveData.value?.let {
                     tracker.buyFail(it.price.edition)
                 }

@@ -57,8 +57,8 @@ class RequestVerificationFragment : ScopedFragment() {
                     toast(it.msgId)
                     binding.btnSendRequest.isEnabled = true
                 }
-                is FetchResult.Error -> {
-                    it.exception.message?.let { toast(it) }
+                is FetchResult.TextError -> {
+                    toast(it.text)
                     binding.btnSendRequest.isEnabled  = true
                 }
                 is FetchResult.Success -> {

@@ -13,6 +13,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.model.fetch.FetchResult
+import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -75,7 +76,7 @@ class ForgotPasswordActivity : ScopedAppActivity() {
         letterViewModel.letterSent.observe(this) { result ->
             when (result) {
                 is FetchResult.LocalizedError -> toast(result.msgId)
-                is FetchResult.Error -> result.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(result.text)
                 is FetchResult.Success -> {
                     if (result.data) {
                         alertLetterSent()
@@ -89,7 +90,7 @@ class ForgotPasswordActivity : ScopedAppActivity() {
         letterViewModel.verificationResult.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> alertVrfFailure(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
                     PasswordResetFragment(it.data)
                         .show(supportFragmentManager, "PasswordResetFragment")

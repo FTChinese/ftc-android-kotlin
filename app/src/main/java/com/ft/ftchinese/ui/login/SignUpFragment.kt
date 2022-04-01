@@ -121,7 +121,7 @@ class SignUpFragment : ScopedBottomSheetDialogFragment() {
         signUpViewModel.accountResult.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> onAccountLoaded(it.data)
             }
         }

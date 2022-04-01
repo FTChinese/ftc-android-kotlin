@@ -19,6 +19,7 @@ import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isConnected
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.toast
 
 /**
  * Show details of account to be bound, show a button to let
@@ -102,7 +103,7 @@ class LinkPreviewFragment(
                         .create()
                         .show()
                 }
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
                     toast(R.string.prompt_linked)
                     sessionManager.saveAccount(it.data)

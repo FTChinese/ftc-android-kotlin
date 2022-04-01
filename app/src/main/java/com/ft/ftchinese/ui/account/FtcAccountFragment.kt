@@ -98,7 +98,7 @@ class FtcAccountFragment : ScopedFragment() {
 
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> onAccountRefreshed(it.data)
             }
         }
@@ -106,7 +106,7 @@ class FtcAccountFragment : ScopedFragment() {
         customerViewModel.customerCreated.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
                     sessionManager.saveStripeId(it.data.id)
                     CustomerActivity.start(context)

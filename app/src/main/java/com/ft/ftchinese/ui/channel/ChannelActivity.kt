@@ -20,7 +20,6 @@ private const val EXTRA_CHANNEL_SOURCE = "extra_channel_source"
  * It is similar to [MainActivity] except that it does not wrap a TabLayout.
  * Use cases: column channel, editor's choice, archive list.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class ChannelActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityChannelBinding

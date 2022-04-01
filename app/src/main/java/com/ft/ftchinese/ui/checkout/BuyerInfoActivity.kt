@@ -60,7 +60,7 @@ class BuyerInfoActivity : ScopedAppActivity() {
         viewModel.htmlRendered.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
                     binding.webView.loadDataWithBaseURL(
                         Config.discoverServer(sessionManager.loadAccount()),

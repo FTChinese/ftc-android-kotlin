@@ -47,7 +47,7 @@ class UpdatePasswordFragment : ScopedFragment() {
         viewModel.updated.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> handleApiError(it.msgId)
-                is FetchResult.Error ->  it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
                     toast(R.string.prompt_saved)
                 }

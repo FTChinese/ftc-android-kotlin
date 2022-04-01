@@ -209,9 +209,7 @@ class ArticleActivity : ScopedAppActivity(),
                 is FetchResult.LocalizedError -> {
                     toast(result.msgId)
                 }
-                is FetchResult.Error -> {
-                    result.exception.message?.let { toast(it) }
-                }
+                is FetchResult.TextError -> toast(result.text)
                 is FetchResult.Success -> {
                     // Pass html string to webview.
                     Log.i(TAG, "Loading web page content")

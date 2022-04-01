@@ -73,7 +73,7 @@ class PasswordResetFragment(
         viewModel.resetResult.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> alertErrMsg(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
                     if (it.data) {
                         toast(R.string.reset_password_success)

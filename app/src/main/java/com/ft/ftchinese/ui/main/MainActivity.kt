@@ -61,6 +61,7 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
 /**
@@ -161,7 +162,7 @@ class MainActivity : ScopedAppActivity(),
         wxInfoViewModel.avatarLoaded.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> Log.i(TAG, getString(it.msgId))
-                is FetchResult.Error -> it.exception.message?.let { msg -> Log.i(TAG, msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
                     navHeaderBinding.avatar = Drawable.createFromStream(
                         it.data,

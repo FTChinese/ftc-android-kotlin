@@ -111,7 +111,7 @@ class MobileFragment : ScopedFragment() {
         viewModel.codeSent.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> onSendCodeError(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
                     toast("验证码已发送")
                 }
@@ -151,7 +151,7 @@ class MobileFragment : ScopedFragment() {
         viewModel.accountLoaded.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
 
                     sessionManager.saveAccount(it.data)
@@ -172,7 +172,7 @@ class MobileFragment : ScopedFragment() {
         viewModel.mobileUpdated.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> onUpdateError(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
                     toast(R.string.refresh_success)
                     sessionManager

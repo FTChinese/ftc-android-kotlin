@@ -133,7 +133,7 @@ class SignInFragment : ScopedBottomSheetDialogFragment() {
         loginViewModel.accountResult.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> alertError(getString(it.msgId))
-                is FetchResult.Error -> it.exception.message?.let { msg -> alertError(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> onAccountLoaded(it.data)
             }
         }

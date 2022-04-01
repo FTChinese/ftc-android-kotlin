@@ -72,7 +72,7 @@ class LinkFtcActivity : ScopedAppActivity() {
         emailViewModel.existsResult.observe(this) { result ->
             when (result) {
                 is FetchResult.LocalizedError -> toast(result.msgId)
-                is FetchResult.Error -> result.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(result.text)
                 is FetchResult.Success -> {
                     // If email exists, show sign in.
                     if (result.data) {

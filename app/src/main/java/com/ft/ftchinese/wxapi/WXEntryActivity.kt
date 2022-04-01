@@ -68,9 +68,9 @@ class WXEntryActivity : WxBaseActivity(), IWXAPIEventHandler {
                     binding.title = getString(R.string.prompt_login_failed)
                     binding.details = getString(result.msgId)
                 }
-                is FetchResult.Error -> {
+                is FetchResult.TextError -> {
                     binding.title = getString(R.string.prompt_login_failed)
-                    binding.details = result.exception.message ?: ""
+                    binding.details = result.text
                 }
             }
         }
@@ -85,9 +85,9 @@ class WXEntryActivity : WxBaseActivity(), IWXAPIEventHandler {
                     binding.title  = getString(R.string.prompt_login_failed)
                     binding.details = getString(result.msgId)
                 }
-                is FetchResult.Error -> {
+                is FetchResult.TextError -> {
                     binding.title = getString(R.string.prompt_login_failed)
-                    binding.details = result.exception.message ?: ""
+                    binding.details = result.text
                 }
                 is FetchResult.Success -> {
                     when (WxOAuth.getLastIntent()) {

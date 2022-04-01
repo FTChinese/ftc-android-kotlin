@@ -174,7 +174,7 @@ class MobileViewModel : BaseViewModel() {
                 if (ok) {
                     codeSent.value = FetchResult.Success(true)
                 } else {
-                    codeSent.value = FetchResult.Error(Exception("Unknown error occurred!"))
+                    codeSent.value = FetchResult.TextError("Unknown error occurred!")
                 }
 
                 progressLiveData.value = false

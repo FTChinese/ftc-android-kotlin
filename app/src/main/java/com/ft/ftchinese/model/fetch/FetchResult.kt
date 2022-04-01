@@ -10,15 +10,12 @@ sealed class FetchResult<out T : Any> {
 
     data class Success<out T : Any>(val data: T) : FetchResult<T>()
     data class LocalizedError(val msgId: Int) : FetchResult<Nothing>()
-    @Deprecated("")
-    data class Error(val exception: Exception) : FetchResult<Nothing>()
     data class TextError(val text: String) : FetchResult<Nothing>()
 
     override fun toString(): String {
         return when (this) {
             is Success<*> -> "Success[data=$data]"
             is LocalizedError -> "LocalizedError[msgId=$msgId"
-            is Error -> "Error[exception=$exception]"
             is TextError -> "Error[exception=$text]"
         }
     }

@@ -89,7 +89,7 @@ class WxInfoFragment : ScopedFragment(), SwipeRefreshLayout.OnRefreshListener {
         infoViewModel.accountLoaded.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> onAccountRefreshed(it.data)
             }
         }
@@ -98,7 +98,7 @@ class WxInfoFragment : ScopedFragment(), SwipeRefreshLayout.OnRefreshListener {
         infoViewModel.avatarLoaded.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.Error ->  it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError ->  toast(it.text)
                 is FetchResult.Success -> {
                     binding.wxAvatar.setImageDrawable(
                         Drawable.createFromStream(

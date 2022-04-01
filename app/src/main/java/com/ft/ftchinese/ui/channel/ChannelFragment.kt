@@ -142,7 +142,7 @@ class ChannelFragment : ScopedFragment(),
 
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> load(it.data)
             }
         }
@@ -151,9 +151,9 @@ class ChannelFragment : ScopedFragment(),
          * If user clicked on a link inside webview
          * and the link point to another channel page, open the [ChannelActivity]
          */
-        wvViewModel.urlChannelSelected.observe(viewLifecycleOwner, {
+        wvViewModel.urlChannelSelected.observe(viewLifecycleOwner) {
             ChannelActivity.start(context, it.withParentPerm(channelSource?.permission))
-        })
+        }
 
         // If web view signaled that loading a url is finished.
         wvViewModel.pageFinished.observe(viewLifecycleOwner, {

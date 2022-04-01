@@ -61,7 +61,7 @@ class UnlinkActivity : ScopedAppActivity() {
         unlinkViewModel.accountLoaded.observe(this) {
             when (it) {
                 is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
                     toast(R.string.prompt_unlinked)
                     sessionManager.saveAccount(it.data)

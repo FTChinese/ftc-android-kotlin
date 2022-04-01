@@ -188,8 +188,8 @@ class ArticleViewModel(
                 is FetchResult.LocalizedError -> {
                     htmlResult.value = FetchResult.LocalizedError(result.msgId)
                 }
-                is FetchResult.Error -> {
-                    htmlResult.value = FetchResult.Error(result.exception)
+                is FetchResult.TextError -> {
+                    htmlResult.value = FetchResult.TextError(result.text)
                 }
             }
         }

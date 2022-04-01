@@ -64,7 +64,7 @@ class DeleteAccountFragment : ScopedFragment() {
         viewModel.deleted.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> alertError(getString(it.msgId))
-                is FetchResult.Error -> it.exception.message?.let { msg -> alertError(msg) }
+                is FetchResult.TextError -> alertError(it.text)
                 is FetchResult.Success -> {
                     Log.i(TAG, "Account deleted")
                     toast(R.string.message_account_deleted)

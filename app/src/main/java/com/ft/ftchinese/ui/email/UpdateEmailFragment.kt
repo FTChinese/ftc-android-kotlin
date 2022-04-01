@@ -80,7 +80,7 @@ class UpdateEmailFragment : ScopedFragment() {
         emailViewModel.emailUpdated.observe(viewLifecycleOwner) {
             when (it) {
                 is FetchResult.LocalizedError -> alertErrorMsg(it.msgId)
-                is FetchResult.Error -> it.exception.message?.let { msg -> toast(msg) }
+                is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> {
                     toast(R.string.refresh_success)
                     sessionManager
