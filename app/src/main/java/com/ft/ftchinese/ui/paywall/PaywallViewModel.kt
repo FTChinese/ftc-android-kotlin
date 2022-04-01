@@ -144,8 +144,8 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
             is FetchResult.LocalizedError -> {
                 toastLiveData.value = FetchUi.ResMsg(result.msgId)
             }
-            is FetchResult.Error -> {
-                toastLiveData.value = FetchUi.fromException(result.exception)
+            is FetchResult.TextError -> {
+                toastLiveData.value = FetchUi.TextMsg(result.text)
             }
         }
     }
@@ -212,8 +212,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
             }
 
             val prices = json.parseArray<StripePrice>(resp.body)
-                ?: return FetchResult.Error(Exception("JSON parsing failed"))
-            StripePriceStore.set(prices)
+                ?: return FetchResult.TextError("JSON parsing failed")
 
             return FetchResult.Success(prices)
         } catch (e: Exception) {
@@ -235,8 +234,8 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
             is FetchResult.LocalizedError -> {
                 toastLiveData.value = FetchUi.ResMsg(result.msgId)
             }
-            is FetchResult.Error -> {
-                toastLiveData.value = FetchUi.fromException(result.exception)
+            is FetchResult.TextError -> {
+                toastLiveData.value = FetchUi.TextMsg(result.text)
             }
         }
     }
