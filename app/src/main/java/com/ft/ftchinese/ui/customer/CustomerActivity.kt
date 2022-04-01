@@ -19,6 +19,7 @@ import com.ft.ftchinese.ui.account.UIBankCard
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.stripe.android.*
+import com.stripe.android.core.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
 import org.jetbrains.anko.*
