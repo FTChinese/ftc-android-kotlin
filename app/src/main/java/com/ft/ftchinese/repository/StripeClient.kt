@@ -5,9 +5,8 @@ import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.HttpResp
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.stripesubs.StripeCustomer
-import com.ft.ftchinese.model.stripesubs.StripeSubsResult
-import com.ft.ftchinese.model.stripesubs.SubParams
+import com.ft.ftchinese.model.request.CustomerParams
+import com.ft.ftchinese.model.stripesubs.*
 
 object StripeClient {
 
@@ -51,6 +50,7 @@ object StripeClient {
             .endApiJson()
     }
 
+    @Deprecated("")
     fun createEphemeralKey(account: Account, apiVersion: String): String? {
         if (account.stripeId == null) {
             return null
@@ -64,6 +64,44 @@ object StripeClient {
             .sendJson()
             .endApiText()
             .body
+    }
+
+    fun setupWithEphemeral(customerId: String): HttpResp<PaymentSheetParams> {
+        return Fetch()
+            .post("${Endpoint.stripePaymentSheet}/setup")
+            .noCache()
+            .sendJson(json.toJsonString(CustomerParams(customer = customerId)))
+            .endApiJson()
+    }
+
+    fun subsDefaultPaymentMethod(subsId: String, ftcId: String): HttpResp<StripePaymentMethod> {
+        return Fetch()
+            .get("${Endpoint.stripeSubs}/${subsId}/default-payment-method")
+            .setUserId(ftcId)
+            .noCache()
+            .endJson()
+    }
+
+    fun cusDefaultPaymentMethod(cusId: String, ftcId: String): HttpResp<StripePaymentMethod> {
+        return Fetch()
+            .get("${Endpoint.stripeCustomers}/${cusId}/default-payment-method")
+            .setUserId(ftcId)
+            .noCache()
+            .endJson()
+    }
+
+    fun loadDefaultPaymentMethod(cusId: String, subsId: String?, ftcId: String): HttpResp<StripePaymentMethod> {
+        if (subsId != null) {
+            return subsDefaultPaymentMethod(
+                subsId = subsId,
+                ftcId = ftcId,
+            )
+        }
+
+        return cusDefaultPaymentMethod(
+            cusId = cusId,
+            ftcId = ftcId,
+        )
     }
 
     fun createSubscription(account: Account, params: SubParams): StripeSubsResult? {
