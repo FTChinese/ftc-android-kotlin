@@ -207,7 +207,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
 
             if (resp.raw.isNotBlank()) {
                 viewModelScope.launch(Dispatchers.IO) {
-                    cache.saveText(CacheFileNames.stripePrices, resp.raw)
+                    cache.saveText(CacheFileNames.stripePrices, resp.body)
                 }
             }
 
