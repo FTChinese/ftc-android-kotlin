@@ -40,6 +40,7 @@ import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.ftcpay.FtcPayActivityScreen
 import com.ft.ftchinese.ui.ftcpay.FtcPayViewModel
 import com.ft.ftchinese.ui.ftcpay.OrderResult
+import com.ft.ftchinese.ui.paywall.PaywallActivityScreen
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.stripepay.StripePayActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme

@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.subsactivity
+package com.ft.ftchinese.ui.paywall
 
 import android.app.Activity
 import android.content.Context
@@ -16,9 +16,6 @@ import com.ft.ftchinese.model.paywall.CartItemFtcV2
 import com.ft.ftchinese.model.paywall.CartItemStripeV2
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.ui.login.AuthActivity
-import com.ft.ftchinese.ui.paywall.LinkEmailDialog
-import com.ft.ftchinese.ui.paywall.PaywallScreen
-import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
