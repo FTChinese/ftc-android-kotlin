@@ -209,7 +209,7 @@ class CustomerViewModel(
                 customerCreated.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.stripe_customer_not_found)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
             } catch (e: Exception) {
                 progressLiveData.value = false
@@ -254,7 +254,7 @@ class CustomerViewModel(
                 paymentMethodUpdated.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.stripe_customer_not_found)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
             } catch (e: Exception) {
                 Log.i(TAG, "$e")
