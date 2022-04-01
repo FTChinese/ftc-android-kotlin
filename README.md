@@ -6,7 +6,7 @@ Android 12 start providing Splash Screens. We implemented our custom one till ve
 
 ## Login
 
-### Wechat Login Process
+### Wechat Login Workflow
 
 #### Step 1: Launch Wechat
 
@@ -70,6 +70,8 @@ Access token, refresh token should not be saved by client.
 
 #### Step 4: Use `unionid` to Get User Data
 
+### Mobile Login Workflow
+
 ## Delete Account
 
 * Placed on the app bar menu of AccountActivity;
@@ -88,19 +90,29 @@ If a non-logged-in, or non-subscribed user clicked a article behind paywall, a b
 
 ### Paywall
 
+Paywall data should be retrieved for both FTC prices and Stripe Prices
+
 ### Alipay
 
 Alipay has a Maven repository `implementation 'com.alipay.sdk:alipay-sdk-java:3.3.49.ALL'`. It's the server-side SDK. DO NOT USE IT for Android!
 
-### Wechat
+### Wechat Pay
 
 TODO
 
-### Stripe
+### Stripe Integration
 
-TODO
+Refer to https://stripe.com/docs/payments/accept-a-payment?platform=android
 
-# Development Issues
+Do not use the payment intent workflow. Use setup intent instead.
+
+1. To present Stripe SDK's prebuilt UI, you should get those data from server-side:
+    * [Setup intent](https://stripe.com/docs/api/setup_intents) client secret, 
+    * ephemeral key secret, 
+    * customer id, 
+    * publishable key.
+
+# Issues
 
 ## Protobuf
 

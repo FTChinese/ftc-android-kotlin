@@ -37,7 +37,7 @@ keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
 android {
     // minSdkVersion <= targetSdkVersion <= compileSdkVersion
-    compileSdkVersion 31
+    compileSdkVersion 32
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -207,7 +207,7 @@ dependencies {
 
     // Payment
     implementation(name: 'alipaysdk-15.8.03.210428205839', ext: 'aar')
-    implementation 'com.stripe:stripe-android:16.1.1'
+    implementation 'com.stripe:stripe-android:19.3.1'
 
     // ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
@@ -249,7 +249,7 @@ dependencies {
     implementation 'androidx.compose.material:material:1.1.1'
     // Material design icons
     implementation 'androidx.compose.material:material-icons-core:1.1.1'
-    implementation 'androidx.compose.material:material-icons-extended:1.1.1'
+//    implementation 'androidx.compose.material:material-icons-extended:1.1.1'
     // Integration with activities
     implementation 'androidx.activity:activity-compose:1.4.0'
     // Integration with ViewModels
