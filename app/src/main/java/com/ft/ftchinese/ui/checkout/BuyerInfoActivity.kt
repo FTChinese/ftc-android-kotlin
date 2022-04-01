@@ -24,7 +24,6 @@ import com.ft.ftchinese.ui.webpage.ChromeClient
 import com.ft.ftchinese.ui.webpage.WVClient
 import org.jetbrains.anko.toast
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class BuyerInfoActivity : ScopedAppActivity() {
 
     private lateinit var binding: ActivityBuyerInfoBinding
