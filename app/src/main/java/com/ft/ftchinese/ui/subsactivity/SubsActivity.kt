@@ -37,6 +37,7 @@ import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.components.SubsScreen
 import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.ftcpay.FtcPayActivityScreen
 import com.ft.ftchinese.ui.ftcpay.FtcPayViewModel
 import com.ft.ftchinese.ui.ftcpay.OrderResult
 import com.ft.ftchinese.ui.paywall.PaywallViewModel

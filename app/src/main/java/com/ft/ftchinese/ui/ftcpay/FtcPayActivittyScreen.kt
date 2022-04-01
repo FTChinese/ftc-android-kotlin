@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.subsactivity
+package com.ft.ftchinese.ui.ftcpay
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
@@ -10,8 +10,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.ui.components.ErrorDialog
-import com.ft.ftchinese.ui.ftcpay.FtcPayScreen
-import com.ft.ftchinese.ui.ftcpay.FtcPayViewModel
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.tencent.mm.opensdk.constants.Build
