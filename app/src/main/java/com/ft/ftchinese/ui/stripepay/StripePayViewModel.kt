@@ -10,8 +10,6 @@ private const val TAG = "StripePayViewModel"
 
 class StripePayViewModel : ViewModel() {
 
-    val isNetworkAvailable = MutableLiveData<Boolean>()
-
     private var _progress = MutableLiveData<FetchUi>(FetchUi.Progress(false))
     val progressLiveData = _progress
 
