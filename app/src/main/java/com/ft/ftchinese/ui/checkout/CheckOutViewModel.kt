@@ -250,7 +250,7 @@ class CheckOutViewModel : BaseViewModel() {
                 wxPayIntentResult.value = if (e.statusCode == 403) {
                     FetchResult.LocalizedError(R.string.duplicate_purchase)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
             } catch (e: Exception) {
                 progressLiveData.value = false
@@ -287,7 +287,7 @@ class CheckOutViewModel : BaseViewModel() {
                 aliPayIntentResult.value = if (msgId != null) {
                     FetchResult.LocalizedError(msgId)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
             } catch (e: Exception) {
                 progressLiveData.value = false
