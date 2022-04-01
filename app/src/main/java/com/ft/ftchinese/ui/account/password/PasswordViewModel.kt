@@ -102,11 +102,11 @@ class PasswordViewModel : BaseViewModel() {
                     403 -> FetchResult.LocalizedError(R.string.password_current_incorrect)
                     404 -> FetchResult.LocalizedError(R.string.account_not_found)
                     422 -> when {
-                        e.error == null -> FetchResult.fromServerError(e)
+                        e.error == null -> FetchResult.fromApi(e)
                         e.error.isFieldInvalid("password") -> FetchResult.LocalizedError(R.string.signup_invalid_password)
-                        else -> FetchResult.fromServerError(e)
+                        else -> FetchResult.fromApi(e)
                     }
-                    else -> FetchResult.fromServerError(e)
+                    else -> FetchResult.fromApi(e)
                 }
 
             } catch (e: Exception) {

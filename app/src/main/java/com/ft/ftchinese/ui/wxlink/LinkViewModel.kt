@@ -89,16 +89,16 @@ class LinkViewModel : BaseViewModel() {
         accountLinked.value = when (e.statusCode) {
             404 -> FetchResult.LocalizedError(R.string.account_not_found)
             422 -> if (e.error == null) {
-                FetchResult.fromServerError(e)
+                FetchResult.fromApi(e)
             } else {
                 when {
                     e.error.isFieldAlreadyExists("account_link") -> FetchResult.LocalizedError(R.string.api_account_already_linked)
                     e.error.isFieldAlreadyExists("membership_link") -> FetchResult.LocalizedError(R.string.api_membership_already_linked)
                     e.error.isFieldAlreadyExists("membership_both_valid") -> FetchResult.LocalizedError(R.string.api_membership_all_valid)
-                    else -> FetchResult.fromServerError(e)
+                    else -> FetchResult.fromApi(e)
                 }
             }
-            else -> FetchResult.fromServerError(e)
+            else -> FetchResult.fromApi(e)
         }
     }
 }

@@ -81,7 +81,7 @@ class UnlinkViewModel : BaseViewModel() {
                 accountLoaded.value = if (msgId != null) {
                     FetchResult.LocalizedError(msgId)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
                 progressLiveData.value = false
             } catch (e: Exception) {

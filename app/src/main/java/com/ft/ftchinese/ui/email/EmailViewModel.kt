@@ -86,7 +86,7 @@ class EmailViewModel : BaseViewModel() {
                     return@launch
                 }
 
-                existsResult.value = FetchResult.fromServerError(e)
+                existsResult.value = FetchResult.fromApi(e)
             } catch (e: Exception) {
                 existsResult.value = FetchResult.fromException(e)
                 progressLiveData.value = false
@@ -122,16 +122,16 @@ class EmailViewModel : BaseViewModel() {
                 emailUpdated.value = when (e.statusCode) {
                     422 -> {
                         if (e.error == null) {
-                            FetchResult.fromServerError(e)
+                            FetchResult.fromApi(e)
                         } else {
                             when {
                                 e.error.isFieldAlreadyExists("email") -> FetchResult.LocalizedError(R.string.signup_email_taken)
                                 e.error.isFieldInvalid("email") -> FetchResult.LocalizedError(R.string.signup_invalid_email)
-                                else -> FetchResult.fromServerError(e)
+                                else -> FetchResult.fromApi(e)
                             }
                         }
                     }
-                    else -> FetchResult.fromServerError(e)
+                    else -> FetchResult.fromApi(e)
                 }
             } catch (e: Exception) {
                 progressLiveData.value = false
@@ -172,7 +172,7 @@ class EmailViewModel : BaseViewModel() {
                 letterSent.value = if (msgId != null) {
                     FetchResult.LocalizedError(msgId)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
                 progressLiveData.value = false
                 isLetterBtnEnabled.value = true

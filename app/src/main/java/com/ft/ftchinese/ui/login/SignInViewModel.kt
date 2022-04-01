@@ -153,7 +153,7 @@ class SignInViewModel : BaseViewModel() {
         accountResult.value = when (e.statusCode) {
             403 -> FetchResult.LocalizedError(R.string.login_incorrect_password)
             404 -> FetchResult.LocalizedError(R.string.account_not_found)
-            else -> FetchResult.fromServerError(e)
+            else -> FetchResult.fromApi(e)
         }
     }
 }

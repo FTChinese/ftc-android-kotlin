@@ -14,7 +14,6 @@ import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -144,7 +143,7 @@ class SettingsViewModel(
                 releaseResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.release_not_found)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
 
             } catch (e: Exception) {

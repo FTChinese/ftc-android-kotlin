@@ -118,17 +118,17 @@ class SignUpViewModel : ViewModel() {
         accountResult.value = when (e.statusCode) {
             422 -> {
                 if (e.error == null) {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 } else {
                     when {
                         e.error.isFieldAlreadyExists("email") -> FetchResult.LocalizedError(R.string.signup_email_taken)
                         e.error.isFieldInvalid("email") -> FetchResult.LocalizedError(R.string.signup_invalid_email)
                         e.error.isFieldInvalid("password") -> FetchResult.LocalizedError(R.string.signup_invalid_password)
-                        else -> FetchResult.fromServerError(e)
+                        else -> FetchResult.fromApi(e)
                     }
                 }
             }
-            else -> FetchResult.fromServerError(e)
+            else -> FetchResult.fromApi(e)
         }
     }
 

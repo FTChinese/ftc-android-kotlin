@@ -250,7 +250,7 @@ class MobileViewModel : BaseViewModel() {
             accountLoaded.value = if (e.statusCode == 404) {
                 FetchResult.LocalizedError(R.string.account_not_found)
             } else {
-                FetchResult.fromServerError(e)
+                FetchResult.fromApi(e)
             }
         } catch (e: Exception) {
             accountLoaded.value = FetchResult.fromException(e)
@@ -294,12 +294,12 @@ class MobileViewModel : BaseViewModel() {
                 accountLoaded.value = when(e.statusCode) {
                     422 -> {
                         if (e.error == null) {
-                            FetchResult.fromServerError(e)
+                            FetchResult.fromApi(e)
                         } else {
                             when {
                                 e.error.isFieldAlreadyExists("email") -> FetchResult.LocalizedError(R.string.signup_mobile_taken)
                                 e.error.isFieldInvalid("mobile") -> FetchResult.LocalizedError(R.string.signup_invalid_mobile)
-                                else -> FetchResult.fromServerError(e)
+                                else -> FetchResult.fromApi(e)
                             }
                         }
                     }
@@ -342,16 +342,16 @@ class MobileViewModel : BaseViewModel() {
                 codeSent.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.account_not_found)
                     422 -> if (e.error == null) {
-                        FetchResult.fromServerError(e)
+                        FetchResult.fromApi(e)
                     } else {
                         when {
                             // Alert this message
                             e.error.isFieldAlreadyExists("mobile") -> FetchResult.LocalizedError(R.string.mobile_conflict)
                             e.error.isFieldInvalid("mobile") -> FetchResult.LocalizedError(R.string.mobile_invalid)
-                            else -> FetchResult.fromServerError(e)
+                            else -> FetchResult.fromApi(e)
                         }
                     }
-                    else -> FetchResult.fromServerError(e)
+                    else -> FetchResult.fromApi(e)
                 }
             } catch (e: Exception) {
                 progressLiveData.value = false
@@ -390,16 +390,16 @@ class MobileViewModel : BaseViewModel() {
                 mobileUpdated.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.mobile_code_not_found)
                     422 -> if (e.error == null) {
-                        FetchResult.fromServerError(e)
+                        FetchResult.fromApi(e)
                     } else {
                         when {
                             e.error.isFieldAlreadyExists("mobile") -> FetchResult.LocalizedError(R.string.mobile_already_exists)
                             e.error.isFieldInvalid("mobile") -> FetchResult.LocalizedError(R.string.mobile_invalid)
                             e.error.isFieldInvalid("code") -> FetchResult.LocalizedError(R.string.mobile_code_invalid)
-                            else -> FetchResult.fromServerError(e)
+                            else -> FetchResult.fromApi(e)
                         }
                     }
-                    else -> FetchResult.fromServerError(e)
+                    else -> FetchResult.fromApi(e)
                 }
             } catch (e: Exception) {
                 progressLiveData.value = false

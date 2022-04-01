@@ -89,7 +89,7 @@ class AccountViewModel : BaseViewModel() {
                 addOnResult.value =  if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
             } catch (e: Exception) {
                 addOnResult.value = FetchResult.fromException(e)
@@ -121,7 +121,7 @@ class AccountViewModel : BaseViewModel() {
                 stripeResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
 
             } catch (e: Exception) {
@@ -154,7 +154,7 @@ class AccountViewModel : BaseViewModel() {
                 stripeResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
 
             } catch (e: Exception) {
@@ -191,7 +191,7 @@ class AccountViewModel : BaseViewModel() {
                 stripeResult.value = if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
 
             } catch (e: Exception) {
@@ -224,7 +224,7 @@ class AccountViewModel : BaseViewModel() {
                 iapRefreshResult.value =  if (e.statusCode == 404) {
                     FetchResult.LocalizedError(R.string.loading_failed)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
 
             } catch (e: Exception) {

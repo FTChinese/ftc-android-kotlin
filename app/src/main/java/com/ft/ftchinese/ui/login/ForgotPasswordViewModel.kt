@@ -122,7 +122,7 @@ class ForgotPasswordViewModel : BaseViewModel() {
                 progressLiveData.value = false
                 letterSent.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.login_email_not_found)
-                    else -> FetchResult.fromServerError(e)
+                    else -> FetchResult.fromApi(e)
                 }
             } catch (e: Exception) {
                 letterSent.value = FetchResult.fromException(e)
@@ -162,7 +162,7 @@ class ForgotPasswordViewModel : BaseViewModel() {
                 progressLiveData.value = false
                 verificationResult.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.forgot_password_code_not_found)
-                    else -> FetchResult.fromServerError(e)
+                    else -> FetchResult.fromApi(e)
                 }
             } catch (e: Exception) {
                 progressLiveData.value = false

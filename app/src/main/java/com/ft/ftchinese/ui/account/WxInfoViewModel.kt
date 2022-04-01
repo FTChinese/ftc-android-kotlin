@@ -110,7 +110,7 @@ class WxInfoViewModel : BaseViewModel() {
                 accountLoaded.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.account_not_found)
                     // TODO: handle 422?
-                    else -> FetchResult.fromServerError(e)
+                    else -> FetchResult.fromApi(e)
                 }
             } catch (e: Exception) {
                 Log.i(TAG, "$e")

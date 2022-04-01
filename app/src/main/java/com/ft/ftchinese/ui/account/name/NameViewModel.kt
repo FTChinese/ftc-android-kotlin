@@ -83,7 +83,7 @@ class NameViewModel : BaseViewModel() {
                 nameUpdated.value = if (msgId != null) {
                     FetchResult.LocalizedError(msgId)
                 } else {
-                    FetchResult.fromServerError(e)
+                    FetchResult.fromApi(e)
                 }
                 progressLiveData.value = false
             } catch (e: Exception) {

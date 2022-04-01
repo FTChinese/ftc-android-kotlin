@@ -99,7 +99,7 @@ class DeleteAccountViewModel : BaseViewModel() {
             422 -> {
                 when {
                     e.error == null -> {
-                        deleted.value = FetchResult.fromServerError(e)
+                        deleted.value = FetchResult.fromApi(e)
                         return
                     }
                     e.error.isFieldMissing("email") -> {
@@ -111,7 +111,7 @@ class DeleteAccountViewModel : BaseViewModel() {
                         return
                     }
                     else -> {
-                        deleted.value = FetchResult.fromServerError(e)
+                        deleted.value = FetchResult.fromApi(e)
                     }
                 }
             }

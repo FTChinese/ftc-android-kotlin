@@ -115,7 +115,7 @@ class WxOAuthViewModel : BaseViewModel() {
             accountResult.value = if (e.statusCode == 404) {
                 FetchResult.LocalizedError(R.string.loading_failed)
             } else {
-                FetchResult.fromServerError(e)
+                FetchResult.fromApi(e)
             }
 
         } catch (e: Exception) {

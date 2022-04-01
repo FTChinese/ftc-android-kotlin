@@ -98,7 +98,7 @@ class PasswordResetViewModel : BaseViewModel() {
                 progressLiveData.value = false
                 resetResult.value = when (e.statusCode) {
                     404 -> FetchResult.LocalizedError(R.string.forgot_password_code_not_found)
-                    else -> FetchResult.fromServerError(e)
+                    else -> FetchResult.fromApi(e)
                 }
             } catch (e: Exception) {
                 progressLiveData.value = false
