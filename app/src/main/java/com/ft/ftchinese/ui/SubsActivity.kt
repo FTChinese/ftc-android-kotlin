@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.subsactivity
+package com.ft.ftchinese.ui
 
 import android.app.Activity
 import android.content.Context
@@ -29,7 +29,6 @@ import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.PayIntent
 import com.ft.ftchinese.model.ftcsubs.WxPayIntent
 import com.ft.ftchinese.model.paywall.CartItemFtcV2
-import com.ft.ftchinese.model.paywall.CartItemStripeV2
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedComponentActivity
@@ -42,7 +41,6 @@ import com.ft.ftchinese.ui.ftcpay.FtcPayViewModel
 import com.ft.ftchinese.ui.ftcpay.OrderResult
 import com.ft.ftchinese.ui.paywall.PaywallActivityScreen
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
-import com.ft.ftchinese.ui.stripepay.StripePayActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.tencent.mm.opensdk.openapi.IWXAPI
@@ -50,6 +48,7 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.anko.toast
 
 class SubsActivity : ScopedComponentActivity() {
 
@@ -141,7 +140,7 @@ class SubsActivity : ScopedComponentActivity() {
             val msg = payResult["memo"] ?: getString(R.string.wxpay_failed)
 
             if (resultStatus != "9000") {
-                ftcPayViewModel.showMessage(msg)
+                toast(msg)
                 tracker.buyFail(aliPayIntent.price.edition)
 
                 return@launch
@@ -168,7 +167,7 @@ class SubsActivity : ScopedComponentActivity() {
         ftcPayViewModel.saveConfirmation(confirmed, pi)
         Log.i(TAG, "New membership: ${confirmed.membership}")
 
-        ftcPayViewModel.showMessage(getString(R.string.subs_success))
+        toast(getString(R.string.subs_success))
 
         // Show the order details.
         LatestInvoiceActivity.start(this)
@@ -258,13 +257,13 @@ fun SubsApp(
                                 priceId = item.price.id,
                             )
                         },
-                        onStripePay = { item: CartItemStripeV2 ->
-                            navigateToStripePay(
-                                navController = navController,
-                                priceId = item.recurring.id,
-                                trialId = item.trial?.id,
-                            )
-                        },
+//                        onStripePay = { item: CartItemStripeV2 ->
+//                            navigateToStripePay(
+//                                navController = navController,
+//                                priceId = item.recurring.id,
+//                                trialId = item.trial?.id,
+//                            )
+//                        },
                         showSnackBar = { msg ->
                             scope.launch {
                                 scaffoldState.snackbarHostState.showSnackbar(msg)
@@ -295,33 +294,33 @@ fun SubsApp(
                     )
                 }
 
-                composable(
-                    route = "${SubsScreen.StripePay.name}/{priceId}?trialId={trialId}",
-                    arguments = listOf(
-                        navArgument("priceId") {
-                            type = NavType.StringType
-                        },
-                        navArgument("trialId") {
-                            type = NavType.StringType
-                        }
-                    )
-                ) { entry ->
-                    val priceId = entry.arguments?.getString("priceId")
-                    val trialId = entry.arguments?.getString("trialId")
-                    StripePayActivityScreen(
-                        pwViewModel = paywallViewModel,
-                        priceId = priceId,
-                        trialId = trialId,
-                        showSnackBar = { msg ->
-                            scope.launch {
-                                scaffoldState.snackbarHostState.showSnackbar(msg)
-                            }
-                        },
-                        onExit = {
-                            navController.popBackStack()
-                        }
-                    )
-                }
+//                composable(
+//                    route = "${SubsScreen.StripePay.name}/{priceId}?trialId={trialId}",
+//                    arguments = listOf(
+//                        navArgument("priceId") {
+//                            type = NavType.StringType
+//                        },
+//                        navArgument("trialId") {
+//                            type = NavType.StringType
+//                        }
+//                    )
+//                ) { entry ->
+//                    val priceId = entry.arguments?.getString("priceId")
+//                    val trialId = entry.arguments?.getString("trialId")
+//                    StripePayActivityScreen(
+//                        pwViewModel = paywallViewModel,
+//                        priceId = priceId,
+//                        trialId = trialId,
+//                        showSnackBar = { msg ->
+//                            scope.launch {
+//                                scaffoldState.snackbarHostState.showSnackbar(msg)
+//                            }
+//                        },
+//                        onExit = {
+//                            navController.popBackStack()
+//                        }
+//                    )
+//                }
             }
         }
     }
@@ -335,12 +334,12 @@ private fun navigateToFtcPay(
     navController.navigate("${SubsScreen.FtcPay.name}/$priceId")
 }
 
-private fun navigateToStripePay(
-    navController: NavHostController,
-    priceId: String,
-    trialId: String?,
-) {
-    navController.navigate("${SubsScreen.StripePay.name}/$priceId?trialId=${trialId}")
-}
+//private fun navigateToStripePay(
+//    navController: NavHostController,
+//    priceId: String,
+//    trialId: String?,
+//) {
+//    navController.navigate("${SubsScreen.StripePay.name}/$priceId?trialId=${trialId}")
+//}
 
 
