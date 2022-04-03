@@ -1,42 +1,28 @@
 package com.ft.ftchinese.model.paywall
 
-import android.os.Parcelable
-import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.StripePrice
-import kotlinx.parcelize.Parcelize
-
-/**
- * Used to pass as parcel.
- */
-@Deprecated("")
-@Parcelize
-data class StripePriceIDs(
-    val orderKind: OrderKind,
-    val recurring: String,
-    val trial: String?,
-) : Parcelable
 
 /**
  * Stripe price ids attached to a specific ftc product.
  */
-data class StripePriceIDsOfProduct(
+data class StripePriceIDs(
     val recurring: List<String>,
     val trial: String?,
 ) {
-    fun listShoppingItems(prices: Map<String, StripePrice>, m: Membership): List<CartItemStripeV2> {
+    fun listShoppingItems(prices: Map<String, StripePrice>, m: Membership): List<CartItemStripe> {
         if (prices.isEmpty()) {
             return listOf()
         }
 
         val trialPrice = trial?.let { prices[it] }
 
-        val items = mutableListOf<CartItemStripeV2>()
+        val items = mutableListOf<CartItemStripe>()
 
         recurring.forEach { id ->
             val price = prices[id]
             if (price != null) {
-                items.add(CartItemStripeV2(
+                items.add(CartItemStripe(
                     intent = price.checkoutIntent(m),
                     recurring = price,
                     trial = trialPrice
@@ -48,7 +34,7 @@ data class StripePriceIDsOfProduct(
     }
 
     companion object {
-        fun newInstance(ftcItems: List<CartItemFtcV2>): StripePriceIDsOfProduct {
+        fun newInstance(ftcItems: List<CartItemFtc>): StripePriceIDs {
             var trial: String? = null
             val recur = mutableListOf<String>()
 
@@ -60,7 +46,7 @@ data class StripePriceIDsOfProduct(
                 }
             }
 
-            return StripePriceIDsOfProduct(
+            return StripePriceIDs(
                 recurring = recur,
                 trial = trial,
             )
