@@ -7,7 +7,7 @@ data class WxPayIntent(
     override val price: Price,
     override val order: Order,
     val params: WxPaySDKParams,
-) : PayIntent(
+) : FtcPayIntent(
     price = price,
     order = order
 )

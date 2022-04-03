@@ -4,7 +4,7 @@ data class AliPayIntent(
     override val price: Price,
     override val order: Order,
     val params: AliPaySDKParams,
-) : PayIntent(
+) : FtcPayIntent(
     price = price,
     order = order,
 )

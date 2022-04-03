@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.core.content.edit
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.Order
-import com.ft.ftchinese.model.ftcsubs.PayIntent
+import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
 import com.ft.ftchinese.model.ftcsubs.Price
 
 /**
@@ -14,7 +14,7 @@ class PayIntentStore private constructor(ctx: Context) {
 
     private val sharedPref = ctx.getSharedPreferences(FILE_NAME_PI, Context.MODE_PRIVATE)
 
-    fun save(pi: PayIntent) {
+    fun save(pi: FtcPayIntent) {
         sharedPref.edit(commit = true) {
             clear()
 
@@ -23,7 +23,7 @@ class PayIntentStore private constructor(ctx: Context) {
         }
     }
 
-    fun load(): PayIntent? {
+    fun load(): FtcPayIntent? {
         val price = sharedPref.getString(KEY_ORDER, null)?.let {
             try {
                 json.parse<Price>(it)
@@ -40,7 +40,7 @@ class PayIntentStore private constructor(ctx: Context) {
             }
         } ?: return null
 
-        return PayIntent(
+        return FtcPayIntent(
             price = price,
             order = order
         )
