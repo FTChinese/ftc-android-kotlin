@@ -7,12 +7,8 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.Edition
-import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.ftcsubs.PayIntent
-import com.ft.ftchinese.model.paywall.PaymentIntent
 import com.ft.ftchinese.model.request.WxMiniParams
 import com.ft.ftchinese.model.splash.ScreenAd
-import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.google.android.gms.analytics.GoogleAnalytics
 import com.google.android.gms.analytics.HitBuilders
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -29,6 +25,7 @@ class StatsTracker private constructor(context: Context) {
         firebaseAnalytics.setUserId(id)
     }
 
+    // When paywall is displayed.
     fun displayPaywall() {
 
         val source = PaywallTracker.from ?: return
@@ -48,7 +45,8 @@ class StatsTracker private constructor(context: Context) {
                 .build())
     }
 
-    fun addCart(params: CartParams) {
+    // When FtcPayActivityScreen or StripeSubsActivity is present.
+    fun addCart(params: AddCartParams) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle().apply {
             putString(FirebaseAnalytics.Param.ITEM_ID, params.id)
             putString(FirebaseAnalytics.Param.ITEM_NAME, params.name)
@@ -63,48 +61,16 @@ class StatsTracker private constructor(context: Context) {
             .build())
     }
 
-    fun checkOut(value: Double, currency: String, payMethod: PayMethod) {
+    // When use clicked pay button.
+    fun beginCheckOut(params: BeginCheckoutParams) {
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.BEGIN_CHECKOUT, Bundle().apply {
-            putDouble(FirebaseAnalytics.Param.VALUE, value)
-            putString(FirebaseAnalytics.Param.CURRENCY, currency)
-            putString(FirebaseAnalytics.Param.METHOD, payMethod.toString())
+            putDouble(FirebaseAnalytics.Param.VALUE, params.value)
+            putString(FirebaseAnalytics.Param.CURRENCY, params.currency)
+            putString(FirebaseAnalytics.Param.METHOD, params.payMethod.toString())
         })
     }
 
-    fun checkoutFtc(pi: PaymentIntent) {
-        checkOut(pi.item.payableAmount(), pi.item.price.currency, pi.payMethod)
-    }
-
-    fun buyStripeSuccess(price: StripePrice) {
-        purchaseSucceed(
-            edition = price.edition,
-            currency = price.currency,
-            amountPaid = price.moneyAmount,
-            paymentMethod = PayMethod.STRIPE,
-        )
-    }
-
-    fun oneTimePurchaseSuccess(pi: PayIntent) {
-        purchaseSucceed(
-            edition = pi.price.edition,
-            currency = "cny",
-            amountPaid = pi.order.payableAmount,
-            paymentMethod = pi.order.payMethod
-        )
-    }
-
-    private fun purchaseSucceed(
-        edition: Edition,
-        currency: String,
-        amountPaid: Double,
-        paymentMethod: PayMethod?,
-    ) {
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.PURCHASE, Bundle().apply {
-            putString(FirebaseAnalytics.Param.CURRENCY, currency)
-            putDouble(FirebaseAnalytics.Param.VALUE, amountPaid)
-            putString(FirebaseAnalytics.Param.METHOD, paymentMethod.toString())
-        })
-
+    fun payFailed(edition: Edition) {
         tracker.send(HitBuilders.EventBuilder()
             .setCategory(GACategory.SUBSCRIPTION)
             .setAction(GAAction.get(edition))
@@ -112,10 +78,16 @@ class StatsTracker private constructor(context: Context) {
             .build())
     }
 
-    fun buyFail(edition: Edition) {
+    fun paySuccess(params: PaySuccessParams) {
+        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.PURCHASE, Bundle().apply {
+            putString(FirebaseAnalytics.Param.CURRENCY, params.currency)
+            putDouble(FirebaseAnalytics.Param.VALUE, params.amountPaid)
+            putString(FirebaseAnalytics.Param.METHOD, params.payMethod.toString())
+        })
+
         tracker.send(HitBuilders.EventBuilder()
             .setCategory(GACategory.SUBSCRIPTION)
-            .setAction(GAAction.get(edition))
+            .setAction(GAAction.get(params.edition))
             .setLabel(PaywallTracker.from?.label ?: "")
             .build())
     }
