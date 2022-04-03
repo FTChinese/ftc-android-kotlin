@@ -212,7 +212,6 @@ class SessionManager private constructor(context: Context) {
 
     fun logout() {
         AccountCache.clear()
-        PaywallCache.clear()
         sharedPreferences.edit {
             clear()
         }
