@@ -6,6 +6,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,8 +28,9 @@ fun Toolbar(
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(
-                    if (isMenu) Icons.Filled.ArrowBack else Icons.Filled.ArrowBack,
-                    ""
+                    imageVector = if (isMenu) Icons.Filled.Menu else Icons.Filled.ArrowBack,
+                    "",
+                    tint = OColor.black90
                 )
             }
         },
