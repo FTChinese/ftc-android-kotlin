@@ -14,7 +14,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.model.paywall.CartItemStripeV2
+import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.components.*
@@ -65,7 +65,7 @@ class StripeSubActivity : ScopedAppActivity() {
             ephemeralKeyViewModel.isNetworkAvailable.value = it
         }
 
-        intent.getParcelableExtra<CartItemStripeV2>(EXTRA_CHECKOUT_ITEM)?.let {
+        intent.getParcelableExtra<CartItemStripe>(EXTRA_CHECKOUT_ITEM)?.let {
             subsViewModel.putIntoCart(it)
         }
 
@@ -80,9 +80,6 @@ class StripeSubActivity : ScopedAppActivity() {
 
         subsViewModel.membershipUpdated.observe(this) {
             userViewModel.saveMembership(it)
-            subsViewModel.itemLiveData.value?.let { item ->
-                tracker.buyStripeSuccess(item.recurring)
-            }
         }
 
         setContent { 
@@ -270,7 +267,7 @@ class StripeSubActivity : ScopedAppActivity() {
         private const val EXTRA_CHECKOUT_ITEM = "extra_checkout_item"
 
         @JvmStatic
-        fun startForResult(activity: Activity, requestCode: Int, item: CartItemStripeV2) {
+        fun startForResult(activity: Activity, requestCode: Int, item: CartItemStripe) {
             activity.startActivityForResult(
                 Intent(activity, StripeSubActivity::class.java).apply {
                     putExtra(EXTRA_CHECKOUT_ITEM, item)
@@ -280,7 +277,7 @@ class StripeSubActivity : ScopedAppActivity() {
         }
 
         @JvmStatic
-        fun intent(context: Context, item: CartItemStripeV2) = Intent(context, StripeSubActivity::class.java).apply {
+        fun intent(context: Context, item: CartItemStripe) = Intent(context, StripeSubActivity::class.java).apply {
             putExtra(EXTRA_CHECKOUT_ITEM, item)
         }
     }
