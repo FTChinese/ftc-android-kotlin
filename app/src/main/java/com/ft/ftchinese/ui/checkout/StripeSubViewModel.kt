@@ -8,12 +8,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
-import com.ft.ftchinese.model.paywall.CartItemStripeV2
+import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.*
 import com.ft.ftchinese.repository.StripeClient
+import com.ft.ftchinese.tracking.BeginCheckoutParams
+import com.ft.ftchinese.tracking.PaySuccessParams
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.components.ToastMessage
 import com.stripe.android.PaymentSession
@@ -33,6 +36,7 @@ class StripeSubViewModel(application: Application)
     : AndroidViewModel(application),
     PaymentSession.PaymentSessionListener {
 
+    private val tracker = StatsTracker.getInstance(application)
     private val idempotency = Idempotency.getInstance(application)
 
     fun clearIdempotency() {
@@ -71,8 +75,8 @@ class StripeSubViewModel(application: Application)
         }
     }
 
-    val itemLiveData: MutableLiveData<CartItemStripeV2> by lazy {
-        MutableLiveData<CartItemStripeV2>()
+    val itemLiveData: MutableLiveData<CartItemStripe> by lazy {
+        MutableLiveData<CartItemStripe>()
     }
 
     private val isUpdate: Boolean
@@ -102,7 +106,7 @@ class StripeSubViewModel(application: Application)
      * When the UI is created, use the price and current
      * membership to build PaymentCounter.
      */
-    fun putIntoCart(item: CartItemStripeV2) {
+    fun putIntoCart(item: CartItemStripe) {
         itemLiveData.value = item
     }
 
@@ -174,6 +178,7 @@ class StripeSubViewModel(application: Application)
                 progressLiveData.value = false
             }
         }
+        tracker.beginCheckOut(BeginCheckoutParams.ofStripe(item))
     }
 
     private fun handleSubsResult(result: StripeSubsResult) {
@@ -181,6 +186,10 @@ class StripeSubViewModel(application: Application)
             toastLiveData.value = ToastMessage.Resource(R.string.subs_success)
             membershipUpdated.value = result.membership
             subsCreated.value = result.subs
+
+            itemLiveData.value?.let {
+                tracker.paySuccess(PaySuccessParams.ofStripe(it))
+            }
             return
         }
 
@@ -211,9 +220,16 @@ class StripeSubViewModel(application: Application)
             } catch (e: APIError) {
                 progressLiveData.value = false
                 toastLiveData.value = ToastMessage.fromApi(e)
+
+                itemLiveData.value?.let {
+                    tracker.payFailed(it.recurring.edition)
+                }
             } catch (e: Exception) {
                 progressLiveData.value = false
                 toastLiveData.value = ToastMessage.fromException(e)
+                itemLiveData.value?.let {
+                    tracker.payFailed(it.recurring.edition)
+                }
             }
         }
     }
@@ -236,6 +252,9 @@ class StripeSubViewModel(application: Application)
             } catch (e: Exception) {
                 progressLiveData.value = false
                 toastLiveData.value = ToastMessage.fromException(e)
+                itemLiveData.value?.let {
+                    tracker.payFailed(it.recurring.edition)
+                }
             }
         }
     }
