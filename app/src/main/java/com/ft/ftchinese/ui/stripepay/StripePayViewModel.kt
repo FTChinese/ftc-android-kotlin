@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
-import com.ft.ftchinese.model.paywall.CartItemStripeV2
+import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.PaymentSheetParams
 import com.ft.ftchinese.repository.StripeClient
@@ -92,7 +92,7 @@ class StripePayViewModel : BaseViewModel() {
 
     }
 
-    fun subscribe(account: Account, item: CartItemStripeV2) {
+    fun subscribe(account: Account, item: CartItemStripe) {
 
     }
 
