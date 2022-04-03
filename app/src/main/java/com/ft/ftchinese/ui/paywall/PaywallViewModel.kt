@@ -7,16 +7,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.paywall.*
+import com.ft.ftchinese.model.paywall.CartItemFtcV2
+import com.ft.ftchinese.model.paywall.CartItemStripeV2
+import com.ft.ftchinese.model.paywall.Paywall
+import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.store.PaywallCache
+import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.components.ToastMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -29,7 +32,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
     private val cache = FileCache(application)
     private var premiumOnTop = false
 
-    val isNetworkAvailable = MutableLiveData<Boolean>()
+    val isNetworkAvailable = MutableLiveData(application.isConnected)
     val progressLiveData = MutableLiveData(false)
     val refreshingLiveData = MutableLiveData(false)
 
@@ -41,13 +44,8 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         MutableLiveData<Map<String, StripePrice>>()
     }
 
-    val toastLiveData: MutableLiveData<FetchUi> by lazy {
-        MutableLiveData<FetchUi>()
-    }
-
-    @Deprecated("")
-    val stripePrices: MutableLiveData<FetchResult<List<StripePrice>>> by lazy {
-        MutableLiveData<FetchResult<List<StripePrice>>>()
+    val toastLiveData: MutableLiveData<ToastMessage> by lazy {
+        MutableLiveData<ToastMessage>()
     }
 
     fun putPremiumOnTop(onTop: Boolean) {
@@ -89,10 +87,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
 
             if (!data.isNullOrBlank()) {
                 try {
-                    json.parse<Paywall>(data)?.let {
-                        PaywallCache.setFtc(it)
-                        it
-                    }
+                    json.parse<Paywall>(data)
                 } catch (e: Exception) {
                     e.message?.let { Log.i(TAG, it) }
                     null
@@ -104,9 +99,6 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private suspend fun loadRemotePaywall(isTest: Boolean): FetchResult<Paywall> {
-        if (isNetworkAvailable.value != true) {
-            return FetchResult.LocalizedError(R.string.prompt_no_network)
-        }
 
         try {
             val pwResp = withContext(Dispatchers.IO) {
@@ -124,7 +116,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
             if (pwResp.raw.isNotBlank()) {
                 viewModelScope.launch(Dispatchers.IO) {
                     Log.i(TAG, "Caching paywall data to file")
-                    cache.saveText(CacheFileNames.paywallFile(isTest), pwResp.raw)
+                    cache.saveFtcPrice(isTest, pwResp.raw)
                 }
             }
 
@@ -139,13 +131,12 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         when (result) {
             is FetchResult.Success -> {
                 ftcPriceLiveData.value = result.data.reOrderProducts(premiumOnTop)
-                PaywallCache.setFtc(result.data)
             }
             is FetchResult.LocalizedError -> {
-                toastLiveData.value = FetchUi.ResMsg(result.msgId)
+                toastLiveData.value = ToastMessage.Resource(result.msgId)
             }
             is FetchResult.TextError -> {
-                toastLiveData.value = FetchUi.TextMsg(result.text)
+                toastLiveData.value = ToastMessage.Text(result.text)
             }
         }
     }
@@ -158,6 +149,10 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
             if (pw != null) {
                 Log.i(TAG, "Paywall data loaded from local cached file")
                 setFtcPrice(FetchResult.Success(pw))
+            }
+
+            if (isNetworkAvailable.value != true) {
+                return@launch
             }
 
             val result = loadRemotePaywall(isTest)
@@ -176,11 +171,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
                 null
             } else {
                 try {
-                    json.parseArray<StripePrice>(data)?.let {
-                        StripePriceStore.set(it)
-
-                        it
-                    }
+                    json.parseArray(data)
                 } catch (e: Exception) {
                     e.message?.let { Log.i(TAG, it) }
 
@@ -191,9 +182,6 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private suspend fun loadRemoteStripe(): FetchResult<List<StripePrice>> {
-        if (isNetworkAvailable.value != true) {
-            return FetchResult.LocalizedError(R.string.prompt_no_network)
-        }
 
         try {
             Log.i(TAG, "Retrieving stripe prices from server")
@@ -207,14 +195,11 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
 
             if (resp.raw.isNotBlank()) {
                 viewModelScope.launch(Dispatchers.IO) {
-                    cache.saveText(CacheFileNames.stripePrices, resp.body)
+                    cache.saveStripePrice(resp.raw)
                 }
             }
 
-            val prices = json.parseArray<StripePrice>(resp.body)
-                ?: return FetchResult.TextError("JSON parsing failed")
-
-            return FetchResult.Success(prices)
+            return FetchResult.Success(resp.body)
         } catch (e: Exception) {
             e.message?.let { Log.i(TAG, "Error retrieving stripe prices: $it") }
             return FetchResult.fromException(e)
@@ -228,14 +213,13 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
                     it.id
                 }.let {
                     stripePriceLiveData.value = it
-                    PaywallCache.setStripe(it)
                 }
             }
             is FetchResult.LocalizedError -> {
-                toastLiveData.value = FetchUi.ResMsg(result.msgId)
+                toastLiveData.value = ToastMessage.Resource(result.msgId)
             }
             is FetchResult.TextError -> {
-                toastLiveData.value = FetchUi.TextMsg(result.text)
+                toastLiveData.value = ToastMessage.Text(result.text)
             }
         }
     }
@@ -245,7 +229,6 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
     // This works as a backup in case stripe prices is not yet
     // loaded into memory.
     fun loadStripePrices() {
-        progressLiveData.value = true
 
         viewModelScope.launch {
             val prices = loadCachedStripe()
@@ -254,15 +237,19 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
                 setStripePrice(FetchResult.Success(prices))
             }
 
+            if (isNetworkAvailable.value != true) {
+                return@launch
+            }
+
             val result = loadRemoteStripe()
-            progressLiveData.value = false
+
             setStripePrice(result)
         }
     }
 
     fun refresh() {
         if (isNetworkAvailable.value != true) {
-            toastLiveData.value = FetchUi.ResMsg(R.string.prompt_no_network)
+            toastLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
             return
         }
 
@@ -279,16 +266,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
             setStripePrice(stripeRes)
 
             refreshingLiveData.value = false
-            toastLiveData.value = FetchUi.ResMsg(R.string.refresh_success)
+            toastLiveData.value = ToastMessage.Resource(R.string.refresh_success)
         }
-    }
-
-    @Deprecated("")
-    fun ensureStripePrices() {
-        if (!StripePriceStore.isEmpty) {
-            return
-        }
-
-        loadStripePrices()
     }
 }

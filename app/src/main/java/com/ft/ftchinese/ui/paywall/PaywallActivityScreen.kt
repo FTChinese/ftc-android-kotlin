@@ -11,10 +11,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.model.paywall.CartItemFtcV2
 import com.ft.ftchinese.model.paywall.CartItemStripeV2
 import com.ft.ftchinese.model.paywall.defaultPaywall
+import com.ft.ftchinese.ui.checkout.StripeSubActivity
+import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -37,12 +38,20 @@ private fun launchLinkFtcActivity(
     launcher.launch(LinkFtcActivity.intent(context))
 }
 
+private fun launchStripeSubsActivity(
+    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    context: Context,
+    item: CartItemStripeV2,
+) {
+    launcher.launch(StripeSubActivity.intent(context, item))
+}
+
 @Composable
 fun PaywallActivityScreen(
     paywallViewModel: PaywallViewModel = viewModel(),
     userViewModel: UserViewModel = viewModel(),
     onFtcPay: (item: CartItemFtcV2) -> Unit,
-    onStripePay: (item: CartItemStripeV2) -> Unit,
+//    onStripePay: (item: CartItemStripeV2) -> Unit,
     showSnackBar: (String) -> Unit,
 ) {
 
@@ -50,7 +59,7 @@ fun PaywallActivityScreen(
     val isRefreshing by paywallViewModel.refreshingLiveData.observeAsState(false)
     val ftcPaywall by paywallViewModel.ftcPriceLiveData.observeAsState(defaultPaywall)
     val stripePrices by paywallViewModel.stripePriceLiveData.observeAsState(mapOf())
-    val messageState = paywallViewModel.toastLiveData.observeAsState()
+    val toastState = paywallViewModel.toastLiveData.observeAsState()
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -69,11 +78,11 @@ fun PaywallActivityScreen(
         mutableStateOf(false)
     }
 
-    when (val s = messageState.value) {
-        is FetchUi.ResMsg -> {
-            showSnackBar(context.getString(s.strId))
+    when (val s = toastState.value) {
+        is ToastMessage.Resource -> {
+            showSnackBar(context.getString(s.id))
         }
-        is FetchUi.TextMsg -> {
+        is ToastMessage.Text -> {
             showSnackBar(s.text)
         }
         else -> {}
@@ -124,7 +133,8 @@ fun PaywallActivityScreen(
                     setOpenDialog(true)
                     return@PaywallScreen
                 }
-                onStripePay(it)
+//                onStripePay(it)
+                launchStripeSubsActivity(launcher, context, it)
             },
             onError = showSnackBar,
             onLoginRequest = {
