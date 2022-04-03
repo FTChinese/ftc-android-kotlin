@@ -33,6 +33,14 @@ class FileCache (private val context: Context) {
         }
     }
 
+    fun saveFtcPrice(isTest: Boolean, text: String) {
+        saveText(CacheFileNames.paywallFile(isTest), text = text)
+    }
+
+    fun saveStripePrice(text: String) {
+        saveText(CacheFileNames.stripePrices, text)
+    }
+
     fun loadText(name: String?): String? {
         if (name.isNullOrBlank()) {
             return null
