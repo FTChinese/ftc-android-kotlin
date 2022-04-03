@@ -28,8 +28,8 @@ fun PaywallScreen(
     paywall: Paywall,
     stripePrices: Map<String, StripePrice>,
     account: Account?,
-    onFtcPay: (item: CartItemFtcV2) -> Unit,
-    onStripePay: (item: CartItemStripeV2) -> Unit,
+    onFtcPay: (item: CartItemFtc) -> Unit,
+    onStripePay: (item: CartItemStripe) -> Unit,
     onError: (String) -> Unit,
     onLoginRequest: () -> Unit,
 ) {
@@ -61,7 +61,7 @@ fun PaywallScreen(
                 priceContent = {
                     PriceList(
                         ftcCartItems = ftcItems,
-                        stripeCartItems = StripePriceIDsOfProduct
+                        stripeCartItems = StripePriceIDs
                             .newInstance(ftcItems)
                             .listShoppingItems(stripePrices, membership),
                         onFtcPay = onFtcPay,

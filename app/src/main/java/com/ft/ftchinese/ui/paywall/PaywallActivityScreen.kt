@@ -11,9 +11,10 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ft.ftchinese.model.paywall.CartItemFtcV2
-import com.ft.ftchinese.model.paywall.CartItemStripeV2
+import com.ft.ftchinese.model.paywall.CartItemFtc
+import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.defaultPaywall
+import com.ft.ftchinese.tracking.AddCartParams
 import com.ft.ftchinese.ui.checkout.StripeSubActivity
 import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.login.AuthActivity
@@ -41,7 +42,7 @@ private fun launchLinkFtcActivity(
 private fun launchStripeSubsActivity(
     launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
     context: Context,
-    item: CartItemStripeV2,
+    item: CartItemStripe,
 ) {
     launcher.launch(StripeSubActivity.intent(context, item))
 }
@@ -50,7 +51,7 @@ private fun launchStripeSubsActivity(
 fun PaywallActivityScreen(
     paywallViewModel: PaywallViewModel = viewModel(),
     userViewModel: UserViewModel = viewModel(),
-    onFtcPay: (item: CartItemFtcV2) -> Unit,
+    onFtcPay: (item: CartItemFtc) -> Unit,
 //    onStripePay: (item: CartItemStripeV2) -> Unit,
     showSnackBar: (String) -> Unit,
 ) {
@@ -107,6 +108,10 @@ fun PaywallActivityScreen(
         paywallViewModel.loadStripePrices()
     }
 
+    LaunchedEffect(key1 = Unit) {
+        paywallViewModel.trackDisplayPaywall()
+    }
+
     SwipeRefresh(
         state = rememberSwipeRefreshState(
             isRefreshing = isRefreshing,
@@ -123,6 +128,8 @@ fun PaywallActivityScreen(
                     return@PaywallScreen
                 }
                 onFtcPay(it)
+
+                paywallViewModel.trackAddCart(AddCartParams.ofFtc(it.price))
             },
             onStripePay = {
                 if (!userViewModel.isLoggedIn) {
@@ -135,6 +142,8 @@ fun PaywallActivityScreen(
                 }
 //                onStripePay(it)
                 launchStripeSubsActivity(launcher, context, it)
+
+                paywallViewModel.trackAddCart(AddCartParams.ofStripe(it.recurring))
             },
             onError = showSnackBar,
             onLoginRequest = {
