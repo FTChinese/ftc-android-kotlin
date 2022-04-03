@@ -1,10 +1,8 @@
 package com.ft.ftchinese.ui.ftcpay
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Card
-import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -12,44 +10,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.paywall.CartItemFtcV2
+import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.paywall.defaultPaywall
-import com.ft.ftchinese.ui.components.CheckoutHeader
-import com.ft.ftchinese.ui.components.CheckoutMessage
-import com.ft.ftchinese.ui.components.PrimaryButton
-import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.product.PriceCard
 import com.ft.ftchinese.ui.product.PriceCardParams
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OFont
 
-data class PayMethodRes(
-    val image: Int,
-    val text: Int,
-)
-
-var payMethodResources = mapOf(
-    PayMethod.ALIPAY to PayMethodRes(
-        image = R.drawable.alipay,
-        text = R.string.pay_brand_ali
-    ),
-    PayMethod.WXPAY to PayMethodRes(
-        image = R.drawable.wechat_pay,
-        text = R.string.pay_brand_wechat
-    ),
-)
-
 @Composable
 fun FtcPayScreen(
-    cartItem: CartItemFtcV2,
+    cartItem: CartItemFtc,
     loading: Boolean,
     onClickPay: (PayMethod) -> Unit,
 ) {
@@ -89,10 +66,10 @@ fun FtcPayScreen(
                 Spacer(modifier = Modifier.height(Dimens.dp16))
 
                 radioOptions.forEach { payMethod ->
-                    PayMethodRow(
+                    PayMethodOption(
                         method = payMethod,
                         selected = (payMethod == selectOption),
-                        enabled = (cartItem.intent.kind == IntentKind.Forbidden),
+                        enabled = (cartItem.intent.kind != IntentKind.Forbidden),
                         onSelect = onOptionSelected,
                     )
                 }
@@ -119,50 +96,29 @@ fun FtcPayScreen(
 }
 
 @Composable
-private fun PayMethodRow(
+private fun PayMethodOption(
     method: PayMethod,
     selected: Boolean,
     enabled: Boolean,
     onSelect: (PayMethod) -> Unit,
 ) {
-
-    val res = payMethodResources[method] ?: return
-    val name = LocalContext.current.getString(res.text)
-
-    Row(
+    Box(
         modifier = Modifier
-            .selectable(
-                selected = selected,
+            .clickable(
                 onClick = {
                     onSelect(method)
                 },
-                enabled = enabled,
+                enabled = enabled
             )
+            .padding(Dimens.dp8)
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
     ) {
 
-        Row {
-            Image(
-                painter = painterResource(id = res.image),
-                contentDescription = name,
-            )
+        PaymentBrand(payMethod = method)
 
-            Text(
-                text = name,
-                modifier = Modifier.padding(start = Dimens.dp16),
-                fontSize = 18.sp,
-
-            )
-        }
-
-        RadioButton(
+        RadioIcon(
             selected = selected,
-            onClick = {
-                onSelect(method)
-            },
-            modifier = Modifier
+            modifier = Modifier.align(Alignment.CenterEnd)
         )
     }
 }
@@ -171,7 +127,7 @@ private fun PayMethodRow(
 @Composable
 fun PreviewFtcPayBody() {
     FtcPayScreen(
-        cartItem = CartItemFtcV2(
+        cartItem = CartItemFtc(
             intent = CheckoutIntent(
                 kind = IntentKind.Create,
                 message = "",
