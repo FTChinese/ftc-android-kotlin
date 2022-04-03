@@ -1,11 +1,13 @@
 package com.ft.ftchinese.ui.checkout
 
+import android.app.Application
 import android.util.Log
+import android.webkit.JavascriptInterface
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.TemplateBuilder
-import com.ft.ftchinese.model.enums.PurchaseAction
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
@@ -13,18 +15,44 @@ import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.ui.base.BaseViewModel
-import kotlinx.coroutines.*
+import com.ft.ftchinese.store.InvoiceStore
+import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.base.isConnected
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class BuyerInfoViewModel : BaseViewModel() {
+private const val TAG = "BuyerInfoViewModel"
 
+class BuyerInfoViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val session = SessionManager.getInstance(application)
+    private val fileCache = FileCache(application)
+    private val invoiceStore = InvoiceStore.getInstance(application)
+
+    val progressLiveData = MutableLiveData<Boolean>()
+    val isNetworkAvailable = MutableLiveData(application.isConnected)
     val htmlRendered = MutableLiveData<FetchResult<String>>()
+    val exitLiveData = MutableLiveData(false)
+    val alertLiveData = MutableLiveData("")
 
     /**
      * @param action - `buy` or `renew`.
      */
-    fun loadPage(account: Account, cache: FileCache, action: PurchaseAction) {
+    fun loadPage() {
+//        htmlRendered.value = FetchResult.Success(fileCache.readTestHtml())
+//        progressLiveData.value = false
+//        return
+
         if (isNetworkAvailable.value == false) {
+            return
+        }
+
+        val account = session.loadAccount()
+        val action = invoiceStore.loadPurchaseAction()
+        if (account == null || action == null) {
+            exitLiveData.value = true
             return
         }
 
@@ -67,7 +95,6 @@ class BuyerInfoViewModel : BaseViewModel() {
                 }
                 val html = render(
                     account = account,
-                    cache = cache,
                     content = webContent,
                     address = address,
                 )
@@ -81,9 +108,9 @@ class BuyerInfoViewModel : BaseViewModel() {
         }
     }
 
-    private suspend fun render(account: Account, cache: FileCache, content: String, address: Address): String {
+    private suspend fun render(account: Account, content: String, address: Address): String {
         val template = withContext(Dispatchers.IO) {
-            cache.readChannelTemplate()
+            fileCache.readChannelTemplate()
         }
 
         return withContext(Dispatchers.Default) {
@@ -95,7 +122,22 @@ class BuyerInfoViewModel : BaseViewModel() {
         }
     }
 
-    companion object {
-        private const val TAG = "BuyerInfoViewModel"
+    fun clearAlert() {
+        alertLiveData.value = ""
+    }
+
+    @JavascriptInterface
+    fun wvClosePage() {
+        exitLiveData.postValue(true)
+    }
+
+    @JavascriptInterface
+    fun wvProgress(loading: Boolean = false) {
+        progressLiveData.postValue(loading)
+    }
+
+    @JavascriptInterface
+    fun wvAlert(msg: String) {
+        alertLiveData.postValue(msg)
     }
 }

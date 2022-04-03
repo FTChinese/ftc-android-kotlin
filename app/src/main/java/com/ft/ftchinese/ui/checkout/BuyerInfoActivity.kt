@@ -4,154 +4,153 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.KeyEvent
-import android.webkit.JavascriptInterface
-import androidx.databinding.DataBindingUtil
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
-import com.ft.ftchinese.databinding.ActivityBuyerInfoBinding
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.dialog.AlertDialogFragment
-import com.ft.ftchinese.ui.member.MemberActivity
+import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.ChromeClient
 import com.ft.ftchinese.ui.webpage.WVClient
-import org.jetbrains.anko.toast
+import com.google.accompanist.web.WebContent
+import com.google.accompanist.web.WebView
+import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 
 class BuyerInfoActivity : ScopedAppActivity() {
 
-    private lateinit var binding: ActivityBuyerInfoBinding
-    private lateinit var sessionManager: SessionManager
-    private lateinit var fileCache: FileCache
     private lateinit var viewModel: BuyerInfoViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_buyer_info)
 
-        setSupportActionBar(binding.toolbar.toolbar)
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowTitleEnabled(true)
-        }
-
-        sessionManager = SessionManager.getInstance(this)
-        fileCache = FileCache(this)
-
-        viewModel = ViewModelProvider(this)
-            .get(BuyerInfoViewModel::class.java)
-
-        setupViewModel()
-        setupWebView()
-        init()
-    }
-
-    private fun setupViewModel() {
-        viewModel.progressLiveData.observe(this) {
-            binding.inProgress = it
-        }
-
-        viewModel.htmlRendered.observe(this) {
-            when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.TextError -> toast(it.text)
-                is FetchResult.Success -> {
-                    binding.webView.loadDataWithBaseURL(
-                        Config.discoverServer(sessionManager.loadAccount()),
-                        it.data,
-                        "text/html",
-                        null,
-                        null)
-                }
-            }
-        }
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupWebView() {
-        // Setup webview
-        binding.webView.settings.apply {
-            javaScriptEnabled = true
-            loadsImagesAutomatically = true
-            domStorageEnabled = true
-            databaseEnabled = true
-        }
-
-        binding.webView.apply {
-            addJavascriptInterface(
-                this@BuyerInfoActivity,
-                JS_INTERFACE_NAME
-            )
-
-            webViewClient = WVClient(this@BuyerInfoActivity)
-            webChromeClient = ChromeClient()
-
-            setOnKeyListener { _, keyCode, _ ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
-                    binding.webView.goBack()
-                    return@setOnKeyListener true
-                }
-                false
-            }
-        }
-    }
-
-    private fun init() {
-        // Initiate loading.
-        val account = sessionManager.loadAccount()
-
-        val action = InvoiceStore
+        val account = SessionManager
             .getInstance(this)
-            .loadPurchaseAction()
+            .loadAccount()
+            ?: return
 
-        if (account == null || action == null) {
-            Log.i(TAG, "Either account or action is null")
-            MemberActivity.start(this)
-            finish()
-            return
+        viewModel = ViewModelProvider(this)[BuyerInfoViewModel::class.java]
+
+        setContent {
+            OTheme {
+                Scaffold(
+                    topBar = {
+                        Toolbar(
+                            heading = "完善信息",
+                            onBack = { finish() }
+                        )
+                    }
+                ) {
+                    BuyerInfoScreen(
+                        baseUrl = Config.discoverServer(account),
+                        infoViewModel = viewModel,
+                        wvClient = WVClient(this)
+                    ) {
+                        finish()
+                    }
+                }
+            }
         }
-
-        viewModel.loadPage(
-            account = account,
-            cache = fileCache,
-            action = action
-        )
-
-//        viewModel.htmlRendered.value = FetchResult.Success(fileCache.readTestHtml())
-    }
-
-    @JavascriptInterface
-    fun wvClosePage() {
-        MemberActivity.start(this)
-        finish()
-    }
-
-    @JavascriptInterface
-    fun wvProgress(show: Boolean = false) {
-        binding.inProgress = show
-    }
-
-    @JavascriptInterface
-    fun wvAlert(msg: String) {
-        Log.i(TAG, "Show alert: $msg")
-        AlertDialogFragment.newMsgInstance(msg)
-            .show(supportFragmentManager, "AddressSubmitted")
     }
 
     companion object {
-        private const val TAG = "BuyerInfoActivity"
-
         @JvmStatic
         fun start(context: Context) {
             context.startActivity(
                 Intent(context, BuyerInfoActivity::class.java)
             )
         }
+    }
+}
+
+@Composable
+fun BuyerInfoScreen(
+    baseUrl: String,
+    infoViewModel: BuyerInfoViewModel,
+    wvClient: WVClient,
+    onExit: () -> Unit,
+) {
+    val context = LocalContext.current
+    val wvState = rememberWebViewStateWithHTMLData(
+        data = "Loading...",
+    )
+    val existState by infoViewModel.exitLiveData.observeAsState(false)
+    val alertState by infoViewModel.alertLiveData.observeAsState("")
+
+    val inProgress by infoViewModel.progressLiveData.observeAsState(true)
+    val htmlRendered by infoViewModel.htmlRendered.observeAsState()
+
+    if (existState) {
+        onExit()
+        return
+    }
+
+    if (alertState.isNotBlank()) {
+        AlertDialog(
+            onDismissRequest = { infoViewModel.clearAlert() },
+            text = {
+                Text(text = alertState)
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { infoViewModel.clearAlert() }
+                ) {
+                    Text(text = stringResource(id = R.string.action_ok))
+                }
+            }
+        )
+    }
+
+    when (val h = htmlRendered) {
+        is FetchResult.LocalizedError -> {
+            wvState.content = WebContent.Data(context.getString(h.msgId), baseUrl = baseUrl)
+        }
+        is FetchResult.TextError -> {
+            wvState.content = WebContent.Data(h.text, baseUrl = "")
+        }
+        is FetchResult.Success -> {
+            wvState.content = WebContent.Data(h.data, baseUrl = "")
+        }
+        else -> { }
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        infoViewModel.loadPage()
+    }
+
+    ProgressLayout(
+        loading = inProgress,
+    ) {
+
+        WebView(
+            state = wvState,
+            modifier = Modifier.fillMaxSize(),
+            captureBackPresses = false,
+            onCreated = {
+                it.settings.javaScriptEnabled = true
+                it.settings.loadsImagesAutomatically = true
+                it.settings.domStorageEnabled = true
+                it.settings.databaseEnabled = true
+                it.addJavascriptInterface(infoViewModel, JS_INTERFACE_NAME)
+                it.webViewClient = wvClient
+                it.webChromeClient = ChromeClient()
+            },
+        )
     }
 }
