@@ -1,109 +1,101 @@
 package com.ft.ftchinese.ui.checkout
 
+import android.app.Application
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.paywall.CartItemStripeV2
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.stripesubs.StripeSubsResult
-import com.ft.ftchinese.model.stripesubs.SubParams
+import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.stripesubs.*
 import com.ft.ftchinese.repository.StripeClient
-import com.ft.ftchinese.ui.base.BaseViewModel
-import com.stripe.android.model.Customer
-import com.stripe.android.model.PaymentMethod
+import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.components.ToastMessage
+import com.stripe.android.PaymentSession
+import com.stripe.android.PaymentSessionData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class StripeSubViewModel : BaseViewModel() {
-    val messageLiveData: MutableLiveData<Int> by lazy {
-        MutableLiveData<Int>()
+private const val TAG = "StripeSubViewModel"
+
+sealed class FailureStatus {
+    class Message(val message: String) : FailureStatus()
+    class NextAction(val secret: String) : FailureStatus()
+}
+
+class StripeSubViewModel(application: Application)
+    : AndroidViewModel(application),
+    PaymentSession.PaymentSessionListener {
+
+    private val idempotency = Idempotency.getInstance(application)
+
+    fun clearIdempotency() {
+        idempotency.clear()
+    }
+
+    val toastLiveData: MutableLiveData<ToastMessage> by lazy {
+        MutableLiveData<ToastMessage>()
+    }
+
+    val progressLiveData = MutableLiveData<Boolean>()
+    val isNetworkAvailable = MutableLiveData(application.isConnected)
+
+    private val paymentSessionInProgress: MutableLiveData<Boolean> by lazy {
+        MutableLiveData<Boolean>()
+    }
+
+    private fun showProgress(): Boolean {
+        if (progressLiveData.value == true) {
+            return true
+        }
+
+        if (paymentSessionInProgress.value == true) {
+            return true
+        }
+
+        return false
+    }
+
+    val inProgress = MediatorLiveData<Boolean>().apply {
+        addSource(progressLiveData) {
+            value = showProgress()
+        }
+        addSource(paymentSessionInProgress) {
+            value = showProgress()
+        }
     }
 
     val itemLiveData: MutableLiveData<CartItemStripeV2> by lazy {
         MutableLiveData<CartItemStripeV2>()
     }
 
-    val customerLiveData: MutableLiveData<Customer> by lazy {
-        MutableLiveData<Customer>()
-    }
-
-    val isUpdate: Boolean
+    private val isUpdate: Boolean
         get() = itemLiveData.value?.intent?.kind == IntentKind.Upgrade
 
-    val subsResult: MutableLiveData<FetchResult<StripeSubsResult>> by lazy {
-        MutableLiveData<FetchResult<StripeSubsResult>>()
+    val paymentMethodLiveData: MutableLiveData<StripePaymentMethod> by lazy {
+        MutableLiveData<StripePaymentMethod>()
     }
 
-    val paymentMethodLiveData: MutableLiveData<PaymentMethod> by lazy {
-        MutableLiveData<PaymentMethod>()
+    val subsCreated: MutableLiveData<Subscription> by lazy {
+        MutableLiveData<Subscription>()
     }
 
-    private fun enableSubmit(): Boolean {
-        if (progressLiveData.value == true) {
-            return false
-        }
-
-        if (itemLiveData.value == null) {
-            return false
-        }
-
-        if (customerLiveData.value == null) {
-            return false
-        }
-
-        if (paymentMethodLiveData.value == null) {
-            return false
-        }
-
-        return true
+    val failureLiveData: MutableLiveData<FailureStatus> by lazy {
+        MutableLiveData<FailureStatus>()
     }
 
-    private fun enablePayMethod(): Boolean {
-        if (progressLiveData.value == true) {
-            return false
-        }
-
-        if (itemLiveData.value == null) {
-            return false
-        }
-
-        if (customerLiveData.value == null) {
-            return false
-        }
-
-        return true
+    fun clearFailureState() {
+        failureLiveData.value = null
     }
 
-    val isPayMethodEnabled = MediatorLiveData<Boolean>().apply {
-        addSource(progressLiveData) {
-            value = enablePayMethod()
-        }
-        addSource(itemLiveData) {
-            value = enablePayMethod()
-        }
-        addSource(customerLiveData) {
-            value = enablePayMethod()
-        }
-    }
-
-    val isSubmitEnabled = MediatorLiveData<Boolean>().apply {
-        addSource(progressLiveData) {
-            value = enableSubmit()
-        }
-        addSource(itemLiveData) {
-            value = enableSubmit()
-        }
-        addSource(customerLiveData) {
-            value = enablePayMethod()
-        }
-        addSource(paymentMethodLiveData) {
-            value = enableSubmit()
-        }
+    val membershipUpdated: MutableLiveData<Membership> by lazy {
+        MutableLiveData<Membership>()
     }
 
     /**
@@ -114,10 +106,50 @@ class StripeSubViewModel : BaseViewModel() {
         itemLiveData.value = item
     }
 
-    fun subscribe(account: Account, idemKey: String) {
+    fun loadDefaultPaymentMethod(account: Account) {
         if (isNetworkAvailable.value == false) {
-            subsResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
+            toastLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
             return
+        }
+
+        val cusId = account.stripeId
+        if (cusId == null) {
+            toastLiveData.value = ToastMessage.Text("Not a stripe customer")
+            return
+        }
+
+        progressLiveData.value = true
+        viewModelScope.launch {
+            try {
+                val resp = withContext(Dispatchers.IO) {
+                    StripeClient.loadDefaultPaymentMethod(
+                        cusId = cusId,
+                        subsId = account.membership.stripeSubsId,
+                        ftcId = account.id
+                    )
+                }
+
+                progressLiveData.value = false
+                if (resp.body == null) {
+                    return@launch
+                }
+
+                paymentMethodLiveData.value = resp.body
+            } catch (e: Exception) {
+                progressLiveData.value = false
+                Log.i(TAG, e.message ?: "")
+            }
+        }
+    }
+
+    fun subscribe(account: Account) {
+        if (isNetworkAvailable.value == false) {
+            toastLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
+            return
+        }
+
+        if (isUpdate) {
+            idempotency.clear()
         }
 
         val item = itemLiveData.value ?: return
@@ -125,82 +157,103 @@ class StripeSubViewModel : BaseViewModel() {
             priceId = item.recurring.id,
             introductoryPriceId = item.trial?.id,
             defaultPaymentMethod = paymentMethodLiveData.value?.id,
-            idempotency = idemKey,
+            idempotency = idempotency.retrieveKey(),
         )
-
-        progressLiveData.value = true
 
         when (item.intent.kind) {
             IntentKind.Create -> {
-                messageLiveData.value = R.string.creating_subscription
-                createStripeSub(account, params)
+                toastLiveData.value = ToastMessage.Resource(R.string.creating_subscription)
+                createSub(account, params)
             }
             IntentKind.Upgrade, IntentKind.Downgrade -> {
-                messageLiveData.value = R.string.confirm_upgrade
-                upgradeStripeSub(account, params)
+                toastLiveData.value = ToastMessage.Resource(R.string.confirm_upgrade)
+                updateSub(account, params)
             }
             else -> {
-                subsResult.value = FetchResult.LocalizedError(R.string.unknown_order_kind)
+                toastLiveData.value = ToastMessage.Resource(R.string.unknown_order_kind)
                 progressLiveData.value = false
             }
         }
     }
 
-    private fun createStripeSub(account: Account, params: SubParams) {
-        val pm = paymentMethodLiveData.value
-        if (pm == null) {
-            subsResult.value = FetchResult.LocalizedError(R.string.toast_no_pay_method)
-            return
-        }
-        if (params.defaultPaymentMethod == null) {
-            subsResult.value = FetchResult.LocalizedError(R.string.toast_no_pay_method)
+    private fun handleSubsResult(result: StripeSubsResult) {
+        if (result.subs.paymentIntent?.requiresAction == false) {
+            toastLiveData.value = ToastMessage.Resource(R.string.subs_success)
+            membershipUpdated.value = result.membership
+            subsCreated.value = result.subs
             return
         }
 
+        if (result.subs.paymentIntent?.clientSecret == null) {
+            idempotency.clear()
+            failureLiveData.value = FailureStatus.Message("订阅失败！请重试或更换支付方式")
+            return
+        }
+
+        failureLiveData.value = FailureStatus.NextAction(result.subs.paymentIntent.clientSecret)
+    }
+
+    private fun createSub(account: Account, params: SubParams) {
+        progressLiveData.value = true
         viewModelScope.launch {
             try {
-                val sub = withContext(Dispatchers.IO) {
+                val result = withContext(Dispatchers.IO) {
                     StripeClient.createSubscription(account, params)
                 }
 
-                if (sub == null) {
-                    subsResult.value = FetchResult.LocalizedError(R.string.error_unknown)
+                progressLiveData.value = false
+                if (result == null) {
+                    toastLiveData.value = ToastMessage.Resource(R.string.error_unknown)
                     return@launch
                 }
 
-                subsResult.value = FetchResult.Success(sub)
-
+                handleSubsResult(result)
             } catch (e: APIError) {
-                subsResult.value = if (e.type == "idempotency_error") {
-                    FetchResult.Error(IdempotencyError())
-                } else {
-                    FetchResult.fromServerError(e)
-                }
-
+                progressLiveData.value = false
+                toastLiveData.value = ToastMessage.fromApi(e)
             } catch (e: Exception) {
-                subsResult.value = FetchResult.fromException(e)
+                progressLiveData.value = false
+                toastLiveData.value = ToastMessage.fromException(e)
             }
         }
     }
 
-    private fun upgradeStripeSub(account: Account, params: SubParams) {
-
+    private fun updateSub(account: Account, params: SubParams) {
+        progressLiveData.value = true
         viewModelScope.launch {
             try {
-                val sub = withContext(Dispatchers.IO) {
+                val result = withContext(Dispatchers.IO) {
                     StripeClient.updateSubs(account, params)
                 }
 
-                if (sub == null) {
-                    subsResult.value = FetchResult.LocalizedError(R.string.error_unknown)
+                progressLiveData.value = false
+                if (result == null) {
+                    toastLiveData.value = ToastMessage.Resource(R.string.error_unknown)
                     return@launch
                 }
 
-                subsResult.value = FetchResult.Success(sub)
-
+                handleSubsResult(result)
             } catch (e: Exception) {
-                subsResult.value = FetchResult.fromException(e)
+                progressLiveData.value = false
+                toastLiveData.value = ToastMessage.fromException(e)
             }
+        }
+    }
+
+    // Implement a PaymentSessionListener
+    override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
+        paymentSessionInProgress.value = isCommunicating
+    }
+
+    override fun onError(errorCode: Int, errorMessage: String) {
+        paymentSessionInProgress.value = false
+        toastLiveData.value = ToastMessage.Text(errorMessage)
+    }
+
+    override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
+        paymentSessionInProgress.value = false
+        data.paymentMethod?.let {
+            paymentMethodLiveData.value = StripePaymentMethod.newInstance(it)
         }
     }
 }
