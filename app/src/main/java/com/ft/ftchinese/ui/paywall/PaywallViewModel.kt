@@ -8,8 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.paywall.CartItemFtcV2
-import com.ft.ftchinese.model.paywall.CartItemStripeV2
+import com.ft.ftchinese.model.paywall.CartItemFtc
+import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.Paywall
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Membership
@@ -18,6 +18,8 @@ import com.ft.ftchinese.repository.PaywallClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
+import com.ft.ftchinese.tracking.AddCartParams
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.components.ToastMessage
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +31,7 @@ private const val TAG = "PaywallViewModel"
 
 class PaywallViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val tracker = StatsTracker.getInstance(application)
     private val cache = FileCache(application)
     private var premiumOnTop = false
 
@@ -59,7 +62,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun ftcCheckoutItem(priceId: String, m: Membership): CartItemFtcV2? {
+    fun ftcCheckoutItem(priceId: String, m: Membership): CartItemFtc? {
         val price = ftcPriceLiveData.value?.products
             ?.flatMap { it.prices }
             ?.findLast { it.id == priceId }
@@ -68,10 +71,10 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         return price.buildCartItem(m)
     }
 
-    fun stripeCheckoutItem(priceId:  String, trialId: String?, m: Membership): CartItemStripeV2? {
+    fun stripeCheckoutItem(priceId:  String, trialId: String?, m: Membership): CartItemStripe? {
         val price = stripePriceLiveData.value?.get(priceId) ?: return null
 
-        return CartItemStripeV2(
+        return CartItemStripe(
             intent = price.checkoutIntent(m),
             recurring = price,
             trial = trialId?.let { stripePriceLiveData.value?.get(it) }
@@ -268,5 +271,13 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
             refreshingLiveData.value = false
             toastLiveData.value = ToastMessage.Resource(R.string.refresh_success)
         }
+    }
+
+    fun trackDisplayPaywall() {
+        tracker.displayPaywall()
+    }
+
+    fun trackAddCart(params: AddCartParams) {
+        tracker.addCart(params)
     }
 }
