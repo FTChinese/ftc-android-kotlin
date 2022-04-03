@@ -14,12 +14,14 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.base.isConnected
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
     private val session = SessionManager.getInstance(application)
+    val isNetworkAvailable = MutableLiveData(application.isConnected)
 
     var account by mutableStateOf<Account?>(null)
         private set
