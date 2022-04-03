@@ -134,7 +134,7 @@ fun PriceCard(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewDiscountPrice() {
     PriceCard(
