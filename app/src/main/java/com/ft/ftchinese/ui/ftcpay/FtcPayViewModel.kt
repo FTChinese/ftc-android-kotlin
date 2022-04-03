@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.fetch.APIError
-import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.ftcsubs.ConfirmationResult
 import com.ft.ftchinese.model.ftcsubs.PayIntent
@@ -19,6 +18,8 @@ import com.ft.ftchinese.model.request.OrderParams
 import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.PayIntentStore
+import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.components.ToastMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,31 +36,26 @@ class FtcPayViewModel(application: Application) : AndroidViewModel(application) 
     private val payIntentStore = PayIntentStore.getInstance(application)
     private val invoiceStore = InvoiceStore.getInstance(application)
 
-    val isNetworkAvailable = MutableLiveData<Boolean>()
+    val isNetworkAvailable = MutableLiveData(application.isConnected)
+    val inProgress = MutableLiveData(false)
+    val toastMessage: MutableLiveData<ToastMessage> by lazy {
+        MutableLiveData<ToastMessage>()
+    }
 
     val orderLiveData: MutableLiveData<OrderResult> by lazy {
         MutableLiveData<OrderResult>()
     }
 
-    private var _progress = MutableLiveData<FetchUi>(FetchUi.Progress(false))
-    val progressLiveData = _progress
-
     fun clearPaymentError() {
-        _progress.value = FetchUi.Progress(false)
-    }
-
-    fun showMessage(msg: String) {
-        _progress.value = FetchUi.TextMsg(msg)
+        toastMessage.value = null
     }
 
     fun createOrder(account: Account, cartItem: CartItemFtcV2, payMethod: PayMethod) {
 
         if (isNetworkAvailable.value == false) {
-            _progress.value = FetchUi.ResMsg(R.string.prompt_no_network)
+            toastMessage.value = ToastMessage.Resource(R.string.prompt_no_network)
             return
         }
-
-        _progress.value = FetchUi.Progress(true)
 
         val params = OrderParams(
             priceId = cartItem.price.id,
@@ -70,12 +66,13 @@ class FtcPayViewModel(application: Application) : AndroidViewModel(application) 
             PayMethod.ALIPAY -> createAliOrder(account, params)
             PayMethod.WXPAY -> createWxOrder(account, params)
             else -> {
-                _progress.value = FetchUi.ResMsg(R.string.toast_no_pay_method)
+                toastMessage.value = ToastMessage.Resource(R.string.toast_no_pay_method)
             }
         }
     }
 
     private fun createWxOrder(account: Account, params: OrderParams) {
+        inProgress.value = true
 
         Log.i(TAG, "Creating wx order $params")
         viewModelScope.launch {
@@ -84,37 +81,39 @@ class FtcPayViewModel(application: Application) : AndroidViewModel(application) 
                     FtcPayClient.createWxOrder(account, params)
                 }
 
+                inProgress.value = false
+
                 if (wxOrder == null) {
-                    _progress.value = FetchUi.ResMsg(R.string.toast_order_failed)
+                    toastMessage.value = ToastMessage.Resource(R.string.toast_order_failed)
                     return@launch
                 }
 
                 if (wxOrder.params.app == null) {
-                    _progress.value = FetchUi.TextMsg("WxPayIntent.params.app should not be null")
+                    toastMessage.value = ToastMessage.Text("WxPayIntent.params.app should not be null")
                     return@launch
                 }
 
-
-
-                _progress.value = FetchUi.Progress(false)
                 orderLiveData.value = OrderResult.WxPay(wxOrder)
 
                 withContext(Dispatchers.IO) {
                     payIntentStore.save(wxOrder)
                 }
             } catch (e: APIError) {
-                _progress.value = if (e.statusCode == 403) {
-                    FetchUi.ResMsg(R.string.duplicate_purchase)
+                inProgress.value = false
+                toastMessage.value = if (e.statusCode == 403) {
+                    ToastMessage.Resource(R.string.duplicate_purchase)
                 } else {
-                    FetchUi.fromApi(e)
+                    ToastMessage.fromApi(e)
                 }
             } catch (e: Exception) {
-                _progress.value = FetchUi.fromException(e)
+                inProgress.value = false
+                toastMessage.value = ToastMessage.fromException(e)
             }
         }
     }
 
     private fun createAliOrder(account: Account, params: OrderParams) {
+        inProgress.value = true
 
         Log.i(TAG, "Creating alipay order $params")
 
@@ -124,33 +123,31 @@ class FtcPayViewModel(application: Application) : AndroidViewModel(application) 
                     FtcPayClient.createAliOrder(account, params)
                 }
 
+                inProgress.value = false
+
                 if (aliOrder == null) {
-                    _progress.value = FetchUi.ResMsg(R.string.toast_order_failed)
+                    toastMessage.value = ToastMessage.Resource(R.string.toast_order_failed)
                     return@launch
                 }
 
-                _progress.value = FetchUi.Progress(false)
                 orderLiveData.value = OrderResult.AliPay(aliOrder)
 
                 withContext(Dispatchers.IO) {
                     payIntentStore.save(aliOrder)
                 }
             } catch (e: APIError) {
-                Log.i(TAG, "$e")
-                val msgId = if (e.statusCode == 403) {
-                    R.string.duplicate_purchase
+                inProgress.value = false
+                toastMessage.value = if (e.statusCode == 403) {
+                    ToastMessage.Resource(R.string.duplicate_purchase)
                 } else {
-                    null
+                    ToastMessage.fromApi(e)
                 }
 
-                _progress.value = if (msgId != null) {
-                    FetchUi.ResMsg(msgId)
-                } else {
-                    FetchUi.fromApi(e)
-                }
-            } catch (e: Exception) {
                 Log.i(TAG, "$e")
-                _progress.value = FetchUi.fromException(e)
+            } catch (e: Exception) {
+                inProgress.value = false
+                toastMessage.value = ToastMessage.fromException(e)
+                Log.i(TAG, "$e")
             }
         }
     }

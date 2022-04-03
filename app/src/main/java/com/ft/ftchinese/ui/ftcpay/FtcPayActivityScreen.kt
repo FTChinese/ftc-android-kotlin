@@ -1,15 +1,14 @@
 package com.ft.ftchinese.ui.ftcpay
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.ui.components.ErrorDialog
+import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.tencent.mm.opensdk.constants.Build
@@ -25,31 +24,24 @@ fun FtcPayActivityScreen(
     showSnackBar: (String) -> Unit,
 ) {
     val context = LocalContext.current
-    val (loading, setLoading) = remember {
-        mutableStateOf(false)
-    }
 
-    val fetchState = payViewModel.progressLiveData.observeAsState(FetchUi.Progress(false))
+    val loadingState by payViewModel.inProgress.observeAsState(false)
+    val toastState by payViewModel.toastMessage.observeAsState()
 
-    when (val s = fetchState.value) {
-        is FetchUi.Progress -> {
-            setLoading(s.loading)
-        }
-        is FetchUi.ResMsg -> {
-            setLoading(false)
-            ErrorDialog(
-                text = context.getString(s.strId)
-            ) {
-                payViewModel.clearPaymentError()
+    toastState?.let {
+        val msg = when (it) {
+            is ToastMessage.Resource -> {
+                context.getString(it.id)
+            }
+            is ToastMessage.Text -> {
+                it.text
             }
         }
-        is FetchUi.TextMsg -> {
-            setLoading(false)
-            ErrorDialog(
-                text = s.text
-            ) {
-                payViewModel.clearPaymentError()
-            }
+
+        ErrorDialog(
+            text = msg
+        ) {
+            payViewModel.clearPaymentError()
         }
     }
 
@@ -73,7 +65,7 @@ fun FtcPayActivityScreen(
 
         FtcPayScreen(
             cartItem = item,
-            loading = loading,
+            loading = loadingState,
             onClickPay = { payMethod ->
                 if (payMethod == PayMethod.WXPAY && wxApi.wxAppSupportAPI < Build.PAY_SUPPORTED_SDK_INT) {
                     showSnackBar(context.getString(R.string.wxpay_not_supported))
