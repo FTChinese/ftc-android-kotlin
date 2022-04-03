@@ -12,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -94,293 +95,35 @@ class TestActivity : ScopedAppActivity() {
                         )
                     }
                 ) {
-                    Column(
+                    LazyColumn(
                         modifier = Modifier.verticalScroll(rememberScrollState())
                     ) {
 
-                        PaywallButton()
-                        WxMiniButton()
-                        PostPurchaseButton()
-                        FullScreenDialog()
-
-                        Button(onClick = {
-                            AuthActivity.start(this@TestActivity)
-                        }) {
-                            Text(text = "Sign In/Up Activity")
+                        item {
+                            PaywallButton()
                         }
 
-                        Button(onClick = {
-                            SignInFragment
-                                .forEmailLogin()
-                                .show(supportFragmentManager, "SignInFragment")
-                        }) {
-                            Text(text = "Login")
+                        item {
+                            WxMiniButton()
                         }
 
-                        Button(onClick = {
-                            SignUpFragment
-                                .forEmailLogin()
-                                .show(supportFragmentManager, "SignUpFragment")
-                        }) {
-                            Text(text = "Sign Up")
-                        }
-                        
-                        Button(onClick = {
-                            mobileViewModel.mobileLiveData.value = "1234567890"
-                            SignInFragment
-                                .forMobileLink().
-                                show(supportFragmentManager, "TestMobileLinkExistingEmail")
-                        }) {
-                            Text(text = "Mobile Link Existing Email")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(AccountBuilder()
-                                .withTier(null)
-                                .build())
-                        }) {
-                            Text(text = "Free User")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(AccountBuilder()
-                                .withAccountKind(LoginMethod.WECHAT)
-                                .withTier(null)
-                                .build())
-                        }) {
-                            Text(text = "Wx-only Free User")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(AccountBuilder()
-                                .build())
-                        }) {
-                            Text(text = "Standard User")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(
-                                AccountBuilder()
-                                    .withTier(Tier.PREMIUM)
-                                    .build()
-                            )
-                        }) {
-                            Text(text = "Premium User")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(
-                                AccountBuilder()
-                                    .withVip(true)
-                                    .build()
-                            )
-                        }) {
-                            Text(text = "VIP User")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(
-                                AccountBuilder()
-                                    .withTier(Tier.STANDARD)
-                                    .withPayMethod(PayMethod.STRIPE)
-                                    .withAutoRenewal(true)
-                                    .build())
-                        }) {
-                            Text(text = "Stripe Standard Year")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(
-                                AccountBuilder()
-                                    .withPayMethod(PayMethod.STRIPE)
-                                    .withAutoRenewal(true)
-                                    .withCycle(Cycle.MONTH)
-                                    .build()
-                            )
-                        }) {
-                            Text(text = "Stripe Standard Month")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(
-                                AccountBuilder()
-                                    .withPayMethod(PayMethod.STRIPE)
-                                    .withAutoRenewal(true)
-                                    .withTier(Tier.PREMIUM)
-                                    .build()
-                            )
-                        }) {
-                            Text(text = "Stripe Premium")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(
-                                AccountBuilder()
-                                    .withPayMethod(PayMethod.STRIPE)
-                                    .withAutoRenewal(false)
-                                    .build()
-                            )
-                        }) {
-                            Text(text = "Stripe Auto Renew Off")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(
-                                AccountBuilder()
-                                    .withPayMethod(PayMethod.STRIPE)
-                                    .withAutoRenewal(true)
-                                    .withStdAddOn(30)
-                                    .withPrmAddOn(366)
-                                    .build()
-                            )
-                        }) {
-                            Text(text = "Stripe Auto Renew Off with Add-on")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(
-                                AccountBuilder()
-                                    .withPayMethod(PayMethod.APPLE)
-                                    .withAutoRenewal(true)
-                                    .build()
-                            )
-                        }) {
-                            Text(text = "IAP Premium")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(
-                                AccountBuilder()
-                                    .withPayMethod(PayMethod.APPLE)
-                                    .withAutoRenewal(false)
-                                    .build()
-                            )
-                        }) {
-                            Text(text = "IAP Standard")
-                        }
-                        
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(
-                                AccountBuilder()
-                                    .withPayMethod(PayMethod.APPLE)
-                                    .withAutoRenewal(false)
-                                    .build()
-                            )
-                        }) {
-                            Text(text = "IAP Auto Renew Off")
+                        item {
+                            PostPurchaseButton()
                         }
 
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(
-                                AccountBuilder()
-                                    .withPayMethod(PayMethod.APPLE)
-                                    .withAutoRenewal(true)
-                                    .withStdAddOn(31)
-                                    .withPrmAddOn(366)
-                                    .build()
-                            )
-                        }) {
-                            Text(text = "IAP AddOn")
+                        item {
+                            FullScreenDialog()
                         }
 
-                        Button(onClick = {
-                            sessionManager.logout()
-                            sessionManager.saveAccount(
-                                AccountBuilder()
-                                    .withPayMethod(PayMethod.APPLE)
-                                    .withAutoRenewal(false)
-                                    .withExpired(true)
-                                    .withStdAddOn(31)
-                                    .withPrmAddOn(366)
-                                    .build()
-                            )
-                        }) {
-                            Text(text = "IAP Expired with AddOn")
+                        item {
+                            ShowSignInUp()
                         }
 
-                        Button(onClick = {
-                            Log.i(TAG, "Subscribing to news topic")
-
-                            FirebaseMessaging
-                                .getInstance()
-                                .subscribeToTopic("news")
-                                .addOnCompleteListener {
-                                    if (!it.isSuccessful) {
-                                        alert(Appcompat, "Subscription failed").show()
-                                    } else {
-                                        alert(Appcompat, "Subscribed").show()
-                                    }
-                                }
-                        }) {
-                            Text(text = "FCM Subscribe a Topic")
+                        item {
+                            SignInFragment()
                         }
 
-                        Button(onClick = {
-                            createPaymentResult()
-                            LatestInvoiceActivity.start(this@TestActivity)
-                        }) {
-                            Text(text = "Show Payment Result")
-                        }
-                        
-                        Button(onClick = {
-                            createUpgradeResult()
-                            LatestInvoiceActivity.start(this@TestActivity)
-                        }) {
-                            Text(text = "Show Upgrade Result")
-                        }
 
-                        Button(onClick = { /*TODO*/ }) {
-                            Text(text = "Service Acceptance")
-                        }
-                        
-                        Button(onClick = {
-                            ServiceAcceptance
-                                .getInstance(this@TestActivity)
-                                .clear()
-                        }) {
-                            Text(text = "Clear Service Acceptance")
-                        }
-
-                        Button(onClick = {
-                            val request = OneTimeWorkRequestBuilder<VerifySubsWorker>()
-                                .build()
-                            workManager.enqueue(request)
-                        }) {
-                            Text(text = "One Time Work Manager")
-                        }
-
-                        Button(onClick = {
-                            LatestInvoiceActivity
-                                .start(this@TestActivity)
-                        }) {
-                            Text(text = "Latest Order Activity")
-                        }
-
-                        Button(onClick = {
-                            createNotiChannel()
-                        }) {
-                            Text(text = "Create Notification Channel")
-                        }
-                        
-                        Button(onClick = {
-                            createNotification()
-                        }) {
-                            Text(text = "Create Local Notification")
-                        }
                     }
                 }
             }
@@ -391,6 +134,15 @@ class TestActivity : ScopedAppActivity() {
                 val value = intent.extras?.get(key)
                 Log.i(TAG, "Key: $key Value: $value")
             }
+        }
+    }
+
+    @Composable
+    fun ShowBottomSheet() {
+        Button(
+            onClick = { /*TODO*/ }
+        ) {
+            Text(text = "Show Bottom Sheet")
         }
     }
 
@@ -462,6 +214,374 @@ class TestActivity : ScopedAppActivity() {
                     }
                 }
             )
+        }
+    }
+
+    @Composable
+    private fun ShowSignInUp() {
+        Button(onClick = {
+            AuthActivity.start(this@TestActivity)
+        }) {
+            Text(text = "Sign In/Up Activity")
+        }
+    }
+
+    @Composable
+    private fun SignInFragment() {
+        Button(onClick = {
+            SignInFragment
+                .forEmailLogin()
+                .show(supportFragmentManager, "SignInFragment")
+        }) {
+            Text(text = "Login")
+        }
+    }
+
+    @Composable
+    private fun SignUpFragment() {
+        Button(onClick = {
+            SignUpFragment
+                .forEmailLogin()
+                .show(supportFragmentManager, "SignUpFragment")
+        }) {
+            Text(text = "Sign Up")
+        }
+    }
+
+    @Composable
+    private fun MobileLinkEmail() {
+        Button(onClick = {
+            mobileViewModel.mobileLiveData.value = "1234567890"
+            SignInFragment
+                .forMobileLink().
+                show(supportFragmentManager, "TestMobileLinkExistingEmail")
+        }) {
+            Text(text = "Mobile Link Existing Email")
+        }
+    }
+
+    @Composable
+    fun FreeUser() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(AccountBuilder()
+                .withTier(null)
+                .build())
+        }) {
+            Text(text = "Free User")
+        }
+    }
+
+    @Composable
+    fun WxOnlyFreeUser() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(AccountBuilder()
+                .withAccountKind(LoginMethod.WECHAT)
+                .withTier(null)
+                .build())
+        }) {
+            Text(text = "Wx-only Free User")
+        }
+    }
+
+    @Composable
+    fun StandardUser() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(AccountBuilder()
+                .build())
+        }) {
+            Text(text = "Standard User")
+        }
+    }
+
+    @Composable
+    fun PremiumUser() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withTier(Tier.PREMIUM)
+                    .build()
+            )
+        }) {
+            Text(text = "Premium User")
+        }
+    }
+
+    @Composable
+    fun VIPUser() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withVip(true)
+                    .build()
+            )
+        }) {
+            Text(text = "VIP User")
+        }
+    }
+
+
+    @Composable
+    fun StripeStandardUser() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withTier(Tier.STANDARD)
+                    .withPayMethod(PayMethod.STRIPE)
+                    .withAutoRenewal(true)
+                    .build())
+        }) {
+            Text(text = "Stripe Standard Year")
+        }
+    }
+
+    @Composable
+    private fun StripeStandardMonth() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.STRIPE)
+                    .withAutoRenewal(true)
+                    .withCycle(Cycle.MONTH)
+                    .build()
+            )
+        }) {
+            Text(text = "Stripe Standard Month")
+        }
+    }
+
+    @Composable
+    fun StripePremium() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.STRIPE)
+                    .withAutoRenewal(true)
+                    .withTier(Tier.PREMIUM)
+                    .build()
+            )
+        }) {
+            Text(text = "Stripe Premium")
+        }
+    }
+
+    @Composable
+    fun StripeAutoRenewOff() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.STRIPE)
+                    .withAutoRenewal(false)
+                    .build()
+            )
+        }) {
+            Text(text = "Stripe Auto Renew Off")
+        }
+    }
+
+    @Composable
+    fun StripeAutoRenewOffWithAddOn() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.STRIPE)
+                    .withAutoRenewal(true)
+                    .withStdAddOn(30)
+                    .withPrmAddOn(366)
+                    .build()
+            )
+        }) {
+            Text(text = "Stripe Auto Renew Off with Add-on")
+        }
+    }
+
+    @Composable
+    fun IAPPremium() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.APPLE)
+                    .withAutoRenewal(true)
+                    .build()
+            )
+        }) {
+            Text(text = "IAP Premium")
+        }
+    }
+
+    @Composable
+    fun IAPStandard() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.APPLE)
+                    .withAutoRenewal(false)
+                    .build()
+            )
+        }) {
+            Text(text = "IAP Standard")
+        }
+    }
+
+    @Composable
+    fun IAPAutoRenewOff() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.APPLE)
+                    .withAutoRenewal(false)
+                    .build()
+            )
+        }) {
+            Text(text = "IAP Auto Renew Off")
+        }
+    }
+
+    @Composable
+    fun IAPAddOn() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.APPLE)
+                    .withAutoRenewal(true)
+                    .withStdAddOn(31)
+                    .withPrmAddOn(366)
+                    .build()
+            )
+        }) {
+            Text(text = "IAP AddOn")
+        }
+    }
+
+
+    @Composable
+    fun IAPExpiredWithAddOn() {
+        Button(onClick = {
+            sessionManager.logout()
+            sessionManager.saveAccount(
+                AccountBuilder()
+                    .withPayMethod(PayMethod.APPLE)
+                    .withAutoRenewal(false)
+                    .withExpired(true)
+                    .withStdAddOn(31)
+                    .withPrmAddOn(366)
+                    .build()
+            )
+        }) {
+            Text(text = "IAP Expired with AddOn")
+        }
+    }
+
+
+    @Composable
+    fun FCMSubscribeTopic() {
+        Button(onClick = {
+            Log.i(TAG, "Subscribing to news topic")
+
+            FirebaseMessaging
+                .getInstance()
+                .subscribeToTopic("news")
+                .addOnCompleteListener {
+                    if (!it.isSuccessful) {
+                        alert(Appcompat, "Subscription failed").show()
+                    } else {
+                        alert(Appcompat, "Subscribed").show()
+                    }
+                }
+        }) {
+            Text(text = "FCM Subscribe a Topic")
+        }
+    }
+
+    @Composable
+    fun ShowPaymentResult() {
+        Button(onClick = {
+            createPaymentResult()
+            LatestInvoiceActivity.start(this@TestActivity)
+        }) {
+            Text(text = "Show Payment Result")
+        }
+    }
+
+
+    @Composable
+    fun ShowUpgradeResult() {
+        Button(onClick = {
+            createUpgradeResult()
+            LatestInvoiceActivity.start(this@TestActivity)
+        }) {
+            Text(text = "Show Upgrade Result")
+        }
+    }
+
+
+    @Composable
+    fun ServiceAcceptance() {
+        Button(onClick = {  }) {
+            Text(text = "Service Acceptance")
+        }
+    }
+
+    @Composable
+    fun ClearServiceAcceptance() {
+        Button(onClick = {
+            ServiceAcceptance
+                .getInstance(this@TestActivity)
+                .clear()
+        }) {
+            Text(text = "Clear Service Acceptance")
+        }
+    }
+
+    @Composable
+    fun OneTimeWorkManager() {
+        Button(onClick = {
+            val request = OneTimeWorkRequestBuilder<VerifySubsWorker>()
+                .build()
+            workManager.enqueue(request)
+        }) {
+            Text(text = "One Time Work Manager")
+        }
+    }
+
+    @Composable
+    fun ShowLatestOrderActivity() {
+        Button(onClick = {
+            LatestInvoiceActivity
+                .start(this@TestActivity)
+        }) {
+            Text(text = "Latest Order Activity")
+        }
+    }
+
+    @Composable
+    fun CreateNotificationChannel() {
+        Button(onClick = {
+            createNotiChannel()
+        }) {
+            Text(text = "Create Notification Channel")
+        }
+    }
+
+    @Composable
+    fun CreateLocalNotification() {
+        Button(onClick = {
+            createNotification()
+        }) {
+            Text(text = "Create Local Notification")
         }
     }
 
