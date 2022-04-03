@@ -50,7 +50,7 @@ import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.search.SearchableActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
-import com.ft.ftchinese.ui.webabout.AboutListActivity
+import com.ft.ftchinese.ui.AboutListActivity
 import com.ft.ftchinese.ui.webpage.WVViewModel
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.ft.ftchinese.util.RequestCode
@@ -61,7 +61,6 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
 /**
