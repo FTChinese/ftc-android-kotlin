@@ -8,15 +8,18 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -24,36 +27,30 @@ import androidx.core.app.TaskStackBuilder
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import androidx.work.WorkRequest
 import com.ft.ftchinese.model.content.ArticleType
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.Order
-import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.legal.WebpageMeta
-import com.ft.ftchinese.model.paywall.CartItemStripeV2
-import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
-import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.PayIntentStore
 import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
-import com.ft.ftchinese.ui.checkout.StripeSubActivity
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.ui.subsactivity.SubsActivity
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.firebase.messaging.FirebaseMessaging
@@ -81,10 +78,6 @@ class TestActivity : ScopedAppActivity() {
 
         mobileViewModel = ViewModelProvider(this)[MobileViewModel::class.java]
 
-        val uploadWorkRequest: WorkRequest = OneTimeWorkRequestBuilder<VerifySubsWorker>()
-            .build()
-        WorkManager.getInstance(this).enqueue(uploadWorkRequest)
-
         setContent {
             OTheme {
                 Scaffold(
@@ -104,66 +97,11 @@ class TestActivity : ScopedAppActivity() {
                     Column(
                         modifier = Modifier.verticalScroll(rememberScrollState())
                     ) {
-                        Button(
-                            onClick = {
-                                SubsActivity.start(this@TestActivity)
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = "Compose Paywall")
-                        }
 
-                        Button(
-                            onClick = {
-                                StripeSubActivity.start(
-                                    this@TestActivity,
-                                    CartItemStripeV2(
-                                        intent = CheckoutIntent.newMember,
-                                        recurring = StripePrice(
-                                            id = "",
-                                            active = true,
-                                            currency = "gbp",
-                                            liveMode = true,
-                                            nickname = "",
-                                            periodCount = YearMonthDay(
-                                                years = 1,
-                                                months = 0,
-                                                days = 0,
-                                            ),
-                                            tier = Tier.STANDARD,
-                                            unitAmount = 3999,
-                                        ),
-                                        trial = null,
-                                    )
-                                )
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = "Test Stripe Pay")
-                        }
-
-                        Button(
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = {
-                                WebpageActivity.start(this@TestActivity, WebpageMeta(
-                                    title = "Test",
-                                    url = "http://192.168.1.42:8080"
-                                ))
-                            },
-                        ) {
-                            Text(text = "Test Wechat Mini Program")
-                        }
-
-                        Button(
-                            onClick = {
-                                InvoiceStore.getInstance(this@TestActivity)
-                                    .savePurchaseAction(PurchaseAction.BUY)
-                                BuyerInfoActivity.start(this@TestActivity)
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = "Address - Buy")
-                        }
+                        PaywallButton()
+                        WxMiniButton()
+                        PostPurchaseButton()
+                        FullScreenDialog()
 
                         Button(onClick = {
                             AuthActivity.start(this@TestActivity)
@@ -392,14 +330,14 @@ class TestActivity : ScopedAppActivity() {
                         }
 
                         Button(onClick = {
-                            createPaymentReuslt()
+                            createPaymentResult()
                             LatestInvoiceActivity.start(this@TestActivity)
                         }) {
                             Text(text = "Show Payment Result")
                         }
                         
                         Button(onClick = {
-                            createUpgrdeResult()
+                            createUpgradeResult()
                             LatestInvoiceActivity.start(this@TestActivity)
                         }) {
                             Text(text = "Show Upgrade Result")
@@ -456,7 +394,78 @@ class TestActivity : ScopedAppActivity() {
         }
     }
 
-    private fun createPaymentReuslt() {
+    @Composable
+    fun PaywallButton() {
+        Button(
+            onClick = {
+                SubsActivity.start(this@TestActivity)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Compose Paywall")
+        }
+    }
+
+    @Composable
+    fun WxMiniButton() {
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                WebpageActivity.start(this@TestActivity, WebpageMeta(
+                    title = "Test",
+                    url = "http://192.168.1.42:8080"
+                ))
+            },
+        ) {
+            Text(text = "Test Wechat Mini Program")
+        }
+    }
+
+    @Composable
+    fun PostPurchaseButton() {
+        Button(
+            onClick = {
+                InvoiceStore.getInstance(this@TestActivity)
+                    .savePurchaseAction(PurchaseAction.BUY)
+                BuyerInfoActivity.start(this@TestActivity)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Address - Buy")
+        }
+    }
+
+    @Composable
+    fun FullScreenDialog() {
+        val (open, setOpen) = remember {
+            mutableStateOf(false)
+        }
+        Button(
+            onClick = { setOpen(true) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Compose Alert")
+        }
+
+        if (open) {
+            AlertDialog(
+                onDismissRequest = { setOpen(false) },
+                confirmButton = {
+                    TextButton(onClick = { setOpen(false) }) {
+                        Text(text = "OK")
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+                dismissButton = {
+                    TextButton(onClick = { setOpen(false) }) {
+                        Text(text = "Cancel")
+                    }
+                }
+            )
+        }
+    }
+
+    private fun createPaymentResult() {
         InvoiceStore.
         getInstance(this@TestActivity).
         saveInvoices(
@@ -482,7 +491,7 @@ class TestActivity : ScopedAppActivity() {
         )
     }
 
-    private fun createUpgrdeResult() {
+    private fun createUpgradeResult() {
         InvoiceStore
             .getInstance(this@TestActivity)
             .saveInvoices(
@@ -563,13 +572,6 @@ class TestActivity : ScopedAppActivity() {
         with(NotificationManagerCompat.from(this)) {
             notify(1, builder.build())
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        super.onCreateOptionsMenu(menu)
-        menuInflater.inflate(R.menu.article_top_menu, menu)
-
-        return true
     }
 
     class AccountBuilder {
