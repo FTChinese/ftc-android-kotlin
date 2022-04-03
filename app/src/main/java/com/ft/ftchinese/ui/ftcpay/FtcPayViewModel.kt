@@ -10,14 +10,17 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.ftcsubs.ConfirmationResult
-import com.ft.ftchinese.model.ftcsubs.PayIntent
+import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
 import com.ft.ftchinese.model.ftcsubs.WxPayIntent
-import com.ft.ftchinese.model.paywall.CartItemFtcV2
+import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.OrderParams
 import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.PayIntentStore
+import com.ft.ftchinese.tracking.BeginCheckoutParams
+import com.ft.ftchinese.tracking.PaySuccessParams
+import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.components.ToastMessage
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +36,7 @@ sealed class OrderResult {
 
 class FtcPayViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val tracker = StatsTracker.getInstance(application)
     private val payIntentStore = PayIntentStore.getInstance(application)
     private val invoiceStore = InvoiceStore.getInstance(application)
 
@@ -50,7 +54,7 @@ class FtcPayViewModel(application: Application) : AndroidViewModel(application) 
         toastMessage.value = null
     }
 
-    fun createOrder(account: Account, cartItem: CartItemFtcV2, payMethod: PayMethod) {
+    fun createOrder(account: Account, cartItem: CartItemFtc, payMethod: PayMethod) {
 
         if (isNetworkAvailable.value == false) {
             toastMessage.value = ToastMessage.Resource(R.string.prompt_no_network)
@@ -63,8 +67,26 @@ class FtcPayViewModel(application: Application) : AndroidViewModel(application) 
         )
 
         when (payMethod) {
-            PayMethod.ALIPAY -> createAliOrder(account, params)
-            PayMethod.WXPAY -> createWxOrder(account, params)
+            PayMethod.ALIPAY -> {
+                createAliOrder(account, params)
+
+                tracker.beginCheckOut(
+                    BeginCheckoutParams.ofFtc(
+                        item = cartItem,
+                        method = PayMethod.ALIPAY,
+                    )
+                )
+            }
+            PayMethod.WXPAY -> {
+                createWxOrder(account, params)
+
+                tracker.beginCheckOut(
+                    BeginCheckoutParams.ofFtc(
+                        item = cartItem,
+                        method = PayMethod.WXPAY,
+                    )
+                )
+            }
             else -> {
                 toastMessage.value = ToastMessage.Resource(R.string.toast_no_pay_method)
             }
@@ -152,12 +174,18 @@ class FtcPayViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun saveConfirmation(confirmed: ConfirmationResult, pi: PayIntent) {
+    fun saveConfirmation(confirmed: ConfirmationResult, pi: FtcPayIntent) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 invoiceStore.save(confirmed)
                 payIntentStore.save(pi.withConfirmed(confirmed.order))
             }
         }
+
+        tracker.paySuccess(PaySuccessParams.ofFtc(pi))
+    }
+
+    fun trackFailedPay(pi: FtcPayIntent) {
+        tracker.payFailed(pi.price.edition)
     }
 }
