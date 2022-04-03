@@ -33,41 +33,11 @@ data class PaywallProduct(
         return desc
     }
 
-    @Deprecated("")
-    fun introPrice(m: Membership): CartItemFtc? {
-        return if ((introductory?.isValid() == true) && m.isZero) {
-            CartItemFtc(
-                price = introductory,
-                discount = null,
-                isIntro = true,
-                stripeTrialParents = prices.map { it.stripePriceId }
-            )
-        } else null
-    }
-
-    /**
-     * Compose information required by price buttons on ui.
-     */
-    @Deprecated("")
-    fun recurringPrices(m: Membership): List<CartItemFtc> {
-
-        val offerKinds = m.offerKinds
-
-        return prices.map {
-            CartItemFtc(
-                price = it,
-                discount = it.filterOffer(offerKinds),
-                isIntro = false,
-                stripeTrialParents = listOf(),
-            )
-        }
-    }
-
-    fun listShoppingItems(m: Membership): List<CartItemFtcV2> {
+    fun listShoppingItems(m: Membership): List<CartItemFtc> {
         val offerKinds = m.offerKinds
 
         val recurringItems = prices.map { price ->
-            CartItemFtcV2(
+            CartItemFtc(
                 intent = price.checkoutIntent(m),
                 price = price,
                 discount = price.filterOffer(offerKinds),
@@ -80,7 +50,7 @@ data class PaywallProduct(
         }
 
         return listOf(
-            CartItemFtcV2(
+            CartItemFtc(
                 intent = CheckoutIntent.newMember,
                 price = introductory,
                 discount = null,
