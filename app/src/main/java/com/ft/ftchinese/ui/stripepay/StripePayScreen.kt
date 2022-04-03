@@ -17,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
-import com.ft.ftchinese.model.paywall.CartItemStripeV2
+import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.stripesubs.StripePaymentCard
@@ -36,7 +36,7 @@ import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun StripePayScreen(
-    cartItem: CartItemStripeV2,
+    cartItem: CartItemStripe,
     loading: Boolean,
     paymentMethod: StripePaymentMethod?,
     subs: Subscription?,
@@ -150,7 +150,7 @@ private fun Footnote() {
 @Composable
 fun PreviewStripePayScreen() {
     StripePayScreen(
-        cartItem = CartItemStripeV2(
+        cartItem = CartItemStripe(
             intent = CheckoutIntent(
                 kind = IntentKind.Create,
                 message = ""
