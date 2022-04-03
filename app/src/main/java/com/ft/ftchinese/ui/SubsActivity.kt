@@ -26,11 +26,10 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
-import com.ft.ftchinese.model.ftcsubs.PayIntent
+import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
 import com.ft.ftchinese.model.ftcsubs.WxPayIntent
-import com.ft.ftchinese.model.paywall.CartItemFtcV2
+import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
-import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedComponentActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
@@ -53,7 +52,6 @@ import org.jetbrains.anko.toast
 class SubsActivity : ScopedComponentActivity() {
 
     private lateinit var wxApi: IWXAPI
-    private lateinit var tracker: StatsTracker
     private lateinit var ftcPayViewModel: FtcPayViewModel
     private lateinit var paywallViewModel: PaywallViewModel
     private lateinit var userViewModel: UserViewModel
@@ -102,8 +100,6 @@ class SubsActivity : ScopedComponentActivity() {
                 wxApi = wxApi,
             )
         }
-
-        tracker = StatsTracker.getInstance(this)
     }
 
     private fun launchWxPay(wxPayIntent: WxPayIntent) {
@@ -141,17 +137,16 @@ class SubsActivity : ScopedComponentActivity() {
 
             if (resultStatus != "9000") {
                 toast(msg)
-                tracker.buyFail(aliPayIntent.price.edition)
+                ftcPayViewModel.trackFailedPay(aliPayIntent)
 
                 return@launch
             }
 
             confirmAliSubscription(aliPayIntent)
-            tracker.oneTimePurchaseSuccess(aliPayIntent)
         }
     }
 
-    private fun confirmAliSubscription(pi: PayIntent) {
+    private fun confirmAliSubscription(pi: FtcPayIntent) {
         val account = userViewModel.account ?: return
         val member = account.membership
 
@@ -251,7 +246,7 @@ fun SubsApp(
                 ) {
                     PaywallActivityScreen(
                         paywallViewModel = paywallViewModel,
-                        onFtcPay = { item: CartItemFtcV2 ->
+                        onFtcPay = { item: CartItemFtc ->
                             navigateToFtcPay(
                                 navController = navController,
                                 priceId = item.price.id,
