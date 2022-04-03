@@ -9,12 +9,10 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -33,6 +31,7 @@ import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.Order
+import com.ft.ftchinese.model.iapsubs.IAPSubsResult
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.LoginMethod
@@ -52,6 +51,7 @@ import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
+import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.firebase.messaging.FirebaseMessaging
@@ -96,34 +96,43 @@ class TestActivity : ScopedAppActivity() {
                     }
                 ) {
                     LazyColumn(
-                        modifier = Modifier.verticalScroll(rememberScrollState())
+                        modifier = Modifier.padding(Dimens.dp16)
                     ) {
 
-                        item {
-                            PaywallButton()
-                        }
+                        item { PaywallButton() }
 
-                        item {
-                            WxMiniButton()
-                        }
+                        item { WxMiniButton() }
 
-                        item {
-                            PostPurchaseButton()
-                        }
+                        item { PostPurchaseButton() }
 
-                        item {
-                            FullScreenDialog()
-                        }
+                        item { FullScreenDialog() }
 
-                        item {
-                            ShowSignInUp()
-                        }
+                        item { ShowSignInUp() }
+                        item { SignInFragment() }
+                        item { SignUpFragment() }
 
-                        item {
-                            SignInFragment()
-                        }
+                        item { MobileLinkEmail() }
 
+                        item { PostPurchaseButton() }
 
+                        item { FreeUser() }
+                        item { WxOnlyFreeUser() }
+                        item { VIPUser() }
+
+                        item { StandardUser() }
+                        item { PremiumUser() }
+
+                        item { StripeStandardUser() }
+                        item { StripeStandardMonth() }
+                        item { StripeAutoRenewOff() }
+                        item { StripeAutoRenewOffWithAddOn() }
+                        item { StripePremium() }
+
+                        item { IAPStandard() }
+                        item { IAPPremium() }
+                        item { IAPAddOn() }
+                        item { IAPAutoRenewOff() }
+                        item { IAPExpiredWithAddOn() }
                     }
                 }
             }
@@ -219,107 +228,134 @@ class TestActivity : ScopedAppActivity() {
 
     @Composable
     private fun ShowSignInUp() {
-        Button(onClick = {
-            AuthActivity.start(this@TestActivity)
-        }) {
+        Button(
+            onClick = {
+                AuthActivity.start(this@TestActivity)
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Sign In/Up Activity")
         }
     }
 
     @Composable
     private fun SignInFragment() {
-        Button(onClick = {
-            SignInFragment
-                .forEmailLogin()
-                .show(supportFragmentManager, "SignInFragment")
-        }) {
+        Button(
+            onClick = {
+                SignInFragment
+                    .forEmailLogin()
+                    .show(supportFragmentManager, "SignInFragment")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Login")
         }
     }
 
     @Composable
     private fun SignUpFragment() {
-        Button(onClick = {
-            SignUpFragment
-                .forEmailLogin()
-                .show(supportFragmentManager, "SignUpFragment")
-        }) {
+        Button(
+            onClick = {
+                SignUpFragment
+                    .forEmailLogin()
+                    .show(supportFragmentManager, "SignUpFragment")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Sign Up")
         }
     }
 
     @Composable
     private fun MobileLinkEmail() {
-        Button(onClick = {
-            mobileViewModel.mobileLiveData.value = "1234567890"
-            SignInFragment
-                .forMobileLink().
-                show(supportFragmentManager, "TestMobileLinkExistingEmail")
-        }) {
+        Button(
+            onClick = {
+                mobileViewModel.mobileLiveData.value = "1234567890"
+                SignInFragment
+                    .forMobileLink().
+                    show(supportFragmentManager, "TestMobileLinkExistingEmail")
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Mobile Link Existing Email")
         }
     }
 
     @Composable
     fun FreeUser() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(AccountBuilder()
-                .withTier(null)
-                .build())
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(AccountBuilder()
+                    .withTier(null)
+                    .build())
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Free User")
         }
     }
 
     @Composable
     fun WxOnlyFreeUser() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(AccountBuilder()
-                .withAccountKind(LoginMethod.WECHAT)
-                .withTier(null)
-                .build())
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(AccountBuilder()
+                    .withAccountKind(LoginMethod.WECHAT)
+                    .withTier(null)
+                    .build())
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Wx-only Free User")
         }
     }
 
     @Composable
     fun StandardUser() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(AccountBuilder()
-                .build())
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(AccountBuilder()
+                    .build())
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Standard User")
         }
     }
 
     @Composable
     fun PremiumUser() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withTier(Tier.PREMIUM)
-                    .build()
-            )
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withTier(Tier.PREMIUM)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Premium User")
         }
     }
 
     @Composable
     fun VIPUser() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withVip(true)
-                    .build()
-            )
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withVip(true)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "VIP User")
         }
     }

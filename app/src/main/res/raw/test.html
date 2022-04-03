@@ -20,12 +20,18 @@
             <button id="show-progress">Show Progress</button>
         </div>
 
+        <div>
+            <button id="close-page">Close Page</button>
+        </div>
         <script>
         document.getElementById("alert-dialog").addEventListener("click", function() {
             Android.wvAlert("I am an alert!");
         })
         document.getElementById("show-progress").addEventListener("click", function() {
             Android.wvProgress(true);
+        })
+        document.getElementById("close-page").addEventListener("click", function() {
+            Android.wvClosePage();
         })
     </script>
     </body>
