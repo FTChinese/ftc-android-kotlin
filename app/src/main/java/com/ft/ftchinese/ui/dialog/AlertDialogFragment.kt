@@ -91,14 +91,5 @@ class AlertDialogFragment : DialogFragment() {
             )
         )
 
-        @JvmStatic
-        fun newStripeRequireEmail() = newInstance(
-            params = DialogArgs(
-                title = R.string.title_link_email,
-                message = "您当前使用了微信登录。Stripe支付要求提供邮箱，是否绑定邮箱？",
-                positiveButton = R.string.yes,
-                negativeButton = R.string.no,
-            )
-        )
     }
 }
