@@ -1,9 +1,9 @@
 package com.ft.ftchinese.ui.checkout
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.AlertDialog
@@ -23,7 +23,6 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
-import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
@@ -33,7 +32,7 @@ import com.google.accompanist.web.WebContent
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
 
-class BuyerInfoActivity : ScopedAppActivity() {
+class BuyerInfoActivity : ComponentActivity() {
 
     private lateinit var viewModel: BuyerInfoViewModel
 
