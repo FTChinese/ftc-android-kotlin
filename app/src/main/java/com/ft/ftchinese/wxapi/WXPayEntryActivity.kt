@@ -8,10 +8,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
-import com.ft.ftchinese.model.ftcsubs.PayIntent
+import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.PayIntentStore
+import com.ft.ftchinese.tracking.PaySuccessParams
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.SubsActivity
@@ -107,7 +108,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
 
                     // Tracking failure
                     pi?.let {
-                        tracker?.buyFail(it.price.edition)
+                        tracker?.payFailed(it.price.edition)
                     }
                 }
                 // 用户取消
@@ -122,7 +123,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
     }
 
 
-    private fun confirmSubscription(pi: PayIntent?) {
+    private fun confirmSubscription(pi: FtcPayIntent?) {
 
         // Load current membership
         val account = sessionManager.loadAccount() ?: return
@@ -149,7 +150,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
 
         verifyPayment()
 
-        tracker?.oneTimePurchaseSuccess(pi)
+        tracker?.paySuccess(PaySuccessParams.ofFtc(pi))
     }
 
     private fun verifyPayment() {
