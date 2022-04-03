@@ -15,11 +15,11 @@ object StripeClient {
     // Retrieve a list of stripe prices.
     // If use is logged-in and it is a test account, use sandbox
     // api to get test prices; otherwise retrieve prices from live mode.
-    fun listPrices(): HttpResp<String> {
+    fun listPrices(): HttpResp<List<StripePrice>> {
         return Fetch()
             .get(Endpoint.stripePrices)
             .noCache()
-            .endApiText()
+            .endApiArray(withRaw = true)
     }
 
     fun createCustomer(account: Account): HttpResp<StripeCustomer> {
@@ -50,7 +50,6 @@ object StripeClient {
             .endApiJson()
     }
 
-    @Deprecated("")
     fun createEphemeralKey(account: Account, apiVersion: String): String? {
         if (account.stripeId == null) {
             return null
@@ -74,20 +73,20 @@ object StripeClient {
             .endApiJson()
     }
 
-    fun subsDefaultPaymentMethod(subsId: String, ftcId: String): HttpResp<StripePaymentMethod> {
+    private fun subsDefaultPaymentMethod(subsId: String, ftcId: String): HttpResp<StripePaymentMethod> {
         return Fetch()
             .get("${Endpoint.stripeSubs}/${subsId}/default-payment-method")
             .setUserId(ftcId)
             .noCache()
-            .endJson()
+            .endApiJson()
     }
 
-    fun cusDefaultPaymentMethod(cusId: String, ftcId: String): HttpResp<StripePaymentMethod> {
+    private fun cusDefaultPaymentMethod(cusId: String, ftcId: String): HttpResp<StripePaymentMethod> {
         return Fetch()
             .get("${Endpoint.stripeCustomers}/${cusId}/default-payment-method")
             .setUserId(ftcId)
             .noCache()
-            .endJson()
+            .endApiJson()
     }
 
     fun loadDefaultPaymentMethod(cusId: String, subsId: String?, ftcId: String): HttpResp<StripePaymentMethod> {
