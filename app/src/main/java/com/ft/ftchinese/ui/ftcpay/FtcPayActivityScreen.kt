@@ -56,13 +56,10 @@ fun FtcPayActivityScreen(
         return
     }
 
-    val item = pwViewModel.ftcCheckoutItem(
+    pwViewModel.ftcCheckoutItem(
         priceId = priceId,
         m = account.membership.normalize(),
-    )
-
-    if (item != null) {
-
+    )?.let { item ->
         FtcPayScreen(
             cartItem = item,
             loading = loadingState,
@@ -79,7 +76,5 @@ fun FtcPayActivityScreen(
                 )
             }
         )
-    } else {
-        showSnackBar("Empty shopping cart")
     }
 }
