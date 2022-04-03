@@ -1,16 +1,14 @@
 package com.ft.ftchinese.ui.stripepay
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.ui.components.CreateCustomerDialog
+import com.ft.ftchinese.ui.paywall.PaywallViewModel
 import com.ft.ftchinese.viewmodel.UserViewModel
 
 @Composable
@@ -24,12 +22,9 @@ fun StripePayActivityScreen(
     onExit: () -> Unit,
 ) {
     val context = LocalContext.current
-    val (loading, setLoading) = remember {
-        mutableStateOf(false)
-    }
     val account = userViewModel.account
-    val customerState = userViewModel.progressLiveData.observeAsState()
-    val subsState = payViewModel.progressLiveData.observeAsState()
+    val inProgress by payViewModel.inProgress.observeAsState(false)
+    val status by payViewModel.status.observeAsState("")
 
     if (account == null) {
         showSnackBar("Not logged in")
@@ -41,30 +36,8 @@ fun StripePayActivityScreen(
         return
     }
 
-    when (val s = customerState.value) {
-        is FetchUi.ResMsg -> {
-            showSnackBar(context.getString(s.strId))
-        }
-        is FetchUi.TextMsg -> {
-            showSnackBar(s.text)
-        }
-        is FetchUi.Progress -> {
-            setLoading(s.loading)
-        }
-        else -> {}
-    }
-
-    when (val s = subsState.value) {
-        is FetchUi.ResMsg -> {
-            showSnackBar(context.getString(s.strId))
-        }
-        is FetchUi.TextMsg -> {
-            showSnackBar(s.text)
-        }
-        is FetchUi.Progress -> {
-            setLoading(s.loading)
-        }
-        else -> {}
+    if (status.isNotBlank()) {
+        showSnackBar(status)
     }
 
     if (account.stripeId.isNullOrBlank()) {
@@ -91,14 +64,19 @@ fun StripePayActivityScreen(
     if (item != null) {
         StripePayScreen(
             cartItem = item,
-            loading = loading,
-            onSelectPayment = {  },
-            onClickPay = {
+            loading = inProgress,
+            paymentMethod = null,
+            subs = null,
+            onPaymentMethod = {
+                payViewModel.createSetupIntent(account)
+            },
+            onSubscribe = {
                 payViewModel.subscribe(
                     account = account,
                     item = item,
                 )
-            }
+            },
+            onDone = {}
         )
     }
 }
