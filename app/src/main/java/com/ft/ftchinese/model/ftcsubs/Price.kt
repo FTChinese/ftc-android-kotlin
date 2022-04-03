@@ -3,7 +3,7 @@ package com.ft.ftchinese.model.ftcsubs
 import android.os.Parcelable
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
-import com.ft.ftchinese.model.paywall.CartItemFtcV2
+import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.reader.Membership
@@ -41,14 +41,6 @@ data class Price(
 
     fun toJsonString(): String {
         return json.toJsonString(this)
-    }
-
-    fun isAnnual(): Boolean {
-        return periodCount.years > 0
-    }
-
-    fun isMonthly(): Boolean {
-        return periodCount.months > 0
     }
 
     val isIntro: Boolean
@@ -182,10 +174,10 @@ data class Price(
         return filtered[0]
     }
 
-    fun buildCartItem(m: Membership): CartItemFtcV2 {
+    fun buildCartItem(m: Membership): CartItemFtc {
         val offerFilter = m.offerKinds
 
-        return CartItemFtcV2(
+        return CartItemFtc(
             intent = checkoutIntent(m),
             price = this,
             discount = filterOffer(offerFilter),
