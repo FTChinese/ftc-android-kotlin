@@ -1,8 +1,8 @@
 package com.ft.ftchinese.ui.product
 
 import android.content.Context
-import com.ft.ftchinese.model.paywall.CartItemFtcV2
-import com.ft.ftchinese.model.paywall.CartItemStripeV2
+import com.ft.ftchinese.model.paywall.CartItemFtc
+import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.PriceParts
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.formatter.PeriodFormatter
@@ -16,7 +16,7 @@ data class PriceCardParams(
     val smallPrint: String?,
 ) {
     companion object {
-        fun ofFtc(ctx: Context, item: CartItemFtcV2): PriceCardParams {
+        fun ofFtc(ctx: Context, item: CartItemFtc): PriceCardParams {
             val heading = if (item.isIntro)
                 "试用"
             else
@@ -67,7 +67,7 @@ data class PriceCardParams(
             )
         }
 
-        fun ofStripe(ctx: Context, item: CartItemStripeV2): PriceCardParams {
+        fun ofStripe(ctx: Context, item: CartItemStripe): PriceCardParams {
             val heading = "连续包${FormatHelper.cycleOfYMD(ctx, item.recurring.periodCount)}"
 
             val currencySymbol = PriceParts.findSymbol(item.recurring.currency)

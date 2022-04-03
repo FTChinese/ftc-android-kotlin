@@ -8,18 +8,18 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.ft.ftchinese.model.paywall.CartItemFtcV2
-import com.ft.ftchinese.model.paywall.CartItemStripeV2
+import com.ft.ftchinese.model.paywall.CartItemFtc
+import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun PriceList(
-    ftcCartItems: List<CartItemFtcV2>,
-    stripeCartItems: List<CartItemStripeV2>,
-    onFtcPay: (item: CartItemFtcV2) -> Unit,
-    onStripePay: (item: CartItemStripeV2) -> Unit,
+    ftcCartItems: List<CartItemFtc>,
+    stripeCartItems: List<CartItemStripe>,
+    onFtcPay: (item: CartItemFtc) -> Unit,
+    onStripePay: (item: CartItemStripe) -> Unit,
 ) {
     Column {
         ftcCartItems.forEach { cartItem ->
