@@ -15,9 +15,9 @@ import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun Toolbar(
-    onBack: () -> Unit,
     currentScreen: SubsScreen,
     isMenu: Boolean = false,
+    onBack: () -> Unit,
 ) {
     TopAppBar(
         title = {
@@ -29,6 +29,31 @@ fun Toolbar(
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = if (isMenu) Icons.Filled.Menu else Icons.Filled.ArrowBack,
+                    "",
+                    tint = OColor.black90
+                )
+            }
+        },
+        elevation = Dimens.dp4,
+        backgroundColor = OColor.wheat
+    )
+}
+
+@Composable
+fun Toolbar(
+    heading: String,
+    onBack: () -> Unit,
+) {
+    TopAppBar(
+        title = {
+            Text(
+                text = heading
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
                     "",
                     tint = OColor.black90
                 )
