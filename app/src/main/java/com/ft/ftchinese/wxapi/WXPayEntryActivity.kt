@@ -14,10 +14,9 @@ import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.PayIntentStore
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.checkout.CheckOutViewModel
+import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.member.MemberActivity
-import com.ft.ftchinese.ui.subsactivity.SubsActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
@@ -39,7 +38,6 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
     private var tracker: StatsTracker? = null
 
     private lateinit var accountViewModel: AccountViewModel
-    private lateinit var checkoutViewModel: CheckOutViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,10 +47,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
         binding.inProgress = true
 
         payIntentStore = PayIntentStore.getInstance(this)
-        accountViewModel = ViewModelProvider(this)
-                .get(AccountViewModel::class.java)
-        checkoutViewModel = ViewModelProvider(this)
-                .get(CheckOutViewModel::class.java)
+        accountViewModel = ViewModelProvider(this)[AccountViewModel::class.java]
 
         tracker = StatsTracker.getInstance(this)
 
