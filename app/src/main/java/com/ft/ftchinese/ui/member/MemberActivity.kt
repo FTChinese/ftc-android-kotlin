@@ -20,16 +20,14 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.stripesubs.StripeSubsResult
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.checkout.CheckOutActivity
 import com.ft.ftchinese.ui.order.MyOrdersActivity
-import com.ft.ftchinese.ui.subsactivity.SubsActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
 class MemberActivity : ScopedAppActivity(),
@@ -244,13 +242,6 @@ class MemberActivity : ScopedAppActivity(),
         initUI()
     }
 
-
-    /**
-     * After [CheckOutActivity] finished, it sends activity result here.
-     * This activity kills itself since the [CheckOutActivity]
-     * will display a new [MemberActivity] to show updated
-     * membership.
-     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
