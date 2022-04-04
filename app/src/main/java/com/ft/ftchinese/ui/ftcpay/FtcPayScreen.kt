@@ -114,7 +114,7 @@ private fun PayMethodOption(
             .fillMaxWidth(),
     ) {
 
-        PaymentBrand(payMethod = method)
+        PaymentBrandItem(payMethod = method)
 
         RadioIcon(
             selected = selected,

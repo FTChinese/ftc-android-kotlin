@@ -48,7 +48,7 @@ data class PaymentBrandRes(
 }
 
 @Composable
-fun PaymentBrand(
+fun PaymentBrandItem(
     payMethod: PayMethod,
 ) {
     val res = PaymentBrandRes.of(payMethod) ?: return
