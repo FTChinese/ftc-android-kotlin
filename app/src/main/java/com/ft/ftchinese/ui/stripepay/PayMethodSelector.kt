@@ -1,19 +1,14 @@
 package com.ft.ftchinese.ui.stripepay
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.ft.ftchinese.R
 import com.ft.ftchinese.model.stripesubs.StripePaymentCard
+import com.ft.ftchinese.ui.components.ClickableRow
 import com.ft.ftchinese.ui.components.StripeCardRow
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
@@ -25,15 +20,12 @@ fun PaymentMethodSelector(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    Row(
+    ClickableRow(
         modifier = modifier
-            .clickable(
-                enabled = enabled,
-                onClick = onClick,
-            )
             .background(OColor.black5)
             .padding(Dimens.dp8),
-        verticalAlignment = Alignment.CenterVertically
+        enabled = enabled,
+        onClick = onClick
     ) {
         if (card != null) {
             StripeCardRow(
@@ -52,11 +44,6 @@ fun PaymentMethodSelector(
                 style = MaterialTheme.typography.subtitle1,
             )
         }
-
-        Image(
-            painter = painterResource(id = R.drawable.ic_keyboard_arrow_right_gray_24dp),
-            contentDescription = ""
-        )
     }
 }
 
