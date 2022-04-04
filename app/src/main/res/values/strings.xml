@@ -471,8 +471,8 @@
     <string name="fcm_summary">接收或关闭通知推送</string>
     <string name="fcm_setting_title">推送设置</string>
 
-    <string name="channel_setting_news">设置新闻频道通知</string>
-    <string name="fcm_check_guide">接收通知推送需要您的设备已经安装了Google Play服务并且能够访问Firebase Cloud Messaging服务，点击下方按钮检测是否满足条件</string>
+    <string name="channel_setting_news">设置通知推送</string>
+    <string name="fcm_check_guide">接收通知推送需要您的设备已经安装了Google Play服务并且能够访问Firebase Cloud Messaging服务，请打开通知推送并点击下方按钮检测是否满足条件</string>
     <string name="fcm_start_checking">检测</string>
     <string name="play_service_available">Google Play服务可用</string>
     <string name="play_service_not_available">Google Play服务不可用，您可以前往应用商店下载</string>
