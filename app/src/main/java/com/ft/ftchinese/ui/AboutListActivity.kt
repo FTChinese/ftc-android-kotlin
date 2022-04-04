@@ -63,7 +63,7 @@ fun AboutListScreen() {
                         WebpageActivity.start(context, pageMeta)
                     }
                     .fillMaxWidth()
-                    .padding(Dimens.dp8),
+                    .padding(Dimens.dp16),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -74,7 +74,7 @@ fun AboutListScreen() {
                 )
             }
 
-            Divider(startIndent = Dimens.dp8)
+            Divider(startIndent = Dimens.dp16)
         }
     }
 }
