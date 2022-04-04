@@ -5,9 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.Scaffold
@@ -16,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
@@ -26,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.ui.components.ClickableRow
 import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.Dimens
@@ -80,46 +78,6 @@ enum class PrefId {
     ClearHistory,
     Notification,
     CheckVersion,
-}
-
-@Composable
-fun PreferenceItem(
-    title: String,
-    summary: String,
-    leadIcon: Painter,
-    trailIcon: Painter?,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .clickable(
-                onClick = onClick,
-            )
-            .padding(Dimens.dp8),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            painter = leadIcon,
-            contentDescription = title
-        )
-        Column(
-            modifier = Modifier.padding(
-                start = Dimens.dp8,
-                end = Dimens.dp8
-            ).weight(1f)
-        ) {
-            Text(
-                text = title
-            )
-            Text(
-                text = summary,
-                color = OColor.black60
-            )
-        }
-        trailIcon?.let {
-            Icon(painter = it, contentDescription = "")
-        }
-    }
 }
 
 @Composable
@@ -205,6 +163,42 @@ fun PreferenceBody(
                 onClickRow(PrefId.CheckVersion)
             },
         )
+    }
+}
+
+@Composable
+fun PreferenceItem(
+    title: String,
+    summary: String,
+    leadIcon: Painter,
+    trailIcon: Painter?,
+    onClick: () -> Unit,
+) {
+    ClickableRow(
+        onClick = onClick,
+        trailIcon = trailIcon,
+    ) {
+        Icon(
+            painter = leadIcon,
+            contentDescription = title
+        )
+
+        Column(
+            modifier = Modifier
+                .padding(
+                    start = Dimens.dp8,
+                    end = Dimens.dp8
+                )
+                .weight(1f)
+        ) {
+            Text(
+                text = title
+            )
+            Text(
+                text = summary,
+                color = OColor.black60
+            )
+        }
     }
 }
 
