@@ -135,8 +135,7 @@
             android:name=".ui.checkout.StripeSubActivity"
             android:exported="true"
             android:label="@string/pay_method_stripe"
-            android:launchMode="singleTask"
-            android:parentActivityName=".ui.SubsActivity">
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -182,16 +181,13 @@
             android:label="@string/title_latest_invoice" />
         <activity
             android:name=".ui.settings.SettingsActivity"
-            android:label="@string/action_settings"
-            android:parentActivityName=".ui.main.MainActivity" />
+            android:label="@string/action_settings" />
         <activity
             android:name=".ui.settings.FCMActivity"
-            android:label="@string/fcm_setting_title"
-            android:parentActivityName=".ui.settings.SettingsActivity" />
+            android:label="@string/fcm_setting_title" />
         <activity
             android:name=".ui.settings.UpdateAppActivity"
-            android:label="@string/pref_check_new_version"
-            android:parentActivityName=".ui.settings.SettingsActivity" />
+            android:label="@string/pref_check_new_version" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
