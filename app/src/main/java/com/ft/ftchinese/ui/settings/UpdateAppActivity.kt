@@ -20,13 +20,9 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpdateAppBinding
 import com.ft.ftchinese.model.AppRelease
-import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.viewmodel.SettingsViewModel
-import com.ft.ftchinese.viewmodel.SettingsViewModelFactory
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.jetbrains.anko.toast
@@ -36,10 +32,9 @@ private const val PREF_FILE_DOWNLOAD = "app_download"
 private const val PREF_DOWNLOAD_ID = "download_id"
 private const val EXTRA_CACHE_FILENAME = "extra_cache_filename"
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class UpdateAppActivity : ScopedAppActivity() {
 
-    private lateinit var settingsViewModel: SettingsViewModel
+    private lateinit var appViewModel: UpdateAppViewModel
 
     private lateinit var binding: ActivityUpdateAppBinding
     private var release: AppRelease? = null
@@ -145,28 +140,24 @@ class UpdateAppActivity : ScopedAppActivity() {
 
     private fun setupViewModel() {
         // Create view model.
-        settingsViewModel = ViewModelProvider(
-            this,
-            SettingsViewModelFactory(FileCache(this))
-        ).get(SettingsViewModel::class.java)
+        appViewModel = ViewModelProvider(this)[UpdateAppViewModel::class.java]
 
         // Network status
         connectionLiveData.observe(this) {
-            settingsViewModel.isNetworkAvailable.value = it
+            appViewModel.isNetworkAvailable.value = it
         }
-        settingsViewModel.isNetworkAvailable.value = isConnected
 
         // Latest release log might already cached by LatestReleaseWorker.
-        settingsViewModel.cachedReleaseFound.observe(this) {
+        appViewModel.cachedReleaseFound.observe(this) {
             if (it) {
                 return@observe
             }
             // If cache is not found, fetch from server.
-            settingsViewModel.fetchRelease(current = false)
+            appViewModel.fetchRelease(current = false)
         }
 
         // The release might comes either from cache or from server.
-        settingsViewModel.releaseResult.observe(this) {
+        appViewModel.releaseResult.observe(this) {
             onLatestRelease(it)
         }
 
@@ -177,14 +168,14 @@ class UpdateAppActivity : ScopedAppActivity() {
         if (filename != null) {
             // Load from cache.
             // If cache not found, the cachedReleaseFound observer will call checkLatestRelease
-            settingsViewModel.loadCachedRelease(filename)
+            appViewModel.loadCachedRelease(filename)
             return
         }
 
         // No coming from notification. Fetch data directly from server.
         toast(R.string.checking_latest_release)
 
-        settingsViewModel.fetchRelease(current = false)
+        appViewModel.fetchRelease(current = false)
     }
 
     private fun onLatestRelease(result: FetchResult<AppRelease>) {

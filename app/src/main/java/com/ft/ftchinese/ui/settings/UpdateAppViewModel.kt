@@ -1,83 +1,30 @@
-package com.ft.ftchinese.viewmodel
+package com.ft.ftchinese.ui.settings
 
-import android.util.Log
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.sqlite.db.SimpleSQLiteQuery
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.database.ReadingHistoryDao
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.model.fetch.APIError
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.ui.base.isConnected
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class SettingsViewModel(
-    private val cache: FileCache
-) : ViewModel() {
+class UpdateAppViewModel(application: Application) : AndroidViewModel(application) {
+    private val cache = FileCache(application)
 
-    val isNetworkAvailable = MutableLiveData<Boolean>()
-
-    val cacheSizeResult = MutableLiveData<String>()
-    val cacheClearedResult = MutableLiveData<Boolean>()
-
-    val articlesReadResult = MutableLiveData<Int>()
-    val articlesClearedResult = MutableLiveData<Boolean>()
+    val isNetworkAvailable = MutableLiveData<Boolean>(application.isConnected)
 
     val cachedReleaseFound = MutableLiveData<Boolean>()
     val releaseResult: MutableLiveData<FetchResult<AppRelease>> by lazy {
         MutableLiveData<FetchResult<AppRelease>>()
-    }
-
-    fun calculateCacheSize() {
-        viewModelScope.launch {
-            val size = withContext(Dispatchers.IO) {
-                cache.space()
-            }
-
-            cacheSizeResult.value = size
-        }
-    }
-
-    fun clearCache() {
-        viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                cache.clear()
-
-            }
-
-            cacheClearedResult.value = result
-        }
-    }
-
-    fun countReadArticles(readDao: ReadingHistoryDao) {
-        viewModelScope.launch {
-            val count = withContext(Dispatchers.IO) {
-                readDao.count()
-            }
-
-            articlesReadResult.value = count
-        }
-    }
-
-    fun truncateReadArticles(readDao: ReadingHistoryDao) {
-        viewModelScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                readDao.deleteAll()
-                readDao.vacuumDb(SimpleSQLiteQuery("VACUUM"))
-            }
-
-            Log.i(TAG, "Truncated $result")
-
-            articlesClearedResult.value = true
-            articlesReadResult.value = 0
-        }
     }
 
     // Load current version's release log from cache.
@@ -150,9 +97,5 @@ class SettingsViewModel(
                 releaseResult.value = FetchResult.fromException(e)
             }
         }
-    }
-
-    companion object {
-        private const val TAG = "SettingsViewModel"
     }
 }
