@@ -23,7 +23,6 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.order.MyOrdersActivity
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import org.jetbrains.anko.alert
@@ -269,10 +268,11 @@ class MemberActivity : ScopedAppActivity(),
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
-        R.id.action_orders -> {
-            MyOrdersActivity.start(this)
-            true
-        }
+
+//        R.id.action_orders -> {
+//            MyOrdersActivity.start(this)
+//            true
+//        }
         R.id.action_cancel_stripe -> {
 
             alert(Appcompat, "该操作将关闭Stripe自动续订，当前订阅在到期前依然有效。在订阅到期前，您随时可以重新打开自动续订。", "取消订阅") {

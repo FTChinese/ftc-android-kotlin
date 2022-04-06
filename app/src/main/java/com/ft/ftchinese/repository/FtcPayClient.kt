@@ -1,5 +1,7 @@
 package com.ft.ftchinese.repository
 
+import android.util.Log
+import com.ft.ftchinese.model.PagedList
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
@@ -12,15 +14,28 @@ import com.ft.ftchinese.model.request.OrderParams
 
 object FtcPayClient {
 
-    fun listOrders(account: Account): List<Order> {
+    private const val TAG = "FtcPayClient"
 
-        return Fetch()
+    fun listOrders(account: Account): PagedList<Order>? {
+
+        val resp = Fetch()
             .get(Endpoint.subsBase(account.isTest) + "/orders")
             .addHeaders(account.headers())
             .noCache()
-            .endApiArray<Order>()
-            .body
-            ?: listOf()
+            .endApiText()
+
+        Log.i(TAG, "$resp")
+
+        return if (resp.body != null) {
+            try {
+                json.parse<PagedList<Order>>(resp.body)
+            } catch (e: Exception) {
+                Log.i(TAG, "Error parsing list ${e.message}")
+                null
+            }
+        } else {
+            null
+        }
     }
 
     fun verifyOrder(account: Account, orderId: String):  VerificationResult? {

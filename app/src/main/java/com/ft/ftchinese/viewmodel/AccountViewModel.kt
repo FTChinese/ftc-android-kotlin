@@ -245,8 +245,14 @@ class AccountViewModel : BaseViewModel() {
                     FtcPayClient.listOrders(account)
                 }
 
-                ordersResult.value = FetchResult.Success(orders)
+                Log.i(TAG, "Order result $orders")
+                if (orders == null) {
+                    ordersResult.value = FetchResult.LocalizedError(R.string.api_server_error)
+                } else {
+                    ordersResult.value = FetchResult.Success(orders.data)
+                }
             } catch (e: Exception) {
+                Log.i(TAG, "Error listing orders ${e.message}")
                 ordersResult.value = FetchResult.fromException(e)
             }
         }
