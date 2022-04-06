@@ -148,10 +148,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.order.MyOrdersActivity"
-            android:label="@string/title_my_orders"
-            android:parentActivityName=".ui.member.MemberActivity" />
-        <activity
             android:name=".wxapi.WXPayEntryActivity"
             android:exported="true"
             android:label="@string/pay_brand_wechat"
