@@ -47,6 +47,8 @@ fun StripePayScreen(
 
     val context = LocalContext.current
 
+    val forbidden = cartItem.intent.kind == IntentKind.Forbidden
+
     ProgressLayout(
         loading = loading,
     ) {
@@ -87,7 +89,7 @@ fun StripePayScreen(
             if (subs == null) {
                 PrimaryButton(
                     onClick = onSubscribe,
-                    enabled = (!loading && paymentMethod != null),
+                    enabled = (!loading && paymentMethod != null && !forbidden),
                     modifier = Modifier
                         .padding(Dimens.dp16)
                         .fillMaxWidth()
@@ -104,7 +106,7 @@ fun StripePayScreen(
                     onClick = onDone,
                     modifier = Modifier
                         .padding(Dimens.dp16)
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
                 ) {
                     Text(text = stringResource(id = R.string.action_done))
                 }

@@ -37,6 +37,8 @@ fun FtcPayScreen(
         mutableStateOf<PayMethod?>(null)
     }
 
+    val forbidden = cartItem.intent.kind == IntentKind.Forbidden
+
     ProgressLayout(
         loading = loading,
     ) {
@@ -69,7 +71,7 @@ fun FtcPayScreen(
                     PayMethodOption(
                         method = payMethod,
                         selected = (payMethod == selectOption),
-                        enabled = (cartItem.intent.kind != IntentKind.Forbidden),
+                        enabled = !forbidden,
                         onSelect = onOptionSelected,
                     )
                 }
@@ -81,7 +83,7 @@ fun FtcPayScreen(
                         onClickPay(it)
                     }
                 },
-                enabled = (selectOption != null && !loading),
+                enabled = (!loading && selectOption != null && !forbidden),
                 modifier = Modifier
                     .padding(Dimens.dp16)
                     .fillMaxWidth()
