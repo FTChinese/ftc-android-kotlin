@@ -156,12 +156,13 @@ fun PreferenceBody(
         )
 
         PreferenceItem(
-            title = stringResource(id = R.string.pref_check_new_version),
-            summary = stringResource(R.string.current_version, BuildConfig.VERSION_NAME),
+//            title = stringResource(id = R.string.pref_check_new_version),
+            title = stringResource(R.string.current_version, BuildConfig.VERSION_NAME),
+            summary = null,
             leadIcon = painterResource(id = R.drawable.ic_update_black_24dp),
-            trailIcon = painterResource(id = R.drawable.ic_keyboard_arrow_right_gray_24dp),
+            trailIcon = null,
             onClick = {
-                onClickRow(PrefId.CheckVersion)
+//                onClickRow(PrefId.CheckVersion)
             },
         )
     }
@@ -170,7 +171,7 @@ fun PreferenceBody(
 @Composable
 fun PreferenceItem(
     title: String,
-    summary: String,
+    summary: String?,
     leadIcon: Painter,
     trailIcon: Painter?,
     onClick: () -> Unit,
@@ -195,13 +196,15 @@ fun PreferenceItem(
             Text(
                 text = title,
                 style = MaterialTheme.typography.body1,
-                modifier = Modifier.padding(bottom = Dimens.dp8)
             )
-            Text(
-                text = summary,
-                color = OColor.black60,
-                style = MaterialTheme.typography.body2
-            )
+            summary?.let {
+                Text(
+                    text = it,
+                    color = OColor.black60,
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.padding(top = Dimens.dp8)
+                )
+            }
         }
     }
 }
