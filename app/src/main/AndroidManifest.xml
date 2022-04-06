@@ -187,7 +187,8 @@
             android:label="@string/fcm_setting_title" />
         <activity
             android:name=".ui.settings.UpdateAppActivity"
-            android:label="@string/pref_check_new_version" />
+            android:label="@string/pref_check_new_version"
+            android:parentActivityName=".ui.settings.SettingsActivity"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"
