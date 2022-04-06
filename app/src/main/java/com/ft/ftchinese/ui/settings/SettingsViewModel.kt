@@ -31,7 +31,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             withContext(Dispatchers.IO) {
                 cache.space()
             }.let {
-                cacheSizeLiveData.value
+                cacheSizeLiveData.value = it
             }
         }
     }
