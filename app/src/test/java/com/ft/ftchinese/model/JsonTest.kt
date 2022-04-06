@@ -7,7 +7,17 @@ import com.ft.ftchinese.model.reader.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.model.fetch.json
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.junit.Test
+
+@Serializable
+data class Data(
+    val a: Int,
+    val b: String,
+)
 
 class JsonTest {
     private val data = """
@@ -139,5 +149,16 @@ class JsonTest {
         val result = json.parse<PaymentResult>(data)
 
         println(result)
+    }
+
+    @Test fun encodeJson() {
+        val jsonStr = Json.encodeToString(Data(42, "str"))
+        print(jsonStr)
+    }
+
+    @Test
+    fun decodeJson() {
+        val obj = Json.decodeFromString<Data>("""{"a":42, "b": "str"}""")
+        print(obj)
     }
 }
