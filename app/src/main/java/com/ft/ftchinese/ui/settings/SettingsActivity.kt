@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -124,7 +125,7 @@ fun PreferenceBody(
     Column {
         PreferenceItem(
             title = stringResource(id = R.string.pref_clear_cache),
-            summary = cacheSize ?: "",
+            summary = cacheSize ?: "0 KiB",
             leadIcon = painterResource(id = R.drawable.ic_clear_24dp),
             trailIcon = null,
             onClick = {
@@ -192,11 +193,14 @@ fun PreferenceItem(
                 .weight(1f)
         ) {
             Text(
-                text = title
+                text = title,
+                style = MaterialTheme.typography.body1,
+                modifier = Modifier.padding(bottom = Dimens.dp8)
             )
             Text(
                 text = summary,
-                color = OColor.black60
+                color = OColor.black60,
+                style = MaterialTheme.typography.body2
             )
         }
     }

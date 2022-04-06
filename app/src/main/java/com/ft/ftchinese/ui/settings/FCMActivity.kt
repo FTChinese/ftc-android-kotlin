@@ -186,7 +186,6 @@ private fun FcmBody(
                     onClick = onSetting,
                     modifier = Modifier
                         .background(OColor.black5)
-                        .padding(Dimens.dp16)
                 ) {
                     Text(
                         text = stringResource(id = R.string.channel_setting_news),
