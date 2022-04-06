@@ -20,13 +20,13 @@ data class RelatedStory(
     val id: String,
 
     @Json(name = "cheadline")
-    val titleCN: String,
+    val titleCN: String? = null,
 
     @Json(name = "eheadline")
-    val titleEN: String = "", // This might not exist.
+    val titleEN: String? = null, // This might not exist.
 
     @Json(name = "last_publish_time")
-    val publishedAt: String
+    val publishedAt: String? = null
 )
 
 data class AiAudio(
@@ -353,7 +353,7 @@ class Story (
         }
         val listItems = relatedStory.mapIndexed { index, relatedStory ->
             """
-            <li class="mp${index+1}"><a target="_blank" href="/story/${relatedStory.id}\">${relatedStory.titleCN}</a></li>
+            <li class="mp${index+1}"><a target="_blank" href="/story/${relatedStory.id}\">${relatedStory.titleCN ?: ""}</a></li>
             """.trimIndent()
         }
                 .joinToString("")
