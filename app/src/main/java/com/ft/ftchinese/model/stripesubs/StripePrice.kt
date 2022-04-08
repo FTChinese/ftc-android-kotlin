@@ -74,7 +74,7 @@ data class StripePrice(
             return CheckoutIntent.vip
         }
 
-        if (m.isZero) {
+        if (m.autoRenewOffExpired) {
             return CheckoutIntent.newMember
         }
 
@@ -91,7 +91,7 @@ data class StripePrice(
                         kind = IntentKind.Forbidden,
                         message = "自动续订不能重复订阅"
                     )
-                }  else {
+                } else {
                     CheckoutIntent(
                         kind = IntentKind.SwitchInterval,
                         message = "更改Stripe自动扣款周期，建议您订阅年度版更划算"

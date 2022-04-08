@@ -43,7 +43,7 @@ data class Price(
         return json.toJsonString(this)
     }
 
-    val isIntro: Boolean
+    private val isIntro: Boolean
         get() = kind == PriceKind.OneTime
 
     val edition: Edition
@@ -101,7 +101,7 @@ data class Price(
             return CheckoutIntent.vip
         }
 
-        if (m.isZero) {
+        if (m.autoRenewOffExpired) {
             return CheckoutIntent.newMember
         }
 
@@ -119,7 +119,7 @@ data class Price(
                     // Standard -> onetime premium
                     Tier.PREMIUM -> CheckoutIntent(
                         kind = IntentKind.Forbidden,
-                        message = "Stripe标准版自动续订使用支付宝/微信购买的订阅时间只能在自动续订结束后才能升次奥，如果您希望升级到高端版，请继续使用Stripe支付升级"
+                        message = "Stripe标准版自动续订使用支付宝/微信购买的订阅时间只能在自动续订结束后才能升级，如果您希望升级到高端版，请继续使用Stripe支付升级"
                     )
                     Tier.STANDARD -> CheckoutIntent.autoRenewAddOn
                 }
