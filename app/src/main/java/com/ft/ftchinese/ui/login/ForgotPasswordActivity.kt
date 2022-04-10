@@ -9,14 +9,12 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityForgotPasswordBinding
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.model.fetch.FetchResult
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class ForgotPasswordActivity : ScopedAppActivity() {
 
     private lateinit var letterViewModel: ForgotPasswordViewModel
