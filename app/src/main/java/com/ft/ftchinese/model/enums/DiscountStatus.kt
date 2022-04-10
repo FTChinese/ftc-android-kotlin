@@ -1,10 +1,15 @@
-package com.ft.ftchinese.model.ftcsubs
+package com.ft.ftchinese.model.enums
 
-import com.ft.ftchinese.model.enums.OfferKind
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class DiscountStatus(val code: String) {
+    @SerialName("active")
     Active("active"),
+    @SerialName("paused")
     Paused("paused"),
+    @SerialName("cancelled")
     Cancelled("cancelled");
 
     companion object {

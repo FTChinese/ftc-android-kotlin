@@ -1,12 +1,19 @@
 package com.ft.ftchinese.model.enums
 
-import com.ft.ftchinese.R
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class PayMethod(val symbol: String) {
+    @SerialName("alipay")
     ALIPAY("alipay"),
+    @SerialName("wechat")
     WXPAY("wechat"),
+    @SerialName("stripe")
     STRIPE("stripe"),
+    @SerialName("apple")
     APPLE("apple"),
+    @SerialName("b2b")
     B2B("b2b");
 
     override fun toString(): String {

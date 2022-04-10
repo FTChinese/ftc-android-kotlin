@@ -2,10 +2,15 @@ package com.ft.ftchinese.model.enums
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Parcelize
+@Serializable
 enum class PriceKind(val symbol: String) : Parcelable {
+    @SerialName("recurring")
     Recurring("recurring"),
+    @SerialName("one_time")
     OneTime("one_time");
 
     override fun toString(): String {

@@ -3,12 +3,17 @@ package com.ft.ftchinese.model.enums
 import android.os.Parcelable
 import com.ft.ftchinese.R
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.threeten.bp.Period
 import org.threeten.bp.Year
 
 @Parcelize
+@Serializable
 enum class Cycle(val symbol: String) : Parcelable {
+    @SerialName("month")
     MONTH("month"),
+    @SerialName("year")
     YEAR("year");
 
     val stringRes: Int

@@ -1,14 +1,9 @@
 package com.ft.ftchinese.model.enums
 
-import com.ft.ftchinese.model.fetch.KCycle
-import com.ft.ftchinese.model.fetch.KTier
+import kotlinx.serialization.Serializable
 
+@Serializable
 open class Edition(
-    @KTier
     open val tier: Tier,
-    @KCycle
     open val cycle: Cycle
-) {
-    val namedKey: String
-        get() = "${tier}_${cycle}"
-}
+)

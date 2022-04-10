@@ -1,24 +1,33 @@
 package com.ft.ftchinese.model.enums
 
 import com.ft.ftchinese.R
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 enum class StripeSubStatus(val symbol: String) {
     // if the initial payment attempt fails.
+    @SerialName("incomplete")
     Incomplete("incomplete"),
 
     // If the first invoice is not paid within 23 hours
     // This is a terminal state, the open invoice will be voided and no further invoices will be generated
+    @SerialName("incomplete_expired")
     IncompleteExpired("incomplete_expired"),
 
-
+    @SerialName("trialing")
     Trialing("trialing"),
+    @SerialName("active")
     Active("active"),
 
     // when payment to renew it fails
+    @SerialName("past_due")
     PastDue("past_due"),
 
     // when Stripe has exhausted all payment retry attempts.
+    @SerialName("canceled")
     Canceled("canceled"),
+    @SerialName("unpaid")
     Unpaid("unpaid");
 
     val stringRes: Int

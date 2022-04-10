@@ -1,7 +1,13 @@
-package com.ft.ftchinese.model.reader
+package com.ft.ftchinese.model.enums
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class UnlinkAnchor(val symbol: String) {
+    @SerialName("ftc")
     FTC("ftc"),
+    @SerialName("wechat")
     WECHAT("wechat");
 
     override fun toString(): String {

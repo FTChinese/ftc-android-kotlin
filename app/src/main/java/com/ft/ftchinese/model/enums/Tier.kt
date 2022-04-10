@@ -3,10 +3,15 @@ package com.ft.ftchinese.model.enums
 import android.os.Parcelable
 import com.ft.ftchinese.R
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 @Parcelize
+@Serializable
 enum class Tier(val symbol: String) : Parcelable {
+    @SerialName("standard")
     STANDARD("standard"),
+    @SerialName("premium")
     PREMIUM("premium");
 
     val stringRes: Int

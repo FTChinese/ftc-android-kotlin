@@ -1,8 +1,15 @@
-package com.ft.ftchinese.model.reader
+package com.ft.ftchinese.model.enums
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class LoginMethod {
+    @SerialName("email")
     EMAIL,
+    @SerialName("wechat")
     WECHAT,
+    @SerialName("mobile")
     MOBILE;
 
     fun string(): String {

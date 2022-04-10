@@ -1,9 +1,17 @@
 package com.ft.ftchinese.model.enums
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class OfferKind(val code: String) {
+    @SerialName("promotion")
     Promotion("promotion"),
+    @SerialName("retention")
     Retention("retention"),
+    @SerialName("win_back")
     WinBack("win_back"),
+    @SerialName("introductory")
     Introductory("introductory");
 
     companion object {
