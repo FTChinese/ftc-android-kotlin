@@ -8,6 +8,7 @@ import androidx.core.app.NotificationManagerCompat
 import com.ft.ftchinese.R
 import com.ft.ftchinese.R.string.news_notification_channel_id
 import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.google.firebase.messaging.FirebaseMessagingService

@@ -2,7 +2,7 @@ package com.ft.ftchinese.repository
 
 import android.net.Uri
 import com.ft.ftchinese.BuildConfig
-import com.ft.ftchinese.model.content.ArticleType
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
 import com.ft.ftchinese.model.content.Teaser

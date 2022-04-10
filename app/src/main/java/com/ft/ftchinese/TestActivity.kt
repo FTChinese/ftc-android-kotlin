@@ -26,15 +26,14 @@ import androidx.core.app.TaskStackBuilder
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.ft.ftchinese.model.content.ArticleType
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.Order
-import com.ft.ftchinese.model.iapsubs.IAPSubsResult
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.service.VerifySubsWorker

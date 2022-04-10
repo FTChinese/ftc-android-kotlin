@@ -11,6 +11,7 @@ import androidx.work.*
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivitySplashBinding
 import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.service.SplashWorker
 import com.ft.ftchinese.store.FileCache
@@ -22,7 +23,6 @@ import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.share.ShareUtils
 import com.ft.ftchinese.ui.webpage.UrlHandler
-import kotlinx.coroutines.*
 
 private const val EXTRA_MESSAGE_TYPE = "content_type"
 private const val EXTRA_CONTENT_ID = "content_id"

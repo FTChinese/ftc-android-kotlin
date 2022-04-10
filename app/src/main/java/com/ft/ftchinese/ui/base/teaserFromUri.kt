@@ -1,7 +1,7 @@
 package com.ft.ftchinese.ui.base
 
 import android.net.Uri
-import com.ft.ftchinese.model.content.ArticleType
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.content.Teaser
 
 fun teaserFromUri(uri: Uri): Teaser {
