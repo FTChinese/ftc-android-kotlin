@@ -137,12 +137,12 @@ class SubsActivity : ScopedComponentActivity() {
 
             if (resultStatus != "9000") {
                 toast(msg)
-                ftcPayViewModel.trackFailedPay(aliPayIntent)
+                ftcPayViewModel.trackFailedPay(aliPayIntent.toPayIntent())
 
                 return@launch
             }
 
-            confirmAliSubscription(aliPayIntent)
+            confirmAliSubscription(aliPayIntent.toPayIntent())
         }
     }
 
