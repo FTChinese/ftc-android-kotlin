@@ -4,13 +4,15 @@ import android.content.Context
 import android.util.Log
 import androidx.core.content.edit
 import com.ft.ftchinese.model.enums.PurchaseAction
-import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.ftcsubs.ConfirmationResult
 import com.ft.ftchinese.model.ftcsubs.Invoices
 import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.model.ftcsubs.PaymentResult
 import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.model.reader.Membership
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
 /**
  * InvoiceStore saves all related data after an order is paid:
@@ -41,7 +43,7 @@ class InvoiceStore private constructor(ctx: Context) {
 
         val membership = sharedPref.getString(KEY_LATEST_MEMBERSHIP, null)?.let {
             try {
-                json.parse<Membership>(it)
+                marshaller.decodeFromString<Membership>(it)
             } catch (e: Exception) {
                 null
             }
@@ -49,7 +51,7 @@ class InvoiceStore private constructor(ctx: Context) {
 
         val snapshot = sharedPref.getString(KEY_MEMBER_SNAPSHOT, null)?.let {
             try {
-                json.parse<Membership>(it)
+                marshaller.decodeFromString<Membership>(it)
             } catch (e: Exception) {
                 null
             }
@@ -97,7 +99,7 @@ class InvoiceStore private constructor(ctx: Context) {
         Log.i(TAG, "Loading invoices")
         val purchased = sharedPref.getString(KEY_PURCHASED, null)?.let {
             try {
-                json.parse<Invoice>(it)
+                marshaller.decodeFromString<Invoice>(it)
             } catch (e: Exception) {
                 Log.i(TAG, "$e")
                 null
@@ -108,7 +110,7 @@ class InvoiceStore private constructor(ctx: Context) {
             purchased = purchased,
             carriedOver = sharedPref.getString(KEY_CARRIED_OVER, null)?.let {
                 try {
-                    json.parse(it)
+                    marshaller.decodeFromString(it)
                 } catch (e: Exception) {
                     Log.i(TAG, "$e")
                     null
@@ -123,7 +125,7 @@ class InvoiceStore private constructor(ctx: Context) {
             null
         )?.let {
             try {
-                json.parse<Order>(it)
+                marshaller.decodeFromString<Order>(it)
             } catch (e: Exception) {
                 null
             }
@@ -133,7 +135,7 @@ class InvoiceStore private constructor(ctx: Context) {
     fun loadPayResult(): PaymentResult? {
         val pr = sharedPref.getString(KEY_PAYMENT_VERIFIED, null)?.let {
             try {
-                json.parse<PaymentResult>(it)
+                marshaller.decodeFromString<PaymentResult>(it)
             } catch (e: Exception) {
                 null
             }
@@ -160,7 +162,7 @@ class InvoiceStore private constructor(ctx: Context) {
 
     fun savePayResult(pr: PaymentResult) {
         sharedPref.edit {
-            putString(KEY_PAYMENT_VERIFIED, json.toJsonString(pr))
+            putString(KEY_PAYMENT_VERIFIED, marshaller.encodeToString(pr))
         }
     }
 

@@ -2,10 +2,11 @@ package com.ft.ftchinese.store
 
 import android.content.Context
 import androidx.core.content.edit
-import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.ftcsubs.Order
+import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
+import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.model.ftcsubs.Price
+import kotlinx.serialization.decodeFromString
 
 /**
  * Saves the latest order and price returned from api.
@@ -26,7 +27,7 @@ class PayIntentStore private constructor(ctx: Context) {
     fun load(): FtcPayIntent? {
         val price = sharedPref.getString(KEY_ORDER, null)?.let {
             try {
-                json.parse<Price>(it)
+                marshaller.decodeFromString<Price>(it)
             } catch (e: Exception) {
                 null
             }
@@ -34,7 +35,7 @@ class PayIntentStore private constructor(ctx: Context) {
 
         val order = sharedPref.getString(KEY_ORDER, null)?.let {
             try {
-                json.parse<Order>(it)
+                marshaller.decodeFromString<Order>(it)
             } catch(e: Exception) {
                 null
             }
