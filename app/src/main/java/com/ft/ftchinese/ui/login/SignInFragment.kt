@@ -15,7 +15,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentSignInBinding
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.store.TokenManager
 import com.ft.ftchinese.tracking.StatsTracker
