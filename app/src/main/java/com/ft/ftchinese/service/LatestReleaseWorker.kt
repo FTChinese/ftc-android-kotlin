@@ -42,7 +42,7 @@ class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
         }
 
         try {
-            val resp = ReleaseRepo.getLatest() ?: return Result.failure()
+            val resp = ReleaseRepo.getLatest()
 
             Log.i(TAG, "Latest release ${resp.body}")
 
