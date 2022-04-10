@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.ft.ftchinese.model.fetch.Fetch
-import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.splash.Schedule
 import com.ft.ftchinese.model.splash.SplashScreenManager
 import com.ft.ftchinese.repository.AdClient
@@ -14,6 +14,7 @@ import com.ft.ftchinese.repository.Endpoint
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
+import kotlinx.serialization.decodeFromString
 
 private const val TAG = "SplashWorker"
 class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams) {
@@ -39,7 +40,7 @@ class SplashWorker(appContext: Context, workerParams: WorkerParameters) : Worker
         Log.i(TAG, "Cache splash schedule")
         return cache.loadText(CacheFileNames.splashSchedule)?.let {
             try {
-                json.parse<Schedule>(it)
+                marshaller.decodeFromString<Schedule>(it)
             } catch (e: Exception) {
                 null
             }
