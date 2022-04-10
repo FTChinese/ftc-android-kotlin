@@ -3,7 +3,7 @@ package com.ft.ftchinese.database
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import androidx.sqlite.db.SupportSQLiteQuery
-import com.ft.ftchinese.model.content.ArticleType
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.model.content.Story
 import com.ft.ftchinese.model.content.Teaser
