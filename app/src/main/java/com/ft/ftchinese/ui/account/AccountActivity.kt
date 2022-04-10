@@ -11,7 +11,7 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAccountBinding
-import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity

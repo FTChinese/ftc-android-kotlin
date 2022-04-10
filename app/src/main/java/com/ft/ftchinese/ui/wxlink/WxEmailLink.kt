@@ -3,7 +3,7 @@ package com.ft.ftchinese.ui.wxlink
 import android.content.Context
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 
 data class WxEmailLink(

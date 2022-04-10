@@ -30,7 +30,7 @@ import com.ft.ftchinese.databinding.ActivityMainBinding
 import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.legal.WebpageMeta
-import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker

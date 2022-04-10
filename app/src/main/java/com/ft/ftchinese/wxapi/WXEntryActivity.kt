@@ -7,7 +7,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.reader.WxOAuth
 import com.ft.ftchinese.model.reader.WxOAuthIntent
 import com.ft.ftchinese.ui.login.AuthActivity
