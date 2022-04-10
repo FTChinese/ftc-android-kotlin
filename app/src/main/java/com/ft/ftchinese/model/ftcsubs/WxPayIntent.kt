@@ -4,13 +4,17 @@ import com.tencent.mm.opensdk.modelpay.PayReq
 
 // This is user's payment intent.
 data class WxPayIntent(
-    override val price: Price,
-    override val order: Order,
+    val price: Price,
+    val order: Order,
     val params: WxPaySDKParams,
-) : FtcPayIntent(
-    price = price,
-    order = order
-)
+) {
+    fun toPayIntent(): FtcPayIntent {
+        return FtcPayIntent(
+            price = price,
+            order = order,
+        )
+    }
+}
 
 data class WxPaySDKParams(
     val app: WxAppPayParams?

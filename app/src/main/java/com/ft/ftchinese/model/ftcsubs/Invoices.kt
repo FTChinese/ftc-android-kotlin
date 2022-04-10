@@ -2,7 +2,9 @@ package com.ft.ftchinese.model.ftcsubs
 
 import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.model.reader.Membership
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Invoices(
     val purchased: Invoice,
     val carriedOver: Invoice? = null,

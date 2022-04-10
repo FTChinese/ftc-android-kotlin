@@ -2,12 +2,15 @@ package com.ft.ftchinese.model.ftcsubs
 
 import android.os.Parcelable
 import com.ft.ftchinese.model.enums.*
-import com.ft.ftchinese.model.fetch.*
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.threeten.bp.ZonedDateTime
 
 /**
@@ -15,15 +18,13 @@ import org.threeten.bp.ZonedDateTime
  * It unifies both ftc and Stripe product.
  */
 @Parcelize
+@Serializable
 data class Price(
     val id: String,
-    @KTier
     val tier: Tier,
-    @KCycle
     val cycle: Cycle?,
     val active: Boolean = true,
     val currency: String = "cny",
-    @KPriceKind
     val kind: PriceKind? = null,
     val liveMode: Boolean,
     val nickname: String? = null,
@@ -32,15 +33,15 @@ data class Price(
     val stripePriceId: String,
     val title: String? = null,
     val unitAmount: Double,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val startUtc: ZonedDateTime? = null,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val endUtc: ZonedDateTime? = null,
     val offers: List<Discount> = listOf(), // Does not exist when used as introductory price.
 ) : Parcelable {
 
     fun toJsonString(): String {
-        return json.toJsonString(this)
+        return Json.encodeToString(this)
     }
 
     val isIntro: Boolean

@@ -1,20 +1,20 @@
 package com.ft.ftchinese.model.ftcsubs
 
-import com.beust.klaxon.Json
 import com.ft.ftchinese.model.enums.AddOnSource
 import com.ft.ftchinese.model.enums.OrderKind
 import com.ft.ftchinese.model.enums.PurchaseAction
 import com.ft.ftchinese.model.invoice.Invoice
 import com.ft.ftchinese.model.reader.Membership
+import kotlinx.serialization.Serializable
 import org.threeten.bp.ZoneId
 import org.threeten.bp.ZonedDateTime
 
 // Purchase action: buy|renew|winback
+@Serializable
 data class ConfirmationResult (
     val order: Order,
     val membership: Membership, // Latest membership
     val snapshot: Membership, // Prior membership
-    @Json(ignored = true)
     val invoices: Invoices,
     val action: PurchaseAction
 )

@@ -3,10 +3,12 @@ package com.ft.ftchinese.model.ftcsubs
 import android.os.Parcelable
 import com.ft.ftchinese.model.enums.Cycle
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import org.threeten.bp.LocalDate
 import org.threeten.bp.Period
 
 @Parcelize
+@Serializable
 data class YearMonthDay(
     val years: Int = 0,
     val months: Int = 0,

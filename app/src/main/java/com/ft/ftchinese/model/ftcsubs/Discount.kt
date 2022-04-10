@@ -1,23 +1,23 @@
 package com.ft.ftchinese.model.ftcsubs
 
 import android.os.Parcelable
+import com.ft.ftchinese.model.enums.DiscountStatus
 import com.ft.ftchinese.model.enums.OfferKind
-import com.ft.ftchinese.model.fetch.KDateTime
-import com.ft.ftchinese.model.fetch.KDiscountStatus
-import com.ft.ftchinese.model.fetch.KOfferKind
+import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import org.threeten.bp.ZonedDateTime
 
 @Parcelize
+@Serializable
 data class Discount(
     val id: String = "",
     val currency: String = "cny",
     val description: String? = null,
-    @KOfferKind
     val kind: OfferKind? = null,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val startUtc: ZonedDateTime? = null,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val endUtc: ZonedDateTime? = null,
     val overridePeriod: YearMonthDay = YearMonthDay(), // Override the period specified in price if present.
     val priceOff: Double? = null,
@@ -25,7 +25,6 @@ data class Discount(
     val priceId: String = "",
     val recurring: Boolean = false,
     val liveMode: Boolean = false,
-    @KDiscountStatus
     val status: DiscountStatus? = null,
 ) : Parcelable {
 
