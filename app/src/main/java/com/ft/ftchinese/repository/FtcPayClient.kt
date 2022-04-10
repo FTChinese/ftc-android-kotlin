@@ -1,11 +1,7 @@
 package com.ft.ftchinese.repository
 
-import android.util.Log
-import com.ft.ftchinese.model.PagedList
 import com.ft.ftchinese.model.fetch.Fetch
-import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
-import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.model.ftcsubs.VerificationResult
 import com.ft.ftchinese.model.ftcsubs.WxPayIntent
 import com.ft.ftchinese.model.reader.Account
@@ -14,36 +10,13 @@ import com.ft.ftchinese.model.request.OrderParams
 
 object FtcPayClient {
 
-    private const val TAG = "FtcPayClient"
-
-    fun listOrders(account: Account): PagedList<Order>? {
-
-        val resp = Fetch()
-            .get(Endpoint.subsBase(account.isTest) + "/orders")
-            .addHeaders(account.headers())
-            .noCache()
-            .endApiText()
-
-        Log.i(TAG, "$resp")
-
-        return if (resp.body != null) {
-            try {
-                json.parse<PagedList<Order>>(resp.body)
-            } catch (e: Exception) {
-                Log.i(TAG, "Error parsing list ${e.message}")
-                null
-            }
-        } else {
-            null
-        }
-    }
-
     fun verifyOrder(account: Account, orderId: String):  VerificationResult? {
         return Fetch()
             .post(Endpoint.subsBase(account.isTest) + "/orders/$orderId/verify-payment")
             .noCache()
-            .sendJson()
-            .endApiJson<VerificationResult>()
+            .setApiKey()
+            .send()
+            .endJson<VerificationResult>()
             .body
     }
 
@@ -55,9 +28,10 @@ object FtcPayClient {
             .setTimeout(30)
             .noCache()
             .setClient()
+            .setApiKey()
             .setAppId() // Deprecated
-            .sendJson(json.toJsonString(params))
-            .endApiJson<WxPayIntent>()
+            .sendJson(params)
+            .endJson<WxPayIntent>()
             .body
     }
 
@@ -68,9 +42,10 @@ object FtcPayClient {
             .setTimeout(30)
             .addHeaders(account.headers())
             .noCache()
+            .setApiKey()
             .setClient()
-            .sendJson(json.toJsonString(params))
-            .endApiJson<AliPayIntent>()
+            .sendJson(params)
+            .endJson<AliPayIntent>()
             .body
     }
 
@@ -80,8 +55,9 @@ object FtcPayClient {
            .post(Endpoint.subsBase(account.isTest) + "/membership/addons")
            .addHeaders(account.headers())
            .noCache()
-           .sendJson()
-           .endApiJson<Membership>()
+           .setApiKey()
+           .send()
+           .endJson<Membership>()
            .body
     }
 }

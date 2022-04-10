@@ -15,7 +15,7 @@ object ConversionClient {
             .post(Endpoint.conversionTracking)
             .addParams(params.toMap())
             .addHeader("User-Agent", ua.toString())
-            .sendJson()
+            .send()
             .setTimeout(timeout)
             .endJson()
     }

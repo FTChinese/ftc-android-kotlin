@@ -1,11 +1,9 @@
 package com.ft.ftchinese.repository
 
 import android.util.Log
-import com.beust.klaxon.Klaxon
-import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.APIError
+import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.reader.*
-import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.request.*
 
 object AuthClient {
@@ -16,7 +14,8 @@ object AuthClient {
                 .get(Endpoint.emailExists)
                 .addQuery("v", email)
                 .noCache()
-                .endApiText()
+                .setApiKey()
+                .endText()
 
             // Code below 400
             if (resp.code != 204) {
@@ -39,9 +38,10 @@ object AuthClient {
         return Fetch()
             .post(Endpoint.emailLogin)
             .noCache()
+            .setApiKey()
             .setClient()
-            .sendJson(json.toJsonString(c))
-            .endApiJson<Account>()
+            .sendJson(c)
+            .endJson<Account>()
             .body
     }
 
@@ -49,9 +49,10 @@ object AuthClient {
         return Fetch()
             .post(Endpoint.emailSignUp)
             .noCache()
+            .setApiKey()
             .setClient()
-            .sendJson(json.toJsonString(c))
-            .endApiJson<Account>()
+            .sendJson(c)
+            .endJson<Account>()
             .body
     }
 
@@ -59,9 +60,10 @@ object AuthClient {
         val resp = Fetch()
             .put(Endpoint.mobileVerificationCode)
             .noCache()
+            .setApiKey()
             .setClient()
-            .sendJson(json.toJsonString(params))
-            .endApiText()
+            .sendJson(params)
+            .endText()
 
         return resp.code == 204
     }
@@ -70,9 +72,10 @@ object AuthClient {
         return Fetch()
             .post(Endpoint.mobileVerificationCode)
             .noCache()
+            .setApiKey()
             .setClient()
-            .sendJson(json.toJsonString(params))
-            .endApiJson<UserFound>()
+            .sendJson(params)
+            .endJson<UserFound>()
             .body
     }
 
@@ -80,9 +83,10 @@ object AuthClient {
         return Fetch()
             .post(Endpoint.mobileInitialLink)
             .noCache()
+            .setApiKey()
             .setClient()
-            .sendJson(json.toJsonString(params))
-            .endApiJson<Account>()
+            .sendJson(params)
+            .endJson<Account>()
             .body
     }
 
@@ -93,9 +97,10 @@ object AuthClient {
         return Fetch()
             .post(Endpoint.mobileSignUp)
             .noCache()
+            .setApiKey()
             .setClient()
-            .sendJson(json.toJsonString(params))
-            .endApiJson<Account>()
+            .sendJson(params)
+            .endJson<Account>()
             .body
     }
 
@@ -105,8 +110,9 @@ object AuthClient {
             .setTimeout(30)
             .setClient()
             .noCache()
-            .sendJson(json.toJsonString(params))
-            .endApiText()
+            .setApiKey()
+            .sendJson(params)
+            .endText()
 
         return resp.code == 204
     }
@@ -115,7 +121,8 @@ object AuthClient {
         return Fetch()
             .get("${Endpoint.passwordResetCodes}?email=${v.email}&code=${v.code}")
             .noCache()
-            .endApiJson<PwResetBearer>()
+            .setApiKey()
+            .endJson<PwResetBearer>()
             .body
     }
 
@@ -124,8 +131,9 @@ object AuthClient {
             .post(Endpoint.passwordReset)
             .setClient()
             .noCache()
-            .sendJson(json.toJsonString(params))
-            .endApiText()
+            .setApiKey()
+            .sendJson(params)
+            .endText()
 
         return resp.code == 204
     }
@@ -142,9 +150,10 @@ object AuthClient {
             .setClient()
             .setAppId()
             .noCache()
+            .setApiKey()
             .setTimeout(30)
-            .sendJson(json.toJsonString(params))
-            .endApiJson<WxSession>()
+            .sendJson(params)
+            .endJson<WxSession>()
             .body
     }
 
@@ -152,7 +161,7 @@ object AuthClient {
         Log.i("AuthClient", "Engagement length of ${dur.userId}: ${dur.startUnix} - ${dur.endUnix}")
 
         return Fetch().post("${dur.refer}/engagement.php")
-            .sendJson(Klaxon().toJsonString(dur))
+            .sendJson(dur)
             .endText()
             .body
     }

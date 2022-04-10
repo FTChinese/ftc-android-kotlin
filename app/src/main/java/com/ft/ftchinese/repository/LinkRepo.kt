@@ -3,7 +3,6 @@ package com.ft.ftchinese.repository
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
-import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.request.WxLinkParams
 import com.ft.ftchinese.model.request.WxUnlinkParams
 
@@ -16,8 +15,9 @@ object LinkRepo {
             .post(Endpoint.wxLink)
             .setUnionId(unionId)
             .noCache()
-            .sendJson(json.toJsonString(params))
-            .endApiText()
+            .setApiKey()
+            .sendJson(params)
+            .endText()
             .code == 204
     }
 
@@ -25,23 +25,25 @@ object LinkRepo {
      * Wechat user creates a new email account.
      */
     fun signUp(c: Credentials, unionId: String): Account? {
-        return Fetch().post(Endpoint.wxSignUp)
+        return Fetch()
+            .post(Endpoint.wxSignUp)
             .setUnionId(unionId)
             .setClient()
             .noCache()
-            .sendJson(json.toJsonString(c))
-            .endApiJson<Account>()
+            .setApiKey()
+            .sendJson(c)
+            .endJson<Account>()
             .body
     }
 
     fun unlink(unionId: String, params: WxUnlinkParams): Boolean {
-
         return Fetch()
             .post(Endpoint.wxUnlink)
-            .setUnionId(unionId)
-            .sendJson(json.toJsonString(params))
             .noCache()
-            .endApiText()
+            .setApiKey()
+            .setUnionId(unionId)
+            .sendJson(params)
+            .endText()
             .code == 204
     }
 }

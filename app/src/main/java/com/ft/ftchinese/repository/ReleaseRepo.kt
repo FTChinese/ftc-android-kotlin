@@ -9,15 +9,17 @@ object ReleaseRepo {
     fun getRelease(versionName: String): HttpResp<AppRelease> {
         return Fetch()
             .setAppId()
+            .setApiKey()
             .get("${Endpoint.releaseOf}/${normalizeVersionName(versionName)}")
-            .endApiJson(withRaw = true)
+            .endJson(withRaw = true)
     }
 
     fun getLatest(): HttpResp<AppRelease> {
         return Fetch()
             .setAppId()
+            .setApiKey()
             .get(Endpoint.latestRelease)
-            .endApiJson(withRaw = true)
+            .endJson(withRaw = true)
     }
 
     private fun normalizeVersionName(versionName: String): String {

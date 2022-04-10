@@ -1,9 +1,7 @@
 package com.ft.ftchinese.repository
 
-import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.fetch.HttpResp
-import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.CustomerParams
 import com.ft.ftchinese.model.stripesubs.*
@@ -19,7 +17,8 @@ object StripeClient {
         return Fetch()
             .get(Endpoint.stripePrices)
             .noCache()
-            .endApiArray(withRaw = true)
+            .setApiKey()
+            .endJson(withRaw = true)
     }
 
     fun createCustomer(account: Account): HttpResp<StripeCustomer> {
@@ -27,8 +26,9 @@ object StripeClient {
             .post(Endpoint.stripeCustomers)
             .setUserId(account.id)
             .noCache()
-            .sendJson()
-            .endApiJson()
+            .setApiKey()
+            .send()
+            .endJson()
     }
 
     fun retrieveCustomer(account: Account): HttpResp<StripeCustomer> {
@@ -36,7 +36,8 @@ object StripeClient {
             .get("${Endpoint.stripeCustomers}/${account.stripeId}")
             .setUserId(account.id)
             .noCache()
-            .endApiJson()
+            .setApiKey()
+            .endJson()
     }
 
     fun setDefaultPaymentMethod(account: Account, pmId: String): HttpResp<StripeCustomer> {
@@ -44,10 +45,11 @@ object StripeClient {
             .post("${Endpoint.stripeCustomers}/${account.stripeId}/default-payment-method")
             .setUserId(account.id)
             .noCache()
-            .sendJson(Klaxon().toJsonString(mapOf(
+            .setApiKey()
+            .sendJson(mapOf(
                 "defaultPaymentMethod" to pmId
-            )))
-            .endApiJson()
+            ))
+            .endJson()
     }
 
     fun createEphemeralKey(account: Account, apiVersion: String): String? {
@@ -60,8 +62,9 @@ object StripeClient {
             .setUserId(account.id)
             .addQuery("api_version", apiVersion)
             .noCache()
-            .sendJson()
-            .endApiText()
+            .setApiKey()
+            .send()
+            .endText()
             .body
     }
 
@@ -69,8 +72,9 @@ object StripeClient {
         return Fetch()
             .post("${Endpoint.stripePaymentSheet}/setup")
             .noCache()
-            .sendJson(json.toJsonString(CustomerParams(customer = customerId)))
-            .endApiJson()
+            .setApiKey()
+            .sendJson(CustomerParams(customer = customerId))
+            .endJson()
     }
 
     private fun subsDefaultPaymentMethod(subsId: String, ftcId: String): HttpResp<StripePaymentMethod> {
@@ -78,7 +82,8 @@ object StripeClient {
             .get("${Endpoint.stripeSubs}/${subsId}/default-payment-method")
             .setUserId(ftcId)
             .noCache()
-            .endApiJson()
+            .setApiKey()
+            .endJson()
     }
 
     private fun cusDefaultPaymentMethod(cusId: String, ftcId: String): HttpResp<StripePaymentMethod> {
@@ -86,7 +91,8 @@ object StripeClient {
             .get("${Endpoint.stripeCustomers}/${cusId}/default-payment-method")
             .setUserId(ftcId)
             .noCache()
-            .endApiJson()
+            .setApiKey()
+            .endJson()
     }
 
     fun loadDefaultPaymentMethod(cusId: String, subsId: String?, ftcId: String): HttpResp<StripePaymentMethod> {
@@ -109,8 +115,9 @@ object StripeClient {
             .post(Endpoint.stripeSubs)
             .setUserId(account.id)
             .noCache()
-            .sendJson(params.toJsonString())
-            .endApiJson<StripeSubsResult>()
+            .setApiKey()
+            .sendJson(params)
+            .endJson<StripeSubsResult>()
             .body
     }
 
@@ -123,8 +130,9 @@ object StripeClient {
             .post("${Endpoint.stripeSubs}/$subsId/refresh")
             .setUserId(account.id)
             .noCache()
-            .sendJson()
-            .endApiJson<StripeSubsResult>()
+            .setApiKey()
+            .send()
+            .endJson<StripeSubsResult>()
             .body
     }
 
@@ -136,8 +144,9 @@ object StripeClient {
             .post("${Endpoint.stripeSubs}/$subsId")
             .setUserId(account.id)
             .noCache()
-            .sendJson(json.toJsonString(params))
-            .endApiJson<StripeSubsResult>()
+            .setApiKey()
+            .sendJson(params)
+            .endJson<StripeSubsResult>()
             .body
     }
 
@@ -148,8 +157,9 @@ object StripeClient {
             .post("${Endpoint.stripeSubs}/$subsId/cancel")
             .setUserId(account.id)
             .noCache()
-            .sendJson()
-            .endApiJson<StripeSubsResult>()
+            .setApiKey()
+            .send()
+            .endJson<StripeSubsResult>()
             .body
     }
 
@@ -160,8 +170,9 @@ object StripeClient {
             .post("${Endpoint.stripeSubs}/$subsId/reactivate")
             .setUserId(account.id)
             .noCache()
-            .sendJson()
-            .endApiJson<StripeSubsResult>()
+            .setApiKey()
+            .send()
+            .endJson<StripeSubsResult>()
             .body
     }
 }

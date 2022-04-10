@@ -1,18 +1,24 @@
 package com.ft.ftchinese.repository
 
-import com.beust.klaxon.Klaxon
+import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.fetch.Fetch
-import com.ft.ftchinese.model.fetch.json
-import com.ft.ftchinese.model.reader.*
-import com.ft.ftchinese.model.request.*
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.Address
+import com.ft.ftchinese.model.reader.BaseAccount
+import com.ft.ftchinese.model.reader.WxSession
+import com.ft.ftchinese.model.request.EmailPasswordParams
+import com.ft.ftchinese.model.request.MobileFormParams
+import com.ft.ftchinese.model.request.PasswordUpdateParams
+import com.ft.ftchinese.model.request.SMSCodeParams
 
 object AccountRepo {
     fun loadFtcAccount(ftcId: String): Account? {
         return Fetch()
             .get(Endpoint.ftcAccount)
             .noCache()
+            .setApiKey()
             .setUserId(ftcId)
-            .endApiJson<Account>()
+            .endJson<Account>()
             .body
     }
 
@@ -29,7 +35,8 @@ object AccountRepo {
             .get(Endpoint.wxAccount)
             .setUnionId(unionId)
             .noCache()
-            .endApiJson<Account>()
+            .setApiKey()
+            .endJson<Account>()
             .body
     }
 
@@ -50,18 +57,20 @@ object AccountRepo {
     fun updateEmail(ftcId: String, email: String): BaseAccount? {
         return Fetch().patch(Endpoint.email)
             .noCache()
+            .setApiKey()
             .setUserId(ftcId)
-            .sendJson(json.toJsonString(mapOf("email" to email)))
-            .endApiJson<BaseAccount>()
+            .sendJson(mapOf("email" to email))
+            .endJson<BaseAccount>()
             .body
     }
 
     fun updateUserName(ftcId: String, name: String): BaseAccount? {
         return Fetch().patch(Endpoint.userName)
             .noCache()
+            .setApiKey()
             .setUserId(ftcId)
-            .sendJson(json.toJsonString(mapOf("userName" to name)))
-            .endApiJson<BaseAccount>()
+            .sendJson(mapOf("userName" to name))
+            .endJson<BaseAccount>()
             .body
     }
 
@@ -69,9 +78,10 @@ object AccountRepo {
         val resp =  Fetch()
             .patch(Endpoint.passwordUpdate)
             .noCache()
+            .setApiKey()
             .setUserId(ftcId)
-            .sendJson(json.toJsonString(params))
-            .endApiText()
+            .sendJson(params)
+            .endText()
 
         return resp.code == 204
     }
@@ -81,10 +91,11 @@ object AccountRepo {
             .post(Endpoint.emailVrfLetter)
             .setTimeout(30)
             .noCache()
+            .setApiKey()
             .setClient()
             .setUserId(ftcId)
-            .sendJson()
-            .endApiText()
+            .send()
+            .endText()
 
         return resp.code == 204
     }
@@ -93,10 +104,11 @@ object AccountRepo {
         val resp = Fetch()
             .put("${Endpoint.subsBase(account.isTest)}/account/mobile/verification")
             .noCache()
+            .setApiKey()
             .setClient()
             .setUserId(account.id)
-            .sendJson(json.toJsonString(params))
-            .endApiText()
+            .sendJson(params)
+            .endText()
 
         return resp.code == 204
     }
@@ -105,10 +117,11 @@ object AccountRepo {
         return Fetch()
             .patch("${Endpoint.subsBase(account.isTest)}/account/mobile")
             .noCache()
+            .setApiKey()
             .setClient()
             .setUserId(account.id)
-            .sendJson(json.toJsonString(params))
-            .endApiJson<BaseAccount>()
+            .sendJson(params)
+            .endJson<BaseAccount>()
             .body
     }
 
@@ -119,12 +132,13 @@ object AccountRepo {
         val resp = Fetch()
             .post(Endpoint.wxRefresh)
             .noCache()
+            .setApiKey()
             .setAppId()
             .setTimeout(30)
-            .sendJson(Klaxon().toJsonString(mapOf(
+            .sendJson(mapOf(
                 "sessionId" to wxSession.sessionId
-            )))
-            .endApiText()
+            ))
+            .endText()
 
         // The server API might change and return data in the future.
         return resp.code == 204 || resp.code == 200
@@ -141,7 +155,8 @@ object AccountRepo {
            .get(Endpoint.address)
            .setUserId(ftcId)
            .noCache()
-           .endApiJson<Address>()
+           .setApiKey()
+           .endJson<Address>()
            .body
     }
 
@@ -150,8 +165,9 @@ object AccountRepo {
             .patch(Endpoint.address)
             .setUserId(ftcId)
             .noCache()
-            .sendJson(json.toJsonString(address))
-            .endApiText()
+            .setApiKey()
+            .sendJson(address)
+            .endText()
 
         return resp.code == 204
     }
@@ -160,9 +176,10 @@ object AccountRepo {
         val resp =  Fetch()
             .delete(Endpoint.ftcAccount)
             .noCache()
+            .setApiKey()
             .setUserId(ftcId)
-            .sendJson(json.toJsonString(params))
-            .endApiText()
+            .sendJson(params)
+            .endText()
 
         return resp.code == 204
     }

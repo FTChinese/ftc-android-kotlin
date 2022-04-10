@@ -12,7 +12,8 @@ object AppleClient {
         return Fetch()
             .patch(Endpoint.refreshIAP(account.isTest, origTxId))
             .noCache()
-            .endApiJson<IAPSubsResult>()
+            .setApiKey()
+            .endJson<IAPSubsResult>()
             .body
     }
 }
