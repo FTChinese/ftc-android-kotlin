@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentUnlinkAnchorBinding
 import com.ft.ftchinese.model.enums.PayMethod
-import com.ft.ftchinese.model.reader.UnlinkAnchor
+import com.ft.ftchinese.model.enums.UnlinkAnchor
 import com.ft.ftchinese.store.AccountCache
 
 class UnlinkAnchorFragment : Fragment() {

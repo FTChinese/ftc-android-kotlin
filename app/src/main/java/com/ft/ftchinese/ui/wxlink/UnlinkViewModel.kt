@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.UnlinkAnchor
+import com.ft.ftchinese.model.enums.UnlinkAnchor
 import com.ft.ftchinese.model.request.WxUnlinkParams
 import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.ui.base.BaseViewModel
