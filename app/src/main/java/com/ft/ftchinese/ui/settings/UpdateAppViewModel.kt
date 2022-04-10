@@ -9,13 +9,14 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.isConnected
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
 
 class UpdateAppViewModel(application: Application) : AndroidViewModel(application) {
     private val cache = FileCache(application)
@@ -37,7 +38,7 @@ class UpdateAppViewModel(application: Application) : AndroidViewModel(applicatio
                     if (text == null) {
                         null
                     } else {
-                        json.parse<AppRelease>(text)
+                        marshaller.decodeFromString<AppRelease>(text)
                     }
                 }
 

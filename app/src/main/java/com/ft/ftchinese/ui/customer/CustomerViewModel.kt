@@ -5,20 +5,18 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.FetchUi
-import com.ft.ftchinese.model.fetch.APIError
-import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.fetch.*
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.stripesubs.StripeCustomer
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.stripe.android.model.PaymentMethod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
 
 class CustomerViewModel(
     private val fileCache: FileCache
@@ -140,7 +138,7 @@ class CustomerViewModel(
                     null
                 } else {
                     try {
-                        json.parse<StripeCustomer>(data)
+                        marshaller.decodeFromString<StripeCustomer>(data)
                     } catch (e: Exception) {
                         null
                     }

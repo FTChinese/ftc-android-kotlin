@@ -21,8 +21,9 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentChannelBinding
 import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
@@ -38,6 +39,7 @@ import com.ft.ftchinese.ui.webpage.WVViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
 import org.jetbrains.anko.support.v4.toast
 import java.util.*
 import kotlin.properties.Delegates
@@ -291,7 +293,7 @@ class ChannelFragment : ScopedFragment(),
 
         Log.i(TAG, "JS onPageLoaded")
 
-        val channelContent = json.parse<ChannelContent>(message) ?: return
+        val channelContent = marshaller.decodeFromString<ChannelContent>(message) ?: return
 
         // Save all teasers.
         articleList = channelContent.sections[0].lists[0].items
@@ -332,7 +334,7 @@ class ChannelFragment : ScopedFragment(),
         Log.i(TAG, "Loaded sponsors: $message")
 
         try {
-            SponsorManager.sponsors = json.parseArray(message) ?: return
+            SponsorManager.sponsors = marshaller.decodeFromString(message) ?: return
         } catch (e: Exception) {
             e.message?.let { msg -> Log.i(TAG, msg) }
         }

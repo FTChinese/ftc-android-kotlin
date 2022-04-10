@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.Paywall
@@ -26,6 +26,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
 
 private const val TAG = "PaywallViewModel"
 
@@ -90,7 +91,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
 
             if (!data.isNullOrBlank()) {
                 try {
-                    json.parse<Paywall>(data)
+                    marshaller.decodeFromString<Paywall>(data)
                 } catch (e: Exception) {
                     e.message?.let { Log.i(TAG, it) }
                     null
@@ -174,7 +175,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
                 null
             } else {
                 try {
-                    json.parseArray(data)
+                    marshaller.decodeFromString(data)
                 } catch (e: Exception) {
                     e.message?.let { Log.i(TAG, it) }
 

@@ -14,12 +14,13 @@ import android.webkit.WebView
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.model.content.Following
 import com.ft.ftchinese.model.content.FollowingManager
-import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.share.ScreenshotViewModel
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 private const val TAG =  "WVBaseFragment"
 
@@ -110,7 +111,7 @@ abstract class WVBaseFragment : ScopedFragment() {
     fun follow(message: String) {
         Log.i(TAG, "Clicked follow: $message")
         try {
-            val f = json.parse<Following>(message) ?: return
+            val f = Json.decodeFromString<Following>(message) ?: return
             val isSubscribed = followingManager.save(f)
 
             if (isSubscribed) {
