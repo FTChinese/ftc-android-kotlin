@@ -1,8 +1,9 @@
-package com.ft.ftchinese.model.ftcsubs
+package com.ft.ftchinese.model.paywall
 
-import com.ft.ftchinese.model.fetch.json
 import com.ft.ftchinese.model.paywall.PaywallProduct
-import org.junit.Assert.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 
 private const val products = """
@@ -79,7 +80,7 @@ private const val products = """
 class ProductTest {
     @Test
     fun parseProducts() {
-        val products = json.parseArray<PaywallProduct>(products)
+        val products = Json.decodeFromString<PaywallProduct>(products)
 
         assertNotNull(products)
     }

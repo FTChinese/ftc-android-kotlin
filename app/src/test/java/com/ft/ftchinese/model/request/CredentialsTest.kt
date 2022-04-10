@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model.request
 
-import com.ft.ftchinese.model.fetch.json
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.junit.Test
 
 class CredentialsTest {
@@ -12,7 +13,7 @@ class CredentialsTest {
 
     @Test
     fun stringify() {
-        val s = json.toJsonString(c)
+        val s = Json.encodeToString(c)
         println(s)
     }
 }

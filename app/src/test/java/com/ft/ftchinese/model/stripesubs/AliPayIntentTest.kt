@@ -1,7 +1,8 @@
 package com.ft.ftchinese.model.stripesubs
 
 import com.ft.ftchinese.model.ftcsubs.AliPayIntent
-import com.ft.ftchinese.model.fetch.json
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.junit.Test
 
 private val orderData = """
@@ -26,7 +27,7 @@ private val orderData = """
 
 class AliPayIntentTest {
     @Test fun parseOrder() {
-        val result = json.parse<AliPayIntent>(orderData)
+        val result = Json.decodeFromString<AliPayIntent>(orderData)
 
         println(result)
     }

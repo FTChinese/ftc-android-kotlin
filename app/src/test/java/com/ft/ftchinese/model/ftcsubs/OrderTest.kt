@@ -1,36 +1,32 @@
 package com.ft.ftchinese.model.ftcsubs
 
-import com.ft.ftchinese.model.fetch.json
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.junit.Test
 
 class OrderTest {
-    val rawOrder = """
+    private val data = """
     {
         "id": "FT05307ECBA3858FC3",
         "ftcId": "c07f79dc-664b-44ca-87ea-42958e7991b0",
         "unionId": null,
-        "planId": "plan_ICMPPM0UXcpZ",
-        "discountId": null,
-        "price": 258,
         "tier": "standard",
-        "cycle": "year",
-        "amount": 0.01,
-        "currency": "cny",
-        "cycleCount": 1,
-        "extraDays": 1,
-        "usageType": "renew",
-        "payMethod": "alipay",
-        "totalBalance": null,
-        "createdAt": "2020-11-09T03:12:25Z",
-        "confirmedAt": null,
+        "kind": "create",
+        "originalPrice": 298,
+        "payableAmount": 298,
+        "payMethod": "alipay"
+        "yearsCount": 1,
+        "monthsCount": 0,
+        "daysCount": 0,
         "startDate": null,
         "endDate": null,
-        "live": false
+        "createdAt": "2020-11-09T03:12:25Z",
+        "confirmedAt": null
     }
     """.trimIndent()
     @Test
     fun parseOrder() {
-        val order = json.parse<Order>(rawOrder)
+        val order = Json.decodeFromString<Order>(data)
         print(order)
     }
 }

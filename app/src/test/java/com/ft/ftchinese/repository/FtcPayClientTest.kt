@@ -1,7 +1,7 @@
 package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.LoginMethod
+import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
 import org.junit.Assert.assertNotNull

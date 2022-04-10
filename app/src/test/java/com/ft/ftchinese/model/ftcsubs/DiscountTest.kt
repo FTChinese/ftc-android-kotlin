@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model.ftcsubs
 
-import com.ft.ftchinese.model.fetch.json
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.junit.Test
 
 
@@ -17,7 +18,7 @@ class DiscountTest {
     """.trimIndent()
     @Test
     fun parseJSON() {
-        val d = json.parse<Discount>(data)
+        val d = Json.decodeFromString<Discount>(data)
         println(d)
     }
 }

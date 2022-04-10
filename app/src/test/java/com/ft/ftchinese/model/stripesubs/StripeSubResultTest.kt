@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model.stripesubs
 
-import com.ft.ftchinese.model.fetch.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.junit.Test
 
 class StripeSubResultTest {
@@ -30,7 +31,7 @@ class StripeSubResultTest {
     """.trimIndent()
     @Test
     fun parseJONS() {
-        val result = json.parse<Subscription>(data)
+        val result = Json.decodeFromString<Subscription>(data)
 
         println(result)
     }

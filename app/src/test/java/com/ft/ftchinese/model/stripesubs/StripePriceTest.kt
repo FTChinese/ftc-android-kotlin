@@ -1,4 +1,4 @@
-package com.ft.ftchinese.model.ftcsubs
+package com.ft.ftchinese.model.stripesubs
 
 class StripePriceTest {
     private val data = """

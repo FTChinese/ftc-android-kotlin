@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.content
 
-import com.ft.ftchinese.model.fetch.json
-import org.junit.Assert.*
+import com.ft.ftchinese.model.fetch.marshaller
+import kotlinx.serialization.decodeFromString
 import org.junit.Test
 
 class StoryTest {
@@ -207,7 +207,7 @@ class StoryTest {
     """.trimIndent()
     @Test
     fun parseStory() {
-        val story = json.parse<Story>(data)
+        val story = marshaller.decodeFromString<Story>(data)
 
         println(story)
     }

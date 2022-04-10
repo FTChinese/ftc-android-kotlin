@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.paywall
 
-import com.ft.ftchinese.model.fetch.json
-import org.junit.Assert.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.junit.Test
 
 class PaywallTest {
@@ -224,7 +224,7 @@ class PaywallTest {
     """.trimIndent()
     @Test fun parsePaywallJSON() {
         try {
-            val pw = json.parse<Paywall>(data)
+            val pw = Json.decodeFromString<Paywall>(data)
             println(pw)
         } catch (e: Exception) {
             println(e)

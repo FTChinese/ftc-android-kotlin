@@ -1,6 +1,5 @@
 package com.ft.ftchinese.model.stripesubs
 
-import com.ft.ftchinese.model.fetch.json
 import org.junit.Test
 
 private val data = """

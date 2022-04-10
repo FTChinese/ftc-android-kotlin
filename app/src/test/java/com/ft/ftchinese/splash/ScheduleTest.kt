@@ -1,10 +1,11 @@
 package com.ft.ftchinese.splash
 
 import android.net.Uri
-import com.beust.klaxon.Klaxon
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.splash.Schedule
 import com.ft.ftchinese.model.splash.ScreenAd
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.junit.Test
 
 import org.threeten.bp.LocalDate
@@ -75,13 +76,9 @@ class ScheduleTest {
 }""".trimIndent()
 
     @Test fun parse() {
-        val schedule = Klaxon().parse<Schedule>(data)
+        val schedule = Json.decodeFromString<Schedule>(data)
 
-        println(schedule?.meta)
-
-        if (schedule == null) {
-            return
-        }
+        println(schedule.meta)
 
         for (item in schedule.sections) {
             println(item)
@@ -90,11 +87,11 @@ class ScheduleTest {
 
     @Test
     fun findToday() {
-        val schedule = Klaxon().parse<Schedule>(data)
+        val schedule = Json.decodeFromString<Schedule>(data)
 
-        val todayAds = schedule?.findToday(Tier.STANDARD)
+        val todayAds = schedule.findToday(Tier.STANDARD)
 
-        println(todayAds?.pickRandom())
+        println(todayAds.pickRandom())
     }
 
     @Test fun parseDate() {
@@ -133,7 +130,7 @@ class ScheduleTest {
       "note": ""
 }""".trimIndent()
 
-        val screenAd = Klaxon().parse<ScreenAd>(adData)
+        val screenAd = Json.decodeFromString<ScreenAd>(adData)
 
         println(screenAd)
     }

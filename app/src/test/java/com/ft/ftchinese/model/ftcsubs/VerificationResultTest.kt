@@ -1,7 +1,8 @@
 package com.ft.ftchinese.model.ftcsubs
 
-import com.ft.ftchinese.model.fetch.json
-import org.junit.Assert.*
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 
 class VerificationResultTest {
@@ -56,7 +57,7 @@ class VerificationResultTest {
 
     @Test
     fun parseJson() {
-        val vrfResult = json.parse<VerificationResult>(data)
+        val vrfResult = Json.decodeFromString<VerificationResult>(data)
 
         assertNotNull(vrfResult)
 
