@@ -1,10 +1,13 @@
 package com.ft.ftchinese.model.content
 
 import android.text.format.DateFormat
-import com.beust.klaxon.Json
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.tracking.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.util.*
 
 data class Bilingual(
@@ -12,76 +15,80 @@ data class Bilingual(
     var en: String?
 )
 
+@Serializable
 data class StoryPic(
     val smallbutton: String,
 )
 
+@Serializable
 data class RelatedStory(
     val id: String,
 
-    @Json(name = "cheadline")
+    @SerialName("cheadline")
     val titleCN: String? = null,
 
-    @Json(name = "eheadline")
+    @SerialName("eheadline")
     val titleEN: String? = null, // This might not exist.
 
-    @Json(name = "last_publish_time")
+    @SerialName("last_publish_time")
     val publishedAt: String? = null
 )
 
+@Serializable
 data class AiAudio(
-    @Json(name = "ai_audio_e")
+    @SerialName("ai_audio_e")
     val english: String = "",
-    @Json(name = "ai_audio_c")
+    @SerialName("ai_audio_c")
     val chinese: String = "",
-    @Json(name = "interactive_id")
+    @SerialName("interactive_id")
     val interactiveId: String = "",
 )
 
+@Serializable
 class Story (
-    @Json(ignored = true)
+    @Transient
     var teaser: Teaser? = null,
 
     val id: String = "",
 
-    @Json(name = "fileupdatetime")
+    @SerialName("fileupdatetime")
     val createdAt: String,
 
     // Used as share's title
-    @Json(name = "cheadline")
+    @SerialName("cheadline")
     val titleCN: String,
 
-    @Json(name = "clongleadbody")
+    @SerialName("clongleadbody")
     val standfirstCN: String,
 
-    @Json(name = "cbody")
+    @SerialName("cbody")
     val bodyCN: String,
 
-    @Json(name = "eheadline")
+    @SerialName("eheadline")
     val titleEN: String = "",
 
-    @Json(name = "elongleadbody")
+    @SerialName("elongleadbody")
     val standfirstEN: String = "",
 
-    @Json(name = "ebody")
+    @SerialName("ebody")
     val bodyEN: String = "",
 
-    @Json(name = "ebyline_description")
+    @SerialName("ebyline_description")
     val orgEN: String = "",
 
-    @Json(name = "cbyline_description")
+    @SerialName("cbyline_description")
     val orgCN: String,
 
-    @Json(name = "cauthor")
+    @SerialName("cauthor")
     val authorCN: String? = "",
 
-    @Json(name = "cbyline_status")
+    @SerialName("cbyline_status")
     val locationCN: String,
 
-    @Json(name = "eauthor")
+    @SerialName("eauthor")
     val authorEN: String = "",
 
-    @Json(name = "ebyline_status")
+    @SerialName("ebyline_status")
     val locationEN: String = "",
 
     val tag: String,
@@ -93,19 +100,19 @@ class Story (
     // 0 - free
     // 1 - standard
     // 2 - premium
-    @Json(name = "accessright")
+    @SerialName("accessright")
     val accessibleBy: String? = null,
 
-    @Json(name = "last_publish_time")
+    @SerialName("last_publish_time")
     val publishedAt: String,
 
-    @Json(name = "story_pic")
+    @SerialName("story_pic")
     val cover: StoryPic,
 
-    @Json(name = "story_audio")
+    @SerialName("story_audio")
     val aiAudios: AiAudio? = null,
 
-    @Json(name = "relative_story")
+    @SerialName("relative_story")
     val relatedStory: List<RelatedStory> = listOf(),
     val whitelist: Int = 0,
 ) {

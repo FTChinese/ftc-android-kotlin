@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model.content
 
 import android.content.Context
+import kotlinx.serialization.Serializable
 import java.net.URLEncoder
 
 private val followingTemplate: Map<String, String> = hashMapOf(
@@ -26,6 +27,7 @@ private val followingTemplate: Map<String, String> = hashMapOf(
  * </map>
  * ```
  */
+@Serializable
 data class Following(
         var type: String, // JS uses this value. Possible values: `tag`, `topic`, `industry`, `area`, `author`, `column`.
         var tag: String, // This is the string shown along with the FOLLOW button
@@ -61,18 +63,18 @@ class FollowingManager private constructor(context: Context) {
         val hs = sharedPreferences.getStringSet(following.type, HashSet<String>())
 
         // Create a new HashSet from the original one.
-        val newHs = HashSet(hs)
+        val newHs = hs?.let { HashSet(it) }
 
         // Use the value of Following#tag as the the value of a HashSet
         var isSubscribed = false
         when (following.action) {
             ACTION_FOLLOW -> {
                 isSubscribed = true
-                newHs.add(following.tag)
+                newHs?.add(following.tag)
             }
 
             ACTION_UNFOLLOW -> {
-                newHs.remove(following.tag)
+                newHs?.remove(following.tag)
             }
         }
 

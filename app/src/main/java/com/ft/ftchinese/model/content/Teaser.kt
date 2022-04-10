@@ -2,10 +2,12 @@ package com.ft.ftchinese.model.content
 
 import android.net.Uri
 import android.os.Parcelable
-import com.beust.klaxon.Json
-import com.ft.ftchinese.model.fetch.KArticleType
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.reader.Permission
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.util.*
 
 /**
@@ -19,6 +21,7 @@ data class ChannelContent(
 )
 
 @Parcelize
+@Serializable
 data class ChannelMeta(
     val title: String,
     val description: String,
@@ -67,23 +70,23 @@ data class ChannelList(
  * This class is also used to record reading history. `standfirst` is used only for this purpose. `subType` and `shortlead` should not be used for this purpose. ArticleStore could only recored `type==story`.
  */
 @Parcelize
+@Serializable
 data class Teaser(
     val id: String, // The only field required to build jsapi url in case type is Story or Premium.
     // For column type, you should start a ChannelActivity instead of  StoryActivity.
-    @KArticleType
     val type: ArticleType, // story | premium | video | photonews | interactive | column
     val subType: String? = null, // speedreading | radio | bilingual to show cn-en content.
 
-    @Json(name = "headline")
+    @SerialName("headline")
     var title: String,
 
-    @Json(name = "eaudio")
+    @SerialName("eaudio")
     val audioUrl: String? = null,
 
-    @Json(name = "shortlead")
+    @SerialName("shortlead")
     val radioUrl: String? = null, // this is a webUrl of mp3 for subType radio.
 
-    @Json(name = "timeStamp")
+    @SerialName("timeStamp")
     val publishedAt: String? = null, // "1536249600"
 
     // "线下活动,企业公告,会员专享"
@@ -92,18 +95,18 @@ data class Teaser(
     // Whether this instance is created by analysing url. In such case, teaser contains only id and type.
     // For type == story | premium, you should update it based on the loaded story;
     // for other types, you could only update the teaser from open graph.
-    @Json(ignored = true)
+    @Transient
     val isCreatedFromUrl: Boolean = false,
 
     // These properties are not parsed from JSON.
     // Copied from ChannelMeta
-    @Json(ignored = true)
+    @Transient
     var hideAd: Boolean = false,
-    @Json(ignored = true)
+    @Transient
     var langVariant: Language? = null,
-    @Json(ignored = true)
+    @Transient
     var channelPerm: Permission? = null,
-    @Json(ignored = true)
+    @Transient
     var channelMeta: ChannelMeta? = null,
 ) : Parcelable {
 
