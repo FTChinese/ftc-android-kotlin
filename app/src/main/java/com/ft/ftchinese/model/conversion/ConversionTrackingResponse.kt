@@ -1,14 +1,16 @@
 package com.ft.ftchinese.model.conversion
 
-import com.beust.klaxon.Json
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.threeten.bp.DateTimeUtils
 import org.threeten.bp.Instant
 import org.threeten.bp.ZonedDateTime
 import java.util.*
 
+@Serializable
 data class AdEvent(
     val timestamp: Double,
-    @Json(name = "campaign_id")
+    @SerialName("campaign_id")
     val campaignId: Long,
 ) {
     // Do not call this method is attributed is false.
@@ -31,8 +33,9 @@ data class AdEvent(
     }
 }
 
+@Serializable
 data class ConversionTrackingResponse(
-    @Json(name = "ad_events")
+    @SerialName("ad_events")
     val adEvents: List<AdEvent>,
     val errors: List<String>,
     val attributed: Boolean
