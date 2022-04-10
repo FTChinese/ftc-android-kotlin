@@ -3,6 +3,8 @@ package com.ft.ftchinese.model.fetch
 import android.util.Log
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.repository.Endpoint
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -23,6 +25,7 @@ class Fetch {
     private var request: Request? = null
     private var call: Call? = null
     private var timeout: Int = 30
+    private var mediaType: MediaType? = contentTypeJson
 
     private var disableCache = false
 
@@ -100,7 +103,7 @@ class Fetch {
     }
 
     // Authorization: Bearer xxxxxxx
-    fun setAccessKey() = apply {
+    fun setApiKey() = apply {
         headers["Authorization"] = "Bearer ${Endpoint.accessToken}"
     }
 
@@ -132,36 +135,43 @@ class Fetch {
         disableCache = true
     }
 
+    fun setContentJson() = apply {
+        mediaType = contentTypeJson
+    }
+
+    fun setContentPlainText() = apply {
+        mediaType = contentTypePlainText
+    }
+
+    fun setContentUrlEncoded() = apply {
+        mediaType = contentTypeUrlEncoded
+    }
+
+    fun setContentOctet() = apply {
+        mediaType = contentTypeOctet
+    }
+
     /**
      * Use this to send json content.
-     * @body - the data to send. If omitted, default to `{}`
-     * to prevent server returns EOF error.
+     * For POST, PUT, PATCH, PATCH methods,
+     * okhttp does not allow nullable body.
+     * @body - the data to send..
      */
-    fun sendJson(body: String = "") = apply {
-        val contentType = "application/json; charset=utf-8".toMediaTypeOrNull()
+    fun send(body: String = "") = apply {
+        reqBody = body.toRequestBody(mediaType)
+    }
 
-        reqBody = body.toRequestBody(contentType)
+    inline fun <reified T> sendJson(body: T) = apply {
+        setContentJson()
+        val str = marshaller.encodeToString(body)
+        send(str)
     }
 
     /**
      * Use this to transmit binary files.
      */
     fun upload(body: ByteArray) = apply {
-        headers["Content-Type"] = "application/octet-stream"
-
-        reqBody = body.toRequestBody(null)
-    }
-
-    /**
-     * For POST, PUT, PATCH, PROPPATCH and REPORT method,
-     * okhttp does not allow nullable body.
-     */
-    fun sendForm(body: String = "") = apply {
-        reqBody = body.toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
-    }
-
-    fun sendText(body: String = "") = apply {
-        reqBody = body.toRequestBody("text/plain".toMediaTypeOrNull())
+        reqBody = body.toRequestBody("application/octet-stream".toMediaTypeOrNull())
     }
 
     /**
@@ -183,36 +193,10 @@ class Fetch {
         )
     }
 
-    inline fun <reified T> endJson(withRaw: Boolean = false): HttpResp<T> {
-        val resp = end()
-
-        /**
-         * @throws IOException when reading body.
-         */
-        return resp.body?.string()?.let {
-            HttpResp(
-                message = resp.message,
-                code = resp.code,
-                body = json.parse<T>(it),
-                raw = if (withRaw) {
-                    it
-                } else {
-                    ""
-                }
-            )
-        } ?: HttpResp(
-            message = resp.message,
-            code = resp.code,
-            body = null,
-            raw = "",
-        )
-    }
-
     /**
      * NOTE: this only parse json object, not array.
      */
-    inline fun <reified T> endApiJson(withRaw: Boolean = false): HttpResp<T> {
-        setAccessKey()
+    inline fun <reified T> endJson(withRaw: Boolean = false): HttpResp<T> {
 
         val resp = end()
 
@@ -225,7 +209,7 @@ class Fetch {
                 HttpResp(
                     message = resp.message,
                     code = resp.code,
-                    body = json.parse<T>(it),
+                    body = marshaller.decodeFromString<T>(it),
                     raw = if (withRaw) {
                         it
                     } else {
@@ -237,58 +221,6 @@ class Fetch {
                 code = resp.code,
                 body = null,
                 raw = "",
-            )
-        }
-
-        throw APIError.from(resp)
-    }
-
-    inline fun <reified T> endApiArray(withRaw: Boolean = false): HttpResp<List<T>> {
-        setAccessKey()
-
-        val resp = end()
-
-        /**
-         * Success response.
-         * @throws IOException when reading body.
-         */
-        if (resp.code in 200 until 400) {
-            return resp.body?.string()?.let {
-                HttpResp(
-                    message = resp.message,
-                    code = resp.code,
-                    body = json.parseArray(it),
-                    raw = if (withRaw) {
-                        it
-                    } else {
-                        ""
-                    }
-                )
-            } ?: HttpResp(
-                message = resp.message,
-                code = resp.code,
-                body = null,
-                raw = "",
-            )
-        }
-
-        throw APIError.from(resp)
-    }
-
-    fun endApiText(): HttpResp<String> {
-        setAccessKey()
-
-        val resp = end()
-
-        /**
-         * Success response.
-         * @throws IOException when reading body.
-         */
-        if (resp.code in 200 until 400) {
-            return HttpResp(
-                message = resp.message,
-                code = resp.code,
-                body = resp.body?.string()
             )
         }
 
@@ -349,6 +281,10 @@ class Fetch {
     companion object {
         const val TAG = "Fetch"
         private val client = OkHttpClient()
+        private val contentTypeJson = "application/json; charset=utf-8".toMediaTypeOrNull()
+        private val contentTypePlainText = "text/plain".toMediaTypeOrNull()
+        private val contentTypeUrlEncoded = "application/x-www-form-urlencoded".toMediaTypeOrNull()
+        private val contentTypeOctet = "application/octet-stream".toMediaTypeOrNull()
     }
 }
 
