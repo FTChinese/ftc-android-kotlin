@@ -8,7 +8,7 @@ import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Permission
 import com.ft.ftchinese.repository.ArticleClient
@@ -19,6 +19,7 @@ import com.ft.ftchinese.ui.base.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
 
 private const val TAG = "ArticleViewModel"
 
@@ -206,7 +207,7 @@ class ArticleViewModel(
             }
 
             if (!data.isNullOrBlank()) {
-                json.parse<Story>(data)?.apply {
+                marshaller.decodeFromString<Story>(data).apply {
                     this.teaser = teaser
                 }
             } else {

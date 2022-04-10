@@ -29,7 +29,7 @@ import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.databinding.ActivityArticleBinding
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.fetch.json
+import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
@@ -48,6 +48,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
+import kotlinx.serialization.decodeFromString
 import org.jetbrains.anko.toast
 import java.util.*
 
@@ -58,7 +59,6 @@ private const val READ_EXTERNAL_STORAGE_REQUEST = 0x1045
  * NOTE: after trial and error, as of Android Studio RC1, data binding class cannot be
  * properly generated for CoordinatorLayout.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class ArticleActivity : ScopedAppActivity(),
     SwipeRefreshLayout.OnRefreshListener {
 
@@ -255,7 +255,7 @@ class ArticleActivity : ScopedAppActivity(),
             }
 
             val og = try {
-                json.parse<OpenGraphMeta>(it)
+                marshaller.decodeFromString<OpenGraphMeta>(it)
             } catch (e: Exception) {
                 null
             } ?: return@observe
@@ -525,7 +525,7 @@ class ArticleActivity : ScopedAppActivity(),
 
         menuInflater.inflate(R.menu.article_top_menu, menu)
 
-        menu?.findItem(R.id.menu_audio)?.isVisible = showAudioIcon
+        menu.findItem(R.id.menu_audio)?.isVisible = showAudioIcon
 
         return super.onCreateOptionsMenu(menu)
     }
