@@ -1,19 +1,17 @@
 package com.ft.ftchinese.ui.login
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentConsentPrivacyBinding
 import com.ft.ftchinese.model.legal.legalPages
 import com.ft.ftchinese.ui.webpage.WebpageActivity
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
-@ExperimentalCoroutinesApi
 class ConsentPrivacyFragment : Fragment() {
 
     lateinit var binding: FragmentConsentPrivacyBinding

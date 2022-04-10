@@ -28,7 +28,6 @@ import org.jetbrains.anko.toast
  * 1. Wx-only user tries to link to an existing email account
  * 2. Email user wants to link to wechat.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class LinkPreviewFragment(
     private val params: WxEmailLink
 ) : ScopedBottomSheetDialogFragment() {
