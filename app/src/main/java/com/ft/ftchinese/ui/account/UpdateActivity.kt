@@ -23,7 +23,6 @@ import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.account.name.NameViewModel
 import com.ft.ftchinese.ui.account.name.UpdateNameFragment
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class UpdateActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager

@@ -25,7 +25,6 @@ import org.jetbrains.anko.support.v4.toast
 /**
  * Contained both by [AccountActivity] and [WxInfoActivity]
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class WxInfoFragment : ScopedFragment(), SwipeRefreshLayout.OnRefreshListener {
 
     private lateinit var sessionManager: SessionManager

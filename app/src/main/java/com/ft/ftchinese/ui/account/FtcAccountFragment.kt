@@ -33,7 +33,6 @@ import org.jetbrains.anko.support.v4.toast
  * 'not verified' message, nor should it alert user to verify the email.
  * In such case the mobile row should not allow user to open the UpdateActivity to change phone.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class FtcAccountFragment : ScopedFragment() {
 
     private lateinit var sessionManager: SessionManager
