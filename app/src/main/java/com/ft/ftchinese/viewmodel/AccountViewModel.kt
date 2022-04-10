@@ -43,10 +43,6 @@ class AccountViewModel : BaseViewModel() {
         MutableLiveData<FetchResult<IAPSubsResult>>()
     }
 
-    val ordersResult: MutableLiveData<FetchResult<List<Order>>> by lazy {
-        MutableLiveData<FetchResult<List<Order>>>()
-    }
-
     // Refresh a user's account data, regardless of logged in
     // via email or wecaht.
     fun refresh(account: Account, manual: Boolean = false) {
@@ -233,28 +229,4 @@ class AccountViewModel : BaseViewModel() {
         }
     }
 
-    fun fetchOrders(account: Account) {
-        if (isNetworkAvailable.value == false) {
-            ordersResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val orders = withContext(Dispatchers.IO) {
-                    FtcPayClient.listOrders(account)
-                }
-
-                Log.i(TAG, "Order result $orders")
-                if (orders == null) {
-                    ordersResult.value = FetchResult.LocalizedError(R.string.api_server_error)
-                } else {
-                    ordersResult.value = FetchResult.Success(orders.data)
-                }
-            } catch (e: Exception) {
-                Log.i(TAG, "Error listing orders ${e.message}")
-                ordersResult.value = FetchResult.fromException(e)
-            }
-        }
-    }
 }
