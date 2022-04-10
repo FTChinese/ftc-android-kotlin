@@ -1,8 +1,10 @@
 package com.ft.ftchinese.model.paywall
 
-import com.ft.ftchinese.model.fetch.KDateTime
+import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
+import kotlinx.serialization.Serializable
 import org.threeten.bp.ZonedDateTime
 
+@Serializable
 data class Banner(
     val id: String,
     val heading: String,
@@ -10,8 +12,8 @@ data class Banner(
     val coverUrl: String? = null,
     val content: String? = null,
     val terms: String? = null,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val startUtc: ZonedDateTime?,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val endUtc: ZonedDateTime?
 )

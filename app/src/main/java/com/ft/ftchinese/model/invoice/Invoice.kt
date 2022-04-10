@@ -1,49 +1,47 @@
 package com.ft.ftchinese.model.invoice
 
-import com.beust.klaxon.Json
 import com.ft.ftchinese.model.enums.*
-import com.ft.ftchinese.model.fetch.*
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
+import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import kotlinx.serialization.encodeToString
 import org.threeten.bp.ZonedDateTime
 
+@Serializable
 data class Invoice(
     val id: String,
     val compoundId: String,
-    @KTier
     val tier: Tier,
     @Deprecated("Use YearMonthDay")
-    @KCycle
     val cycle: Cycle,
     val years: Int = 0,
     val months: Int = 0,
     val days: Int = 0,
-    @KAddOnSource
     val addOnSource: AddOnSource? = null,
     val appleTxId: String? = null,
-    @Json(ignored = true)
+    @Transient
     val currency: String = "cny",
     var orderId: String? = null,
-    @KOrderKind
     val orderKind: OrderKind? = null,
     val paidAmount: Double,
-    @KPayMethod
     val payMethod: PayMethod? = null,
     val priceId: String? = null,
     val stripeSubsId: String? = null,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val createdUtc: ZonedDateTime? = null,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val consumedUtc: ZonedDateTime? = null,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val startUtc: ZonedDateTime? = null,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val endUtc: ZonedDateTime? = null,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val carriedOverUtc: ZonedDateTime? = null,
 ) {
 
     fun toJsonString(): String {
-        return json.toJsonString(this)
+        return kotlinx.serialization.json.Json.encodeToString(this)
     }
 
     val period: YearMonthDay
@@ -58,7 +56,6 @@ data class Invoice(
         return this
     }
 
-    @Json(ignored = true)
     val totalDays: Int
         get() = years * 366 + months * 31 + days
 

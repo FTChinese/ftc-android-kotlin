@@ -2,16 +2,14 @@ package com.ft.ftchinese.model.iapsubs
 
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.fetch.KCycle
-import com.ft.ftchinese.model.fetch.KTier
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Subscription(
     val originalTransactionId: String,
     val purchaseDateUtc: String?,
     val expiresDateUtc: String?,
-    @KTier
     val tier: Tier,
-    @KCycle
     val cycle: Cycle,
     val autoRenewal: Boolean,
     val createdUtc: String?,

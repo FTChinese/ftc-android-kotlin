@@ -1,7 +1,9 @@
 package com.ft.ftchinese.model.stripesubs
 
 import com.stripe.android.model.PaymentMethod
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class StripePaymentMethod(
     val id: String,
     val customerId: String,
@@ -25,6 +27,7 @@ data class StripePaymentMethod(
     }
 }
 
+@Serializable
 data class StripePaymentCard(
     val brand: String,
     val country: String,

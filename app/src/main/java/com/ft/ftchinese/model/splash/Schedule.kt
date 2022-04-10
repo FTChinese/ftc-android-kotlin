@@ -1,30 +1,32 @@
 package com.ft.ftchinese.model.splash
 
 import android.util.Log
-import com.beust.klaxon.Json
 import com.ft.ftchinese.model.enums.Tier
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import org.threeten.bp.LocalDate
 import org.threeten.bp.format.DateTimeFormatter
 
 private const val TAG = "Schedule"
 
+@Serializable
 data class ScheduleMeta(
-
-        val title: String,
-        val description: String,
-        val theme: String,
-        val adid: String,
-        val sponsorMobile: String,
-        @Json(name = "fileTime")
-        val lastModified: Long,
-        val hideAd: String,
-        val audiencePixelTag: String,
-        val guideline: String
+    val title: String,
+    val description: String,
+    val theme: String,
+    val adid: String,
+    val sponsorMobile: String,
+    @SerialName("fileTime")
+    val lastModified: Long,
+    val hideAd: String,
+    val audiencePixelTag: String,
+    val guideline: String
 )
 
+@Serializable
 class Schedule(
-        val meta: ScheduleMeta,
-        val sections: Array<ScreenAd>
+    val meta: ScheduleMeta,
+    val sections: List<ScreenAd>
 )  {
 
     /**

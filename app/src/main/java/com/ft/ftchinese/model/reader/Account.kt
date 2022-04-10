@@ -1,10 +1,9 @@
 package com.ft.ftchinese.model.reader
 
-import android.os.Parcelable
-import com.beust.klaxon.Json
-import com.ft.ftchinese.model.fetch.KLoginMethod
-import com.ft.ftchinese.model.fetch.json
-import kotlinx.parcelize.Parcelize
+import com.ft.ftchinese.model.enums.LoginMethod
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 /**
  * A user's essential data.
@@ -12,47 +11,24 @@ import kotlinx.parcelize.Parcelize
  * When user changes data like email, user userName, verified email, purchased subscription, the corresponding fields should be updated and saved to shared preferences.
  * Avoid modifying an instance when user's data changed so that everything is immutable.
  */
-@Parcelize
+@Serializable
 data class Account(
-    @Json(name = "id")
-    override val id: String,
-    @Json(name = "unionId")
-    override val unionId: String? = null,
-    @Json(name = "stripeId")
-    override val stripeId: String? = null,
-    @Json(name = "userName")
-    override val userName: String? = null,
-    @Json(name = "email")
-    override val email: String,
-    @Json(name = "mobile")
-    override val mobile: String? = null,
-    @Json(name = "isVerified")
-    override val isVerified: Boolean = false,
-    @Json(name = "avatarUrl")
-    override val avatarUrl: String? = null,
-    @Json(name = "campaignCode")
-    override val campaignCode: String? = null,
-    @Json(name = "loginMethod")
-    @KLoginMethod
+    val id: String,
+    val unionId: String? = null,
+    val stripeId: String? = null,
+    val userName: String? = null,
+    val email: String,
+    val mobile: String? = null,
+    val isVerified: Boolean = false,
+    val avatarUrl: String? = null,
+    val campaignCode: String? = null,
     val loginMethod: LoginMethod? = null,
-    @Json(name = "wechat")
     val wechat: Wechat,
-    @Json(name = "membership")
     val membership: Membership
-) : BaseAccount(
-    id = id,
-    unionId = unionId,
-    stripeId = stripeId,
-    email = email,
-    mobile = mobile,
-    userName = userName,
-    avatarUrl = avatarUrl,
-    isVerified = isVerified,
-    campaignCode = campaignCode,
-), Parcelable {
+) {
 
     fun toJsonString(): String {
-        return json.toJsonString(this)
+        return Json.encodeToString(this)
     }
 
     // Perform partial update.
@@ -104,11 +80,9 @@ data class Account(
         )
     }
 
-    @Json(ignored = true)
     val isTest: Boolean
         get() = email.endsWith(".test@ftchinese.com")
 
-    @Json(ignored = true)
     val isMobileEmail: Boolean
         get() = email.endsWith("@ftchinese.user")
 
@@ -122,7 +96,6 @@ data class Account(
     /**
      * Checks whether an ftc account is bound to a wechat account.
      */
-    @Json(ignored = true)
     val isLinked: Boolean
         get() = id.isNotBlank() && !unionId.isNullOrBlank()
 
@@ -130,7 +103,6 @@ data class Account(
      * Is this account a wechat-only one?
      * -- logged in with wecaht and not bound to FTC account.
      */
-    @Json(ignored = true)
     val isWxOnly: Boolean
         get() = !unionId.isNullOrBlank() && id.isBlank()
 
@@ -138,14 +110,12 @@ data class Account(
      * Is this account an FTC-only one?
      * -- logged in with email and not bound to a wechat account.
      */
-    @Json(ignored = true)
     val isFtcOnly: Boolean
         get() = id.isNotBlank() && unionId.isNullOrBlank()
 
     /**
      * isMember checks whether user is/was a member.
      */
-    @Json(ignored = true)
     val isMember: Boolean
         get() = when {
             membership.vip -> true
@@ -159,7 +129,6 @@ data class Account(
      * otherwise use the name part of email address;
      * finally tell user userName is not set.
      */
-    @Json(ignored = true)
     val displayName: String
         get() {
             if (userName != null) {

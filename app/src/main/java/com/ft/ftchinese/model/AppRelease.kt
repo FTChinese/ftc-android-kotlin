@@ -1,7 +1,9 @@
 package com.ft.ftchinese.model
 
 import com.ft.ftchinese.BuildConfig
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class AppRelease(
     val versionName: String = "",
     val versionCode: Int,

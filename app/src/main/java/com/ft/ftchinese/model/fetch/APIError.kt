@@ -1,15 +1,19 @@
 package com.ft.ftchinese.model.fetch
 
-import com.beust.klaxon.Json
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import okhttp3.Response
 
 // API error.
+@Serializable
 data class APIError(
     override val message: String,
     val error: Unprocessable? = null,
 
     // Not from API
-    @Json(ignored = true)
+    @Transient
     var statusCode: Int = 400, // HTTP status code
 
     // Stripe Only
@@ -42,13 +46,10 @@ data class APIError(
                 )
             }
 
-            return json.parse<APIError>(body)?.apply {
+
+            return Json.decodeFromString<APIError>(body).apply {
                 statusCode = resp.code
             }
-                ?: APIError(
-                    message = "No response from server",
-                    statusCode = resp.code
-                )
         }
     }
 }

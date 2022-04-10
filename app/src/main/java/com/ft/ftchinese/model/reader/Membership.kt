@@ -1,55 +1,41 @@
 package com.ft.ftchinese.model.reader
 
 import android.os.Parcelable
-import com.beust.klaxon.Json
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.fetch.*
 import com.ft.ftchinese.model.invoice.AddOn
 import com.ft.ftchinese.model.invoice.Invoice
+import com.ft.ftchinese.model.serializer.DateAsStringSerializer
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import org.threeten.bp.LocalDate
 import org.threeten.bp.ZonedDateTime
 import org.threeten.bp.format.DateTimeFormatter
 import org.threeten.bp.temporal.ChronoUnit
 
 @Parcelize
+@Serializable
 data class Membership(
-    @Json(name = "tier")
-    @KTier
     val tier: Tier? = null,
-    @Json(name = "cycle")
-    @KCycle
     val cycle: Cycle? = null,
-
     // ISO8601 format. Example: 2019-08-05
-    @Json(name = "expireDate")
-    @KDate
+    @Serializable(with = DateAsStringSerializer::class)
     val expireDate: LocalDate? = null,
-    @Json(name = "payMethod")
-    @KPayMethod
     val payMethod: PayMethod? = null,
-    @Json("stripeSubsId")
     val stripeSubsId: String? = null,
     // If autoRenew is true, ignore expireDate.
-    @Json(name = "autoRenew")
     val autoRenew: Boolean = false,
-    @Json(name = "status")
-    @KStripeSubStatus
     val status: StripeSubStatus? = null,
-    @Json(name = "appleSubsId")
     val appleSubsId: String? = null,
-    @Json(name = "b2bLicenceId")
     val b2bLicenceId: String? = null,
-    @Json(name = "standardAddOn")
     val standardAddOn: Long = 0,
-    @Json(name = "premiumAddOn")
     val premiumAddOn: Long = 0,
-    @Json(name = "vip")
     val vip: Boolean = false,
 ) : Parcelable {
 
     fun toJsonString(): String {
-        return json.toJsonString(this)
+        return marshaller.encodeToString(this)
     }
 
     fun tierQueryVal(): String {
@@ -185,7 +171,6 @@ data class Membership(
         return this
     }
 
-    @Json(ignored = true)
     val addOns: List<Pair<Tier, Long>>
         get() = mutableListOf<Pair<Tier, Long>>().apply {
             if (hasPremiumAddOn) {
@@ -196,7 +181,6 @@ data class Membership(
             }
         }
 
-    @Json(ignored = true)
     val autoRenewMoment: AutoRenewMoment?
         get() = if (autoRenew && expireDate != null && cycle != null) {
             AutoRenewMoment(
@@ -209,7 +193,6 @@ data class Membership(
         } else null
 
     // In case legacy purchase has payment method null.
-    @Json(ignored = true)
     val normalizedPayMethod: PayMethod?
         get() = payMethod
             ?: if (tier != null) {
@@ -218,18 +201,15 @@ data class Membership(
                 null
             }
 
-    @Json(ignored = true)
     val isStripe: Boolean
         get() = payMethod == PayMethod.STRIPE && stripeSubsId != null
 
-    @Json(ignored = true)
     val isInvalidStripe: Boolean
         get() = isStripe && status?.isInvalid() == true
 
     val isTrialing: Boolean
         get() = status == StripeSubStatus.Trialing
 
-    @Json(ignored = true)
     val canCancelStripe: Boolean
         get() = if (payMethod != PayMethod.STRIPE) {
             false
@@ -237,7 +217,6 @@ data class Membership(
             autoRenew
         }
 
-    @Json(ignored = true)
     val isZero: Boolean
         get() = tier == null
 
@@ -246,7 +225,6 @@ data class Membership(
      * for next round of purchase when using wechat/alipay.
      * OfferKind.Promotion always applies to anyone.
      */
-    @Json(ignored = true)
     val offerKinds: List<OfferKind>
         get() = when {
             // For zero membership.
@@ -291,7 +269,6 @@ data class Membership(
 
     // Tests if the expiration date is before today.
     // This does not take into account whether user is using auto renewal subscription.
-    @Json(ignored = true)
     val expired: Boolean
         get() = when {
             vip -> false
@@ -303,26 +280,21 @@ data class Membership(
     // 1. Auto Renew
     // 2. Expiration Date
     // 3. Has AddOns
-    @Json(ignored = true)
     val autoRenewOffExpired: Boolean
         get() = !autoRenew && expired
 
-    @Json(ignored = true)
     val hasAddOn: Boolean
         get() = standardAddOn > 0 || premiumAddOn > 0
 
-    @Json(ignored = true)
     val hasStandardAddOn: Boolean
         get() = standardAddOn > 0
 
-    @Json(ignored = true)
     val hasPremiumAddOn: Boolean
         get() = premiumAddOn > 0
 
     // Tests whether subscription time has moved to add-ons.
     // Usually you call this method without calling normalize method;
     // otherwise it won't reflect user's actual membership state.
-    @Json(ignored = true)
     val shouldUseAddOn: Boolean
         get() = !autoRenew && expired && hasAddOn
 

@@ -1,8 +1,8 @@
 package com.ft.ftchinese.model.stripesubs
 
-import com.ft.ftchinese.model.fetch.KDateTime
-import org.threeten.bp.ZonedDateTime
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class PaymentIntent(
     val id: String,
     val amount: Double,

@@ -5,34 +5,32 @@ import com.ft.ftchinese.model.enums.Edition
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.PriceKind
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.fetch.KDateTime
-import com.ft.ftchinese.model.fetch.KPriceKind
-import com.ft.ftchinese.model.fetch.KTier
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Serializable
 import org.threeten.bp.ZonedDateTime
 
 @Parcelize
+@Serializable
 data class StripePrice(
     val id: String,
     val active: Boolean,
     val currency: String,
     val isIntroductory: Boolean = false,
-    @KPriceKind
     val kind: PriceKind = PriceKind.Recurring,
     val liveMode: Boolean,
     val nickname: String,
     val productId: String = "",
     val periodCount: YearMonthDay = YearMonthDay(),
-    @KTier
     val tier: Tier,
     val unitAmount: Int,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val startUtc: ZonedDateTime? = null,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val endUtc: ZonedDateTime? = null,
     val created: Int = 0,
 ) : Parcelable {

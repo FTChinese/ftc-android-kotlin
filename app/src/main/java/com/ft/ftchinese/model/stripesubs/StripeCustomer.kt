@@ -1,5 +1,8 @@
 package com.ft.ftchinese.model.stripesubs
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class StripeCustomer(
     val id: String,
     val ftcId: String,

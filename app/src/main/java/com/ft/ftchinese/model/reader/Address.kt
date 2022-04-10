@@ -1,7 +1,10 @@
 package com.ft.ftchinese.model.reader
 
-import com.ft.ftchinese.model.fetch.json
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
+@Serializable
 data class Address(
     val country: String? = null,
     val province: String? = null,
@@ -12,7 +15,7 @@ data class Address(
 ) {
 
     fun toJsonString(): String {
-        return json.toJsonString(this)
+        return Json.encodeToString(this)
     }
 
     fun withProvince(p: String): Address {

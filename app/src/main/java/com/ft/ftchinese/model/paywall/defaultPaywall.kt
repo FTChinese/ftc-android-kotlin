@@ -5,7 +5,7 @@ import com.ft.ftchinese.model.enums.OfferKind
 import com.ft.ftchinese.model.enums.PriceKind
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.ftcsubs.Discount
-import com.ft.ftchinese.model.ftcsubs.DiscountStatus
+import com.ft.ftchinese.model.enums.DiscountStatus
 import com.ft.ftchinese.model.ftcsubs.Price
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 

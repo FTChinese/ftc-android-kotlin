@@ -1,7 +1,9 @@
 package com.ft.ftchinese.model.paywall
 
+import kotlinx.serialization.Serializable
 import org.threeten.bp.ZonedDateTime
 
+@Serializable
 data class Paywall(
     val id: Int,
     val banner: Banner,

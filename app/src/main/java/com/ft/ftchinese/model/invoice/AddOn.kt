@@ -1,7 +1,9 @@
 package com.ft.ftchinese.model.invoice
 
 import com.ft.ftchinese.model.enums.Tier
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class AddOn(
     val standardAddOn: Int,
     val premiumAddOn: Int,

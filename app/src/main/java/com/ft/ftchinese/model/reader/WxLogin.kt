@@ -1,7 +1,8 @@
 package com.ft.ftchinese.model.reader
 
-import com.ft.ftchinese.model.fetch.KDateTime
-import com.ft.ftchinese.util.*
+import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
+import com.ft.ftchinese.util.generateNonce
+import kotlinx.serialization.Serializable
 import org.threeten.bp.DateTimeException
 import org.threeten.bp.ZonedDateTime
 
@@ -42,10 +43,11 @@ object WxOAuth {
  * retrieved from Wechat OAuth API. Since those tokens cannot be
  * store on client-side, a session id is returned for future query.
  */
+@Serializable
 data class WxSession(
     val sessionId: String,
     val unionId: String,
-    @KDateTime
+    @Serializable(with = DateTimeAsStringSerializer::class)
     val createdAt: ZonedDateTime
 ) {
 

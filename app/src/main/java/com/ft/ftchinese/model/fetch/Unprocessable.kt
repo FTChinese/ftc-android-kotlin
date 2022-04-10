@@ -1,10 +1,13 @@
 package com.ft.ftchinese.model.fetch
 
+import kotlinx.serialization.Serializable
+
 private const val codeMissing = "missing"
 private const val codeMissingField = "missing_field"
 private const val codeAlreadyExists = "already_exists"
 private const val codeInvalid = "invalid"
 
+@Serializable
 data class Unprocessable(
     val field: String,
     val code: String

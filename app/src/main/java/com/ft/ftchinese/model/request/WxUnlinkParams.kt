@@ -1,10 +1,10 @@
 package com.ft.ftchinese.model.request
 
-import com.ft.ftchinese.model.fetch.KUnlinkAnchor
-import com.ft.ftchinese.model.reader.UnlinkAnchor
+import com.ft.ftchinese.model.enums.UnlinkAnchor
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class WxUnlinkParams(
     val ftcId: String,
-    @KUnlinkAnchor
     val anchor: UnlinkAnchor? = null,
 )

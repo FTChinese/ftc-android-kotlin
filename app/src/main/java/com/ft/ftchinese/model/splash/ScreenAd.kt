@@ -1,44 +1,48 @@
 package com.ft.ftchinese.model.splash
 
 import android.net.Uri
-import com.beust.klaxon.Json
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import org.threeten.bp.LocalDate
 
+@Serializable
 data class ScreenAd(
-        val type: String,
-        val title: String,
+    val type: String,
+    val title: String,
 
-        @Json("fileName")
-        val imageUrl: String,
+    @SerialName("fileName")
+    val imageUrl: String,
 
-        @Json("click")
-        val linkUrl: String,
+    @SerialName("click")
+    val linkUrl: String,
 
-        @Json("impression_1")
-        val impressionUrl1: String,
+    @SerialName("impression_1")
+    val impressionUrl1: String,
 
-        @Json("impression_2")
-        val impressionUrl2: String?,
+    @SerialName("impression_2")
+    val impressionUrl2: String?,
 
-        @Json("impression_3")
-        val impressionUrl3: String?,
+    @SerialName("impression_3")
+    val impressionUrl3: String?,
 
-        val iphone: String,
-        val android: String,
-        val ipad: String,
-        // targetUser is an enum: all, free, standard, premium.
-        // It indicates which groups of user can see the launch ad.
+    val iphone: String,
+    val android: String,
+    val ipad: String,
+    // targetUser is an enum: all, free, standard, premium.
+    // It indicates which groups of user can see the launch ad.
 
-        @Json("audienceCohort")
-        val targetUser: String? = null,
+    @SerialName("audienceCohort")
+    val targetUser: String? = null,
 
-        val dates: String,
-        // weight actually means https://en.wikipedia.org/wiki/Probability_distribution#Discrete_probability_distribution
-        val weight: String
+    val dates: String,
+    // weight actually means https://en.wikipedia.org/wiki/Probability_distribution#Discrete_probability_distribution
+    val weight: String
 ) {
     val scheduledOn: List<String>
         get() = dates.split(",")
 
+    @Transient
     var date: LocalDate? = null
 
     fun isToday(): Boolean {

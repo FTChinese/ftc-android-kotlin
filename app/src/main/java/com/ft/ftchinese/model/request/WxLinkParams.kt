@@ -1,7 +1,8 @@
 package com.ft.ftchinese.model.request
 
-import com.ft.ftchinese.model.fetch.json
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class WxLinkParams(
     val ftcId: String
 )

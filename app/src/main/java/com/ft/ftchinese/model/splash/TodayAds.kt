@@ -1,6 +1,7 @@
 package com.ft.ftchinese.model.splash
 
-import com.ft.ftchinese.model.fetch.KDate
+import com.ft.ftchinese.model.serializer.DateAsStringSerializer
+import kotlinx.serialization.Serializable
 import org.apache.commons.math3.distribution.EnumeratedDistribution
 import org.apache.commons.math3.util.Pair
 import org.threeten.bp.LocalDate
@@ -10,7 +11,7 @@ import org.threeten.bp.LocalDate
  * [Schedule] for today.
  */
 data class TodayAds(
-    @KDate
+    @Serializable(with = DateAsStringSerializer::class)
     val date: LocalDate,
     val items: List<ScreenAd>
 ) {
