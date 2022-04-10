@@ -123,12 +123,8 @@ fun PreviewProductCard() {
             PriceList(
                 ftcCartItems = ftcItems,
                 stripeCartItems = listOf(),
-                onFtcPay = { item ->
-
-                },
-                onStripePay = { item ->
-
-                }
+                onFtcPay = { },
+                onStripePay = { }
             )
         }
     )
