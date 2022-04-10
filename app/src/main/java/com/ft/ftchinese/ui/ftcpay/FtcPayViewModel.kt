@@ -118,7 +118,7 @@ class FtcPayViewModel(application: Application) : AndroidViewModel(application) 
                 orderLiveData.value = OrderResult.WxPay(wxOrder)
 
                 withContext(Dispatchers.IO) {
-                    payIntentStore.save(wxOrder)
+                    payIntentStore.save(wxOrder.toPayIntent())
                 }
             } catch (e: APIError) {
                 inProgress.value = false
@@ -155,7 +155,7 @@ class FtcPayViewModel(application: Application) : AndroidViewModel(application) 
                 orderLiveData.value = OrderResult.AliPay(aliOrder)
 
                 withContext(Dispatchers.IO) {
-                    payIntentStore.save(aliOrder)
+                    payIntentStore.save(aliOrder.toPayIntent())
                 }
             } catch (e: APIError) {
                 inProgress.value = false
