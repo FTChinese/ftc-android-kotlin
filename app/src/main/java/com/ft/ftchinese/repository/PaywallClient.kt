@@ -8,6 +8,7 @@ object PaywallClient {
 
     fun retrieve(isTest: Boolean): HttpResp<Paywall> {
         return Fetch()
+            .setApiKey()
             .get(Endpoint.paywall(isTest))
             .endJson(withRaw = true)
     }
