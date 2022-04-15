@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 
+@Deprecated("Use compose ui")
 class TwoEqualColViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     private val leadingText: TextView = view.findViewById(R.id.equal_col_leading)
     private val trailingText: TextView = view.findViewById(R.id.equal_col_trailing)

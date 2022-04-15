@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 
+@Deprecated("Use compose ui")
 class CardItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
     val primaryText: TextView = view.findViewById(R.id.card_primary_tv)

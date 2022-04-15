@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.R
 
+@Deprecated("Use compose ui")
 class TwoLineItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     val leadingIcon: ImageView = view.findViewById(R.id.list_item_leading_icon)
     val primaryText: TextView = view.findViewById(R.id.list_item_primary_text)

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
  * @param margin
  * @param spanCount - The span count of the grid layout used to determine which one should have a left margin.
  */
+@Deprecated("Use compose ui")
 class MarginGridDecoration(private val margin: Int, private val spanCount: Int) : RecyclerView.ItemDecoration() {
 
     override fun getItemOffsets(
