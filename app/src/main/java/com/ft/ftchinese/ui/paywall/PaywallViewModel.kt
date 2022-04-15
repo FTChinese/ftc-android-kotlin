@@ -135,6 +135,11 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         when (result) {
             is FetchResult.Success -> {
                 ftcPriceLiveData.value = result.data.reOrderProducts(premiumOnTop)
+                stripePriceLiveData.value = result.data.stripe.associateBy({
+                    it.price.id
+                }, {
+                    it.price
+                })
             }
             is FetchResult.LocalizedError -> {
                 toastLiveData.value = ToastMessage.Resource(result.msgId)
@@ -165,6 +170,31 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun refresh(isTest: Boolean) {
+        if (isNetworkAvailable.value != true) {
+            toastLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
+            return
+        }
+
+        refreshingLiveData.value = true
+
+        viewModelScope.launch {
+//            val ftcDeferred = async { loadRemotePaywall(false) }
+//            val stripeDeferred = async { loadRemoteStripe() }
+//
+//            val ftcRes = ftcDeferred.await()
+//            val stripeRes = stripeDeferred.await()
+//
+            val ftcRes = loadRemotePaywall(isTest)
+            setFtcPrice(ftcRes)
+//            setStripePrice(stripeRes)
+
+            refreshingLiveData.value = false
+            toastLiveData.value = ToastMessage.Resource(R.string.refresh_success)
+        }
+    }
+
+    @Deprecated("")
     private suspend fun loadCachedStripe(): List<StripePrice>? {
         Log.i(TAG, "Loading stripe prices from cache...")
         return withContext(Dispatchers.IO) {
@@ -185,6 +215,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    @Deprecated("")
     private suspend fun loadRemoteStripe(): FetchResult<List<StripePrice>> {
 
         try {
@@ -210,6 +241,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    @Deprecated("")
     private fun setStripePrice(result: FetchResult<List<StripePrice>>) {
         when (result) {
             is FetchResult.Success -> {
@@ -232,6 +264,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
     // before show stripe payment page.
     // This works as a backup in case stripe prices is not yet
     // loaded into memory.
+    @Deprecated("")
     fun loadStripePrices() {
 
         viewModelScope.launch {
@@ -248,29 +281,6 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
             val result = loadRemoteStripe()
 
             setStripePrice(result)
-        }
-    }
-
-    fun refresh() {
-        if (isNetworkAvailable.value != true) {
-            toastLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
-            return
-        }
-
-        refreshingLiveData.value = true
-
-        viewModelScope.launch {
-            val ftcDeferred = async { loadRemotePaywall(false) }
-            val stripeDeferred = async { loadRemoteStripe() }
-
-            val ftcRes = ftcDeferred.await()
-            val stripeRes = stripeDeferred.await()
-
-            setFtcPrice(ftcRes)
-            setStripePrice(stripeRes)
-
-            refreshingLiveData.value = false
-            toastLiveData.value = ToastMessage.Resource(R.string.refresh_success)
         }
     }
 

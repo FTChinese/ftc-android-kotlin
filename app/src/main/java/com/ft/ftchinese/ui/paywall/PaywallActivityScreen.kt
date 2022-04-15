@@ -116,7 +116,7 @@ fun PaywallActivityScreen(
         state = rememberSwipeRefreshState(
             isRefreshing = isRefreshing,
         ),
-        onRefresh = { paywallViewModel.refresh() },
+        onRefresh = { paywallViewModel.refresh(userViewModel.account?.isTest ?: false) },
     ) {
         PaywallScreen(
             paywall = ftcPaywall,
