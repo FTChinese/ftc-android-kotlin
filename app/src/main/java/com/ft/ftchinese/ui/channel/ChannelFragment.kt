@@ -158,17 +158,17 @@ class ChannelFragment : ScopedFragment(),
         }
 
         // If web view signaled that loading a url is finished.
-        wvViewModel.pageFinished.observe(viewLifecycleOwner, {
+        wvViewModel.pageFinished.observe(viewLifecycleOwner) {
             // If finished loading, stop progress.
             if (it) {
                 binding.inProgress = false
                 binding.swipeRefresh.isRefreshing = false
             }
-        })
+        }
 
-        wvViewModel.pagingBtnClicked.observe(viewLifecycleOwner, {
+        wvViewModel.pagingBtnClicked.observe(viewLifecycleOwner) {
             onPagination(it)
-        })
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -293,7 +293,7 @@ class ChannelFragment : ScopedFragment(),
 
         Log.i(TAG, "JS onPageLoaded")
 
-        val channelContent = marshaller.decodeFromString<ChannelContent>(message) ?: return
+        val channelContent = marshaller.decodeFromString<ChannelContent>(message)
 
         // Save all teasers.
         articleList = channelContent.sections[0].lists[0].items
