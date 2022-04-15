@@ -175,4 +175,5 @@ val defaultPaywall = Paywall(
             ),
         ),
     ),
+    stripe = listOf(),
 )

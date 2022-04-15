@@ -10,6 +10,7 @@ data class Paywall(
     val promo: Banner,
     val products: List<PaywallProduct>,
     val liveMode: Boolean = true,
+    val stripe: List<StripePaywallItem>,
 ) {
     fun isPromoValid(): Boolean {
         if (promo.id.isEmpty()) {
@@ -36,6 +37,7 @@ data class Paywall(
                 products.sortedBy { it.tier.ordinal }
             },
             liveMode = liveMode,
+            stripe = stripe,
         )
     }
 }
