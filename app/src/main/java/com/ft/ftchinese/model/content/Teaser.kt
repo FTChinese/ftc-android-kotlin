@@ -15,6 +15,7 @@ import java.util.*
  * Most of them are useless, serving as placeholders so that we can extract the deep nested JSON values.
  * `ChannelMeta` represent the `meta` fieled in JSON data.
  */
+@Serializable
 data class ChannelContent(
     val meta: ChannelMeta,
     val sections: List<ChannelSection>
@@ -30,7 +31,7 @@ data class ChannelMeta(
     val adZone: String = "home"
 ) : Parcelable
 
-
+@Serializable
 data class ChannelSection(
     val type: String,
     val title: String,
@@ -40,6 +41,7 @@ data class ChannelSection(
     val lists: List<ChannelList>
 )
 
+@Serializable
 data class ChannelList(
     val name: String,
     val title: String,
