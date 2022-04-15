@@ -5,73 +5,100 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.ft.ftchinese.R
+import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.Following
-import com.ft.ftchinese.model.content.FollowingManager
-import com.ft.ftchinese.ui.lists.CardItemViewHolder
-import com.ft.ftchinese.ui.lists.MarginGridDecoration
+import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.ui.theme.OTheme
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class FollowingFragment : Fragment() {
 
-    private lateinit var viewAdapter: Adapter
-    private lateinit var followingManager: FollowingManager
+    private lateinit var followViewModel: FollowingViewModel
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-
-        followingManager = FollowingManager.getInstance(context)
-        viewAdapter = Adapter(listOf())
+        followViewModel = ViewModelProvider(this)[FollowingViewModel::class.java]
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        super.onCreateView(inflater, container, savedInstanceState)
-        return inflater.inflate(R.layout.fragment_recycler, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        view.findViewById<RecyclerView>(R.id.recycler_view)?.apply {
-            layoutManager = GridLayoutManager(context, 2)
-            adapter = viewAdapter
-            addItemDecoration(MarginGridDecoration(resources.getDimension(R.dimen.space_16).toInt(), 2))
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                OTheme {
+                    FollowScreen(followViewModel = followViewModel)
+                }
+            }
         }
-
-        val follows = followingManager.load()
-        viewAdapter.setData(follows)
     }
 
     companion object {
         @JvmStatic
         fun newInstance() = FollowingFragment()
     }
+}
 
-    inner class Adapter(var mFollows: List<Following>) : RecyclerView.Adapter<CardItemViewHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardItemViewHolder {
-            return CardItemViewHolder.create(parent)
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun FollowScreen(
+    followViewModel: FollowingViewModel
+) {
+    val context = LocalContext.current
+    val tags by followViewModel.tagsLiveData.observeAsState(listOf())
+
+    LaunchedEffect(key1 = Unit) {
+        followViewModel.load()
+    }
+
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        contentPadding = PaddingValues(Dimens.dp8),
+        verticalArrangement = Arrangement.spacedBy(Dimens.dp8),
+        horizontalArrangement = Arrangement.spacedBy(Dimens.dp8),
+    ) {
+        items(tags) {
+            FollowTagCard(
+                text = it.tag,
+                onClick = {
+                    ChannelActivity.start(
+                        context,
+                        ChannelSource.ofFollowing(it)
+                    )
+                }
+            )
         }
+    }
+}
 
-        override fun getItemCount() = mFollows.size
-
-        override fun onBindViewHolder(holder: CardItemViewHolder, position: Int) {
-            val item = mFollows[position]
-
-            holder.setPrimaryText(item.tag)
-            holder.setSecondaryText(null)
-
-            holder.itemView.setOnClickListener {
-                ChannelActivity.start(context, ChannelSource.ofFollowing(item))
-            }
-        }
-
-        fun setData(items: List<Following>) {
-            mFollows = items
-            notifyDataSetChanged()
-        }
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun FollowTagCard(
+    text: String,
+    onClick: () -> Unit
+) {
+    Card (
+        onClick = onClick
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.h6,
+            modifier = Modifier.padding(Dimens.dp16)
+        )
     }
 }

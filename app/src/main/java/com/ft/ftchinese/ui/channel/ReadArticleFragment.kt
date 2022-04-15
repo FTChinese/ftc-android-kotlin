@@ -4,76 +4,42 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.base.ScopedFragment
-import com.ft.ftchinese.ui.lists.CardItemViewHolder
-import com.ft.ftchinese.ui.lists.MarginItemDecoration
-import com.ft.ftchinese.viewmodel.ReadArticleViewModel
+import com.ft.ftchinese.ui.components.ArticleItem
+import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.ui.theme.OTheme
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
-class ReadArticleFragment : ScopedFragment() {
+class ReadArticleFragment : Fragment() {
 
     private lateinit var model: ReadArticleViewModel
-    private lateinit var viewAdapter: ListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         model = ViewModelProvider(this)[ReadArticleViewModel::class.java]
-
-        viewAdapter = ListAdapter(listOf())
-
-        model.getAllRead().observe(this) {
-            viewAdapter.setData(it)
-        }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.fragment_recycler, container, false)
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        view.findViewById<RecyclerView>(R.id.recycler_view)?.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = viewAdapter
-            addItemDecoration(MarginItemDecoration(resources.getDimension(R.dimen.space_8).toInt()))
-        }
-    }
-
-    inner class ListAdapter(private var articles: List<ReadArticle>) :
-        RecyclerView.Adapter<CardItemViewHolder>() {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CardItemViewHolder {
-
-            return CardItemViewHolder.create(parent)
-        }
-
-        override fun getItemCount(): Int {
-            return articles.size
-        }
-
-        override fun onBindViewHolder(holder: CardItemViewHolder, position: Int) {
-            val article = articles[position]
-
-            holder.setPrimaryText(article.title)
-            holder.setSecondaryText(article.standfirst)
-
-            holder.itemView.setOnClickListener {
-                ArticleActivity.start(
-                    context,
-                    article.toTeaser()
-                )
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return ComposeView(requireContext()).apply {
+            setContent {
+                OTheme {
+                    ReadArticleScreen(readViewModel = model)
+                }
             }
-        }
-
-        fun setData(newData: List<ReadArticle>) {
-            this.articles = newData
-            notifyDataSetChanged()
         }
     }
 
@@ -83,4 +49,45 @@ class ReadArticleFragment : ScopedFragment() {
     }
 }
 
+@Composable
+private fun ReadArticleScreen(
+    readViewModel: ReadArticleViewModel
+) {
+    val context = LocalContext.current
+
+    val listItems by readViewModel
+        .getAllRead()
+        .observeAsState(listOf())
+
+    TeaserList(
+        teasers = listItems,
+        onClick = {
+            ArticleActivity.start(
+                context,
+                it.toTeaser()
+            )
+        }
+    )
+}
+
+@Composable
+private fun TeaserList(
+    teasers: List<ReadArticle>,
+    onClick: (ReadArticle) -> Unit,
+) {
+    LazyColumn(
+        modifier = Modifier.padding(Dimens.dp8),
+    ) {
+        items(teasers) { teaser ->
+            ArticleItem(
+                heading = teaser.title,
+                subHeading = teaser.standfirst,
+                onClick = {
+                    onClick(teaser)
+                }
+            )
+            Spacer(modifier = Modifier.height(Dimens.dp8))
+        }
+    }
+}
 
