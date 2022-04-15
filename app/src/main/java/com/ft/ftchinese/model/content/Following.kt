@@ -103,7 +103,7 @@ class FollowingManager private constructor(context: Context) {
     }
 
     // Load data as a list to build recycler view.
-    fun load(): MutableList<Following> {
+    fun load(): List<Following> {
         val result = mutableListOf<Following>()
 
         followingTemplate.forEach { (_, value) ->
