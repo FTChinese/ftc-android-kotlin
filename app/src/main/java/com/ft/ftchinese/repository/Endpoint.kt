@@ -2,15 +2,8 @@ package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.BuildConfig
 
-private const val devIP = "http://192.168.1.37"
+private const val devIP = "http://192.168.1.48"
 private const val devPort = "8206"
-
-object ContentApi {
-    private val BASE = Endpoint.contentBase
-
-    val STORY = "$BASE/stories"
-    val INTERACTIVE = "$BASE/interactive/contents"
-}
 
 object Endpoint {
 

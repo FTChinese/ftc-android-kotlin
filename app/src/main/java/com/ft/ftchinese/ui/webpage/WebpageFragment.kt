@@ -12,7 +12,6 @@ import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.ui.share.ArticleScreenshot
 import com.ft.ftchinese.ui.share.ScreenshotFragment
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class WebpageFragment : WVBaseFragment() {
     private lateinit var binding: FragmentWebpageBinding
 

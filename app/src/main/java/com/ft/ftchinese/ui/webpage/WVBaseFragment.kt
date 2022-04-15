@@ -27,7 +27,6 @@ private const val TAG =  "WVBaseFragment"
 /**
  * A base fragment collects shared functionalities for webview-based page.
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 abstract class WVBaseFragment : ScopedFragment() {
 
     protected lateinit var wvViewModel: WVViewModel
