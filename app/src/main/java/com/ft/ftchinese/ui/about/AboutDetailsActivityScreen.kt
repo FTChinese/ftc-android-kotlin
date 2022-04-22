@@ -1,8 +1,7 @@
 package com.ft.ftchinese.ui.about
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import com.ft.ftchinese.ui.components.WebInterfaceViewModel
+import com.ft.ftchinese.ui.components.WebClientViewModel
 import com.ft.ftchinese.ui.components.WebPage
 import com.ft.ftchinese.ui.webpage.WVClient
 import com.google.accompanist.web.rememberWebViewState
@@ -10,11 +9,10 @@ import com.google.accompanist.web.rememberWebViewState
 @Composable
 fun AboutDetailsActivityScreen(
     url: String,
-    webViewModel: WebInterfaceViewModel
+    webViewModel: WebClientViewModel
 ) {
-    val context = LocalContext.current
     val wvState = rememberWebViewState(url = url)
-    val wvClient = WVClient(context)
+    val wvClient = WVClient()
 
     WebPage(
         loading = false,

@@ -10,14 +10,11 @@ import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.tracking.Sponsor
 import com.ft.ftchinese.tracking.SponsorManager
-import com.ft.ftchinese.ui.article.ArticleActivity
-import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
 private const val TAG = "WebInterfaceViewModel"
 
-class WebInterfaceViewModel : ViewModel() {
+class WebClientViewModel : ViewModel() {
 
     val progressLiveData = MutableLiveData<Boolean>()
     val exitLiveData = MutableLiveData(false)

@@ -14,7 +14,7 @@ fun WebPage(
     loading: Boolean,
     state: WebViewState,
     wvClient: WVClient,
-    jsInterface: WebInterfaceViewModel,
+    jsInterface: WebClientViewModel,
 ) {
     ProgressLayout(
         loading = loading
