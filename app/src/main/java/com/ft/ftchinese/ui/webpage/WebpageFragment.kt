@@ -30,6 +30,10 @@ class WebpageFragment : WVBaseFragment() {
         setupViewModel()
     }
 
+    override fun onWebPageRefresh() {
+
+    }
+
     private fun setupViewModel() {
         // In case we are loading a url directly into webview.
         wvViewModel.urlLiveData.observe(viewLifecycleOwner) {

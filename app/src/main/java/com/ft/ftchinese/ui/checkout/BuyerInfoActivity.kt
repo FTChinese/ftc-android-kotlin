@@ -59,7 +59,7 @@ class BuyerInfoActivity : ComponentActivity() {
                     BuyerInfoScreen(
                         baseUrl = Config.discoverServer(account),
                         infoViewModel = viewModel,
-                        wvClient = WVClient(this)
+                        wvClient = WVClient()
                     ) {
                         finish()
                     }

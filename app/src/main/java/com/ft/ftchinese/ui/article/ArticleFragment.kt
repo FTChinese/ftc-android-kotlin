@@ -13,7 +13,6 @@ import com.ft.ftchinese.ui.share.ArticleScreenshot
 import com.ft.ftchinese.ui.share.ScreenshotFragment
 import com.ft.ftchinese.ui.webpage.WVBaseFragment
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class ArticleFragment : WVBaseFragment() {
 
     private lateinit var binding: FragmentArticleBinding
@@ -37,6 +36,10 @@ class ArticleFragment : WVBaseFragment() {
 
         configWebView(binding.webView)
         setupViewModel()
+    }
+
+    override fun onWebPageRefresh() {
+
     }
 
     private fun setupViewModel() {

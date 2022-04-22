@@ -31,7 +31,7 @@ import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.ui.about.AboutActivityScreen
 import com.ft.ftchinese.ui.about.AboutDetailsActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
-import com.ft.ftchinese.ui.components.WebInterfaceViewModel
+import com.ft.ftchinese.ui.components.WebClientViewModel
 import com.ft.ftchinese.ui.theme.OTheme
 
 class AboutListActivity : ComponentActivity() {
@@ -72,7 +72,7 @@ enum class AboutScreen {
 
 @Composable
 fun AboutApp(
-    wiViewModel: WebInterfaceViewModel = viewModel(),
+    wiViewModel: WebClientViewModel = viewModel(),
     onExit: () -> Unit
 ) {
     val context = LocalContext.current
