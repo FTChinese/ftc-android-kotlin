@@ -18,7 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -28,27 +28,23 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.legal.WebpageMeta
-import com.ft.ftchinese.ui.components.Toolbar
-import com.ft.ftchinese.ui.components.WebInterfaceViewModel
 import com.ft.ftchinese.ui.about.AboutActivityScreen
 import com.ft.ftchinese.ui.about.AboutDetailsActivityScreen
+import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.components.WebInterfaceViewModel
 import com.ft.ftchinese.ui.theme.OTheme
 
 class AboutListActivity : ComponentActivity() {
 
-    private lateinit var webViewModel: WebInterfaceViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        webViewModel = ViewModelProvider(this)[WebInterfaceViewModel::class.java]
-
         setContent {
             AboutApp(
-                wiViewModel = webViewModel
-            ) {
-                finish()
-            }
+                onExit = {
+                    finish()
+                }
+            )
         }
     }
 
@@ -76,7 +72,7 @@ enum class AboutScreen {
 
 @Composable
 fun AboutApp(
-    wiViewModel: WebInterfaceViewModel,
+    wiViewModel: WebInterfaceViewModel = viewModel(),
     onExit: () -> Unit
 ) {
     val context = LocalContext.current
