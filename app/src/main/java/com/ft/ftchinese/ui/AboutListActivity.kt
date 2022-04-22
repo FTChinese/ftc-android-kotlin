@@ -2,44 +2,52 @@ package com.ft.ftchinese.ui
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Scaffold
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.legal.legalPages
+import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.ui.components.Toolbar
-import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.ui.components.WebInterfaceViewModel
+import com.ft.ftchinese.ui.about.AboutActivityScreen
+import com.ft.ftchinese.ui.about.AboutDetailsActivityScreen
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.ui.webpage.WebpageActivity
 
 class AboutListActivity : ComponentActivity() {
+
+    private lateinit var webViewModel: WebInterfaceViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        webViewModel = ViewModelProvider(this)[WebInterfaceViewModel::class.java]
+
         setContent {
-            OTheme {
-                Scaffold(
-                    topBar = {
-                        Toolbar(
-                            heading = stringResource(id = R.string.title_about_us),
-                            onBack = { finish() }
-                        )
-                    },
-                    scaffoldState = rememberScaffoldState()
-                ) {
-                    AboutListScreen()
-                }
+            AboutApp(
+                wiViewModel = webViewModel
+            ) {
+                finish()
             }
         }
     }
@@ -51,36 +59,131 @@ class AboutListActivity : ComponentActivity() {
     }
 }
 
+enum class AboutScreen {
+    Overview,
+    Details;
+
+    companion object {
+        fun fromRoute(route: String?): AboutScreen =
+            when (route?.substringBefore("/")) {
+                Overview.name -> Overview
+                Details.name -> Details
+                null -> Overview
+                else -> throw IllegalArgumentException("Route $route is not recognized")
+            }
+    }
+}
+
 @Composable
-fun AboutListScreen() {
+fun AboutApp(
+    wiViewModel: WebInterfaceViewModel,
+    onExit: () -> Unit
+) {
     val context = LocalContext.current
 
-    Column {
-        legalPages.forEach { pageMeta ->
-            Row(
-                modifier = Modifier
-                    .clickable {
-                        WebpageActivity.start(context, pageMeta)
-                    }
-                    .fillMaxWidth()
-                    .padding(Dimens.dp16),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = pageMeta.title)
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_keyboard_arrow_right_gray_24dp),
-                    contentDescription = "Open"
-                )
-            }
+    val homePageMeta = WebpageMeta(
+        title = context.getString(R.string.title_about_us),
+        url = "",
+        showMenu = false
+    )
 
-            Divider(startIndent = Dimens.dp16)
+    val scaffoldState = rememberScaffoldState()
+    val (pageMeta, setPageMeta) = remember {
+        mutableStateOf(homePageMeta)
+    }
+
+    OTheme {
+        val navController = rememberNavController()
+        val backstackEntry = navController.currentBackStackEntryAsState()
+        val currentScreen = AboutScreen.fromRoute(
+            backstackEntry.value?.destination?.route
+        )
+        if (currentScreen == AboutScreen.Overview) {
+            setPageMeta(homePageMeta)
+        }
+
+        Scaffold(
+            topBar = {
+                Toolbar(
+                    heading = pageMeta.title,
+                    onBack = {
+                        val ok = navController.popBackStack()
+                        if (!ok) {
+                            onExit()
+                        }
+                    },
+                    actions = {
+                        if (pageMeta.showMenu) {
+                            ToolbarMenu {
+                                CustomTabsIntent
+                                    .Builder()
+                                    .build()
+                                    .launchUrl(
+                                        context,
+                                        Uri.parse(pageMeta.url)
+                                    )
+                            }
+                        }
+                    }
+                )
+            },
+            scaffoldState = scaffoldState
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = AboutScreen.Overview.name,
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                composable(
+                    route = AboutScreen.Overview.name
+                ) {
+                    AboutActivityScreen(
+                        onNavigate = {
+                            setPageMeta(it)
+                            navigateToDetails(
+                                navController = navController,
+                                url = it.url
+                            )
+                        }
+                    )
+                }
+
+                composable(
+                    route = "${AboutScreen.Details.name}/?url={url}",
+                    arguments = listOf(
+                        navArgument("url") {
+                            type = NavType.StringType
+                        }
+                    )
+                ) { entry ->
+                    val url = entry.arguments?.getString("url")!!
+                    AboutDetailsActivityScreen(
+                        url = url,
+                        webViewModel = wiViewModel
+                    )
+                }
+            }
         }
     }
 }
 
-@Preview(showBackground = true)
+private fun navigateToDetails(
+    navController: NavController,
+    url: String,
+) {
+    navController.navigate("${AboutScreen.Details.name}/?url=${url}")
+}
+
 @Composable
-fun PreviewAboutListScreen() {
-    AboutListScreen()
+fun ToolbarMenu(
+    onClick: () -> Unit
+) {
+    IconButton(
+        onClick = onClick
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_baseline_open_in_browser_24),
+            contentDescription = "Open in browser"
+        )
+    }
 }
