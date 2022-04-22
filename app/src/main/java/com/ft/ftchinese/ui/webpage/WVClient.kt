@@ -41,8 +41,8 @@ private const val TYPE_ARCHIVE = "archiver"
  * ViewPagerFragment.
  */
 open class WVClient(
-        private val context: Context,
-        private val viewModel: WVViewModel? = null
+    private val context: Context,
+    private val viewModel: WVViewModel? = null
 ) : WebViewClient() {
 
     private fun getPrivilegeCode(): String {
