@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.components
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
@@ -43,6 +44,7 @@ fun Toolbar(
 fun Toolbar(
     heading: String,
     onBack: () -> Unit,
+    actions: @Composable RowScope.() -> Unit = {}
 ) {
     TopAppBar(
         title = {
@@ -59,6 +61,7 @@ fun Toolbar(
                 )
             }
         },
+        actions = actions,
         elevation = Dimens.dp4,
         backgroundColor = OColor.wheat
     )
