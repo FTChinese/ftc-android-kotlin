@@ -17,9 +17,7 @@ import com.ft.ftchinese.ui.webpage.WVClient
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@ExperimentalCoroutinesApi
 class AiAudioFragment : BottomSheetDialogFragment() {
 
     private lateinit var articleViewModel: ArticleViewModel
@@ -98,7 +96,7 @@ class AiAudioFragment : BottomSheetDialogFragment() {
             databaseEnabled = true
         }
 
-        val wvClient = WVClient(requireContext())
+        val wvClient = WVClient()
 
         binding.audioWebView.apply {
 
