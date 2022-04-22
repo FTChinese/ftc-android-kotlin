@@ -24,7 +24,6 @@ import org.jetbrains.anko.sdk27.coroutines.onClick
  * Use the [ScreenshotFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-@ExperimentalCoroutinesApi
 class ScreenshotFragment : ScopedBottomSheetDialogFragment() {
 
     private lateinit var binding: FragmentScreenshotBinding
