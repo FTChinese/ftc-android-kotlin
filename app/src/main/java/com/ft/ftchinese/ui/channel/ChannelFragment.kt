@@ -4,9 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -18,19 +20,26 @@ import androidx.work.workDataOf
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentChannelBinding
-import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.HTML_TYPE_COMPLETE
-import com.ft.ftchinese.model.content.HTML_TYPE_FRAGMENT
+import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.tracking.SponsorManager
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.webpage.WVBaseFragment
+import com.ft.ftchinese.ui.webpage.ChromeClient
+import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.base.*
+import com.ft.ftchinese.ui.webpage.WVClient
+import com.ft.ftchinese.ui.webpage.WVViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.serialization.decodeFromString
 import org.jetbrains.anko.support.v4.toast
 import java.util.*
 import kotlin.properties.Delegates
@@ -39,24 +48,27 @@ import kotlin.properties.Delegates
  * Hosted inside [TabPagerAdapter] or [ChannelActivity]
  * when used to handle pagination.
  */
-class ChannelFragment : WVBaseFragment(),
+class ChannelFragment : ScopedFragment(),
     SwipeRefreshLayout.OnRefreshListener {
 
     /**
      * Meta data about current page: the tab's title, where to load data, etc.
      * Passed in when the fragment is created.
      */
+    private var channelSource: ChannelSource? = null
+
     private lateinit var sessionManager: SessionManager
     private lateinit var cache: FileCache
     private lateinit var statsTracker: StatsTracker
     private lateinit var binding: FragmentChannelBinding
 
     private lateinit var channelViewModel: ChannelViewModel
+    private lateinit var wvViewModel: WVViewModel
 
     // An array of article teaser passed from JS.
     // This is used to determine which article user is trying to read.
-//    private var articleList: List<Teaser>? = null
-//    private var channelMeta: ChannelMeta? = null
+    private var articleList: List<Teaser>? = null
+    private var channelMeta: ChannelMeta? = null
     // Record when this page starts to load.
     private var start by Delegates.notNull<Long>()
 
@@ -80,18 +92,15 @@ class ChannelFragment : WVBaseFragment(),
         start = Date().time / 1000
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View {
 
         super.onCreateView(inflater, container, savedInstanceState)
         binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_channel,
-            container,
-            false)
+                inflater,
+                R.layout.fragment_channel,
+                container,
+                false)
 
         // Setup swipe refresh listener
         binding.swipeRefresh.setOnRefreshListener(this)
@@ -102,12 +111,16 @@ class ChannelFragment : WVBaseFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache))[ChannelViewModel::class.java]
+        channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache))
+            .get(ChannelViewModel::class.java)
+
+        wvViewModel = ViewModelProvider(this)
+            .get(WVViewModel::class.java)
 
         // Network status.
-        connectionLiveData.observe(viewLifecycleOwner) {
+        connectionLiveData.observe(viewLifecycleOwner, {
             channelViewModel.isNetworkAvailable.value = it
-        }
+        })
         channelViewModel.isNetworkAvailable.value = context?.isConnected
 
         setupViewModel()
@@ -135,15 +148,62 @@ class ChannelFragment : WVBaseFragment(),
                 is FetchResult.Success -> load(it.data)
             }
         }
+
+        /**
+         * If user clicked on a link inside webview
+         * and the link point to another channel page, open the [ChannelActivity]
+         */
+        wvViewModel.urlChannelSelected.observe(viewLifecycleOwner) {
+            ChannelActivity.start(context, it.withParentPerm(channelSource?.permission))
+        }
+
+        // If web view signaled that loading a url is finished.
+        wvViewModel.pageFinished.observe(viewLifecycleOwner) {
+            // If finished loading, stop progress.
+            if (it) {
+                binding.inProgress = false
+                binding.swipeRefresh.isRefreshing = false
+            }
+        }
+
+        wvViewModel.pagingBtnClicked.observe(viewLifecycleOwner) {
+            onPagination(it)
+        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupUI() {
-        configWebView(binding.webView)
-    }
+        // Configure web view.
+        binding.webView.settings.apply {
+            javaScriptEnabled = true
+            loadsImagesAutomatically = true
+            domStorageEnabled = true
+            databaseEnabled = true
+        }
 
-    override fun onWebPageRefresh() {
-        onRefresh()
+        binding.webView.apply {
+
+            // Interact with JS.
+            // See Page/Layouts/Page/SuperDataViewController.swift#viewDidLoad() how iOS inject js to web view.
+            addJavascriptInterface(
+                this@ChannelFragment,
+                JS_INTERFACE_NAME
+            )
+
+            // Set WebViewClient to handle various links
+            webViewClient = WVClient(requireContext(), wvViewModel)
+
+            webChromeClient = ChromeClient()
+
+            setOnKeyListener { _, keyCode, _ ->
+                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
+                    binding.webView.goBack()
+                    return@setOnKeyListener true
+                }
+
+                false
+            }
+        }
     }
 
     override fun onRefresh() {
@@ -208,143 +268,138 @@ class ChannelFragment : WVBaseFragment(),
     /**
      * WVClient click pagination.
      */
-//    @Deprecated("")
-//    private fun onPagination(p: Paging) {
-//        val source = channelSource ?: return
-//
-//        val pagedSource = source.withPagination(p.key, p.page)
-//
-//        Log.i(TAG, "Open a pagination: $pagedSource")
-//
-//        // If the the pagination number is not changed, simply refresh it.
-//        if (pagedSource.shouldReload) {
-//            onRefresh()
-//        } else {
-//            Log.i(TAG, "Start a new activity for $pagedSource")
-//            ChannelActivity.start(activity, pagedSource)
-//        }
-//    }
+    private fun onPagination(p: Paging) {
+        val source = channelSource ?: return
+
+        val pagedSource = source.withPagination(p.key, p.page)
+
+        Log.i(TAG, "Open a pagination: $pagedSource")
+
+        // If the the pagination number is not changed, simply refresh it.
+        if (pagedSource.shouldReload) {
+            onRefresh()
+        } else {
+            Log.i(TAG, "Start a new activity for $pagedSource")
+            ChannelActivity.start(activity, pagedSource)
+        }
+    }
 
     /**
      * After HTML is loaded into webview, it will call this
      * method in JS and a list of Teaser is posted.
      */
-//    @Deprecated("")
-//    @JavascriptInterface
-//    fun onPageLoaded(message: String) {
-//
-//        Log.i(TAG, "JS onPageLoaded")
-//
-//        val channelContent = marshaller.decodeFromString<ChannelContent>(message)
-//
-//        // Save all teasers.
-//        articleList = channelContent.sections[0].lists[0].items
-//        Log.i(TAG, "Channel teasers $articleList")
-//        channelMeta = channelContent.meta
-//
-//        cacheChannelData(message)
-//    }
+    @JavascriptInterface
+    fun onPageLoaded(message: String) {
 
-//    @Deprecated("")
-//    @JavascriptInterface
-//    fun onSelectItem(index: String) {
-//        Log.i(TAG, "JS select item: $index")
-//
-//        val i = try {
-//            index.toInt()
-//        } catch (e: Exception) {
-//            -1
-//        }
-//
-//        selectItem(i)
-//    }
+        Log.i(TAG, "JS onPageLoaded")
 
-//    @Deprecated("")
-//    @JavascriptInterface
-//    fun onLoadedSponsors(message: String) {
-//
-////         See what the sponsor data is.
-//        if (BuildConfig.DEBUG) {
-//            val name = channelSource?.name
-//
-//            if (name != null) {
-//                Log.i(TAG, "Saving js posted data for sponsors of $channelSource")
-//                launch {
-//                    cache.saveText("${name}_sponsors.json", message)
-//                }
-//            }
-//        }
-//
-//        Log.i(TAG, "Loaded sponsors: $message")
-//
-//        try {
-//            SponsorManager.sponsors = marshaller.decodeFromString(message) ?: return
-//        } catch (e: Exception) {
-//            e.message?.let { msg -> Log.i(TAG, msg) }
-//        }
-//    }
+        val channelContent = marshaller.decodeFromString<ChannelContent>(message)
 
-//    private fun cacheChannelData(data: String) {
-//        if (!BuildConfig.DEBUG) {
-//            return
-//        }
-//
-//        val fileName = channelSource?.name ?: return
-//
-//        launch(Dispatchers.IO) {
-//            cache.saveText("$fileName.json", data)
-//        }
-//    }
+        // Save all teasers.
+        articleList = channelContent.sections[0].lists[0].items
+        Log.i(TAG, "Channel teasers $articleList")
+        channelMeta = channelContent.meta
+
+        cacheChannelData(message)
+    }
+
+    @JavascriptInterface
+    fun onSelectItem(index: String) {
+        Log.i(TAG, "JS select item: $index")
+
+        val i = try {
+            index.toInt()
+        } catch (e: Exception) {
+            -1
+        }
+
+        selectItem(i)
+    }
+
+    @JavascriptInterface
+    fun onLoadedSponsors(message: String) {
+
+//         See what the sponsor data is.
+        if (BuildConfig.DEBUG) {
+            val name = channelSource?.name
+
+            if (name != null) {
+                Log.i(TAG, "Saving js posted data for sponsors of $channelSource")
+                launch {
+                    cache.saveText("${name}_sponsors.json", message)
+                }
+            }
+        }
+
+        Log.i(TAG, "Loaded sponsors: $message")
+
+        try {
+            SponsorManager.sponsors = marshaller.decodeFromString(message) ?: return
+        } catch (e: Exception) {
+            e.message?.let { msg -> Log.i(TAG, msg) }
+        }
+    }
+
+    private fun cacheChannelData(data: String) {
+        if (!BuildConfig.DEBUG) {
+            return
+        }
+
+        val fileName = channelSource?.name ?: return
+
+        launch(Dispatchers.IO) {
+            cache.saveText("$fileName.json", data)
+        }
+    }
 
     /**
      * When user clicks on an item of article list,
      * the js interface sends the clickd item index back.
      */
-//    @Deprecated("")
-//    private fun selectItem(index: Int) {
-//        Log.i(TAG, "JS interface responding to click on an item")
-//        if (index < 0) {
-//            return
-//        }
-//
-//        // Find which item user is clicked.
-//        val teaser = articleList
-//            ?.getOrNull(index)
-//            ?.withMeta(channelMeta)
-//            ?.withParentPerm(channelSource?.permission)
-//            ?: return
-//
-//        Log.i(TAG, "Select item: $teaser")
-//
-//        /**
-//         * {
-//         * "id": "007000049",
-//         * "type": "column",
-//         * "headline": "徐瑾经济人" }
-//         * Canonical URL: http://www.ftchinese.com/channel/column.html
-//         * Content URL: https://api003.ftmailbox.com/column/007000049?webview=ftcapp&bodyonly=yes
-//         */
-//        if (teaser.type == ArticleType.Column) {
-//            Log.i(TAG, "Open a column: $teaser")
-//
-//            ChannelActivity.start(context, ChannelSource.fromTeaser(teaser))
-//            return
-//        }
-//
-//        /**
-//         * For this type of data, load url directly.
-//         * Teaser(
-//         * id=44330,
-//         * type=interactive,
-//         * subType=mbagym,
-//         * title=一周新闻小测：2021年07月17日,
-//         * audioUrl=null,
-//         * radioUrl=null,
-//         * publishedAt=null,
-//         * tag=FT商学院,教程,一周新闻,入门级,FTQuiz,AITranslation)
-//         */
-//        ArticleActivity.start(activity, teaser)
-//    }
+    private fun selectItem(index: Int) {
+        Log.i(TAG, "JS interface responding to click on an item")
+        if (index < 0) {
+            return
+        }
+
+        // Find which item user is clicked.
+        val teaser = articleList
+            ?.getOrNull(index)
+            ?.withMeta(channelMeta)
+            ?.withParentPerm(channelSource?.permission)
+            ?: return
+
+        Log.i(TAG, "Select item: $teaser")
+
+        /**
+         * {
+         * "id": "007000049",
+         * "type": "column",
+         * "headline": "徐瑾经济人" }
+         * Canonical URL: http://www.ftchinese.com/channel/column.html
+         * Content URL: https://api003.ftmailbox.com/column/007000049?webview=ftcapp&bodyonly=yes
+         */
+        if (teaser.type == ArticleType.Column) {
+            Log.i(TAG, "Open a column: $teaser")
+
+            ChannelActivity.start(context, ChannelSource.fromTeaser(teaser))
+            return
+        }
+
+        /**
+         * For this type of data, load url directly.
+         * Teaser(
+         * id=44330,
+         * type=interactive,
+         * subType=mbagym,
+         * title=一周新闻小测：2021年07月17日,
+         * audioUrl=null,
+         * radioUrl=null,
+         * publishedAt=null,
+         * tag=FT商学院,教程,一周新闻,入门级,FTQuiz,AITranslation)
+         */
+        ArticleActivity.start(activity, teaser)
+    }
 
     override fun onDestroy() {
         super.onDestroy()

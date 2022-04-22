@@ -58,7 +58,7 @@ class SearchableActivity : AppCompatActivity() {
 
             // Use WVClient and override the onPageFinished method.
             // The webpage handles pagination itself.
-            webViewClient = object : WVClient() {
+            webViewClient = object : WVClient(context) {
                 // Don't use onPageFinished because it'll wait for all the resources to be loaded.
                 // Some resources might be blocked by the Chinese government.
                 // Evaluate the javascript as soon the HTML is loaded.
