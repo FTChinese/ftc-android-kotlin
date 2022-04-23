@@ -2,6 +2,7 @@ package com.ft.ftchinese.model.fetch
 
 import com.ft.ftchinese.R
 
+@Deprecated("Use ToastMessage")
 sealed class FetchUi {
     data class ResMsg(val strId: Int) : FetchUi() // Id of string resources
     data class TextMsg(val text: String) : FetchUi()
