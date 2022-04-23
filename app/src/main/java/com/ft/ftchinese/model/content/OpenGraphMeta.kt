@@ -1,5 +1,7 @@
 package com.ft.ftchinese.model.content
 
+import kotlinx.serialization.Serializable
+
 /**
  * Example data
  * description: ""
@@ -9,6 +11,7 @@ package com.ft.ftchinese.model.content
  * type: "article"
  * webUrl: "/interactive/12781"
  */
+@Serializable
 data class OpenGraphMeta(
         // The title of your object
         val title: String,
