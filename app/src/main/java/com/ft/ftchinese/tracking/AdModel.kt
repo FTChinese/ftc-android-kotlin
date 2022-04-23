@@ -1,5 +1,7 @@
 package com.ft.ftchinese.tracking
 
+import kotlinx.serialization.Serializable
+
 data class AdModel(
         val imageString: String,
         val link: String,
@@ -113,6 +115,7 @@ object AdLayout {
 
 }
 
+@Serializable
 data class Sponsor(
     // If tag or title appeares in Story#keywords
     // then hideAdd determines whether ad should be visible.
