@@ -1,52 +1,47 @@
-package com.ft.ftchinese.ui.components
+package com.ft.ftchinese.ui.webpage
 
 import android.util.Log
 import android.webkit.JavascriptInterface
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.ft.ftchinese.model.content.ChannelContent
+import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.Following
 import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.tracking.Sponsor
 import com.ft.ftchinese.tracking.SponsorManager
 import kotlinx.serialization.decodeFromString
 
-private const val TAG = "WebInterfaceViewModel"
+private const val TAG = "JsInterface"
 
-class WebClientViewModel : ViewModel() {
+sealed class JsEvent {
+    object Close : JsEvent()
+    data class Progress(val loading: Boolean) : JsEvent()
+    data class Alert(val message: String) : JsEvent()
+    data class TeaserSelected(val teaser: Teaser) : JsEvent()
+    data class ChannelSelected(val source: ChannelSource) : JsEvent()
+    data class TopicClicked(val following: Following) : JsEvent()
+}
 
-    val progressLiveData = MutableLiveData<Boolean>()
-    val exitLiveData = MutableLiveData(false)
-    val alertLiveData = MutableLiveData("")
-
-    val teaserSelected: MutableLiveData<Teaser> by lazy {
-        MutableLiveData<Teaser>()
-    }
-
-    val sponsorsReceived: MutableLiveData<List<Sponsor>> by lazy {
-        MutableLiveData<List<Sponsor>>()
-    }
-
-    val followTagClicked: MutableLiveData<Following> by lazy {
-        MutableLiveData<Following>()
-    }
+class JsInterface(
+    private val onEvent: (JsEvent) -> Unit = {}
+) {
 
     private var teasers: List<Teaser> = listOf()
 
     @JavascriptInterface
     fun wvClosePage() {
-        exitLiveData.postValue(true)
+        onEvent(JsEvent.Close)
     }
 
     @JavascriptInterface
     fun wvProgress(loading: Boolean = false) {
-        progressLiveData.postValue(loading)
+        onEvent(JsEvent.Progress(loading))
     }
 
     @JavascriptInterface
     fun wvAlert(msg: String) {
-        alertLiveData.postValue(msg)
+        onEvent(JsEvent.Alert(msg))
     }
 
     /**
@@ -86,22 +81,46 @@ class WebClientViewModel : ViewModel() {
 
     private fun articleListItemSelected(index: Int) {
         Log.i(TAG, "JS interface responding to click on an item")
-        if (index < 0 || index >= teasers.size) {
-            return
-        }
 
-        teasers[index].let {
-            teaserSelected.postValue(it)
-        }
+        // Find which item user is clicked.
+        teasers
+            .getOrNull(index)
+            ?.let {
+                /**
+                 * {
+                 * "id": "007000049",
+                 * "type": "column",
+                 * "headline": "徐瑾经济人" }
+                 * Canonical URL: http://www.ftchinese.com/channel/column.html
+                 * Content URL: https://api003.ftmailbox.com/column/007000049?webview=ftcapp&bodyonly=yes
+                 */
+                if (it.type == ArticleType.Column) {
+                    onEvent(JsEvent.ChannelSelected(
+                        ChannelSource.fromTeaser(it)
+                    ))
+                } else {
+                    /**
+                     * For this type of data, load url directly.
+                     * Teaser(
+                     * id=44330,
+                     * type=interactive,
+                     * subType=mbagym,
+                     * title=一周新闻小测：2021年07月17日,
+                     * audioUrl=null,
+                     * radioUrl=null,
+                     * publishedAt=null,
+                     * tag=FT商学院,教程,一周新闻,入门级,FTQuiz,AITranslation)
+                     */
+                    onEvent(JsEvent.TeaserSelected(it))
+                }
+            }
     }
 
     @JavascriptInterface
     fun onLoadedSponsors(message: String) {
-
         Log.i(TAG, "Loaded sponsors: $message")
 
         marshaller.decodeFromString<List<Sponsor>>(message).let {
-            sponsorsReceived.postValue(it)
             SponsorManager.sponsors = it
         }
     }
@@ -112,7 +131,7 @@ class WebClientViewModel : ViewModel() {
 
         marshaller.decodeFromString<Following>(message)
             .let {
-                followTagClicked.postValue(it)
+                onEvent(JsEvent.TopicClicked(it))
             }
     }
 }
