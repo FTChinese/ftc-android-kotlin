@@ -42,7 +42,7 @@ import com.ft.ftchinese.ui.account.WxInfoViewModel
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.TabPages
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.channel.MyftPagerAdapter
+import com.ft.ftchinese.ui.myft.MyftPagerAdapter
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
 import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment
 import com.ft.ftchinese.ui.login.AuthActivity
