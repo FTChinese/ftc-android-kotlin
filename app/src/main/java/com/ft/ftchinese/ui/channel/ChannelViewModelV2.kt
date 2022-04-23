@@ -20,7 +20,7 @@ import kotlinx.coroutines.withContext
 
 private const val TAG = "ChannelViewModelV2"
 
-private data class Loaded(
+data class Loaded(
     val html: String,
     val isRemote: Boolean
 )
