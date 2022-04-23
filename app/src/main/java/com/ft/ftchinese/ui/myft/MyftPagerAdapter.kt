@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.channel
+package com.ft.ftchinese.ui.myft
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager

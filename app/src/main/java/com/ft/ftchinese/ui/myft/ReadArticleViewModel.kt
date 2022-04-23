@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.channel
+package com.ft.ftchinese.ui.myft
 
 import android.app.Application
 import android.util.Log
