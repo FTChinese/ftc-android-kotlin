@@ -31,7 +31,7 @@ class ChannelFragmentV2 : ScopedFragment() {
 
     private lateinit var sessionManager: SessionManager
 
-    private lateinit var channelViewModel: ChannelViewModel
+    private lateinit var channelViewModel: ChannelViewModelV2
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -55,7 +55,7 @@ class ChannelFragmentV2 : ScopedFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        channelViewModel = ViewModelProvider(this)[ChannelViewModel::class.java]
+        channelViewModel = ViewModelProvider(this)[ChannelViewModelV2::class.java]
 
         connectionLiveData.observe(viewLifecycleOwner) {
             channelViewModel.isNetworkAvailable.value = it
