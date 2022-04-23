@@ -66,7 +66,7 @@ class AiAudioFragment : BottomSheetDialogFragment() {
                     FileCache(requireContext()),
                     ArticleDb.getInstance(this)
                 )
-            ).get(ArticleViewModel::class.java)
+            )[ArticleViewModel::class.java]
         } ?: throw Exception("Invalid activity")
 
         setupViewModel()
@@ -96,7 +96,7 @@ class AiAudioFragment : BottomSheetDialogFragment() {
             databaseEnabled = true
         }
 
-        val wvClient = WVClient()
+        val wvClient = WVClient(requireContext())
 
         binding.audioWebView.apply {
 
