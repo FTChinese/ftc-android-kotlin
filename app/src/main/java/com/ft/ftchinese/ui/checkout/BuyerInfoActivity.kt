@@ -89,13 +89,13 @@ fun BuyerInfoScreen(
     val wvState = rememberWebViewStateWithHTMLData(
         data = "Loading...",
     )
-    val existState by infoViewModel.exitLiveData.observeAsState(false)
+    val exitState by infoViewModel.exitLiveData.observeAsState(false)
     val alertState by infoViewModel.alertLiveData.observeAsState("")
 
     val inProgress by infoViewModel.progressLiveData.observeAsState(true)
     val htmlRendered by infoViewModel.htmlRendered.observeAsState()
 
-    if (existState) {
+    if (exitState) {
         onExit()
         return
     }
@@ -118,13 +118,13 @@ fun BuyerInfoScreen(
 
     when (val h = htmlRendered) {
         is FetchResult.LocalizedError -> {
-            wvState.content = WebContent.Data(context.getString(h.msgId), baseUrl = baseUrl)
+            wvState.content = WebContent.Data(context.getString(h.msgId), baseUrl = "")
         }
         is FetchResult.TextError -> {
             wvState.content = WebContent.Data(h.text, baseUrl = "")
         }
         is FetchResult.Success -> {
-            wvState.content = WebContent.Data(h.data, baseUrl = "")
+            wvState.content = WebContent.Data(h.data, baseUrl = baseUrl)
         }
         else -> { }
     }
