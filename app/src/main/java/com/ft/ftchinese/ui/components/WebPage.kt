@@ -39,7 +39,7 @@ fun WebPage(
                 it.settings.domStorageEnabled = true
                 it.settings.databaseEnabled = true
                 it.webChromeClient = ChromeClient()
-                it.webViewClient = WVClient(
+                it.webViewClient = WVClientV2(
                     context = context,
                     onEvent = onWebViewEvent
                 )
