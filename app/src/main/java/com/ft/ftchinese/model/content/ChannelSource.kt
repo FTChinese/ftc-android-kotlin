@@ -25,6 +25,9 @@ data class ChannelSource (
 
 ) : Parcelable {
 
+    val isFragment: Boolean
+        get() = htmlType == HTML_TYPE_FRAGMENT
+
     fun withParentPerm(p: Permission?): ChannelSource {
         if (p == null) {
             return this
@@ -46,6 +49,14 @@ data class ChannelSource (
     val fileName: String?
         get() = if (name.isBlank()) null else "$name.html"
 
+    // Somehow there's a problem on the the web page's pagination:
+    // the number on of the current page is never disabled
+    // so user could click the page 2 even if it is no page2.
+    // TO handle such situation, we just ignore it.
+    fun isSamePage(other: ChannelSource): Boolean {
+        return query.contains(other.query)
+    }
+
     /**
      * Returns a new instance for a pagination link.
      * Example:
@@ -63,16 +74,6 @@ data class ChannelSource (
      */
     fun withPagination(pageKey: String, pageNumber: String): ChannelSource {
         val qs = "$pageKey=$pageNumber"
-
-        // Somehow there's a problem on the the web page's pagination:
-        // the number on of the current page is never disabled
-        // so user could click the page 2 even if it is no page2.
-        // TO handle such situation, we just let it to refresh data rather than opening a new ChannelActivity.
-        if (query.contains(qs)) {
-            return this.apply {
-                shouldReload = true
-            }
-        }
 
         return ChannelSource(
             title = title,
