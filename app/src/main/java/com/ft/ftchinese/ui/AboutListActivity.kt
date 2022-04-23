@@ -18,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -31,7 +30,6 @@ import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.ui.about.AboutActivityScreen
 import com.ft.ftchinese.ui.about.AboutDetailsActivityScreen
 import com.ft.ftchinese.ui.components.Toolbar
-import com.ft.ftchinese.ui.components.WebClientViewModel
 import com.ft.ftchinese.ui.theme.OTheme
 
 class AboutListActivity : ComponentActivity() {
@@ -40,11 +38,9 @@ class AboutListActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            AboutApp(
-                onExit = {
-                    finish()
-                }
-            )
+            AboutApp {
+                finish()
+            }
         }
     }
 
@@ -72,7 +68,6 @@ enum class AboutScreen {
 
 @Composable
 fun AboutApp(
-    wiViewModel: WebClientViewModel = viewModel(),
     onExit: () -> Unit
 ) {
     val context = LocalContext.current
@@ -154,8 +149,7 @@ fun AboutApp(
                 ) { entry ->
                     val url = entry.arguments?.getString("url")!!
                     AboutDetailsActivityScreen(
-                        url = url,
-                        webViewModel = wiViewModel
+                        url = url
                     )
                 }
             }
