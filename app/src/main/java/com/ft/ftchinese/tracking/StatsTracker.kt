@@ -201,7 +201,7 @@ class StatsTracker private constructor(context: Context) {
         @Synchronized
         fun getInstance(context: Context): StatsTracker {
             if (instance == null) {
-                instance = StatsTracker(context)
+                instance = StatsTracker(context.applicationContext)
             }
 
             return instance!!
