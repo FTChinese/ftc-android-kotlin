@@ -1,27 +1,37 @@
 package com.ft.ftchinese.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
-import com.ft.ftchinese.ui.webpage.ChromeClient
-import com.ft.ftchinese.ui.webpage.WVClient
+import com.ft.ftchinese.ui.theme.OColor
+import com.ft.ftchinese.ui.webpage.*
 import com.google.accompanist.web.WebView
 import com.google.accompanist.web.WebViewState
 
 @Composable
 fun WebPage(
-    loading: Boolean,
-    state: WebViewState,
-    wvClient: WVClient,
-    jsInterface: WebClientViewModel,
+    wvState: WebViewState,
+    onJsEvent: (JsEvent) -> Unit,
+    onWebViewEvent: (WVEvent) -> Unit,
 ) {
-    ProgressLayout(
-        loading = loading
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier
+            .verticalScroll(rememberScrollState())
+            .fillMaxSize()
     ) {
         WebView(
-            state = state,
-            modifier = Modifier.fillMaxSize(),
+            state = wvState,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(OColor.paper),
             captureBackPresses = false,
             onCreated = {
                 it.settings.javaScriptEnabled = true
@@ -29,8 +39,14 @@ fun WebPage(
                 it.settings.domStorageEnabled = true
                 it.settings.databaseEnabled = true
                 it.webChromeClient = ChromeClient()
-                it.webViewClient = wvClient
-                it.addJavascriptInterface(jsInterface, JS_INTERFACE_NAME)
+                it.webViewClient = WVClient(
+                    context = context,
+                    onEvent = onWebViewEvent
+                )
+                it.addJavascriptInterface(
+                    JsInterface(onJsEvent),
+                    JS_INTERFACE_NAME,
+                )
             }
         )
     }
