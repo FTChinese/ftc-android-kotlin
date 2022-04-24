@@ -20,8 +20,8 @@ import com.ft.ftchinese.ui.components.CustomerService
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.product.PriceList
 import com.ft.ftchinese.ui.product.ProductCard
+import com.ft.ftchinese.ui.product.SubsRuleContent
 import com.ft.ftchinese.ui.theme.Dimens
-import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @Composable
 fun PaywallScreen(
@@ -112,11 +112,6 @@ fun SubsStatusBox(
         ),
         style = MaterialTheme.typography.body1
     )
-}
-
-@Composable
-fun SubsRuleContent() {
-    MarkdownText(markdown = paywallGuide)
 }
 
 @Preview(showBackground = true)

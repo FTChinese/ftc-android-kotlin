@@ -18,6 +18,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.ui.components.ClickableRow
 import com.ft.ftchinese.ui.components.ListItemTwoCol
+import com.ft.ftchinese.ui.product.SubsRuleContent
 import com.ft.ftchinese.ui.product.ProductHeading
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
@@ -55,6 +56,8 @@ fun MemberScreen(
 
                 }
             )
+
+            SubsRuleContent()
         }
     }
 }
