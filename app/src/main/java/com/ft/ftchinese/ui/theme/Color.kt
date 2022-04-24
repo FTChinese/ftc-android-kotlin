@@ -25,6 +25,9 @@ object OColor {
     val crimson = Color(0xFFcc0000)
     val candy = Color(0xFFff7faa)
 
+    // Tint claret
+    val claret80 = Color(0xFFcc1452)
+
     // Tint black
     val black5 = Color(0xFFf2e5da)
     val black10 = Color(0xFFe6d9ce)
