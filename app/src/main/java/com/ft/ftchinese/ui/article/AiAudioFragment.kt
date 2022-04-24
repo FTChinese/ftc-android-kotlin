@@ -62,10 +62,6 @@ class AiAudioFragment : BottomSheetDialogFragment() {
         articleViewModel = activity?.run {
             ViewModelProvider(
                 this,
-                ArticleViewModelFactory(
-                    FileCache(requireContext()),
-                    ArticleDb.getInstance(this)
-                )
             )[ArticleViewModel::class.java]
         } ?: throw Exception("Invalid activity")
 

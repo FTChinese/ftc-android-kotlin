@@ -1,6 +1,8 @@
 package com.ft.ftchinese.ui.article
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
@@ -15,7 +17,7 @@ import com.ft.ftchinese.repository.ArticleClient
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.ui.base.BaseViewModel
+import com.ft.ftchinese.ui.base.isConnected
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -24,9 +26,15 @@ import kotlinx.serialization.decodeFromString
 private const val TAG = "ArticleViewModel"
 
 class ArticleViewModel(
-    private val cache: FileCache,
-    private val db: ArticleDb,
-) : BaseViewModel() {
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val cache: FileCache = FileCache(application)
+    private val db: ArticleDb = ArticleDb.getInstance(application)
+
+    val progressLiveData = MutableLiveData<Boolean>()
+    val isNetworkAvailable = MutableLiveData(application.isConnected)
+    val refreshingLiveData = MutableLiveData(false)
 
     private var _languageSelected = Language.CHINESE
 
@@ -58,6 +66,10 @@ class ArticleViewModel(
      */
     val accessChecked: MutableLiveData<Access> by lazy {
         MutableLiveData<Access>()
+    }
+
+    val openGraphLiveData: MutableLiveData<OpenGraphMeta> by lazy {
+        MutableLiveData<OpenGraphMeta>()
     }
 
     // Host activity tells fragment to switch content.
@@ -338,6 +350,8 @@ class ArticleViewModel(
             }
 
             htmlResult.value = FetchResult.Success(html)
+            progressLiveData.value = false
+            refreshingLiveData.value = false
         }
     }
 

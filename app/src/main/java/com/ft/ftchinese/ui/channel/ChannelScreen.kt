@@ -12,12 +12,10 @@ import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
-import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.components.WebPage
-import com.ft.ftchinese.ui.webpage.JsEvent
-import com.ft.ftchinese.ui.webpage.WVEvent
+import com.ft.ftchinese.ui.webpage.BaseJsEventListener
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
@@ -97,62 +95,9 @@ fun ChannelFragmentScreen(
         ) {
             WebPage(
                 wvState = wvState,
-                onJsEvent = { event ->
-                    handleJsEvent(context, event)
-                },
-                onWebViewEvent = { event ->
-                    handleWVEvent(
-                        context = context,
-                        event = event,
-                        currentChannel = source
-                    )
-                }
+                jsEventListener = BaseJsEventListener(context),
             )
         }
-    }
-}
-
-fun handleJsEvent(
-    context: Context,
-    event: JsEvent
-) {
-    when (event) {
-        is JsEvent.TeaserSelected -> {
-            ArticleActivity.start(context, event.teaser)
-        }
-        is JsEvent.ChannelSelected -> {
-            ChannelActivity.start(context, event.source)
-        }
-        else -> {}
-    }
-}
-
-fun handleWVEvent(
-    context: Context,
-    event: WVEvent,
-    currentChannel: ChannelSource,
-) {
-    when (event) {
-        is WVEvent.ChannelPage -> {
-            ChannelActivity.start(
-                context,
-                event.source.withParentPerm(
-                    currentChannel.permission
-                )
-            )
-        }
-        is WVEvent.Pagination -> {
-            val p = event.paging
-            val pagedSource = currentChannel
-                .withPagination(p.key, p.page)
-
-            if (currentChannel.isSamePage(pagedSource)) {
-                return
-            }
-
-            ChannelActivity.start(context, pagedSource)
-        }
-        else -> {}
     }
 }
 

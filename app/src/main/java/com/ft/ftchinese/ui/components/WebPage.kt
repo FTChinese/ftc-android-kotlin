@@ -17,8 +17,7 @@ import com.google.accompanist.web.WebViewState
 @Composable
 fun WebPage(
     wvState: WebViewState,
-    onJsEvent: (JsEvent) -> Unit,
-    onWebViewEvent: (WVEvent) -> Unit,
+    jsEventListener: JsEventListener,
 ) {
     val context = LocalContext.current
 
@@ -45,7 +44,7 @@ fun WebPage(
 //                    onEvent = onWebViewEvent
 //                )
                 it.addJavascriptInterface(
-                    JsInterface(onJsEvent),
+                    JsInterface(jsEventListener),
                     JS_INTERFACE_NAME,
                 )
             },

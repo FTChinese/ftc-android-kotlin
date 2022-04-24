@@ -1,47 +1,93 @@
 package com.ft.ftchinese.ui.webpage
 
+import android.content.Context
 import android.util.Log
 import android.webkit.JavascriptInterface
-import com.ft.ftchinese.model.content.ChannelContent
-import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.Following
-import com.ft.ftchinese.model.content.Teaser
+import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.enums.ArticleType
 import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.tracking.Sponsor
 import com.ft.ftchinese.tracking.SponsorManager
+import com.ft.ftchinese.ui.article.ArticleActivity
+import com.ft.ftchinese.ui.channel.ChannelActivity
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.serialization.decodeFromString
+import org.jetbrains.anko.toast
 
 private const val TAG = "JsInterface"
 
-sealed class JsEvent {
-    object Close : JsEvent()
-    data class Progress(val loading: Boolean) : JsEvent()
-    data class Alert(val message: String) : JsEvent()
-    data class TeaserSelected(val teaser: Teaser) : JsEvent()
-    data class ChannelSelected(val source: ChannelSource) : JsEvent()
-    data class TopicClicked(val following: Following) : JsEvent()
+interface JsEventListener {
+    fun onClosePage()
+    fun onProgress(loading: Boolean)
+    fun onAlert(message: String)
+    fun onTeaserClicked(teaser: Teaser)
+    fun onChannelClicked(source: ChannelSource)
+    fun onFollowTopic(following: Following)
+}
+
+open class BaseJsEventListener(
+    private val context: Context
+) : JsEventListener {
+    private val topicStore = FollowingManager.getInstance(context)
+
+    override fun onClosePage() {
+
+    }
+
+    override fun onProgress(loading: Boolean) {
+
+    }
+
+    override fun onAlert(message: String) {
+        context.toast(message)
+    }
+
+    override fun onTeaserClicked(teaser: Teaser) {
+        ArticleActivity.start(context, teaser)
+    }
+
+    override fun onChannelClicked(source: ChannelSource) {
+        ChannelActivity.start(context, source)
+    }
+
+    override fun onFollowTopic(following: Following) {
+        val isSubscribed = topicStore.save(following)
+
+        if (isSubscribed) {
+            FirebaseMessaging.getInstance()
+                .subscribeToTopic(following.topic)
+                .addOnCompleteListener { task ->
+                    Log.i(ArticleActivity.TAG, "Subscribing to topic ${following.topic} success: ${task.isSuccessful}")
+                }
+        } else {
+            FirebaseMessaging.getInstance()
+                .unsubscribeFromTopic(following.topic)
+                .addOnCompleteListener { task ->
+                    Log.i(ArticleActivity.TAG, "Unsubscribing from topic ${following.topic} success: ${task.isSuccessful}")
+                }
+        }
+    }
 }
 
 class JsInterface(
-    private val onEvent: (JsEvent) -> Unit = {}
+    private val listener: JsEventListener
 ) {
 
     private var teasers: List<Teaser> = listOf()
 
     @JavascriptInterface
     fun wvClosePage() {
-        onEvent(JsEvent.Close)
+        listener.onClosePage()
     }
 
     @JavascriptInterface
     fun wvProgress(loading: Boolean = false) {
-        onEvent(JsEvent.Progress(loading))
+        listener.onProgress(loading)
     }
 
     @JavascriptInterface
     fun wvAlert(msg: String) {
-        onEvent(JsEvent.Alert(msg))
+        listener.onAlert(msg)
     }
 
     /**
@@ -100,9 +146,9 @@ class JsInterface(
                  * Content URL: https://api003.ftmailbox.com/column/007000049?webview=ftcapp&bodyonly=yes
                  */
                 if (it.type == ArticleType.Column) {
-                    onEvent(JsEvent.ChannelSelected(
+                    listener.onChannelClicked(
                         ChannelSource.fromTeaser(it)
-                    ))
+                    )
                 } else {
                     /**
                      * For this type of data, load url directly.
@@ -116,7 +162,7 @@ class JsInterface(
                      * publishedAt=null,
                      * tag=FT商学院,教程,一周新闻,入门级,FTQuiz,AITranslation)
                      */
-                    onEvent(JsEvent.TeaserSelected(it))
+                    listener.onTeaserClicked(it)
                 }
             }
     }
@@ -137,9 +183,6 @@ class JsInterface(
     fun follow(message: String) {
         Log.i(TAG, "Clicked follow: $message")
 
-        marshaller.decodeFromString<Following>(message)
-            .let {
-                onEvent(JsEvent.TopicClicked(it))
-            }
+        listener.onFollowTopic(marshaller.decodeFromString(message))
     }
 }

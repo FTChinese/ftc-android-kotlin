@@ -37,7 +37,6 @@ class WebpageFragment : WVBaseFragment() {
         }
 
         // In case we are loading a html string.
-        // TODO: base url might not be ftc.
         wvViewModel.htmlReceived.observe(viewLifecycleOwner) {
             binding.webView.loadDataWithBaseURL(
                 Config.discoverServer(AccountCache.get()),

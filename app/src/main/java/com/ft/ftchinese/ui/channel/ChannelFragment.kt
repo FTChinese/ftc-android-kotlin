@@ -20,16 +20,16 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentChannelBinding
 import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
+import com.ft.ftchinese.ui.base.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.components.ToastMessage
-import com.ft.ftchinese.ui.webpage.ChromeClient
-import com.ft.ftchinese.ui.webpage.JsInterface
-import com.ft.ftchinese.ui.webpage.WVClient
+import com.ft.ftchinese.ui.webpage.*
 import kotlinx.coroutines.cancel
 import org.jetbrains.anko.support.v4.toast
 import java.util.*
@@ -93,6 +93,34 @@ class ChannelFragment : ScopedFragment(),
         return binding.root
     }
 
+    private val clientListener = object : WebViewListener {
+        override fun onOpenGraph(openGraph: OpenGraphMeta) {
+
+        }
+
+        override fun onChannelSelected(source: ChannelSource) {
+            ChannelActivity.start(
+                context,
+                source.withParentPerm(
+                    channelSource?.permission
+                )
+            )
+        }
+
+        override fun onPagination(paging: Paging) {
+            val currentChannel = channelSource ?: return
+
+            val pagedSource = currentChannel
+                .withPagination(paging.key, paging.page)
+
+            if (currentChannel.isSamePage(pagedSource)) {
+                return
+            }
+
+            ChannelActivity.start(context, pagedSource)
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -104,7 +132,17 @@ class ChannelFragment : ScopedFragment(),
         }
 
         setupViewModel()
-        setupUI()
+
+        configWebView(
+            webView = binding.webView,
+            jsInterface = JsInterface(
+                BaseJsEventListener(requireContext())
+            ),
+            client = WVClient(
+                context = requireContext(),
+                listener = clientListener
+            )
+        )
         channelSource?.let {
             channelViewModel.load(it, sessionManager.loadAccount())
         }
@@ -130,57 +168,6 @@ class ChannelFragment : ScopedFragment(),
 
         channelViewModel.htmlLiveData.observe(viewLifecycleOwner) {
             load(it)
-        }
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupUI() {
-        // Configure web view.
-        binding.webView.settings.apply {
-            javaScriptEnabled = true
-            loadsImagesAutomatically = true
-            domStorageEnabled = true
-            databaseEnabled = true
-        }
-
-        binding.webView.apply {
-
-            // Interact with JS.
-            // See Page/Layouts/Page/SuperDataViewController.swift#viewDidLoad() how iOS inject js to web view.
-            addJavascriptInterface(
-                JsInterface { event ->
-                    handleJsEvent(
-                        context = context,
-                        event = event)
-                },
-                JS_INTERFACE_NAME
-            )
-
-            // Set WebViewClient to handle various links
-            webViewClient = WVClient(
-                requireContext(),
-                null,
-                onEvent = { event ->
-                    channelSource?.let {
-                        handleWVEvent(
-                            context = context,
-                            event = event,
-                            currentChannel = it
-                        )
-                    }
-                }
-            )
-
-            webChromeClient = ChromeClient()
-
-            setOnKeyListener { _, keyCode, _ ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && binding.webView.canGoBack()) {
-                    binding.webView.goBack()
-                    return@setOnKeyListener true
-                }
-
-                false
-            }
         }
     }
 

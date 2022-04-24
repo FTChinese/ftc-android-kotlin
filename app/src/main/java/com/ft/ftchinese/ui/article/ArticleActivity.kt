@@ -25,7 +25,6 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.databinding.ActivityArticleBinding
 import com.ft.ftchinese.model.content.*
 import com.ft.ftchinese.model.fetch.FetchResult
@@ -34,7 +33,6 @@ import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
-import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
@@ -109,11 +107,7 @@ class ArticleActivity : ScopedAppActivity(),
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
 
         articleViewModel = ViewModelProvider(
-            this,
-            ArticleViewModelFactory(
-                FileCache(this),
-                ArticleDb.getInstance(this)
-            )
+            this
         )[ArticleViewModel::class.java]
 
         accessViewModel = ViewModelProvider(this)[AccessViewModel::class.java]
@@ -127,14 +121,12 @@ class ArticleActivity : ScopedAppActivity(),
         connectionLiveData.observe(this) {
             articleViewModel.isNetworkAvailable.value = it
         }
-        articleViewModel.isNetworkAvailable.value = isConnected
 
         setupViewModel()
         setupUI()
 
         statsTracker.selectListItem(teaser)
     }
-
 
     private fun setupUI() {
 
@@ -166,6 +158,14 @@ class ArticleActivity : ScopedAppActivity(),
 
         screenshotViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
+        }
+
+        articleViewModel.progressLiveData.observe(this) {
+            binding.inProgress = it
+        }
+
+        articleViewModel.refreshingLiveData.observe(this) {
+            binding.articleRefresh.isRefreshing = it
         }
 
         // Access rights may comes from 3 sources, in order:
@@ -201,23 +201,6 @@ class ArticleActivity : ScopedAppActivity(),
             binding.isBilingual = it.isBilingual
         }
 
-        // If article view model render the complete html locally, load it into webview as a string.
-        articleViewModel.htmlResult.observe(this) { result ->
-            binding.progressBar.visibility = View.GONE
-            binding.articleRefresh.isRefreshing = false
-            when (result) {
-                is FetchResult.LocalizedError -> {
-                    toast(result.msgId)
-                }
-                is FetchResult.TextError -> toast(result.text)
-                is FetchResult.Success -> {
-                    // Pass html string to webview.
-                    Log.i(TAG, "Loading web page content")
-                    wvViewModel.htmlReceived.value = result.data
-                }
-            }
-        }
-
         articleViewModel.audioFoundLiveData.observe(this) {
             showAudioIcon = it
             invalidateOptionsMenu()
@@ -245,7 +228,7 @@ class ArticleActivity : ScopedAppActivity(),
          * an article loading directly with URL.
          * The value is posted from WVClient via WVViewModel.
          */
-        wvViewModel.openGraphEvaluated.observe(this) {
+        articleViewModel.openGraphLiveData.observe(this) {
 
             // Even if the article is loaded by clicking URL,
             // we can still get enough structured data if
@@ -254,21 +237,7 @@ class ArticleActivity : ScopedAppActivity(),
                 return@observe
             }
 
-            val og = try {
-                marshaller.decodeFromString<OpenGraphMeta>(it)
-            } catch (e: Exception) {
-                null
-            } ?: return@observe
-
-            articleViewModel.lastResortByOG(og, teaser)
-        }
-
-        // Stop progress after webview send signal page finished loading.
-        // However, this is not of much use since the it waits all
-        // static loaded.
-        wvViewModel.pageFinished.observe(this) {
-            Log.i(TAG, "Webpage finished loading")
-            binding.inProgress = !it
+            articleViewModel.lastResortByOG(it, teaser)
         }
 
         // Pass the share app selected share component to article view model.

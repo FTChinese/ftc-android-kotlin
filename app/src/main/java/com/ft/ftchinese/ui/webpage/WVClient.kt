@@ -12,6 +12,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.model.content.OpenGraphMeta
 import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.repository.Config
@@ -37,6 +39,15 @@ private const val TYPE_TAG = "tag"
 private const val TYPE_M = "m"
 private const val TYPE_ARCHIVE = "archiver"
 
+interface WebViewListener {
+    // After article page executed js to collect open graph meta data
+    fun onOpenGraph(openGraph: OpenGraphMeta)
+    // When a link in web view point to a channel
+    fun onChannelSelected(source: ChannelSource)
+    // When pagination link in a channel page is clicked
+    fun onPagination(paging: Paging)
+}
+
 /**
  * WVClient is use mostly to handle webUrl clicks loaded into
  * ViewPagerFragment.
@@ -45,7 +56,7 @@ open class WVClient(
     private val context: Context,
     @Deprecated("")
     private val viewModel: WVViewModel? = null,
-    private val onEvent: (WVEvent) -> Unit = {}
+    private val listener: WebViewListener? = null,
 ) : WebViewClient() {
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -67,8 +78,8 @@ open class WVClient(
             JsSnippets.openGraph
         ) {
             Log.i(TAG, "JS evaluation result: $it")
-            viewModel?.openGraphEvaluated?.value = it
-            onEvent(WVEvent.OpenGraph(marshaller.decodeFromString(it)))
+            listener?.onOpenGraph(marshaller.decodeFromString(it))
+
         }
     }
 
@@ -222,9 +233,7 @@ open class WVClient(
             // Since the pagination query parameter's key is not uniform across whole site, we have to explicitly tells host.
             // Let host activity/fragment to handle pagination link
 //            mListener?.onPagination(paging)
-
-            viewModel?.pagingBtnClicked?.value = paging
-            onEvent(WVEvent.Pagination(paging))
+            listener?.onPagination(paging)
             return true
         }
 
@@ -286,8 +295,7 @@ open class WVClient(
              */
             TYPE_CHANNEL -> {
                 Log.i(TAG, "Open a channel link: $uri")
-                viewModel?.urlChannelSelected?.value = channelFromUri(uri)
-                onEvent(WVEvent.ChannelPage(channelFromUri(uri)))
+                listener?.onChannelSelected(channelFromUri(uri))
                 true
             }
 
@@ -298,9 +306,7 @@ open class WVClient(
              */
             TYPE_M -> {
                 Log.i(TAG, "Loading marketing page")
-
-                viewModel?.urlChannelSelected?.value = marketingChannelFromUri(uri)
-                onEvent(WVEvent.ChannelPage(marketingChannelFromUri(uri)))
+                listener?.onChannelSelected(marketingChannelFromUri(uri))
                 true
             }
 
@@ -311,8 +317,7 @@ open class WVClient(
             TYPE_TAG,
             TYPE_ARCHIVE -> {
                 Log.i(TAG, "Loading tag or archive")
-                viewModel?.urlChannelSelected?.value = tagOrArchiveChannel(uri)
-                onEvent(WVEvent.ChannelPage(tagOrArchiveChannel(uri)))
+                listener?.onChannelSelected(tagOrArchiveChannel(uri))
                 true
             }
 

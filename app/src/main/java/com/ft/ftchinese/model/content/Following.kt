@@ -130,7 +130,7 @@ class FollowingManager private constructor(context: Context) {
 
         @Synchronized fun getInstance(ctx: Context): FollowingManager {
             if (instance == null) {
-                instance = FollowingManager(ctx)
+                instance = FollowingManager(ctx.applicationContext)
             }
             return instance!!
         }
