@@ -33,6 +33,7 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.base.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.webpage.ChromeClient
 import com.ft.ftchinese.ui.webpage.WVClient
 import com.ft.ftchinese.ui.webpage.WVViewModel
@@ -110,8 +111,7 @@ class ChannelFragment : ScopedFragment(),
 
         channelViewModel = ViewModelProvider(this)[ChannelViewModel::class.java]
 
-        wvViewModel = ViewModelProvider(this)
-            .get(WVViewModel::class.java)
+        wvViewModel = ViewModelProvider(this)[WVViewModel::class.java]
 
         // Network status.
         connectionLiveData.observe(viewLifecycleOwner) {
@@ -120,7 +120,9 @@ class ChannelFragment : ScopedFragment(),
 
         setupViewModel()
         setupUI()
-        initLoading()
+        channelSource?.let {
+            channelViewModel.load(it, sessionManager.loadAccount())
+        }
     }
 
     private fun setupViewModel() {
@@ -134,14 +136,15 @@ class ChannelFragment : ScopedFragment(),
             toast(R.string.refresh_success)
         }
 
-        channelViewModel.htmlRendered.observe(viewLifecycleOwner) {
-            Log.i(TAG, "Loaded channel content: ${channelSource?.fileName}")
-
+        channelViewModel.errorLiveData.observe(viewLifecycleOwner) {
             when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.TextError -> toast(it.text)
-                is FetchResult.Success -> load(it.data)
+                is ToastMessage.Resource -> toast(it.id)
+                is ToastMessage.Text -> toast(it.text)
             }
+        }
+
+        channelViewModel.htmlLiveData.observe(viewLifecycleOwner) {
+            load(it)
         }
 
         /**
@@ -150,15 +153,6 @@ class ChannelFragment : ScopedFragment(),
          */
         wvViewModel.urlChannelSelected.observe(viewLifecycleOwner) {
             ChannelActivity.start(context, it.withParentPerm(channelSource?.permission))
-        }
-
-        // If web view signaled that loading a url is finished.
-        wvViewModel.pageFinished.observe(viewLifecycleOwner) {
-            // If finished loading, stop progress.
-            if (it) {
-                binding.inProgress = false
-                binding.swipeRefresh.isRefreshing = false
-            }
         }
 
         wvViewModel.pagingBtnClicked.observe(viewLifecycleOwner) {
@@ -203,37 +197,8 @@ class ChannelFragment : ScopedFragment(),
 
     override fun onRefresh() {
         toast(R.string.refreshing_data)
-        initLoading()
-    }
-
-    private fun initLoading() {
-        val chSrc = channelSource
-        if (chSrc == null) {
-            binding.swipeRefresh.isRefreshing = false
-            return
-        }
-
-        // For partial HTML, we need to crawl its content and render it with a template file to get the template HTML page.
-        when (chSrc.htmlType) {
-            HTML_TYPE_FRAGMENT -> {
-                Log.i(TAG, "initLoading: html fragment")
-
-                if (binding.swipeRefresh.isRefreshing) {
-                    channelViewModel.refresh(chSrc, sessionManager.loadAccount())
-                } else {
-                    channelViewModel.load(chSrc, sessionManager.loadAccount())
-                }
-            }
-            // For complete HTML, load it directly into Web view.
-            HTML_TYPE_COMPLETE -> {
-                val url =  Config.buildChannelSourceUrl(sessionManager.loadAccount(), chSrc) ?: return
-                Log.i(TAG, "initLoading: web page on $url")
-                binding.webView.loadUrl(url.toString())
-                if (binding.swipeRefresh.isRefreshing) {
-                    toast(R.string.refresh_success)
-                    binding.swipeRefresh.isRefreshing = false
-                }
-            }
+        channelSource?.let {
+            channelViewModel.refresh(it, sessionManager.loadAccount())
         }
     }
 

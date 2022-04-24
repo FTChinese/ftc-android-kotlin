@@ -9,11 +9,9 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.TemplateBuilder
 import com.ft.ftchinese.model.fetch.Fetch
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileCache
-import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.components.ToastMessage
 import kotlinx.coroutines.Dispatchers
@@ -41,142 +39,124 @@ class ChannelViewModel(application: Application) :
         MutableLiveData<String>()
     }
 
-    val htmlRendered: MutableLiveData<FetchResult<String>> by lazy {
-        MutableLiveData<FetchResult<String>>()
-    }
-
     fun load(channelSource: ChannelSource, account: Account?) {
 
-       val cacheName = channelSource.fileName
-
-        Log.i(TAG, "Loading channel content for $channelSource. Cache file name $cacheName")
-
+        progressLiveData.value = true
         viewModelScope.launch {
-            // Fetch from server
-            if (cacheName.isNullOrBlank()) {
-                Log.i(TAG, "Channel ${channelSource.path} cache file name empty. Load from server.")
-                loadFromServer(channelSource, account)
-                return@launch
-            }
 
-            val ok = loadFromCache(cacheName, account)
-            // If loaded from cache, update cache silently and stop.
-            if (ok) {
-                Log.i(TAG, "Channel ${channelSource.path} cache found. Start silent update.")
-                silentUpdate(channelSource, account)
-                return@launch
-            }
+            val loaded = loadFromCacheOrRemote(channelSource, account)
 
-            Log.i(TAG, "Start loading ${channelSource.path} from server")
-            loadFromServer(channelSource, account)
-        }
-    }
-
-    /**
-     * @return Boolean - true if loaded from cache, false otherwise.
-     */
-    private suspend fun loadFromCache(cacheName: String, account: Account?): Boolean {
-        progressLiveData.value = true
-        try {
-            Log.i(TAG, "Loading channel cache file $cacheName")
-            val content = withContext(Dispatchers.IO) {
-                cache.loadText(cacheName)
-            }
-            // Cache not found
-            if (content.isNullOrBlank()) {
-                Log.i(TAG, "Cached channel not found")
+            if (loaded == null) {
+                errorLiveData.value = ToastMessage.Text("Error: no data loaded!")
                 progressLiveData.value = false
-                return false
+                return@launch
             }
 
-            htmlRendered.value = render(content, account)
+            setHtmlData(
+                isFragment = channelSource.isFragment,
+                htmlData = loaded.html,
+                account = account
+            )
+
             progressLiveData.value = false
-            // Rendered from cache
-            return true
-        } catch (e: Exception) {
-            e.message?.let {
-                Log.i(TAG, it)
+
+            if (loaded.isRemote || isNetworkAvailable.value != true) {
+                return@launch
             }
-            // Error from cache.
-            progressLiveData.value = false
-            return false
+
+            Log.i(TAG, "Background update ${channelSource.path}")
+            loadRemoteHtml(channelSource, account)?.let {
+                setHtmlData(
+                    isFragment = channelSource.isFragment,
+                    htmlData = it,
+                    account = account
+                )
+            }
         }
     }
 
-    private suspend fun loadFromServer(channelSource: ChannelSource, account: Account?) {
-        progressLiveData.value = true
+    private suspend fun loadFromCacheOrRemote(source: ChannelSource, account: Account?): Loaded? {
+        val cacheName = source.fileName
 
-        htmlRendered.value = fetchAndRender(channelSource, account)
+        if (!cacheName.isNullOrBlank()) {
+            Log.i(TAG, "Load channel ${source.path} from cache")
+            val html = loadCachedHtml(cacheName)
+            if (html != null) {
+                return Loaded(
+                    html = html,
+                    isRemote = false
+                )
+            }
+        }
 
-        progressLiveData.value = false
+        if (isNetworkAvailable.value != true) {
+            errorLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
+            return null
+        }
+
+        Log.i(TAG, "Load channel ${source.path} from server")
+        return loadRemoteHtml(source, account)?.let {
+            Loaded(
+                html = it,
+                isRemote = true
+            )
+        }
     }
 
     fun refresh(channelSource: ChannelSource, account: Account?) {
+        errorLiveData.value = ToastMessage.Resource(R.string.refreshing_data)
+        refreshingLiveData.value = true
+
+        if (isNetworkAvailable.value != true) {
+            errorLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
+            return
+        }
+
         viewModelScope.launch {
-            refreshingLiveData.value = true
-            htmlRendered.value = fetchAndRender(channelSource, account)
+            loadRemoteHtml(channelSource, account)?.let {
+                setHtmlData(
+                    isFragment = channelSource.isFragment,
+                    htmlData = it,
+                    account = account
+                )
+            }
+
             refreshingLiveData.value = false
         }
     }
 
-    private suspend fun render(content: String, account: Account?): FetchResult<String> {
-        val template = withContext(Dispatchers.IO) {
-            cache.readChannelTemplate()
-        }
-
-        val html = withContext(Dispatchers.Default) {
-            TemplateBuilder(template)
-                .withChannel(content)
-                .withUserInfo(account)
-                .render()
-        }
-
-        return FetchResult.Success(html)
-    }
-
-    private suspend fun silentUpdate(channelSource: ChannelSource, account: Account?) {
-        if (isNetworkAvailable.value != true) {
-            return
-        }
-
-        val url = Config.buildChannelSourceUrl(account, channelSource) ?: return
-
-        Log.i(TAG, "Silent update ${channelSource.path} from $url")
-
-        try {
-            val content = withContext(Dispatchers.IO) {
-                Fetch()
-                    .get(url.toString())
-                    .endText()
-                    .body
-            } ?: return
-
-            render(content, account)
-
-            channelSource.fileName?.let {
-                cacheChannel(it, content)
-            }
-        } catch (e: Exception) {
-            e.message?.let {
-                Log.i(TAG, it)
-            }
+    private suspend fun setHtmlData(
+        isFragment: Boolean,
+        htmlData: String,
+        account: Account?
+    ) {
+        Log.i(TAG, "Set html string")
+        htmlLiveData.value = if (isFragment) {
+            render(htmlData, account)
+        } else {
+            htmlData
         }
     }
 
-    // Used when both loading and refreshing.
-    private suspend fun fetchAndRender(channelSource: ChannelSource, account: Account?): FetchResult<String> {
-        Log.i(TAG, "Fetching channel ${channelSource.path} from server")
-        if (isNetworkAvailable.value != true) {
-            return FetchResult.LocalizedError(R.string.prompt_no_network)
+    private suspend fun loadCachedHtml(fileName: String): String? {
+        return withContext(Dispatchers.IO) {
+            cache.loadText(fileName)
         }
+    }
 
-        val url = Config.buildChannelSourceUrl(account, channelSource)
+    private suspend fun loadRemoteHtml(
+        source: ChannelSource,
+        account: Account?
+    ): String? {
+
+        val url = Config.buildChannelSourceUrl(account, source)
         if (url == null) {
-            Log.i(TAG,"Channel url for ${channelSource.path} is emmpty")
-            return FetchResult.LocalizedError(R.string.api_empty_url)
+            Log.i(TAG,"Channel url for ${source.path} is empty")
+            errorLiveData.value = ToastMessage.Resource(R.string.api_empty_url)
+            return null
         }
 
-        Log.i(TAG, "Channel ${channelSource.path} url $url")
+        Log.i(TAG, "Fetch channel page ${source.path} from $url")
         try {
             val content = withContext(Dispatchers.IO) {
                 Fetch()
@@ -186,25 +166,37 @@ class ChannelViewModel(application: Application) :
             }
 
             if (content.isNullOrBlank()) {
-                Log.i(TAG, "Channel ${channelSource.path} data not fetched from server")
-                return FetchResult.LocalizedError(R.string.loading_failed)
+                Log.i(TAG, "Channel ${source.path} data not fetched from server")
+                errorLiveData.value = ToastMessage.Resource(R.string.loading_failed)
+                return null
             }
 
-            channelSource.fileName?.let {
-                cacheChannel(it, content)
+            viewModelScope.launch(Dispatchers.IO) {
+
+                source.fileName?.let {
+                    Log.i(TAG, "Cache channel file $it")
+                    cache.saveText(it, content)
+                }
             }
 
-            return render(content, account)
+            return content
         } catch (e: Exception) {
-            e.message?.let{ Log.i(TAG, it)}
-            return FetchResult.fromException(e)
+            e.message?.let { Log.i(TAG, it) }
+            errorLiveData.value = ToastMessage.fromException(e)
+            return null
         }
     }
 
-    private fun cacheChannel(filename: String, content: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            Log.i(TAG, "Caching channel started $filename")
-            cache.saveText(filename, content)
+    private suspend fun render(content: String, account: Account?): String {
+        val template = withContext(Dispatchers.IO) {
+            cache.readChannelTemplate()
+        }
+
+        return withContext(Dispatchers.Default) {
+            TemplateBuilder(template)
+                .withChannel(content)
+                .withUserInfo(account)
+                .render()
         }
     }
 }
