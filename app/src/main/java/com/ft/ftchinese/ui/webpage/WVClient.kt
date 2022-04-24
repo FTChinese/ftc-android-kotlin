@@ -106,21 +106,6 @@ open class WVClient(
     private val viewModel: WVViewModel? = null
 ) : WebViewClient() {
 
-    private fun getPrivilegeCode(): String {
-        val account = AccountCache.get()
-
-        val prvl = when (account?.membership?.tier) {
-            Tier.STANDARD -> """['premium']"""
-            Tier.PREMIUM -> """['premium', 'EditorChoice']"""
-            else -> "[]"
-        }
-
-        return """
-        window.gPrivileges=$prvl;
-        updateHeadlineLocks();
-        """.trimIndent()
-    }
-
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
