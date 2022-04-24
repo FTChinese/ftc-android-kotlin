@@ -61,11 +61,9 @@ class MemberActivity : ScopedAppActivity(),
     }
 
     private fun setupViewModel() {
-        accountViewModel = ViewModelProvider(this)
-            .get(AccountViewModel::class.java)
+        accountViewModel = ViewModelProvider(this)[AccountViewModel::class.java]
 
-        subsStatusViewModel = ViewModelProvider(this)
-            .get(SubsStatusViewModel::class.java)
+        subsStatusViewModel = ViewModelProvider(this)[SubsStatusViewModel::class.java]
 
         connectionLiveData.observe(this) {
             accountViewModel.isNetworkAvailable.value = it
