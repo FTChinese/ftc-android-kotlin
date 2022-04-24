@@ -8,10 +8,10 @@ import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Cycle
@@ -24,17 +24,13 @@ import com.ft.ftchinese.ui.theme.OColor
 import org.threeten.bp.LocalDate
 
 @Composable
-private fun ProductHeading(text: String) {
-    Row(
+fun ProductHeading(text: String) {
+    Text(
+        text = text,
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.h5,
-        )
-    }
+        textAlign = TextAlign.Center,
+        style = MaterialTheme.typography.h5,
+    )
     Divider(color = OColor.teal)
     Spacer(modifier = Modifier.height(Dimens.dp16))
 }
