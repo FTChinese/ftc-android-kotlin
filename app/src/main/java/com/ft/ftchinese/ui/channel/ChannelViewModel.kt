@@ -21,7 +21,7 @@ private const val TAG = "ChannelViewModel"
 class ChannelViewModel(val cache: FileCache) :
         BaseViewModel() {
 
-    val swipingLiveData: MutableLiveData<Boolean> by lazy {
+    val refreshingLiveData: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
     }
 
@@ -97,9 +97,9 @@ class ChannelViewModel(val cache: FileCache) :
 
     fun refresh(channelSource: ChannelSource, account: Account?) {
         viewModelScope.launch {
-            swipingLiveData.value = true
+            refreshingLiveData.value = true
             htmlRendered.value = fetchAndRender(channelSource, account)
-            swipingLiveData.value = false
+            refreshingLiveData.value = false
         }
     }
 

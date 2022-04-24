@@ -134,7 +134,7 @@ class ChannelFragment : ScopedFragment(),
             binding.inProgress = it
         }
 
-        channelViewModel.swipingLiveData.observe(viewLifecycleOwner) {
+        channelViewModel.refreshingLiveData.observe(viewLifecycleOwner) {
             binding.swipeRefresh.isRefreshing = it
             toast(R.string.refresh_success)
         }
