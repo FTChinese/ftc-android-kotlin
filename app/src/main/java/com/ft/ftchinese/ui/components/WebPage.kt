@@ -22,6 +22,7 @@ fun WebPage(
 ) {
     val context = LocalContext.current
 
+    // There is no way to set web view client up to version 0.25.
     Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
@@ -38,16 +39,17 @@ fun WebPage(
                 it.settings.loadsImagesAutomatically = true
                 it.settings.domStorageEnabled = true
                 it.settings.databaseEnabled = true
-                it.webChromeClient = ChromeClient()
-                it.webViewClient = WVClient(
-                    context = context,
-                    onEvent = onWebViewEvent
-                )
+//                it.webChromeClient = ChromeClient()
+//                it.webViewClient = WVClient(
+//                    context = context,
+//                    onEvent = onWebViewEvent
+//                )
                 it.addJavascriptInterface(
                     JsInterface(onJsEvent),
                     JS_INTERFACE_NAME,
                 )
-            }
+            },
+
         )
     }
 }
