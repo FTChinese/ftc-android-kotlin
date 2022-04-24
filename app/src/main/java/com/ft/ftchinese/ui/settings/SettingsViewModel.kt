@@ -43,17 +43,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             }.let {
                 toastMessage.value = ToastMessage.Resource(
                     if (it) {
+                        withContext(Dispatchers.IO) {
+                            cache.space()
+                        }.let { size ->
+                            cacheSizeLiveData.value = size
+                        }
                         R.string.prompt_cache_cleared
                     } else {
                         R.string.prompt_cache_not_cleared
                     }
                 )
-            }
-
-            withContext(Dispatchers.IO) {
-                cache.space()
-            }.let {
-                cacheSizeLiveData.value
             }
         }
     }
