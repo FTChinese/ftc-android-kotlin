@@ -20,9 +20,11 @@ import androidx.work.workDataOf
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentChannelBinding
-import com.ft.ftchinese.model.content.*
+import com.ft.ftchinese.model.content.ChannelContent
+import com.ft.ftchinese.model.content.ChannelMeta
+import com.ft.ftchinese.model.content.ChannelSource
+import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.ArticleType
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
