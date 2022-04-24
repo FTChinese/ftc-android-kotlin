@@ -8,7 +8,6 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.JavascriptInterface
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -20,25 +19,18 @@ import androidx.work.workDataOf
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentChannelBinding
-import com.ft.ftchinese.model.content.ChannelContent
-import com.ft.ftchinese.model.content.ChannelMeta
 import com.ft.ftchinese.model.content.ChannelSource
-import com.ft.ftchinese.model.content.Teaser
-import com.ft.ftchinese.model.enums.ArticleType
-import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.tracking.SponsorManager
-import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.webpage.ChromeClient
+import com.ft.ftchinese.ui.webpage.JsInterface
 import com.ft.ftchinese.ui.webpage.WVClient
 import kotlinx.coroutines.cancel
-import kotlinx.serialization.decodeFromString
 import org.jetbrains.anko.support.v4.toast
 import java.util.*
 import kotlin.properties.Delegates
@@ -61,10 +53,6 @@ class ChannelFragment : ScopedFragment(),
 
     private lateinit var channelViewModel: ChannelViewModel
 
-    // An array of article teaser passed from JS.
-    // This is used to determine which article user is trying to read.
-    private var articleList: List<Teaser>? = null
-    private var channelMeta: ChannelMeta? = null
     // Record when this page starts to load.
     private var start by Delegates.notNull<Long>()
 
@@ -160,7 +148,11 @@ class ChannelFragment : ScopedFragment(),
             // Interact with JS.
             // See Page/Layouts/Page/SuperDataViewController.swift#viewDidLoad() how iOS inject js to web view.
             addJavascriptInterface(
-                this@ChannelFragment,
+                JsInterface { event ->
+                    handleJsEvent(
+                        context = context,
+                        event = event)
+                },
                 JS_INTERFACE_NAME
             )
 
@@ -220,93 +212,6 @@ class ChannelFragment : ScopedFragment(),
     override fun onStop() {
         super.onStop()
         cancel()
-    }
-
-    /**
-     * After HTML is loaded into webview, it will call this
-     * method in JS and a list of Teaser is posted.
-     */
-    @JavascriptInterface
-    fun onPageLoaded(message: String) {
-
-        Log.i(TAG, "JS onPageLoaded")
-
-        val channelContent = marshaller.decodeFromString<ChannelContent>(message)
-
-        // Save all teasers.
-        articleList = channelContent.sections[0].lists[0].items
-        Log.i(TAG, "Channel teasers $articleList")
-        channelMeta = channelContent.meta
-    }
-
-    @JavascriptInterface
-    fun onSelectItem(index: String) {
-        Log.i(TAG, "JS select item: $index")
-
-        val i = try {
-            index.toInt()
-        } catch (e: Exception) {
-            -1
-        }
-
-        selectItem(i)
-    }
-
-    @JavascriptInterface
-    fun onLoadedSponsors(message: String) {
-
-        Log.i(TAG, "Loaded sponsors: $message")
-
-        SponsorManager.sponsors = marshaller.decodeFromString(message)
-    }
-
-    /**
-     * When user clicks on an item of article list,
-     * the js interface sends the clickd item index back.
-     */
-    private fun selectItem(index: Int) {
-        Log.i(TAG, "JS interface responding to click on an item")
-        if (index < 0) {
-            return
-        }
-
-        // Find which item user is clicked.
-        val teaser = articleList
-            ?.getOrNull(index)
-            ?.withMeta(channelMeta)
-            ?.withParentPerm(channelSource?.permission)
-            ?: return
-
-        Log.i(TAG, "Select item: $teaser")
-
-        /**
-         * {
-         * "id": "007000049",
-         * "type": "column",
-         * "headline": "徐瑾经济人" }
-         * Canonical URL: http://www.ftchinese.com/channel/column.html
-         * Content URL: https://api003.ftmailbox.com/column/007000049?webview=ftcapp&bodyonly=yes
-         */
-        if (teaser.type == ArticleType.Column) {
-            Log.i(TAG, "Open a column: $teaser")
-
-            ChannelActivity.start(context, ChannelSource.fromTeaser(teaser))
-            return
-        }
-
-        /**
-         * For this type of data, load url directly.
-         * Teaser(
-         * id=44330,
-         * type=interactive,
-         * subType=mbagym,
-         * title=一周新闻小测：2021年07月17日,
-         * audioUrl=null,
-         * radioUrl=null,
-         * publishedAt=null,
-         * tag=FT商学院,教程,一周新闻,入门级,FTQuiz,AITranslation)
-         */
-        ArticleActivity.start(activity, teaser)
     }
 
     override fun onDestroy() {
