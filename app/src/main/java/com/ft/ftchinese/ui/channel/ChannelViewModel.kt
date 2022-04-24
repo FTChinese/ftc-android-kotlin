@@ -1,6 +1,8 @@
 package com.ft.ftchinese.ui.channel
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
@@ -12,17 +14,31 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.BaseViewModel
+import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.components.ToastMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 private const val TAG = "ChannelViewModel"
 
-class ChannelViewModel(val cache: FileCache) :
-        BaseViewModel() {
+class ChannelViewModel(application: Application) :
+        AndroidViewModel(application) {
+
+    private val cache: FileCache = FileCache(application)
+    val progressLiveData = MutableLiveData<Boolean>()
+    val isNetworkAvailable = MutableLiveData(application.isConnected)
 
     val refreshingLiveData: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
+    }
+
+    val errorLiveData: MutableLiveData<ToastMessage> by lazy {
+        MutableLiveData<ToastMessage>()
+    }
+
+    val htmlLiveData: MutableLiveData<String> by lazy {
+        MutableLiveData<String>()
     }
 
     val htmlRendered: MutableLiveData<FetchResult<String>> by lazy {

@@ -92,8 +92,11 @@ class ChannelFragment : ScopedFragment(),
         start = Date().time / 1000
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
 
         super.onCreateView(inflater, container, savedInstanceState)
         binding = DataBindingUtil.inflate(
@@ -111,17 +114,15 @@ class ChannelFragment : ScopedFragment(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        channelViewModel = ViewModelProvider(this, ChannelViewModelFactory(cache))
-            .get(ChannelViewModel::class.java)
+        channelViewModel = ViewModelProvider(this)[ChannelViewModel::class.java]
 
         wvViewModel = ViewModelProvider(this)
             .get(WVViewModel::class.java)
 
         // Network status.
-        connectionLiveData.observe(viewLifecycleOwner, {
+        connectionLiveData.observe(viewLifecycleOwner) {
             channelViewModel.isNetworkAvailable.value = it
-        })
-        channelViewModel.isNetworkAvailable.value = context?.isConnected
+        }
 
         setupViewModel()
         setupUI()
