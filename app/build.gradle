@@ -185,7 +185,6 @@ dependencies {
     def room_version = '2.4.2'
     def lifecycle_version = "2.2.0"
     def work_version = "2.7.1"
-    def accompanist = "0.24.5-alpha"
 
     // Since 1.4.0: You no longer need to declare a dependency on the stdlib library in any Kotlin Gradle project, including a multiplatform one. The dependency is added by default.
 //    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -260,8 +259,8 @@ dependencies {
     // Integration with observables
     implementation 'androidx.compose.runtime:runtime-livedata:1.1.1'
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0"
-    implementation "com.google.accompanist:accompanist-swiperefresh:$accompanist"
-    implementation "com.google.accompanist:accompanist-webview:$accompanist"
+    implementation "com.google.accompanist:accompanist-swiperefresh:0.24.7-alpha"
+    implementation "com.google.accompanist:accompanist-webview:0.24.7-alpha"
 
     // UI Tests
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.1.1'
