@@ -27,18 +27,16 @@ import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
-import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.SponsorManager
-import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.webpage.ChromeClient
 import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.base.*
+import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
+import com.ft.ftchinese.ui.base.Paging
+import com.ft.ftchinese.ui.base.ScopedFragment
+import com.ft.ftchinese.ui.webpage.ChromeClient
 import com.ft.ftchinese.ui.webpage.WVClient
 import com.ft.ftchinese.ui.webpage.WVViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import org.jetbrains.anko.support.v4.toast
 import java.util.*
@@ -58,8 +56,6 @@ class ChannelFragment : ScopedFragment(),
     private var channelSource: ChannelSource? = null
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var cache: FileCache
-    private lateinit var statsTracker: StatsTracker
     private lateinit var binding: FragmentChannelBinding
 
     private lateinit var channelViewModel: ChannelViewModel
@@ -79,8 +75,6 @@ class ChannelFragment : ScopedFragment(),
         super.onAttach(context)
 
         sessionManager = SessionManager.getInstance(context)
-        cache = FileCache(context)
-        statsTracker = StatsTracker.getInstance(context)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -300,8 +294,6 @@ class ChannelFragment : ScopedFragment(),
         articleList = channelContent.sections[0].lists[0].items
         Log.i(TAG, "Channel teasers $articleList")
         channelMeta = channelContent.meta
-
-        cacheChannelData(message)
     }
 
     @JavascriptInterface
@@ -320,37 +312,9 @@ class ChannelFragment : ScopedFragment(),
     @JavascriptInterface
     fun onLoadedSponsors(message: String) {
 
-//         See what the sponsor data is.
-        if (BuildConfig.DEBUG) {
-            val name = channelSource?.name
-
-            if (name != null) {
-                Log.i(TAG, "Saving js posted data for sponsors of $channelSource")
-                launch {
-                    cache.saveText("${name}_sponsors.json", message)
-                }
-            }
-        }
-
         Log.i(TAG, "Loaded sponsors: $message")
 
-        try {
-            SponsorManager.sponsors = marshaller.decodeFromString(message) ?: return
-        } catch (e: Exception) {
-            e.message?.let { msg -> Log.i(TAG, msg) }
-        }
-    }
-
-    private fun cacheChannelData(data: String) {
-        if (!BuildConfig.DEBUG) {
-            return
-        }
-
-        val fileName = channelSource?.name ?: return
-
-        launch(Dispatchers.IO) {
-            cache.saveText("$fileName.json", data)
-        }
+        SponsorManager.sponsors = marshaller.decodeFromString(message)
     }
 
     /**
