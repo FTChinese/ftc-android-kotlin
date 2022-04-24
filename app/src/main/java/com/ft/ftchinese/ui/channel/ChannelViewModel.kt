@@ -65,13 +65,7 @@ class ChannelViewModel(application: Application) :
             }
 
             Log.i(TAG, "Background update ${channelSource.path}")
-            loadRemoteHtml(channelSource, account)?.let {
-                setHtmlData(
-                    isFragment = channelSource.isFragment,
-                    htmlData = it,
-                    account = account
-                )
-            }
+            loadRemoteHtml(channelSource, account)
         }
     }
 
