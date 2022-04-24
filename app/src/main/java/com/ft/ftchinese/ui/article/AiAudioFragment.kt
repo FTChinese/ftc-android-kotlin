@@ -8,11 +8,9 @@ import android.webkit.WebChromeClient
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
-import com.ft.ftchinese.database.ArticleDb
 import com.ft.ftchinese.databinding.FragmentAiAudioBinding
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
-import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.webpage.WVClient
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog

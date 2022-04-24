@@ -66,7 +66,7 @@ abstract class WVBaseFragment : ScopedFragment() {
                 JS_INTERFACE_NAME
             )
 
-            webViewClient = WVClient(requireContext(), wvViewModel)
+            webViewClient = WVClient(requireContext())
             webChromeClient = ChromeClient()
 
             setOnKeyListener { _, keyCode, _ ->

@@ -54,8 +54,6 @@ interface WebViewListener {
  */
 open class WVClient(
     private val context: Context,
-    @Deprecated("")
-    private val viewModel: WVViewModel? = null,
     private val listener: WebViewListener? = null,
 ) : WebViewClient() {
 

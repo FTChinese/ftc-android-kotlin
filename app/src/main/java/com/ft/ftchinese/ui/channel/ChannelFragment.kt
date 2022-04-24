@@ -1,10 +1,8 @@
 package com.ft.ftchinese.ui.channel
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +23,6 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
 import com.ft.ftchinese.ui.base.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.components.ToastMessage

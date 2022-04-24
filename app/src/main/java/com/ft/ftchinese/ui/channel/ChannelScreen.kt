@@ -14,8 +14,6 @@ import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.ToastMessage
-import com.ft.ftchinese.ui.components.WebPage
-import com.ft.ftchinese.ui.webpage.BaseJsEventListener
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.accompanist.web.rememberWebViewStateWithHTMLData
@@ -93,10 +91,7 @@ fun ChannelFragmentScreen(
                 channelViewModel.refresh(source, account)
             }
         ) {
-            WebPage(
-                wvState = wvState,
-                jsEventListener = BaseJsEventListener(context),
-            )
+
         }
     }
 }
