@@ -49,13 +49,7 @@ data class ChannelSource (
     val fileName: String?
         get() = if (name.isBlank()) null else "$name.html"
 
-    // Somehow there's a problem on the the web page's pagination:
-    // the number on of the current page is never disabled
-    // so user could click the page 2 even if it is no page2.
-    // TO handle such situation, we just ignore it.
-    fun isSamePage(other: ChannelSource): Boolean {
-        return query.contains(other.query)
-    }
+
 
     /**
      * Returns a new instance for a pagination link.
@@ -82,6 +76,14 @@ data class ChannelSource (
             query = qs,
             htmlType = htmlType
         )
+    }
+
+    // Somehow there's a problem on the the web page's pagination:
+    // the number on of the current page is never disabled
+    // so user could click the page 2 even if it is no page2.
+    // TO handle such situation, we just ignore it.
+    fun isSamePage(other: ChannelSource): Boolean {
+        return name == other.name
     }
 
     companion object {
