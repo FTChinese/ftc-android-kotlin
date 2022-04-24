@@ -45,6 +45,7 @@ class JsInterface(
     }
 
     /**
+     * Used when a channel page loaded.
      * After HTML is loaded into webview, it will call this
      * method in JS and a list of Teaser is posted.
      */
@@ -66,6 +67,10 @@ class JsInterface(
         }
     }
 
+    /**
+     * Used when an item is clicked on a channel page.
+     * The clicked item might be an article, or another channel page.
+     */
     @JavascriptInterface
     fun onSelectItem(index: String) {
         Log.i(TAG, "JS select item: $index")
@@ -125,6 +130,9 @@ class JsInterface(
         }
     }
 
+    /**
+     * Used to handle follow topics in an article page.
+     */
     @JavascriptInterface
     fun follow(message: String) {
         Log.i(TAG, "Clicked follow: $message")
