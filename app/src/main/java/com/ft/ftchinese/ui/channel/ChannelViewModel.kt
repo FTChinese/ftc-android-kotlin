@@ -20,6 +20,11 @@ import kotlinx.coroutines.withContext
 
 private const val TAG = "ChannelViewModel"
 
+data class Loaded(
+    val html: String,
+    val isRemote: Boolean
+)
+
 class ChannelViewModel(application: Application) :
         AndroidViewModel(application) {
 

@@ -27,7 +27,7 @@ import java.util.*
 fun ChannelFragmentScreen(
     account: Account?,
     source: ChannelSource?,
-    channelViewModel: ChannelViewModelV2,
+    channelViewModel: ChannelViewModel,
     showSnackBar: (String) -> Unit,
 ) {
     val context = LocalContext.current
