@@ -31,16 +31,25 @@ fun ChannelFragmentScreen(
     showSnackBar: (String) -> Unit,
 ) {
     val context = LocalContext.current
-    val baseUrl = Config.discoverServer(account)
+    val baseUrl by remember {
+        mutableStateOf(Config.discoverServer(account))
+    }
     val startTime by remember {
         mutableStateOf(Date().time / 1000)
     }
     val loading by channelViewModel.progressLiveData.observeAsState(false)
     val isRefreshing by channelViewModel.refreshingLiveData.observeAsState(false)
-    val htmlData by channelViewModel.htmlLiveData.observeAsState("Loading...")
+    val htmlData by channelViewModel.htmlLiveData.observeAsState("")
     val err by channelViewModel.errorLiveData.observeAsState()
 
-    val wvState = rememberWebViewStateWithHTMLData(htmlData, baseUrl)
+    val wvState = rememberWebViewStateWithHTMLData(
+        data = htmlData,
+        baseUrl = if (htmlData.isBlank()) {
+            null
+        } else {
+            baseUrl
+        }
+    )
 
     if (source == null) {
         return
@@ -65,12 +74,12 @@ fun ChannelFragmentScreen(
         }
     }
 
-    when (val h = err) {
+    when (val m = err) {
         is ToastMessage.Resource -> {
-            showSnackBar(context.getString(h.id))
+            showSnackBar(context.getString(m.id))
         }
         is ToastMessage.Text -> {
-            showSnackBar(h.text)
+            showSnackBar(m.text)
         }
         else -> {}
     }
@@ -103,7 +112,7 @@ fun ChannelFragmentScreen(
     }
 }
 
-private fun handleJsEvent(
+fun handleJsEvent(
     context: Context,
     event: JsEvent
 ) {
