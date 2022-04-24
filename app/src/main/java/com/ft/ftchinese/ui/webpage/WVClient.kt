@@ -144,21 +144,6 @@ open class WVClient(
 
         Log.i(TAG, "shouldOverrideUrlLoading: $uri")
 
-        if (ShareUtils.containWxMiniProgram(uri)) {
-            val params = ShareUtils.wxMiniProgramParams(uri)
-            if (params != null) {
-                Log.i(TAG, "Open in wechat mini program $params")
-                ShareUtils
-                    .createWxApi(context)
-                    .sendReq(
-                        ShareUtils.wxMiniProgramReq(params)
-                    )
-                StatsTracker.getInstance(context).openedInWxMini(params)
-                return true
-            }
-            // otherwise fallthrough.
-        }
-
         // At the comment section of story page there is a login form.
         // Handle login in web view.
         // the login button calls js `bower_components/ftcnext/app/scripts/user-login-native.js`
@@ -201,6 +186,7 @@ open class WVClient(
              */
             "http", "https" -> {
                 return when {
+                    ShareUtils.containWxMiniProgram(uri) -> handleWxMiniProgram(uri)
                     Config.isInternalLink(uri.host ?: "") -> handleInSiteLink(uri)
                     Config.isFtaLink(uri.host ?: "") -> handleFtaLink(uri)
                     else -> handleExternalLink(uri)
@@ -212,6 +198,23 @@ open class WVClient(
         }
     }
 
+    private fun handleWxMiniProgram(uri: Uri): Boolean {
+        val params = ShareUtils.wxMiniProgramParams(uri)
+        if (params != null) {
+            Log.i(TAG, "Open in wechat mini program $params")
+            ShareUtils
+                .createWxApi(context)
+                .sendReq(
+                    ShareUtils.wxMiniProgramReq(params)
+                )
+            StatsTracker
+                .getInstance(context)
+                .openedInWxMini(params)
+            return true
+        }
+
+        return false
+    }
 
     /**
      * Handle urls like:
