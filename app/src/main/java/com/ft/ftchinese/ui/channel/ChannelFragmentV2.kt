@@ -89,7 +89,7 @@ class ChannelFragmentV2 : ScopedFragment() {
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        fun newInstance(channel: ChannelSource) = ChannelFragment().apply {
+        fun newInstance(channel: ChannelSource) = ChannelFragmentV2().apply {
             arguments = bundleOf(ARG_CHANNEL_SOURCE to channel)
         }
 
