@@ -12,6 +12,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.fetch.marshaller
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
@@ -21,6 +22,7 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.share.ShareUtils
+import kotlinx.serialization.decodeFromString
 import org.jetbrains.anko.toast
 
 private const val TAG = "WVClient"
@@ -46,7 +48,6 @@ open class WVClient(
     private val onEvent: (WVEvent) -> Unit = {}
 ) : WebViewClient() {
 
-
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
         Log.i(TAG, "Start loading $url")
@@ -67,6 +68,7 @@ open class WVClient(
         ) {
             Log.i(TAG, "JS evaluation result: $it")
             viewModel?.openGraphEvaluated?.value = it
+            onEvent(WVEvent.OpenGraph(marshaller.decodeFromString(it)))
         }
     }
 
@@ -222,7 +224,7 @@ open class WVClient(
 //            mListener?.onPagination(paging)
 
             viewModel?.pagingBtnClicked?.value = paging
-
+            onEvent(WVEvent.Pagination(paging))
             return true
         }
 
@@ -285,6 +287,7 @@ open class WVClient(
             TYPE_CHANNEL -> {
                 Log.i(TAG, "Open a channel link: $uri")
                 viewModel?.urlChannelSelected?.value = channelFromUri(uri)
+                onEvent(WVEvent.ChannelPage(channelFromUri(uri)))
                 true
             }
 
@@ -297,7 +300,7 @@ open class WVClient(
                 Log.i(TAG, "Loading marketing page")
 
                 viewModel?.urlChannelSelected?.value = marketingChannelFromUri(uri)
-
+                onEvent(WVEvent.ChannelPage(marketingChannelFromUri(uri)))
                 true
             }
 
@@ -309,6 +312,7 @@ open class WVClient(
             TYPE_ARCHIVE -> {
                 Log.i(TAG, "Loading tag or archive")
                 viewModel?.urlChannelSelected?.value = tagOrArchiveChannel(uri)
+                onEvent(WVEvent.ChannelPage(tagOrArchiveChannel(uri)))
                 true
             }
 
@@ -317,8 +321,7 @@ open class WVClient(
                 WebpageActivity.start(context, WebpageMeta(
                     title = "",
                     url = uri.toString()
-                )
-                )
+                ))
                 true
             }
         }

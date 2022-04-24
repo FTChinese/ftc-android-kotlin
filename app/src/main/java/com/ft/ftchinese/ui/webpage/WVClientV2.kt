@@ -84,10 +84,6 @@ open class WVClientV2(
 
         val uri = request?.url ?: return true
 
-        if (ShareUtils.containWxMiniProgram(uri)) {
-            return handleWxMiniProgram(uri)
-        }
-
         // At the comment section of story page there is a login form.
         // Handle login in web view.
         // the login button calls js `bower_components/ftcnext/app/scripts/user-login-native.js`
@@ -130,6 +126,7 @@ open class WVClientV2(
              */
             "http", "https" -> {
                 return when {
+                    ShareUtils.containWxMiniProgram(uri) -> handleWxMiniProgram(uri)
                     Config.isInternalLink(uri.host ?: "") -> handleInSiteLink(uri)
                     Config.isFtaLink(uri.host ?: "") -> handleFtaLink(uri)
                     else -> handleExternalLink(uri)
