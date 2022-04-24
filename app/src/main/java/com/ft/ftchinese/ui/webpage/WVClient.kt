@@ -12,15 +12,14 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.tracking.*
+import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.*
 import com.ft.ftchinese.ui.login.AuthActivity
-import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.share.ShareUtils
 import org.jetbrains.anko.toast
 
@@ -36,80 +35,20 @@ private const val TYPE_TAG = "tag"
 private const val TYPE_M = "m"
 private const val TYPE_ARCHIVE = "archiver"
 
-fun jsLockerIcon(tier: Tier?): String {
-    val prvl = when (tier) {
-        Tier.STANDARD -> """['premium']"""
-        Tier.PREMIUM -> """['premium', 'EditorChoice']"""
-        else -> "[]"
-    }
-
-    return """
-        (function() {
-            window.gPrivileges=$prvl;
-            updateHeadlineLocks();
-        return window.gPrivileges;
-        })()
-    """.trimIndent()
-}
-
-fun jsOpenGraph(): String {
-    return """
-    (function getOpenGraph() {
-        var metaElms = document.getElementsByTagName('meta');
-        var graph = {};
-        var standfirst = "";
-        for (var index = 0; index < metaElms.length; index++) {
-            var elm = metaElms[index];
-            if (elm.hasAttribute("name")) {
-                var nameVal = elm.getAttribute("name")
-                switch (nameVal) {
-                    case "keywords":
-                        graph.keywords = elm.getAttribute("content");
-                        break;
-                    case "description":
-                        standfirst = elm.getAttribute("content");
-                        break;
-                }
-                continue;
-            }
-            if (!elm.hasAttribute('property')) {
-                continue;
-            }
-            var prop = elm.getAttribute('property');
-            if (!prop.startsWith('og:')) {
-                continue;
-            }
-            var key = prop.split(":")[1];
-            var value = elm.getAttribute('content');
-            graph[key] = value;
-        }
-
-        if (!graph["title"]) {
-            graph["title"] = document.title;
-        }
-
-        if (!graph["description"]) {
-            graph["description"] = standfirst;
-        }
-
-        return graph;
-    })();
-    """.trimIndent()
-}
-
 /**
  * WVClient is use mostly to handle webUrl clicks loaded into
  * ViewPagerFragment.
  */
 open class WVClient(
     private val context: Context,
-    private val viewModel: WVViewModel? = null
+    @Deprecated("")
+    private val viewModel: WVViewModel? = null,
+    private val onEvent: (WVEvent) -> Unit = {}
 ) : WebViewClient() {
 
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
-
         Log.i(TAG, "Start loading $url")
     }
 
@@ -117,16 +56,14 @@ open class WVClient(
         super.onPageFinished(view, url)
         Log.i(TAG, "Finished loading $url")
 
-        viewModel?.pageFinished?.value = true
-
         view?.evaluateJavascript(
-            jsLockerIcon(AccountCache.get()?.membership?.tier)
+            JsSnippets.lockerIcon(AccountCache.get()?.membership?.tier)
         ) {
             Log.i(TAG, "Privilege result: $it")
         }
 
         view?.evaluateJavascript(
-            jsOpenGraph()
+            JsSnippets.openGraph
         ) {
             Log.i(TAG, "JS evaluation result: $it")
             viewModel?.openGraphEvaluated?.value = it
