@@ -4,6 +4,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.ft.ftchinese.ui.lists.TwoEqualColViewHolder
 
+@Deprecated("")
 class SubsDetailListAdapter : RecyclerView.Adapter<TwoEqualColViewHolder>() {
 
     private var rows: List<Pair<String, String>> = listOf()
