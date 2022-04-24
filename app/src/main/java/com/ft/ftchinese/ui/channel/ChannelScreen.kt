@@ -118,7 +118,7 @@ private fun handleJsEvent(
     }
 }
 
-private fun handleWVEvent(
+fun handleWVEvent(
     context: Context,
     event: WVEvent,
     currentChannel: ChannelSource,

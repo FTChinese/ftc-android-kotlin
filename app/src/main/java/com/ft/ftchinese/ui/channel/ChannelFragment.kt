@@ -33,13 +33,10 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.SponsorManager
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.base.JS_INTERFACE_NAME
-import com.ft.ftchinese.ui.base.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.webpage.ChromeClient
 import com.ft.ftchinese.ui.webpage.WVClient
-import com.ft.ftchinese.ui.webpage.WVEvent
-import com.ft.ftchinese.ui.webpage.WVViewModel
 import kotlinx.coroutines.cancel
 import kotlinx.serialization.decodeFromString
 import org.jetbrains.anko.support.v4.toast
@@ -63,8 +60,6 @@ class ChannelFragment : ScopedFragment(),
     private lateinit var binding: FragmentChannelBinding
 
     private lateinit var channelViewModel: ChannelViewModel
-    @Deprecated("")
-    private lateinit var wvViewModel: WVViewModel
 
     // An array of article teaser passed from JS.
     // This is used to determine which article user is trying to read.
@@ -115,8 +110,6 @@ class ChannelFragment : ScopedFragment(),
 
         channelViewModel = ViewModelProvider(this)[ChannelViewModel::class.java]
 
-        wvViewModel = ViewModelProvider(this)[WVViewModel::class.java]
-
         // Network status.
         connectionLiveData.observe(viewLifecycleOwner) {
             channelViewModel.isNetworkAvailable.value = it
@@ -150,18 +143,6 @@ class ChannelFragment : ScopedFragment(),
         channelViewModel.htmlLiveData.observe(viewLifecycleOwner) {
             load(it)
         }
-
-        /**
-         * If user clicked on a link inside webview
-         * and the link point to another channel page, open the [ChannelActivity]
-         */
-//        wvViewModel.urlChannelSelected.observe(viewLifecycleOwner) {
-//            ChannelActivity.start(context, it.withParentPerm(channelSource?.permission))
-//        }
-
-//        wvViewModel.pagingBtnClicked.observe(viewLifecycleOwner) {
-//            onPagination(it)
-//        }
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -186,23 +167,14 @@ class ChannelFragment : ScopedFragment(),
             // Set WebViewClient to handle various links
             webViewClient = WVClient(
                 requireContext(),
-                wvViewModel,
+                null,
                 onEvent = { event ->
-                    when (event) {
-                        is WVEvent.Pagination -> {
-                            onPagination(event.paging)
-                        }
-                        is WVEvent.ChannelPage -> {
-
-                            ChannelActivity.start(
-                                context,
-                                event.source.withParentPerm(
-                                        channelSource?.permission)
-                            )
-                        }
-                        is WVEvent.OpenGraph -> {
-                            // Available only for article page.
-                        }
+                    channelSource?.let {
+                        handleWVEvent(
+                            context = context,
+                            event = event,
+                            currentChannel = it
+                        )
                     }
                 }
             )
@@ -248,27 +220,6 @@ class ChannelFragment : ScopedFragment(),
     override fun onStop() {
         super.onStop()
         cancel()
-    }
-
-    /**
-     * WVClient click pagination.
-     */
-    private fun onPagination(p: Paging) {
-        Log.i(TAG, "Handle pagination $p")
-
-        val source = channelSource ?: return
-
-        val pagedSource = source.withPagination(p.key, p.page)
-
-        Log.i(TAG, "Open a pagination: $pagedSource")
-
-        // If the the pagination number is not changed, simply refresh it.
-        if (pagedSource.isSamePage(source)) {
-            return
-        }
-
-        Log.i(TAG, "Start a new activity for $pagedSource")
-        ChannelActivity.start(activity, pagedSource)
     }
 
     /**
