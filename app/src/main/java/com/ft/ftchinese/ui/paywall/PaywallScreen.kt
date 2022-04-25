@@ -12,13 +12,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.paywall.*
+import com.ft.ftchinese.model.paywall.CartItemFtc
+import com.ft.ftchinese.model.paywall.CartItemStripe
+import com.ft.ftchinese.model.paywall.Paywall
+import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.ui.components.CustomerService
 import com.ft.ftchinese.ui.formatter.FormatHelper
-import com.ft.ftchinese.ui.product.PriceList
 import com.ft.ftchinese.ui.product.ProductCard
 import com.ft.ftchinese.ui.product.SubsRuleContent
 import com.ft.ftchinese.ui.theme.Dimens
@@ -26,7 +27,6 @@ import com.ft.ftchinese.ui.theme.Dimens
 @Composable
 fun PaywallScreen(
     paywall: Paywall,
-    stripePrices: Map<String, StripePrice>,
     account: Account?,
     onFtcPay: (item: CartItemFtc) -> Unit,
     onStripePay: (item: CartItemStripe) -> Unit,
@@ -34,6 +34,8 @@ fun PaywallScreen(
     onLoginRequest: () -> Unit,
 ) {
     val membership = account?.membership?.normalize() ?: Membership()
+
+    val productItems = paywall.buildUiProducts(membership)
 
     Column(
         modifier = Modifier
@@ -51,23 +53,12 @@ fun PaywallScreen(
             PromoBox(banner = paywall.promo)
         }
         
-        paywall.products.forEach { product ->
-            val ftcItems = product.listShoppingItems(membership)
+        productItems.forEach { item ->
 
             ProductCard(
-                heading = product.heading,
-                description = product.descWithDailyCost(),
-                smallPrint = product.smallPrint,
-                priceContent = {
-                    PriceList(
-                        ftcCartItems = ftcItems,
-                        stripeCartItems = StripePriceIDs
-                            .newInstance(ftcItems)
-                            .listShoppingItems(stripePrices, membership),
-                        onFtcPay = onFtcPay,
-                        onStripePay = onStripePay
-                    )
-                }
+                item = item,
+                onFtcPay = onFtcPay,
+                onStripePay = onStripePay
             )
             Spacer(modifier = Modifier.height(Dimens.dp16))
         }
@@ -119,11 +110,9 @@ fun SubsStatusBox(
 fun PreviewPaywallContent() {
     PaywallScreen(
         paywall = defaultPaywall,
-        stripePrices = mapOf(),
         account = null,
         onFtcPay = {},
         onStripePay = {},
         onError = {},
-        onLoginRequest = {},
-    )
+    ) {}
 }

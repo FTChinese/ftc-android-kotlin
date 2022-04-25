@@ -8,14 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.fetch.marshaller
-import com.ft.ftchinese.model.paywall.CartItemFtc
-import com.ft.ftchinese.model.paywall.CartItemStripe
-import com.ft.ftchinese.model.paywall.Paywall
-import com.ft.ftchinese.model.paywall.defaultPaywall
+import com.ft.ftchinese.model.paywall.*
 import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.repository.PaywallClient
-import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.CacheFileNames
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.tracking.AddCartParams
@@ -43,9 +38,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         MutableLiveData<Paywall>(defaultPaywall)
     }
 
-    val stripePriceLiveData: MutableLiveData<Map<String, StripePrice>> by lazy {
-        MutableLiveData<Map<String, StripePrice>>()
-    }
+    private var stripePaywallItems: Map<String, StripePaywallItem> = mapOf()
 
     val toastLiveData: MutableLiveData<ToastMessage> by lazy {
         MutableLiveData<ToastMessage>()
@@ -71,13 +64,16 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         return price.buildCartItem(m)
     }
 
-    fun stripeCheckoutItem(priceId:  String, trialId: String?, m: Membership): CartItemStripe? {
-        val price = stripePriceLiveData.value?.get(priceId) ?: return null
+    fun stripeCheckoutItem(priceId: String, trialId: String?, m: Membership): CartItemStripe? {
+        val pwItem = stripePaywallItems[priceId] ?: return null
 
         return CartItemStripe(
-            intent = price.checkoutIntent(m),
-            recurring = price,
-            trial = trialId?.let { stripePriceLiveData.value?.get(it) }
+            intent = pwItem.price.checkoutIntent(m),
+            recurring = pwItem.price,
+            trial = trialId?.let { id ->
+                stripePaywallItems[id]?.price
+            },
+            coupon = pwItem.getCoupon()
         )
     }
 
@@ -134,11 +130,10 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         when (result) {
             is FetchResult.Success -> {
                 ftcPriceLiveData.value = result.data.reOrderProducts(premiumOnTop)
-                stripePriceLiveData.value = result.data.stripe.associateBy({
-                    it.price.id
-                }, {
-                    it.price
-                })
+                stripePaywallItems = result.data
+                    .stripe.associateBy {
+                        it.price.id
+                    }
             }
             is FetchResult.LocalizedError -> {
                 toastLiveData.value = ToastMessage.Resource(result.msgId)
@@ -178,108 +173,11 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
         refreshingLiveData.value = true
 
         viewModelScope.launch {
-//            val ftcDeferred = async { loadRemotePaywall(false) }
-//            val stripeDeferred = async { loadRemoteStripe() }
-//
-//            val ftcRes = ftcDeferred.await()
-//            val stripeRes = stripeDeferred.await()
-//
             val ftcRes = loadRemotePaywall(isTest)
             setFtcPrice(ftcRes)
-//            setStripePrice(stripeRes)
 
             refreshingLiveData.value = false
             toastLiveData.value = ToastMessage.Resource(R.string.refresh_success)
-        }
-    }
-
-    @Deprecated("")
-    private suspend fun loadCachedStripe(): List<StripePrice>? {
-        Log.i(TAG, "Loading stripe prices from cache...")
-        return withContext(Dispatchers.IO) {
-            val data = cache.loadText(CacheFileNames.stripePrices)
-
-            if (data == null) {
-                Log.i(TAG, "Stripe prices not found in cache")
-                null
-            } else {
-                try {
-                    marshaller.decodeFromString(data)
-                } catch (e: Exception) {
-                    e.message?.let { Log.i(TAG, it) }
-
-                    null
-                }
-            }
-        }
-    }
-
-    @Deprecated("")
-    private suspend fun loadRemoteStripe(): FetchResult<List<StripePrice>> {
-
-        try {
-            Log.i(TAG, "Retrieving stripe prices from server")
-            val resp = withContext(Dispatchers.IO) {
-                StripeClient.listPrices()
-            }
-
-            if (resp.body == null) {
-                return FetchResult.LocalizedError(R.string.api_server_error)
-            }
-
-            if (resp.raw.isNotBlank()) {
-                viewModelScope.launch(Dispatchers.IO) {
-                    cache.saveStripePrice(resp.raw)
-                }
-            }
-
-            return FetchResult.Success(resp.body)
-        } catch (e: Exception) {
-            e.message?.let { Log.i(TAG, "Error retrieving stripe prices: $it") }
-            return FetchResult.fromException(e)
-        }
-    }
-
-    @Deprecated("")
-    private fun setStripePrice(result: FetchResult<List<StripePrice>>) {
-        when (result) {
-            is FetchResult.Success -> {
-                result.data.associateBy {
-                    it.id
-                }.let {
-                    stripePriceLiveData.value = it
-                }
-            }
-            is FetchResult.LocalizedError -> {
-                toastLiveData.value = ToastMessage.Resource(result.msgId)
-            }
-            is FetchResult.TextError -> {
-                toastLiveData.value = ToastMessage.Text(result.text)
-            }
-        }
-    }
-
-    // Load stripe prices from cache, or from server if cached data not found,
-    // before show stripe payment page.
-    // This works as a backup in case stripe prices is not yet
-    // loaded into memory.
-    @Deprecated("")
-    fun loadStripePrices() {
-
-        viewModelScope.launch {
-            val prices = loadCachedStripe()
-            if (prices != null) {
-                progressLiveData.value = false
-                setStripePrice(FetchResult.Success(prices))
-            }
-
-            if (isNetworkAvailable.value != true) {
-                return@launch
-            }
-
-            val result = loadRemoteStripe()
-
-            setStripePrice(result)
         }
     }
 

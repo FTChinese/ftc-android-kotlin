@@ -172,6 +172,7 @@ fun PreviewStripePayScreen() {
                 unitAmount = 3999,
             ),
             trial = null,
+            coupon = null
         ),
         paymentMethod = null,
         subs = null,
