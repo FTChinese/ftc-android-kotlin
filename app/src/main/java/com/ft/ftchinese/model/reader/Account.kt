@@ -1,9 +1,9 @@
 package com.ft.ftchinese.model.reader
 
 import com.ft.ftchinese.model.enums.LoginMethod
+import com.ft.ftchinese.model.fetch.marshaller
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 /**
  * A user's essential data.
@@ -27,8 +27,11 @@ data class Account(
     val membership: Membership
 ) {
 
+    val isStripeCustomer: Boolean
+        get() = !stripeId.isNullOrBlank()
+
     fun toJsonString(): String {
-        return Json.encodeToString(this)
+        return marshaller.encodeToString(this)
     }
 
     // Perform partial update.
