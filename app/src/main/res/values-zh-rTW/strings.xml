@@ -262,7 +262,7 @@
     <string name="stripe_default_bank_brand">我的銀行卡</string>
     <string name="add_or_select_payment_method">點擊添加银行卡或選擇默認支付方式</string>
     <string name="set_default_payment_method">设为默認支付方式</string>
-    <string name="stripe_customer_not_found">Stripe 使用者不存在，請檢查帳號或者重新登入</string>
+    <string name="stripe_customer_not_found">帳號不存在，請檢查帳號或者重新登入</string>
 
     <string name="stripe_authentication_failed">Stripe支付驗證似乎失敗了</string>
     <string name="stripe_unable_to_authenticate">無法驗證，請联系客服</string>

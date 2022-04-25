@@ -380,7 +380,7 @@
     <string name="stripe_default_bank_brand">我的银行卡</string>
     <string name="add_or_select_payment_method">点击添加银行卡或选择默认支付方式</string>
     <string name="set_default_payment_method">设为默认支付方式</string>
-    <string name="stripe_customer_not_found">Stripe用户不存在，请检查账号或者重新登录</string>
+    <string name="stripe_customer_not_found">账号不存在，请检查账号或者重新登录</string>
 
     <string name="stripe_authentication_failed">Stripe支付验证似乎失败了</string>
     <string name="stripe_unable_to_authenticate">无法验证，请联系客服</string>
