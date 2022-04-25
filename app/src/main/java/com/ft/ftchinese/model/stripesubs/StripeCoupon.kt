@@ -1,9 +1,12 @@
 package com.ft.ftchinese.model.stripesubs
 
+import android.os.Parcelable
 import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 import org.threeten.bp.ZonedDateTime
 
+@Parcelize
 @Serializable
 data class StripeCoupon(
     val id: String,
@@ -15,4 +18,4 @@ data class StripeCoupon(
     val startUtc: ZonedDateTime? = null,
     @Serializable(with = DateTimeAsStringSerializer::class)
     val endUtc: ZonedDateTime? = null,
-)
+) : Parcelable
