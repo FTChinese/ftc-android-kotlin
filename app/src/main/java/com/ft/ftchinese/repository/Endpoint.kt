@@ -2,7 +2,7 @@ package com.ft.ftchinese.repository
 
 import com.ft.ftchinese.BuildConfig
 
-private const val devIP = "http://192.168.1.48"
+private const val devIP = "http://192.168.1.39"
 private const val devPort = "8206"
 
 object Endpoint {
