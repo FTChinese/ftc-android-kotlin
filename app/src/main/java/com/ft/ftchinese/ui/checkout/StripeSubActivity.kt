@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.checkout
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -8,10 +9,8 @@ import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.paywall.CartItemStripe
@@ -41,6 +40,7 @@ class StripeSubActivity : ScopedAppActivity() {
 
     private lateinit var paymentSession: PaymentSession
 
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -60,7 +60,7 @@ class StripeSubActivity : ScopedAppActivity() {
 
         // Monitoring network status.
         connectionLiveData.observe(this) {
-            userViewModel.isNetworkAvailable.value = it
+//            userViewModel.isNetworkAvailable.value = it
             subsViewModel.isNetworkAvailable.value = it
             ephemeralKeyViewModel.isNetworkAvailable.value = it
         }
@@ -70,13 +70,6 @@ class StripeSubActivity : ScopedAppActivity() {
         }
 
         tracker = StatsTracker.getInstance(this)
-
-        subsViewModel.toastLiveData.observe(this) {
-            when (it) {
-                is ToastMessage.Resource -> toast(it.id)
-                is ToastMessage.Text -> toast(it.text)
-            }
-        }
 
         subsViewModel.membershipUpdated.observe(this) {
             userViewModel.saveMembership(it)
@@ -116,6 +109,21 @@ class StripeSubActivity : ScopedAppActivity() {
         userViewModel.account?.let {
             subsViewModel.loadDefaultPaymentMethod(it)
         }
+
+        // Error message from creating stripe customer
+        userViewModel.toastLiveData.observe(this) {
+            when (it) {
+                is ToastMessage.Resource -> toast(it.id)
+                is ToastMessage.Text -> toast(it.text)
+            }
+        }
+
+        subsViewModel.toastLiveData.observe(this) {
+            when (it) {
+                is ToastMessage.Resource -> toast(it.id)
+                is ToastMessage.Text -> toast(it.text)
+            }
+        }
     }
 
     @Composable
@@ -124,7 +132,15 @@ class StripeSubActivity : ScopedAppActivity() {
         userViewModel: UserViewModel,
         showSnackBar: (String) -> Unit,
     ) {
-        val loadingState by subsViewModel.inProgress.observeAsState(false)
+        val cusProgress by userViewModel.progressLiveData.observeAsState(false)
+        val subsProgress by subsViewModel.inProgress.observeAsState(false)
+        
+        val loading by remember(key1 = cusProgress, key2 = subsProgress) {
+            derivedStateOf {
+                subsProgress || cusProgress
+            }
+        }
+
         val paymentMethodState by subsViewModel.paymentMethodLiveData.observeAsState()
         val cartItemState by subsViewModel.itemLiveData.observeAsState()
         val subsState by subsViewModel.subsCreated.observeAsState()
@@ -178,7 +194,7 @@ class StripeSubActivity : ScopedAppActivity() {
         cartItemState?.let {
             StripePayScreen(
                 cartItem = it,
-                loading = loadingState,
+                loading = loading,
                 paymentMethod = paymentMethodState,
                 subs = subsState,
                 onPaymentMethod = {

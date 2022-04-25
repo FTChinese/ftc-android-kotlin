@@ -39,7 +39,7 @@ class SubsAddOnFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProvider(this).get(SubsStatusViewModel::class.java)
+            ViewModelProvider(this)[SubsStatusViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
         initUI()

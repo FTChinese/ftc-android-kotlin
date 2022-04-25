@@ -117,8 +117,8 @@ class StripeSubViewModel(application: Application)
         }
 
         val cusId = account.stripeId
-        if (cusId == null) {
-            toastLiveData.value = ToastMessage.Text("Not a stripe customer")
+        if (cusId.isNullOrBlank()) {
+            Log.i(TAG, "Not a stripe customer")
             return
         }
 

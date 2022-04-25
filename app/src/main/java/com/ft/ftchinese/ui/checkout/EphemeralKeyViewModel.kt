@@ -32,12 +32,16 @@ class EphemeralKeyViewModel(application: Application) : AndroidViewModel(applica
 
         val account = session.loadAccount() ?: return
 
+        if (!account.isStripeCustomer) {
+            return
+        }
+
+        Log.i(TAG, "Start retrieving stripe ephemeral key")
         viewModelScope.launch {
             try {
                 val rawKey = withContext(Dispatchers.IO) {
                     StripeClient.createEphemeralKey(account, apiVersion)
                 }
-
 
                 // Example
                 // {

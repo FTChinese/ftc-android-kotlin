@@ -9,19 +9,27 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
-import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.base.ConnectionLiveData
+import com.ft.ftchinese.ui.components.ToastMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class UserViewModel(application: Application) : AndroidViewModel(application) {
     private val session = SessionManager.getInstance(application)
-    val isNetworkAvailable = MutableLiveData(application.isConnected)
+//    val isNetworkAvailable = MutableLiveData(application.isConnected)
+
+    val connectionLiveData = ConnectionLiveData(application)
+
+    val progressLiveData = MutableLiveData(false)
+
+    val toastLiveData: MutableLiveData<ToastMessage> by lazy {
+        MutableLiveData<ToastMessage>()
+    }
 
     var account by mutableStateOf<Account?>(null)
         private set
@@ -35,10 +43,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     val isWxOnly: Boolean
         get() = account?.isWxOnly == true
-
-    val progressLiveData: MutableLiveData<FetchUi> by lazy {
-        MutableLiveData<FetchUi>()
-    }
 
     fun load() {
         account = session.loadAccount(raw = true)
@@ -60,7 +64,12 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun createCustomer(account: Account) {
-        progressLiveData.value = FetchUi.Progress(true)
+        if (connectionLiveData.value != true) {
+            toastLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
+            return
+        }
+
+        progressLiveData.value = true
 
         viewModelScope.launch {
             try {
@@ -68,22 +77,23 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     StripeClient.createCustomer(account)
                 }
 
+                progressLiveData.value = false
                 if (resp.body == null) {
-                    progressLiveData.value = FetchUi.ResMsg(R.string.stripe_customer_not_created)
+                    toastLiveData.value = ToastMessage.Resource(R.string.stripe_customer_not_created)
                     return@launch
                 }
 
-                progressLiveData.value = FetchUi.Progress(false)
                 save(account.withCustomerID(resp.body.id))
             } catch (e: APIError) {
-
-                progressLiveData.value = if (e.statusCode == 404) {
-                    FetchUi.ResMsg(R.string.stripe_customer_not_found)
+                progressLiveData.value = false
+                toastLiveData.value = if (e.statusCode == 404) {
+                    ToastMessage.Resource(R.string.stripe_customer_not_found)
                 } else {
-                    FetchUi.fromApi(e)
+                    ToastMessage.fromApi(e)
                 }
             } catch (e: Exception) {
-                progressLiveData.value = FetchUi.fromException(e)
+                progressLiveData.value = false
+                toastLiveData.value = ToastMessage.fromException(e)
             }
         }
     }
