@@ -7,7 +7,7 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import androidx.lifecycle.LiveData
 
-class ConnectionLiveData(private val context: Context) : LiveData<Boolean>() {
+class ConnectionLiveData(private val context: Context) : LiveData<Boolean>(context.isConnected) {
 
     private val networkReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
