@@ -1,8 +1,10 @@
 package com.ft.ftchinese.model.ftcsubs
 
 import com.tencent.mm.opensdk.modelpay.PayReq
+import kotlinx.serialization.Serializable
 
 // This is user's payment intent.
+@Serializable
 data class WxPayIntent(
     val price: Price,
     val order: Order,
@@ -16,10 +18,12 @@ data class WxPayIntent(
     }
 }
 
+@Serializable
 data class WxPaySDKParams(
     val app: WxAppPayParams?
 )
 
+@Serializable
 data class WxAppPayParams(
     val appId: String,
     val partnerId: String,
