@@ -53,7 +53,7 @@ object StripeClient {
     }
 
     fun createEphemeralKey(account: Account, apiVersion: String): String? {
-        if (account.stripeId == null) {
+        if (account.stripeId.isNullOrBlank()) {
             return null
         }
 
