@@ -59,7 +59,6 @@ fun PaywallActivityScreen(
     val context = LocalContext.current
     val isRefreshing by paywallViewModel.refreshingLiveData.observeAsState(false)
     val ftcPaywall by paywallViewModel.ftcPriceLiveData.observeAsState(defaultPaywall)
-    val stripePrices by paywallViewModel.stripePriceLiveData.observeAsState(mapOf())
     val toastState = paywallViewModel.toastLiveData.observeAsState()
 
     val launcher = rememberLauncherForActivityResult(
@@ -105,7 +104,6 @@ fun PaywallActivityScreen(
         paywallViewModel.loadPaywall(
             userViewModel.account?.isTest ?: false
         )
-        paywallViewModel.loadStripePrices()
     }
 
     LaunchedEffect(key1 = Unit) {
@@ -120,7 +118,6 @@ fun PaywallActivityScreen(
     ) {
         PaywallScreen(
             paywall = ftcPaywall,
-            stripePrices = stripePrices,
             account = userViewModel.account,
             onFtcPay = {
                 if (!userViewModel.isLoggedIn) {
@@ -146,9 +143,8 @@ fun PaywallActivityScreen(
                 paywallViewModel.trackAddCart(AddCartParams.ofStripe(it.recurring))
             },
             onError = showSnackBar,
-            onLoginRequest = {
-                launchLoginActivity(launcher, context)
-            },
-        )
+        ) {
+            launchLoginActivity(launcher, context)
+        }
     }
 }
