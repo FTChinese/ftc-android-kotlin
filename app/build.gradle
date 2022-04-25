@@ -261,6 +261,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0"
     implementation "com.google.accompanist:accompanist-swiperefresh:0.24.7-alpha"
     implementation "com.google.accompanist:accompanist-webview:0.24.7-alpha"
+    implementation 'com.radusalagean:info-bar-compose:1.0.0'
 
     // UI Tests
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.1.1'
