@@ -34,6 +34,7 @@ import com.ft.ftchinese.ui.base.ScopedComponentActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.components.SubsScreen
+import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.ftcpay.FtcPayActivityScreen
 import com.ft.ftchinese.ui.ftcpay.FtcPayViewModel
@@ -99,6 +100,13 @@ class SubsActivity : ScopedComponentActivity() {
                 onExit = { finish() },
                 wxApi = wxApi,
             )
+        }
+
+        paywallViewModel.toastLiveData.observe(this) {
+            when (it) {
+                is ToastMessage.Resource -> toast(it.id)
+                is ToastMessage.Text -> toast(it.text)
+            }
         }
     }
 
@@ -245,26 +253,13 @@ fun SubsApp(
                     route = SubsScreen.Paywall.name
                 ) {
                     PaywallActivityScreen(
-                        paywallViewModel = paywallViewModel,
-                        onFtcPay = { item: CartItemFtc ->
-                            navigateToFtcPay(
-                                navController = navController,
-                                priceId = item.price.id,
-                            )
-                        },
-//                        onStripePay = { item: CartItemStripeV2 ->
-//                            navigateToStripePay(
-//                                navController = navController,
-//                                priceId = item.recurring.id,
-//                                trialId = item.trial?.id,
-//                            )
-//                        },
-                        showSnackBar = { msg ->
-                            scope.launch {
-                                scaffoldState.snackbarHostState.showSnackbar(msg)
-                            }
-                        }
-                    )
+                        paywallViewModel = paywallViewModel
+                    ) { item: CartItemFtc ->
+                        navigateToFtcPay(
+                            navController = navController,
+                            priceId = item.price.id,
+                        )
+                    }
                 }
 
                 composable(

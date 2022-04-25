@@ -30,7 +30,6 @@ fun PaywallScreen(
     account: Account?,
     onFtcPay: (item: CartItemFtc) -> Unit,
     onStripePay: (item: CartItemStripe) -> Unit,
-    onError: (String) -> Unit,
     onLoginRequest: () -> Unit,
 ) {
     val membership = account?.membership?.normalize() ?: Membership()
@@ -67,7 +66,7 @@ fun PaywallScreen(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-        CustomerService(onError = onError)
+        CustomerService()
     }
 }
 
@@ -113,6 +112,5 @@ fun PreviewPaywallContent() {
         account = null,
         onFtcPay = {},
         onStripePay = {},
-        onError = {},
     ) {}
 }

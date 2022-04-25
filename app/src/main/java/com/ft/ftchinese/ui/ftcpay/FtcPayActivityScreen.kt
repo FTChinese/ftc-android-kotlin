@@ -26,7 +26,7 @@ fun FtcPayActivityScreen(
     val context = LocalContext.current
 
     val loadingState by payViewModel.inProgress.observeAsState(false)
-    val toastState by payViewModel.toastMessage.observeAsState()
+    val toastState by payViewModel.toastMessage.observeAsState(null)
 
     toastState?.let {
         val msg = when (it) {

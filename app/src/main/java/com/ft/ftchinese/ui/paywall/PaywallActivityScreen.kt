@@ -16,7 +16,6 @@ import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.tracking.AddCartParams
 import com.ft.ftchinese.ui.checkout.StripeSubActivity
-import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
@@ -52,14 +51,11 @@ fun PaywallActivityScreen(
     paywallViewModel: PaywallViewModel = viewModel(),
     userViewModel: UserViewModel = viewModel(),
     onFtcPay: (item: CartItemFtc) -> Unit,
-//    onStripePay: (item: CartItemStripeV2) -> Unit,
-    showSnackBar: (String) -> Unit,
 ) {
 
     val context = LocalContext.current
     val isRefreshing by paywallViewModel.refreshingLiveData.observeAsState(false)
     val ftcPaywall by paywallViewModel.ftcPriceLiveData.observeAsState(defaultPaywall)
-    val toastState = paywallViewModel.toastLiveData.observeAsState()
 
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -78,14 +74,11 @@ fun PaywallActivityScreen(
         mutableStateOf(false)
     }
 
-    when (val s = toastState.value) {
-        is ToastMessage.Resource -> {
-            showSnackBar(context.getString(s.id))
-        }
-        is ToastMessage.Text -> {
-            showSnackBar(s.text)
-        }
-        else -> {}
+    LaunchedEffect(key1 = Unit) {
+        paywallViewModel.loadPaywall(
+            userViewModel.account?.isTest ?: false
+        )
+        paywallViewModel.trackDisplayPaywall()
     }
 
     if (openDialog ) {
@@ -98,16 +91,6 @@ fun PaywallActivityScreen(
                 setOpenDialog(false)
             }
         )
-    }
-
-    LaunchedEffect(key1 = Unit) {
-        paywallViewModel.loadPaywall(
-            userViewModel.account?.isTest ?: false
-        )
-    }
-
-    LaunchedEffect(key1 = Unit) {
-        paywallViewModel.trackDisplayPaywall()
     }
 
     SwipeRefresh(
@@ -137,12 +120,10 @@ fun PaywallActivityScreen(
                     setOpenDialog(true)
                     return@PaywallScreen
                 }
-//                onStripePay(it)
                 launchStripeSubsActivity(launcher, context, it)
 
                 paywallViewModel.trackAddCart(AddCartParams.ofStripe(it.recurring))
             },
-            onError = showSnackBar,
         ) {
             launchLoginActivity(launcher, context)
         }
