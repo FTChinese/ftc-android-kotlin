@@ -1,5 +1,6 @@
 package com.ft.ftchinese.model.paywall
 
+import com.ft.ftchinese.model.reader.Membership
 import kotlinx.serialization.Serializable
 import org.threeten.bp.ZonedDateTime
 
@@ -39,6 +40,16 @@ data class Paywall(
             liveMode = liveMode,
             stripe = stripe,
         )
+    }
+
+    fun buildUiProducts(m: Membership): List<ProductItem> {
+        val stripeItemStore = stripe.associateBy {
+            it.price.id
+        }
+
+        return products.map {
+            it.buildUiItem(m, stripeItemStore)
+        }
     }
 }
 
