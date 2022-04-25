@@ -33,7 +33,17 @@ data class PaywallProduct(
         return desc
     }
 
-    fun listShoppingItems(m: Membership): List<CartItemFtc> {
+    private fun buildContent(): ProductContent {
+        return ProductContent(
+            id = id,
+            tier = tier,
+            heading = heading,
+            description = descWithDailyCost(),
+            smallPrint = smallPrint,
+        )
+    }
+
+    private fun collectFtcItems(m: Membership): Pair<List<CartItemFtc>, StripePriceIDs> {
         val offerKinds = m.offerKinds
 
         val recurringItems = prices.map { price ->
@@ -46,16 +56,59 @@ data class PaywallProduct(
         }
 
         if (introductory == null || !introductory.isValid() || !m.isZero) {
-            return recurringItems
+            return Pair(
+                recurringItems,
+                StripePriceIDs(
+                    recurring = prices.map { it.stripePriceId },
+                    trial = null
+                )
+            )
         }
 
-        return listOf(
-            CartItemFtc(
-                intent = CheckoutIntent.newMember,
-                price = introductory,
-                discount = null,
-                isIntro = true,
+        return Pair(
+            listOf(
+                CartItemFtc(
+                    intent = CheckoutIntent.newMember,
+                    price = introductory,
+                    discount = null,
+                    isIntro = true,
+                )
+            ) + recurringItems,
+            StripePriceIDs(
+                recurring = prices.map { it.stripePriceId },
+                trial = introductory.stripePriceId
             )
-        ) + recurringItems
+        )
+    }
+
+    fun buildUiItem(m: Membership, stripeStore: Map<String, StripePaywallItem>): ProductItem {
+        val content = buildContent()
+
+        val (ftcItems, stripeIds) = collectFtcItems(m)
+
+        val stripeItems = stripeIds.buildCartItems(
+            prices = stripeStore,
+            m = m
+        )
+
+        return ProductItem(
+            content = content,
+            ftcItems = ftcItems,
+            stripeItems = stripeItems,
+        )
     }
 }
+
+data class ProductContent(
+    val id: String,
+    val tier: Tier,
+    val heading: String,
+    val description: String,
+    val smallPrint: String?,
+)
+
+data class ProductItem(
+    val content: ProductContent,
+    val ftcItems: List<CartItemFtc>,
+    val stripeItems: List<CartItemStripe>,
+)
