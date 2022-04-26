@@ -27,24 +27,24 @@ object PaywallTracker {
         }
 
         from = PaywallSource(
-                id = item.id,
-                type = item.type.toString(),
-                title = item.title,
-                language = item.langVariant,
-                category = GACategory.SUBSCRIPTION,
-                action = GAAction.DISPLAY,
-                label = item.buildGALabel()
+            id = item.id,
+            type = item.type.toString(),
+            title = item.title,
+            language = item.langVariant,
+            category = GACategory.SUBSCRIPTION,
+            action = GAAction.DISPLAY,
+            label = item.buildGALabel()
         )
     }
 
     fun fromDrawer() {
         from = PaywallSource(
-                id = "action_subscription",
-                type = "drawer",
-                title = "User initiated",
-                category = GACategory.SUBSCRIPTION,
-                action = GAAction.DISPLAY,
-                label = "drawer/action_subscription"
+            id = "action_subscription",
+            type = "drawer",
+            title = "User initiated",
+            category = GACategory.SUBSCRIPTION,
+            action = GAAction.DISPLAY,
+            label = "drawer/action_subscription"
         )
     }
 
