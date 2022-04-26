@@ -13,6 +13,7 @@ object ApiRequest {
     private const val TAG = "ApiRequest"
     // Refresh a user's account data, regardless of logged in
     // via email or wecaht.
+    @Deprecated("")
     suspend fun asyncRefreshAccount(account: Account): FetchResult<Account> {
         try {
 
