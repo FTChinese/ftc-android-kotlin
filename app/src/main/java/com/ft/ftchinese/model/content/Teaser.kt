@@ -152,7 +152,7 @@ data class Teaser(
         return "${Config.discoverServer(account)}${jsApiPath}"
     }
 
-    private fun htmlUrl(account: Account?): String? {
+    fun htmlUrl(account: Account?): String? {
         if (id.isBlank()) {
             return null
         }
