@@ -31,7 +31,6 @@ import com.ft.ftchinese.model.ftcsubs.WxPayIntent
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.service.VerifyOneTimePurchaseWorker
 import com.ft.ftchinese.ui.base.ScopedComponentActivity
-import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.components.SubsScreen
 import com.ft.ftchinese.ui.components.ToastMessage
@@ -65,10 +64,6 @@ class SubsActivity : ScopedComponentActivity() {
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         connectionLiveData.observe(this) {
-            paywallViewModel.isNetworkAvailable.value = it
-            ftcPayViewModel.isNetworkAvailable.value = it
-        }
-        isConnected.let {
             paywallViewModel.isNetworkAvailable.value = it
             ftcPayViewModel.isNetworkAvailable.value = it
         }
