@@ -1,6 +1,7 @@
 package com.ft.ftchinese.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,6 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ConnectionLiveData
@@ -19,13 +21,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class UserViewModel(application: Application) : AndroidViewModel(application) {
+private const val TAG = "UserViewModel"
+
+open class UserViewModel(application: Application) : AndroidViewModel(application) {
     private val session = SessionManager.getInstance(application)
-//    val isNetworkAvailable = MutableLiveData(application.isConnected)
 
     val connectionLiveData = ConnectionLiveData(application)
 
     val progressLiveData = MutableLiveData(false)
+    val refreshLiveData = MutableLiveData(false)
 
     val toastLiveData: MutableLiveData<ToastMessage> by lazy {
         MutableLiveData<ToastMessage>()
@@ -58,7 +62,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         session.saveMembership(m)
     }
 
-    fun clear() {
+    fun logout() {
         account = null
         session.logout()
     }
@@ -95,6 +99,44 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                 progressLiveData.value = false
                 toastLiveData.value = ToastMessage.fromException(e)
             }
+        }
+    }
+
+    fun refreshAccount() {
+        val a = account ?: return
+
+        if (connectionLiveData.value != true) {
+            toastLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
+            progressLiveData.value = false
+            refreshLiveData.value = false
+            return
+        }
+
+        viewModelScope.launch {
+            Log.i(TAG, "Start refreshing account")
+
+            try {
+                val refreshed = withContext(Dispatchers.IO) {
+                    AccountRepo.refresh(a)
+                }
+
+                if (refreshed == null) {
+                    toastLiveData.value = ToastMessage.Resource(R.string.loading_failed)
+                } else {
+                    account = refreshed
+                }
+            } catch (e: APIError) {
+                toastLiveData.value = if (e.statusCode == 404) {
+                     ToastMessage.Resource(R.string.account_not_found)
+                } else {
+                    ToastMessage.fromApi(e)
+                }
+            } catch (e: Exception) {
+                toastLiveData.value = ToastMessage.fromException(e)
+            }
+
+            progressLiveData.value = false
+            refreshLiveData.value = false
         }
     }
 }
