@@ -26,7 +26,8 @@ interface JsEventListener {
 }
 
 open class BaseJsEventListener(
-    private val context: Context
+    private val context: Context,
+    private val channelSource: ChannelSource? = null
 ) : JsEventListener {
     private val topicStore = FollowingManager.getInstance(context)
 
@@ -43,7 +44,10 @@ open class BaseJsEventListener(
     }
 
     override fun onTeaserClicked(teaser: Teaser) {
-        ArticleActivity.start(context, teaser)
+        ArticleActivity.start(
+            context,
+            teaser.withParentPerm(channelSource?.permission)
+        )
     }
 
     override fun onChannelClicked(source: ChannelSource) {
