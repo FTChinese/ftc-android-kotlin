@@ -133,7 +133,10 @@ class ChannelFragment : ScopedFragment(),
         configWebView(
             webView = binding.webView,
             jsInterface = JsInterface(
-                BaseJsEventListener(requireContext())
+                BaseJsEventListener(
+                    context = requireContext(),
+                    channelSource = channelSource,
+                )
             ),
             client = WVClient(
                 context = requireContext(),

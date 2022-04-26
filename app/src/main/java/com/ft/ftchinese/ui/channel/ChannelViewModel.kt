@@ -8,8 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.TemplateBuilder
-import com.ft.ftchinese.model.fetch.Fetch
 import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.repository.ArticleClient
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.ui.base.isConnected
@@ -157,14 +157,11 @@ class ChannelViewModel(application: Application) :
 
         Log.i(TAG, "Fetch channel page ${source.path} from $url")
         try {
-            val content = withContext(Dispatchers.IO) {
-                Fetch()
-                    .get(url.toString())
-                    .endText()
-                    .body
+            val resp = withContext(Dispatchers.IO) {
+                ArticleClient.crawlFile(url.toString())
             }
 
-            if (content.isNullOrBlank()) {
+            if (resp.body.isNullOrBlank()) {
                 Log.i(TAG, "Channel ${source.path} data not fetched from server")
                 errorLiveData.value = ToastMessage.Resource(R.string.loading_failed)
                 return null
@@ -174,11 +171,11 @@ class ChannelViewModel(application: Application) :
 
                 source.fileName?.let {
                     Log.i(TAG, "Cache channel file $it")
-                    cache.saveText(it, content)
+                    cache.saveText(it, resp.body)
                 }
             }
 
-            return content
+            return resp.body
         } catch (e: Exception) {
             e.message?.let { Log.i(TAG, it) }
             errorLiveData.value = ToastMessage.fromException(e)
