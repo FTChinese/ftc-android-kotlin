@@ -130,15 +130,14 @@ class Story (
         }
     }
 
-    fun permission(): Permission {
-        return when {
+    val permission: Permission
+        get() = when {
             whitelist == 1 -> Permission.FREE
 //            accessibleBy == "1" -> Permission.STANDARD
 //            accessibleBy == "2" -> Permission.PREMIUM
             isSevenDaysOld() -> Permission.STANDARD
             else -> teaser?.permission() ?: Permission.FREE
         }
-    }
 
     private fun isSevenDaysOld(): Boolean {
         if (publishedAt.isBlank()) {
