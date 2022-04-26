@@ -3,7 +3,9 @@ package com.ft.ftchinese.model.content
 import android.net.Uri
 import android.os.Parcelable
 import com.ft.ftchinese.model.enums.ArticleType
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Permission
+import com.ft.ftchinese.repository.Config
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -78,59 +80,136 @@ data class Teaser(
     // For column type, you should start a ChannelActivity instead of  StoryActivity.
     val type: ArticleType, // story | premium | video | photonews | interactive | column
     val subType: String? = null, // speedreading | radio | bilingual to show cn-en content.
-
     @SerialName("headline")
     var title: String,
-
     @SerialName("eaudio")
     val audioUrl: String? = null,
-
     @SerialName("shortlead")
     val radioUrl: String? = null, // this is a webUrl of mp3 for subType radio.
-
     @SerialName("timeStamp")
     val publishedAt: String? = null, // "1536249600"
 
     // "线下活动,企业公告,会员专享"
     val tag: String = "",
-
     // Whether this instance is created by analysing url. In such case, teaser contains only id and type.
     // For type == story | premium, you should update it based on the loaded story;
     // for other types, you could only update the teaser from open graph.
     @Transient
     val isCreatedFromUrl: Boolean = false,
-
     // These properties are not parsed from JSON.
     // Copied from ChannelMeta
     @Transient
     var hideAd: Boolean = false,
     @Transient
-    var langVariant: Language? = null,
+    val langVariant: Language = Language.CHINESE,
     @Transient
-    var channelPerm: Permission? = null,
+    val channelPerm: Permission? = null,
     @Transient
-    var channelMeta: ChannelMeta? = null,
+    val channelMeta: ChannelMeta? = null,
 ) : Parcelable {
 
-    // Only stories have api.
-    fun hasJsAPI(): Boolean {
-        return type == ArticleType.Story || type == ArticleType.Premium || (type == ArticleType.Interactive && subType == "bilingual")
+    fun withLangVariant(lang: Language): Teaser {
+        return Teaser(
+            id = id,
+            type = type,
+            subType = subType,
+            title = title,
+            audioUrl = audioUrl,
+            radioUrl = radioUrl,
+            publishedAt = publishedAt,
+            tag = tag,
+            isCreatedFromUrl = isCreatedFromUrl,
+            hideAd = hideAd,
+            langVariant = lang,
+            channelPerm = channelPerm,
+            channelMeta = channelMeta,
+        )
     }
 
-    fun apiPathSegment(): String {
-        return when (type) {
-            ArticleType.Story, ArticleType.Premium -> "/index.php/jsapi/get_story_more_info/${id}"
+    val cacheFileName: String
+        get() = if (hasJsAPI) {
+            "${type}_$id.json"
+        } else {
+            "${type}_$id.html"
+        }
+
+    // Only stories have api.
+    val hasJsAPI: Boolean
+        get() = type == ArticleType.Story ||
+            type == ArticleType.Premium ||
+            (type == ArticleType.Interactive && subType == "bilingual")
+
+
+    private val jsApiPath: String
+        get () = when (type) {
+            ArticleType.Story,
+            ArticleType.Premium -> "/index.php/jsapi/get_story_more_info/${id}"
             ArticleType.Interactive -> "/index.php/jsapi/get_interactive_more_info/${id}"
             else -> ""
         }
+
+    private fun jsApiUrl(account: Account?): String {
+        return "${Config.discoverServer(account)}${jsApiPath}"
     }
 
-    fun articleUrl(baseUrl: String): String {
-        return "${baseUrl}${apiPathSegment()}"
+    private fun htmlUrl(account: Account?): String? {
+        if (id.isBlank()) {
+            return null
+        }
+
+        val builder = Uri.parse(Config.discoverServer(account))
+            .buildUpon()
+
+        // Otherwise use webpage.
+        builder
+            .appendPath(type.toString())
+            .appendPath(id)
+
+
+        langVariant.aiAudioPathSuffix().let {
+            builder.appendPath(it)
+        }
+
+        builder.appendQueryParameter("webview", "ftcapp")
+
+        when (type) {
+            ArticleType.Interactive -> {
+
+                builder
+                    .appendQueryParameter("001", "")
+                    .appendQueryParameter("exclusive", "")
+
+                when (subType) {
+                    SUB_TYPE_RADIO,
+                    SUB_TYPE_SPEED_READING,
+                    SUB_TYPE_MBAGYM -> {
+                    }
+
+                    else -> builder
+                        .appendQueryParameter("hideheader", "yes")
+                        .appendQueryParameter("ad", "no")
+                        .appendQueryParameter("inNavigation", "yes")
+                        .appendQueryParameter("for", "audio")
+                        .appendQueryParameter("enableScript", "yes")
+                        .appendQueryParameter("timestamp", "${Date().time}")
+                }
+            }
+
+            ArticleType.Video -> builder
+                .appendQueryParameter("004", "")
+
+            else -> {}
+        }
+
+        return Config.appendUtm(builder).build().toString()
     }
 
-    fun hasMp3(): Boolean {
-        return !audioUrl.isNullOrBlank() || !radioUrl.isNullOrBlank()
+    fun contentUrl(account: Account?): String? {
+        return if (hasJsAPI) {
+            jsApiUrl(account)
+        } else {
+            htmlUrl(account)
+        }
     }
 
     fun audioUri(): Uri? {
@@ -140,6 +219,10 @@ data class Teaser(
         } catch (e: Exception) {
             null
         }
+    }
+
+    fun hasMp3(): Boolean {
+        return !audioUrl.isNullOrBlank() || !radioUrl.isNullOrBlank()
     }
 
     fun buildGALabel(): String {
@@ -169,15 +252,48 @@ data class Teaser(
     }
 
     fun withMeta(meta: ChannelMeta?): Teaser {
-        channelMeta = meta
+        if (meta == null) {
+            return this
+        }
 
-        return this
+        return Teaser(
+            id = id,
+            type = type,
+            subType = subType,
+            title = title,
+            audioUrl = audioUrl,
+            radioUrl = radioUrl,
+            publishedAt = publishedAt,
+            tag = tag,
+            isCreatedFromUrl = isCreatedFromUrl,
+            hideAd = hideAd,
+            langVariant = langVariant,
+            channelPerm = channelPerm,
+            channelMeta = meta,
+        )
     }
 
     // Pass permission from hosting channel.
     fun withParentPerm(p: Permission?): Teaser {
-        channelPerm = p
-        return this
+        if (p == null) {
+            return this
+        }
+
+        return Teaser(
+            id = id,
+            type = type,
+            subType = subType,
+            title = title,
+            audioUrl = audioUrl,
+            radioUrl = radioUrl,
+            publishedAt = publishedAt,
+            tag = tag,
+            isCreatedFromUrl = isCreatedFromUrl,
+            hideAd = hideAd,
+            langVariant = langVariant,
+            channelPerm = p,
+            channelMeta = channelMeta,
+        )
     }
 
     private fun isSevenDaysOld(): Boolean {
@@ -200,18 +316,6 @@ data class Teaser(
         return true
     }
 
-    // File name used to cache/retrieve json data.
-    fun cacheNameJson(): String {
-        return "${type}_$id.json"
-    }
-
-    val cacheNameHtml: String
-        get() = "${type}_$id.html"
-
-    fun screenshotName(): String {
-        return "${type}_$id"
-    }
-    
     fun permission(): Permission {
         val p = channelPerm
         if (p != null) {
@@ -261,11 +365,6 @@ data class Teaser(
 
     fun getCommentsOrder(): String {
         return "story"
-    }
-
-    // Used for standard restful api.
-    fun apiCacheFileName(lang: Language): String {
-        return "${type}_${id}_${lang}.api.json"
     }
 
     companion object {
