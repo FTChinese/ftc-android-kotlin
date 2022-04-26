@@ -1,17 +1,21 @@
 package com.ft.ftchinese.ui.article
 
-import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.Context
 import android.os.Bundle
-import android.view.*
-import android.webkit.WebChromeClient
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentAiAudioBinding
-import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.store.AccountCache
+import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.webpage.BaseJsEventListener
+import com.ft.ftchinese.ui.webpage.JsInterface
 import com.ft.ftchinese.ui.webpage.WVClient
+import com.ft.ftchinese.ui.webpage.configWebView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -20,6 +24,12 @@ class AiAudioFragment : BottomSheetDialogFragment() {
 
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var binding: FragmentAiAudioBinding
+    private lateinit var session: SessionManager
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        session = SessionManager.getInstance(context)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -63,48 +73,19 @@ class AiAudioFragment : BottomSheetDialogFragment() {
             )[ArticleViewModel::class.java]
         } ?: throw Exception("Invalid activity")
 
-        setupViewModel()
-        setupUI()
-    }
+        configWebView(
+            webView = binding.audioWebView,
+            jsInterface = JsInterface(BaseJsEventListener(requireContext())),
+            client = WVClient(
+                context = requireContext(),
+            )
+        )
 
-    private fun setupViewModel() {
-        articleViewModel.storyLoadedLiveData.observe(viewLifecycleOwner) {
-
-            it.aiAudioTeaser(articleViewModel.language)?.let { teaser ->
-                val uri = Config.buildArticleSourceUrl(
-                    AccountCache.get(),
-                    teaser,
-                )
-
-                binding.audioWebView.loadUrl(uri.toString())
+        articleViewModel.aiAudioTeaser
+            ?.htmlUrl(session.loadAccount())
+            ?.let { url ->
+                binding.audioWebView.loadUrl(url)
             }
-        }
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupUI() {
-        binding.audioWebView.settings.apply {
-            javaScriptEnabled = true
-            loadsImagesAutomatically = true
-            domStorageEnabled = true
-            databaseEnabled = true
-        }
-
-        val wvClient = WVClient(requireContext())
-
-        binding.audioWebView.apply {
-
-            webViewClient = wvClient
-            webChromeClient = WebChromeClient()
-
-            setOnKeyListener { _, keyCode, _ ->
-                if (keyCode == KeyEvent.KEYCODE_BACK && binding.audioWebView.canGoBack()) {
-                    binding.audioWebView.goBack()
-                    return@setOnKeyListener true
-                }
-                false
-            }
-        }
     }
 
     fun onCloseBottomSheet(view: View) {
@@ -112,7 +93,6 @@ class AiAudioFragment : BottomSheetDialogFragment() {
     }
 
     companion object {
-        private const val TAG = "AiAudioFragment"
 
         /**
          * Use this factory method to create a new instance of

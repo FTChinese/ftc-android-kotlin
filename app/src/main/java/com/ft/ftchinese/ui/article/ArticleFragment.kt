@@ -17,9 +17,8 @@ import com.ft.ftchinese.databinding.FragmentArticleBinding
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.model.content.FollowingManager
 import com.ft.ftchinese.model.content.OpenGraphMeta
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.repository.Config
-import com.ft.ftchinese.store.AccountCache
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.channel.ChannelActivity
@@ -27,7 +26,6 @@ import com.ft.ftchinese.ui.share.ArticleScreenshot
 import com.ft.ftchinese.ui.share.ScreenshotFragment
 import com.ft.ftchinese.ui.share.ScreenshotViewModel
 import com.ft.ftchinese.ui.webpage.*
-import org.jetbrains.anko.support.v4.toast
 
 private const val TAG = "ArticleFragment"
 
@@ -38,10 +36,12 @@ class ArticleFragment : ScopedFragment() {
     private lateinit var screenshotViewModel: ScreenshotViewModel
     private lateinit var articleViewModel: ArticleViewModel
     private lateinit var followingManager: FollowingManager
+    private lateinit var session: SessionManager
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         followingManager = FollowingManager.getInstance(context)
+        session = SessionManager.getInstance(context)
     }
 
     override fun onCreateView(
@@ -61,7 +61,10 @@ class ArticleFragment : ScopedFragment() {
 
     private val clientListener = object : WebViewListener{
         override fun onOpenGraph(openGraph: OpenGraphMeta) {
-            articleViewModel.openGraphLiveData.value = openGraph
+            articleViewModel.lastResortByOG(
+                openGraph,
+                session.loadAccount()
+            )
         }
 
         override fun onChannelSelected(source: ChannelSource) {
@@ -99,24 +102,15 @@ class ArticleFragment : ScopedFragment() {
     }
 
     private fun setupViewModel() {
-        articleViewModel.htmlResult.observe(viewLifecycleOwner) { result ->
-            when (result) {
-                is FetchResult.LocalizedError -> {
-                    toast(result.msgId)
-                }
-                is FetchResult.TextError -> toast(result.text)
-                is FetchResult.Success -> {
-                    // Pass html string to webview.
-                    Log.i(TAG, "Loading web page content")
-                    binding.webView.loadDataWithBaseURL(
-                        Config.discoverServer(AccountCache.get()),
-                        result.data,
-                        "text/html",
-                        null,
-                        null,
-                    )
-                }
-            }
+        articleViewModel.htmlLiveData.observe(viewLifecycleOwner) { result ->
+            Log.i(TAG, "Loading web page content")
+            binding.webView.loadDataWithBaseURL(
+                Config.discoverServer(session.loadAccount()),
+                result,
+                "text/html",
+                null,
+                null,
+            )
         }
 
         // Once a row is created for the screenshot

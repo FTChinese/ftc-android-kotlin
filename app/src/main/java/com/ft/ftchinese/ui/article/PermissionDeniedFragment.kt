@@ -7,26 +7,20 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentPermissionDeniedBinding
 import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Permission
+import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.channel.DenialReason
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.member.MemberActivity
-import com.ft.ftchinese.ui.SubsActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
-/**
- * create an instance of this fragment.
- */
 class PermissionDeniedFragment : BottomSheetDialogFragment() {
 
-    private lateinit var viewModel: AccessViewModel
-
-    private var cancellable: Boolean = false
+    private var access: Access? = null
 
     private lateinit var binding: FragmentPermissionDeniedBinding
 
@@ -34,14 +28,14 @@ class PermissionDeniedFragment : BottomSheetDialogFragment() {
         super.onCreate(savedInstanceState)
 
         arguments?.let {
-            cancellable = it.getBoolean(ARG_CANCELLABLE)
+            access = it.getParcelable(ARG_ACCESS)
         }
     }
 
     override fun onCancel(dialog: DialogInterface) {
         super.onCancel(dialog)
         // For language switcher, user can cancel the dialog and content will not be switched.
-        if (!cancellable) {
+        if (access?.cancellable != true) {
             activity?.finish()
         }
     }
@@ -76,12 +70,7 @@ class PermissionDeniedFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(AccessViewModel::class.java)
-        } ?: throw Exception("Invalid activity")
-
-        viewModel.accessLiveData.observe(viewLifecycleOwner) {
+        access?.let {
             setupUI(it)
         }
 

@@ -27,9 +27,6 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityArticleBinding
 import com.ft.ftchinese.model.content.*
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.fetch.marshaller
-import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.service.*
@@ -37,16 +34,13 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.share.*
 import com.ft.ftchinese.ui.webpage.WVViewModel
-import com.ft.ftchinese.ui.webpage.WebpageFragment
 import com.ft.ftchinese.util.RequestCode
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
-import kotlinx.serialization.decodeFromString
 import org.jetbrains.anko.toast
 import java.util.*
 
@@ -70,7 +64,6 @@ class ArticleActivity : ScopedAppActivity(),
     private lateinit var shareViewModel: SocialShareViewModel
     private lateinit var wvViewModel: WVViewModel
     private lateinit var screenshotViewModel: ScreenshotViewModel
-    private lateinit var accessViewModel: AccessViewModel
 
     private var permissionFragment: PermissionDeniedFragment? = null
     private var teaser: Teaser? = null
@@ -92,7 +85,10 @@ class ArticleActivity : ScopedAppActivity(),
             setDisplayShowTitleEnabled(false)
         }
 
-        val teaser = intent.getParcelableExtra<Teaser>(EXTRA_ARTICLE_TEASER) ?: return
+        val teaser = intent
+            .getParcelableExtra<Teaser>(EXTRA_ARTICLE_TEASER)
+            ?: return
+
         Log.i(TAG, "Article teaser: $teaser")
 
         this.teaser = teaser
@@ -106,21 +102,13 @@ class ArticleActivity : ScopedAppActivity(),
         statsTracker = StatsTracker.getInstance(this)
         wxApi = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID, false)
 
-        articleViewModel = ViewModelProvider(
-            this
-        )[ArticleViewModel::class.java]
-
-        accessViewModel = ViewModelProvider(this)[AccessViewModel::class.java]
+        articleViewModel = ViewModelProvider(this)[ArticleViewModel::class.java]
 
         wvViewModel = ViewModelProvider(this)[WVViewModel::class.java]
 
         shareViewModel = ViewModelProvider(this)[SocialShareViewModel::class.java]
 
         screenshotViewModel = ViewModelProvider(this)[ScreenshotViewModel::class.java]
-
-        connectionLiveData.observe(this) {
-            articleViewModel.isNetworkAvailable.value = it
-        }
 
         setupViewModel()
         setupUI()
@@ -132,26 +120,16 @@ class ArticleActivity : ScopedAppActivity(),
 
         val t = teaser ?: return
 
-        binding.inProgress = true
-
-        if (t.subType == "mbagym") {
-            supportFragmentManager.commit {
-                replace(R.id.content_container, WebpageFragment.newInstance())
-            }
-        } else {
-            supportFragmentManager.commit {
-                replace(R.id.content_container, ArticleFragment.newInstance())
-            }
+        supportFragmentManager.commit {
+            replace(R.id.content_container, ArticleFragment.newInstance())
         }
 
         // Load a story.
-        articleViewModel.loadStory(
+        articleViewModel.loadContent(
             teaser = t,
-            isRefreshing = false,
+            account = sessionManager.loadAccount(),
+            refreshing = false,
         )
-
-        // Check access rights.
-        Log.i(TAG, "Checking access of teaser $teaser")
     }
 
     private fun setupViewModel() {
@@ -168,20 +146,41 @@ class ArticleActivity : ScopedAppActivity(),
             binding.articleRefresh.isRefreshing = it
         }
 
+        articleViewModel.audioFoundLiveData.observe(this) {
+            showAudioIcon = it
+            invalidateOptionsMenu()
+        }
+
+        articleViewModel.bilingualLiveData.observe(this) {
+            binding.isBilingual = it
+        }
+
+        articleViewModel.toastLiveData.observe(this) {
+            when (it) {
+                is ToastMessage.Resource -> toast(it.id)
+                is ToastMessage.Text -> toast(it.text)
+            }
+        }
+
         // Access rights may comes from 3 sources, in order:
         // 1. Defined on a Teaser;
         // 2. Defined on a Story;
         // 3. Acquired from html meta data of open graph.
-        articleViewModel.accessChecked.observe(this) {
+        articleViewModel.accessLiveData.observe(this) {
 
+            Log.i(TAG, "Access $it")
             if (it.granted) {
                 permissionFragment?.dismiss()
                 return@observe
             }
 
-            PaywallTracker.fromArticle(teaser)
+            if (it.isBilingual) {
+                binding.langCnBtn.isChecked = true
+                binding.langEnBtn.isChecked = false
+                binding.langBiBtn.isChecked = false
+            }
 
-            accessViewModel.accessLiveData.value = it
+            PaywallTracker.fromArticle(teaser?.withLangVariant(it.lang))
 
             if (permissionFragment == null) {
                 permissionFragment = PermissionDeniedFragment.newInstance(it)
@@ -191,53 +190,16 @@ class ArticleActivity : ScopedAppActivity(),
             }
         }
 
-        // After story json loaded either from cache or from server.
-        articleViewModel.storyLoadedLiveData.observe(this) {
-            articleViewModel.compileHtml(
-                FollowingManager
-                    .getInstance(this)
-                    .loadTemplateCtx()
-            )
-            binding.isBilingual = it.isBilingual
-        }
-
-        articleViewModel.audioFoundLiveData.observe(this) {
-            showAudioIcon = it
-            invalidateOptionsMenu()
-        }
-
         // Show message after bookmark clicked.
-        articleViewModel.bookmarkState.observe(this) {
-            Log.i(TAG, "Bookmark state $it")
+        articleViewModel.bookmarkLiveData.observe(this) {
             binding.isStarring = it.isStarring
-            if (it.message != null) {
-                Snackbar.make(
-                    binding.root,
-                    it.message,
-                    Snackbar.LENGTH_SHORT
-                ).show()
+            it.message?.let { msg ->
+                toast(msg)
             }
         }
 
         articleViewModel.articleReadLiveData.observe(this) {
             statsTracker.storyViewed(it)
-        }
-
-        /**
-         * Evaluate open graph by JS to get essential data of
-         * an article loading directly with URL.
-         * The value is posted from WVClient via WVViewModel.
-         */
-        articleViewModel.openGraphLiveData.observe(this) {
-
-            // Even if the article is loaded by clicking URL,
-            // we can still get enough structured data if
-            // it has JSON API.
-            if (teaser?.hasJsAPI() == true) {
-                return@observe
-            }
-
-            articleViewModel.lastResortByOG(it, teaser)
         }
 
         // Pass the share app selected share component to article view model.
@@ -415,51 +377,28 @@ class ArticleActivity : ScopedAppActivity(),
         }
     }
 
-    private fun handleLangPermission(lang: Language) {
-        val account = sessionManager.loadAccount()
-
-        val t = teaser ?: return
-
-        val access = Access.ofEnglishArticle(account)
-
-        if (access.granted) {
-            articleViewModel.switchLang(lang, t)
-        } else {
-            // Tracking
-            PaywallTracker.fromArticle(t)
-
-            disableLangSwitch()
-
-            t.langVariant = lang
-
-            PermissionDeniedFragment.newInstance(
-                access = access,
-                cancellable = true,
-            ).show(supportFragmentManager, "PermissionDeniedFragment")
-        }
-    }
-
-    private fun disableLangSwitch() {
-        binding.langCnBtn.isChecked = true
-        binding.langEnBtn.isChecked = false
-        binding.langBiBtn.isChecked = false
-    }
-
     fun onClickChinese(view: View) {
         Log.i(TAG, "Clicking chinese tab")
-        teaser?.let {
-            articleViewModel.switchLang(Language.CHINESE, it)
-        }
+        articleViewModel.switchLang(
+            Language.CHINESE,
+            sessionManager.loadAccount()
+        )
     }
 
     fun onClickEnglish(view: View) {
         Log.i(TAG, "Clicking english tag")
-        handleLangPermission(Language.ENGLISH)
+        articleViewModel.switchLang(
+            lang = Language.ENGLISH,
+            account = sessionManager.loadAccount()
+        )
     }
 
     fun onClickBilingual(view: View) {
         Log.i(TAG, "Clicking bilingual tag")
-        handleLangPermission(Language.BILINGUAL)
+        articleViewModel.switchLang(
+            lang = Language.BILINGUAL,
+            account = sessionManager.loadAccount()
+        )
     }
 
     fun onClickBookmark(view: View) {
@@ -480,10 +419,12 @@ class ArticleActivity : ScopedAppActivity(),
             return
         }
 
-        toast(R.string.refreshing_data)
-
         teaser?.let {
-            articleViewModel.refreshStory(it)
+            articleViewModel.loadContent(
+                teaser = it,
+                account = sessionManager.loadAccount(),
+                refreshing = true
+            )
         }
     }
 
@@ -562,9 +503,7 @@ class ArticleActivity : ScopedAppActivity(),
     }
 
     private fun refreshAccess() {
-        teaser?.let {
-            articleViewModel.refreshAccess(it)
-        } ?: finish()
+        articleViewModel.refreshAccess(sessionManager.loadAccount())
     }
 
     companion object {
