@@ -1,19 +1,20 @@
 package com.ft.ftchinese.ui.member
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Divider
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.components.ClickableRow
+import com.ft.ftchinese.ui.components.RightArrow
 import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.ui.theme.OColor
 
-enum class OptionRow {
+enum class SubsOptionRow {
     GoToPaywall,
     CancelStripe,
     ReactivateStripe;
@@ -23,56 +24,59 @@ enum class OptionRow {
 fun SubsOptions(
     cancelStripe: Boolean,
     reactivateStripe: Boolean,
-    onClickRow: (OptionRow) -> Unit
+    onClickRow: (SubsOptionRow) -> Unit
 ) {
-    val rowModifier = Modifier.padding(vertical = Dimens.dp8)
+    val rowModifier = Modifier
+        .background(OColor.black5)
+        .padding(Dimens.dp8)
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
     ) {
         ClickableRow(
+            modifier = rowModifier,
+            endIcon = { RightArrow() },
             onClick = {
-                onClickRow(OptionRow.GoToPaywall)
-            },
-            modifier = rowModifier
+                onClickRow(SubsOptionRow.GoToPaywall)
+            }
         ) {
             Text(
                 text = "购买订阅或更改自动续订",
-                modifier = Modifier.weight(1f)
+                color = OColor.teal
             )
         }
 
-        Divider()
+        Spacer(modifier = Modifier.height(1.dp))
 
         if (reactivateStripe) {
             ClickableRow(
+                modifier = rowModifier,
                 onClick = {
-                    onClickRow(OptionRow.ReactivateStripe)
+                    onClickRow(SubsOptionRow.ReactivateStripe)
                 },
-                modifier = rowModifier
             ) {
                 Text(
                     text = stringResource(id = R.string.stripe_reactivate_auto_renew)
                 )
             }
 
-            Divider()
+            Spacer(modifier = Modifier.height(1.dp))
         }
 
         if (cancelStripe) {
             ClickableRow(
+                modifier = rowModifier,
                 onClick = {
-                    onClickRow(OptionRow.CancelStripe)
-                },
-                modifier = rowModifier
+                    onClickRow(SubsOptionRow.CancelStripe)
+                }
             ) {
                 Text(
                     text = stringResource(id = R.string.stripe_cancel)
                 )
             }
 
-            Divider()
+            Spacer(modifier = Modifier.height(1.dp))
         }
     }
 }
