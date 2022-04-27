@@ -22,7 +22,6 @@ import com.ft.ftchinese.ui.mobile.MobileFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.util.RequestCode
 import com.google.android.material.tabs.TabLayoutMediator
-import org.jetbrains.anko.support.v4.toast
 import org.jetbrains.anko.toast
 
 private val tabs = listOf(
