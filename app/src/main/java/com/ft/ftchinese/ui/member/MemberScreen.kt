@@ -15,7 +15,7 @@ import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.ui.components.ProgressLayout
-import com.ft.ftchinese.ui.product.SubsRuleContent
+import com.ft.ftchinese.ui.components.SubsRuleContent
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 import org.threeten.bp.LocalDate
@@ -24,6 +24,7 @@ import org.threeten.bp.LocalDate
 fun MemberScreen(
     member: Membership,
     loading: Boolean,
+    onSubsOption: (SubsOptionRow) -> Unit,
 ) {
     val context = LocalContext.current
     val status = SubsStatus.newInstance(
@@ -56,9 +57,7 @@ fun MemberScreen(
             SubsOptions(
                 cancelStripe = member.canCancelStripe,
                 reactivateStripe = status.reactivateStripe,
-                onClickRow = {
-
-                }
+                onClickRow = onSubsOption
             )
 
             Spacer(modifier = Modifier.height(Dimens.dp16))
@@ -80,7 +79,8 @@ fun PreviewMemberScreen() {
             standardAddOn = 30,
             premiumAddOn = 20,
         ),
-        loading = false
+        loading = false,
+        onSubsOption = {}
     )
 }
 
