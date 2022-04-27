@@ -40,6 +40,7 @@ class FtcPayViewModel(application: Application) : AndroidViewModel(application) 
     private val payIntentStore = PayIntentStore.getInstance(application)
     private val invoiceStore = InvoiceStore.getInstance(application)
 
+    @Deprecated("")
     val isNetworkAvailable = MutableLiveData(application.isConnected)
     val inProgress = MutableLiveData(false)
     val toastMessage: MutableLiveData<ToastMessage> by lazy {
