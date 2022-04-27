@@ -10,6 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.legal.legalPages
 import com.ft.ftchinese.ui.components.ClickableRow
+import com.ft.ftchinese.ui.components.RightArrow
 import com.ft.ftchinese.ui.theme.Dimens
 
 @Composable
@@ -19,15 +20,17 @@ fun AboutActivityScreen(
     Column {
         legalPages.forEach { pageMeta ->
             ClickableRow(
+                modifier = Modifier
+                    .padding(Dimens.dp16),
+                endIcon = {
+                    RightArrow()
+                },
                 onClick = {
                   onNavigate(pageMeta)
-                },
-                modifier = Modifier
-                    .padding(Dimens.dp16)
+                }
             ) {
                 Text(
                     text = pageMeta.title,
-                    modifier = Modifier.weight(1f)
                 )
             }
 

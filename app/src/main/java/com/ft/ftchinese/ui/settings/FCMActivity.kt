@@ -185,15 +185,15 @@ private fun FcmBody(
                 )
 
                 ClickableRow(
-                    onClick = onSetting,
                     modifier = Modifier
                         .background(OColor.black5)
-                        .padding(Dimens.dp16)
+                        .padding(Dimens.dp16),
+                    endIcon = { RightArrow() },
+                    onClick = onSetting
                 ) {
                     Text(
                         text = stringResource(id = R.string.channel_setting_news),
                         style = MaterialTheme.typography.h6,
-                        modifier = Modifier.weight(1f)
                     )
                 }
 

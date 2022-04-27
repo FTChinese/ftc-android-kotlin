@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.settings
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -25,6 +26,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.components.ClickableRow
+import com.ft.ftchinese.ui.components.RightArrow
 import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.Dimens
@@ -37,6 +39,7 @@ class SettingsActivity : ComponentActivity() {
 
     private lateinit var settingsViewModel: SettingsViewModel
 
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -127,7 +130,6 @@ fun PreferenceBody(
             title = stringResource(id = R.string.pref_clear_cache),
             summary = cacheSize ?: "0 KiB",
             leadIcon = painterResource(id = R.drawable.ic_clear_24dp),
-            trailIcon = null,
             onClick = {
                 onClickRow(PrefId.ClearCache)
             }
@@ -139,7 +141,6 @@ fun PreferenceBody(
                 stringResource(R.string.summary_articles_read, it)
             } ?: "",
             leadIcon = painterResource(id = R.drawable.ic_delete_forever_black_24dp),
-            trailIcon = null,
             onClick = {
                 onClickRow(PrefId.ClearHistory)
             }
@@ -149,7 +150,7 @@ fun PreferenceBody(
             title = stringResource(id = R.string.fcm_pref),
             summary = stringResource(id = R.string.fcm_summary),
             leadIcon = painterResource(id = R.drawable.ic_notifications_black_24dp),
-            trailIcon = painterResource(id = R.drawable.ic_keyboard_arrow_right_gray_24dp),
+            trailIcon = true,
             onClick = {
                 onClickRow(PrefId.Notification)
             }
@@ -160,7 +161,6 @@ fun PreferenceBody(
             title = stringResource(R.string.current_version, BuildConfig.VERSION_NAME),
             summary = null,
             leadIcon = painterResource(id = R.drawable.ic_update_black_24dp),
-            trailIcon = null,
             onClick = {
 //                onClickRow(PrefId.CheckVersion)
             },
@@ -173,17 +173,17 @@ fun PreferenceItem(
     title: String,
     summary: String?,
     leadIcon: Painter,
-    trailIcon: Painter?,
+    trailIcon: Boolean = false,
     onClick: () -> Unit,
 ) {
     ClickableRow(
-        onClick = onClick,
-        trailIcon = trailIcon,
+        modifier = Modifier.padding(Dimens.dp16),
+        startIcon = {
+            Icon(painter = leadIcon, contentDescription = title)
+        },
+        endIcon = { if (trailIcon) { RightArrow() } },
+        onClick = onClick
     ) {
-        Icon(
-            painter = leadIcon,
-            contentDescription = title
-        )
 
         Column(
             modifier = Modifier
@@ -191,7 +191,6 @@ fun PreferenceItem(
                     start = Dimens.dp8,
                     end = Dimens.dp8
                 )
-                .weight(1f)
         ) {
             Text(
                 text = title,

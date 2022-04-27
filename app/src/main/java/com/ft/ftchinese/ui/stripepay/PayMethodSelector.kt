@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.model.stripesubs.StripePaymentCard
 import com.ft.ftchinese.ui.components.ClickableRow
+import com.ft.ftchinese.ui.components.RightArrow
 import com.ft.ftchinese.ui.components.StripeCardRow
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
@@ -25,18 +26,17 @@ fun PaymentMethodSelector(
             .padding(Dimens.dp8)
             .background(OColor.black5),
         enabled = enabled,
+        startIcon = { RightArrow() },
         onClick = onClick
     ) {
         if (card != null) {
             StripeCardRow(
                 card = card,
-                modifier = Modifier.weight(1f)
             )
         } else {
             Text(
                 text = "未设置",
                 modifier = Modifier
-                    .weight(1f)
                     .padding(
                         top = Dimens.dp8,
                         bottom = Dimens.dp8,
