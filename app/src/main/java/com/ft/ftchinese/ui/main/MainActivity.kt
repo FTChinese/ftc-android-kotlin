@@ -28,29 +28,29 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.TestActivity
 import com.ft.ftchinese.databinding.ActivityMainBinding
 import com.ft.ftchinese.databinding.DrawerNavHeaderBinding
+import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.legal.WebpageMeta
-import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.reader.WX_AVATAR_NAME
 import com.ft.ftchinese.service.LatestReleaseWorker
 import com.ft.ftchinese.service.VerifySubsWorker
 import com.ft.ftchinese.store.*
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.AboutListActivity
+import com.ft.ftchinese.ui.MemberActivityV2
+import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.account.WxInfoViewModel
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.TabPages
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.myft.MyftPagerAdapter
 import com.ft.ftchinese.ui.channel.TabPagerAdapter
 import com.ft.ftchinese.ui.dialog.WxExpireDialogFragment
 import com.ft.ftchinese.ui.login.AuthActivity
-import com.ft.ftchinese.ui.member.MemberActivity
-import com.ft.ftchinese.ui.SubsActivity
+import com.ft.ftchinese.ui.myft.MyftPagerAdapter
 import com.ft.ftchinese.ui.search.SearchableActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
-import com.ft.ftchinese.ui.AboutListActivity
 import com.ft.ftchinese.ui.webpage.WVViewModel
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.ft.ftchinese.util.RequestCode
@@ -336,7 +336,7 @@ class MainActivity : ScopedAppActivity(),
                     PaywallTracker.fromDrawer()
                     SubsActivity.start(this)
                 }
-                R.id.action_my_subs -> MemberActivity.start(this)
+                R.id.action_my_subs -> MemberActivityV2.start(this)
                 R.id.action_feedback -> feedbackEmail()
                 R.id.action_settings -> SettingsActivity.start(this)
                 R.id.action_about -> AboutListActivity.start(this)
