@@ -3,11 +3,12 @@ package com.ft.ftchinese.store
 import android.content.Context
 import androidx.core.content.edit
 import com.ft.ftchinese.model.enums.*
-import com.ft.ftchinese.model.fetch.formatISODateTime
-import com.ft.ftchinese.model.fetch.formatLocalDate
-import com.ft.ftchinese.model.fetch.parseISODateTime
-import com.ft.ftchinese.model.fetch.parseLocalDate
+import com.ft.ftchinese.model.fetch.*
+import com.ft.ftchinese.model.iapsubs.IapSubs
 import com.ft.ftchinese.model.reader.*
+import com.ft.ftchinese.model.stripesubs.StripeSubs
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 
 private const val SESSION_PREF_NAME = "account"
 private const val PREF_USER_ID = "id"
@@ -41,6 +42,9 @@ private const val PREF_LOGIN_METHOD = "login_method"
 private const val PREF_WX_SESSION_ID = "wx_session_id"
 private const val PREF_WX_UNION_ID = "wx_union_id"
 private const val PREF_WX_OAUTH_TIME = "wx_oauth_time"
+
+private const val PREF_STRIPE_SUBS = "stripe_subs"
+private const val PREF_IAP_SUBS = "iap_subs"
 
 class SessionManager private constructor(context: Context) {
     private val sharedPreferences = context.getSharedPreferences(SESSION_PREF_NAME, Context.MODE_PRIVATE)
@@ -179,6 +183,28 @@ class SessionManager private constructor(context: Context) {
         sharedPreferences.edit(commit = true) {
             putString(PREF_STRIPE_CUS_ID, id)
         }
+    }
+
+    fun saveStripeSubs(subs: StripeSubs) {
+        sharedPreferences.edit(commit = true) {
+            putString(PREF_STRIPE_SUBS, marshaller.encodeToString(subs))
+        }
+    }
+
+    fun loadStripeSubs(): StripeSubs? {
+        val subsStr = sharedPreferences.getString(PREF_STRIPE_SUBS, null) ?: return null
+        return marshaller.decodeFromString(subsStr)
+    }
+
+    fun saveIapSus(subs: IapSubs) {
+        sharedPreferences.edit(commit = true) {
+            putString(PREF_IAP_SUBS, marshaller.encodeToString(subs))
+        }
+    }
+
+    fun loadIapSubs(): IapSubs? {
+        val subsStr = sharedPreferences.getString(PREF_IAP_SUBS, null) ?: return null
+        return marshaller.decodeFromString(subsStr)
     }
 
     fun isLoggedIn(): Boolean {
