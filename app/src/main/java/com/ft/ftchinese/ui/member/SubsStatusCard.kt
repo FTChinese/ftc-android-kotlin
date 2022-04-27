@@ -18,10 +18,12 @@ fun SubsStatusCard(
     status: SubsStatus
 ) {
     Card(
-        modifier = Modifier.padding(Dimens.dp8),
+        modifier = Modifier,
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(Dimens.dp8)
         ) {
             ProductHeading(text = status.productName)
 
@@ -45,10 +47,16 @@ fun SubsStatusCard(
                     text = "待启用订阅时长",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.h6
+                    style = MaterialTheme.typography.subtitle1
                 )
                 Spacer(modifier = Modifier.height(Dimens.dp8))
-                RemindMessage(message = "以下订阅时间将在现有订阅服务到期后使用")
+                Text(
+                    text = "以下订阅时间将在现有订阅服务到期后使用",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.subtitle2,
+                    color = OColor.black60
+                )
                 Spacer(modifier = Modifier.height(Dimens.dp8))
                 status.addOns.forEach {
                     ListItemTwoCol(
