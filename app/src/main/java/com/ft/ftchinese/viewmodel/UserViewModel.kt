@@ -24,12 +24,12 @@ import kotlinx.coroutines.withContext
 private const val TAG = "UserViewModel"
 
 open class UserViewModel(application: Application) : AndroidViewModel(application) {
-    private val session = SessionManager.getInstance(application)
+    protected val session = SessionManager.getInstance(application)
 
     val connectionLiveData = ConnectionLiveData(application)
 
     val progressLiveData = MutableLiveData(false)
-    val refreshLiveData = MutableLiveData(false)
+    val refreshingLiveData = MutableLiveData(false)
 
     val toastLiveData: MutableLiveData<ToastMessage> by lazy {
         MutableLiveData<ToastMessage>()
@@ -108,9 +108,11 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
         if (connectionLiveData.value != true) {
             toastLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
             progressLiveData.value = false
-            refreshLiveData.value = false
+            refreshingLiveData.value = false
             return
         }
+
+        toastLiveData.value = ToastMessage.Resource(R.string.refreshing_account)
 
         viewModelScope.launch {
             Log.i(TAG, "Start refreshing account")
@@ -124,6 +126,7 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
                     toastLiveData.value = ToastMessage.Resource(R.string.loading_failed)
                 } else {
                     account = refreshed
+                    toastLiveData.value = ToastMessage.Resource(R.string.refresh_success)
                 }
             } catch (e: APIError) {
                 toastLiveData.value = if (e.statusCode == 404) {
@@ -136,7 +139,7 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
             }
 
             progressLiveData.value = false
-            refreshLiveData.value = false
+            refreshingLiveData.value = false
         }
     }
 }
