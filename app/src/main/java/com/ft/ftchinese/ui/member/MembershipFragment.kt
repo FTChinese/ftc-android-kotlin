@@ -15,6 +15,7 @@ import com.ft.ftchinese.databinding.FragmentMembershipBinding
 /**
  * UI to show current membership's status.
  */
+@Deprecated("")
 class MembershipFragment : Fragment() {
 
     private lateinit var binding: FragmentMembershipBinding
