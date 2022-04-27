@@ -131,6 +131,10 @@
             android:name=".ui.member.MemberActivity"
             android:label="@string/title_my_subs"
             android:parentActivityName=".ui.main.MainActivity" />
+
+        <activity
+            android:name=".ui.MemberActivityV2"
+            android:label="@string/title_my_subs" />
         <activity
             android:name=".ui.checkout.StripeSubActivity"
             android:exported="true"
