@@ -30,6 +30,7 @@ class PaywallViewModel(application: Application) : AndroidViewModel(application)
     private val cache = FileCache(application)
     private var premiumOnTop = false
 
+    @Deprecated("")
     val isNetworkAvailable = MutableLiveData(application.isConnected)
     val progressLiveData = MutableLiveData(false)
     val refreshingLiveData = MutableLiveData(false)
