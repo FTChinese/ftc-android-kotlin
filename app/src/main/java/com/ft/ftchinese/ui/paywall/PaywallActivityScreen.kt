@@ -62,7 +62,7 @@ fun PaywallActivityScreen(
     ) { result ->
         when (result.resultCode) {
             Activity.RESULT_OK -> {
-                userViewModel.load()
+                userViewModel.reloadAccount()
             }
             Activity.RESULT_CANCELED -> {
 
