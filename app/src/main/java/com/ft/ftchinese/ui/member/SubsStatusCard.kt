@@ -23,7 +23,7 @@ fun SubsStatusCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Dimens.dp8)
+                .padding(Dimens.dp16)
         ) {
             ProductHeading(text = status.productName)
 
