@@ -203,6 +203,9 @@ class SubsActivity : ScopedComponentActivity() {
                 }
             )
         }
+
+        @JvmStatic
+        fun intent(context: Context) = Intent(context, SubsActivity::class.java)
     }
 }
 
