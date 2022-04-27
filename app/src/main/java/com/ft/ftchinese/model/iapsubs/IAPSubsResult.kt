@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class IAPSubsResult(
-    val subscription: Subscription,
+    val subscription: IapSubs,
     val membership: Membership,
 )

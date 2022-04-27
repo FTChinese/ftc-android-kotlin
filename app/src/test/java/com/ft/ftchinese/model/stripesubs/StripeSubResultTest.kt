@@ -31,7 +31,7 @@ class StripeSubResultTest {
     """.trimIndent()
     @Test
     fun parseJONS() {
-        val result = Json.decodeFromString<Subscription>(data)
+        val result = Json.decodeFromString<StripeSubs>(data)
 
         println(result)
     }

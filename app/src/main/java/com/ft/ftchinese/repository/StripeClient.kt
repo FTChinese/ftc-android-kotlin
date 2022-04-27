@@ -109,7 +109,7 @@ object StripeClient {
         )
     }
 
-    fun loadSubscription(account: Account, subsId: String): HttpResp<Subscription> {
+    fun loadSubscription(account: Account, subsId: String): HttpResp<StripeSubs> {
         return Fetch().get("${Endpoint.stripeSubs}/${subsId}")
             .setUserId(account.id)
             .noCache()

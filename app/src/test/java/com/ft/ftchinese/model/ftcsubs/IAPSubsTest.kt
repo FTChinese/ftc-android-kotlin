@@ -1,6 +1,6 @@
 package com.ft.ftchinese.model.ftcsubs
 
-import com.ft.ftchinese.model.iapsubs.Subscription
+import com.ft.ftchinese.model.iapsubs.IapSubs
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertNotNull
@@ -23,7 +23,7 @@ class IAPSubsTest {
 
     @Test
     fun parseSubs() {
-        val subs = Json.decodeFromString<Subscription>(data)
+        val subs = Json.decodeFromString<IapSubs>(data)
         assertNotNull(subs)
         print(subs)
     }

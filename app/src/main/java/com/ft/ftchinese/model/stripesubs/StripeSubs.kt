@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 import org.threeten.bp.ZonedDateTime
 
 @Serializable
-data class Subscription(
+data class StripeSubs(
     val id: String,
     val tier: Tier,
     val cycle: Cycle,
@@ -23,18 +23,12 @@ data class Subscription(
     val currentPeriodStart: ZonedDateTime,
     val customerId: String,
     val defaultPaymentMethod: String? = null,
-//    val subsItemId: String,
-//    val priceId: String,
-    val latestInvoiceId: String,
+    val latestInvoiceId: String, // Empty when intro exists
     val liveMode: Boolean,
     @Serializable(with = DateTimeAsStringSerializer::class)
     val startDateUtc: ZonedDateTime? = null,
     @Serializable(with = DateTimeAsStringSerializer::class)
     val endedUtc: ZonedDateTime? = null,
-//    @KDateTime
-//    val createdUtc: ZonedDateTime? = null,
-//    @KDateTime
-//    val updatedUtc: ZonedDateTime? = null,
     val status: StripeSubStatus? = null,
     val ftcUserId: String? = null,
     val paymentIntent: PaymentIntent? = null,

@@ -5,7 +5,7 @@ import com.ft.ftchinese.model.enums.Tier
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Subscription(
+data class IapSubs(
     val originalTransactionId: String,
     val purchaseDateUtc: String?,
     val expiresDateUtc: String?,

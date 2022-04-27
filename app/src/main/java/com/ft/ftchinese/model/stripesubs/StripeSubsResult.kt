@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class StripeSubsResult(
-    val subs: Subscription,
+    val subs: StripeSubs,
     val membership: Membership
 )
