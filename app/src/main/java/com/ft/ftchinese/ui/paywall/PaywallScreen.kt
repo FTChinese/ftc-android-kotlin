@@ -21,7 +21,7 @@ import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.ui.components.CustomerService
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.product.ProductCard
-import com.ft.ftchinese.ui.product.SubsRuleContent
+import com.ft.ftchinese.ui.components.SubsRuleContent
 import com.ft.ftchinese.ui.theme.Dimens
 
 @Composable
