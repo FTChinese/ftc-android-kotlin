@@ -4,9 +4,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -38,6 +39,8 @@ class MemberActivity : ScopedAppActivity(),
     private lateinit var binding: ActivityMemberBinding
     private var addonFragment: SubsAddOnFragment? = null
 
+    private lateinit var resultLauncher: ActivityResultLauncher<Intent>
+
     private fun stopRefresh() {
         binding.swipeRefresh.isRefreshing = false
     }
@@ -58,6 +61,15 @@ class MemberActivity : ScopedAppActivity(),
 
         setupViewModel()
         initUI()
+
+        resultLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                setResult(Activity.RESULT_OK)
+                finish()
+            }
+        }
     }
 
     private fun setupViewModel() {
@@ -162,7 +174,7 @@ class MemberActivity : ScopedAppActivity(),
         }
 
         binding.subsUpdate.setOnClickListener {
-            SubsActivity.start(this)
+            resultLauncher.launch(SubsActivity.intent(this))
         }
 
         sessionManager.loadAccount()?.membership?.let {
@@ -239,23 +251,6 @@ class MemberActivity : ScopedAppActivity(),
         initUI()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        Log.i(TAG, "onActivityResult requestCode: $requestCode, resultCode: $resultCode")
-
-        when (requestCode) {
-            RequestCode.PAYMENT -> {
-                if (resultCode != Activity.RESULT_OK) {
-                    return
-                }
-
-                setResult(Activity.RESULT_OK)
-                finish()
-            }
-        }
-    }
-
     // Create menus
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val m = sessionManager.loadAccount()?.membership
@@ -267,10 +262,6 @@ class MemberActivity : ScopedAppActivity(),
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
 
-//        R.id.action_orders -> {
-//            MyOrdersActivity.start(this)
-//            true
-//        }
         R.id.action_cancel_stripe -> {
 
             alert(Appcompat, "该操作将关闭Stripe自动续订，当前订阅在到期前依然有效。在订阅到期前，您随时可以重新打开自动续订。", "取消订阅") {
@@ -296,8 +287,6 @@ class MemberActivity : ScopedAppActivity(),
     }
 
     companion object {
-
-        private const val TAG = "MemberActivity"
 
         fun start(context: Context?) {
             context?.startActivity(Intent(context, MemberActivity::class.java))

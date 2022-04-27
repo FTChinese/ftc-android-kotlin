@@ -39,7 +39,10 @@ class MemberActivityV2 : ComponentActivity() {
                     topBar = {
                         Toolbar(
                             heading = stringResource(id = R.string.title_my_subs),
-                            onBack = { finish() }
+                            onBack = {
+                                setResult(Activity.RESULT_OK)
+                                finish()
+                            }
                         )
                     },
                     scaffoldState = scaffoldState
@@ -59,19 +62,14 @@ class MemberActivityV2 : ComponentActivity() {
     }
 
     companion object {
-        private const val TAG = "MemberActivity"
 
         @JvmStatic
         fun start(context: Context?) {
             context?.startActivity(Intent(context, MemberActivityV2::class.java))
         }
 
+        // Intent in place of old startActivityForResult.
         @JvmStatic
-        fun startForResult(activity: Activity?) {
-            activity?.startActivityForResult(
-                Intent(activity, MemberActivityV2::class.java),
-                RequestCode.MEMBER_REFRESHED
-            )
-        }
+        fun startIntent(context: Context) = Intent(context, MemberActivityV2::class.java)
     }
 }
