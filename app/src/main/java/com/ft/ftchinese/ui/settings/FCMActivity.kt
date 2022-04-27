@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.settings
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -37,6 +38,7 @@ class FCMActivity : AppCompatActivity() {
 
     private var errorDialog: Dialog? = null
 
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -186,6 +188,7 @@ private fun FcmBody(
                     onClick = onSetting,
                     modifier = Modifier
                         .background(OColor.black5)
+                        .padding(Dimens.dp16)
                 ) {
                     Text(
                         text = stringResource(id = R.string.channel_setting_news),

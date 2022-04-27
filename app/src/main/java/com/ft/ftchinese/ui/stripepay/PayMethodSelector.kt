@@ -22,8 +22,8 @@ fun PaymentMethodSelector(
 ) {
     ClickableRow(
         modifier = modifier
+            .padding(Dimens.dp8)
             .background(OColor.black5),
-        contentPadding = Dimens.dp8,
         enabled = enabled,
         onClick = onClick
     ) {
