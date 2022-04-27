@@ -48,11 +48,11 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
     val isWxOnly: Boolean
         get() = account?.isWxOnly == true
 
-    fun load() {
+    fun reloadAccount() {
         account = session.loadAccount(raw = true)
     }
 
-    fun save(a: Account) {
+    fun saveAccount(a: Account) {
         account = a
         session.saveAccount(a)
     }
@@ -87,7 +87,7 @@ open class UserViewModel(application: Application) : AndroidViewModel(applicatio
                     return@launch
                 }
 
-                save(account.withCustomerID(resp.body.id))
+                saveAccount(account.withCustomerID(resp.body.id))
             } catch (e: APIError) {
                 progressLiveData.value = false
                 toastLiveData.value = if (e.statusCode == 404) {
