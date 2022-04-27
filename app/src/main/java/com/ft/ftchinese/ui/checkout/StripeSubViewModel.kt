@@ -86,8 +86,8 @@ class StripeSubViewModel(application: Application)
         MutableLiveData<StripePaymentMethod>()
     }
 
-    val subsCreated: MutableLiveData<Subscription> by lazy {
-        MutableLiveData<Subscription>()
+    val subsCreated: MutableLiveData<StripeSubs> by lazy {
+        MutableLiveData<StripeSubs>()
     }
 
     val failureLiveData: MutableLiveData<FailureStatus> by lazy {

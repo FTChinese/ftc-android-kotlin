@@ -11,7 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.StripeSubStatus
 import com.ft.ftchinese.model.enums.Tier
-import com.ft.ftchinese.model.stripesubs.Subscription
+import com.ft.ftchinese.model.stripesubs.StripeSubs
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
@@ -20,7 +20,7 @@ import org.threeten.bp.format.DateTimeFormatter
 
 @Composable
 fun SubsDetails(
-    subs: Subscription
+    subs: StripeSubs
 ) {
     val context = LocalContext.current
 
@@ -90,7 +90,7 @@ private fun SubsDetailRow(
 @Preview(showBackground = true)
 @Composable
 fun PreviewSubsDetails() {
-    SubsDetails(subs = Subscription(
+    SubsDetails(subs = StripeSubs(
         id = "",
         tier = Tier.STANDARD,
         cycle = Cycle.YEAR,

@@ -23,7 +23,7 @@ import com.ft.ftchinese.model.paywall.IntentKind
 import com.ft.ftchinese.model.stripesubs.StripePaymentCard
 import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
 import com.ft.ftchinese.model.stripesubs.StripePrice
-import com.ft.ftchinese.model.stripesubs.Subscription
+import com.ft.ftchinese.model.stripesubs.StripeSubs
 import com.ft.ftchinese.ui.components.CheckoutHeader
 import com.ft.ftchinese.ui.components.CheckoutMessage
 import com.ft.ftchinese.ui.components.PrimaryButton
@@ -39,7 +39,7 @@ fun StripePayScreen(
     cartItem: CartItemStripe,
     loading: Boolean,
     paymentMethod: StripePaymentMethod?,
-    subs: Subscription?,
+    subs: StripeSubs?,
     onPaymentMethod: () -> Unit,
     onSubscribe: () -> Unit,
     onDone: () -> Unit,
