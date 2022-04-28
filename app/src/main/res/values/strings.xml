@@ -488,9 +488,10 @@
     <string name="no_new_release">没有找到新版本</string>
     <string name="release_not_found">未找到发布信息</string>
     <string name="btn_download_now">马上下载</string>
+    <string name="btn_downloading">正在下载...</string>
     <string name="btn_install">安装</string>
     <string name="title_install">安装App</string>
-    <string name="app_download_complete">下载完成，开始安装？</string>
+    <string name="btn_download_complete">下载完成，开始安装？</string>
     <string name="download_not_found">没有找到下载文件</string>
     <string name="download_title">FT中文网%1$s</string>
     <string name="download_pending">等待下载</string>
