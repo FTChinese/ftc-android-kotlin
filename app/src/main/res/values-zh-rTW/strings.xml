@@ -395,7 +395,7 @@
     <string name="btn_download_now">馬上下載</string>
     <string name="btn_install">安裝</string>
     <string name="title_install">安装App</string>
-    <string name="app_download_complete">下載完成，開始安裝？</string>
+    <string name="btn_download_complete">下載完成，開始安裝？</string>
     <string name="download_not_found">没有找到下載文件</string>
     <string name="download_title">FT中文網%1$s</string>
     <string name="download_pending">等待下載</string>
