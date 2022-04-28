@@ -13,5 +13,4 @@ data class AppRelease(
     val isNew: Boolean
         get() = versionCode > BuildConfig.VERSION_CODE
 
-    fun cacheFileName() = "release_log_$versionCode.json"
 }
