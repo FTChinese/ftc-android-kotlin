@@ -15,7 +15,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.components.Toolbar
-import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.member.MemberActivityScreen
 import com.ft.ftchinese.ui.member.MembershipViewModel
 import com.ft.ftchinese.ui.theme.OTheme
@@ -66,6 +65,14 @@ class MemberActivityV2 : ComponentActivity() {
         @JvmStatic
         fun start(context: Context?) {
             context?.startActivity(Intent(context, MemberActivityV2::class.java))
+        }
+
+        @JvmStatic
+        fun startForResult(activity: Activity?) {
+            activity?.startActivityForResult(
+                Intent(activity, MemberActivityV2::class.java),
+                RequestCode.MEMBER_REFRESHED
+            )
         }
 
         // Intent in place of old startActivityForResult.
