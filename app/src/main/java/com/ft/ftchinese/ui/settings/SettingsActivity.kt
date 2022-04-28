@@ -29,6 +29,7 @@ import com.ft.ftchinese.ui.components.ClickableRow
 import com.ft.ftchinese.ui.components.RightArrow
 import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.release.ReleaseActivity
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.theme.OTheme
@@ -112,7 +113,7 @@ fun PreferenceScreen(
                     FCMActivity.start(context)
                 }
                 PrefId.CheckVersion -> {
-                    UpdateAppActivity.start(context)
+                    ReleaseActivity.start(context)
                 }
             }
         }
@@ -157,12 +158,12 @@ fun PreferenceBody(
         )
 
         PreferenceItem(
-//            title = stringResource(id = R.string.pref_check_new_version),
-            title = stringResource(R.string.current_version, BuildConfig.VERSION_NAME),
-            summary = null,
+            title = stringResource(id = R.string.pref_check_new_version),
+            summary = stringResource(R.string.current_version, BuildConfig.VERSION_NAME),
             leadIcon = painterResource(id = R.drawable.ic_update_black_24dp),
+            trailIcon = true,
             onClick = {
-//                onClickRow(PrefId.CheckVersion)
+                onClickRow(PrefId.CheckVersion)
             },
         )
     }
