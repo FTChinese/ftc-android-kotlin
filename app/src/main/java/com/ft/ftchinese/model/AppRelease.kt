@@ -13,4 +13,6 @@ data class AppRelease(
     val isNew: Boolean
         get() = versionCode > BuildConfig.VERSION_CODE
 
+    val isValid: Boolean
+        get() = apkUrl.startsWith("http")
 }
