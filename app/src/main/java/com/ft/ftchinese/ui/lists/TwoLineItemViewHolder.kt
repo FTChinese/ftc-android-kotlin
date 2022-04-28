@@ -10,22 +10,13 @@ import com.ft.ftchinese.R
 
 @Deprecated("Use compose ui")
 class TwoLineItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-    val leadingIcon: ImageView = view.findViewById(R.id.list_item_leading_icon)
-    val primaryText: TextView = view.findViewById(R.id.list_item_primary_text)
-    val secondaryText: TextView = view.findViewById(R.id.list_item_secondary_text)
-    val trailingIcon: ImageView = view.findViewById(R.id.list_item_trailing_icon)
+    private val leadingIcon: ImageView = view.findViewById(R.id.list_item_leading_icon)
+    private val primaryText: TextView = view.findViewById(R.id.list_item_primary_text)
+    private val secondaryText: TextView = view.findViewById(R.id.list_item_secondary_text)
 
     fun setLeadingIcon(resId: Int?) {
         if (resId != null) {
             leadingIcon.setImageResource(resId)
-        } else {
-            leadingIcon.visibility = View.GONE
-        }
-    }
-
-    fun setTrailingIcon(resId: Int?) {
-        if (resId != null) {
-            trailingIcon.setImageResource(resId)
         } else {
             leadingIcon.visibility = View.GONE
         }
@@ -41,10 +32,6 @@ class TwoLineItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         } else {
             secondaryText.visibility = View.GONE
         }
-    }
-
-    fun setPadding(size: Int) {
-        itemView.setPadding(size, size, size, size)
     }
 
     companion object {
