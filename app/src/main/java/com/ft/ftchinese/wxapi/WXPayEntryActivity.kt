@@ -17,7 +17,6 @@ import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
-import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
@@ -163,11 +162,6 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
         WorkManager.getInstance(this).enqueue(verifyRequest)
     }
 
-    /**
-     * After user paid by wechat, show the done button
-     * which starts [MemberActivity] if the updated
-     * if membership is still invalid.
-     */
     private fun onClickDone() {
 
         val pi = payIntentStore?.load()
