@@ -50,8 +50,7 @@
             android:parentActivityName=".ui.AboutListActivity" />
         <activity
             android:name=".ui.checkout.BuyerInfoActivity"
-            android:label="完善信息"
-            android:parentActivityName=".ui.member.MemberActivity" />
+            android:label="完善信息"/>
         <activity
             android:name=".TestActivity"
             android:label="Test"
@@ -127,14 +126,9 @@
             android:name=".ui.account.UpdateActivity"
             android:parentActivityName=".ui.account.AccountActivity"
             android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".ui.member.MemberActivity"
-            android:label="@string/title_my_subs"
-            android:parentActivityName=".ui.main.MainActivity" />
 
         <activity
-            android:name=".ui.MemberActivityV2"
-            android:label="@string/title_my_subs" />
+            android:name=".ui.MemberActivityV2" />
         <activity
             android:name=".ui.checkout.StripeSubActivity"
             android:exported="true"
@@ -186,10 +180,7 @@
             android:name=".ui.settings.FCMActivity"
             android:label="@string/fcm_setting_title" />
         <activity
-            android:name=".ui.settings.UpdateAppActivity"
-            android:label="@string/pref_check_new_version"
-            android:parentActivityName=".ui.settings.SettingsActivity"/>
-
+            android:name=".ui.release.ReleaseActivity"/>
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.ft.ftchinese.fileprovider"
