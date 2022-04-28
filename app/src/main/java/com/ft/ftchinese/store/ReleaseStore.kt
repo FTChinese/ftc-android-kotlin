@@ -12,7 +12,8 @@ import org.threeten.bp.ZonedDateTime
 
 private const val FILE_NAME_DOWNLOAD = "com.ft.ftchinese.app_release"
 private const val PREF_KEY_DOWNLOAD_ID = "download_id"
-private const val PREF_KEY_RELEASE = "release"
+private const val PREF_KEY_LATEST = "latest_release"
+private const val PREF_KEY_DOWNLOADING = "downloading_version"
 private const val PREF_KEY_LAST_CHECKED = "last_checked_at"
 
 class ReleaseStore(context: Context) {
@@ -22,10 +23,10 @@ class ReleaseStore(context: Context) {
             Context.MODE_PRIVATE,
         )
 
-    fun saveVersion(release: AppRelease) {
+    fun saveLatest(release: AppRelease) {
         sharedPref.edit(commit = true) {
             putString(
-                PREF_KEY_RELEASE,
+                PREF_KEY_LATEST,
                 marshaller.encodeToString(release),
             )
             putString(
@@ -43,21 +44,32 @@ class ReleaseStore(context: Context) {
         return parseISODateTime(checkedAt)
     }
 
-    fun loadVersion(): AppRelease? {
+    fun loadLatest(): AppRelease? {
         val release = sharedPref
-            .getString(PREF_KEY_RELEASE, null)
+            .getString(PREF_KEY_LATEST, null)
             ?: return null
 
         return marshaller.decodeFromString(release)
     }
 
-    fun saveDownloadId(id: Long) {
+    fun saveDownloadId(id: Long, release: AppRelease) {
         sharedPref.edit(commit = true) {
             putLong(PREF_KEY_DOWNLOAD_ID, id)
+            putString(PREF_KEY_DOWNLOADING, marshaller.encodeToString(release))
         }
     }
 
-    fun loadDownloadId(): Long {
-        return sharedPref.getLong(PREF_KEY_DOWNLOAD_ID, -1)
+    fun loadDownloadId(): Pair<Long, AppRelease>? {
+        val id = sharedPref.getLong(PREF_KEY_DOWNLOAD_ID, -1)
+        val releaseStr = sharedPref
+            .getString(PREF_KEY_DOWNLOADING, null) ?: return null
+
+        return Pair(id, marshaller.decodeFromString(releaseStr))
+    }
+
+    fun clear() {
+        sharedPref.edit(commit = true) {
+            clear()
+        }
     }
 }
