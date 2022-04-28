@@ -11,10 +11,10 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentPermissionDeniedBinding
 import com.ft.ftchinese.model.reader.Access
 import com.ft.ftchinese.model.reader.Permission
+import com.ft.ftchinese.ui.MemberActivityV2
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.channel.DenialReason
 import com.ft.ftchinese.ui.login.AuthActivity
-import com.ft.ftchinese.ui.member.MemberActivity
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
@@ -75,7 +75,7 @@ class PermissionDeniedFragment : BottomSheetDialogFragment() {
         }
 
         binding.showMemberStatus.onClick {
-            MemberActivity.startForResult(activity)
+            MemberActivityV2.startForResult(activity)
         }
     }
 

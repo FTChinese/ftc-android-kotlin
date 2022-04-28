@@ -15,9 +15,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.tracking.StatsTracker
+import com.ft.ftchinese.ui.MemberActivityV2
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.components.*
-import com.ft.ftchinese.ui.member.MemberActivity
 import com.ft.ftchinese.ui.stripepay.AlertAuthentication
 import com.ft.ftchinese.ui.stripepay.StripePayScreen
 import com.ft.ftchinese.ui.theme.OTheme
@@ -205,7 +205,7 @@ class StripeSubActivity : ScopedAppActivity() {
                     subsViewModel.subscribe(account)
                 },
                 onDone = {
-                    MemberActivity.start(this)
+                    MemberActivityV2.start(this)
                     setResult(Activity.RESULT_OK)
                     finish()
                 }
