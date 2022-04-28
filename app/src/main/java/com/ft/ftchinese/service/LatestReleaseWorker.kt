@@ -12,7 +12,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.AppRelease
 import com.ft.ftchinese.repository.ReleaseRepo
 import com.ft.ftchinese.store.ReleaseStore
-import com.ft.ftchinese.ui.settings.UpdateAppActivity
+import com.ft.ftchinese.ui.release.ReleaseActivity
 import org.threeten.bp.ZonedDateTime
 
 /**
@@ -50,7 +50,7 @@ class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
                 return Result.success()
             }
 
-            store.saveVersion(resp.body)
+            store.saveLatest(resp.body)
 
             urgeUpdate(resp.body)
         } catch (e: Exception) {
@@ -71,7 +71,7 @@ class LatestReleaseWorker(appContext: Context, workerParams: WorkerParameters):
 
         Log.i(TAG, "Send notification for latest release")
 
-        val intent = UpdateAppActivity.newIntent(ctx)
+        val intent = ReleaseActivity.newIntent(ctx)
 
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(ctx)
             .addNextIntentWithParentStack(intent)
