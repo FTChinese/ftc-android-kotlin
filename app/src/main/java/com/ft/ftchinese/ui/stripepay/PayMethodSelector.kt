@@ -26,7 +26,7 @@ fun PaymentMethodSelector(
             .padding(Dimens.dp8)
             .background(OColor.black5),
         enabled = enabled,
-        startIcon = { RightArrow() },
+        endIcon = { RightArrow() },
         onClick = onClick
     ) {
         if (card != null) {
