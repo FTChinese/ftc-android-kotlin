@@ -70,7 +70,7 @@ class CustomerActivity : ScopedAppActivity() {
         customerViewModel = ViewModelProvider(
             this,
             CustomerViewModelFactory(fileCache)
-        ).get(CustomerViewModel::class.java)
+        )[CustomerViewModel::class.java]
 
         binding.handler = this
 
