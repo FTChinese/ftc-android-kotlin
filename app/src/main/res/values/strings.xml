@@ -378,7 +378,7 @@
     <string name="stripe_payment_method">支付方式</string>
     <string name="stripe_init">设置Stripe支付</string>
     <string name="stripe_default_bank_brand">我的银行卡</string>
-    <string name="add_or_select_payment_method">点击添加银行卡或选择默认支付方式</string>
+    <string name="add_or_select_payment_method">添加或选择默认支付方式</string>
     <string name="set_default_payment_method">设为默认支付方式</string>
     <string name="stripe_customer_not_found">账号不存在，请检查账号或者重新登录</string>
 
