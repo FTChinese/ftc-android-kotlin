@@ -82,7 +82,7 @@ fun StripePayScreen(
                 Footnote()
                 
                 subs?.let {
-                    SubsDetails(subs = it)
+                    StripeSubsDetails(subs = it)
                 }
             }
 
