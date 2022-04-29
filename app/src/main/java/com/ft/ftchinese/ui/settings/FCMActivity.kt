@@ -230,13 +230,13 @@ fun PlayServiceStatus(
     available: Boolean
 ) {
     if (available) {
-        IconTextItem(
+        ListItemIconText(
             icon = painterResource(id = R.drawable.ic_done_claret_24dp),
             text = stringResource(id = R.string.play_service_available),
             iconTint = OColor.claret
         )
     } else {
-        IconTextItem(
+        ListItemIconText(
             icon = painterResource(id = R.drawable.ic_error_outline_claret_24dp),
             text = stringResource(id = R.string.play_service_not_available),
             iconTint = OColor.claret
@@ -249,13 +249,13 @@ private fun TokenStatus(
     retrievable: Boolean,
 ) {
     if (retrievable) {
-        IconTextItem(
+        ListItemIconText(
             icon = painterResource(id = R.drawable.ic_done_claret_24dp),
             text = stringResource(R.string.fcm_accessible),
             iconTint = OColor.claret,
         )
     } else {
-        IconTextItem(
+        ListItemIconText(
             icon = painterResource(id = R.drawable.ic_error_outline_claret_24dp),
             text = stringResource(R.string.fcm_inaccessible),
             iconTint = OColor.claret

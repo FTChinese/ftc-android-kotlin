@@ -13,7 +13,7 @@ import androidx.compose.ui.text.TextStyle
 import com.ft.ftchinese.ui.theme.Dimens
 
 @Composable
-fun IconTextItem(
+fun ListItemIconText(
     icon: Painter,
     text: String,
     modifier: Modifier = Modifier,
