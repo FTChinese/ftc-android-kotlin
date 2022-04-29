@@ -46,7 +46,7 @@ fun CustomerService() {
 
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun PreviewCustomerService() {
     CustomerService()
