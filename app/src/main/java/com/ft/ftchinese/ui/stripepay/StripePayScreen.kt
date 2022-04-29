@@ -20,7 +20,6 @@ import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
-import com.ft.ftchinese.model.stripesubs.StripePaymentCard
 import com.ft.ftchinese.model.stripesubs.StripePaymentMethod
 import com.ft.ftchinese.model.stripesubs.StripePrice
 import com.ft.ftchinese.model.stripesubs.StripeSubs
@@ -53,7 +52,8 @@ fun StripePayScreen(
         loading = loading,
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier
@@ -73,7 +73,7 @@ fun StripePayScreen(
 
                 CheckoutMessage(text = cartItem.intent.message)
 
-                PaymentMethodBlock(
+                PaymentMethodSelector(
                     card = paymentMethod?.card,
                     clickable = !loading,
                     onClick = onPaymentMethod
@@ -112,30 +112,6 @@ fun StripePayScreen(
                 }
             }
         }
-    }
-}
-@Composable
-private fun PaymentMethodBlock(
-    card: StripePaymentCard?,
-    clickable: Boolean,
-    onClick: () -> Unit,
-) {
-    Column(
-        modifier = Modifier.padding(
-            top = Dimens.dp8,
-            bottom = Dimens.dp8
-        )
-    ) {
-        Text(
-            text = stringResource(id = R.string.stripe_payment_method),
-            style = MaterialTheme.typography.h6,
-            modifier = Modifier.padding(Dimens.dp8)
-        )
-        PaymentMethodSelector(
-            card = card,
-            enabled = clickable,
-            onClick = onClick,
-        )
     }
 }
 
