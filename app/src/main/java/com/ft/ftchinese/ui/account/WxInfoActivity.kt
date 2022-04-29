@@ -14,7 +14,6 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class WxInfoActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
