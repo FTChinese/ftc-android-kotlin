@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityCustomerBinding
-import com.ft.ftchinese.model.fetch.FetchUi
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.service.StripeEphemeralKeyProvider
 import com.ft.ftchinese.store.FileCache
@@ -18,11 +17,14 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.account.UIBankCard
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
+import com.ft.ftchinese.ui.components.ToastMessage
 import com.stripe.android.*
 import com.stripe.android.core.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
-import org.jetbrains.anko.*
+import org.jetbrains.anko.alert
+import org.jetbrains.anko.toast
+import org.jetbrains.anko.yesButton
 
 /**
  * Guide user to add bank card and choose a default payment method.
@@ -83,8 +85,8 @@ class CustomerActivity : ScopedAppActivity() {
 
         customerViewModel.errorLiveData.observe(this) {
             when (it) {
-                is FetchUi.ResMsg -> toast(it.strId)
-                is FetchUi.TextMsg -> toast(it.text)
+                is ToastMessage.Resource -> toast(it.id)
+                is ToastMessage.Text -> toast(it.text)
             }
         }
 
