@@ -28,7 +28,6 @@ import org.jetbrains.anko.*
  * Guide user to add bank card and choose a default payment method.
  * https://stripe.com/docs/api/setup_intents
  */
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class CustomerActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
