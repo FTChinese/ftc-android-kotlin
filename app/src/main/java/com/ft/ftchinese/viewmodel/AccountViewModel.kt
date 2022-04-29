@@ -4,20 +4,11 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.model.iapsubs.IAPSubsResult
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.reader.Membership
-import com.ft.ftchinese.model.stripesubs.StripeSubsResult
-import com.ft.ftchinese.repository.AppleClient
-import com.ft.ftchinese.repository.FtcPayClient
-import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.ui.base.BaseViewModel
 import com.ft.ftchinese.ui.data.ApiRequest
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 private const val TAG = "AccountViewModel"
 
@@ -29,18 +20,6 @@ class AccountViewModel : BaseViewModel() {
 
     val accountRefreshed: MutableLiveData<FetchResult<Account>> by lazy {
         MutableLiveData<FetchResult<Account>>()
-    }
-
-    val addOnResult: MutableLiveData<FetchResult<Membership>> by lazy {
-        MutableLiveData<FetchResult<Membership>>()
-    }
-
-    val stripeResult: MutableLiveData<FetchResult<StripeSubsResult>> by lazy {
-        MutableLiveData<FetchResult<StripeSubsResult>>()
-    }
-
-    val iapRefreshResult: MutableLiveData<FetchResult<IAPSubsResult>> by lazy {
-        MutableLiveData<FetchResult<IAPSubsResult>>()
     }
 
     // Refresh a user's account data, regardless of logged in
@@ -61,171 +40,6 @@ class AccountViewModel : BaseViewModel() {
                 .asyncRefreshAccount(account)
 
             progressLiveData.value = false
-        }
-    }
-
-    fun migrateAddOn(account: Account) {
-        if (isNetworkAvailable.value == false) {
-            addOnResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val m = withContext(Dispatchers.IO) {
-                    FtcPayClient.useAddOn(account)
-                }
-
-                addOnResult.value = if (m == null) {
-                    FetchResult.LocalizedError(R.string.loading_failed)
-                } else {
-                    FetchResult.Success(m)
-                }
-            } catch (e: APIError) {
-                addOnResult.value =  if (e.statusCode == 404) {
-                    FetchResult.LocalizedError(R.string.loading_failed)
-                } else {
-                    FetchResult.fromApi(e)
-                }
-            } catch (e: Exception) {
-                addOnResult.value = FetchResult.fromException(e)
-            }
-        }
-    }
-
-    // Ask the latest stripe subscription data.
-    fun refreshStripe(account: Account) {
-        if (isNetworkAvailable.value == false) {
-            stripeResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val stripeSub = withContext(Dispatchers.IO) {
-                    StripeClient.refreshSub(account)
-                }
-
-                stripeResult.value = if (stripeSub == null) {
-                    FetchResult.LocalizedError(R.string.stripe_refresh_failed)
-                } else {
-                    FetchResult.Success(stripeSub)
-                }
-
-            } catch (e: APIError) {
-                Log.i(TAG, "$e")
-                stripeResult.value = if (e.statusCode == 404) {
-                    FetchResult.LocalizedError(R.string.loading_failed)
-                } else {
-                    FetchResult.fromApi(e)
-                }
-
-            } catch (e: Exception) {
-                Log.i(TAG, "$e")
-                stripeResult.value = FetchResult.fromException(e)
-            }
-        }
-    }
-
-    fun cancelStripe(account: Account) {
-        if (isNetworkAvailable.value == false) {
-            stripeResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val stripeSub = withContext(Dispatchers.IO) {
-                    StripeClient.cancelSub(account)
-                }
-
-                stripeResult.value = if (stripeSub == null) {
-                    FetchResult.LocalizedError(R.string.stripe_refresh_failed)
-                } else {
-                    FetchResult.Success(stripeSub)
-                }
-
-            } catch (e: APIError) {
-                Log.i(TAG, "$e")
-                stripeResult.value = if (e.statusCode == 404) {
-                    FetchResult.LocalizedError(R.string.loading_failed)
-                } else {
-                    FetchResult.fromApi(e)
-                }
-
-            } catch (e: Exception) {
-                Log.i(TAG, "$e")
-                stripeResult.value = FetchResult.fromException(e)
-            }
-        }
-    }
-
-    fun reactivateStripe(account: Account) {
-        if (isNetworkAvailable.value == false) {
-            stripeResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        progressLiveData.value = true
-
-        viewModelScope.launch {
-            try {
-                val stripeSub = withContext(Dispatchers.IO) {
-                    StripeClient.reactivateSub(account)
-                }
-
-                progressLiveData.value = false
-                stripeResult.value = if (stripeSub == null) {
-                    FetchResult.LocalizedError(R.string.stripe_refresh_failed)
-                } else {
-                    FetchResult.Success(stripeSub)
-                }
-
-            } catch (e: APIError) {
-                progressLiveData.value = false
-                Log.i(TAG, "$e")
-                stripeResult.value = if (e.statusCode == 404) {
-                    FetchResult.LocalizedError(R.string.loading_failed)
-                } else {
-                    FetchResult.fromApi(e)
-                }
-
-            } catch (e: Exception) {
-                progressLiveData.value = false
-                Log.i(TAG, "$e")
-                stripeResult.value = FetchResult.fromException(e)
-            }
-        }
-    }
-
-    fun refreshIAP(account: Account) {
-        if (isNetworkAvailable.value == false) {
-            iapRefreshResult.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        viewModelScope.launch {
-            try {
-                val iapSubs = withContext(Dispatchers.IO) {
-                    AppleClient.refreshIAP(account)
-                }
-
-                iapRefreshResult.value = if (iapSubs == null) {
-                    FetchResult.LocalizedError(R.string.iap_refresh_failed)
-                } else {
-                    FetchResult.Success(iapSubs)
-                }
-
-            } catch (e: APIError) {
-                iapRefreshResult.value =  if (e.statusCode == 404) {
-                    FetchResult.LocalizedError(R.string.loading_failed)
-                } else {
-                    FetchResult.fromApi(e)
-                }
-
-            } catch (e: Exception) {
-                iapRefreshResult.value = FetchResult.fromException(e)
-            }
         }
     }
 
