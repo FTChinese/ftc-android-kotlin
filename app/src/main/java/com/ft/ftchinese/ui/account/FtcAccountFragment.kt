@@ -76,7 +76,7 @@ class FtcAccountFragment : ScopedFragment() {
                 CustomerViewModelFactory(
                     FileCache(requireContext()),
                 ),
-            ).get(CustomerViewModel::class.java)
+            )[CustomerViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
         val layout = LinearLayoutManager(context)
@@ -157,7 +157,14 @@ class FtcAccountFragment : ScopedFragment() {
 
     // Turns account data to a list of row.
     private fun updateUI() {
-        listAdapter.setData(buildAccountRows(requireContext()))
+        sessionManager.loadAccount()?.let {
+            listAdapter.setData(
+                buildAccountRows(
+                    requireContext(),
+                    it,
+                )
+            )
+        }
     }
 
     override fun onResume() {

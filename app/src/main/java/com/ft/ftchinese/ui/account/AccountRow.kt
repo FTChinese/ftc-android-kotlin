@@ -2,7 +2,7 @@ package com.ft.ftchinese.ui.account
 
 import android.content.Context
 import com.ft.ftchinese.R
-import com.ft.ftchinese.store.AccountCache
+import com.ft.ftchinese.model.reader.Account
 
 data class AccountRow(
     val id: AccountRowType,
@@ -21,8 +21,7 @@ enum class AccountRowType {
     DELETE
 }
 
-fun buildAccountRows(ctx: Context): List<AccountRow> {
-    val account = AccountCache.get() ?: return listOf()
+fun buildAccountRows(ctx: Context, account: Account): List<AccountRow> {
 
     return listOf(
         AccountRow(
