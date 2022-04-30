@@ -21,7 +21,7 @@ import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.util.RequestCode
 import kotlinx.coroutines.launch
 
-class MemberActivityV2 : ComponentActivity() {
+class MemberActivity : ComponentActivity() {
     private lateinit var membershipViewModel: MembershipViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,19 +64,19 @@ class MemberActivityV2 : ComponentActivity() {
 
         @JvmStatic
         fun start(context: Context?) {
-            context?.startActivity(Intent(context, MemberActivityV2::class.java))
+            context?.startActivity(Intent(context, MemberActivity::class.java))
         }
 
         @JvmStatic
         fun startForResult(activity: Activity?) {
             activity?.startActivityForResult(
-                Intent(activity, MemberActivityV2::class.java),
+                Intent(activity, MemberActivity::class.java),
                 RequestCode.MEMBER_REFRESHED
             )
         }
 
         // Intent in place of old startActivityForResult.
         @JvmStatic
-        fun startIntent(context: Context) = Intent(context, MemberActivityV2::class.java)
+        fun startIntent(context: Context) = Intent(context, MemberActivity::class.java)
     }
 }
