@@ -26,14 +26,6 @@ fun PaymentMethodSelector(
             bottom = Dimens.dp8
         )
     ) {
-        Text(
-            text = stringResource(id = R.string.stripe_payment_method),
-            style = MaterialTheme.typography.h6,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(Dimens.dp8),
-            textAlign = TextAlign.Center
-        )
 
         if (card != null) {
             BankCard(
