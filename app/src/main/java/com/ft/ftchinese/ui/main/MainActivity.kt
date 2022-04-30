@@ -38,7 +38,7 @@ import com.ft.ftchinese.store.*
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.AboutListActivity
-import com.ft.ftchinese.ui.MemberActivityV2
+import com.ft.ftchinese.ui.MemberActivity
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.account.AccountActivity
 import com.ft.ftchinese.ui.account.WxInfoViewModel
@@ -336,7 +336,7 @@ class MainActivity : ScopedAppActivity(),
                     PaywallTracker.fromDrawer()
                     SubsActivity.start(this)
                 }
-                R.id.action_my_subs -> MemberActivityV2.start(this)
+                R.id.action_my_subs -> MemberActivity.start(this)
                 R.id.action_feedback -> feedbackEmail()
                 R.id.action_settings -> SettingsActivity.start(this)
                 R.id.action_about -> AboutListActivity.start(this)
