@@ -18,7 +18,7 @@ import com.ft.ftchinese.repository.FtcPayClient
 import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.store.InvoiceStore
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.MemberActivityV2
+import com.ft.ftchinese.ui.MemberActivity
 
 /**
  * Verify subscription status each time the app launches.
@@ -79,7 +79,7 @@ class VerifySubsWorker(
         }
 
         val pendingIntent: PendingIntent? = TaskStackBuilder.create(ctx).run {
-            addNextIntentWithParentStack(Intent(ctx, MemberActivityV2::class.java))
+            addNextIntentWithParentStack(Intent(ctx, MemberActivity::class.java))
             getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
