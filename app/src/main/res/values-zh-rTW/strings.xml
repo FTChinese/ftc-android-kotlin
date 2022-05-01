@@ -257,7 +257,7 @@
     <string name="card_brand_last4">%1$s (尾号%2$s)</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
     <string name="stripe_requirement">* 使用Stripe訂閱FT中文網會員以英镑计价</string>
-    <string name="stripe_payment_method">支付方式</string>
+    <string name="payment_method">支付方式</string>
     <string name="stripe_init">設置Stripe支付</string>
     <string name="stripe_default_bank_brand">我的銀行卡</string>
     <string name="add_or_select_payment_method">添加或選擇默認支付方式</string>
