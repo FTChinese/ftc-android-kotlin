@@ -2,7 +2,6 @@ package com.ft.ftchinese.ui.stripewallet
 
 import android.app.Application
 import android.util.Log
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
@@ -21,35 +20,7 @@ import kotlinx.coroutines.withContext
 
 private const val TAG = "StripeWalletViewModel"
 
-data class ShownPaymentMethod(
-    val current: StripePaymentMethod?,
-    val isDefault: Boolean
-)
-
 class StripeWalletViewModel(application: Application) : StripeViewModel(application) {
-
-    val shownPaymentMethod = MediatorLiveData<ShownPaymentMethod>().apply {
-        addSource(paymentMethodSelected) {
-            value = updateVisiblePayment()
-        }
-        addSource(defaultPaymentMethod) {
-            value = updateVisiblePayment()
-        }
-    }
-
-    private fun updateVisiblePayment(): ShownPaymentMethod {
-        if (paymentMethodSelected.value != null) {
-            return ShownPaymentMethod(
-                current = paymentMethodSelected.value,
-                isDefault = paymentMethodSelected.value?.id == defaultPaymentMethod.value?.id
-            )
-        }
-
-        return ShownPaymentMethod(
-            current = defaultPaymentMethod.value,
-            isDefault = true,
-        )
-    }
 
     // Cache a setup intent so that we can reuse it if
     // not being confirmed yet.
