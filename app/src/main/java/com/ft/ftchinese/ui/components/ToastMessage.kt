@@ -8,6 +8,8 @@ sealed class ToastMessage {
     data class Text(val text: String) : ToastMessage()
 
     companion object {
+        val errorUnknown = Resource(R.string.error_unknown)
+
         @JvmStatic
         fun fromApi(e: APIError): ToastMessage {
             return when (e.statusCode) {
