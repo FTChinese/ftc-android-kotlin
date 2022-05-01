@@ -155,7 +155,8 @@ private fun StripeSetupActivityScreen(
 ) {
 
     val loading by walletViewModel.progressLiveData.observeAsState(false)
-    val paymentMethod by walletViewModel.shownPaymentMethod.observeAsState()
+    val paymentMethod by walletViewModel.paymentMethodInUse.observeAsState()
+    val customer by walletViewModel.customerLiveData.observeAsState()
 
     val account = remember {
         userViewModel.account
@@ -164,6 +165,12 @@ private fun StripeSetupActivityScreen(
     if (account == null) {
         showSnackBar("Not logged in")
         return
+    }
+
+    LaunchedEffect(key1 = customer) {
+        customer?.let {
+            userViewModel.saveAccount(account.withCustomerID(it.id))
+        }
     }
 
     // Show dialog if user is not a stripe customer yet.
