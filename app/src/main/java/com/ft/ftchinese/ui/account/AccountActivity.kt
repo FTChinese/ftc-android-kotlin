@@ -12,12 +12,9 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityAccountBinding
 import com.ft.ftchinese.model.enums.LoginMethod
-import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.customer.CustomerViewModel
-import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
 import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.dialog.DialogArgs
 import com.ft.ftchinese.ui.login.AuthActivity
@@ -37,7 +34,6 @@ class AccountActivity : ScopedAppActivity() {
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var binding: ActivityAccountBinding
 
-    private lateinit var customerViewModel: CustomerViewModel
     private lateinit var wxInfoViewModel: WxInfoViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,22 +51,15 @@ class AccountActivity : ScopedAppActivity() {
 
         accountViewModel = ViewModelProvider(this)[AccountViewModel::class.java]
 
-        customerViewModel = ViewModelProvider(
-            this,
-            CustomerViewModelFactory(FileCache(this)),
-        )[CustomerViewModel::class.java]
-
         wxInfoViewModel = ViewModelProvider(this)[WxInfoViewModel::class.java]
 
         connectionLiveData.observe(this) {
             accountViewModel.isNetworkAvailable.value = it
-            customerViewModel.isNetworkAvailable.value = it
             wxInfoViewModel.isNetworkAvailable.value = it
         }
 
         isConnected.let {
             accountViewModel.isNetworkAvailable.value = it
-            customerViewModel.isNetworkAvailable.value = it
             wxInfoViewModel.isNetworkAvailable.value = it
         }
 
@@ -80,10 +69,6 @@ class AccountActivity : ScopedAppActivity() {
 
     private fun setupViewModel() {
         accountViewModel.progressLiveData.observe(this) {
-            binding.inProgress = it
-        }
-
-        customerViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
         }
 

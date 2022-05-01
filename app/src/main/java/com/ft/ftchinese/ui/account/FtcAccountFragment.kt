@@ -14,14 +14,11 @@ import com.ft.ftchinese.databinding.FragmentFtcAccountBinding
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.store.AccountCache
-import com.ft.ftchinese.store.FileCache
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.*
-import com.ft.ftchinese.ui.customer.CustomerActivity
-import com.ft.ftchinese.ui.customer.CustomerViewModel
-import com.ft.ftchinese.ui.customer.CustomerViewModelFactory
+import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.lists.TwoLineItemViewHolder
+import com.ft.ftchinese.ui.stripewallet.StripeWalletActivity
 import com.ft.ftchinese.ui.wxlink.LinkWxDialogFragment
 import com.ft.ftchinese.viewmodel.AccountViewModel
 import org.jetbrains.anko.support.v4.toast
@@ -38,8 +35,6 @@ class FtcAccountFragment : ScopedFragment() {
     private lateinit var sessionManager: SessionManager
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var binding: FragmentFtcAccountBinding
-
-    private lateinit var customerViewModel: CustomerViewModel
 
     private var listAdapter: ListAdapter = ListAdapter()
 
@@ -70,15 +65,6 @@ class FtcAccountFragment : ScopedFragment() {
                 .get(AccountViewModel::class.java)
         } ?: throw Exception("Invalid Activity")
 
-        customerViewModel = activity?.run {
-            ViewModelProvider(
-                this,
-                CustomerViewModelFactory(
-                    FileCache(requireContext()),
-                ),
-            )[CustomerViewModel::class.java]
-        } ?: throw Exception("Invalid Activity")
-
         val layout = LinearLayoutManager(context)
 
         binding.accountListRv.apply {
@@ -99,17 +85,6 @@ class FtcAccountFragment : ScopedFragment() {
                 is FetchResult.LocalizedError -> toast(it.msgId)
                 is FetchResult.TextError -> toast(it.text)
                 is FetchResult.Success -> onAccountRefreshed(it.data)
-            }
-        }
-
-        customerViewModel.customerCreated.observe(viewLifecycleOwner) {
-            when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.TextError -> toast(it.text)
-                is FetchResult.Success -> {
-                    sessionManager.saveStripeId(it.data.id)
-                    CustomerActivity.start(context)
-                }
             }
         }
     }
@@ -188,7 +163,9 @@ class FtcAccountFragment : ScopedFragment() {
 
             holder.itemView.setOnClickListener {
                 when (item.id) {
-                    AccountRowType.STRIPE -> onClickStripe()
+                    AccountRowType.STRIPE -> {
+                        StripeWalletActivity.start(context)
+                    }
                     AccountRowType.WECHAT -> onClickWechat()
                     AccountRowType.MOBILE -> {
                         // For mobile-created account, forbid user to update mobile to another one.
@@ -211,30 +188,6 @@ class FtcAccountFragment : ScopedFragment() {
         fun setData(items: List<AccountRow>) {
             this.rows = items
             notifyDataSetChanged()
-        }
-
-        // If user is already a Stripe customer, show the
-        // CustomerActivity; otherwise pop up a dialog urging
-        // user to become a Stripe customer.
-        private fun onClickStripe() {
-            val account = sessionManager.loadAccount() ?: return
-
-            if (!account.stripeId.isNullOrBlank()) {
-                CustomerActivity.start(context)
-                return
-            }
-
-            AlertDialogFragment
-                .newStripeCustomer(account.email)
-                .onPositiveButtonClicked { dialog, _ ->
-                    toast(R.string.stripe_init)
-                    customerViewModel.createCustomer(account)
-                    dialog.dismiss()
-                }
-                .onNegativeButtonClicked { dialog, _ ->
-                    dialog.dismiss()
-                }
-                .show(childFragmentManager, "CreateStripeCustomer")
         }
 
         // If email-wechat linked, show wechat details;
