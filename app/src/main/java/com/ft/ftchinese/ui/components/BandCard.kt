@@ -73,15 +73,16 @@ fun AddBankCard(
                 .fillMaxWidth()
                 .padding(Dimens.dp16)
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_baseline_add_circle_outline_24),
-                contentDescription = "Add"
+
+            IconAddCircle(
+                tint = OColor.teal
             )
 
             Text(
                 text = stringResource(id = R.string.add_or_select_payment_method),
                 style = MaterialTheme.typography.body1,
-                modifier = Modifier.padding(start = Dimens.dp8)
+                modifier = Modifier.padding(start = Dimens.dp8),
+                color = OColor.teal
             )
         }
     }
