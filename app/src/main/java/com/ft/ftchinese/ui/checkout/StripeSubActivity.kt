@@ -6,15 +6,16 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.paywall.CartItemStripe
-import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.MemberActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.components.*
@@ -36,8 +37,14 @@ class StripeSubActivity : ScopedAppActivity() {
     private lateinit var ephemeralKeyViewModel: EphemeralKeyViewModel
 
     private lateinit var stripe: Stripe
-    private lateinit var tracker: StatsTracker
 
+    // The core of this integration is the PaymentSession class.
+    // It uses CustomerSession to launch full-screen activities
+    // to collect and store payment information,
+    // and can also be used to collect shipping info.
+    // To work with PaymentSession, you’ll need to:
+    // 1. Create a PaymentSessionConfig object
+    // 2. Implement a PaymentSessionListener
     private lateinit var paymentSession: PaymentSession
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -60,8 +67,6 @@ class StripeSubActivity : ScopedAppActivity() {
 
         // Monitoring network status.
         connectionLiveData.observe(this) {
-//            userViewModel.isNetworkAvailable.value = it
-            subsViewModel.isNetworkAvailable.value = it
             ephemeralKeyViewModel.isNetworkAvailable.value = it
         }
 
@@ -69,11 +74,7 @@ class StripeSubActivity : ScopedAppActivity() {
             subsViewModel.putIntoCart(it)
         }
 
-        tracker = StatsTracker.getInstance(this)
-
-        subsViewModel.membershipUpdated.observe(this) {
-            userViewModel.saveMembership(it)
-        }
+        setupCustomerSession()
 
         setContent { 
             OTheme {
@@ -91,13 +92,27 @@ class StripeSubActivity : ScopedAppActivity() {
                 ) {
 
                     userViewModel.account?.let {
-                        ComposeScreen(
+                        StripeSubActivityScreen(
                             subsViewModel = subsViewModel,
                             userViewModel = userViewModel,
+                            onNextAction = {
+                                stripe.handleNextActionForPayment(
+                                    this,
+                                    it
+                                )
+                            },
+                            onPresentPaymentMethod = {
+                                // Step 1 when user clicked payment method selection row.
+                                paymentSession.presentPaymentMethodSelection()
+                            },
                             showSnackBar = { msg ->
                                 scope.launch {
                                     scaffoldState.snackbarHostState.showSnackbar(msg)
                                 }
+                            },
+                            onExit = { resultCode ->
+                                setResult(resultCode)
+                                finish()
                             }
                         )
                     }
@@ -105,17 +120,8 @@ class StripeSubActivity : ScopedAppActivity() {
             }
         }
 
-        setupCustomerSession()
-        userViewModel.account?.let {
-            subsViewModel.loadDefaultPaymentMethod(it)
-        }
-
-        // Error message from creating stripe customer
-        userViewModel.toastLiveData.observe(this) {
-            when (it) {
-                is ToastMessage.Resource -> toast(it.id)
-                is ToastMessage.Text -> toast(it.text)
-            }
+        subsViewModel.membershipUpdated.observe(this) {
+            userViewModel.saveMembership(it)
         }
 
         subsViewModel.toastLiveData.observe(this) {
@@ -123,93 +129,6 @@ class StripeSubActivity : ScopedAppActivity() {
                 is ToastMessage.Resource -> toast(it.id)
                 is ToastMessage.Text -> toast(it.text)
             }
-        }
-    }
-
-    @Composable
-    fun ComposeScreen(
-        subsViewModel: StripeSubViewModel,
-        userViewModel: UserViewModel,
-        showSnackBar: (String) -> Unit,
-    ) {
-        val cusProgress by userViewModel.progressLiveData.observeAsState(false)
-        val subsProgress by subsViewModel.inProgress.observeAsState(false)
-        
-        val loading by remember(key1 = cusProgress, key2 = subsProgress) {
-            derivedStateOf {
-                subsProgress || cusProgress
-            }
-        }
-
-        val paymentMethodState by subsViewModel.paymentMethodLiveData.observeAsState()
-        val cartItemState by subsViewModel.itemLiveData.observeAsState()
-        val subsState by subsViewModel.subsCreated.observeAsState()
-        val failureState by subsViewModel.failureLiveData.observeAsState()
-
-        val account = userViewModel.account
-
-        if (account == null) {
-            showSnackBar("Not logged in")
-            return
-        }
-
-        if (account.stripeId.isNullOrBlank()) {
-            CreateCustomerDialog(
-                email = account.email,
-                onDismiss = { finish() },
-                onConfirm = {
-                    userViewModel.createCustomer(account)
-                }
-            )
-        }
-
-        failureState?.let {
-            when (it) {
-                is FailureStatus.Message -> {
-                    ErrorDialog(
-                        text = it.message,
-                        onDismiss = {
-                            subsViewModel.clearFailureState()
-                        }
-                    )
-                }
-                is FailureStatus.NextAction -> {
-                    AlertAuthentication(
-                        onConfirm = {
-                            stripe.handleNextActionForPayment(
-                                this,
-                                it.secret
-                            )
-                            subsViewModel.clearIdempotency()
-                            subsViewModel.clearFailureState()
-                        },
-                        onDismiss = {
-                            subsViewModel.clearFailureState()
-                        }
-                    )
-                }
-            }
-        }
-
-        cartItemState?.let {
-            StripePayScreen(
-                cartItem = it,
-                loading = loading,
-                paymentMethod = paymentMethodState,
-                subs = subsState,
-                onPaymentMethod = {
-                    // Step 1 when user clicked payment method selection row.
-                    paymentSession.presentPaymentMethodSelection()
-                },
-                onSubscribe = {
-                    subsViewModel.subscribe(account)
-                },
-                onDone = {
-                    MemberActivity.start(this)
-                    setResult(Activity.RESULT_OK)
-                    finish()
-                }
-            )
         }
     }
 
@@ -234,30 +153,12 @@ class StripeSubActivity : ScopedAppActivity() {
             )
         }
 
-        setupPaymentSession()
-    }
-
-    // The core of this integration is the PaymentSession class.
-    // It uses CustomerSession to launch full-screen activities
-    // to collect and store payment information,
-    // and can also be used to collect shipping info.
-    // To work with PaymentSession, you’ll need to:
-    // 1. Create a PaymentSessionConfig object
-    // 2. Implement a PaymentSessionListener
-    private fun setupPaymentSession() {
-        // Creation payment session
-        paymentSession = PaymentSession(
-            this,
-            PaymentSessionConfig.Builder()
-                .setShippingInfoRequired(false)
-                .setShippingMethodsRequired(false)
-                .setShouldShowGooglePay(false)
-                .build()
+        paymentSession = createPaymentSession(
+            activity = this,
+            listener = subsViewModel.onPaymentSessionData,
         )
-
-        // Attached PaymentSessionListener
-        paymentSession.init(subsViewModel)
     }
+
 
     /**
      * Handle select payment method or authentication.
@@ -299,3 +200,111 @@ class StripeSubActivity : ScopedAppActivity() {
     }
 }
 
+@Composable
+private fun StripeSubActivityScreen(
+    subsViewModel: StripeSubViewModel,
+    userViewModel: UserViewModel,
+    onNextAction: (String) -> Unit,
+    onPresentPaymentMethod: () -> Unit,
+    showSnackBar: (String) -> Unit,
+    onExit: (Int) -> Unit,
+) {
+
+    val context = LocalContext.current
+    val loading by subsViewModel.inProgress.observeAsState(false)
+    val customer by subsViewModel.customerLiveData.observeAsState()
+    val paymentMethodState by subsViewModel.paymentMethodInUse.observeAsState()
+    val cartItemState by subsViewModel.itemLiveData.observeAsState()
+    val subsState by subsViewModel.subsCreated.observeAsState()
+    val failureState by subsViewModel.failureLiveData.observeAsState()
+
+    val account = remember {
+        userViewModel.account
+    }
+
+    if (account == null) {
+        showSnackBar("Not logged in")
+        return
+    }
+
+    LaunchedEffect(key1 = customer) {
+        customer?.let {
+            userViewModel.saveAccount(account.withCustomerID(it.id))
+        }
+    }
+
+    if (account.stripeId.isNullOrBlank()) {
+        CreateCustomerDialog(
+            email = account.email,
+            onDismiss = {
+                onExit(Activity.RESULT_CANCELED)
+            },
+            onConfirm = {
+                subsViewModel.createCustomer(account)
+            }
+        )
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        subsViewModel.loadDefaultPaymentMethod(account)
+    }
+
+    failureState?.let {
+        when (it) {
+            is FailureStatus.Message -> {
+                ErrorDialog(
+                    text = it.message,
+                    onDismiss = {
+                        subsViewModel.clearFailureState()
+                    }
+                )
+            }
+            is FailureStatus.NextAction -> {
+                AlertAuthentication(
+                    onConfirm = {
+                        onNextAction(it.secret)
+                        subsViewModel.clearIdempotency()
+                        subsViewModel.clearFailureState()
+                    },
+                    onDismiss = {
+                        subsViewModel.clearFailureState()
+                    }
+                )
+            }
+        }
+    }
+
+    cartItemState?.let {
+        StripePayScreen(
+            cartItem = it,
+            loading = loading,
+            paymentMethod = paymentMethodState?.current,
+            subs = subsState,
+            onPaymentMethod = onPresentPaymentMethod,
+            onSubscribe = {
+                subsViewModel.subscribe(account)
+            },
+            onDone = {
+                MemberActivity.start(context)
+                onExit(Activity.RESULT_OK)
+            }
+        )
+    }
+}
+
+private fun createPaymentSession(
+    activity: ComponentActivity,
+    listener: PaymentSession.PaymentSessionListener
+): PaymentSession {
+    return PaymentSession(
+        activity = activity,
+        PaymentSessionConfig.Builder()
+            .setShippingInfoRequired(false)
+            .setShippingMethodsRequired(false)
+            .setShouldShowGooglePay(false)
+            .build()
+    ).apply {
+        // Attached PaymentSessionListener
+        init(listener)
+    }
+}

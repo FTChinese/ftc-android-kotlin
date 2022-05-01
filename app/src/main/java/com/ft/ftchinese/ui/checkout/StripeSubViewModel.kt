@@ -2,7 +2,6 @@ package com.ft.ftchinese.ui.checkout
 
 import android.app.Application
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -17,8 +16,8 @@ import com.ft.ftchinese.repository.StripeClient
 import com.ft.ftchinese.tracking.BeginCheckoutParams
 import com.ft.ftchinese.tracking.PaySuccessParams
 import com.ft.ftchinese.tracking.StatsTracker
-import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.components.ToastMessage
+import com.ft.ftchinese.viewmodel.StripeViewModel
 import com.stripe.android.PaymentSession
 import com.stripe.android.PaymentSessionData
 import kotlinx.coroutines.Dispatchers
@@ -33,8 +32,7 @@ sealed class FailureStatus {
 }
 
 class StripeSubViewModel(application: Application)
-    : AndroidViewModel(application),
-    PaymentSession.PaymentSessionListener {
+    : StripeViewModel(application) {
 
     private val tracker = StatsTracker.getInstance(application)
     private val idempotency = Idempotency.getInstance(application)
@@ -42,13 +40,6 @@ class StripeSubViewModel(application: Application)
     fun clearIdempotency() {
         idempotency.clear()
     }
-
-    val toastLiveData: MutableLiveData<ToastMessage> by lazy {
-        MutableLiveData<ToastMessage>()
-    }
-
-    val progressLiveData = MutableLiveData<Boolean>()
-    val isNetworkAvailable = MutableLiveData(application.isConnected)
 
     private val paymentSessionInProgress: MutableLiveData<Boolean> by lazy {
         MutableLiveData<Boolean>()
@@ -82,10 +73,6 @@ class StripeSubViewModel(application: Application)
     private val isUpdate: Boolean
         get() = itemLiveData.value?.intent?.kind == IntentKind.Upgrade
 
-    val paymentMethodLiveData: MutableLiveData<StripePaymentMethod> by lazy {
-        MutableLiveData<StripePaymentMethod>()
-    }
-
     val subsCreated: MutableLiveData<StripeSubs> by lazy {
         MutableLiveData<StripeSubs>()
     }
@@ -107,48 +94,12 @@ class StripeSubViewModel(application: Application)
      * membership to build PaymentCounter.
      */
     fun putIntoCart(item: CartItemStripe) {
+        Log.i(TAG, "Stripe shopping cart $item")
         itemLiveData.value = item
     }
 
-    fun loadDefaultPaymentMethod(account: Account) {
-        if (isNetworkAvailable.value == false) {
-            toastLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
-            return
-        }
-
-        val cusId = account.stripeId
-        if (cusId.isNullOrBlank()) {
-            Log.i(TAG, "Not a stripe customer")
-            return
-        }
-
-        progressLiveData.value = true
-        viewModelScope.launch {
-            try {
-                val resp = withContext(Dispatchers.IO) {
-                    StripeClient.loadDefaultPaymentMethod(
-                        cusId = cusId,
-                        subsId = account.membership.stripeSubsId,
-                        ftcId = account.id
-                    )
-                }
-
-                progressLiveData.value = false
-                if (resp.body == null) {
-                    return@launch
-                }
-
-                paymentMethodLiveData.value = resp.body
-            } catch (e: Exception) {
-                progressLiveData.value = false
-                Log.i(TAG, e.message ?: "")
-            }
-        }
-    }
-
     fun subscribe(account: Account) {
-        if (isNetworkAvailable.value == false) {
-            toastLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
+        if (!ensureNetwork()) {
             return
         }
 
@@ -160,7 +111,7 @@ class StripeSubViewModel(application: Application)
         val params = SubParams(
             priceId = item.recurring.id,
             introductoryPriceId = item.trial?.id,
-            defaultPaymentMethod = paymentMethodLiveData.value?.id,
+            defaultPaymentMethod = paymentMethodInUse.value?.current?.id,
             idempotency = idempotency.retrieveKey(),
         )
 
@@ -259,20 +210,22 @@ class StripeSubViewModel(application: Application)
         }
     }
 
-    // Implement a PaymentSessionListener
-    override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
-        paymentSessionInProgress.value = isCommunicating
-    }
+    val onPaymentSessionData = object : PaymentSession.PaymentSessionListener {
+        // Implement a PaymentSessionListener
+        override fun onCommunicatingStateChanged(isCommunicating: Boolean) {
+            paymentSessionInProgress.value = isCommunicating
+        }
 
-    override fun onError(errorCode: Int, errorMessage: String) {
-        paymentSessionInProgress.value = false
-        toastLiveData.value = ToastMessage.Text(errorMessage)
-    }
+        override fun onError(errorCode: Int, errorMessage: String) {
+            paymentSessionInProgress.value = false
+            toastLiveData.value = ToastMessage.Text(errorMessage)
+        }
 
-    override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
-        paymentSessionInProgress.value = false
-        data.paymentMethod?.let {
-            paymentMethodLiveData.value = StripePaymentMethod.newInstance(it)
+        override fun onPaymentSessionDataChanged(data: PaymentSessionData) {
+            paymentSessionInProgress.value = false
+            data.paymentMethod?.let {
+                paymentMethodSelected.value = StripePaymentMethod.newInstance(it)
+            }
         }
     }
 }
