@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.checkout
+package com.ft.ftchinese.ui.stripepay
 
 import android.app.Application
 import android.util.Log

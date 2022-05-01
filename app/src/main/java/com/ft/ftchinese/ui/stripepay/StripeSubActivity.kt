@@ -1,4 +1,4 @@
-package com.ft.ftchinese.ui.checkout
+package com.ft.ftchinese.ui.stripepay
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -19,8 +19,6 @@ import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.ui.MemberActivity
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.components.*
-import com.ft.ftchinese.ui.stripepay.AlertAuthentication
-import com.ft.ftchinese.ui.stripepay.StripePayScreen
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.stripe.android.*
