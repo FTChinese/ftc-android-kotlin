@@ -85,6 +85,7 @@ object Endpoint {
     val stripeCustomers = "${stripeBase}/customers"
     val stripeSubs = "${stripeBase}/subs"
     val stripePaymentSheet = "${stripeBase}/payment-sheet"
+    val stripePaymentMethod = "${stripeBase}/payment-methods"
 
     private val authEmailBase = "${subsBase()}/auth/email"
     val emailExists = "${authEmailBase}/exists"

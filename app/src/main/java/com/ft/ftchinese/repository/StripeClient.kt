@@ -40,6 +40,14 @@ object StripeClient {
             .endJson()
     }
 
+    fun retrievePaymentMethod(id: String): HttpResp<StripePaymentMethod> {
+        return Fetch()
+            .get("${Endpoint.stripePaymentMethod}/$id")
+            .noCache()
+            .setApiKey()
+            .endJson()
+    }
+
     fun setDefaultPaymentMethod(account: Account, pmId: String): HttpResp<StripeCustomer> {
         return Fetch()
             .post("${Endpoint.stripeCustomers}/${account.stripeId}/default-payment-method")
@@ -52,6 +60,7 @@ object StripeClient {
             .endJson()
     }
 
+    @Deprecated("")
     fun createEphemeralKey(account: Account, apiVersion: String): String? {
         if (account.stripeId.isNullOrBlank()) {
             return null
