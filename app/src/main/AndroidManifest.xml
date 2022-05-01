@@ -38,6 +38,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".ui.stripewallet.StripeWalletActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.SubsActivity"
             android:exported="false" />
         <activity android:name=".wxapi.WxBaseActivity" />
@@ -50,7 +53,7 @@
             android:parentActivityName=".ui.AboutListActivity" />
         <activity
             android:name=".ui.checkout.BuyerInfoActivity"
-            android:label="完善信息"/>
+            android:label="完善信息" />
         <activity
             android:name=".TestActivity"
             android:label="Test"
@@ -105,11 +108,10 @@
             android:name=".ui.account.AccountActivity"
             android:label="@string/title_account"
             android:parentActivityName=".ui.main.MainActivity"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".ui.customer.CustomerActivity"
-            android:label="@string/stripe_setting"
-            android:parentActivityName=".ui.account.AccountActivity" />
+            android:windowSoftInputMode="adjustResize" /> <!-- <activity -->
+        <!-- android:name=".ui.customer.CustomerActivity" -->
+        <!-- android:label="@string/stripe_setting" -->
+        <!-- android:parentActivityName=".ui.account.AccountActivity" /> -->
         <activity
             android:name=".ui.wxlink.LinkFtcActivity"
             android:label="@string/title_link_email"
@@ -126,9 +128,7 @@
             android:name=".ui.account.UpdateActivity"
             android:parentActivityName=".ui.account.AccountActivity"
             android:windowSoftInputMode="adjustResize" />
-
-        <activity
-            android:name=".ui.MemberActivityV2" />
+        <activity android:name=".ui.MemberActivity" />
         <activity
             android:name=".ui.checkout.StripeSubActivity"
             android:exported="true"
@@ -179,8 +179,8 @@
         <activity
             android:name=".ui.settings.FCMActivity"
             android:label="@string/fcm_setting_title" />
-        <activity
-            android:name=".ui.release.ReleaseActivity"/>
+        <activity android:name=".ui.release.ReleaseActivity" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.ft.ftchinese.fileprovider"
