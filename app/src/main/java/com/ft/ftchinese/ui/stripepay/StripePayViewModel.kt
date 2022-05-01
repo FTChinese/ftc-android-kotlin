@@ -67,40 +67,7 @@ class StripePayViewModel : BaseViewModel() {
         }
     }
 
-    private val onSetupIntent = object : ApiResultCallback<SetupIntent> {
-        override fun onError(e: Exception) {
-            inProgress.value = false
-            // TODO: alert dialog.
-            Log.i(TAG, e.message ?: "")
-        }
-
-        override fun onSuccess(result: SetupIntent) {
-            inProgress.value = false
-            Log.i(TAG, "${result.paymentMethod}")
-            Log.i(TAG, "${result.paymentMethodId}")
-        }
-    }
-
-    fun retrieveSetupIntent(stripe: Stripe) {
-        Log.i(TAG, "Retrieving setup intent")
-
-        inProgress.value = true
-
-        setupLiveData.value?.let {
-            stripe.retrieveSetupIntent(it.clientSecret, null, onSetupIntent)
-        }
-
-    }
-
     fun subscribe(account: Account, item: CartItemStripe) {
-
-    }
-
-    private fun createSubs(account: Account) {
-
-    }
-
-    private fun updateSubs(account: Account) {
 
     }
 }

@@ -68,7 +68,7 @@ fun StripePayActivityScreen(
             paymentMethod = null,
             subs = null,
             onPaymentMethod = {
-                payViewModel.createSetupIntent(account)
+
             },
             onSubscribe = {
                 payViewModel.subscribe(
