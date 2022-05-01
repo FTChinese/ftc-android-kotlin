@@ -2,6 +2,7 @@ package com.ft.ftchinese.viewmodel
 
 import android.app.Application
 import android.util.Log
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
@@ -17,6 +18,11 @@ import kotlinx.coroutines.withContext
 
 private const val TAG = "StripeSetupViewModel"
 
+data class PaymentMethodInUse(
+    val current: StripePaymentMethod?,
+    val isDefault: Boolean,
+)
+
 open class StripeViewModel(application: Application) : BaseAppViewModel(application) {
 
     val customerLiveData : MutableLiveData<StripeCustomer> by lazy {
@@ -29,6 +35,29 @@ open class StripeViewModel(application: Application) : BaseAppViewModel(applicat
 
     val paymentMethodSelected: MutableLiveData<StripePaymentMethod> by lazy {
         MutableLiveData<StripePaymentMethod>()
+    }
+
+    val paymentMethodInUse = MediatorLiveData<PaymentMethodInUse>().apply {
+        addSource(paymentMethodSelected) {
+            value = updatePaymentInUse()
+        }
+        addSource(defaultPaymentMethod) {
+            value = updatePaymentInUse()
+        }
+    }
+
+    private fun updatePaymentInUse(): PaymentMethodInUse {
+        if (paymentMethodSelected.value != null) {
+            return PaymentMethodInUse(
+                current = paymentMethodSelected.value,
+                isDefault = paymentMethodSelected.value?.id == defaultPaymentMethod.value?.id
+            )
+        }
+
+        return PaymentMethodInUse(
+            current = defaultPaymentMethod.value,
+            isDefault = true,
+        )
     }
 
     fun createCustomer(account: Account) {
