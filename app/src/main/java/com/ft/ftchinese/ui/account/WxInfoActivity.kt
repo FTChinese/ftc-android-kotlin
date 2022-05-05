@@ -34,8 +34,7 @@ class WxInfoActivity : ScopedAppActivity() {
             setDisplayShowTitleEnabled(true)
         }
 
-        infoViewModel = ViewModelProvider(this)
-            .get(WxInfoViewModel::class.java)
+        infoViewModel = ViewModelProvider(this)[WxInfoViewModel::class.java]
 
         connectionLiveData.observe(this) {
             infoViewModel.isNetworkAvailable.value = it

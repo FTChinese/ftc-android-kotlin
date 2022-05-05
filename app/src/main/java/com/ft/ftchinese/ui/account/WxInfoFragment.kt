@@ -60,8 +60,7 @@ class WxInfoFragment : ScopedFragment(), SwipeRefreshLayout.OnRefreshListener {
         super.onViewCreated(view, savedInstanceState)
 
         infoViewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(WxInfoViewModel::class.java)
+            ViewModelProvider(this)[WxInfoViewModel::class.java]
         } ?: throw Exception("Invalid exception")
 
         binding.handler = this
