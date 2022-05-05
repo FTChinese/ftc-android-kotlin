@@ -16,7 +16,6 @@ import com.bumptech.glide.request.target.Target
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentScreenshotBinding
 import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.sdk27.coroutines.onClick
 
 /**
@@ -48,8 +47,7 @@ class ScreenshotFragment : ScopedBottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(ScreenshotViewModel::class.java)
+            ViewModelProvider(this)[ScreenshotViewModel::class.java]
         } ?: throw Exception("Invalid activity")
 
         setupViewModel()
