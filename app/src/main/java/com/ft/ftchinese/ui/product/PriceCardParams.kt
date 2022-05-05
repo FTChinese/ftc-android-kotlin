@@ -68,7 +68,7 @@ data class PriceCardParams(
         }
 
         fun ofStripe(ctx: Context, item: CartItemStripe): PriceCardParams {
-            val heading = "连续包${FormatHelper.cycleOfYMD(ctx, item.recurring.periodCount)}"
+            val heading = "包${FormatHelper.cycleOfYMD(ctx, item.recurring.periodCount)}"
 
             val currencySymbol = PriceParts.findSymbol(item.recurring.currency)
 
