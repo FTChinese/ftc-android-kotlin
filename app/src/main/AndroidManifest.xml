@@ -38,6 +38,9 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name=".ui.wxinfo.WxInfoActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.stripewallet.StripeWalletActivity"
             android:exported="false" />
         <activity
