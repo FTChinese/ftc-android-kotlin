@@ -261,7 +261,6 @@ dependencies {
     // Image loading
     implementation 'com.github.bumptech.glide:glide:4.13.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
-    implementation("io.coil-kt:coil-compose:2.0.0-rc03")
 
     //  Network
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'

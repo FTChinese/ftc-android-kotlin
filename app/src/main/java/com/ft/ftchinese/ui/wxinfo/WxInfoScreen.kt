@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import coil.compose.AsyncImage
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.ui.components.PrimaryButton
@@ -73,10 +72,10 @@ fun WxAvatar(
     Column(
         modifier = modifier
     ) {
-        AsyncImage(
-            model = imageUrl, 
-            contentDescription = "Wechat Avatar"
-        )
+//        AsyncImage(
+//            model = imageUrl,
+//            contentDescription = "Wechat Avatar"
+//        )
         
         Text(text = name)
     }
