@@ -15,7 +15,7 @@ import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.tracking.AddCartParams
-import com.ft.ftchinese.ui.checkout.StripeSubActivity
+import com.ft.ftchinese.ui.stripepay.StripeSubActivity
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.viewmodel.UserViewModel

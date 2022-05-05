@@ -130,7 +130,7 @@
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ui.MemberActivity" />
         <activity
-            android:name=".ui.checkout.StripeSubActivity"
+            android:name=".ui.stripepay.StripeSubActivity"
             android:exported="true"
             android:label="@string/pay_method_stripe"
             android:launchMode="singleTask">
