@@ -261,6 +261,7 @@ dependencies {
     // Image loading
     implementation 'com.github.bumptech.glide:glide:4.13.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.13.0'
+    implementation("io.coil-kt:coil-compose:2.0.0-rc03")
 
     //  Network
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
@@ -277,8 +278,7 @@ dependencies {
     implementation 'com.jakewharton.byteunits:byteunits:0.9.1'
     implementation 'org.threeten:threetenbp:1.6.0'
     implementation 'org.apache.commons:commons-math3:3.6.1'
-
-    implementation 'com.github.jeziellago:compose-markdown:0.2.6'
+    implementation "io.noties.markwon:core:4.6.2"
 
     //    Test
     testImplementation 'junit:junit:4.13.2'
