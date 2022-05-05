@@ -278,7 +278,6 @@ dependencies {
     implementation 'org.threeten:threetenbp:1.6.0'
     implementation 'org.apache.commons:commons-math3:3.6.1'
 
-    implementation "io.noties.markwon:core:4.6.2"
     implementation 'com.github.jeziellago:compose-markdown:0.2.6'
 
     //    Test

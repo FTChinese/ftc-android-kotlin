@@ -22,7 +22,6 @@ import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import io.noties.markwon.Markwon
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
 
@@ -43,7 +42,6 @@ class SignUpFragment : ScopedBottomSheetDialogFragment() {
     private lateinit var mobileViewModel: MobileViewModel
 
     private lateinit var binding: FragmentSignUpBinding
-    private lateinit var markwon: Markwon
 
     private var usageKind: AuthKind? = null
 
@@ -52,7 +50,6 @@ class SignUpFragment : ScopedBottomSheetDialogFragment() {
 
         sessionManager = SessionManager.getInstance(context)
         tokenManager = TokenManager.getInstance(context)
-        markwon = Markwon.create(context)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
