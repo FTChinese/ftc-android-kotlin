@@ -374,7 +374,7 @@
     <string name="stripe_retrieve_customer">查询Stripe账号&#8230;</string>
     <string name="card_brand_last4">%1$s (尾号%2$s)</string>
     <string name="bank_card_number">**** **** **** %1$s</string>
-    <string name="stripe_requirement">* Stripe订阅FT中文网会员以英镑计价，需使用支持国际货币的信用卡，到期自动续订</string>
+    <string name="stripe_requirement">* Stripe订阅FT中文网会员以英镑计价，需使用支持国际货币的信用卡，建议中国大陆以外地区使用</string>
     <string name="payment_method">支付方式</string>
     <string name="stripe_init">设置Stripe支付</string>
     <string name="stripe_default_bank_brand">我的银行卡</string>
