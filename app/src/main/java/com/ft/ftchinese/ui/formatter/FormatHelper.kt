@@ -67,17 +67,6 @@ object FormatHelper {
         }
     }
 
-    private fun getOrderKind(ctx: Context, k: OrderKind): String {
-        return when (k) {
-            OrderKind.Create -> ctx.getString(R.string.subs_create)
-            OrderKind.Renew -> ctx.getString(R.string.subs_renew)
-            OrderKind.Upgrade -> ctx.getString(R.string.subs_upgrade)
-            OrderKind.Downgrade -> "降级"
-            OrderKind.AddOn -> ctx.getString(R.string.subs_addon)
-            OrderKind.SwitchCycle -> ctx.getString(R.string.stripe_switch_cycle)
-        }
-    }
-
     /**
      * Generate human readable string like:
      * 标准会员/年
@@ -100,11 +89,6 @@ object FormatHelper {
             R.string.formatter_money,
             amount
         )
-    }
-
-    @Deprecated("")
-    fun formatPrice(ctx: Context, currency: String, amount: Double): String {
-        return "${currencySymbol(currency)}${formatMoney(ctx, amount)}"
     }
 
     fun stripeIntentText(ctx: Context, kind: IntentKind): String {
