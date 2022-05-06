@@ -10,8 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.model.paywall.Banner
+import com.ft.ftchinese.ui.components.MarkdownText
 import com.ft.ftchinese.ui.theme.Dimens
-import dev.jeziellago.compose.markdowntext.MarkdownText
 import org.threeten.bp.ZonedDateTime
 
 @Composable
