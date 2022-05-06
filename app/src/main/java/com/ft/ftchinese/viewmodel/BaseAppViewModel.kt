@@ -17,6 +17,10 @@ open class BaseAppViewModel(application: Application) : AndroidViewModel(applica
         MutableLiveData<ToastMessage>()
     }
 
+    fun resetToast() {
+        toastLiveData.value = null
+    }
+
     fun ensureNetwork(): Boolean {
         if (connectionLiveData.value != true) {
             toastLiveData.value = ToastMessage.Resource(R.string.prompt_no_network)
