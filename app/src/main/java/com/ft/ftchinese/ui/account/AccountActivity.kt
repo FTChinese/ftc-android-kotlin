@@ -13,14 +13,18 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.ui.components.ShowToast
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.stripewallet.StripeWalletActivity
 import com.ft.ftchinese.ui.theme.OTheme
@@ -89,6 +93,14 @@ fun AccountActivityScreen(
 ) {
     val context = LocalContext.current
     val refreshing by accountViewModel.refreshingLiveData.observeAsState(false)
+    val messageState = accountViewModel.toastLiveData.observeAsState(null)
+    val (showDelete, setShowDelete) = remember {
+        mutableStateOf(false)
+    }
+
+    val (showMobileAlert, setShowMobileAlert) = remember {
+        mutableStateOf(false)
+    }
     val account = remember {
         accountViewModel.account
     }
@@ -107,14 +119,6 @@ fun AccountActivityScreen(
             }
             Activity.RESULT_CANCELED -> {}
         }
-    }
-
-    val (showDelete, setShowDelete) = remember {
-        mutableStateOf(false)
-    }
-
-    val (showMobileAlert, setShowMobileAlert) = remember {
-        mutableStateOf(false)
     }
 
     if (showDelete) {
@@ -139,6 +143,12 @@ fun AccountActivityScreen(
                 setShowMobileAlert(false)
             }
         )
+    }
+
+    ShowToast(
+        toast = messageState.value
+    ) {
+        accountViewModel.resetToast()
     }
 
     if (account.isWxOnly) {

@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.model.reader.WxOAuth
 import com.ft.ftchinese.model.reader.WxOAuthIntent
+import com.ft.ftchinese.ui.components.ShowToast
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.ui.wxlink.UnlinkActivity
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -32,6 +33,7 @@ fun WxInfoActivityScreen(
 ) {
     val context = LocalContext.current
     val refreshing by wxInfoViewModel.refreshingLiveData.observeAsState(false)
+    val messageState = wxInfoViewModel.toastLiveData.observeAsState(null)
     val reAuth by wxInfoViewModel.reAuthLiveData.observeAsState(false)
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
@@ -63,6 +65,12 @@ fun WxInfoActivityScreen(
                 wxInfoViewModel.clearReAuth()
             }
         )
+    }
+
+    ShowToast(
+        toast = messageState.value
+    ) {
+        wxInfoViewModel.resetToast()
     }
 
     if (account.isEmailOnly) {
