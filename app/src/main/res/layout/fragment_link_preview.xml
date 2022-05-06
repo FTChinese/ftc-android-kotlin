@@ -94,7 +94,7 @@
             style="@style/AppButton.BottomSticky"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/action_start"
+            android:text="@string/btn_start"
             android:layout_marginTop="16dp"
             android:enabled="@{viewModel.isFormEnabled}"
             android:onClick="@{handler::onClickLink}"

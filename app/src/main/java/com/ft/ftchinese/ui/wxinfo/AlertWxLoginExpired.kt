@@ -18,14 +18,14 @@ fun AlertWxLoginExpired(
             Button(
                 onClick = onConfirm
             ) {
-                Text(text = stringResource(id = R.string.action_ok))
+                Text(text = stringResource(id = R.string.btn_ok))
             }
         },
         dismissButton = {
             Button(
                 onClick = onDismiss
             ) {
-                Text(text = stringResource(id = R.string.action_cancel))
+                Text(text = stringResource(id = R.string.btn_cancel))
             }
         },
         title = {

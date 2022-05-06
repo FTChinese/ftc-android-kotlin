@@ -100,7 +100,7 @@ class ForgotPasswordActivity : ScopedAppActivity() {
     private fun alertLetterSent() {
         AlertDialog.Builder(this)
             .setMessage(R.string.forgot_password_letter_sent)
-            .setPositiveButton(R.string.action_ok) { dialog, _ ->
+            .setPositiveButton(R.string.btn_ok) { dialog, _ ->
                 dialog.dismiss()
             }
             .create()
@@ -110,7 +110,7 @@ class ForgotPasswordActivity : ScopedAppActivity() {
     private fun alertVrfFailure(msgId: Int) {
         AlertDialog.Builder(this)
             .setMessage(msgId)
-            .setPositiveButton(R.string.action_ok) { dialog, _ ->
+            .setPositiveButton(R.string.btn_ok) { dialog, _ ->
                 dialog.dismiss()
             }
             .create()

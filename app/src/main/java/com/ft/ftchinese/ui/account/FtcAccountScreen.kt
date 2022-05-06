@@ -87,7 +87,7 @@ fun MobileOnlyNotUpdatable(
             PrimaryButton(
                 onClick = onDismiss
             ) {
-                Text(text = stringResource(id = R.string.action_ok))
+                Text(text = stringResource(id = R.string.btn_ok))
             }
         },
         text = {

@@ -362,7 +362,7 @@ class ArticleActivity : ScopedAppActivity(),
     private fun showNoAccess() {
         MaterialAlertDialogBuilder(this)
             .setMessage("生成截图需要访问图片存储空间")
-            .setPositiveButton(R.string.action_ok) { dialog, _: Int ->
+            .setPositiveButton(R.string.btn_ok) { dialog, _: Int ->
                 dialog.dismiss()
             }
             .show()

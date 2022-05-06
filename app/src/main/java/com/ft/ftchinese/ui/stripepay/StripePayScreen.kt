@@ -108,7 +108,7 @@ fun StripePayScreen(
                         .padding(Dimens.dp16)
                         .fillMaxWidth(),
                 ) {
-                    Text(text = stringResource(id = R.string.action_done))
+                    Text(text = stringResource(id = R.string.btn_done))
                 }
             }
         }

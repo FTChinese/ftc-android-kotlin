@@ -57,7 +57,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="48dp"
-            android:text="@string/action_done"
+            android:text="@string/btn_done"
             android:enabled="@{!inProgress}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

@@ -17,9 +17,7 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.base.isConnected
-import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
-import org.jetbrains.anko.toast
 
 /**
  * Show details of account to be bound, show a button to let
@@ -96,7 +94,7 @@ class LinkPreviewFragment(
                 is FetchResult.LocalizedError -> {
                     AlertDialog.Builder(requireContext())
                         .setMessage(it.msgId)
-                        .setPositiveButton(R.string.action_ok) { dialog, _ ->
+                        .setPositiveButton(R.string.btn_ok) { dialog, _ ->
                             dialog.dismiss()
                         }
                         .create()
@@ -115,7 +113,7 @@ class LinkPreviewFragment(
 
     private fun initUI() {
 
-        binding.toolbar.bottomSheetToolbar.onClick {
+        binding.toolbar.bottomSheetToolbar.setOnClickListener {
             dismiss()
         }
 

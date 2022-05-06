@@ -24,7 +24,7 @@ fun ErrorDialog(
             TextButton(
                 onClick = onDismiss
             ) {
-                Text(text = stringResource(id = R.string.yes))
+                Text(text = stringResource(id = R.string.btn_yes))
             }
         },
     )

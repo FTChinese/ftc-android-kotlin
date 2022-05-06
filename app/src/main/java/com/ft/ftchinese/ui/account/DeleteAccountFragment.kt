@@ -93,8 +93,8 @@ class DeleteAccountFragment : ScopedFragment() {
             params = DialogArgs(
                 title = R.string.title_delete_account_denied,
                 message = getString(R.string.message_delete_account_valid_subs),
-                positiveButton = R.string.button_send_email,
-                negativeButton = R.string.action_cancel
+                positiveButton = R.string.btn_send_email,
+                negativeButton = R.string.btn_cancel
             )
         )
             .onPositiveButtonClicked { dialog, _ ->

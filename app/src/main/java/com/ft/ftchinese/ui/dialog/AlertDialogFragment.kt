@@ -30,8 +30,8 @@ class AlertDialogFragment : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val args = arguments?.getParcelable(ARG_DIALOG_PARAMS) ?: DialogArgs(
-            positiveButton = R.string.action_ok,
-            negativeButton = R.string.action_cancel,
+            positiveButton = R.string.btn_ok,
+            negativeButton = R.string.btn_cancel,
             message = "",
         )
 
@@ -68,7 +68,7 @@ class AlertDialogFragment : DialogFragment() {
         fun newMsgInstance(msg: String) = newInstance(
             params = DialogArgs(
                 message = msg,
-                positiveButton = R.string.action_ok
+                positiveButton = R.string.btn_ok
             )
         )
 
@@ -76,7 +76,7 @@ class AlertDialogFragment : DialogFragment() {
         fun newErrInstance(msg: String) = newInstance(
             params = DialogArgs(
                 message = msg,
-                positiveButton = R.string.action_ok,
+                positiveButton = R.string.btn_ok,
                 title = R.string.dialog_title_error,
             )
         )
@@ -86,8 +86,8 @@ class AlertDialogFragment : DialogFragment() {
             params = DialogArgs(
                 title = R.string.title_create_stripe_customer,
                 message = "Stripe支付要求提供邮箱地址，是否使用当前邮箱注册(${email})？",
-                positiveButton = R.string.yes,
-                negativeButton = R.string.no,
+                positiveButton = R.string.btn_yes,
+                negativeButton = R.string.btn_no,
             )
         )
 

@@ -17,8 +17,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/share_text_view"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:contentDescription="@string/share_icon" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/share_text_view"

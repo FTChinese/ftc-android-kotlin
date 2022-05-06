@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.product
 
 import android.content.Context
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.paywall.CartItemFtc
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.PriceParts
@@ -18,13 +19,16 @@ data class PriceCardParams(
     companion object {
         fun ofFtc(ctx: Context, item: CartItemFtc): PriceCardParams {
             val heading = if (item.isIntro)
-                "试用"
+                ctx.getString(R.string.price_heading_aliwx_trial)
             else
-                "包${FormatHelper.cycleOfYMD(ctx, item.normalizePeriod())}"
+                ctx.getString(
+                    R.string.price_heading_wxali,
+                    FormatHelper.cycleOfYMD(ctx, item.normalizePeriod())
+                )
 
             val currencySymbol = PriceParts.findSymbol(item.price.currency)
 
-            val smallPrint = "* 仅限支付宝或微信支付"
+            val smallPrint = ctx.getString(R.string.limited_to_aliwx)
 
             // For regular price with discount
             if (item.discount != null) {
@@ -44,7 +48,7 @@ data class PriceCardParams(
                         cycle = PeriodFormatter(
                             ymd = item.price.periodCount
                         ).format(ctx, false),
-                        notes = "原价",
+                        notes = ctx.getString(R.string.price_original_aliwx_prefix),
                     ),
                     isAutoRenew = false,
                     smallPrint = smallPrint,
@@ -68,16 +72,19 @@ data class PriceCardParams(
         }
 
         fun ofStripe(ctx: Context, item: CartItemStripe): PriceCardParams {
-            val heading = "包${FormatHelper.cycleOfYMD(ctx, item.recurring.periodCount)}"
+            val heading = ctx.getString(
+                R.string.price_heading_stripe,
+                FormatHelper.cycleOfYMD(ctx, item.recurring.periodCount)
+            )
 
             val currencySymbol = PriceParts.findSymbol(item.recurring.currency)
 
-            val smallPrint = "* 仅限Stripe支付"
+            val smallPrint = ctx.getString(R.string.limited_to_stripe)
 
             if (item.trial != null) {
                 return PriceCardParams(
                     heading = heading,
-                    title = "新会员首次试用",
+                    title = ctx.getString(R.string.price_heading_stripe_trial),
                     payable = PriceParts(
                         symbol = currencySymbol,
                         amount = FormatHelper.formatMoney(ctx, item.trial.moneyAmount),
@@ -91,7 +98,7 @@ data class PriceCardParams(
                         cycle = PeriodFormatter(
                             ymd = item.recurring.periodCount
                         ).format(ctx, true),
-                        notes = "试用结束后自动续订"
+                        notes = ctx.getString(R.string.price_original_stripe_prefix)
                     ),
                     isAutoRenew = true,
                     smallPrint = smallPrint,

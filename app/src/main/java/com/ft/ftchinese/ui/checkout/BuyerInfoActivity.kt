@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.checkout
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -36,6 +37,7 @@ class BuyerInfoActivity : ComponentActivity() {
 
     private lateinit var viewModel: BuyerInfoViewModel
 
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -110,7 +112,7 @@ fun BuyerInfoScreen(
                 TextButton(
                     onClick = { infoViewModel.clearAlert() }
                 ) {
-                    Text(text = stringResource(id = R.string.action_ok))
+                    Text(text = stringResource(id = R.string.btn_ok))
                 }
             }
         )

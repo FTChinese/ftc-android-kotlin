@@ -49,7 +49,7 @@ class WxExpireDialogFragment : DialogFragment() {
                         // login activity?
                         dialog.dismiss()
                     }
-                    .setNegativeButton(R.string.action_cancel){ dialog, id ->
+                    .setNegativeButton(R.string.btn_cancel){ dialog, id ->
                         Log.i(TAG, "Cancel button pressed")
                     }
                     .create()

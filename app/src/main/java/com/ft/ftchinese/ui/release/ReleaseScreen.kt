@@ -95,7 +95,7 @@ fun AlertDownloadStart(
                 onClick = onDismiss
             ) {
                 Text(
-                    text = stringResource(id = R.string.action_ok)
+                    text = stringResource(id = R.string.btn_ok)
                 )
             }
         },

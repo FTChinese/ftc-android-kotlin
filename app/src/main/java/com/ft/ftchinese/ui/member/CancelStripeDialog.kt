@@ -19,7 +19,7 @@ fun CancelStripeDialog(
                 onClick = onConfirm
             ) {
                 Text(
-                    text = stringResource(id = R.string.action_ok)
+                    text = stringResource(id = R.string.btn_ok)
                 )
             }
         },
@@ -28,7 +28,7 @@ fun CancelStripeDialog(
                 onClick = onDismiss
             ) {
                 Text(
-                    text = stringResource(id = R.string.action_cancel)
+                    text = stringResource(id = R.string.btn_cancel)
                 )
             }
         },

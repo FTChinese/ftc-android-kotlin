@@ -83,14 +83,14 @@
     <string name="wx_relogin">重新授權</string>
     <string name="action_wx_login">微信登入</string>
     <string name="wechat_not_found">没有找到您的微信帳號信息</string>
-    <string name="action_bound_account">已綁定</string>
-    <string name="action_bind_account">尚未綁定</string>
+    <string name="account_linked">已綁定</string>
+    <string name="account_not_linked">尚未綁定</string>
     <string name="greeting_wx_login">你好，%1$s！欢迎登入FT中文網。</string>
     <string name="btn_login">登入</string>
     <string name="btn_sign_up">註冊</string>
     <string name="forgot_password_title">找回密碼</string>
     <string name="reset_password_title">重設密碼</string>
-    <string name="btn_password_letter">寄送電子郵件</string>
+    <string name="btn_send_email">寄送電子郵件</string>
 
     <!-- Forgot password -->
     <string name="btn_verify">驗證</string>
@@ -159,8 +159,8 @@
     <string name="progress_request_verification">正在寄送驗證信件…</string>
     <string name="progress_logging">正在登入…</string>
     <string name="forgot_password_link">忘記密碼?</string>
-    <string name="link_sign_up">註冊帳號</string>
-    <string name="link_login">已有帳號？登入</string>
+    <string name="btn_go_signup">註冊帳號</string>
+    <string name="btn_go_login">已有帳號？登入</string>
     <string name="signup_invalid_email">電子信箱錯誤</string>
 
     <string name="error_email_unchanged">您已經在使用該電子信箱</string>
@@ -171,13 +171,13 @@
     <string name="signup_invalid_password">密碼無效</string>
 
     <!-- Generic buttons -->
-    <string name="action_done">完成</string>
-    <string name="action_cancel">取消</string>
-    <string name="action_start">開始</string>
-    <string name="action_ok">確認</string>
-    <string name="action_retry">重試</string>
-    <string name="yes">是</string>
-    <string name="no">否</string>
+    <string name="btn_done">完成</string>
+    <string name="btn_cancel">取消</string>
+    <string name="btn_start">開始</string>
+    <string name="btn_ok">確認</string>
+    <string name="btn_retry">重試</string>
+    <string name="btn_yes">是</string>
+    <string name="btn_no">否</string>
 
     <!--  Order  -->
     <string name="title_my_orders">我的訂單</string>

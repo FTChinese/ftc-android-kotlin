@@ -3,7 +3,6 @@ package com.ft.ftchinese.ui.paywall
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -19,9 +18,10 @@ import com.ft.ftchinese.model.paywall.defaultPaywall
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.ui.components.CustomerService
+import com.ft.ftchinese.ui.components.PrimaryButton
+import com.ft.ftchinese.ui.components.SubsRuleContent
 import com.ft.ftchinese.ui.formatter.FormatHelper
 import com.ft.ftchinese.ui.product.ProductCard
-import com.ft.ftchinese.ui.components.SubsRuleContent
 import com.ft.ftchinese.ui.theme.Dimens
 
 @Composable
@@ -74,7 +74,7 @@ fun PaywallScreen(
 private fun PaywallLogin(
     onClick: () -> Unit,
 ) {
-    Button(
+    PrimaryButton(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth()
     ) {

@@ -68,7 +68,7 @@ class UpdatePasswordFragment : ScopedFragment() {
                     )
                     dialog.dismiss()
                 }
-                .setNegativeButton(R.string.action_cancel) { dialog, _ ->
+                .setNegativeButton(R.string.btn_cancel) { dialog, _ ->
                     dialog.dismiss()
                 }
                 .create()

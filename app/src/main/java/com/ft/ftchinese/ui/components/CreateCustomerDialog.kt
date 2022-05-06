@@ -27,14 +27,14 @@ fun CreateCustomerDialog(
             TextButton(
                 onClick = onConfirm
             ) {
-                Text(text = stringResource(id = R.string.yes))
+                Text(text = stringResource(id = R.string.btn_yes))
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss
             ) {
-                Text(text = stringResource(id = R.string.no))
+                Text(text = stringResource(id = R.string.btn_no))
             }
         }
     )

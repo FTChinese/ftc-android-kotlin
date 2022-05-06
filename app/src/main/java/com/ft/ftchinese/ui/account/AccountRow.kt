@@ -69,9 +69,9 @@ fun buildAccountRows(ctx: Context, account: Account): List<AccountRow> {
             id = AccountRowType.WECHAT,
             primary = ctx.getString(R.string.label_wechat),
             secondary = if (account.isLinked) {
-                ctx.getString(R.string.action_bound_account)
+                ctx.getString(R.string.account_linked)
             } else {
-                ctx.getString(R.string.action_bind_account)
+                ctx.getString(R.string.account_not_linked)
             }
         ),
         AccountRow(

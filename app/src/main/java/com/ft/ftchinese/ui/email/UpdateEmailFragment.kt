@@ -100,7 +100,7 @@ class UpdateEmailFragment : ScopedFragment() {
     private fun alertErrorMsg(id: Int) {
         AlertDialog.Builder(requireContext())
             .setMessage(id)
-            .setPositiveButton(R.string.action_ok) { dialog, _ ->
+            .setPositiveButton(R.string.btn_ok) { dialog, _ ->
                 dialog.dismiss()
             }
             .create()

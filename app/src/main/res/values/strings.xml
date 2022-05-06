@@ -1,163 +1,21 @@
 <resources>
+    <!-- buttons and dialogs -->
     <string name="btn_accept">接受</string>
     <string name="btn_agree">同意</string>
     <string name="btn_decline">拒绝</string>
-    <string name="app_name">FT中文网</string>
-    <string name="action_search">搜索</string>
-    <string name="action_listen_story">朗读</string>
-    <string name="action_favorite">收藏</string>
-
-    <string name="share_template">[FT中文网]%1$s - %2$s</string>
-
-    <!--  Unique id for a channel  -->
-    <string name="news_notification_channel_id">fcm_news_channel</string>
-    <!--  User-visible name of this channel  -->
-    <string name="news_notification_channel_name">新闻</string>
-    <!--  This is optional  -->
-    <string name="news_notification_channel_description">新闻动态</string>
-
-    <string name="exo_download_notification_channel_name">Downloads</string>
-    <string name="exo_download_notification_channel_description">Download mp3</string>
-
-    <string name="exo_playing_channel_id">exo_playing_channel</string>
-    <string name="exo_playing_channel_name">正在播放</string>
-    <string name="exo_playing_channel_description">播放音频</string>
-
-    <string name="nav_news">最新</string>
-    <string name="nav_english">每日英语</string>
-    <string name="nav_ftacademy">FT商学院</string>
-    <string name="nav_video">视•听</string>
-    <string name="nav_myft">我的FT</string>
-    <string name="news_editor_choice">编辑精选</string>
-    <string name="titlebar_cn">中文</string>
-    <string name="titlebar_en">英文</string>
-    <string name="titlebar_bilingual">对照</string>
-    <string name="title_search">搜索 %1$s</string>
-    <string name="title_about_us">关于我们</string>
-    <string name="title_error">错误</string>
-    <string name="menu_share">分享</string>
-    <string name="menu_audio">朗读</string>
-    <string name="share_to">分享到</string>
-    <string name="share_done">分享成功</string>
-    <string name="alert_starred">已收藏</string>
-    <string name="alert_unstarred">收藏已取消</string>
-    <string name="alert_downloading_audio">开始下载音频</string>
-
-    <string name="alert_audio_downloaded">音频下载完成</string>
-    <string name="download_start_error">无法启动下载</string>
-    <string name="myft_reading_history">阅读历史</string>
-    <string name="myft_starred_articles">收藏文章</string>
-    <string name="myft_following">关注</string>
-
-    <!--  Drawer  -->
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_not_logged_in">您尚未登录</string>
-    <string name="nav_header_desc">导航栏头部</string>
-    <string name="action_help">帮助</string>
-    <string name="action_feedback">反馈</string>
-    <string name="action_logout">退出登录</string>
-    <string name="action_settings">设置</string>
-
-    <!-- Generic buttons -->
-    <string name="action_done">完成</string>
-    <string name="action_cancel">取消</string>
-    <string name="action_start">开始</string>
-    <string name="action_ok">确认</string>
-    <string name="action_retry">重试</string>
-    <string name="action_retry_later">请稍后再试</string>
-    <string name="yes">是</string>
-    <string name="no">否</string>
+    <string name="btn_done">完成</string>
+    <string name="btn_cancel">取消</string>
+    <string name="btn_start">开始</string>
+    <string name="btn_ok">确认</string>
+    <string name="btn_retry">重试</string>
+    <string name="btn_yes">是</string>
+    <string name="btn_no">否</string>
     <string name="dialog_title_error">出错了！</string>
-    <string name="button_send_email">发送邮件</string>
-
-    <!--  Generic message  -->
-    <string name="prompt_saved">保存成功!</string>
-    <string name="refresh_success">更新成功!</string>
-
-    <!--  Account  -->
-    <string name="title_login">登录FT中文网</string>
-    <string name="title_sign_up">创建FT中文网账号</string>
-    <string name="title_login_signup">登录/注册</string>
-    <string name="title_activity_profile">我的资料</string>
-    <string name="title_change_password">修改密码</string>
-    <string name="title_change_email">修改登录邮箱</string>
-    <string name="title_change_username">修改用户名</string>
-    <string name="title_wx_account">微信账号</string>
-    <string name="title_unlink">解除绑定</string>
-    <string name="title_account">账号与安全</string>
-    <string name="title_wx_login">微信登录</string>
-    <string name="formatter_wx_name">微信用户 %1$s</string>
-    <string name="oauth_canceled">授权取消！</string>
-    <string name="oauth_denied">授权被拒绝！</string>
-    <string name="oauth_state_missing">授权码缺失！</string>
-    <string name="oauth_state_mismatch">授权状态码错误！</string>
-    <string name="wx_session_expired">微信登录已过期，请重新登录。微信登录会定期失效，如果您以后不希望看到本提示，可以在侧边栏的\"账号与安全\"下绑定FT中文网账号。</string>
-    <string name="wx_refresh_token_expired">微信授权已过期，请重新授权后刷新账号数据。</string>
-    <string name="wx_relogin">重新授权</string>
-    <string name="action_wx_login">微信登录</string>
-    <string name="wechat_not_found">没有找到您的微信账号信息</string>
-    <string name="action_bound_account">已绑定</string>
-    <string name="action_bind_account">尚未绑定</string>
-    <string name="greeting_wx_login">你好，%1$s！欢迎登录FT中文网。</string>
     <string name="btn_login">登录</string>
     <string name="btn_sign_up">注册</string>
-    <string name="btn_password_letter">发送邮件</string>
-
-    <!--  Wechat Link  -->
-    <string name="title_link_email">绑定邮箱账号</string>
-    <string name="title_merge_accounts">合并账号</string>
-    <string name="instruct_sign_in">该邮箱已经注册了FT中文网账号，请输入登录密码</string>
-    <string name="link_heading">您选择合并如下账号</string>
-    <string name="accounts_already_linked">两个账号已经绑定，无需操作。如果您未看到绑定后的账号信息，请返回"账号与安全"后下拉刷新</string>
-    <string name="ftc_account_linked">账号 %1$s 已经绑定了其他微信账号。一个FT中文网账号只能绑定一个微信账号。</string>
-    <string name="wx_account_linked">微信账号 %1$s 已经绑定了其他FT中文网账号。一个FT中文网账号只能绑定一个微信账号。</string>
-    <string name="accounts_member_valid">您的微信账号和FT中文网的账号均购买了会员服务，两个会员均未到期。合并账号会删除其中一个账号的会员信息。为保障您的权益，暂不支持绑定两个会员未过期的账号。您可以寻求客服帮助。</string>
-    <string name="unlink_footnote">* Stripe、苹果内购或企业订阅信息只能保留在FT中文网账号下</string>
-    <string name="prompt_linked">账号已绑定</string>
-    <string name="prompt_unlinked">账号已解除绑定</string>
-
-    <!-- Link accounts -->
-    <string name="unlink_guide">解除如下账号关联？</string>
-    <string name="unlink_anchor">请选择解除关联后，会员信息保留在哪一方？</string>
-    <string name="progress_request_verification">正在发送验证邮件&#8230;</string>
-    <string name="progress_logging">正在登录&#8230;</string>
-
-    <string name="link_sign_up">注册账号</string>
-    <string name="link_login">已有账号?登录</string>
-
-    <string name="error_email_unchanged">您已经在使用该邮箱了</string>
-    <string name="error_invalid_name">用户名不能为空且不超过32 个字符</string>
-
-    <string name="error_name_unchanged">不能与当前用户名相同</string>
-    <string name="error_too_long">过长</string>
-    <string name="error_too_short">过短</string>
-    <string name="error_form_incomplete">表单未填写完整</string>
-
-    <!-- Error message -->
-    <string name="error_field_required">请填写此项</string>
-    <string name="api_bad_request">无效的请求</string>
-
-    <!-- API error message -->
-    <string name="api_too_many_request">请求过于频繁，请稍后再试</string>
-    <string name="api_unauthorized">没有访问服务器的权限</string>
-    <string name="api_server_error">服务器错误，请稍后再试</string>
-    <string name="api_email_server_down">邮件服务器暂时不可用</string>
-    <string name="api_name_taken">用户名已被占用</string>
-    <string name="api_account_already_linked">当前账号或目标账号已被绑定</string>
-    <string name="api_membership_already_linked">当前账号或目标账号的会员已被绑定</string>
-    <string name="api_membership_all_valid">不能绑定两个拥有未过期会员的账号</string>
-    <string name="api_wechat_already_linked">当前微信账号已经绑定了其他FTC账号</string>
-    <string name="api_wechat_member_already_linked">当前微信账号拥有的会员已经绑定了其他FTC账号</string>
-    <string name="api_anchor_missing">会员账号解绑必须选择哪个账号保留会员信息</string>
-    <string name="unlink_missing_union_id">无法解除绑定：您似乎尚未绑定微信</string>
-    <string name="api_missing_field">请求参数缺失</string>
-    <string name="api_empty_url">请求地址错误</string>
-    <string name="api_network_failure">网络错误</string>
-    <string name="api_io_error">无法读取数据</string>
-    <string name="api_json_syntax">无法解析数据</string>
-    <string name="api_empty_response">服务器没有响应</string>
-    <string name="error_unknown">发生未知错误</string>
+    <string name="btn_send_email">发送邮件</string>
+    <string name="btn_go_signup">注册账号</string>
+    <string name="btn_go_login">已有账号?登录</string>
 
     <!--  Mobile Login  -->
     <string name="mobile_phone">手机号</string>
@@ -200,6 +58,108 @@
     <string name="btn_next">下一步</string>
     <string name="btn_verify_password">验证密码</string>
     <string name="password_not_verified">密码错误</string>
+
+    <!-- Inside app   -->
+    <string name="app_name">FT中文网</string>
+    <string name="action_search">搜索</string>
+    <string name="action_listen_story">朗读</string>
+    <string name="action_favorite">收藏</string>
+
+    <string name="share_template">[FT中文网]%1$s - %2$s</string>
+
+    <!--  Unique id for a channel  -->
+    <string name="news_notification_channel_id">fcm_news_channel</string>
+    <!--  User-visible name of this channel  -->
+    <string name="news_notification_channel_name">新闻</string>
+    <!--  This is optional  -->
+    <string name="news_notification_channel_description">新闻动态</string>
+
+    <string name="nav_news">最新</string>
+    <string name="nav_english">每日英语</string>
+    <string name="nav_ftacademy">FT商学院</string>
+    <string name="nav_video">视•听</string>
+    <string name="nav_myft">我的FT</string>
+    <string name="news_editor_choice">编辑精选</string>
+    <string name="titlebar_cn">中文</string>
+    <string name="titlebar_en">英文</string>
+    <string name="titlebar_bilingual">对照</string>
+    <string name="title_search">搜索 %1$s</string>
+    <string name="title_about_us">关于我们</string>
+    <string name="menu_audio">朗读</string>
+    <string name="share_to">分享到</string>
+    <string name="share_done">分享成功</string>
+    <string name="alert_starred">已收藏</string>
+    <string name="alert_unstarred">收藏已取消</string>
+
+    <string name="myft_reading_history">阅读历史</string>
+    <string name="myft_starred_articles">收藏文章</string>
+    <string name="myft_following">关注</string>
+
+    <!--  Drawer  -->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_not_logged_in">您尚未登录</string>
+    <string name="nav_header_desc">导航栏头部</string>
+    <string name="action_help">帮助</string>
+    <string name="action_feedback">反馈</string>
+    <string name="action_logout">退出登录</string>
+    <string name="action_settings">设置</string>
+
+    <!--  Generic message  -->
+    <string name="prompt_saved">保存成功!</string>
+    <string name="refresh_success">更新成功!</string>
+
+    <!--  Account  -->
+    <string name="title_login">登录FT中文网</string>
+    <string name="title_sign_up">创建FT中文网账号</string>
+    <string name="title_login_signup">登录/注册</string>
+    <string name="title_activity_profile">我的资料</string>
+    <string name="title_change_password">修改密码</string>
+    <string name="title_change_email">修改登录邮箱</string>
+    <string name="title_change_username">修改用户名</string>
+    <string name="title_wx_account">微信账号</string>
+    <string name="title_unlink">解除绑定</string>
+    <string name="title_account">账号与安全</string>
+    <string name="title_wx_login">微信登录</string>
+    <string name="formatter_wx_name">微信用户 %1$s</string>
+    <string name="oauth_canceled">授权取消！</string>
+    <string name="oauth_denied">授权被拒绝！</string>
+    <string name="oauth_state_missing">授权码缺失！</string>
+    <string name="oauth_state_mismatch">授权状态码错误！</string>
+    <string name="wx_session_expired">微信登录已过期，请重新登录。微信登录会定期失效，如果您以后不希望看到本提示，可以在侧边栏的\"账号与安全\"下绑定FT中文网账号。</string>
+    <string name="wx_refresh_token_expired">微信授权已过期，请重新授权后刷新账号数据。</string>
+    <string name="wx_relogin">重新授权</string>
+    <string name="action_wx_login">微信登录</string>
+    <string name="wechat_not_found">没有找到您的微信账号信息</string>
+    <string name="account_linked">已绑定</string>
+    <string name="account_not_linked">尚未绑定</string>
+    <string name="greeting_wx_login">你好，%1$s！欢迎登录FT中文网。</string>
+
+    <!--  Wechat Link  -->
+    <string name="title_link_email">绑定邮箱账号</string>
+    <string name="title_merge_accounts">合并账号</string>
+    <string name="instruct_sign_in">该邮箱已经注册了FT中文网账号，请输入登录密码</string>
+    <string name="link_heading">您选择合并如下账号</string>
+    <string name="accounts_already_linked">两个账号已经绑定，无需操作。如果您未看到绑定后的账号信息，请返回"账号与安全"后下拉刷新</string>
+    <string name="ftc_account_linked">账号 %1$s 已经绑定了其他微信账号。一个FT中文网账号只能绑定一个微信账号。</string>
+    <string name="wx_account_linked">微信账号 %1$s 已经绑定了其他FT中文网账号。一个FT中文网账号只能绑定一个微信账号。</string>
+    <string name="accounts_member_valid">您的微信账号和FT中文网的账号均购买了会员服务，两个会员均未到期。合并账号会删除其中一个账号的会员信息。为保障您的权益，暂不支持绑定两个会员未过期的账号。您可以寻求客服帮助。</string>
+    <string name="unlink_footnote">* Stripe、苹果内购或企业订阅信息只能保留在FT中文网账号下</string>
+    <string name="prompt_linked">账号已绑定</string>
+    <string name="prompt_unlinked">账号已解除绑定</string>
+
+    <!-- Link accounts -->
+    <string name="unlink_guide">解除如下账号关联？</string>
+    <string name="unlink_anchor">请选择解除关联后，会员信息保留在哪一方？</string>
+    <string name="progress_request_verification">正在发送验证邮件&#8230;</string>
+    <string name="progress_logging">正在登录&#8230;</string>
+    <string name="error_email_unchanged">您已经在使用该邮箱了</string>
+    <string name="error_invalid_name">用户名不能为空且不超过32 个字符</string>
+
+    <string name="error_name_unchanged">不能与当前用户名相同</string>
+    <string name="error_too_long">过长</string>
+    <string name="error_too_short">过短</string>
+    <string name="error_form_incomplete">表单未填写完整</string>
 
     <!--  Update password  -->
     <string name="password_repeat_mismatch">两次输入的新密码不一致</string>
@@ -270,6 +230,30 @@
     <string name="subject_delete_account_valid_subs">删除有效订阅会员账号</string>
     <string name="message_account_deleted">账号已删除！</string>
 
+    <!-- Error message -->
+    <string name="error_field_required">请填写此项</string>
+    <string name="api_bad_request">无效的请求</string>
+
+    <!-- API error message -->
+    <string name="api_too_many_request">请求过于频繁，请稍后再试</string>
+    <string name="api_unauthorized">没有访问服务器的权限</string>
+    <string name="api_server_error">服务器错误，请稍后再试</string>
+    <string name="api_email_server_down">邮件服务器暂时不可用</string>
+    <string name="api_name_taken">用户名已被占用</string>
+    <string name="api_account_already_linked">当前账号或目标账号已被绑定</string>
+    <string name="api_membership_already_linked">当前账号或目标账号的会员已被绑定</string>
+    <string name="api_membership_all_valid">不能绑定两个拥有未过期会员的账号</string>
+    <string name="api_wechat_already_linked">当前微信账号已经绑定了其他FTC账号</string>
+    <string name="api_wechat_member_already_linked">当前微信账号拥有的会员已经绑定了其他FTC账号</string>
+    <string name="api_anchor_missing">会员账号解绑必须选择哪个账号保留会员信息</string>
+    <string name="unlink_missing_union_id">无法解除绑定：您似乎尚未绑定微信</string>
+    <string name="api_missing_field">请求参数缺失</string>
+    <string name="api_empty_url">请求地址错误</string>
+    <string name="api_network_failure">网络错误</string>
+    <string name="api_io_error">无法读取数据</string>
+    <string name="api_json_syntax">无法解析数据</string>
+    <string name="api_empty_response">服务器没有响应</string>
+    <string name="error_unknown">发生未知错误</string>
 
     <!--  Order  -->
     <string name="title_my_orders">我的订单</string>
@@ -280,23 +264,22 @@
     <string name="title_subscription">会员订阅</string>
     <string name="refresh_paywall">获取最新产品价格…</string>
     <string name="paywall_updated">数据已更新</string>
-    <string name="initial_year">首年</string>
-    <string name="intial_month">首月</string>
-    <string name="initial_week">首周</string>
-    <string name="prefix_first">前</string>
-    <string name="count_years">%1$d年</string>
-    <string name="count_months">%1$d个月</string>
-    <string name="count_weeks">%1$d周</string>
-    <string name="count_days">%1$d天</string>
     <string name="formatter_money">%1$,.2f</string>
-    <string name="prefix_original_price">原价</string>
-    <string name="title_post_trial_renewal">请选择试用结束后自动续订方式</string>
-    <string name="stripe_trial_message">Stripe订阅试用%1$s</string>
-    <string name="after_trial_ends">试用结束后</string>
-    <string name="auto_renewal_message">自动续订%1$s</string>
+    <string name="price_heading_aliwx_trial">试用</string>
+    <string name="price_heading_stripe_trial">新会员首次试用</string>
+    <string name="price_heading_wxali">包%1$s</string>
+    <string name="price_heading_stripe">连续包%1$s</string>
+    <string name="limited_to_aliwx">* 仅限支付宝或微信支付</string>
+    <string name="limited_to_stripe">* 仅限Stripe支付</string>
+    <string name="price_original_aliwx_prefix">原价</string>
+    <string name="price_original_stripe_prefix">试用结束后自动续订</string>
+    <string-array name="stripe_footnotes">
+        <item>* FT中文网的Stripe支付不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</item>
+        <item>* 微信登录的用户需要绑定FT中文网账号后才可以使用Stripe订阅</item>
+        <item>* 通过支付宝或者微信支付购买的会员、且会员尚未到期，无法使用Stripe订阅</item>
+    </string-array>
 
     <!-- Example: 标准会员/年-->
-    <!-- Deprecated -->
     <string name="formatter_edition">%1$s/%2$s</string>
     <string name="formatter_month_date">%1$d月%2$d日</string>
     <string name="formatter_date">%1$d日</string>
@@ -488,7 +471,7 @@
     <string name="no_new_release">没有找到新版本</string>
     <string name="release_not_found">未找到发布信息</string>
     <string name="btn_download_now">马上下载</string>
-    <string name="btn_downloading">正在下载...</string>
+    <string name="btn_downloading">正在下载…</string>
     <string name="btn_install">安装</string>
     <string name="title_install">安装App</string>
     <string name="btn_download_complete">下载完成，开始安装？</string>
@@ -502,60 +485,5 @@
     <string name="wait_download_finish">开始后台下载，请稍候。下载完成后会提示您安装，或者点击通知栏的下载完成通知开始安装。您也可以下载完成后手动安装，文件位于手机存储的下载文件夹下。</string>
     <string name="action_open_download">打开下载文件夹</string>
     <string name="summary_articles_read">已阅读 %1$d 篇文章</string>
-    <string name="pref_release_log">更新历史</string>
-    <string name="summary_release_log">查看本版功能变动</string>
-
-
-    <string name="version_name">版本</string>
-
-    <string name="released_at">发布时间</string>
-    <string name="alert_audio_deleted">已删除下载的音频</string>
-    <string name="bookmark_icon">bookmark this article</string>
-    <string name="share_icon">Share this article</string>
-
-    <string name="exo_download_queued">下载正在排队</string>
-    <string name="exo_download_stopped">下载已停止</string>
-    <string name="exo_download_restarting">重新开始下载</string>
-
-    <string-array name="stripe_footnotes">
-        <item>* FT中文网的Stripe支付不接受人民币计价的银行卡，建议中国大陆以外地区用户使用</item>
-        <item>* 微信登录的用户需要绑定FT中文网账号后才可以使用Stripe订阅</item>
-        <item>* 通过支付宝或者微信支付购买的会员、且会员尚未到期，无法使用Stripe订阅</item>
-    </string-array>
-    <string-array name="profile_gender_entries">
-        <item>男</item>
-        <item>女</item>
-    </string-array>
-    <string-array name="profile_gender_values">
-        <item>M</item>
-        <item>F</item>
-    </string-array>
-
-    <string-array name="settings_font_entries">
-        <item>最小</item>
-        <item>较小</item>
-        <item>默认</item>
-        <item>较大</item>
-        <item>最大</item>
-    </string-array>
-    <string-array name="settings_font_values">
-        <item>xs</item>
-        <item>s</item>
-        <item>m</item>
-        <item>l</item>
-        <item>xl</item>
-    </string-array>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string-array name="settings_language_entries">
-        <item>简体</item>
-        <item>繁体</item>
-    </string-array>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string-array name="settings_language_values">
-        <item>sc</item>
-        <item>tc</item>
-    </string-array>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

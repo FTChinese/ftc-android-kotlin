@@ -132,7 +132,7 @@
             android:id="@+id/signup_link"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/link_sign_up"
+            android:text="@string/btn_go_signup"
             android:visibility="@{showCreateAccount ? View.VISIBLE : View.GONE}"
             android:onClick="@{handler::onClickCreateAccount}"
             android:enabled="@{!inProgress}"
