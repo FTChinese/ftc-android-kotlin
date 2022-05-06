@@ -113,7 +113,7 @@ private fun launchWxOAuth(
     wxApi.sendReq(req)
 }
 
-private fun launchLinkEmailActivity(
+fun launchLinkEmailActivity(
     launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
     context: Context,
 ) {
@@ -122,7 +122,7 @@ private fun launchLinkEmailActivity(
     )
 }
 
-private fun launchUnlinkEmailActivity(
+fun launchUnlinkEmailActivity(
     launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
     context: Context,
 ) {
