@@ -40,10 +40,13 @@ class WxInfoViewModel(application: Application) : UserViewModel(application) {
             return
         }
 
-        progressLiveData.value = true
+        refreshingLiveData.value = true
 
         viewModelScope.launch {
-            val done = refreshWxSession(wxSession)
+            val (done, toast) = asyncRefreshWxSession(wxSession)
+            if (toast != null) {
+                toastLiveData.value = toast
+            }
             if (!done) {
                 refreshingLiveData.value = false
                 reAuthLiveData.value = true
@@ -53,22 +56,21 @@ class WxInfoViewModel(application: Application) : UserViewModel(application) {
             asyncRefreshAccount(a)?.let {
                 saveAccount(it)
             }
+            progressLiveData.value = false
         }
     }
 
-    private suspend fun refreshWxSession(sess: WxSession): Boolean {
+    private suspend fun asyncRefreshWxSession(sess: WxSession): Pair<Boolean, ToastMessage?> {
         return try {
             val done = withContext(Dispatchers.IO) {
                 AccountRepo.refreshWxInfo(wxSession = sess)
             }
 
-            done
+            Pair(done, null)
         } catch (e: APIError) {
-            toastLiveData.value = ToastMessage.fromApi(e)
-            false
+            Pair(false, ToastMessage.fromApi(e))
         } catch (e: Exception) {
-            toastLiveData.value = ToastMessage.fromException(e)
-            false
+            Pair(false, ToastMessage.fromException(e))
         }
     }
 }
