@@ -15,6 +15,7 @@ import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
+@Deprecated("")
 class WxExpireDialogFragment : DialogFragment() {
 
     private lateinit var wxApi: IWXAPI
