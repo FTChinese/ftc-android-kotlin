@@ -61,8 +61,7 @@ class FtcAccountFragment : ScopedFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         accountViewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(AccountViewModel::class.java)
+            ViewModelProvider(this)[AccountViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
 
         val layout = LinearLayoutManager(context)
@@ -147,6 +146,7 @@ class FtcAccountFragment : ScopedFragment() {
         updateUI()
     }
 
+    @Deprecated("")
     inner class ListAdapter : RecyclerView.Adapter<TwoLineItemViewHolder>() {
         private var rows = listOf<AccountRow>()
 
@@ -166,7 +166,9 @@ class FtcAccountFragment : ScopedFragment() {
                     AccountRowType.STRIPE -> {
                         StripeWalletActivity.start(context)
                     }
-                    AccountRowType.WECHAT -> onClickWechat()
+                    AccountRowType.WECHAT -> {
+                        com.ft.ftchinese.ui.wxinfo.WxInfoActivity.start(requireContext())
+                    }
                     AccountRowType.MOBILE -> {
                         // For mobile-created account, forbid user to update mobile to another one.
                         if (AccountCache.get()?.isMobileEmail == true) {
@@ -188,21 +190,6 @@ class FtcAccountFragment : ScopedFragment() {
         fun setData(items: List<AccountRow>) {
             this.rows = items
             notifyDataSetChanged()
-        }
-
-        // If email-wechat linked, show wechat details;
-        // otherwise show a dialog to ask user to perform wechat OAuth.
-        private fun onClickWechat() {
-            AccountCache.get()?.let {
-                if (it.isLinked) {
-                    WxInfoActivity.start(requireContext())
-                    return
-                }
-
-                if (it.isFtcOnly) {
-                    LinkWxDialogFragment().show(childFragmentManager, "EmailLinkWechat")
-                }
-            }
         }
     }
 
