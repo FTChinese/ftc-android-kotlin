@@ -113,7 +113,7 @@ data class Account(
      * Is this account an FTC-only one?
      * -- logged in with email and not bound to a wechat account.
      */
-    val isFtcOnly: Boolean
+    val isEmailOnly: Boolean
         get() = id.isNotBlank() && unionId.isNullOrBlank()
 
     /**
