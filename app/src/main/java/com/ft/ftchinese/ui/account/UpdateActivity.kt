@@ -155,6 +155,10 @@ class UpdateActivity : ScopedAppActivity() {
                 }
             )
         }
-    }
 
+        @JvmStatic
+        fun intent(context: Context, rowType: AccountRowType) = Intent(context, UpdateActivity::class.java).apply {
+            putExtra(TARGET_FRAG, rowType)
+        }
+    }
 }

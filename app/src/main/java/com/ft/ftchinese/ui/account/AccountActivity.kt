@@ -4,23 +4,33 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.commit
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Scaffold
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
-import com.ft.ftchinese.databinding.ActivityAccountBinding
-import com.ft.ftchinese.model.enums.LoginMethod
-import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.dialog.AlertDialogFragment
-import com.ft.ftchinese.ui.dialog.DialogArgs
-import com.ft.ftchinese.ui.login.AuthActivity
-import com.ft.ftchinese.ui.wxinfo.WxInfoFragment
-import com.ft.ftchinese.util.RequestCode
-import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.stripewallet.StripeWalletActivity
+import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.wxinfo.WxInfoActivity
+import com.ft.ftchinese.ui.wxinfo.WxInfoActivityScreen
+import com.ft.ftchinese.ui.wxinfo.WxInfoViewModel
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.tencent.mm.opensdk.openapi.WXAPIFactory
+import org.jetbrains.anko.toast
 
 /**
  * Show user's account details.
@@ -29,133 +39,36 @@ import com.ft.ftchinese.viewmodel.AccountViewModel
  * If user logged in with wechat account and it is not bound to an FTC account, show WxAccountFragment;
  * If user logged in with wechat account and it is bound to an FTC account, show FtcAccountFragment.
  */
-class AccountActivity : ScopedAppActivity() {
-
-    private lateinit var sessionManager: SessionManager
-    private lateinit var accountViewModel: AccountViewModel
-    private lateinit var binding: ActivityAccountBinding
+class AccountActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_account)
-        setSupportActionBar(binding.toolbar.toolbar)
+        setContent {
+            OTheme {
+                val scaffoldState = rememberScaffoldState()
 
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowTitleEnabled(true)
-        }
-
-        sessionManager = SessionManager.getInstance(this)
-
-        accountViewModel = ViewModelProvider(this)[AccountViewModel::class.java]
-
-        connectionLiveData.observe(this) {
-            accountViewModel.isNetworkAvailable.value = it
-        }
-
-        isConnected.let {
-            accountViewModel.isNetworkAvailable.value = it
-        }
-
-        setupViewModel()
-        initUI()
-    }
-
-    private fun setupViewModel() {
-        accountViewModel.progressLiveData.observe(this) {
-            binding.inProgress = it
-        }
-
-        accountViewModel.uiSwitched.observe(this) {
-            initUI()
-        }
-    }
-
-    private fun initUI() {
-        val account = sessionManager.loadAccount()
-        // If the account is deleted
-        if (account == null) {
-            AuthActivity.start(this)
-            finish()
-            return
-        }
-
-        supportFragmentManager.commit {
-            if (account.isWxOnly) {
-                replace(R.id.frag_account, WxInfoFragment.newInstance())
-            } else {
-                replace(R.id.frag_account, FtcAccountFragment.newInstance())
+                Scaffold(
+                    topBar = {
+                        Toolbar(
+                            heading = stringResource(id = R.string.title_account),
+                            onBack = {
+                                setResult(RESULT_OK)
+                                finish()
+                            }
+                        )
+                    },
+                    scaffoldState = scaffoldState
+                ) { innerPadding ->
+                    AccountActivityScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        showSnackBar = {
+                            toast(it)
+                        }
+                    )
+                }
             }
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val a = sessionManager.loadAccount()
-
-        if (a?.loginMethod != LoginMethod.WECHAT) {
-            menuInflater.inflate(R.menu.activity_account_menu, menu)
-            return true
-        }
-
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_delete_account -> {
-                alertConfirmDelete()
-                true
-            }
-            else -> {
-                super.onOptionsItemSelected(item)
-            }
-        }
-    }
-
-    private fun alertConfirmDelete() {
-        AlertDialogFragment.newInstance(
-            params = DialogArgs(
-                title = R.string.title_confirm_delete_account,
-                message = getString(R.string.message_warn_delete_account),
-                positiveButton = R.string.button_delete_account,
-                negativeButton = R.string.button_think_twice,
-            )
-        )
-            .onPositiveButtonClicked { dialog, _ ->
-                dialog.dismiss()
-                UpdateActivity.start(this, AccountRowType.DELETE)
-            }
-            .onNegativeButtonClicked { dialog, _ ->
-                dialog.cancel()
-            }
-            .show(supportFragmentManager, "ConfirmDeleteAccount")
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (resultCode != Activity.RESULT_OK) {
-            return
-        }
-
-        // UNLINK is Passsed back from WxInfoActivity;
-        // LINK is passed from WXEntryActivity.
-        // Used when user is logged in using email account.
-        if (requestCode == RequestCode.LINK || requestCode == RequestCode.UNLINK) {
-            initUI()
-        }
-    }
-
-    /**
-     * This ensures UI changes as user link/unlink accounts.
-     * The onActivityResult mechanism is not reliable since
-     * Wechat's WXEntryActivity might interrupt the data
-     * passing back.
-     */
-    override fun onResume() {
-        super.onResume()
-        initUI()
     }
 
     companion object {
@@ -166,4 +79,138 @@ class AccountActivity : ScopedAppActivity() {
             context.startActivity(intent)
         }
     }
+}
+
+@Composable
+fun AccountActivityScreen(
+    modifier: Modifier = Modifier,
+    accountViewModel: WxInfoViewModel = viewModel(),
+    showSnackBar: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val refreshing by accountViewModel.refreshingLiveData.observeAsState(false)
+    val account = remember {
+        accountViewModel.account
+    }
+
+    if (account == null) {
+        showSnackBar("Not logged in")
+        return
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        when (result.resultCode) {
+            Activity.RESULT_OK -> {
+                accountViewModel.reloadAccount()
+            }
+            Activity.RESULT_CANCELED -> {}
+        }
+    }
+
+    val (showDelete, setShowDelete) = remember {
+        mutableStateOf(false)
+    }
+
+    val (showMobileAlert, setShowMobileAlert) = remember {
+        mutableStateOf(false)
+    }
+
+    if (showDelete) {
+        AlertDeleteAccount(
+            onDismiss = {
+                setShowDelete(false)
+            },
+            onConfirm = {
+                setShowDelete(false)
+                launchUpdateActivity(
+                    launcher = launcher,
+                    context = context,
+                    rowId = AccountRowType.DELETE,
+                )
+            }
+        )
+    }
+
+    if (showMobileAlert) {
+        MobileOnlyNotUpdatable(
+            onDismiss = {
+                setShowMobileAlert(false)
+            }
+        )
+    }
+
+    if (account.isWxOnly) {
+        WxInfoActivityScreen(
+            wxApi = WXAPIFactory.createWXAPI(
+                context,
+                BuildConfig.WX_SUBS_APPID
+            ).apply {
+                registerApp(BuildConfig.WX_SUBS_APPID)
+            },
+            modifier = modifier,
+            wxInfoViewModel = accountViewModel,
+            showSnackBar = showSnackBar
+        )
+    } else {
+        SwipeRefresh(
+            state = rememberSwipeRefreshState(
+                isRefreshing = refreshing
+            ),
+            onRefresh = {
+                accountViewModel.refreshAccount()
+            },
+            modifier = modifier
+        ) {
+
+            FtcAccountScreen(
+                rows = buildAccountRows(
+                    context,
+                    account
+                ),
+                onClickRow = { rowId ->
+                    when (rowId) {
+                        AccountRowType.DELETE -> {
+                            setShowDelete(true)
+                        }
+                        AccountRowType.STRIPE -> {
+                            StripeWalletActivity.start(context)
+                        }
+                        AccountRowType.WECHAT -> {
+                            WxInfoActivity.start(context)
+                        }
+                        AccountRowType.MOBILE -> {
+                            if (account.isMobileEmail) {
+                                setShowMobileAlert(true)
+                            } else {
+                                launchUpdateActivity(
+                                    launcher = launcher,
+                                    context = context,
+                                    rowId = rowId,
+                                )
+                            }
+                        }
+                        else -> {
+                            launchUpdateActivity(
+                                launcher = launcher,
+                                context = context,
+                                rowId = rowId,
+                            )
+                        }
+                    }
+                }
+            )
+        }
+    }
+}
+
+private fun launchUpdateActivity(
+    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    context: Context,
+    rowId: AccountRowType,
+) {
+    launcher.launch(
+        UpdateActivity.intent(context, rowId)
+    )
 }

@@ -1,57 +1,31 @@
 package com.ft.ftchinese.ui.account
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.ft.ftchinese.ui.components.ClickableRow
-import com.ft.ftchinese.ui.components.ListItemTwoLine
-import com.ft.ftchinese.ui.components.RightArrow
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import com.ft.ftchinese.R
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.reader.Wechat
+import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.viewmodel.UserViewModel
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-
-@Composable
-fun FtcAccountFragmentScreen(
-    userViewModel: UserViewModel
-) {
-    val context = LocalContext.current
-    val refreshing by userViewModel.refreshingLiveData.observeAsState(false)
-    val account = remember {
-        userViewModel.account
-    }
-
-    SwipeRefresh(
-        state = rememberSwipeRefreshState(
-            isRefreshing = refreshing
-        ),
-        onRefresh = {
-            userViewModel.refreshAccount()
-        }
-    ) {
-        account?.let {
-            FtcAccountScreen(
-                rows = buildAccountRows(context, it),
-                onClickRow = { rowId ->
-
-                }
-            )
-        }
-    }
-}
+import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun FtcAccountScreen(
     rows: List<AccountRow>,
     onClickRow: (AccountRowType) -> Unit
 ) {
+
     Column(
         modifier = Modifier.verticalScroll(
             rememberScrollState()
@@ -64,6 +38,20 @@ fun FtcAccountScreen(
             ) {
                 onClickRow(row.id)
             }
+        }
+
+        SecondaryButton(
+            onClick = {
+                onClickRow(AccountRowType.DELETE)
+            },
+            modifier = Modifier
+                .padding(Dimens.dp16)
+                .fillMaxWidth(),
+            contentColor = OColor.claret,
+        ) {
+            Text(
+                text = stringResource(id = R.string.title_delete_account)
+            )
         }
     }
 }
@@ -87,4 +75,78 @@ private fun AccountRow(
             secondary = secondary
         )
     }
+}
+
+@Composable
+fun MobileOnlyNotUpdatable(
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            PrimaryButton(
+                onClick = onDismiss
+            ) {
+                Text(text = stringResource(id = R.string.action_ok))
+            }
+        },
+        text = {
+            Text(text = "手机号创建的账号不允许更改")
+        }
+    )
+}
+
+@Composable
+fun AlertDeleteAccount(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            PrimaryButton(
+                onClick = onConfirm
+            ) {
+                Text(text = stringResource(id = R.string.button_delete_account))
+            }
+        },
+        dismissButton = {
+            SecondaryButton(
+                onClick = onDismiss,
+                backgroundColor = OColor.white
+            ) {
+                Text(text = stringResource(id = R.string.button_think_twice))
+            }
+        },
+        title = {
+            Text(
+                text = stringResource(id = R.string.title_confirm_delete_account)
+            )
+        },
+        text = {
+            Text(
+                text = stringResource(id = R.string.message_warn_delete_account)
+            )
+        }
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewFtcAccountScreen() {
+    val context = LocalContext.current
+
+    FtcAccountScreen(
+        rows = buildAccountRows(
+            context,
+            Account(
+                id = "",
+                email = "example@example.org",
+                isVerified = false,
+                wechat = Wechat(),
+                membership = Membership(),
+            )
+        ),
+        onClickRow = {}
+    )
 }
