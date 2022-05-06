@@ -12,11 +12,8 @@ import kotlinx.coroutines.launch
 
 private const val TAG = "AccountViewModel"
 
+@Deprecated("")
 class AccountViewModel : BaseViewModel() {
-
-    val uiSwitched: MutableLiveData<Boolean> by lazy {
-        MutableLiveData<Boolean>()
-    }
 
     val accountRefreshed: MutableLiveData<FetchResult<Account>> by lazy {
         MutableLiveData<FetchResult<Account>>()
