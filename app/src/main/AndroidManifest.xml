@@ -122,11 +122,7 @@
         <activity
             android:name=".ui.wxlink.UnlinkActivity"
             android:label="@string/title_unlink"
-            android:parentActivityName=".ui.account.WxInfoActivity" />
-        <activity
-            android:name=".ui.account.WxInfoActivity"
-            android:label="@string/title_wx_account"
-            android:parentActivityName=".ui.account.AccountActivity" />
+            android:parentActivityName=".ui.wxinfo.WxInfoActivity" />
         <activity
             android:name=".ui.account.UpdateActivity"
             android:parentActivityName=".ui.account.AccountActivity"

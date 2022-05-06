@@ -1,34 +1,48 @@
 package com.ft.ftchinese.ui.wxinfo
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.ui.components.PrimaryButton
 import com.ft.ftchinese.ui.theme.Dimens
 
+/**
+ * Used in two cases:
+ * 1. Wechat-only logg-in;
+ * 2. Email login with wechat linked.
+ * In both cases Account#unionId field is not empty.
+ */
 @Composable
 fun WxInfoScreen(
-    wxInfo: Wechat,
+    wechat: Wechat,
     isLinked: Boolean,
-    onLink: () -> Unit,
-    onUnlink: () -> Unit,
+    onLinkEmail: () -> Unit,
+    onUnlinkEmail: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(Dimens.dp16)
     ) {
-        wxInfo.avatarUrl?.let {
-            WxAvatar(
-                imageUrl = it,
-                name = wxInfo.nickname ?: "",
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-        }
+
+        NamedAvatar(
+            imageUrl = wechat.avatarUrl,
+            name = wechat.nickname ?: "",
+        )
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
@@ -40,19 +54,23 @@ fun WxInfoScreen(
                 style = MaterialTheme.typography.body1,
             )
 
+            Spacer(modifier = Modifier.height(Dimens.dp16))
+
             PrimaryButton(
-                onClick = onLink,
+                onClick = onLinkEmail,
                 modifier = Modifier.align(Alignment.End),
             ) {
                 Text(
-                    text = stringResource(id = R.string.btn_link)
+                    text = stringResource(id = R.string.btn_link),
+                    style = MaterialTheme.typography.body1,
                 )
             }
         } else {
+
             // Wechat is linked to email, show a button to
             // unlink email.
             PrimaryButton(
-                onClick = onUnlink,
+                onClick = onUnlinkEmail,
                 modifier = Modifier.align(Alignment.End),
             ) {
                 Text(
@@ -64,41 +82,43 @@ fun WxInfoScreen(
 }
 
 @Composable
-fun WxAvatar(
-    imageUrl: String,
+private fun NamedAvatar(
+    imageUrl: String?,
     name: String,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-    ) {
-//        AsyncImage(
-//            model = imageUrl,
-//            contentDescription = "Wechat Avatar"
-//        )
-        
-        Text(text = name)
-    }
-}
-
-/**
- * Used when email is not linked to wechat.
- */
-@Composable
-fun AlertEmailLinkWx(
-    onLinkWx: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = "尚未关联微信。绑定微信账号后，可以使用微信账号账号快速登录"
+        AsyncImage(
+            model = imageUrl, 
+            contentDescription = "",
+            placeholder = painterResource(id = R.drawable.ic_account_circle_black_24dp),
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .height(128.dp)
+                .width(128.dp)
+                .clip(RoundedCornerShape(10.dp))
         )
-        
-        PrimaryButton(
-            onClick = { /*TODO*/ }
-        ) {
-            Text(text = "微信授权")
-        }
+        Text(
+            text = name,
+            style = MaterialTheme.typography.subtitle2,
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewWxInfoScreen() {
+    WxInfoScreen(
+        wechat = Wechat(
+            avatarUrl = null,
+            nickname = "Wechat User"
+        ),
+        isLinked = false,
+        onLinkEmail =
+        {  }
+    ) {
+
     }
 }
