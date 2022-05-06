@@ -1,6 +1,7 @@
 package com.ft.ftchinese.ui.wxlink
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -14,10 +15,8 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.util.RequestCode
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.jetbrains.anko.toast
 
-@ExperimentalCoroutinesApi
 class UnlinkActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
@@ -100,11 +99,16 @@ class UnlinkActivity : ScopedAppActivity() {
     companion object {
         private const val TAG = "UnlinkActivity"
 
+        @JvmStatic
         fun startForResult(activity: Activity?) {
             activity?.startActivityForResult(
                     Intent(activity, UnlinkActivity::class.java),
                     RequestCode.UNLINK
             )
+        }
+
+        fun newIntent(context: Context): Intent {
+            return Intent(context, UnlinkActivity::class.java)
         }
     }
 }
