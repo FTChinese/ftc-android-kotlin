@@ -18,6 +18,7 @@ import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.dialog.AlertDialogFragment
 import com.ft.ftchinese.ui.dialog.DialogArgs
 import com.ft.ftchinese.ui.login.AuthActivity
+import com.ft.ftchinese.ui.wxinfo.WxInfoFragment
 import com.ft.ftchinese.util.RequestCode
 import com.ft.ftchinese.viewmodel.AccountViewModel
 
@@ -34,8 +35,6 @@ class AccountActivity : ScopedAppActivity() {
     private lateinit var accountViewModel: AccountViewModel
     private lateinit var binding: ActivityAccountBinding
 
-    private lateinit var wxInfoViewModel: WxInfoViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -51,16 +50,12 @@ class AccountActivity : ScopedAppActivity() {
 
         accountViewModel = ViewModelProvider(this)[AccountViewModel::class.java]
 
-        wxInfoViewModel = ViewModelProvider(this)[WxInfoViewModel::class.java]
-
         connectionLiveData.observe(this) {
             accountViewModel.isNetworkAvailable.value = it
-            wxInfoViewModel.isNetworkAvailable.value = it
         }
 
         isConnected.let {
             accountViewModel.isNetworkAvailable.value = it
-            wxInfoViewModel.isNetworkAvailable.value = it
         }
 
         setupViewModel()
@@ -137,21 +132,6 @@ class AccountActivity : ScopedAppActivity() {
             .show(supportFragmentManager, "ConfirmDeleteAccount")
     }
 
-    /**
-     * Receive results from
-     * [UpdateActivity] or [LinkFtcActivity].
-     *
-     * Source and their meanings:
-     *
-     * [LinkFtcActivity] - Wechat user link to FTC by either
-     * sign up or login. Request code is RequestCode.LINK.
-     * If email alrady exists, the result is relayed from
-     * [LinkPreviewActivity].
-     *
-     * [WxInfoActivity] - Unlink wechat.
-     * The event is originated from [UnlinkActivity].
-     *
-     */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
