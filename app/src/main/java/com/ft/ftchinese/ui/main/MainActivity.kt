@@ -41,7 +41,6 @@ import com.ft.ftchinese.ui.AboutListActivity
 import com.ft.ftchinese.ui.MemberActivity
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.account.AccountActivity
-import com.ft.ftchinese.ui.account.WxInfoViewModel
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.TabPages
 import com.ft.ftchinese.ui.base.isConnected
