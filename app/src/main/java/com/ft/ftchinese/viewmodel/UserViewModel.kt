@@ -68,29 +68,39 @@ open class UserViewModel(application: Application) : BaseAppViewModel(applicatio
         viewModelScope.launch {
             Log.i(TAG, "Start refreshing account")
 
-            try {
-                val refreshed = withContext(Dispatchers.IO) {
-                    AccountRepo.refresh(a)
-                }
-
-                if (refreshed == null) {
-                    toastLiveData.value = ToastMessage.Resource(R.string.loading_failed)
-                } else {
-                    account = refreshed
-                    toastLiveData.value = ToastMessage.Resource(R.string.refresh_success)
-                }
-            } catch (e: APIError) {
-                toastLiveData.value = if (e.statusCode == 404) {
-                     ToastMessage.Resource(R.string.account_not_found)
-                } else {
-                    ToastMessage.fromApi(e)
-                }
-            } catch (e: Exception) {
-                toastLiveData.value = ToastMessage.fromException(e)
+            asyncRefreshAccount(a)?.let {
+                saveAccount(it)
             }
 
             progressLiveData.value = false
             refreshingLiveData.value = false
+        }
+    }
+
+    protected suspend fun asyncRefreshAccount(a: Account): Account? {
+        try {
+            val refreshed = withContext(Dispatchers.IO) {
+                AccountRepo.refresh(a)
+            }
+
+            return if (refreshed == null) {
+                toastLiveData.value = ToastMessage.Resource(R.string.loading_failed)
+                null
+            } else {
+                toastLiveData.value = ToastMessage.Resource(R.string.refresh_success)
+                refreshed
+            }
+        } catch (e: APIError) {
+            toastLiveData.value = if (e.statusCode == 404) {
+                ToastMessage.Resource(R.string.account_not_found)
+            } else {
+                ToastMessage.fromApi(e)
+            }
+
+            return null
+        } catch (e: Exception) {
+            toastLiveData.value = ToastMessage.fromException(e)
+            return null
         }
     }
 }
