@@ -77,7 +77,7 @@ class BuyerInfoViewModel(application: Application) : AndroidViewModel(applicatio
                 }
                 val addressAsync = async(Dispatchers.IO) {
                     Log.i(TAG, "Fetching address...")
-                    if (account.isFtcOnly) {
+                    if (account.isEmailOnly) {
                         AccountRepo.loadAddress(account.id)
                     } else {
                         Address()
