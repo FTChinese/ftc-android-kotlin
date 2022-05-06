@@ -58,13 +58,12 @@ open class UserViewModel(application: Application) : BaseAppViewModel(applicatio
         val a = account ?: return
 
         if (!ensureNetwork()) {
-            progressLiveData.value = false
-            refreshingLiveData.value = false
             return
         }
 
         toastLiveData.value = ToastMessage.Resource(R.string.refreshing_account)
 
+        refreshingLiveData.value = true
         viewModelScope.launch {
             Log.i(TAG, "Start refreshing account")
 
@@ -72,7 +71,6 @@ open class UserViewModel(application: Application) : BaseAppViewModel(applicatio
                 saveAccount(it)
             }
 
-            progressLiveData.value = false
             refreshingLiveData.value = false
         }
     }
