@@ -1,14 +1,18 @@
 package com.ft.ftchinese.ui.components
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.ui.theme.Dimens
@@ -65,6 +69,23 @@ fun Toolbar(
         elevation = Dimens.dp4,
         backgroundColor = OColor.wheat
     )
+}
+
+@Composable
+fun CloseBar(
+    onClose: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        IconButton(onClick = onClose) {
+            Icon(
+                imageVector = Icons.Filled.Close,
+                "",
+                tint = OColor.black90
+            )
+        }
+    }
 }
 
 @Preview
