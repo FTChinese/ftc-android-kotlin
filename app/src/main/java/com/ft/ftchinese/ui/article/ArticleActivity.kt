@@ -204,30 +204,6 @@ class ArticleActivity : ScopedAppActivity(),
 
         // Pass the share app selected share component to article view model.
         shareViewModel.appSelected.observe(this, this::onShareIconClicked)
-
-        // If user want to share screenshot.
-        screenshotViewModel.shareSelected.observe(this) { appId ->
-            val screenshot = screenshotViewModel.imageRowCreated.value ?: return@observe
-
-            Log.i(TAG, "Share screenshot to $appId")
-            grantUriPermission(
-                "com.tencent.mm",
-                screenshot.imageUri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-
-            val req = contentResolver
-                .openInputStream(screenshot.imageUri)
-                ?.use {  stream ->
-                    ShareUtils.wxShareScreenshotReq(
-                        appId = appId,
-                        stream = stream,
-                        screenshot = screenshot
-                    )
-                } ?: return@observe
-
-            wxApi.sendReq(req)
-        }
     }
 
     /**
