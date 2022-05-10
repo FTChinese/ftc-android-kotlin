@@ -23,7 +23,7 @@ import com.ft.ftchinese.ui.base.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.share.ArticleScreenshot
-import com.ft.ftchinese.ui.share.ScreenshotFragment
+import com.ft.ftchinese.ui.share.ScreenshotActivity
 import com.ft.ftchinese.ui.share.ScreenshotViewModel
 import com.ft.ftchinese.ui.webpage.*
 
@@ -123,9 +123,10 @@ class ArticleFragment : ScopedFragment() {
             val ok = takeScreenshot(binding.webView, screenshot.imageUri)
 
             if (ok) {
-                ScreenshotFragment
-                    .newInstance()
-                    .show(childFragmentManager, "ScreenshotDialog")
+                ScreenshotActivity.start(
+                    requireContext(),
+                    screenshot = screenshot,
+                )
             }
         }
     }
