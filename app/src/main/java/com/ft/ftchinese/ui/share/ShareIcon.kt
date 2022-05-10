@@ -24,17 +24,17 @@ fun ShareIcon(
     onClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier.clickable(
-            onClick = onClick
-        )
     ) {
         Image(
             painter = image,
             contentDescription = text,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .height(64.dp)
-                .width(64.dp)
+                .height(32.dp)
+                .width(32.dp)
+                .clickable(
+                    onClick = onClick
+                )
         )
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
