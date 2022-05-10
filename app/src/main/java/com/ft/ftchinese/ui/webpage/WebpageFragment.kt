@@ -10,7 +10,7 @@ import com.ft.ftchinese.databinding.FragmentWebpageBinding
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.ui.share.ArticleScreenshot
-import com.ft.ftchinese.ui.share.ScreenshotFragment
+import com.ft.ftchinese.ui.share.ScreenshotActivity
 
 class WebpageFragment : WVBaseFragment() {
     private lateinit var binding: FragmentWebpageBinding
@@ -52,10 +52,12 @@ class WebpageFragment : WVBaseFragment() {
             val ok = takeScreenshot(binding.webView, screenshot.imageUri)
 
             if (ok) {
-                ScreenshotFragment
-                    .newInstance()
-                    .show(childFragmentManager, "ScreenshotDialog")
+                ScreenshotActivity.start(
+                    requireContext(),
+                    screenshot = screenshot,
+                )
             }
+
         }
     }
 
