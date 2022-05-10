@@ -1,38 +1,113 @@
 package com.ft.ftchinese.ui.share
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
-import androidx.compose.material.Scaffold
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.components.CloseBar
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
+import com.tencent.mm.opensdk.openapi.IWXAPI
+import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
-class ScreenshotActivity : AppCompatActivity() {
+class ScreenshotActivity : ComponentActivity() {
+
+    private lateinit var wxApi: IWXAPI
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val screenshot = intent
+            .getParcelableExtra<ArticleScreenshot>(EXTRA_SCREENSHOT)
+
+        wxApi = WXAPIFactory.createWXAPI(
+            this,
+            BuildConfig.WX_SUBS_APPID,
+            false
+        )
+
         setContent {
             OTheme {
-
+                Screen(
+                    screenshot = screenshot,
+                    onShareTo = { app, screenshot ->
+                        share(
+                            appId = app.id,
+                            screenshot = screenshot
+                        )
+                    },
+                    onExit = {
+                        finish()
+                    }
+                )
             }
+        }
+    }
+
+    private fun share(
+        appId: SocialAppId,
+        screenshot: ArticleScreenshot,
+    ) {
+        Log.i(ArticleActivity.TAG, "Share screenshot to $appId")
+        grantUriPermission(
+            "com.tencent.mm",
+            screenshot.imageUri,
+            Intent.FLAG_GRANT_READ_URI_PERMISSION
+        )
+
+        val req = contentResolver
+            .openInputStream(screenshot.imageUri)
+            ?.use {  stream ->
+                ShareUtils.wxShareScreenshotReq(
+                    appId = appId,
+                    stream = stream,
+                    screenshot = screenshot
+                )
+            } ?: return
+
+        wxApi.sendReq(req)
+    }
+
+    companion object {
+        private const val EXTRA_SCREENSHOT = "extra_screenshot"
+
+        @JvmStatic
+        fun start(context: Context, screenshot: ArticleScreenshot) {
+            context.startActivity(
+                Intent(context, ScreenshotActivity::class.java).apply {
+                    putExtra(EXTRA_SCREENSHOT, screenshot)
+                }
+            )
         }
     }
 }
 
 @Composable
 private fun Screen(
-    onShareTo: (SocialApp) -> Unit,
+    screenshot: ArticleScreenshot?,
+    onShareTo: (SocialApp, ArticleScreenshot) -> Unit,
     onExit: () -> Unit,
 ) {
+
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -41,9 +116,22 @@ private fun Screen(
         )
 
         Column(
-            modifier = Modifier.weight(1.0f)
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+                .weight(1.0f)
         ) {
-
+            AsyncImage(
+                model = ImageRequest
+                    .Builder(context)
+                    .data(screenshot?.imageUri)
+                    .memoryCachePolicy(CachePolicy.DISABLED)
+                    .diskCachePolicy(CachePolicy.DISABLED)
+                    .build(),
+                contentDescription = "",
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
         }
 
         Divider()
@@ -65,12 +153,17 @@ private fun Screen(
                     icon = R.drawable.moments,
                     id = SocialAppId.WECHAT_MOMENTS
                 ),
-            ).forEach {
+            ).forEach { app ->
                 ShareIcon(
-                    image = painterResource(id = it.icon),
-                    text = it.name as String
+                    image = painterResource(id = app.icon),
+                    text = app.name as String
                 ) {
-                    onShareTo(it)
+                    screenshot?.let {
+                        onShareTo(
+                            app,
+                            it,
+                        )
+                    }
                 }
             }
         }
@@ -82,7 +175,11 @@ private fun Screen(
 @Preview(showBackground = true)
 @Composable
 fun PreviewScreenshot() {
-    Screen(onShareTo = {}) {
-        
-    }
+    Screen(
+        screenshot = null,
+        onShareTo = { _, _, ->
+
+        },
+        onExit = {}
+    )
 }
