@@ -14,7 +14,6 @@ import kotlinx.coroutines.withContext
 
 private const val TAG = "ScreenShot"
 
-// TODO: can we merge this into SocialShareViewModel?
 class ScreenshotViewModel(application: Application): AndroidViewModel(application) {
 
     val progressLiveData = MutableLiveData(false)
@@ -23,11 +22,6 @@ class ScreenshotViewModel(application: Application): AndroidViewModel(applicatio
     // image saving location
     val imageRowCreated: MutableLiveData<ArticleScreenshot> by lazy {
         MutableLiveData<ArticleScreenshot>()
-    }
-
-    // After used clicked an app to share.
-    val shareSelected: MutableLiveData<SocialAppId> by lazy {
-        MutableLiveData<SocialAppId>()
     }
 
     /**
@@ -57,14 +51,11 @@ class ScreenshotViewModel(application: Application): AndroidViewModel(applicatio
 
             imageRowCreated.value = ArticleScreenshot(
                 imageUri = imageUri,
-                content = article
+                title = article.title,
+                description = article.standfirst,
             )
             progressLiveData.value = false
         }
     }
 
-    // Share the screenshot to the specified app.
-    fun shareTo(app: SocialApp) {
-        shareSelected.value = app.id
-    }
 }
