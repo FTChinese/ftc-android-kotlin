@@ -43,8 +43,7 @@ class SocialShareFragment :
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(SocialShareViewModel::class.java)
+            ViewModelProvider(this)[SocialShareViewModel::class.java]
         } ?: throw Exception("Invalid Activity")
     }
 
