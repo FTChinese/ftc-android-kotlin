@@ -1,9 +1,12 @@
 package com.ft.ftchinese.ui.share
 
 import android.net.Uri
-import com.ft.ftchinese.database.ReadArticle
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class ArticleScreenshot(
     val imageUri: Uri,
-    val content: ReadArticle,
-)
+    val title: String,
+    val description: String,
+) : Parcelable
