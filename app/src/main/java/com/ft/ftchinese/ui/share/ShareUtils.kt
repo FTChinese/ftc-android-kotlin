@@ -97,8 +97,8 @@ object ShareUtils {
         }
 
         val msg = WXMediaMessage().apply {
-            title = screenshot.content.title
-            description = screenshot.content.standfirst
+            title = screenshot.title
+            description = screenshot.description
             mediaObject = imgObj
             thumbData = bmpToByteArray(
                 Bitmap.createScaledBitmap(
