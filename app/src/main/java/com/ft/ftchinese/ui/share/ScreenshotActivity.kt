@@ -10,22 +10,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import coil.size.Size
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.article.ArticleActivity
@@ -69,7 +66,7 @@ class ScreenshotActivity : ComponentActivity() {
                     },
                     scaffoldState = rememberScaffoldState()
                 ) { innerPadding ->
-                    Screen(
+                    ScreenshotPreview(
                         screenshot = screenshot,
                         modifier = Modifier.padding(innerPadding),
                         onShareTo = { app, screenshot ->
@@ -124,7 +121,7 @@ class ScreenshotActivity : ComponentActivity() {
 }
 
 @Composable
-private fun Screen(
+fun ScreenshotPreview(
     screenshot: ScreenshotMeta?,
     modifier: Modifier = Modifier,
     onShareTo: (SocialApp, ScreenshotMeta) -> Unit,
@@ -135,29 +132,31 @@ private fun Screen(
     Column(
         modifier = modifier.fillMaxSize()
     ) {
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .weight(1.0f)
-        ) {
-            if (screenshot == null) {
-                Text(text = "No screenshot found!")
-            }
 
-            AsyncImage(
-                model = ImageRequest
-                    .Builder(context)
-                    .data(screenshot?.imageUri)
-                    .memoryCachePolicy(CachePolicy.DISABLED)
-                    .diskCachePolicy(CachePolicy.DISABLED)
-                    .build(),
-                contentDescription = "",
-                contentScale = ContentScale.FillWidth,
-                modifier = Modifier
-                    .background(OColor.black)
-                    .fillMaxSize()
-            )
-        }
+        // Compose UI image does not support auto height.
+        // You must specify an exact height otherwise the image won't be drawn.
+        // It behaves very differently to xml-based image:
+        // <!--  Must use the adjustViewBounds to set it to full width  -->
+        //            <androidx.appcompat.widget.AppCompatImageView
+        //                android:id="@+id/screenshot_image"
+        //                android:layout_width="match_parent"
+        //                android:layout_height="wrap_content"
+        //                android:adjustViewBounds="true"/>
+        // The XML support full with width and scrollable auto height.
+        // https://issuetracker.google.com/issues/186012457
+        AsyncImage(
+            model = ImageRequest
+                .Builder(context)
+                .data(screenshot?.imageUri)
+                .memoryCachePolicy(CachePolicy.DISABLED)
+                .diskCachePolicy(CachePolicy.DISABLED)
+                .build(),
+            contentDescription = "",
+            modifier = Modifier
+                .background(OColor.black)
+                .weight(1.0f)
+                .fillMaxSize()
+        )
 
         Divider()
 
@@ -189,7 +188,7 @@ private fun Screen(
 @Preview(showBackground = true)
 @Composable
 fun PreviewScreenshot() {
-    Screen(
+    ScreenshotPreview(
 //        screenshot = ScreenshotMeta(
 //            imageUri = Uri.parse("content://media/external_primary/images/media/1921"),
 //            title = "Test",

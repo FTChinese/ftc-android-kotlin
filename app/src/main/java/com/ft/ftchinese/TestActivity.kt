@@ -5,11 +5,11 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,16 +21,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import coil.compose.AsyncImage
-import coil.request.CachePolicy
-import coil.request.ImageRequest
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
@@ -53,7 +49,8 @@ import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.ui.theme.OColor
+import com.ft.ftchinese.ui.share.ScreenshotMeta
+import com.ft.ftchinese.ui.share.ScreenshotPreview
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.firebase.messaging.FirebaseMessaging
@@ -97,50 +94,15 @@ class TestActivity : ScopedAppActivity() {
                         )
                     }
                 ) { innerPadding ->
-                    LazyColumn(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                    ) {
-
-                        item { PaywallButton() }
-
-                        item { WxMiniButton() }
-
-                        item { PostPurchaseButton() }
-
-                        item { FullScreenDialog() }
-
-                        item { ShowSignInUp() }
-                        item { SignInFragment() }
-                        item { SignUpFragment() }
-
-                        item { MobileLinkEmail() }
-
-                        item { PostPurchaseButton() }
-
-                        item { FreeUser() }
-                        item { WxOnlyFreeUser() }
-                        item { VIPUser() }
-
-                        item { StandardUser() }
-                        item { PremiumUser() }
-
-                        item { StripeStandardUser() }
-                        item { StripeStandardMonth() }
-                        item { StripeAutoRenewOff() }
-                        item { StripeAutoRenewOffWithAddOn() }
-                        item { StripePremium() }
-
-                        item { IAPStandard() }
-                        item { IAPPremium() }
-                        item { IAPAddOn() }
-                        item { IAPAutoRenewOff() }
-                        item { IAPExpiredWithAddOn() }
-
-                        item {
-                            CoilExample()
-                        }
-                    }
+                    ScreenshotPreview(
+                        screenshot = ScreenshotMeta(
+                            imageUri = Uri.parse("content://media/external_primary/images/media/1942"),
+                            title = "Test",
+                            description = "",
+                        ),
+                        modifier = Modifier.padding(innerPadding),
+                        onShareTo = { _, _, -> }
+                    )
                 }
             }
         }
@@ -153,7 +115,46 @@ class TestActivity : ScopedAppActivity() {
         }
     }
 
+    @Composable
+    fun ItemList() {
+        LazyColumn {
 
+            item { PaywallButton() }
+
+            item { WxMiniButton() }
+
+            item { PostPurchaseButton() }
+
+            item { FullScreenDialog() }
+
+            item { ShowSignInUp() }
+            item { SignInFragment() }
+            item { SignUpFragment() }
+
+            item { MobileLinkEmail() }
+
+            item { PostPurchaseButton() }
+
+            item { FreeUser() }
+            item { WxOnlyFreeUser() }
+            item { VIPUser() }
+
+            item { StandardUser() }
+            item { PremiumUser() }
+
+            item { StripeStandardUser() }
+            item { StripeStandardMonth() }
+            item { StripeAutoRenewOff() }
+            item { StripeAutoRenewOffWithAddOn() }
+            item { StripePremium() }
+
+            item { IAPStandard() }
+            item { IAPPremium() }
+            item { IAPAddOn() }
+            item { IAPAutoRenewOff() }
+            item { IAPExpiredWithAddOn() }
+        }
+    }
 
     @Composable
     fun PaywallButton() {
@@ -738,22 +739,6 @@ class TestActivity : ScopedAppActivity() {
             context.startActivity(Intent(context, TestActivity::class.java))
         }
     }
-}
-
-@Composable
-private fun CoilExample() {
-    AsyncImage(
-        model = ImageRequest
-            .Builder(LocalContext.current)
-            .data("https://www.bing.com/th?id=OHR.GiffordPinchot_ROW4523187616_1920x1080.jpg&rf=LaDigue_1920x1080.jpg")
-            .memoryCachePolicy(CachePolicy.DISABLED)
-            .diskCachePolicy(CachePolicy.DISABLED)
-            .build(),
-        contentDescription = "",
-        modifier = Modifier
-            .background(OColor.black)
-            .fillMaxWidth()
-    )
 }
 
 @Composable
