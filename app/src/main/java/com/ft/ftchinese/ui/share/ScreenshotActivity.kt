@@ -6,14 +6,21 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.AsyncImage
@@ -22,10 +29,13 @@ import coil.request.ImageRequest
 import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.components.CloseBar
+import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.theme.OTheme
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
+
+private const val TAG = "ScreenshotActivity"
 
 class ScreenshotActivity : ComponentActivity() {
 
@@ -37,6 +47,8 @@ class ScreenshotActivity : ComponentActivity() {
         val screenshot = intent
             .getParcelableExtra<ScreenshotMeta>(EXTRA_SCREENSHOT)
 
+        Log.i(TAG, "Display screenshot $screenshot")
+
         wxApi = WXAPIFactory.createWXAPI(
             this,
             BuildConfig.WX_SUBS_APPID,
@@ -44,19 +56,31 @@ class ScreenshotActivity : ComponentActivity() {
         )
 
         setContent {
+
             OTheme {
-                Screen(
-                    screenshot = screenshot,
-                    onShareTo = { app, screenshot ->
-                        share(
-                            appId = app.id,
-                            screenshot = screenshot
-                        )
+
+                Scaffold(
+                    topBar = {
+                         Toolbar(
+                             heading = "Preview",
+                             icon = Icons.Default.Close,
+                             onBack = { finish() }
+                         )
                     },
-                    onExit = {
-                        finish()
-                    }
-                )
+                    scaffoldState = rememberScaffoldState()
+                ) { innerPadding ->
+                    Screen(
+                        screenshot = screenshot,
+                        modifier = Modifier.padding(innerPadding),
+                        onShareTo = { app, screenshot ->
+                            share(
+                                appId = app.id,
+                                screenshot = screenshot
+                            )
+                        },
+                    )
+                }
+
             }
         }
     }
@@ -102,25 +126,24 @@ class ScreenshotActivity : ComponentActivity() {
 @Composable
 private fun Screen(
     screenshot: ScreenshotMeta?,
+    modifier: Modifier = Modifier,
     onShareTo: (SocialApp, ScreenshotMeta) -> Unit,
-    onExit: () -> Unit,
 ) {
 
     val context = LocalContext.current
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
-        CloseBar(
-            onClose = onExit
-        )
-
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
-                .fillMaxWidth()
                 .weight(1.0f)
         ) {
+            if (screenshot == null) {
+                Text(text = "No screenshot found!")
+            }
+
             AsyncImage(
                 model = ImageRequest
                     .Builder(context)
@@ -129,8 +152,10 @@ private fun Screen(
                     .diskCachePolicy(CachePolicy.DISABLED)
                     .build(),
                 contentDescription = "",
+                contentScale = ContentScale.FillWidth,
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .background(OColor.black)
+                    .fillMaxSize()
             )
         }
 
@@ -165,10 +190,14 @@ private fun Screen(
 @Composable
 fun PreviewScreenshot() {
     Screen(
+//        screenshot = ScreenshotMeta(
+//            imageUri = Uri.parse("content://media/external_primary/images/media/1921"),
+//            title = "Test",
+//            description = "Test"
+//        ),
         screenshot = null,
         onShareTo = { _, _, ->
 
         },
-        onExit = {}
     )
 }
