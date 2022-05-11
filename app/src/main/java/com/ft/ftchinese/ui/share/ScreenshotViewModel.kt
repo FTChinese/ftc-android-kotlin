@@ -34,7 +34,7 @@ class ScreenshotViewModel(application: Application): AndroidViewModel(applicatio
         progressLiveData.value = true
         viewModelScope.launch {
             val imageUri = withContext(Dispatchers.IO) {
-                val imageCollection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     MediaStore.Images.Media.getContentUri(
                         MediaStore.VOLUME_EXTERNAL_PRIMARY
                     )
@@ -45,7 +45,7 @@ class ScreenshotViewModel(application: Application): AndroidViewModel(applicatio
                 getApplication<Application>()
                     .contentResolver
                     .insert(
-                        imageCollection,
+                        uri,
                         ShareUtils.screenshotDetails(article)
                     )
             } ?: return@launch
