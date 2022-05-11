@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,20 +21,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.ft.ftchinese.model.enums.ArticleType
+import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.ft.ftchinese.model.content.Teaser
 import com.ft.ftchinese.model.enums.*
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.Order
 import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.reader.Account
-import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.service.VerifySubsWorker
@@ -50,7 +53,7 @@ import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.ui.theme.Dimens
+import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.firebase.messaging.FirebaseMessaging
@@ -93,9 +96,10 @@ class TestActivity : ScopedAppActivity() {
                             }
                         )
                     }
-                ) {
+                ) { innerPadding ->
                     LazyColumn(
-                        modifier = Modifier.padding(Dimens.dp16)
+                        modifier = Modifier
+                            .padding(innerPadding)
                     ) {
 
                         item { PaywallButton() }
@@ -132,6 +136,10 @@ class TestActivity : ScopedAppActivity() {
                         item { IAPAddOn() }
                         item { IAPAutoRenewOff() }
                         item { IAPExpiredWithAddOn() }
+
+                        item {
+                            CoilExample()
+                        }
                     }
                 }
             }
@@ -145,14 +153,7 @@ class TestActivity : ScopedAppActivity() {
         }
     }
 
-    @Composable
-    fun ShowBottomSheet() {
-        Button(
-            onClick = { /*TODO*/ }
-        ) {
-            Text(text = "Show Bottom Sheet")
-        }
-    }
+
 
     @Composable
     fun PaywallButton() {
@@ -729,162 +730,6 @@ class TestActivity : ScopedAppActivity() {
         }
     }
 
-    class AccountBuilder {
-
-        private val ftcId = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a"
-        private val unionId = "XiBumZN8QoFl4gO_gQS0ieqgjRU2"
-        private val stripeCusId = "cus_Fo3kC8njfCdo"
-        private val stripeSubId = "sub_65gBB0LBU3uD"
-        private val iapTxId = "1000000799792245"
-        private val licenceId = "lic_x0DaRxLHHuLG"
-        private val mobile = "12345678901"
-
-        private var accountKind: LoginMethod = LoginMethod.EMAIL
-        private var tier: Tier? = Tier.STANDARD
-        private var cycle = Cycle.YEAR
-        private var payMethod = PayMethod.ALIPAY
-        private var expired = false
-        private var autoRenewal = false
-        private var stdAddOn: Long = 0
-        private var prmAddOn: Long = 0
-        private var isVip = false
-
-
-        fun withAccountKind(k: LoginMethod): AccountBuilder {
-            accountKind = k
-            return this
-        }
-
-        fun withTier(t: Tier?): AccountBuilder {
-            tier = t
-            return this
-        }
-
-        fun withCycle(c: Cycle): AccountBuilder {
-            cycle = c
-            return this
-        }
-
-        fun withPayMethod(p: PayMethod): AccountBuilder {
-            payMethod = p
-            return this
-        }
-
-        fun withExpired(yes: Boolean): AccountBuilder {
-            expired = yes
-            return this
-        }
-
-        fun withAutoRenewal(on: Boolean): AccountBuilder {
-            autoRenewal = on
-            return this
-        }
-
-        fun withStdAddOn(days: Long): AccountBuilder {
-            stdAddOn = days
-            return this
-        }
-
-        fun withPrmAddOn(days: Long): AccountBuilder {
-            prmAddOn = days
-            return this
-        }
-
-        fun withVip(yes: Boolean): AccountBuilder {
-            isVip = yes
-            return this
-        }
-
-        private fun buildMembership(): Membership {
-            if (isVip) {
-                return Membership(
-                    vip = true
-                )
-            }
-
-            if (tier == null) {
-                return Membership()
-            }
-
-            return Membership(
-                tier = tier,
-                cycle = cycle,
-                expireDate = if (expired) {
-                    LocalDate.now().minusDays(1)
-                } else {
-                    LocalDate.now().plusDays(1)
-                },
-                payMethod = payMethod,
-                stripeSubsId = if (payMethod == PayMethod.STRIPE) {
-                    stripeSubId
-                } else {
-                    null
-                },
-                autoRenew = autoRenewal,
-                status = if (payMethod == PayMethod.STRIPE) {
-                    if (autoRenewal) {
-                        StripeSubStatus.Active
-                    } else {
-                        if (expired) {
-                            StripeSubStatus.Canceled
-                        } else {
-                            StripeSubStatus.Active
-                        }
-                    }
-                } else {
-                    null
-                },
-                appleSubsId = if (payMethod == PayMethod.ALIPAY) {
-                    iapTxId
-                } else {
-                    null
-                },
-                b2bLicenceId = if (payMethod == PayMethod.B2B) {
-                    licenceId
-                } else {
-                    null
-                },
-                standardAddOn = stdAddOn,
-                premiumAddOn = prmAddOn,
-                vip = isVip,
-            )
-        }
-
-        fun build(): Account {
-            return Account(
-                id = when (accountKind) {
-                    LoginMethod.EMAIL -> ftcId
-                    LoginMethod.WECHAT -> ""
-                    LoginMethod.MOBILE -> ftcId
-                },
-                unionId = when (accountKind) {
-                    LoginMethod.EMAIL -> ""
-                    LoginMethod.WECHAT -> unionId
-                    LoginMethod.MOBILE -> ""
-                },
-                userName = "$payMethod $tier",
-                email = "$tier@example.org",
-                mobile = if (accountKind == LoginMethod.MOBILE) {
-                    mobile
-                } else {
-                    null
-                },
-                isVerified = false,
-                avatarUrl = null,
-                campaignCode = null,
-                loginMethod = accountKind,
-                wechat = if (accountKind == LoginMethod.WECHAT) {
-                    Wechat(
-                        nickname = "Wechat User",
-                        avatarUrl = "https://randomuser.me/api/portraits/thumb/women/7.jpg"
-                    )
-                } else {
-                    Wechat()
-                },
-                membership = buildMembership()
-            )
-        }
-    }
 
     companion object {
 
@@ -892,10 +737,187 @@ class TestActivity : ScopedAppActivity() {
         fun start(context: Context) {
             context.startActivity(Intent(context, TestActivity::class.java))
         }
+    }
+}
 
-        @JvmStatic
-        fun newIntent(context: Context): Intent {
-            return Intent(context, TestActivity::class.java)
+@Composable
+private fun CoilExample() {
+    AsyncImage(
+        model = ImageRequest
+            .Builder(LocalContext.current)
+            .data("https://www.bing.com/th?id=OHR.GiffordPinchot_ROW4523187616_1920x1080.jpg&rf=LaDigue_1920x1080.jpg")
+            .memoryCachePolicy(CachePolicy.DISABLED)
+            .diskCachePolicy(CachePolicy.DISABLED)
+            .build(),
+        contentDescription = "",
+        modifier = Modifier
+            .background(OColor.black)
+            .fillMaxWidth()
+    )
+}
+
+@Composable
+private fun ShowBottomSheet() {
+    Button(
+        onClick = { /*TODO*/ }
+    ) {
+        Text(text = "Show Bottom Sheet")
+    }
+}
+
+private class AccountBuilder {
+
+    private val ftcId = "0c726d53-2ec3-41e2-aa8c-5c4b0e23876a"
+    private val unionId = "XiBumZN8QoFl4gO_gQS0ieqgjRU2"
+    private val stripeCusId = "cus_Fo3kC8njfCdo"
+    private val stripeSubId = "sub_65gBB0LBU3uD"
+    private val iapTxId = "1000000799792245"
+    private val licenceId = "lic_x0DaRxLHHuLG"
+    private val mobile = "12345678901"
+
+    private var accountKind: LoginMethod = LoginMethod.EMAIL
+    private var tier: Tier? = Tier.STANDARD
+    private var cycle = Cycle.YEAR
+    private var payMethod = PayMethod.ALIPAY
+    private var expired = false
+    private var autoRenewal = false
+    private var stdAddOn: Long = 0
+    private var prmAddOn: Long = 0
+    private var isVip = false
+
+
+    fun withAccountKind(k: LoginMethod): AccountBuilder {
+        accountKind = k
+        return this
+    }
+
+    fun withTier(t: Tier?): AccountBuilder {
+        tier = t
+        return this
+    }
+
+    fun withCycle(c: Cycle): AccountBuilder {
+        cycle = c
+        return this
+    }
+
+    fun withPayMethod(p: PayMethod): AccountBuilder {
+        payMethod = p
+        return this
+    }
+
+    fun withExpired(yes: Boolean): AccountBuilder {
+        expired = yes
+        return this
+    }
+
+    fun withAutoRenewal(on: Boolean): AccountBuilder {
+        autoRenewal = on
+        return this
+    }
+
+    fun withStdAddOn(days: Long): AccountBuilder {
+        stdAddOn = days
+        return this
+    }
+
+    fun withPrmAddOn(days: Long): AccountBuilder {
+        prmAddOn = days
+        return this
+    }
+
+    fun withVip(yes: Boolean): AccountBuilder {
+        isVip = yes
+        return this
+    }
+
+    private fun buildMembership(): Membership {
+        if (isVip) {
+            return Membership(
+                vip = true
+            )
         }
+
+        if (tier == null) {
+            return Membership()
+        }
+
+        return Membership(
+            tier = tier,
+            cycle = cycle,
+            expireDate = if (expired) {
+                LocalDate.now().minusDays(1)
+            } else {
+                LocalDate.now().plusDays(1)
+            },
+            payMethod = payMethod,
+            stripeSubsId = if (payMethod == PayMethod.STRIPE) {
+                stripeSubId
+            } else {
+                null
+            },
+            autoRenew = autoRenewal,
+            status = if (payMethod == PayMethod.STRIPE) {
+                if (autoRenewal) {
+                    StripeSubStatus.Active
+                } else {
+                    if (expired) {
+                        StripeSubStatus.Canceled
+                    } else {
+                        StripeSubStatus.Active
+                    }
+                }
+            } else {
+                null
+            },
+            appleSubsId = if (payMethod == PayMethod.ALIPAY) {
+                iapTxId
+            } else {
+                null
+            },
+            b2bLicenceId = if (payMethod == PayMethod.B2B) {
+                licenceId
+            } else {
+                null
+            },
+            standardAddOn = stdAddOn,
+            premiumAddOn = prmAddOn,
+            vip = isVip,
+        )
+    }
+
+    fun build(): Account {
+        return Account(
+            id = when (accountKind) {
+                LoginMethod.EMAIL -> ftcId
+                LoginMethod.WECHAT -> ""
+                LoginMethod.MOBILE -> ftcId
+            },
+            unionId = when (accountKind) {
+                LoginMethod.EMAIL -> ""
+                LoginMethod.WECHAT -> unionId
+                LoginMethod.MOBILE -> ""
+            },
+            userName = "$payMethod $tier",
+            email = "$tier@example.org",
+            mobile = if (accountKind == LoginMethod.MOBILE) {
+                mobile
+            } else {
+                null
+            },
+            isVerified = false,
+            avatarUrl = null,
+            campaignCode = null,
+            loginMethod = accountKind,
+            wechat = if (accountKind == LoginMethod.WECHAT) {
+                Wechat(
+                    nickname = "Wechat User",
+                    avatarUrl = "https://randomuser.me/api/portraits/thumb/women/7.jpg"
+                )
+            } else {
+                Wechat()
+            },
+            membership = buildMembership()
+        )
     }
 }
