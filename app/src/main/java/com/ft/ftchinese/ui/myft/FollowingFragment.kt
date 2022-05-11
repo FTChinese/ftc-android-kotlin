@@ -28,7 +28,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.model.content.ChannelSource
 import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.theme.Dimens
-import com.ft.ftchinese.ui.theme.OTheme
 
 class FollowingFragment : Fragment() {
 
@@ -42,9 +41,7 @@ class FollowingFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return ComposeView(requireContext()).apply {
             setContent {
-                OTheme {
-                    FollowScreen(followViewModel = followViewModel)
-                }
+                FollowScreen(followViewModel = followViewModel)
             }
         }
     }
