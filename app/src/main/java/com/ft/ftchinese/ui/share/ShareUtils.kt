@@ -11,6 +11,7 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.database.ReadArticle
 import com.ft.ftchinese.model.request.WxMiniParams
+import com.ft.ftchinese.ui.util.ImageUtil
 import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX
 import com.tencent.mm.opensdk.modelmsg.WXImageObject
@@ -20,7 +21,6 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.format.DateTimeFormatter
-import java.io.ByteArrayOutputStream
 import java.io.InputStream
 
 object ShareUtils {
@@ -38,26 +38,18 @@ object ShareUtils {
      */
     fun screenshotDetails(teaser: ReadArticle): ContentValues {
         return ContentValues().apply {
-            put(MediaStore.Images.Media.DISPLAY_NAME, generateName())
+            put(MediaStore.Images.Media.DISPLAY_NAME, screenshotName())
             put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
             put(MediaStore.Images.Media.TITLE, teaser.title)
         }
     }
 
-    private fun generateName(): String {
+    private fun screenshotName(): String {
         return "FTC_Screenshot_" + LocalDateTime
             .now()
             .format(
                 DateTimeFormatter.ofPattern("yyyyMMdd_kkmmss")
             )
-    }
-
-    private fun bmpToByteArray(bmp: Bitmap, format: Bitmap.CompressFormat): ByteArray {
-        return ByteArrayOutputStream().use {  stream ->
-            bmp.compress(format, 100, stream)
-            bmp.recycle()
-            stream.toByteArray()
-        }
     }
 
     fun wxShareArticleReq(
@@ -72,7 +64,7 @@ object ShareUtils {
         val mediaMsg = WXMediaMessage(webpageObj).apply {
             title = article.title
             description = article.standfirst
-            thumbData = bmpToByteArray(
+            thumbData = ImageUtil.bitmapToByteArray(
                 BitmapFactory.decodeResource(res, R.drawable.ic_splash),
                 Bitmap.CompressFormat.PNG
             )
@@ -100,7 +92,7 @@ object ShareUtils {
             title = screenshot.title
             description = screenshot.description
             mediaObject = imgObj
-            thumbData = bmpToByteArray(
+            thumbData = ImageUtil.bitmapToByteArray(
                 Bitmap.createScaledBitmap(
                     bmp,
                     150,

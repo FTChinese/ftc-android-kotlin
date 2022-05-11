@@ -1,13 +1,12 @@
 package com.ft.ftchinese.ui.share
 
 import android.app.Application
-import android.os.Build
-import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.database.ReadArticle
+import com.ft.ftchinese.ui.util.ImageUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,18 +33,12 @@ class ScreenshotViewModel(application: Application): AndroidViewModel(applicatio
         progressLiveData.value = true
         viewModelScope.launch {
             val imageUri = withContext(Dispatchers.IO) {
-                val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    MediaStore.Images.Media.getContentUri(
-                        MediaStore.VOLUME_EXTERNAL_PRIMARY
-                    )
-                } else {
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-                }
+                val filePath = ImageUtil.getFilePath()
 
                 getApplication<Application>()
                     .contentResolver
                     .insert(
-                        uri,
+                        filePath,
                         ShareUtils.screenshotDetails(article)
                     )
             } ?: return@launch

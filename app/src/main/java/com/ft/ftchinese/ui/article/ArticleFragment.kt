@@ -25,6 +25,7 @@ import com.ft.ftchinese.ui.channel.ChannelActivity
 import com.ft.ftchinese.ui.share.ScreenshotMeta
 import com.ft.ftchinese.ui.share.ScreenshotActivity
 import com.ft.ftchinese.ui.share.ScreenshotViewModel
+import com.ft.ftchinese.ui.util.ImageUtil
 import com.ft.ftchinese.ui.webpage.*
 
 private const val TAG = "ArticleFragment"
@@ -145,18 +146,11 @@ class ArticleFragment : ScopedFragment() {
 
         Log.i(TAG, "Save image to $saveTo")
 
-        return requireContext()
-            .contentResolver
-            .openOutputStream(saveTo, "w")
-            ?.use {
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, it)
-
-                it.flush()
-
-                bitmap.recycle()
-                true
-            }
-            ?: false
+        return ImageUtil.saveScreenshot(
+            contentResolver = requireContext().contentResolver,
+            bitmap = bitmap,
+            to = saveTo
+        )
     }
 
     companion object {

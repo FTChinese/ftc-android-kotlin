@@ -3,11 +3,8 @@ package com.ft.ftchinese.ui.share
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -39,6 +36,7 @@ import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.util.ImageUtil
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
@@ -103,6 +101,7 @@ class ScreenshotActivity : ComponentActivity() {
             Intent.FLAG_GRANT_READ_URI_PERMISSION
         )
 
+        // TODO: try ContentResolver#loadThumbnail()?
         val req = contentResolver
             .openInputStream(screenshot.imageUri)
             ?.use {  stream ->
@@ -130,21 +129,6 @@ class ScreenshotActivity : ComponentActivity() {
     }
 }
 
-// See https://ngengesenior.medium.com/pick-image-from-gallery-in-jetpack-compose-5fa0d0a8ddaf
-// https://developer.android.com/reference/android/provider/MediaStore.Images.Media
-// https://developer.android.com/reference/android/graphics/ImageDecoder#createSource(android.content.ContentResolver,%20android.net.Uri)
-fun loadImageAsBitmap(
-    context: Context,
-    uri: Uri
-): Bitmap {
-    return if (Build.VERSION.SDK_INT < 28) {
-        MediaStore.Images.Media.getBitmap(context.contentResolver, uri)
-    } else {
-        val source = ImageDecoder.createSource(context.contentResolver, uri)
-        ImageDecoder.decodeBitmap(source)
-    }
-}
-
 @Composable
 fun ScreenshotPreview(
     screenshot: ScreenshotMeta?,
@@ -159,7 +143,9 @@ fun ScreenshotPreview(
 
     LaunchedEffect(key1 = Unit) {
         screenshot?.let {
-            bitmap.value = loadImageAsBitmap(context, it.imageUri)
+            bitmap.value = ImageUtil.loadAsBitmap(
+                context.contentResolver,
+                it.imageUri)
         }
     }
 
