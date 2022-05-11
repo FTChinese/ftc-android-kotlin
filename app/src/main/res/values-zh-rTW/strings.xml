@@ -16,13 +16,6 @@
     <!--  This is optional  -->
     <string name="news_notification_channel_description">新聞動態</string>
 
-    <string name="exo_download_notification_channel_name">Downloads</string>
-    <string name="exo_download_notification_channel_description">Download mp3</string>
-
-    <string name="exo_playing_channel_id">exo_playing_channel</string>
-    <string name="exo_playing_channel_name">正在播放</string>
-    <string name="exo_playing_channel_description">播放音頻</string>
-
     <string name="nav_news">最新</string>
     <string name="nav_english">每日英語</string>
     <string name="nav_ftacademy">FT商學院</string>
@@ -34,17 +27,11 @@
     <string name="titlebar_bilingual">對照</string>
     <string name="title_search">搜索 %1$s</string>
     <string name="title_about_us">關於我們</string>
-    <string name="title_error">錯誤</string>
-    <string name="menu_share">分享</string>
     <string name="menu_audio">朗讀</string>
     <string name="share_to">分享到</string>
     <string name="share_done">分享成功</string>
     <string name="alert_starred">已收藏</string>
     <string name="alert_unstarred">收藏已取消</string>
-    <string name="alert_downloading_audio">開始下載音頻</string>
-
-    <string name="alert_audio_downloaded">音頻下載完成</string>
-    <string name="download_start_error">無法啓動下載</string>
     <string name="myft_reading_history">閱讀歷史</string>
     <string name="myft_starred_articles">收藏文章</string>
     <string name="myft_following">關注</string>
@@ -406,51 +393,13 @@
     <string name="wait_download_finish">开始後臺下載，請稍候。下载完成後会提示您安装，或者點擊通知栏的下载完成通知开始安装。您也可以下载完成後手动安装，文件位于手机存儲的下载文件夹下。</string>
     <string name="action_open_download">打開下載文件夾</string>
     <string name="summary_articles_read">已閱讀 %1$d 篇文章</string>
-    <string name="pref_release_log">更新歷史</string>
-    <string name="summary_release_log">查看本版功能變動</string>
 
-
-    <string name="version_name">版本</string>
-
-    <string name="released_at">發佈時間</string>
-    <string name="alert_audio_deleted">已删除下載的音頻</string>
     <string name="forgot_password_code_not_found">您似乎使用了無效的驗證码，请重新獲取重設密碼信件</string>
 
     <string-array name="stripe_footnotes">
         <item>* FT中文網的Stripe支付不接受人民幣計價的銀行卡，建議中國大陸以外地區用戶使用</item>
         <item>* 微信登入的用户需要綁定FT中文網帳號後才可以使用Stripe訂閱</item>
         <item>* 通过支付寶或者微信支付購買的會員、且會員尚未到期，無法使用Stripe訂閱</item>
-    </string-array>
-    <string-array name="profile_gender_entries">
-        <item>男</item>
-        <item>女</item>
-    </string-array>
-    <string-array name="profile_gender_values">
-        <item>M</item>
-        <item>F</item>
-    </string-array>
-
-    <string-array name="settings_font_entries">
-        <item>最小</item>
-        <item>較小</item>
-        <item>默認</item>
-        <item>較大</item>
-        <item>最大</item>
-    </string-array>
-    <string-array name="settings_font_values">
-        <item>xs</item>
-        <item>s</item>
-        <item>m</item>
-        <item>l</item>
-        <item>xl</item>
-    </string-array>
-    <string-array name="settings_language_entries">
-        <item>簡體</item>
-        <item>繁體</item>
-    </string-array>
-    <string-array name="settings_language_values">
-        <item>sc</item>
-        <item>tc</item>
     </string-array>
     <string name="formatter_month_date">%1$d月%2$d日</string>
     <string name="formatter_date">%1$d日</string>
