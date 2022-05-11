@@ -25,8 +25,8 @@ import java.io.InputStream
 
 object ShareUtils {
 
-    const val keyWxMiniId = "wxminiprogramid"
-    const val keyWxMiniPath = "wxminiprogrampath"
+    private const val keyWxMiniId = "wxminiprogramid"
+    private const val keyWxMiniPath = "wxminiprogrampath"
 
     fun createWxApi(context: Context): IWXAPI {
         return WXAPIFactory.createWXAPI(context, BuildConfig.WX_SUBS_APPID, false)
@@ -52,7 +52,7 @@ object ShareUtils {
             )
     }
 
-    fun bmpToByteArray(bmp: Bitmap, format: Bitmap.CompressFormat): ByteArray {
+    private fun bmpToByteArray(bmp: Bitmap, format: Bitmap.CompressFormat): ByteArray {
         return ByteArrayOutputStream().use {  stream ->
             bmp.compress(format, 100, stream)
             bmp.recycle()
