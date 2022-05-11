@@ -44,13 +44,12 @@ fun FtcPayScreen(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.SpaceBetween,
+                .fillMaxSize(),
         ) {
             Column(
                 modifier = Modifier
                     .padding(all = Dimens.dp8)
+                    .weight(1.0f)
             ) {
 
                 CheckoutHeader(tier = cartItem.price.tier)
