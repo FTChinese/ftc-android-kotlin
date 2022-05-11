@@ -6,14 +6,15 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
@@ -22,7 +23,6 @@ import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.article.ArticleActivity
 import com.ft.ftchinese.ui.components.CloseBar
-import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
@@ -136,13 +136,8 @@ private fun Screen(
 
         Divider()
 
-        Spacer(modifier = Modifier.height(Dimens.dp16))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround,
-        ) {
-            arrayOf(
+        SocialShareList(
+            apps = listOf(
                 SocialApp(
                     name = "好友",
                     icon = R.drawable.wechat,
@@ -153,22 +148,16 @@ private fun Screen(
                     icon = R.drawable.moments,
                     id = SocialAppId.WECHAT_MOMENTS
                 ),
-            ).forEach { app ->
-                ShareIcon(
-                    image = painterResource(id = app.icon),
-                    text = app.name as String
-                ) {
-                    screenshot?.let {
-                        onShareTo(
-                            app,
-                            it,
-                        )
-                    }
+            ),
+            onShareTo = { app ->
+                screenshot?.let {
+                    onShareTo(
+                        app,
+                        it,
+                    )
                 }
             }
-        }
-        
-        Spacer(modifier = Modifier.height(Dimens.dp16))
+        )
     }
 }
 
