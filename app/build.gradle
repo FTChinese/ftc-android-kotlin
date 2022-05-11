@@ -225,7 +225,6 @@ dependencies {
     implementation "androidx.browser:browser:1.4.0"
     // The Support Library is a static library that you can add to your Android application in order to use APIs that are either not available for older platform versions or utility APIs that aren't a part of the framework APIs. Compatible on devices running API 14 or later.
     implementation "androidx.legacy:legacy-support-v4:$support_version"
-    implementation "androidx.recyclerview:recyclerview:1.2.1"
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "com.makeramen:roundedimageview:2.3.0"
 
