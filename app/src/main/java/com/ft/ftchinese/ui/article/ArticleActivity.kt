@@ -61,7 +61,6 @@ class ArticleActivity : ScopedAppActivity(),
     private lateinit var binding: ActivityArticleBinding
 
     private lateinit var articleViewModel: ArticleViewModel
-    private lateinit var shareViewModel: SocialShareViewModel
     private lateinit var wvViewModel: WVViewModel
     private lateinit var screenshotViewModel: ScreenshotViewModel
 
@@ -105,8 +104,6 @@ class ArticleActivity : ScopedAppActivity(),
         articleViewModel = ViewModelProvider(this)[ArticleViewModel::class.java]
 
         wvViewModel = ViewModelProvider(this)[WVViewModel::class.java]
-
-        shareViewModel = ViewModelProvider(this)[SocialShareViewModel::class.java]
 
         screenshotViewModel = ViewModelProvider(this)[ScreenshotViewModel::class.java]
 
@@ -201,9 +198,6 @@ class ArticleActivity : ScopedAppActivity(),
         articleViewModel.articleReadLiveData.observe(this) {
             statsTracker.storyViewed(it)
         }
-
-        // Pass the share app selected share component to article view model.
-        shareViewModel.appSelected.observe(this, this::onShareIconClicked)
     }
 
     /**
@@ -384,8 +378,9 @@ class ArticleActivity : ScopedAppActivity(),
     fun onClickShare(view: View) {
         Log.i(TAG, "Clicking share button")
 
-        SocialShareFragment()
-            .show(supportFragmentManager, "SocialShareFragment")
+        SocialShareFragment(
+            onClickIcon = this::onShareIconClicked
+        ).show(supportFragmentManager, "SocialShareFragment")
     }
 
     override fun onRefresh() {

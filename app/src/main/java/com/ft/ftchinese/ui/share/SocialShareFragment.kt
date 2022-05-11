@@ -4,25 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.painterResource
-import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 /**
  * Popup for share menu.
  */
-class SocialShareFragment :
-        BottomSheetDialogFragment() {
-
-    private lateinit var viewModel: SocialShareViewModel
+class SocialShareFragment(
+    private val onClickIcon: (SocialApp) -> Unit
+) : BottomSheetDialogFragment() {
 
     private val socialApps = listOf(
         SocialApp(
@@ -58,16 +49,12 @@ class SocialShareFragment :
         savedInstanceState: Bundle?
     ): View {
 
-        viewModel = activity?.run {
-            ViewModelProvider(this)[SocialShareViewModel::class.java]
-        } ?: throw Exception("Invalid Activity")
-
         return ComposeView(requireContext()).apply {
             setContent {
                 SocialShareList(
                     apps = socialApps,
                     onShareTo = { app ->
-                        viewModel.select(app)
+                        onClickIcon(app)
                         dismiss()
                     }
                 )
