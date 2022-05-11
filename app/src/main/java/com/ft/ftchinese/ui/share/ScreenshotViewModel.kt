@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-private const val TAG = "ScreenShot"
+private const val TAG = "ScreenShotViewModel"
 
 class ScreenshotViewModel(application: Application): AndroidViewModel(application) {
 
@@ -44,7 +44,10 @@ class ScreenshotViewModel(application: Application): AndroidViewModel(applicatio
 
                 getApplication<Application>()
                     .contentResolver
-                    .insert(imageCollection, ShareUtils.screenshotDetails(article))
+                    .insert(
+                        imageCollection,
+                        ShareUtils.screenshotDetails(article)
+                    )
             } ?: return@launch
 
             Log.i(TAG, "Screenshot will be saved to $imageUri")
