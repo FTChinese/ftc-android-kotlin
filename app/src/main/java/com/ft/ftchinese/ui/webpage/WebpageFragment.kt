@@ -9,7 +9,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.FragmentWebpageBinding
 import com.ft.ftchinese.repository.Config
 import com.ft.ftchinese.store.AccountCache
-import com.ft.ftchinese.ui.share.ArticleScreenshot
+import com.ft.ftchinese.ui.share.ScreenshotMeta
 import com.ft.ftchinese.ui.share.ScreenshotActivity
 
 class WebpageFragment : WVBaseFragment() {
@@ -47,7 +47,7 @@ class WebpageFragment : WVBaseFragment() {
             )
         }
 
-        screenshotViewModel.imageRowCreated.observe(viewLifecycleOwner)  { screenshot: ArticleScreenshot ->
+        screenshotViewModel.imageRowCreated.observe(viewLifecycleOwner)  { screenshot: ScreenshotMeta ->
 
             val ok = takeScreenshot(binding.webView, screenshot.imageUri)
 

@@ -88,7 +88,7 @@ object ShareUtils {
     fun wxShareScreenshotReq(
         stream: InputStream,
         appId: SocialAppId,
-        screenshot: ArticleScreenshot
+        screenshot: ScreenshotMeta
     ): SendMessageToWX.Req {
         val bmp = BitmapFactory.decodeStream(stream)
 

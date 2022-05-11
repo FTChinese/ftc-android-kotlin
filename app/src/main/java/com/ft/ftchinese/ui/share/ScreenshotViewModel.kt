@@ -20,8 +20,8 @@ class ScreenshotViewModel(application: Application): AndroidViewModel(applicatio
 
     // After a row is created in db for the
     // image saving location
-    val imageRowCreated: MutableLiveData<ArticleScreenshot> by lazy {
-        MutableLiveData<ArticleScreenshot>()
+    val imageRowCreated: MutableLiveData<ScreenshotMeta> by lazy {
+        MutableLiveData<ScreenshotMeta>()
     }
 
     /**
@@ -49,7 +49,7 @@ class ScreenshotViewModel(application: Application): AndroidViewModel(applicatio
 
             Log.i(TAG, "Screenshot will be saved to $imageUri")
 
-            imageRowCreated.value = ArticleScreenshot(
+            imageRowCreated.value = ScreenshotMeta(
                 imageUri = imageUri,
                 title = article.title,
                 description = article.standfirst,

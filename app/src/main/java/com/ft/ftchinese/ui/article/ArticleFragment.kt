@@ -22,7 +22,7 @@ import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.Paging
 import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.channel.ChannelActivity
-import com.ft.ftchinese.ui.share.ArticleScreenshot
+import com.ft.ftchinese.ui.share.ScreenshotMeta
 import com.ft.ftchinese.ui.share.ScreenshotActivity
 import com.ft.ftchinese.ui.share.ScreenshotViewModel
 import com.ft.ftchinese.ui.webpage.*
@@ -119,7 +119,7 @@ class ArticleFragment : ScopedFragment() {
         // NOTE: To be able to draw WebView, it must be
         // wrapped into a NestedScrollView; otherwise
         // the drawing is problematic.
-        screenshotViewModel.imageRowCreated.observe(viewLifecycleOwner)  { screenshot: ArticleScreenshot ->
+        screenshotViewModel.imageRowCreated.observe(viewLifecycleOwner)  { screenshot: ScreenshotMeta ->
             val ok = takeScreenshot(binding.webView, screenshot.imageUri)
 
             if (ok) {

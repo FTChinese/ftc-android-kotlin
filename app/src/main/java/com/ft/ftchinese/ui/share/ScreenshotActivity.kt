@@ -35,7 +35,7 @@ class ScreenshotActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val screenshot = intent
-            .getParcelableExtra<ArticleScreenshot>(EXTRA_SCREENSHOT)
+            .getParcelableExtra<ScreenshotMeta>(EXTRA_SCREENSHOT)
 
         wxApi = WXAPIFactory.createWXAPI(
             this,
@@ -63,7 +63,7 @@ class ScreenshotActivity : ComponentActivity() {
 
     private fun share(
         appId: SocialAppId,
-        screenshot: ArticleScreenshot,
+        screenshot: ScreenshotMeta,
     ) {
         Log.i(ArticleActivity.TAG, "Share screenshot to $appId")
         grantUriPermission(
@@ -89,7 +89,7 @@ class ScreenshotActivity : ComponentActivity() {
         private const val EXTRA_SCREENSHOT = "extra_screenshot"
 
         @JvmStatic
-        fun start(context: Context, screenshot: ArticleScreenshot) {
+        fun start(context: Context, screenshot: ScreenshotMeta) {
             context.startActivity(
                 Intent(context, ScreenshotActivity::class.java).apply {
                     putExtra(EXTRA_SCREENSHOT, screenshot)
@@ -101,8 +101,8 @@ class ScreenshotActivity : ComponentActivity() {
 
 @Composable
 private fun Screen(
-    screenshot: ArticleScreenshot?,
-    onShareTo: (SocialApp, ArticleScreenshot) -> Unit,
+    screenshot: ScreenshotMeta?,
+    onShareTo: (SocialApp, ScreenshotMeta) -> Unit,
     onExit: () -> Unit,
 ) {
 

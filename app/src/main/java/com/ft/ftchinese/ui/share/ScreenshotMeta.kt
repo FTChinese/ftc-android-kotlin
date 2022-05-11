@@ -5,7 +5,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-data class ArticleScreenshot(
+data class ScreenshotMeta(
     val imageUri: Uri,
     val title: String,
     val description: String,
