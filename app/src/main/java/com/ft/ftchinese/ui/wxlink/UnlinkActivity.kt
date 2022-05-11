@@ -14,7 +14,7 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.ui.util.RequestCode
 import org.jetbrains.anko.toast
 
 class UnlinkActivity : ScopedAppActivity() {

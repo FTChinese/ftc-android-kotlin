@@ -17,7 +17,7 @@ import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.email.EmailExistsFragment
 import com.ft.ftchinese.ui.login.*
-import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.ui.util.RequestCode
 import org.jetbrains.anko.toast
 
 /**

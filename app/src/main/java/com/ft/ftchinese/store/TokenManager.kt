@@ -1,7 +1,7 @@
 package com.ft.ftchinese.store
 
 import android.content.Context
-import com.ft.ftchinese.util.generateNonce
+import com.ft.ftchinese.model.generateNonce
 
 private const val TOKEN_PREF_NAME = "device_token"
 private const val PREF_TOKEN = "token"

@@ -52,7 +52,7 @@ import com.ft.ftchinese.ui.search.SearchableActivity
 import com.ft.ftchinese.ui.settings.SettingsActivity
 import com.ft.ftchinese.ui.webpage.WVViewModel
 import com.ft.ftchinese.ui.webpage.WebpageActivity
-import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.ui.util.RequestCode
 import com.google.android.material.tabs.TabLayout
 import com.stripe.android.CustomerSession
 import com.tencent.mm.opensdk.openapi.IWXAPI

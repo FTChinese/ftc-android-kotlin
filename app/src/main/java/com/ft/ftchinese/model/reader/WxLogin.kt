@@ -1,7 +1,7 @@
 package com.ft.ftchinese.model.reader
 
 import com.ft.ftchinese.model.serializer.DateTimeAsStringSerializer
-import com.ft.ftchinese.util.generateNonce
+import com.ft.ftchinese.model.generateNonce
 import kotlinx.serialization.Serializable
 import org.threeten.bp.DateTimeException
 import org.threeten.bp.ZonedDateTime

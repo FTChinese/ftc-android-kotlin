@@ -1,4 +1,4 @@
-package com.ft.ftchinese.util
+package com.ft.ftchinese.ui.util
 
 object RequestCode {
     const val SIGN_IN = 1

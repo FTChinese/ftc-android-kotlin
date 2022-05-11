@@ -18,7 +18,7 @@ import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.member.MemberActivityScreen
 import com.ft.ftchinese.ui.member.MembershipViewModel
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.ui.util.RequestCode
 import kotlinx.coroutines.launch
 
 class MemberActivity : ComponentActivity() {

@@ -20,7 +20,7 @@ import com.ft.ftchinese.ui.email.EmailExistsFragment
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.ui.util.RequestCode
 import com.google.android.material.tabs.TabLayoutMediator
 import org.jetbrains.anko.toast
 

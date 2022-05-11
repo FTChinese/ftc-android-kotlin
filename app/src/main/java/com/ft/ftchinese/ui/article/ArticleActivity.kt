@@ -37,7 +37,7 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.components.ToastMessage
 import com.ft.ftchinese.ui.share.*
 import com.ft.ftchinese.ui.webpage.WVViewModel
-import com.ft.ftchinese.util.RequestCode
+import com.ft.ftchinese.ui.util.RequestCode
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
