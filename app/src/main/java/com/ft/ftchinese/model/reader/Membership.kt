@@ -192,31 +192,6 @@ data class Membership(
             )
         } else null
 
-    val expireMoment: ExpirationMoment
-        get() = ExpirationMoment(
-            unlimited = vip,
-            autoRenew = autoRenew,
-            interval = cycle,
-            year = expireDate?.year ?: 0,
-            month = expireDate?.monthValue ?: 0,
-            date = expireDate?.dayOfMonth ?: 0,
-        )
-
-    fun subsDetails(): SubsDetails {
-        return SubsDetails(
-            tier = if (vip) {
-                SubsTier.Vip
-            } else {
-                when (tier) {
-                    Tier.STANDARD -> SubsTier.Standard
-                    Tier.PREMIUM -> SubsTier.Premium
-                    else -> SubsTier.Free
-                }
-            },
-            expiration = expireMoment
-        )
-    }
-
     // In case legacy purchase has payment method null.
     val normalizedPayMethod: PayMethod?
         get() = payMethod

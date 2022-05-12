@@ -20,8 +20,6 @@ import com.ft.ftchinese.ui.components.ListItemTwoCol
 import com.ft.ftchinese.ui.components.PrimaryButton
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.WeightedColumn
-import com.ft.ftchinese.ui.formatter.FormatHelper
-import com.ft.ftchinese.ui.formatter.FormatSubs
 import com.ft.ftchinese.ui.member.SubsStatus
 import com.ft.ftchinese.ui.theme.Dimens
 
@@ -103,32 +101,16 @@ fun buildSubsDetails(
     context: Context,
     member: Membership
 ): List<Pair<String, String>> {
-    val labelSubs = context.getString(R.string.label_current_subs)
 
-    if (member.tier == null) {
-        return listOf(
-            Pair(
-                labelSubs,
-                context.getString(R.string.tier_free)
-            )
-        )
-    }
-
-    if (member.vip) {
-        return listOf(
-            Pair(
-                labelSubs,
-                context.getString(R.string.tier_vip)
-            ),
-            FormatSubs.rowExpiration(context, member.localizeExpireDate())
-        )
-    }
+    val subsStatus = SubsStatus.newInstance(
+        ctx = context,
+        m = member,
+    )
 
     return listOf(
         Pair(
-            labelSubs,
-            FormatHelper.getTier(context, member.tier)
-        ),
-        FormatSubs.rowExpiration(context, member.localizeExpireDate())
-    )
+            context.getString(R.string.label_current_subs),
+            subsStatus.productName
+        )
+    ) + subsStatus.details
 }
