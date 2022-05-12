@@ -17,9 +17,7 @@ import com.ft.ftchinese.ui.theme.OColor
 fun SubsStatusCard(
     status: SubsStatus
 ) {
-    Card(
-        modifier = Modifier,
-    ) {
+    Card {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

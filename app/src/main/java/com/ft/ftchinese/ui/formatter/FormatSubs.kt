@@ -4,8 +4,10 @@ import android.content.Context
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.reader.AutoRenewMoment
+import com.ft.ftchinese.model.reader.SubsTier
 
 object FormatSubs {
+
     fun rowExpiration(ctx: Context, date: String): Pair<String, String> {
         return Pair(
             ctx.getString(R.string.label_expiration_date),
@@ -54,6 +56,18 @@ object FormatSubs {
         return Pair(
             ctx.getString(R.string.label_auto_renew),
             ctx.getString(R.string.auto_renew_off)
+        )
+    }
+
+    fun rowSubsTier(ctx: Context, tier: SubsTier): Pair<String, String> {
+        return Pair(
+            ctx.getString(R.string.label_current_subs),
+            when (tier) {
+                SubsTier.Free -> ctx.getString(R.string.tier_free)
+                SubsTier.Vip -> ctx.getString(R.string.tier_vip)
+                SubsTier.Standard -> ctx.getString(R.string.tier_standard)
+                SubsTier.Premium -> ctx.getString(R.string.tier_premium)
+            }
         )
     }
 }

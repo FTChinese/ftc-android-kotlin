@@ -378,7 +378,7 @@
 
     <!--  Membership status  -->
     <string name="vip_no_expiration">无限期</string>
-    <string name="label_member_tier">会员类型</string>
+    <string name="label_current_subs">会员订阅</string>
     <string name="label_subs_source">订阅方式</string>
     <string name="label_auto_renew">自动续订</string>
     <string name="auto_renew_off">已关闭</string>
@@ -387,6 +387,7 @@
     <string name="tier_premium">高端会员</string>
     <string name="tier_vip">超级会员</string>
     <string name="label_expiration_date">到期时间</string>
+    <string name="vip_no_expiration">无限期</string>
     <string name="label_price">支付金额</string>
     <string name="label_ftc_account">FT中文网账号</string>
     <string name="label_wx_account">微信账号</string>

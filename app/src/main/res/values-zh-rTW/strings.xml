@@ -264,7 +264,7 @@
 
     <!--  Membership status  -->
     <string name="vip_no_expiration">無限期</string>
-    <string name="label_member_tier">會員類型</string>
+    <string name="label_current_subs">會員訂閱</string>
     <string name="tier_free">尚未成為會員</string>
     <string name="tier_standard">標準會員</string>
     <string name="tier_premium">高端會員</string>

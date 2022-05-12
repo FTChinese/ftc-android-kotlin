@@ -10,8 +10,8 @@ import com.ft.ftchinese.ui.theme.OColor
 
 @Composable
 fun ProgressLayout(
-    loading: Boolean = false,
     modifier: Modifier = Modifier,
+    loading: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     Box(
