@@ -15,6 +15,7 @@ import com.ft.ftchinese.model.fetch.formatLocalDate
 /**
  * account-to-be-merged.
  */
+@Deprecated("")
 class LinkTargetFragment : Fragment() {
 
     private var membership: Membership? = null

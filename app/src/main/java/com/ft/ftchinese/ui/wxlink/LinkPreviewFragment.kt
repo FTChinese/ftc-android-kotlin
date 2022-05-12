@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.view.ContextThemeWrapper
+import androidx.compose.runtime.Composable
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
@@ -142,4 +143,9 @@ class LinkPreviewFragment(
     fun onClickLink(view: View) {
         linkViewModel.link()
     }
+}
+
+@Composable
+fun LinkPreviewScreen() {
+
 }
