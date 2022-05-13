@@ -4,6 +4,7 @@ import android.content.res.Resources
 import androidx.annotation.StringRes
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.mutableStateOf
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.AccountRepo
@@ -30,6 +31,10 @@ open class BaseState(
         scope.launch {
             scaffoldState.snackbarHostState.showSnackbar(message)
         }
+    }
+
+    fun showNotConnected() {
+        showSnackBar(resources.getString(R.string.prompt_no_network))
     }
 
     suspend fun refresh(account: Account) {
