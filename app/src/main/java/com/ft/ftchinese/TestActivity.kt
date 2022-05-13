@@ -117,6 +117,8 @@ class TestActivity : ScopedAppActivity() {
 
                         item { FreeUser() }
                         item { WxOnlyFreeUser() }
+                        item { LinkedWithAutoRenew() }
+                        item { LinkedWithOneOff() }
                         item { VIPUser() }
 
                         item { StandardUser() }
@@ -323,6 +325,41 @@ class TestActivity : ScopedAppActivity() {
     }
 
     @Composable
+    fun LinkedWithAutoRenew() {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withPayMethod(PayMethod.STRIPE)
+                        .withAutoRenewal(true)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Linked Account with Stripe")
+        }
+    }
+
+    @Composable
+    fun LinkedWithOneOff() {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withPayMethod(PayMethod.ALIPAY)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Linked Account with One Off")
+        }
+    }
+
+    @Composable
     fun StandardUser() {
         Button(
             onClick = {
@@ -373,141 +410,168 @@ class TestActivity : ScopedAppActivity() {
 
     @Composable
     fun StripeStandardUser() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withTier(Tier.STANDARD)
-                    .withPayMethod(PayMethod.STRIPE)
-                    .withAutoRenewal(true)
-                    .build())
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withTier(Tier.STANDARD)
+                        .withPayMethod(PayMethod.STRIPE)
+                        .withAutoRenewal(true)
+                        .build())
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Stripe Standard Year")
         }
     }
 
     @Composable
     private fun StripeStandardMonth() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.STRIPE)
-                    .withAutoRenewal(true)
-                    .withCycle(Cycle.MONTH)
-                    .build()
-            )
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withPayMethod(PayMethod.STRIPE)
+                        .withAutoRenewal(true)
+                        .withCycle(Cycle.MONTH)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Stripe Standard Month")
         }
     }
 
     @Composable
     fun StripePremium() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.STRIPE)
-                    .withAutoRenewal(true)
-                    .withTier(Tier.PREMIUM)
-                    .build()
-            )
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withPayMethod(PayMethod.STRIPE)
+                        .withAutoRenewal(true)
+                        .withTier(Tier.PREMIUM)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Stripe Premium")
         }
     }
 
     @Composable
     fun StripeAutoRenewOff() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.STRIPE)
-                    .withAutoRenewal(false)
-                    .build()
-            )
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withPayMethod(PayMethod.STRIPE)
+                        .withAutoRenewal(false)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Stripe Auto Renew Off")
         }
     }
 
     @Composable
     fun StripeAutoRenewOffWithAddOn() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.STRIPE)
-                    .withAutoRenewal(true)
-                    .withStdAddOn(30)
-                    .withPrmAddOn(366)
-                    .build()
-            )
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withPayMethod(PayMethod.STRIPE)
+                        .withAutoRenewal(true)
+                        .withStdAddOn(30)
+                        .withPrmAddOn(366)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "Stripe Auto Renew Off with Add-on")
         }
     }
 
     @Composable
     fun IAPPremium() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.APPLE)
-                    .withAutoRenewal(true)
-                    .build()
-            )
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withPayMethod(PayMethod.APPLE)
+                        .withAutoRenewal(true)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "IAP Premium")
         }
     }
 
     @Composable
     fun IAPStandard() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.APPLE)
-                    .withAutoRenewal(false)
-                    .build()
-            )
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withPayMethod(PayMethod.APPLE)
+                        .withAutoRenewal(false)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "IAP Standard")
         }
     }
 
     @Composable
     fun IAPAutoRenewOff() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.APPLE)
-                    .withAutoRenewal(false)
-                    .build()
-            )
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withPayMethod(PayMethod.APPLE)
+                        .withAutoRenewal(false)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "IAP Auto Renew Off")
         }
     }
 
     @Composable
     fun IAPAddOn() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.APPLE)
-                    .withAutoRenewal(true)
-                    .withStdAddOn(31)
-                    .withPrmAddOn(366)
-                    .build()
-            )
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withPayMethod(PayMethod.APPLE)
+                        .withAutoRenewal(true)
+                        .withStdAddOn(31)
+                        .withPrmAddOn(366)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "IAP AddOn")
         }
     }
@@ -515,18 +579,21 @@ class TestActivity : ScopedAppActivity() {
 
     @Composable
     fun IAPExpiredWithAddOn() {
-        Button(onClick = {
-            sessionManager.logout()
-            sessionManager.saveAccount(
-                AccountBuilder()
-                    .withPayMethod(PayMethod.APPLE)
-                    .withAutoRenewal(false)
-                    .withExpired(true)
-                    .withStdAddOn(31)
-                    .withPrmAddOn(366)
-                    .build()
-            )
-        }) {
+        Button(
+            onClick = {
+                sessionManager.logout()
+                sessionManager.saveAccount(
+                    AccountBuilder()
+                        .withPayMethod(PayMethod.APPLE)
+                        .withAutoRenewal(false)
+                        .withExpired(true)
+                        .withStdAddOn(31)
+                        .withPrmAddOn(366)
+                        .build()
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(text = "IAP Expired with AddOn")
         }
     }
@@ -769,7 +836,7 @@ private class AccountBuilder {
     private val licenceId = "lic_x0DaRxLHHuLG"
     private val mobile = "12345678901"
 
-    private var accountKind: LoginMethod = LoginMethod.EMAIL
+    private var accountKind: LoginMethod? = null
     private var tier: Tier? = Tier.STANDARD
     private var cycle = Cycle.YEAR
     private var payMethod = PayMethod.ALIPAY
@@ -883,14 +950,12 @@ private class AccountBuilder {
     fun build(): Account {
         return Account(
             id = when (accountKind) {
-                LoginMethod.EMAIL -> ftcId
                 LoginMethod.WECHAT -> ""
-                LoginMethod.MOBILE -> ftcId
+                else -> ftcId
             },
             unionId = when (accountKind) {
-                LoginMethod.EMAIL -> ""
-                LoginMethod.WECHAT -> unionId
-                LoginMethod.MOBILE -> ""
+                LoginMethod.EMAIL, LoginMethod.MOBILE -> ""
+                else -> unionId
             },
             userName = "$payMethod $tier",
             email = "$tier@example.org",
@@ -903,13 +968,15 @@ private class AccountBuilder {
             avatarUrl = null,
             campaignCode = null,
             loginMethod = accountKind,
-            wechat = if (accountKind == LoginMethod.WECHAT) {
-                Wechat(
-                    nickname = "Wechat User",
-                    avatarUrl = "https://randomuser.me/api/portraits/thumb/women/7.jpg"
-                )
-            } else {
-                Wechat()
+            wechat = when (accountKind) {
+                LoginMethod.EMAIL,
+                LoginMethod.MOBILE -> Wechat()
+                else -> {
+                    Wechat(
+                        nickname = "Wechat User",
+                        avatarUrl = "https://randomuser.me/api/portraits/thumb/women/7.jpg"
+                    )
+                }
             },
             membership = buildMembership()
         )
