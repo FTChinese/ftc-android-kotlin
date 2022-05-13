@@ -18,11 +18,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
@@ -44,7 +42,9 @@ import com.ft.ftchinese.store.ServiceAcceptance
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.SubsActivity
 import com.ft.ftchinese.ui.article.ArticleActivity
-import com.ft.ftchinese.ui.base.*
+import com.ft.ftchinese.ui.base.ConnectionState
+import com.ft.ftchinese.ui.base.ScopedAppActivity
+import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
 import com.ft.ftchinese.ui.login.AuthActivity

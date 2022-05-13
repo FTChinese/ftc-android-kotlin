@@ -8,12 +8,18 @@ import android.view.ViewGroup
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ft.ftchinese.R
+import com.ft.ftchinese.ui.base.ConnectionState
+import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
@@ -39,6 +45,7 @@ class LinkPreviewFragment(
         return ComposeView(requireContext()).apply {
             setContent {
                 OTheme {
+                    val scaffoldState = rememberScaffoldState()
                     Scaffold(
                         topBar = {
                             Toolbar(
@@ -46,11 +53,13 @@ class LinkPreviewFragment(
                                 onBack = { dismiss() },
                                 icon = Icons.Default.Close
                             )
-                        }
+                        },
+                        scaffoldState = scaffoldState
                     ) { innerPadding ->
                         LinkPreviewScreen(
                             linkParams = params,
                             innerPadding = innerPadding,
+                            scaffoldState = scaffoldState,
                             onSuccess = {
                                 activity?.apply {
                                     setResult(Activity.RESULT_OK)
@@ -70,11 +79,14 @@ class LinkPreviewFragment(
 fun LinkPreviewScreen(
     userViewModel: UserViewModel = viewModel(),
     linkParams: WxEmailLink,
+    scaffoldState: ScaffoldState,
     innerPadding: PaddingValues,
     onSuccess: () -> Unit
 ) {
 
-    val linkState = rememberLinkState()
+    val connection by connectivityState()
+    val isConnected = connection == ConnectionState.Available
+    val linkState = rememberLinkState(scaffoldState = scaffoldState)
 
     linkState.linked.value?.let {
         userViewModel.saveAccount(it)
@@ -93,6 +105,10 @@ fun LinkPreviewScreen(
                 loading = linkState.progress.value,
                 params = linkParams,
                 onLink = {
+                    if (!isConnected) {
+                        linkState.showSnackBar(R.string.prompt_no_network)
+                        return@LinkScreen
+                    }
                     linkState.link(it)
                 }
             )
