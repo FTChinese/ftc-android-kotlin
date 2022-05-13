@@ -56,7 +56,8 @@ fun PaywallActivityScreen(
     val context = LocalContext.current
     val isRefreshing by paywallViewModel.refreshingLiveData.observeAsState(false)
     val ftcPaywall by paywallViewModel.ftcPriceLiveData.observeAsState(defaultPaywall)
-
+    val accountState = userViewModel.accountLiveData.observeAsState()
+    val account = accountState.value
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
@@ -76,7 +77,7 @@ fun PaywallActivityScreen(
 
     LaunchedEffect(key1 = Unit) {
         paywallViewModel.loadPaywall(
-            userViewModel.account?.isTest ?: false
+            account?.isTest ?: false
         )
         paywallViewModel.trackDisplayPaywall()
     }
@@ -97,11 +98,11 @@ fun PaywallActivityScreen(
         state = rememberSwipeRefreshState(
             isRefreshing = isRefreshing,
         ),
-        onRefresh = { paywallViewModel.refresh(userViewModel.account?.isTest ?: false) },
+        onRefresh = { paywallViewModel.refresh(account?.isTest ?: false) },
     ) {
         PaywallScreen(
             paywall = ftcPaywall,
-            account = userViewModel.account,
+            account = account,
             onFtcPay = {
                 if (!userViewModel.isLoggedIn) {
                     launchLoginActivity(launcher, context)

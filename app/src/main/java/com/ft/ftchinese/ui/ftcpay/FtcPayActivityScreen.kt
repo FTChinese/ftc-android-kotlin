@@ -45,7 +45,8 @@ fun FtcPayActivityScreen(
         }
     }
 
-    val account = userViewModel.account
+    val accountState = userViewModel.accountLiveData.observeAsState()
+    val account = accountState.value
     if (account == null) {
         showSnackBar("Not logged in")
         return

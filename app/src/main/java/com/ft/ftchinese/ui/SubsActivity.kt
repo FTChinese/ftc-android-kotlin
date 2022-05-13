@@ -150,7 +150,7 @@ class SubsActivity : ScopedComponentActivity() {
     }
 
     private fun confirmAliSubscription(pi: FtcPayIntent) {
-        val account = userViewModel.account ?: return
+        val account = userViewModel.accountLiveData.value ?: return
         val member = account.membership
 
         // Build confirmation result locally

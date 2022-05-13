@@ -101,10 +101,9 @@ fun AccountActivityScreen(
     val (showMobileAlert, setShowMobileAlert) = remember {
         mutableStateOf(false)
     }
-    val account = remember {
-        accountViewModel.account
-    }
+    val accountState = accountViewModel.accountLiveData.observeAsState()
 
+    val account = accountState.value
     if (account == null) {
         showSnackBar("Not logged in")
         return
@@ -161,7 +160,10 @@ fun AccountActivityScreen(
             },
             modifier = modifier,
             wxInfoViewModel = accountViewModel,
-            showSnackBar = showSnackBar
+            showSnackBar = showSnackBar,
+            onUpdated = {
+                accountViewModel.reloadAccount()
+            }
         )
     } else {
         SwipeRefresh(
@@ -188,7 +190,10 @@ fun AccountActivityScreen(
                             StripeWalletActivity.start(context)
                         }
                         AccountRowType.WECHAT -> {
-                            WxInfoActivity.start(context)
+                            launchWxInfoActivity(
+                                launcher = launcher,
+                                context = context
+                            )
                         }
                         AccountRowType.MOBILE -> {
                             if (account.isMobileEmail) {
@@ -222,5 +227,14 @@ private fun launchUpdateActivity(
 ) {
     launcher.launch(
         UpdateActivity.intent(context, rowId)
+    )
+}
+
+private fun launchWxInfoActivity(
+    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+    context: Context,
+) {
+    launcher.launch(
+        WxInfoActivity.newIntent(context)
     )
 }

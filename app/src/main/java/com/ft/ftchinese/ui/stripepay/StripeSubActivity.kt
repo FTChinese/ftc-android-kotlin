@@ -89,31 +89,29 @@ class StripeSubActivity : ScopedAppActivity() {
                     scaffoldState = scaffoldState,
                 ) {
 
-                    userViewModel.account?.let {
-                        StripeSubActivityScreen(
-                            subsViewModel = subsViewModel,
-                            userViewModel = userViewModel,
-                            onNextAction = {
-                                stripe.handleNextActionForPayment(
-                                    this,
-                                    it
-                                )
-                            },
-                            onPresentPaymentMethod = {
-                                // Step 1 when user clicked payment method selection row.
-                                paymentSession.presentPaymentMethodSelection()
-                            },
-                            showSnackBar = { msg ->
-                                scope.launch {
-                                    scaffoldState.snackbarHostState.showSnackbar(msg)
-                                }
-                            },
-                            onExit = { resultCode ->
-                                setResult(resultCode)
-                                finish()
+                    StripeSubActivityScreen(
+                        subsViewModel = subsViewModel,
+                        userViewModel = userViewModel,
+                        onNextAction = {
+                            stripe.handleNextActionForPayment(
+                                this,
+                                it
+                            )
+                        },
+                        onPresentPaymentMethod = {
+                            // Step 1 when user clicked payment method selection row.
+                            paymentSession.presentPaymentMethodSelection()
+                        },
+                        showSnackBar = { msg ->
+                            scope.launch {
+                                scaffoldState.snackbarHostState.showSnackbar(msg)
                             }
-                        )
-                    }
+                        },
+                        onExit = { resultCode ->
+                            setResult(resultCode)
+                            finish()
+                        }
+                    )
                 }
             }
         }
@@ -216,9 +214,8 @@ private fun StripeSubActivityScreen(
     val subsState by subsViewModel.subsCreated.observeAsState()
     val failureState by subsViewModel.failureLiveData.observeAsState()
 
-    val account = remember {
-        userViewModel.account
-    }
+    val accountState = userViewModel.accountLiveData.observeAsState()
+    val account = accountState.value
 
     if (account == null) {
         showSnackBar("Not logged in")

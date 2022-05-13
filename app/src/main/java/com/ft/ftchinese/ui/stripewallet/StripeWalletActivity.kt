@@ -158,9 +158,8 @@ private fun StripeSetupActivityScreen(
     val paymentMethod by walletViewModel.paymentMethodInUse.observeAsState()
     val customer by walletViewModel.customerLiveData.observeAsState()
 
-    val account = remember {
-        userViewModel.account
-    }
+    val accountState = userViewModel.accountLiveData.observeAsState()
+    val account = accountState.value
 
     if (account == null) {
         showSnackBar("Not logged in")

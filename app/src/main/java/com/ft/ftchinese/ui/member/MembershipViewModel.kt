@@ -23,7 +23,7 @@ private const val TAG = "MemberStatusViewModel"
 class MembershipViewModel(application: Application): UserViewModel(application) {
 
     fun refresh() {
-        val a = account ?: return
+        val a = accountLiveData.value ?: return
         refreshingLiveData.value = true
 
         if (a.membership.autoRenewOffExpired && a.membership.hasAddOn) {

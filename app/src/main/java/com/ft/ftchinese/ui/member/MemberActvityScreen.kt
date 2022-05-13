@@ -29,9 +29,8 @@ fun MemberActivityScreen(
 
     val isRefreshing by memberViewModel.refreshingLiveData.observeAsState(false)
     val progress by memberViewModel.progressLiveData.observeAsState(false)
-    val account = remember {
-        memberViewModel.account
-    }
+    val accountState = memberViewModel.accountLiveData.observeAsState()
+    val account = accountState.value
     val (showDialog, setShowDialog) = remember {
         mutableStateOf(false)
     }
