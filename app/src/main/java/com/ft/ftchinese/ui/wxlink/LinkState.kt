@@ -22,6 +22,7 @@ class LinkState(
     val scope: CoroutineScope,
     private val resources: Resources
 ) {
+
     val progress = mutableStateOf(false)
     val linked = mutableStateOf<Account?>(null)
 
