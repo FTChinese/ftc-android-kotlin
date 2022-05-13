@@ -35,13 +35,16 @@ fun IconCheck(
             .width(24.dp)
             .height(24.dp)
     ) {
-        if (checked) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_baseline_check_circle_outline_24),
-                contentDescription = "Checked",
-                modifier = Modifier.align(Alignment.Center),
-                tint = tint
-            )
-        }
+
+        Icon(
+            painter = painterResource(id = if (checked) {
+                R.drawable.ic_baseline_check_circle_outline_24
+            } else {
+                R.drawable.ic_baseline_radio_button_unchecked_24
+            }),
+            contentDescription = "Checked",
+            modifier = Modifier.align(Alignment.Center),
+            tint = tint
+        )
     }
 }
