@@ -10,7 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -30,6 +29,7 @@ fun WxInfoActivityScreen(
     modifier: Modifier = Modifier,
     wxInfoViewModel: WxInfoViewModel = viewModel(),
     showSnackBar: (String) -> Unit,
+    onUpdated: () -> Unit,
 ) {
     val context = LocalContext.current
     val refreshing by wxInfoViewModel.refreshingLiveData.observeAsState(false)
@@ -41,14 +41,15 @@ fun WxInfoActivityScreen(
         when (result.resultCode) {
             Activity.RESULT_OK -> {
                 wxInfoViewModel.reloadAccount()
+                // When hosted inside AccountActivity, notify it to reload account.
+                onUpdated()
             }
             Activity.RESULT_CANCELED -> {}
         }
     }
 
-    val account = remember {
-        wxInfoViewModel.account
-    }
+    val accountState = wxInfoViewModel.accountLiveData.observeAsState()
+    val account = accountState.value
 
     if (account == null) {
         showSnackBar("Not logged in")
