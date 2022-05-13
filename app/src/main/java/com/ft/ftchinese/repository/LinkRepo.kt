@@ -8,7 +8,6 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.Credentials
 import com.ft.ftchinese.model.request.WxLinkParams
 import com.ft.ftchinese.model.request.WxUnlinkParams
-import com.ft.ftchinese.ui.components.ToastMessage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -86,5 +85,34 @@ object LinkRepo {
             .sendJson(params)
             .endText()
             .code == 204
+    }
+
+    suspend fun asyncUnlink(unionId: String, params: WxUnlinkParams): FetchResult<Boolean> {
+        try {
+            val done = withContext(Dispatchers.IO) {
+                unlink(unionId, params)
+            }
+
+            return if (done) {
+                FetchResult.Success(true)
+            } else {
+                FetchResult.LocalizedError(R.string.loading_failed)
+            }
+        } catch (e: APIError) {
+            return when (e.statusCode) {
+                404 -> FetchResult.LocalizedError(R.string.account_not_found)
+                422 -> if (e.error == null) {
+                    FetchResult.fromApi(e)
+                } else {
+                    when {
+                        e.error.isFieldMissing("anchor") -> FetchResult.LocalizedError(R.string.api_anchor_missing)
+                        else -> FetchResult.fromApi(e)
+                    }
+                }
+                else -> FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
     }
 }
