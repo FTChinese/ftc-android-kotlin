@@ -88,11 +88,11 @@ fun LinkPreviewScreen(
     val isConnected = connection == ConnectionState.Available
     val linkState = rememberLinkState(scaffoldState = scaffoldState)
 
-    linkState.linked.value?.let {
+    linkState.accountRefreshed.value?.let {
         userViewModel.saveAccount(it)
     }
 
-    if (linkState.linked.value != null) {
+    if (linkState.accountRefreshed.value != null) {
         LinkResultScreen(
             onFinish = onSuccess
         )

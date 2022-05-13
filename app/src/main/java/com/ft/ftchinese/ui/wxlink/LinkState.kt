@@ -1,44 +1,25 @@
 package com.ft.ftchinese.ui.wxlink
 
 import android.content.res.Resources
-import androidx.annotation.StringRes
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.WxLinkParams
-import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.LinkRepo
+import com.ft.ftchinese.ui.components.BaseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class LinkState(
-    val scaffoldState: ScaffoldState,
-    val scope: CoroutineScope,
-    private val resources: Resources
-) {
-
-    val progress = mutableStateOf(false)
-    val linked = mutableStateOf<Account?>(null)
-
-    fun showSnackBar(@StringRes id: Int) {
-        try {
-            showSnackBar(resources.getString(id))
-        } catch (e: Exception) {
-
-        }
-    }
-
-    fun showSnackBar(message: String) {
-        scope.launch {
-            scaffoldState.snackbarHostState.showSnackbar(message)
-        }
-    }
+    scaffoldState: ScaffoldState,
+    scope: CoroutineScope,
+    resources: Resources
+) : BaseState(scaffoldState, scope, resources) {
 
     fun link(account: Account) {
         val unionId = account.unionId ?: return
@@ -65,23 +46,6 @@ class LinkState(
                 is FetchResult.Success -> {
                     refresh(account)
                 }
-            }
-        }
-    }
-
-    private suspend fun refresh(account: Account) {
-        when (val refreshed = AccountRepo.asyncRefresh(account)) {
-            is FetchResult.LocalizedError -> {
-                progress.value = false
-                showSnackBar(refreshed.msgId)
-            }
-            is FetchResult.TextError -> {
-                progress.value = false
-                showSnackBar(refreshed.text)
-            }
-            is FetchResult.Success -> {
-                progress.value = false
-                linked.value = refreshed.data
             }
         }
     }
