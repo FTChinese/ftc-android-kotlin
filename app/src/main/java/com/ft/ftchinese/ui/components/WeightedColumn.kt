@@ -17,12 +17,12 @@ fun WeightedColumn(
 ) {
     Column(
         modifier = Modifier
+            .padding(Dimens.dp16)
             .fillMaxSize()
     ) {
         Column(
             modifier = Modifier
                 .weight(1f)
-                .padding(Dimens.dp16)
                 .verticalScroll(rememberScrollState())
         ) {
             content()
