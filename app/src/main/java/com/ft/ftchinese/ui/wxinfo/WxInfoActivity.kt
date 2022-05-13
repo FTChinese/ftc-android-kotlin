@@ -1,5 +1,6 @@
 package com.ft.ftchinese.ui.wxinfo
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -38,7 +39,7 @@ class WxInfoActivity : ComponentActivity() {
                         Toolbar(
                             heading = stringResource(id = R.string.title_wx_account),
                             onBack = {
-                                // TODO: setResult(OK)
+                                setResult(Activity.RESULT_OK)
                                 finish()
                             }
                         )
@@ -52,7 +53,10 @@ class WxInfoActivity : ComponentActivity() {
                                 scaffoldState.snackbarHostState.showSnackbar(it)
                             }
                         },
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        onUpdated = {
+
+                        }
                     )
                 }
             }
@@ -60,9 +64,8 @@ class WxInfoActivity : ComponentActivity() {
     }
 
     companion object {
+
         @JvmStatic
-        fun start(context: Context) {
-            context.startActivity(Intent(context, WxInfoActivity::class.java))
-        }
+        fun newIntent(context: Context) = Intent(context, WxInfoActivity::class.java)
     }
 }
