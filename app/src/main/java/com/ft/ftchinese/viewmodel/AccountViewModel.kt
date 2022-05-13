@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.ui.data.ApiRequest
 import kotlinx.coroutines.launch
 
 private const val TAG = "AccountViewModel"
@@ -33,8 +33,8 @@ class AccountViewModel : BaseViewModel() {
         viewModelScope.launch {
             Log.i(TAG, "Start refreshing account")
 
-            accountRefreshed.value = ApiRequest
-                .asyncRefreshAccount(account)
+            accountRefreshed.value = AccountRepo
+                .asyncRefresh(account)
 
             progressLiveData.value = false
         }
