@@ -99,10 +99,6 @@ class LinkFtcActivity : ScopedAppActivity() {
 
         Log.i(TAG, "onActivityResult: requestCode $requestCode, $resultCode")
 
-        if (requestCode != RequestCode.LINK) {
-            return
-        }
-
         if (resultCode != Activity.RESULT_OK) {
             setResult(Activity.RESULT_CANCELED)
             return

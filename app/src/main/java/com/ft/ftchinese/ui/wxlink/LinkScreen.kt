@@ -2,62 +2,131 @@ package com.ft.ftchinese.ui.wxlink
 
 import android.content.Context
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
+import com.ft.ftchinese.model.enums.LoginMethod
+import com.ft.ftchinese.model.enums.PayMethod
+import com.ft.ftchinese.model.enums.Tier
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
+import com.ft.ftchinese.model.reader.Wechat
 import com.ft.ftchinese.ui.components.ListItemTwoCol
 import com.ft.ftchinese.ui.components.PrimaryButton
-import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.ui.components.WeightedColumn
 import com.ft.ftchinese.ui.member.SubsStatus
 import com.ft.ftchinese.ui.theme.Dimens
+import org.threeten.bp.LocalDate
+
+@Composable
+fun LinkResultScreen(
+    onFinish: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .padding(Dimens.dp16)
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = "账号已绑定！",
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(Dimens.dp16))
+
+        PrimaryButton(
+            onClick = onFinish,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = stringResource(id = R.string.btn_ok))
+        }
+    }
+}
 
 @Composable
 fun LinkScreen(
     loading: Boolean,
-    linkable: Boolean,
-    onLink: () -> Unit,
+    params: WxEmailLink,
+    onLink: (Account) -> Unit,
 ) {
-    ProgressLayout(
-        loading = loading
-    ) {
-        WeightedColumn(
-            bottom = {
-                PrimaryButton(
-                    onClick = onLink,
-                    enabled = !loading && linkable
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.btn_start)
-                    )
-                }
-            }
-        ) {
-            Text(
-                text = stringResource(id = R.string.link_heading),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.h6
-            )
+    val context = LocalContext.current
+    val linkMock = params.link(context)
 
-            Row {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_link_teal_24dp),
-                    contentDescription = ""
+    WeightedColumn(
+        bottom = {
+            PrimaryButton(
+                onClick = {
+                    linkMock.linked?.let(onLink)
+                },
+                enabled = !loading && (linkMock.linked != null),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(id = R.string.btn_start)
                 )
             }
         }
+    ) {
+        Text(
+            text = stringResource(id = R.string.link_heading),
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.h6
+        )
+
+        Spacer(modifier = Modifier.height(Dimens.dp16))
+
+        LinkDetails(
+            title = stringResource(id = R.string.label_ftc_account),
+            subTitle = params.ftc.email,
+            subsDetails = buildSubsDetails(
+                context,
+                params.ftc.membership
+            )
+        )
+
+        Spacer(modifier = Modifier.height(Dimens.dp8))
+
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_link_teal_24dp),
+                contentDescription = ""
+            )
+        }
+
+        Spacer(modifier = Modifier.height(Dimens.dp8))
+
+        LinkDetails(
+            title = stringResource(id = R.string.label_wx_account),
+            subTitle = params.wx.wechat.nickname ?: "",
+            subsDetails = buildSubsDetails(
+                context = context,
+                member = params.wx.membership
+            )
+        )
+
+        Spacer(modifier = Modifier.height(Dimens.dp16))
+
+        linkMock.denied?.let {
+            Text(
+                text = it,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
     }
 }
 
@@ -87,6 +156,8 @@ fun LinkDetails(
                 style = MaterialTheme.typography.subtitle2
             )
 
+            Spacer(modifier = Modifier.height(Dimens.dp16))
+
             subsDetails.forEach {
                 ListItemTwoCol(
                     lead = it.first,
@@ -113,4 +184,39 @@ fun buildSubsDetails(
             subsStatus.productName
         )
     ) + subsStatus.details
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewLinkScreen() {
+    LinkScreen(
+        loading = false,
+        params = WxEmailLink(
+            ftc = Account(
+                id = "ftc-id",
+                email = "preview@example.org",
+                wechat = Wechat(),
+                membership = Membership(
+                    tier = Tier.STANDARD,
+                    expireDate = LocalDate.now().plusMonths(1),
+                    payMethod = PayMethod.ALIPAY
+                )
+            ),
+            wx = Account(
+                id = "",
+                unionId = "wechat-id",
+                email = "",
+                wechat = Wechat(
+                    nickname = "Wechat user"
+                ),
+                membership = Membership(
+                    tier = Tier.PREMIUM,
+                    expireDate = LocalDate.now().plusDays(1),
+                    payMethod = PayMethod.WXPAY
+                )
+            ),
+            loginMethod = LoginMethod.EMAIL
+        ),
+        onLink = {}
+    )
 }

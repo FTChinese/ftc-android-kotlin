@@ -4,14 +4,14 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.ft.ftchinese.R
-import com.ft.ftchinese.model.fetch.APIError
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.enums.UnlinkAnchor
+import com.ft.ftchinese.model.fetch.APIError
+import com.ft.ftchinese.model.fetch.FetchResult
+import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.request.WxUnlinkParams
+import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.repository.LinkRepo
 import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.ui.data.ApiRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -64,7 +64,7 @@ class UnlinkViewModel : BaseViewModel() {
                 }
 
                 if (done) {
-                    accountLoaded.value = ApiRequest.asyncRefreshAccount(account)
+                    accountLoaded.value = AccountRepo.asyncRefresh(account)
                 } else {
                     accountLoaded.value = FetchResult.LocalizedError(R.string.loading_failed)
                 }
