@@ -271,7 +271,7 @@
     <string name="tier_vip">超級會員</string>
     <string name="label_expiration_date">到期時間</string>
     <string name="label_price">支付金額</string>
-    <string name="label_ftc_account">FT中文網帳號</string>
+    <string name="label_ftc_account">電子信箱帳號</string>
     <string name="label_wx_account">微信帳號</string>
     <string name="paywall_title">購買會員服務，閱讀FT獨家內容</string>
     <string name="paywall_login_prompt">已經訂閱？登入</string>
