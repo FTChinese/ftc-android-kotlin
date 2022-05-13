@@ -5,7 +5,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -49,8 +48,6 @@ import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.ui.share.ScreenshotMeta
-import com.ft.ftchinese.ui.share.ScreenshotPreview
 import com.ft.ftchinese.ui.theme.OTheme
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.firebase.messaging.FirebaseMessaging
@@ -94,15 +91,54 @@ class TestActivity : ScopedAppActivity() {
                         )
                     }
                 ) { innerPadding ->
-                    ScreenshotPreview(
-                        screenshot = ScreenshotMeta(
-                            imageUri = Uri.parse("content://media/external_primary/images/media/1942"),
-                            title = "Test",
-                            description = "",
-                        ),
-                        modifier = Modifier.padding(innerPadding),
-                        onShareTo = { _, _, -> }
-                    )
+                    LazyColumn(
+                        modifier = Modifier.padding(innerPadding)
+                    ) {
+
+                        item { PaywallButton() }
+
+                        item { WxMiniButton() }
+
+                        item { PostPurchaseButton() }
+
+                        item { FullScreenDialog() }
+
+                        item { ShowSignInUp() }
+                        item { SignInFragment() }
+                        item { SignUpFragment() }
+
+                        item { MobileLinkEmail() }
+
+                        item { PostPurchaseButton() }
+
+                        item { FreeUser() }
+                        item { WxOnlyFreeUser() }
+                        item { VIPUser() }
+
+                        item { StandardUser() }
+                        item { PremiumUser() }
+
+                        item { StripeStandardUser() }
+                        item { StripeStandardMonth() }
+                        item { StripeAutoRenewOff() }
+                        item { StripeAutoRenewOffWithAddOn() }
+                        item { StripePremium() }
+
+                        item { IAPStandard() }
+                        item { IAPPremium() }
+                        item { IAPAddOn() }
+                        item { IAPAutoRenewOff() }
+                        item { IAPExpiredWithAddOn() }
+                    }
+//                    ScreenshotPreview(
+//                        screenshot = ScreenshotMeta(
+//                            imageUri = Uri.parse("content://media/external_primary/images/media/1942"),
+//                            title = "Test",
+//                            description = "",
+//                        ),
+//                        modifier = Modifier.padding(innerPadding),
+//                        onShareTo = { _, _, -> }
+//                    )
                 }
             }
         }
@@ -117,43 +153,7 @@ class TestActivity : ScopedAppActivity() {
 
     @Composable
     fun ItemList() {
-        LazyColumn {
 
-            item { PaywallButton() }
-
-            item { WxMiniButton() }
-
-            item { PostPurchaseButton() }
-
-            item { FullScreenDialog() }
-
-            item { ShowSignInUp() }
-            item { SignInFragment() }
-            item { SignUpFragment() }
-
-            item { MobileLinkEmail() }
-
-            item { PostPurchaseButton() }
-
-            item { FreeUser() }
-            item { WxOnlyFreeUser() }
-            item { VIPUser() }
-
-            item { StandardUser() }
-            item { PremiumUser() }
-
-            item { StripeStandardUser() }
-            item { StripeStandardMonth() }
-            item { StripeAutoRenewOff() }
-            item { StripeAutoRenewOffWithAddOn() }
-            item { StripePremium() }
-
-            item { IAPStandard() }
-            item { IAPPremium() }
-            item { IAPAddOn() }
-            item { IAPAutoRenewOff() }
-            item { IAPExpiredWithAddOn() }
-        }
     }
 
     @Composable
