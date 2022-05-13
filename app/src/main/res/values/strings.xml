@@ -377,7 +377,6 @@
     <string name="creating_subscription">创建订阅&#8230;</string>
 
     <!--  Membership status  -->
-    <string name="vip_no_expiration">无限期</string>
     <string name="label_current_subs">会员订阅</string>
     <string name="label_subs_source">订阅方式</string>
     <string name="label_auto_renew">自动续订</string>
@@ -389,7 +388,7 @@
     <string name="label_expiration_date">到期时间</string>
     <string name="vip_no_expiration">无限期</string>
     <string name="label_price">支付金额</string>
-    <string name="label_ftc_account">FT中文网账号</string>
+    <string name="label_ftc_account">邮箱账号</string>
     <string name="label_wx_account">微信账号</string>
     <string name="paywall_title">购买会员服务，阅读FT独家内容</string>
     <string name="paywall_login_prompt">已经订阅？登录</string>
