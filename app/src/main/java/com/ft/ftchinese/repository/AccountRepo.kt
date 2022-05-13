@@ -1,7 +1,10 @@
 package com.ft.ftchinese.repository
 
+import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.LoginMethod
+import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.Fetch
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.model.reader.BaseAccount
@@ -10,8 +13,11 @@ import com.ft.ftchinese.model.request.EmailPasswordParams
 import com.ft.ftchinese.model.request.MobileFormParams
 import com.ft.ftchinese.model.request.PasswordUpdateParams
 import com.ft.ftchinese.model.request.SMSCodeParams
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object AccountRepo {
+
     fun loadFtcAccount(ftcId: String): Account? {
         return Fetch()
             .get(Endpoint.ftcAccount)
@@ -51,6 +57,26 @@ object AccountRepo {
                 null
             }
             else -> null
+        }
+    }
+
+    suspend fun asyncRefresh(account: Account): FetchResult<Account> {
+        try {
+
+            val updatedAccount = withContext(Dispatchers.IO) {
+                AccountRepo.refresh(account)
+            } ?: return FetchResult.LocalizedError(R.string.loading_failed)
+
+            return FetchResult.Success(updatedAccount)
+        } catch (e: APIError) {
+
+            return if (e.statusCode == 404) {
+                FetchResult.LocalizedError(R.string.account_not_found)
+            } else {
+                FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
         }
     }
 
