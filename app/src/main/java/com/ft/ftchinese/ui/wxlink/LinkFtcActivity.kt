@@ -45,8 +45,7 @@ class LinkFtcActivity : ScopedAppActivity() {
 
         sessionManager = SessionManager.getInstance(this)
 
-        emailViewModel = ViewModelProvider(this)
-            .get(EmailViewModel::class.java)
+        emailViewModel = ViewModelProvider(this)[EmailViewModel::class.java]
 
         connectionLiveData.observe(this) {
             emailViewModel.isNetworkAvailable.value = it
@@ -114,14 +113,6 @@ class LinkFtcActivity : ScopedAppActivity() {
 
     companion object {
         private const val TAG = "LinkFtcActivity"
-        @JvmStatic
-        fun startForResult(activity: Activity?) {
-            activity?.startActivityForResult(
-                Intent(activity, LinkFtcActivity::class.java),
-                RequestCode.LINK
-            )
-
-        }
 
         @JvmStatic
         fun intent(context: Context) = Intent(context, LinkFtcActivity::class.java)
