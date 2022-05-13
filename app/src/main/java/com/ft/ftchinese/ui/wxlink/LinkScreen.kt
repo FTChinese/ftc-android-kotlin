@@ -175,7 +175,7 @@ fun buildSubsDetails(
 
     val subsStatus = SubsStatus.newInstance(
         ctx = context,
-        m = member,
+        m = member.normalize(),
     )
 
     return listOf(

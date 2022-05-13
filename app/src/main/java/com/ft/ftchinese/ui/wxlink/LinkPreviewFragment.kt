@@ -17,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.ft.ftchinese.R
 import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.components.ProgressLayout
@@ -72,7 +71,6 @@ class LinkPreviewFragment(
             }
         }
     }
-
 }
 
 @Composable
@@ -106,7 +104,7 @@ fun LinkPreviewScreen(
                 params = linkParams,
                 onLink = {
                     if (!isConnected) {
-                        linkState.showSnackBar(R.string.prompt_no_network)
+                        linkState.showNotConnected()
                         return@LinkScreen
                     }
                     linkState.link(it)

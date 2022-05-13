@@ -4,113 +4,110 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.commit
-import androidx.lifecycle.ViewModelProvider
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.R
-import com.ft.ftchinese.databinding.ActivityUnlinkBinding
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.base.ConnectionState
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.util.RequestCode
-import org.jetbrains.anko.toast
+import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.viewmodel.UserViewModel
 
 class UnlinkActivity : ScopedAppActivity() {
 
-    private lateinit var sessionManager: SessionManager
-    private lateinit var unlinkViewModel: UnlinkViewModel
-    private lateinit var binding: ActivityUnlinkBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(
-            this,
-            R.layout.activity_unlink,
-        )
-        setSupportActionBar(binding.toolbar.toolbar)
 
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            setDisplayShowTitleEnabled(true)
-        }
+        setContent {
+            OTheme {
+                val scaffoldState = rememberScaffoldState()
 
-        sessionManager = SessionManager.getInstance(this)
-
-        unlinkViewModel = ViewModelProvider(this)[UnlinkViewModel::class.java]
-
-        connectionLiveData.observe(this) {
-            unlinkViewModel.isNetworkAvailable.value = it
-        }
-        isConnected.let {
-            unlinkViewModel.isNetworkAvailable.value = it
-        }
-
-        binding.handler = this
-        setupViewModel()
-        initUI()
-    }
-
-    private fun setupViewModel() {
-        unlinkViewModel.progressLiveData.observe(this) {
-            binding.inProgress = it
-        }
-
-        unlinkViewModel.accountLoaded.observe(this) {
-            when (it) {
-                is FetchResult.LocalizedError -> toast(it.msgId)
-                is FetchResult.TextError -> toast(it.text)
-                is FetchResult.Success -> {
-                    toast(R.string.prompt_unlinked)
-                    sessionManager.saveAccount(it.data)
-                    setResult(Activity.RESULT_OK)
-                    finish()
+                Scaffold(
+                    topBar = {
+                        Toolbar(
+                            heading = stringResource(id = R.string.title_unlink),
+                            onBack = {
+                                setResult(Activity.RESULT_OK)
+                                finish()
+                            }
+                        )
+                    }
+                ) { innerPadding ->
+                    UnlinkActivityScreen(
+                        scaffoldState = scaffoldState,
+                        innerPadding = innerPadding
+                    ) {
+                        setResult(Activity.RESULT_OK)
+                        finish()
+                    }
                 }
             }
         }
     }
 
-    private fun initUI() {
-
-        val account = sessionManager.loadAccount() ?: return
-
-        binding.unlinkFtcAccount.text = arrayOf(getString(R.string.label_ftc_account), account.email)
-                .joinToString("\n")
-        binding.unlinkWxAccount.text = arrayOf(getString(R.string.label_wx_account), account.wechat.nickname)
-                .joinToString("\n")
-
-        if (account.isMember) {
-            supportFragmentManager.commit {
-                replace(
-                    R.id.frag_unlink_anchor,
-                    UnlinkAnchorFragment.newInstance(),
-                )
-            }
-        }
-    }
-
-    fun onSubmit(view: View) {
-        sessionManager.loadAccount()?.let {
-            unlinkViewModel.unlink(it)
-        }
-    }
-
     companion object {
-        private const val TAG = "UnlinkActivity"
-
         @JvmStatic
-        fun startForResult(activity: Activity?) {
-            activity?.startActivityForResult(
-                    Intent(activity, UnlinkActivity::class.java),
-                    RequestCode.UNLINK
-            )
-        }
-
         fun newIntent(context: Context): Intent {
             return Intent(context, UnlinkActivity::class.java)
         }
     }
 }
 
+@Composable
+private fun UnlinkActivityScreen(
+    userViewModel: UserViewModel = viewModel(),
+    scaffoldState: ScaffoldState,
+    innerPadding: PaddingValues,
+    onSuccess: () -> Unit
+) {
+    val connection by connectivityState()
+    val isConnected = connection == ConnectionState.Available
+
+    val accountState = userViewModel.accountLiveData.observeAsState()
+    val account = accountState.value
+
+    val linkState = rememberLinkState(scaffoldState = scaffoldState)
+
+    if (account == null) {
+        return
+    }
+
+    linkState.accountRefreshed.value?.let {
+        userViewModel.saveAccount(it)
+        onSuccess()
+    }
+
+    ProgressLayout(
+        loading = linkState.progress.value,
+        modifier = Modifier.padding(innerPadding)
+    ) {
+        UnlinkScreen(
+            account = account,
+            loading = linkState.progress.value,
+            onUnlink = {
+                if (!isConnected) {
+                    linkState.showNotConnected()
+                    return@UnlinkScreen
+                }
+
+                linkState.unlink(
+                    account = account,
+                    anchor = it,
+                )
+            }
+        )
+    }
+}
 
