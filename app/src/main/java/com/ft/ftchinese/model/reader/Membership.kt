@@ -220,6 +220,12 @@ data class Membership(
     val isZero: Boolean
         get() = tier == null
 
+    val unlinkToEmailOnly: Boolean
+        get() = arrayOf(
+            PayMethod.STRIPE,
+            PayMethod.APPLE,
+            PayMethod.B2B
+        ).contains(payMethod)
     /**
      * What kind of offer an existing membership could enjoy
      * for next round of purchase when using wechat/alipay.
