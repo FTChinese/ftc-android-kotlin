@@ -9,9 +9,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -21,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
@@ -47,11 +46,17 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
+import com.ft.ftchinese.ui.components.PrimaryButton
+import com.ft.ftchinese.ui.components.TextInput
+import com.ft.ftchinese.ui.components.rememberInputState
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
+import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.validator.ValidationRule
+import com.ft.ftchinese.ui.validator.Validator
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.firebase.messaging.FirebaseMessaging
 import org.jetbrains.anko.alert
@@ -98,6 +103,8 @@ class TestActivity : ScopedAppActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         item { NetworkStatus() }
+
+                        item { EmailChecker() }
 
                         item { PaywallButton() }
 
@@ -155,6 +162,80 @@ class TestActivity : ScopedAppActivity() {
                 Log.i(TAG, "Key: $key Value: $value")
             }
         }
+    }
+    
+    @Composable
+    fun EmailChecker() {
+        val (alert, setAlert) = remember {
+            mutableStateOf(false)
+        }
+
+        val emailState = rememberInputState(
+            rules = listOf(
+                ValidationRule(
+                    predicate = Validator::isEmail,
+                    message = "请输入完整的邮箱"
+                )
+            )
+        )
+
+        TextInput(
+            label = stringResource(id = R.string.label_email),
+            state = emailState
+        )
+
+        Spacer(modifier = Modifier.height(Dimens.dp16))
+
+        PrimaryButton(
+            onClick = {
+                setAlert(true)
+            },
+            enabled = emailState.valid.value,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = stringResource(id = R.string.btn_next))
+        }
+
+        if (alert) {
+            Alert(
+                title = "Your Email",
+                body = emailState.field.value,
+                onConfirm = { setAlert(false) },
+                onDismiss = { setAlert(false) }
+            )
+        }
+    }
+    
+    @Composable 
+    fun Alert(
+        title: String,
+        body: String,
+        onConfirm: () -> Unit,
+        onDismiss: () -> Unit,
+    ) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = {
+                Text(text = title)
+            },
+            text = {
+                Text(text = body)
+            },
+            dismissButton = {
+                Button(
+                    onClick = onDismiss
+                ) {
+                    Text(text = stringResource(id = R.string.btn_cancel))
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = onConfirm
+                ) {
+                    Text(text = stringResource(id = R.string.btn_ok))
+                }
+            }
+        )
     }
 
     @Composable
