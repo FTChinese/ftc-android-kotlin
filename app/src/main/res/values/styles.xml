@@ -175,8 +175,4 @@
         <item name="android:textColor">@color/colorClaret80</item>
         <item name="android:textAlignment">center</item>
     </style>
-
-    <style name="AppCard" parent="Widget.MaterialComponents.CardView">
-        <item name="android:textColor">@color/card_text_color_selector</item>
-    </style>
 </resources>
