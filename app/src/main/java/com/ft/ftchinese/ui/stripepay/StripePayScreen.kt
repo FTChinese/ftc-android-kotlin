@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
@@ -13,10 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
+import com.ft.ftchinese.model.legal.WebpageMeta
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
@@ -32,6 +37,7 @@ import com.ft.ftchinese.ui.product.PriceCard
 import com.ft.ftchinese.ui.product.PriceCardParams
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OColor
+import com.ft.ftchinese.ui.webpage.WebpageActivity
 
 @Composable
 fun StripePayScreen(
@@ -53,12 +59,12 @@ fun StripePayScreen(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(all = Dimens.dp16),
         ) {
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(all = Dimens.dp8)
                     .verticalScroll(rememberScrollState())
             ) {
                 CheckoutHeader(tier = cartItem.recurring.tier)
@@ -87,11 +93,12 @@ fun StripePayScreen(
             }
 
             if (subs == null) {
+                AutoRenewAgreement()
+
                 PrimaryButton(
                     onClick = onSubscribe,
                     enabled = (!loading && paymentMethod != null && !forbidden),
                     modifier = Modifier
-                        .padding(Dimens.dp16)
                         .fillMaxWidth()
                 ) {
                     Text(
@@ -121,6 +128,52 @@ private fun Footnote() {
         text = stringResource(id = R.string.stripe_requirement),
         style = MaterialTheme.typography.body2,
         color = OColor.black60,
+    )
+}
+
+@Composable
+private fun AutoRenewAgreement() {
+    val context = LocalContext.current
+
+    val annotatedString = buildAnnotatedString {
+        append("点击订阅即同意FT中文网")
+
+        pushStringAnnotation(
+            "autoRenew",
+            annotation = "https://www.ftacademy.cn/Stripterm.html"
+        )
+        withStyle(
+            style = SpanStyle(
+                color = OColor.claret
+            )
+        ) {
+            append("《自动续订协议》")
+        }
+        pop()
+
+        append("相关内容")
+    }
+
+    ClickableText(
+        text = annotatedString,
+        onClick = { offset ->
+            annotatedString.getStringAnnotations(
+                tag = "autoRenew",
+                start = offset,
+                end = offset
+            ).firstOrNull()?.let {
+                val url = it.item
+                WebpageActivity.start(
+                    context = context,
+                    meta = WebpageMeta(
+                        title = "",
+                        url = url,
+                        showMenu = true
+                    )
+                )
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
     )
 }
 

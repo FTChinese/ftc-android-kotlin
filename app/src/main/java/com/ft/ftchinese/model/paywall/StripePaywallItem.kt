@@ -13,7 +13,7 @@ data class StripePaywallItem(
         return when (coupons.size) {
             0 -> null
             1 -> coupons[0]
-            else ->  coupons.sortedByDescending { it.amountOff }[0]
+            else -> coupons.sortedByDescending { it.amountOff }[0]
         }
     }
 }

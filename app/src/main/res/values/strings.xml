@@ -270,7 +270,7 @@
     <string name="price_heading_wxali">包%1$s</string>
     <string name="price_heading_stripe">连续包%1$s</string>
     <string name="limited_to_aliwx">* 仅限支付宝或微信支付</string>
-    <string name="limited_to_stripe">* 仅限Stripe支付</string>
+    <string name="limited_to_stripe">* 仅限Stripe支付，每年订阅到期日前24小时自动扣款</string>
     <string name="price_original_aliwx_prefix">原价</string>
     <string name="price_original_stripe_prefix">试用结束后自动续订</string>
     <string-array name="stripe_footnotes">
