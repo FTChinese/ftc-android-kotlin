@@ -22,6 +22,7 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Tier
 import com.ft.ftchinese.model.ftcsubs.YearMonthDay
 import com.ft.ftchinese.model.legal.WebpageMeta
+import com.ft.ftchinese.model.legal.legalPages
 import com.ft.ftchinese.model.paywall.CartItemStripe
 import com.ft.ftchinese.model.paywall.CheckoutIntent
 import com.ft.ftchinese.model.paywall.IntentKind
@@ -134,20 +135,21 @@ private fun Footnote() {
 @Composable
 private fun AutoRenewAgreement() {
     val context = LocalContext.current
+    val page = legalPages[2]
 
     val annotatedString = buildAnnotatedString {
         append("点击订阅即同意FT中文网")
 
         pushStringAnnotation(
             "autoRenew",
-            annotation = "https://www.ftacademy.cn/Stripterm.html"
+            annotation = page.url
         )
         withStyle(
             style = SpanStyle(
                 color = OColor.claret
             )
         ) {
-            append("《自动续订协议》")
+            append("《${page.title}》")
         }
         pop()
 
