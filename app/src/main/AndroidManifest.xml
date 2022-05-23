@@ -48,7 +48,6 @@
         <activity
             android:name=".ui.SubsActivity"
             android:exported="false" />
-        <activity android:name=".wxapi.WxBaseActivity" />
         <activity
             android:name=".ui.AboutListActivity"
             android:label="@string/title_about_us"

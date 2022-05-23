@@ -4,12 +4,17 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
+import com.ft.ftchinese.databinding.ActivityWechatBinding
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.reader.WxOAuth
 import com.ft.ftchinese.model.reader.WxOAuthIntent
+import com.ft.ftchinese.store.SessionManager
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
 import com.ft.ftchinese.ui.wxlink.WxEmailLink
@@ -17,16 +22,27 @@ import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
 import com.tencent.mm.opensdk.modelmsg.SendAuth
+import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
+import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
 private const val EXTRA_UI_TEST = "extra_ui_test"
 
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class WXEntryActivity : WxBaseActivity(), IWXAPIEventHandler {
+class WXEntryActivity : ScopedAppActivity(), IWXAPIEventHandler {
+    private var api: IWXAPI? = null
+    private lateinit var sessionManager: SessionManager
+    private lateinit var binding: ActivityWechatBinding
     private lateinit var oauthViewModel: WxOAuthViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_wechat)
+        setSupportActionBar(binding.toolbar.toolbar)
+
+        api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
+        sessionManager = SessionManager.getInstance(this)
 
         oauthViewModel = ViewModelProvider(this)[WxOAuthViewModel::class.java]
 

@@ -1,6 +1,5 @@
 package com.ft.ftchinese.wxapi
 
-import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -10,7 +9,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import com.ft.ftchinese.R
 import com.ft.ftchinese.model.enums.Cycle
 import com.ft.ftchinese.model.enums.PayMethod
 import com.ft.ftchinese.model.enums.Tier
@@ -29,7 +27,7 @@ fun WxPayScreen(
 
     val context = LocalContext.current
 
-    val uiText = buildWxPayUIParams(
+    val uiText = buildWxPayUiParams(
         LocalContext.current,
         status
     )
@@ -74,40 +72,6 @@ fun WxPayScreen(
                 Text(text = it)
             }
         }
-    }
-}
-
-data class WxPayUIParams(
-    val title: String,
-    val subTitle: String?,
-    val button: String?,
-)
-
-fun buildWxPayUIParams(
-    context: Context,
-    status: WxPayStatus
-): WxPayUIParams {
-    return when (status) {
-        is WxPayStatus.Loading -> WxPayUIParams(
-            title = context.getString(R.string.wxpay_query_order),
-            subTitle = null,
-            button = null,
-        )
-        is WxPayStatus.Success -> WxPayUIParams(
-            title = context.getString(R.string.payment_done),
-            subTitle = null,
-            button = context.getString(R.string.btn_done)
-        )
-        is WxPayStatus.Canceled -> WxPayUIParams(
-            title = context.getString(R.string.wxpay_cancelled),
-            subTitle = null,
-            button = context.getString(R.string.btn_done)
-        )
-        is WxPayStatus.Error -> WxPayUIParams(
-            title = context.getString(R.string.wxpay_failed),
-            subTitle = "Error: ${status.message}",
-            button = context.getString(R.string.btn_done)
-        )
     }
 }
 
