@@ -65,7 +65,6 @@ class SubsActivity : ScopedComponentActivity() {
 
         connectionLiveData.observe(this) {
             paywallViewModel.isNetworkAvailable.value = it
-            ftcPayViewModel.isNetworkAvailable.value = it
         }
 
         val premiumFirst = intent.getBooleanExtra(EXTRA_PREMIUM_FIRST, false)
