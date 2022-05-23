@@ -264,7 +264,7 @@
     <string name="title_subscription">会员订阅</string>
     <string name="refresh_paywall">获取最新产品价格…</string>
     <string name="paywall_updated">数据已更新</string>
-    <string name="formatter_money">%1$,.2f</string>
+    <string name="formatter_money">%1$.2f</string>
     <string name="price_heading_aliwx_trial">试用</string>
     <string name="price_heading_stripe_trial">新会员首次试用</string>
     <string name="price_heading_wxali">包%1$s</string>
