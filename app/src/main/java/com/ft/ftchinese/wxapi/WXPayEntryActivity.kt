@@ -4,8 +4,18 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Scaffold
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.ftcsubs.ConfirmationParams
 import com.ft.ftchinese.model.ftcsubs.FtcPayIntent
@@ -16,12 +26,18 @@ import com.ft.ftchinese.tracking.PaySuccessParams
 import com.ft.ftchinese.tracking.PaywallTracker
 import com.ft.ftchinese.tracking.StatsTracker
 import com.ft.ftchinese.ui.SubsActivity
+import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
-import com.ft.ftchinese.viewmodel.AccountViewModel
+import com.ft.ftchinese.ui.components.ProgressLayout
+import com.ft.ftchinese.ui.components.Toolbar
+import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.viewmodel.UserViewModel
 import com.tencent.mm.opensdk.constants.ConstantsAPI
 import com.tencent.mm.opensdk.modelbase.BaseReq
 import com.tencent.mm.opensdk.modelbase.BaseResp
+import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
+import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
 private const val EXTRA_UI_TEST = "extra_ui_test"
 
@@ -32,30 +48,48 @@ private const val EXTRA_UI_TEST = "extra_ui_test"
  * to wechat sdk, which will call Wechat. After you paid inside wechat app, you will be redirected
  * to this page.
  */
-class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
+class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
 
     private var payIntentStore: PayIntentStore? = null
     private var tracker: StatsTracker? = null
+    private var api: IWXAPI? = null
 
-    private lateinit var accountViewModel: AccountViewModel
+    private lateinit var wxPayViewModel: WxPayViewModel
+    private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding.title = getString(R.string.wxpay_query_order)
-        binding.details = "请稍候..."
-        binding.inProgress = true
+        api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
 
         payIntentStore = PayIntentStore.getInstance(this)
-        accountViewModel = ViewModelProvider(this)[AccountViewModel::class.java]
+        wxPayViewModel = ViewModelProvider(this)[WxPayViewModel::class.java]
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         tracker = StatsTracker.getInstance(this)
 
-        binding.doneButton.setOnClickListener {
-            onClickDone()
-        }
-
         api?.handleIntent(intent, this)
+
+        setContent {
+            OTheme {
+                val scaffoldState = rememberScaffoldState()
+                Scaffold(
+                    topBar = {
+                        Toolbar(
+                            heading = stringResource(id = R.string.pay_brand_wechat),
+                            onBack = this::onClickDone
+                        )
+                    },
+                    scaffoldState = scaffoldState
+                ) { innerPadding ->
+                    WxPayActivityScreen(
+                        wxViewModel = wxPayViewModel,
+                        innerPadding = innerPadding,
+                        onClickDone = this::onClickDone
+                    )
+                }
+            }
+        }
     }
 
     /**
@@ -94,17 +128,15 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
                 // 成功
                 // 展示成功页面
                 0 -> {
-                    Log.i(TAG, "Start querying order")
 //                    isPaymentSuccess = true
                     confirmSubscription(pi)
                 }
                 // 错误
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
                 -1 -> {
-                    binding.title = getString(R.string.wxpay_failed)
-                    binding.details = "Error code: ${resp.errStr}"
-                    binding.inProgress = false
-
+                    wxPayViewModel.onPayStatus(
+                        WxPayStatus.Error(resp.errStr)
+                    )
                     // Tracking failure
                     pi?.let {
                         tracker?.payFailed(it.price.edition)
@@ -113,22 +145,22 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
                 // 用户取消
                 // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
                 -2 -> {
-                    binding.title = getString(R.string.wxpay_cancelled)
-                    binding.details = ""
-                    binding.inProgress = false
+                    wxPayViewModel.onPayStatus(
+                        WxPayStatus.Canceled
+                    )
                 }
             }
         }
     }
 
-
     private fun confirmSubscription(pi: FtcPayIntent?) {
 
         // Load current membership
-        val account = sessionManager.loadAccount() ?: return
+        val account = userViewModel.account ?: return
         val member = account.membership
 
         if (pi == null) {
+            wxPayViewModel.onPayStatus(WxPayStatus.Error("Missing payment intent!"))
             return
         }
 
@@ -139,14 +171,10 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
         ).buildResult()
 
         payIntentStore?.save(pi.withConfirmed(confirmed.order))
-        sessionManager.saveMembership(confirmed.membership)
+        userViewModel.saveMembership(confirmed.membership)
         InvoiceStore.getInstance(this).save(confirmed)
 
-        // Start retrieving account data from server.
-        binding.title = getString(R.string.payment_done)
-        binding.details = getString(R.string.subs_success)
-        binding.inProgress = false
-
+        wxPayViewModel.onPayStatus(WxPayStatus.Success(confirmed.membership))
         verifyPayment()
 
         tracker?.paySuccess(PaySuccessParams.ofFtc(pi))
@@ -197,7 +225,7 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
     companion object {
         private const val TAG = "WxPayEntryActivity"
         @JvmStatic
-        fun start(context: Context) {
+        fun start(context: Context, isTest: Boolean = false) {
             val intent = Intent(
                     context,
                     WXPayEntryActivity::class.java
@@ -207,5 +235,25 @@ class WXPayEntryActivity: WxBaseActivity(), IWXAPIEventHandler {
 
             context.startActivity(intent)
         }
+    }
+}
+
+
+@Composable
+private fun WxPayActivityScreen(
+    wxViewModel: WxPayViewModel,
+    innerPadding: PaddingValues,
+    onClickDone: () -> Unit,
+) {
+    val status = wxViewModel.statusLiveData.observeAsState(WxPayStatus.Loading)
+
+    ProgressLayout(
+        loading = status.value is WxPayStatus.Loading,
+        modifier = Modifier.padding(innerPadding)
+    ) {
+        WxPayScreen(
+            status = status.value,
+            onDone = onClickDone
+        )
     }
 }

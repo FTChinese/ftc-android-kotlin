@@ -28,8 +28,7 @@ class WXEntryActivity : WxBaseActivity(), IWXAPIEventHandler {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        oauthViewModel = ViewModelProvider(this)
-            .get(WxOAuthViewModel::class.java)
+        oauthViewModel = ViewModelProvider(this)[WxOAuthViewModel::class.java]
 
         setupViewModel()
 
