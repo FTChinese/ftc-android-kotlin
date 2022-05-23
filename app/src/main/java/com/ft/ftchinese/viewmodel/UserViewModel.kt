@@ -24,6 +24,9 @@ open class UserViewModel(application: Application) : BaseAppViewModel(applicatio
         MutableLiveData<Account>()
     }
 
+    val account: Account?
+        get() = accountLiveData.value
+
     init {
         accountLiveData.value = session.loadAccount(raw = true)
     }
