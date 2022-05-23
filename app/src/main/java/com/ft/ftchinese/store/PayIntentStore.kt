@@ -25,7 +25,7 @@ class PayIntentStore private constructor(ctx: Context) {
     }
 
     fun load(): FtcPayIntent? {
-        val price = sharedPref.getString(KEY_ORDER, null)?.let {
+        val price = sharedPref.getString(KEY_PRICE, null)?.let {
             try {
                 marshaller.decodeFromString<Price>(it)
             } catch (e: Exception) {
@@ -59,7 +59,7 @@ class PayIntentStore private constructor(ctx: Context) {
         @JvmStatic
         fun getInstance(ctx: Context): PayIntentStore {
             if (instance == null) {
-                instance = PayIntentStore(ctx)
+                instance = PayIntentStore(ctx.applicationContext)
             }
 
             return instance!!
