@@ -25,8 +25,8 @@ fun FtcPayActivityScreen(
 ) {
     val context = LocalContext.current
 
-    val loadingState by payViewModel.inProgress.observeAsState(false)
-    val toastState by payViewModel.toastMessage.observeAsState(null)
+    val loading by payViewModel.progressLiveData.observeAsState(false)
+    val toastState by payViewModel.toastLiveData.observeAsState(null)
 
     toastState?.let {
         val msg = when (it) {
@@ -41,7 +41,7 @@ fun FtcPayActivityScreen(
         ErrorDialog(
             text = msg
         ) {
-            payViewModel.clearPaymentError()
+            payViewModel.resetToast()
         }
     }
 
@@ -63,7 +63,7 @@ fun FtcPayActivityScreen(
     )?.let { item ->
         FtcPayScreen(
             cartItem = item,
-            loading = loadingState,
+            loading = loading,
             onClickPay = { payMethod ->
                 if (payMethod == PayMethod.WXPAY && wxApi.wxAppSupportAPI < Build.PAY_SUPPORTED_SDK_INT) {
                     showSnackBar(context.getString(R.string.wxpay_not_supported))
