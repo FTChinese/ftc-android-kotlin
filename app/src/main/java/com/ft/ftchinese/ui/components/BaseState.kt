@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 open class BaseState(
     val scaffoldState: ScaffoldState,
     val scope: CoroutineScope,
-    private val resources: Resources
+    val resources: Resources
 ) {
     val progress = mutableStateOf(false)
     val accountRefreshed = mutableStateOf<Account?>(null)
