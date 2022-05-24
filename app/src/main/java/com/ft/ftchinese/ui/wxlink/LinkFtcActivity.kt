@@ -10,14 +10,13 @@ import androidx.fragment.app.commit
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityFragmentDoubleBinding
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.model.fetch.FetchResult
-import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.email.EmailExistsFragment
+import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.login.*
-import com.ft.ftchinese.ui.util.RequestCode
 import org.jetbrains.anko.toast
 
 /**
