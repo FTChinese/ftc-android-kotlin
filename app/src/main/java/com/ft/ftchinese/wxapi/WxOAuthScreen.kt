@@ -1,20 +1,12 @@
 package com.ft.ftchinese.wxapi
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Membership
 import com.ft.ftchinese.model.reader.Wechat
-import com.ft.ftchinese.ui.components.SecondaryButton
-import com.ft.ftchinese.ui.theme.Dimens
 
 @Composable
 fun WxOAuthAScreen(
@@ -25,7 +17,7 @@ fun WxOAuthAScreen(
 ) {
     when (status) {
         is AuthStatus.Loading -> {
-            WxOAuthProgress(
+            WxRespProgress(
                 title = stringResource(id = R.string.progress_logging),
                 subTitle = stringResource(id = R.string.wait_while_wx_login),
                 buttonText = null,
@@ -33,14 +25,14 @@ fun WxOAuthAScreen(
             )
         }
         is AuthStatus.Failed -> {
-            WxOAuthProgress(
+            WxRespProgress(
                 title = stringResource(id = R.string.prompt_login_failed),
                 subTitle = status.message,
                 onClickButton = onFinish
             )
         }
         is AuthStatus.NotConnected -> {
-            WxOAuthProgress(
+            WxRespProgress(
                 title = "出错了",
                 subTitle = stringResource(id = R.string.prompt_no_network),
                 buttonText = "重试",
@@ -48,7 +40,7 @@ fun WxOAuthAScreen(
             )
         }
         is AuthStatus.LoginSuccess -> {
-            WxOAuthProgress(
+            WxRespProgress(
                 title = stringResource(id = R.string.prompt_logged_in),
                 subTitle = stringResource(
                     R.string.greeting_wx_login,
@@ -58,7 +50,7 @@ fun WxOAuthAScreen(
             )
         }
         is AuthStatus.LinkLoaded -> {
-            WxOAuthProgress(
+            WxRespProgress(
                 title = "授权成功！",
                 subTitle = "关联微信${status.account.wechat.nickname}",
                 buttonText = "关联账号",
@@ -66,45 +58,6 @@ fun WxOAuthAScreen(
                     onLink(status.account)
                 }
             )
-        }
-    }
-}
-
-@Composable
-fun WxOAuthProgress(
-    title: String,
-    subTitle: String,
-    buttonText: String? = stringResource(id = R.string.btn_done),
-    onClickButton: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .padding(Dimens.dp16)
-            .fillMaxSize()
-    ) {
-        Text(
-            text = title,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-            style = MaterialTheme.typography.h6
-        )
-
-        Spacer(modifier = Modifier.height(Dimens.dp16))
-        Text(
-            text = subTitle,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth(),
-            style = MaterialTheme.typography.body1
-        )
-
-        if (!buttonText.isNullOrBlank()) {
-            Spacer(modifier = Modifier.height(Dimens.dp16))
-            SecondaryButton(
-                onClick = onClickButton,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text(text = buttonText)
-            }
         }
     }
 }
