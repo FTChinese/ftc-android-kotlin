@@ -1,7 +1,6 @@
 package com.ft.ftchinese.ui.components
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
@@ -66,7 +65,7 @@ fun TextInput(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxWidth()
     ) {
         OutlinedTextField(
             value = state.field.value,
@@ -84,7 +83,7 @@ fun TextInput(
         if (isError.value) {
             Text(
                 text = state.error.value,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxWidth(),
                 style = MaterialTheme.typography.body2,
                 color = OColor.claret,
             )
