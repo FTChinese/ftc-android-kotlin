@@ -5,9 +5,12 @@ import com.ft.ftchinese.BuildConfig
 private const val devIP = "http://192.168.0.7"
 private const val devPort = "8206"
 
+private const val flavorWx = "wechat"
 object Endpoint {
 
-    val accessToken = if (BuildConfig.DEBUG) {
+    // Build a wechat-specific production version
+    // that could use local dev environment
+    val accessToken = if (BuildConfig.DEBUG || BuildConfig.FLAVOR == flavorWx) {
         BuildConfig.ACCESS_TOKEN_TEST
     } else {
         BuildConfig.ACCESS_TOKEN_LIVE
@@ -42,19 +45,14 @@ object Endpoint {
      * You cannot use wechat pay in debug mode, so to test them correctly, do it
      * only in production app.
      *
-     * For Apple, we also use test account to distinguish Product/Sandbox data.
+     * @param isTest - Distinguish between sandbox or live server for released app.
+     * Debug app always use development environment.
      */
-    fun subsBase(isTest: Boolean = false) = if (isTest) {
-        // When account is test, always use sandbox url, which might be local or online
-        if (BuildConfig.DEBUG) {
-            "$devIP:${devPort}"
-        } else {
-            BuildConfig.API_SUBS_SANDBOX
-        }
+    fun subsBase(isTest: Boolean = false) = if (BuildConfig.DEBUG || BuildConfig.FLAVOR == flavorWx) {
+        "$devIP:${devPort}"
     } else {
-        // When account is not test, always use live url, which might be local or online
-        if (BuildConfig.DEBUG) {
-            "$devIP:${devPort}"
+        if (isTest) {
+            BuildConfig.API_SUBS_SANDBOX
         } else {
             BuildConfig.API_SUBS_LIVE
         }
@@ -67,7 +65,6 @@ object Endpoint {
     fun refreshIAP(isTest: Boolean, origTxID: String): String {
         return "${subsBase(isTest)}/apple/subs/$origTxID"
     }
-
 
     val latestRelease = "${subsBase()}/apps/android/latest"
     val releaseOf = "${subsBase()}/apps/android/releases"
