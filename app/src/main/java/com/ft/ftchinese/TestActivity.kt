@@ -11,15 +11,15 @@ import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
@@ -59,6 +59,7 @@ import com.ft.ftchinese.ui.validator.ValidationRule
 import com.ft.ftchinese.ui.validator.Validator
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.firebase.messaging.FirebaseMessaging
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.jetbrains.anko.toast
@@ -74,6 +75,7 @@ class TestActivity : ScopedAppActivity() {
 
     private lateinit var mobileViewModel: MobileViewModel
 
+    @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -85,64 +87,110 @@ class TestActivity : ScopedAppActivity() {
 
         setContent {
             OTheme {
-                Scaffold(
-                    topBar = {
-                        TopAppBar(
-                            title = { Text(text = "Test")},
-                            navigationIcon = {
-                                IconButton(onClick = {
-                                    finish()
-                                }) {
-                                    Icon(Icons.Filled.ArrowBack, "")
+
+                var skipHalfExpanded by remember { mutableStateOf(false) }
+                val state = rememberModalBottomSheetState(
+                    initialValue = ModalBottomSheetValue.Hidden,
+                    skipHalfExpanded = skipHalfExpanded
+                )
+                val scope = rememberCoroutineScope()
+                ModalBottomSheetLayout(
+                    sheetState = state,
+                    sheetContent = {
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Text(text = "hello")
+                        }
+                    }
+                ) {
+
+                    Scaffold(
+                        topBar = {
+                            TopAppBar(
+                                title = { Text(text = "Test")},
+                                navigationIcon = {
+                                    IconButton(onClick = {
+                                        finish()
+                                    }) {
+                                        Icon(Icons.Filled.ArrowBack, "")
+                                    }
                                 }
+                            )
+                        }
+                    ) { innerPadding ->
+
+                        Column {
+                            Row(
+                                Modifier
+                                    .toggleable(
+                                        value = skipHalfExpanded,
+                                        role = Role.Checkbox,
+                                        onValueChange = { checked -> skipHalfExpanded = checked }
+                                    )
+                            ) {
+                                Checkbox(checked = skipHalfExpanded, onCheckedChange = null)
+                                Spacer(Modifier.width(16.dp))
+                                Text("Skip Half Expanded State")
+
                             }
-                        )
-                    }
-                ) { innerPadding ->
-                    LazyColumn(
-                        modifier = Modifier.padding(innerPadding)
-                    ) {
-                        item { NetworkStatus() }
+                            Spacer(Modifier.height(20.dp))
+                            Button(onClick = { scope.launch { state.show() } }) {
+                                Text("Click to show sheet")
+                            }
+                        }
 
-                        item { EmailChecker() }
+                        Column(
+                            modifier = Modifier.padding(innerPadding).fillMaxWidth()
+                        ) {
 
-                        item { PaywallButton() }
+                        }
+                        //                        LazyColumn(
+//                            modifier = Modifier.padding(innerPadding)
+//                        ) {
+//
+//                            item { NetworkStatus() }
+//
+//                            item { EmailChecker() }
+//
+//                            item { PaywallButton() }
+//
+//                            item { WxMiniButton() }
+//
+//                            item { PostPurchaseButton() }
+//
+//                            item { FullScreenDialog() }
+//
+//                            item { ShowSignInUp() }
+//                            item { SignInFragment() }
+//                            item { SignUpFragment() }
+//
+//                            item { MobileLinkEmail() }
+//
+//                            item { PostPurchaseButton() }
+//
+//                            item { FreeUser() }
+//                            item { WxOnlyFreeUser() }
+//                            item { LinkedWithAutoRenew() }
+//                            item { LinkedWithOneOff() }
+//                            item { VIPUser() }
+//
+//                            item { StandardUser() }
+//                            item { PremiumUser() }
+//
+//                            item { StripeStandardUser() }
+//                            item { StripeStandardMonth() }
+//                            item { StripeAutoRenewOff() }
+//                            item { StripeAutoRenewOffWithAddOn() }
+//                            item { StripePremium() }
+//
+//                            item { IAPStandard() }
+//                            item { IAPPremium() }
+//                            item { IAPAddOn() }
+//                            item { IAPAutoRenewOff() }
+//                            item { IAPExpiredWithAddOn() }
+//                        }
 
-                        item { WxMiniButton() }
 
-                        item { PostPurchaseButton() }
 
-                        item { FullScreenDialog() }
-
-                        item { ShowSignInUp() }
-                        item { SignInFragment() }
-                        item { SignUpFragment() }
-
-                        item { MobileLinkEmail() }
-
-                        item { PostPurchaseButton() }
-
-                        item { FreeUser() }
-                        item { WxOnlyFreeUser() }
-                        item { LinkedWithAutoRenew() }
-                        item { LinkedWithOneOff() }
-                        item { VIPUser() }
-
-                        item { StandardUser() }
-                        item { PremiumUser() }
-
-                        item { StripeStandardUser() }
-                        item { StripeStandardMonth() }
-                        item { StripeAutoRenewOff() }
-                        item { StripeAutoRenewOffWithAddOn() }
-                        item { StripePremium() }
-
-                        item { IAPStandard() }
-                        item { IAPPremium() }
-                        item { IAPAddOn() }
-                        item { IAPAutoRenewOff() }
-                        item { IAPExpiredWithAddOn() }
-                    }
 //                    ScreenshotPreview(
 //                        screenshot = ScreenshotMeta(
 //                            imageUri = Uri.parse("content://media/external_primary/images/media/1942"),
@@ -152,7 +200,10 @@ class TestActivity : ScopedAppActivity() {
 //                        modifier = Modifier.padding(innerPadding),
 //                        onShareTo = { _, _, -> }
 //                    )
+                    }
                 }
+
+
             }
         }
 
