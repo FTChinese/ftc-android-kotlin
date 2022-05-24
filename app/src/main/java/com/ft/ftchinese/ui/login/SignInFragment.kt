@@ -25,7 +25,7 @@ import com.ft.ftchinese.ui.dialog.ScopedBottomSheetDialogFragment
 import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.wxlink.LinkPreviewFragment
-import com.ft.ftchinese.ui.wxlink.WxEmailLink
+import com.ft.ftchinese.ui.wxlink.WxEmailLinkAccounts
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.support.v4.toast
 
@@ -166,7 +166,7 @@ class SignInFragment : ScopedBottomSheetDialogFragment() {
                 Log.i(TAG, "Wechat is linking to an existing account $account")
                 sessionManager.loadAccount()?.let { current ->
                     LinkPreviewFragment(
-                        WxEmailLink(
+                        WxEmailLinkAccounts(
                             ftc = account, // Retrieved account
                             wx = current, // Currently logged-in account
                             loginMethod = current.loginMethod ?: LoginMethod.WECHAT,
