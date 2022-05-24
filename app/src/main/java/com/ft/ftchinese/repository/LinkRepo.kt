@@ -38,7 +38,7 @@ object LinkRepo {
             return if (done) {
                 FetchResult.Success(true)
             } else {
-                FetchResult.LocalizedError(R.string.loading_failed)
+                FetchResult.loadingFailed
             }
         } catch (e: APIError) {
             return when (e.statusCode) {
