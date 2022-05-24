@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
@@ -13,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.*
 import com.ft.ftchinese.BuildConfig
@@ -39,8 +40,6 @@ import com.tencent.mm.opensdk.openapi.IWXAPI
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler
 import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
-private const val EXTRA_UI_TEST = "extra_ui_test"
-
 /**
  * https://pay.weixin.qq.com/wiki/doc/api/app/app.php?chapter=8_5
  * The the callback part of wechat pay.
@@ -54,7 +53,9 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
     private var tracker: StatsTracker? = null
     private var api: IWXAPI? = null
 
-    private lateinit var wxPayViewModel: WxPayViewModel
+    private val statusLiveData: MutableLiveData<WxPayStatus> by lazy {
+        MutableLiveData<WxPayStatus>()
+    }
     private lateinit var userViewModel: UserViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,7 +64,6 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
         api = WXAPIFactory.createWXAPI(this, BuildConfig.WX_SUBS_APPID)
 
         payIntentStore = PayIntentStore.getInstance(this)
-        wxPayViewModel = ViewModelProvider(this)[WxPayViewModel::class.java]
         userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
 
         tracker = StatsTracker.getInstance(this)
@@ -72,22 +72,10 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
 
         setContent {
             OTheme {
-                val scaffoldState = rememberScaffoldState()
-                Scaffold(
-                    topBar = {
-                        Toolbar(
-                            heading = stringResource(id = R.string.pay_brand_wechat),
-                            onBack = this::onClickDone
-                        )
-                    },
-                    scaffoldState = scaffoldState
-                ) { innerPadding ->
-                    WxPayActivityScreen(
-                        wxViewModel = wxPayViewModel,
-                        innerPadding = innerPadding,
-                        onClickDone = this::onClickDone
-                    )
-                }
+                WxPayActivityScreen(
+                    uiStatusLiveData = statusLiveData,
+                    onClickDone = this::onClickDone
+                )
             }
         }
     }
@@ -127,16 +115,13 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
             when (resp.errCode) {
                 // 成功
                 // 展示成功页面
-                0 -> {
-//                    isPaymentSuccess = true
+                BaseResp.ErrCode.ERR_OK -> {
                     confirmSubscription(pi)
                 }
                 // 错误
                 // 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
-                -1 -> {
-                    wxPayViewModel.onPayStatus(
-                        WxPayStatus.Error(resp.errStr)
-                    )
+                BaseResp.ErrCode.ERR_COMM -> {
+                    statusLiveData.value = WxPayStatus.Error(resp.errStr)
                     // Tracking failure
                     pi?.let {
                         tracker?.payFailed(it.price.edition)
@@ -144,10 +129,8 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
                 }
                 // 用户取消
                 // 无需处理。发生场景：用户不支付了，点击取消，返回APP。
-                -2 -> {
-                    wxPayViewModel.onPayStatus(
-                        WxPayStatus.Canceled
-                    )
+                BaseResp.ErrCode.ERR_USER_CANCEL -> {
+                    statusLiveData.value = WxPayStatus.Canceled
                 }
             }
         }
@@ -160,7 +143,7 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
         val member = account.membership
 
         if (pi == null) {
-            wxPayViewModel.onPayStatus(WxPayStatus.Error("Missing payment intent!"))
+            statusLiveData.value = WxPayStatus.Error("Missing payment intent!")
             return
         }
 
@@ -171,10 +154,11 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
         ).buildResult()
 
         payIntentStore?.save(pi.withConfirmed(confirmed.order))
-        userViewModel.saveMembership(confirmed.membership)
         InvoiceStore.getInstance(this).save(confirmed)
 
-        wxPayViewModel.onPayStatus(WxPayStatus.Success(confirmed.membership))
+        userViewModel.saveMembership(confirmed.membership)
+
+        statusLiveData.value = WxPayStatus.Success(confirmed.membership)
         verifyPayment()
 
         tracker?.paySuccess(PaySuccessParams.ofFtc(pi))
@@ -221,19 +205,14 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
         onClickDone()
     }
 
-
     companion object {
         private const val TAG = "WxPayEntryActivity"
         @JvmStatic
-        fun start(context: Context, isTest: Boolean = false) {
-            val intent = Intent(
-                    context,
-                    WXPayEntryActivity::class.java
-            ).apply {
-                putExtra(EXTRA_UI_TEST, true)
-            }
-
-            context.startActivity(intent)
+        fun start(context: Context) {
+            context.startActivity(Intent(
+                context,
+                WXPayEntryActivity::class.java
+            ))
         }
     }
 }
@@ -241,19 +220,31 @@ class WXPayEntryActivity: ScopedAppActivity(), IWXAPIEventHandler {
 
 @Composable
 private fun WxPayActivityScreen(
-    wxViewModel: WxPayViewModel,
-    innerPadding: PaddingValues,
+    uiStatusLiveData: LiveData<WxPayStatus>,
     onClickDone: () -> Unit,
 ) {
-    val status = wxViewModel.statusLiveData.observeAsState(WxPayStatus.Loading)
+    val status = uiStatusLiveData.observeAsState(WxPayStatus.Loading)
 
-    ProgressLayout(
-        loading = status.value is WxPayStatus.Loading,
-        modifier = Modifier.padding(innerPadding)
-    ) {
-        WxPayScreen(
-            status = status.value,
-            onDone = onClickDone
-        )
+    val scaffoldState = rememberScaffoldState()
+
+    Scaffold(
+        topBar = {
+            Toolbar(
+                heading = stringResource(id = R.string.pay_brand_wechat),
+                onBack = onClickDone
+            )
+        },
+        scaffoldState = scaffoldState
+    ) { innerPadding ->
+        ProgressLayout(
+            loading = status.value is WxPayStatus.Loading,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            WxPayScreen(
+                status = status.value,
+                onDone = onClickDone
+            )
+        }
     }
+
 }
