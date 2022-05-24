@@ -54,7 +54,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion '1.1.1'
+        kotlinCompilerExtensionVersion '1.2.0-beta02'
     }
     defaultConfig {
         applicationId "com.ft.ftchinese"
@@ -152,6 +152,13 @@ android {
         oppo {
             dimension "appStore"
             versionNameSuffix "-oppo"
+        }
+        // For test only. This flavor sets server API to local development environment
+        // for release to make Wechat SDK testable.
+        // Use release build variants for this purpose.
+        wechat {
+            dimension "appStore"
+            versionNameSuffix "-wechat"
         }
     }
 
