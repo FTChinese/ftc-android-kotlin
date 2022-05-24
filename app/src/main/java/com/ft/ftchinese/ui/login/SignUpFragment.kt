@@ -84,12 +84,10 @@ class SignUpFragment : ScopedBottomSheetDialogFragment() {
 
         // To share dat with mobile fragment.
         mobileViewModel = activity?.run {
-            ViewModelProvider(this)
-                .get(MobileViewModel::class.java)
+            ViewModelProvider(this)[MobileViewModel::class.java]
         } ?: throw Exception("Invalid activity")
 
-        signUpViewModel = ViewModelProvider(this)
-            .get(SignUpViewModel::class.java)
+        signUpViewModel = ViewModelProvider(this)[SignUpViewModel::class.java]
 
         connectionLiveData.observe(this) {
             signUpViewModel.isNetworkAvailable.value = it
