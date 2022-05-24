@@ -46,6 +46,26 @@ object AccountRepo {
             .body
     }
 
+    suspend fun asyncLoadWxAccount(unionId: String): FetchResult<Account> {
+        try {
+            val account = withContext(Dispatchers.IO) {
+                loadWxAccount(unionId)
+            } ?: return FetchResult.loadingFailed
+
+            return FetchResult.Success(account)
+        } catch (e: APIError) {
+
+            return if (e.statusCode == 404) {
+                FetchResult.LocalizedError(R.string.loading_failed)
+            } else {
+                FetchResult.fromApi(e)
+            }
+
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
+    }
+
     fun refresh(account: Account): Account? {
         return when (account.loginMethod) {
             LoginMethod.EMAIL,

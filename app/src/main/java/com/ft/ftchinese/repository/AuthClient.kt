@@ -3,8 +3,11 @@ package com.ft.ftchinese.repository
 import android.util.Log
 import com.ft.ftchinese.model.fetch.APIError
 import com.ft.ftchinese.model.fetch.Fetch
+import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.*
 import com.ft.ftchinese.model.request.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object AuthClient {
 
@@ -155,6 +158,26 @@ object AuthClient {
             .sendJson(params)
             .endJson<WxSession>()
             .body
+    }
+
+    suspend fun asyncWxLogin(params: WxAuthParams): FetchResult<WxSession> {
+        try {
+            val sess = withContext(Dispatchers.IO) {
+                wxLogin(params)
+            } ?: return FetchResult.loadingFailed
+
+            // Fetched wx session data and send it to
+            // UI thread for saving, and then continues
+            // to fetch account data.
+
+            return FetchResult.Success(sess)
+        } catch (e: Exception) {
+            // If the error is ClientError,
+            // Possible 422 error key: code_missing_field, code_invalid.
+            // We cannot make sure the exact meaning of each error, just
+            // show user API's error message.
+            return FetchResult.fromException(e)
+        }
     }
 
     fun engaged(dur: ReadingDuration): String? {
