@@ -6,7 +6,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.enums.LoginMethod
 import com.ft.ftchinese.model.reader.Membership
 
-data class WxEmailLink(
+data class WxEmailLinkAccounts(
     val ftc: Account,
     val wx: Account,
     val loginMethod: LoginMethod,

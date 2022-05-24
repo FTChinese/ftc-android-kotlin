@@ -33,7 +33,7 @@ import com.ft.ftchinese.viewmodel.UserViewModel
  * 2. Email user wants to link to wechat.
  */
 class LinkPreviewFragment(
-    private val params: WxEmailLink
+    private val params: WxEmailLinkAccounts
 ) : ScopedBottomSheetDialogFragment() {
 
     override fun onCreateView(
@@ -44,29 +44,18 @@ class LinkPreviewFragment(
         return ComposeView(requireContext()).apply {
             setContent {
                 OTheme {
-                    val scaffoldState = rememberScaffoldState()
-                    Scaffold(
-                        topBar = {
-                            Toolbar(
-                                heading = "",
-                                onBack = { dismiss() },
-                                icon = Icons.Default.Close
-                            )
-                        },
-                        scaffoldState = scaffoldState
-                    ) { innerPadding ->
-                        LinkPreviewScreen(
-                            linkParams = params,
-                            innerPadding = innerPadding,
-                            scaffoldState = scaffoldState,
-                            onSuccess = {
-                                activity?.apply {
-                                    setResult(Activity.RESULT_OK)
-                                    finish()
-                                }
+                    LinkFragmentScreen(
+                        params = params,
+                        onSuccess = {
+                            activity?.apply {
+                                setResult(Activity.RESULT_OK)
+                                finish()
                             }
-                        )
-                    }
+                        },
+                        onBack = {
+                            dismiss()
+                        }
+                    )
                 }
             }
         }
@@ -74,9 +63,35 @@ class LinkPreviewFragment(
 }
 
 @Composable
-fun LinkPreviewScreen(
+fun LinkFragmentScreen(
+    params: WxEmailLinkAccounts,
+    onSuccess: () -> Unit,
+    onBack: () -> Unit,
+) {
+    val scaffoldState = rememberScaffoldState()
+    Scaffold(
+        topBar = {
+            Toolbar(
+                heading = "",
+                onBack = onBack,
+                icon = Icons.Default.Close
+            )
+        },
+        scaffoldState = scaffoldState
+    ) { innerPadding ->
+        WxLinkEmailScreen(
+            linkParams = params,
+            innerPadding = innerPadding,
+            scaffoldState = scaffoldState,
+            onSuccess = onSuccess,
+        )
+    }
+}
+
+@Composable
+fun WxLinkEmailScreen(
     userViewModel: UserViewModel = viewModel(),
-    linkParams: WxEmailLink,
+    linkParams: WxEmailLinkAccounts,
     scaffoldState: ScaffoldState,
     innerPadding: PaddingValues,
     onSuccess: () -> Unit

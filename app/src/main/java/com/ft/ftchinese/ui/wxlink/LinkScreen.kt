@@ -56,7 +56,7 @@ fun LinkResultScreen(
 @Composable
 fun LinkScreen(
     loading: Boolean,
-    params: WxEmailLink,
+    params: WxEmailLinkAccounts,
     onLink: (Account) -> Unit,
 ) {
     val context = LocalContext.current
@@ -191,7 +191,7 @@ fun buildSubsDetails(
 fun PreviewLinkScreen() {
     LinkScreen(
         loading = false,
-        params = WxEmailLink(
+        params = WxEmailLinkAccounts(
             ftc = Account(
                 id = "ftc-id",
                 email = "preview@example.org",
