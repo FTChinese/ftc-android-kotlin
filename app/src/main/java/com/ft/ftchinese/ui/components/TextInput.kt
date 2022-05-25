@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -10,6 +11,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.validator.ValidationRule
 
@@ -59,6 +61,7 @@ fun TextInput(
     state: InputState,
     enabled: Boolean = true,
     readOnly: Boolean = false,
+    keyboardType: KeyboardType = KeyboardType.Text,
 ) {
     val isError = remember(state.touched, state.valid) {
         derivedStateOf { state.touched.value && !state.valid.value }
@@ -76,6 +79,9 @@ fun TextInput(
                 )
             },
             isError = isError.value,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = keyboardType
+            ),
             modifier = Modifier.fillMaxWidth(),
             readOnly = readOnly,
             enabled = enabled,
