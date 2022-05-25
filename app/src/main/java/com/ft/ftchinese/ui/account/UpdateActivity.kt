@@ -10,8 +10,6 @@ import com.ft.ftchinese.databinding.ActivityUpdateAccountBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.account.address.AddressViewModel
 import com.ft.ftchinese.ui.account.address.UpdateAddressFragment
-import com.ft.ftchinese.ui.account.password.PasswordViewModel
-import com.ft.ftchinese.ui.account.password.UpdatePasswordFragment
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.mobile.MobileFragment
