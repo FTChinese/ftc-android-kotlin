@@ -10,10 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.ft.ftchinese.R
-import com.ft.ftchinese.ui.components.PrimaryButton
-import com.ft.ftchinese.ui.components.SecondaryButton
-import com.ft.ftchinese.ui.components.TextInput
-import com.ft.ftchinese.ui.components.rememberInputState
+import com.ft.ftchinese.ui.components.*
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.validator.ValidationRule
 import com.ft.ftchinese.ui.validator.Validator
@@ -27,6 +24,7 @@ fun UpdateEmailScreen(
     onSave: (String) -> Unit,
 ) {
     val emailState = rememberInputState(
+        initialValue = email,
         rules = listOf(
             ValidationRule(
                 predicate = Validator::isEmail,
@@ -62,15 +60,12 @@ fun UpdateEmailScreen(
 
         Spacer(modifier = Modifier.height(Dimens.dp16))
 
-        PrimaryButton(
+        SaveButton(
+            enabled = emailState.valid.value && !loading,
             onClick = {
                 onSave(emailState.field.value)
-            },
-            enabled = emailState.valid.value && !loading,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = stringResource(id = R.string.btn_save))
-        }
+            }
+        )
     }
 }
 
