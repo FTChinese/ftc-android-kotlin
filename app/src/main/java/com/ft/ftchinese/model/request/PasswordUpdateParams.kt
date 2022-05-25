@@ -7,3 +7,8 @@ data class PasswordUpdateParams(
     val currentPassword: String,
     val newPassword: String
 )
+
+enum class PwUpdateResult {
+    Done,
+    Mismatched;
+}
