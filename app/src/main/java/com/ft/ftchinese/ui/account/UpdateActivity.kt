@@ -7,21 +7,18 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpdateAccountBinding
-import com.ft.ftchinese.store.AccountCache
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.account.password.PasswordViewModel
-import com.ft.ftchinese.ui.account.password.UpdatePasswordFragment
 import com.ft.ftchinese.ui.account.address.AddressViewModel
 import com.ft.ftchinese.ui.account.address.UpdateAddressFragment
+import com.ft.ftchinese.ui.account.name.NameViewModel
+import com.ft.ftchinese.ui.account.name.UpdateNameFragment
+import com.ft.ftchinese.ui.account.password.PasswordViewModel
+import com.ft.ftchinese.ui.account.password.UpdatePasswordFragment
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.email.EmailViewModel
-import com.ft.ftchinese.ui.email.RequestVerificationFragment
-import com.ft.ftchinese.ui.email.UpdateEmailFragment
 import com.ft.ftchinese.ui.mobile.MobileFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
-import com.ft.ftchinese.ui.account.name.NameViewModel
-import com.ft.ftchinese.ui.account.name.UpdateNameFragment
 
 class UpdateActivity : ScopedAppActivity() {
 
@@ -82,34 +79,23 @@ class UpdateActivity : ScopedAppActivity() {
                 .beginTransaction()
 
         when (intent.getSerializableExtra(TARGET_FRAG)) {
-            AccountRowType.EMAIL -> {
-                supportActionBar?.setTitle(R.string.title_change_email)
-                val account = AccountCache.get() ?: return
-                // Only show verification button for real emails that are not verified.
-                // Do not show it for mobile-created account since that email address is not usable.
-                if (!account.isMobileEmail && !account.isVerified) {
-                    fm.replace(R.id.first_frag, RequestVerificationFragment.newInstance())
-                }
-
-                fm.replace(R.id.second_frag, UpdateEmailFragment.newInstance())
-            }
-            AccountRowType.USER_NAME -> {
+            AccountRowId.USER_NAME -> {
                 supportActionBar?.setTitle(R.string.title_change_username)
                 fm.replace(R.id.first_frag, UpdateNameFragment.newInstance())
             }
-            AccountRowType.PASSWORD -> {
+            AccountRowId.PASSWORD -> {
                 supportActionBar?.setTitle(R.string.title_change_password)
                 fm.replace(R.id.first_frag, UpdatePasswordFragment.newInstance())
             }
-            AccountRowType.Address -> {
+            AccountRowId.Address -> {
                 supportActionBar?.title = "设置地址"
                 fm.replace(R.id.first_frag, UpdateAddressFragment.newInstance())
             }
-            AccountRowType.MOBILE -> {
+            AccountRowId.MOBILE -> {
                 supportActionBar?.title = "关联手机号码"
                 fm.replace(R.id.first_frag, MobileFragment.newInstanceForUpdate())
             }
-            AccountRowType.DELETE -> {
+            AccountRowId.DELETE -> {
                 supportActionBar?.setTitle(R.string.title_delete_account)
                 fm.replace(R.id.first_frag, DeleteAccountFragment.newInstance())
             }
@@ -148,7 +134,7 @@ class UpdateActivity : ScopedAppActivity() {
         private const val TARGET_FRAG = "extra_target_fragment"
 
         @JvmStatic
-        fun start(context: Context, rowType: AccountRowType?) {
+        fun start(context: Context, rowType: AccountRowId?) {
             context.startActivity(
                 Intent(context, UpdateActivity::class.java).apply {
                     putExtra(TARGET_FRAG, rowType)
@@ -157,7 +143,7 @@ class UpdateActivity : ScopedAppActivity() {
         }
 
         @JvmStatic
-        fun intent(context: Context, rowType: AccountRowType) = Intent(context, UpdateActivity::class.java).apply {
+        fun intent(context: Context, rowType: AccountRowId) = Intent(context, UpdateActivity::class.java).apply {
             putExtra(TARGET_FRAG, rowType)
         }
     }
