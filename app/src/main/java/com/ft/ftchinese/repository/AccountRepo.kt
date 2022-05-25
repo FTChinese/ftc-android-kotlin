@@ -271,6 +271,20 @@ object AccountRepo {
         return resp.code == 204 || resp.code == 200
     }
 
+    suspend fun asyncRefreshWxInfo(sess: WxSession): FetchResult<Boolean> {
+        return try {
+            val done = withContext(Dispatchers.IO) {
+                refreshWxInfo(wxSession = sess)
+            }
+
+            FetchResult.Success(done)
+        } catch (e: APIError) {
+            FetchResult.fromApi(e)
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
+    }
+
     fun loadWxAvatar(url: String): ByteArray? {
         return Fetch()
             .get(url)
