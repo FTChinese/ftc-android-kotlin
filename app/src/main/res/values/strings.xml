@@ -115,6 +115,8 @@
     <string name="title_login_signup">登录/注册</string>
     <string name="title_activity_profile">我的资料</string>
     <string name="title_change_password">修改密码</string>
+    <string name="title_change_address">设置地址</string>
+    <string name="title_set_mobile">关联手机号码</string>
     <string name="title_change_email">修改登录邮箱</string>
     <string name="title_change_username">修改用户名</string>
     <string name="title_wx_account">微信账号</string>

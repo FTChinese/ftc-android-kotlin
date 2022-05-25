@@ -88,17 +88,11 @@ fun FtcAccountActivityScreen(
             ),
             onClickRow = { rowId ->
                 when (rowId) {
-                    AccountRowId.DELETE -> {
-                        uiState.showDeleteAlert(true)
+                    AccountRowId.EMAIL -> {
+                        onNavigateTo(AccountAppScreen.Email)
                     }
-                    AccountRowId.STRIPE -> {
-                        StripeWalletActivity.start(context)
-                    }
-                    AccountRowId.WECHAT -> {
-                        launchWxInfoActivity(
-                            launcher = launcher,
-                            context = context
-                        )
+                    AccountRowId.USER_NAME -> {
+                        onNavigateTo(AccountAppScreen.UserName)
                     }
                     AccountRowId.MOBILE -> {
                         if (account.isMobileEmail) {
@@ -111,11 +105,14 @@ fun FtcAccountActivityScreen(
                             )
                         }
                     }
-                    AccountRowId.EMAIL -> {
-                        onNavigateTo(AccountAppScreen.Email)
+                    AccountRowId.STRIPE -> {
+                        StripeWalletActivity.start(context)
                     }
-                    AccountRowId.USER_NAME -> {
-                        onNavigateTo(AccountAppScreen.UserName)
+                    AccountRowId.WECHAT -> {
+                        onNavigateTo(AccountAppScreen.Wechat)
+                    }
+                    AccountRowId.DELETE -> {
+                        uiState.showDeleteAlert(true)
                     }
                     else -> {
                         launchUpdateActivity(

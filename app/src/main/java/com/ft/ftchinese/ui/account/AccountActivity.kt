@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
@@ -20,6 +19,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
+import com.ft.ftchinese.ui.wxinfo.WxInfoActivityScreen
 import com.ft.ftchinese.viewmodel.UserViewModel
 
 /**
@@ -46,6 +46,11 @@ class AccountActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        userViewModel.reloadAccount()
+    }
+
     companion object {
 
         @JvmStatic
@@ -62,7 +67,6 @@ fun AccountApp(
     onExit: () -> Unit
 ) {
     val scaffold = rememberScaffoldState()
-    val scope = rememberCoroutineScope()
 
     OTheme {
         val navController = rememberNavController()
@@ -118,6 +122,15 @@ fun AccountApp(
                     route = AccountAppScreen.UserName.name
                 ) {
                     UpdateNameActivityScreen(
+                        userViewModel = userViewModel,
+                        scaffold = scaffold,
+                    )
+                }
+
+                composable(
+                    route = AccountAppScreen.Wechat.name
+                ) {
+                    WxInfoActivityScreen(
                         userViewModel = userViewModel,
                         scaffold = scaffold,
                     )

@@ -15,6 +15,18 @@ enum class AccountAppScreen(@StringRes val titleId: Int) {
     ),
     Password(
         titleId = R.string.title_change_password
+    ),
+    Address(
+        titleId = R.string.title_change_address
+    ),
+    Stripe(
+        titleId = R.string.stripe_setting
+    ),
+    Wechat(
+        titleId = R.string.title_wx_account
+    ),
+    Mobile(
+        titleId = R.string.title_set_mobile
     );
 
     companion object {
@@ -25,6 +37,7 @@ enum class AccountAppScreen(@StringRes val titleId: Int) {
                 Email.name -> Email
                 UserName.name -> UserName
                 Password.name -> Password
+                Wechat.name -> Wechat
                 null -> Overview
                 else -> throw IllegalArgumentException("Route $route is not recognized")
             }
