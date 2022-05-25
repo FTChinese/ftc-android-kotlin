@@ -19,22 +19,10 @@ class UpdateEmailState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     resources: Resources,
-    private val connState: State<ConnectionState>,
-) : BaseState(scaffoldState, scope, resources) {
+    connState: State<ConnectionState>,
+) : BaseState(scaffoldState, scope, resources, connState) {
 
     val updated = mutableStateOf<BaseAccount?>(null)
-
-    val isConnected: Boolean
-        get() = connState.value == ConnectionState.Available
-
-    fun ensureConnected(): Boolean {
-        if (connState.value != ConnectionState.Available) {
-            showNotConnected()
-            return false
-        }
-
-        return true
-    }
 
     fun requestVrfLetter(ftcId: String) {
         if (!ensureConnected()) {
@@ -69,6 +57,7 @@ class UpdateEmailState(
             return
         }
 
+        progress.value = true
         scope.launch {
             val result = AccountRepo.asyncUpdateEmail(
                 ftcId = ftcId,
@@ -97,7 +86,7 @@ fun rememberUpdateEmailState(
     scope: CoroutineScope = rememberCoroutineScope(),
     resources: Resources = LocalContext.current.resources,
     connState: State<ConnectionState> = connectivityState()
-) = remember {
+) = remember(scaffoldState, resources) {
     UpdateEmailState(
         scaffoldState = scaffoldState,
         scope = scope,
