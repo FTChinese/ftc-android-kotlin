@@ -81,7 +81,7 @@ object AccountRepo {
         try {
 
             val updatedAccount = withContext(Dispatchers.IO) {
-                AccountRepo.refresh(account)
+                refresh(account)
             } ?: return FetchResult.LocalizedError(R.string.loading_failed)
 
             return FetchResult.Success(updatedAccount)
@@ -327,16 +327,41 @@ object AccountRepo {
            .body
     }
 
-    fun updateAddress(ftcId: String, address: Address): Boolean {
-        val resp = Fetch()
+    suspend fun asyncLoadAddress(ftcId: String): Address? {
+        return try {
+            withContext(Dispatchers.IO) {
+                loadAddress(ftcId)
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun updateAddress(ftcId: String, address: Address): Address? {
+        return Fetch()
             .patch(Endpoint.address)
             .setUserId(ftcId)
             .noCache()
             .setApiKey()
             .sendJson(address)
-            .endText()
+            .endJson<Address>()
+            .body
+    }
 
-        return resp.code == 204
+    suspend fun asyncUpdateAddress(ftcId: String, address: Address): FetchResult<Address> {
+        return try {
+            val addr = withContext(Dispatchers.IO) {
+                updateAddress(ftcId, address)
+            }
+
+            if (addr == null) {
+                FetchResult.loadingFailed
+            } else {
+                FetchResult.Success(addr)
+            }
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
     }
 
     fun deleteAccount(ftcId: String, params: EmailPasswordParams): Boolean {
