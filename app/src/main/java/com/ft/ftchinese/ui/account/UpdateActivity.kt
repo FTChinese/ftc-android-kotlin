@@ -22,7 +22,6 @@ class UpdateActivity : ScopedAppActivity() {
     private lateinit var sessionManager: SessionManager
 
     private lateinit var addressViewModel: AddressViewModel
-    private lateinit var passwordViewModel: PasswordViewModel
     private lateinit var mobileViewModel: MobileViewModel
     private lateinit var deleteViewModel: DeleteAccountViewModel
 
@@ -41,8 +40,6 @@ class UpdateActivity : ScopedAppActivity() {
 
         sessionManager = SessionManager.getInstance(this)
 
-        passwordViewModel = ViewModelProvider(this)[PasswordViewModel::class.java]
-
         addressViewModel = ViewModelProvider(this)[AddressViewModel::class.java]
 
         mobileViewModel = ViewModelProvider(this)[MobileViewModel::class.java]
@@ -50,14 +47,12 @@ class UpdateActivity : ScopedAppActivity() {
         deleteViewModel = ViewModelProvider(this)[DeleteAccountViewModel::class.java]
 
         connectionLiveData.observe(this) {
-            passwordViewModel.isNetworkAvailable.value = it
             addressViewModel.isNetworkAvailable.value = it
             // MobileViewModel's network is configured in the its fragment.
             deleteViewModel.isNetworkAvailable.value = it
         }
 
         isConnected.let {
-            passwordViewModel.isNetworkAvailable.value = it
             addressViewModel.isNetworkAvailable.value = it
             deleteViewModel.isNetworkAvailable.value = it
         }
@@ -66,10 +61,6 @@ class UpdateActivity : ScopedAppActivity() {
                 .beginTransaction()
 
         when (intent.getSerializableExtra(TARGET_FRAG)) {
-            AccountRowId.PASSWORD -> {
-                supportActionBar?.setTitle(R.string.title_change_password)
-                fm.replace(R.id.first_frag, UpdatePasswordFragment.newInstance())
-            }
             AccountRowId.Address -> {
                 supportActionBar?.title = "设置地址"
                 fm.replace(R.id.first_frag, UpdateAddressFragment.newInstance())
@@ -90,10 +81,6 @@ class UpdateActivity : ScopedAppActivity() {
     }
 
     private fun setupViewModel() {
-
-        passwordViewModel.progressLiveData.observe(this) {
-            binding.inProgress = it
-        }
 
         addressViewModel.progressLiveData.observe(this) {
             binding.inProgress = it

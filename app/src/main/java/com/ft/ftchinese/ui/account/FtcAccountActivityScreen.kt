@@ -94,6 +94,9 @@ fun FtcAccountActivityScreen(
                     AccountRowId.USER_NAME -> {
                         onNavigateTo(AccountAppScreen.UserName)
                     }
+                    AccountRowId.PASSWORD -> {
+                        onNavigateTo(AccountAppScreen.Password)
+                    }
                     AccountRowId.MOBILE -> {
                         if (account.isMobileEmail) {
                             uiState.showMobileAlert(true)

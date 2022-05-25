@@ -128,6 +128,15 @@ fun AccountApp(
                 }
 
                 composable(
+                    route = AccountAppScreen.Password.name
+                ) {
+                    PasswordActivityScreen(
+                        userViewModel = userViewModel,
+                        scaffold = scaffold,
+                    )
+                }
+
+                composable(
                     route = AccountAppScreen.Wechat.name
                 ) {
                     WxInfoActivityScreen(
