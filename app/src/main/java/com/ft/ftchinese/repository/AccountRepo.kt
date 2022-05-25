@@ -151,6 +151,31 @@ object AccountRepo {
             .body
     }
 
+    suspend fun asyncUpdateName(ftcId: String, name: String): FetchResult<BaseAccount> {
+        try {
+            val baseAccount = withContext(Dispatchers.IO) {
+                updateUserName(ftcId, name)
+            }
+
+            return if (baseAccount == null) {
+                FetchResult.unknownError
+            } else {
+                FetchResult.Success(baseAccount)
+            }
+        } catch (e: APIError) {
+            return if (e.statusCode == 422) {
+                when (e.error?.key) {
+                    "userName_already_exists" -> FetchResult.LocalizedError(R.string.api_name_taken)
+                    else -> FetchResult.fromApi(e)
+                }
+            } else {
+                FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
+    }
+
     fun updatePassword(ftcId: String, params: PasswordUpdateParams): Boolean {
         val resp =  Fetch()
             .patch(Endpoint.passwordUpdate)
