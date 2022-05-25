@@ -3,21 +3,36 @@ package com.ft.ftchinese.ui.components
 import android.content.res.Resources
 import androidx.annotation.StringRes
 import androidx.compose.material.ScaffoldState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.ft.ftchinese.R
 import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.repository.AccountRepo
+import com.ft.ftchinese.ui.base.ConnectionState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 open class BaseState(
     val scaffoldState: ScaffoldState,
     val scope: CoroutineScope,
-    val resources: Resources
+    val resources: Resources,
+    val connection: State<ConnectionState>
 ) {
     val progress = mutableStateOf(false)
     val accountRefreshed = mutableStateOf<Account?>(null)
+
+    val isConnected: Boolean
+        get() = connection.value == ConnectionState.Available
+
+    fun ensureConnected(): Boolean {
+        if (connection.value != ConnectionState.Available) {
+            showNotConnected()
+            return false
+        }
+
+        return true
+    }
 
     fun showSnackBar(@StringRes id: Int) {
         try {
