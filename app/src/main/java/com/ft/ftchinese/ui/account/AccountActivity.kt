@@ -121,7 +121,7 @@ fun AccountApp(
                 composable(
                     route = AccountAppScreen.UserName.name
                 ) {
-                    UpdateNameActivityScreen(
+                    NameActivityScreen(
                         userViewModel = userViewModel,
                         scaffold = scaffold,
                     )

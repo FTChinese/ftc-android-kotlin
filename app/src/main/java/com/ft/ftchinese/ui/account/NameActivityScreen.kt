@@ -7,14 +7,14 @@ import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.viewmodel.UserViewModel
 
 @Composable
-fun UpdateNameActivityScreen(
+fun NameActivityScreen(
     userViewModel: UserViewModel,
     scaffold: ScaffoldState
 ) {
     val accountState = userViewModel.accountLiveData.observeAsState()
     val account = accountState.value
 
-    val nameState = rememberUpdateNameState(
+    val nameState = rememberNameState(
         scaffoldState = scaffold
     )
 
@@ -29,7 +29,7 @@ fun UpdateNameActivityScreen(
     ProgressLayout(
         loading = nameState.progress.value
     ) {
-        UpdateNameScreen(
+        NameScreen(
             userName = account.userName ?: "",
             loading = nameState.progress.value,
             onSave = { newName ->

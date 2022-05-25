@@ -14,7 +14,7 @@ import com.ft.ftchinese.ui.components.BaseState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class UpdateNameState(
+class NameUpdateState(
     scaffoldState: ScaffoldState,
     scope: CoroutineScope,
     resources: Resources,
@@ -50,13 +50,13 @@ class UpdateNameState(
 }
 
 @Composable
-fun rememberUpdateNameState(
+fun rememberNameState(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     scope: CoroutineScope = rememberCoroutineScope(),
     resources: Resources = LocalContext.current.resources,
     connState: State<ConnectionState> = connectivityState()
 ) = remember(scaffoldState, resources) {
-    UpdateNameState(
+    NameUpdateState(
         scaffoldState = scaffoldState,
         scope = scope,
         resources = resources,

@@ -14,7 +14,7 @@ import com.ft.ftchinese.ui.validator.ValidationRule
 import com.ft.ftchinese.ui.validator.Validator
 
 @Composable
-fun UpdateNameScreen(
+fun NameScreen(
     userName: String,
     loading: Boolean,
     onSave: (String) -> Unit
@@ -59,7 +59,7 @@ fun UpdateNameScreen(
 @Preview(showBackground = true)
 @Composable
 fun PreviewUpdateNameScreen() {
-    UpdateNameScreen(
+    NameScreen(
         userName = "Test Name",
         loading = false,
         onSave = {}
