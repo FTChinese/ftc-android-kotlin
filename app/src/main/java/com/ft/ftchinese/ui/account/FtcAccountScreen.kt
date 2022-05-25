@@ -23,7 +23,7 @@ import com.ft.ftchinese.ui.theme.OColor
 @Composable
 fun FtcAccountScreen(
     rows: List<AccountRow>,
-    onClickRow: (AccountRowType) -> Unit
+    onClickRow: (AccountRowId) -> Unit
 ) {
 
     Column(
@@ -42,7 +42,7 @@ fun FtcAccountScreen(
 
         SecondaryButton(
             onClick = {
-                onClickRow(AccountRowType.DELETE)
+                onClickRow(AccountRowId.DELETE)
             },
             modifier = Modifier
                 .padding(Dimens.dp16)
