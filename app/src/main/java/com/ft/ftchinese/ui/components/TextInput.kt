@@ -3,15 +3,19 @@ package com.ft.ftchinese.ui.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import com.ft.ftchinese.ui.theme.OColor
 import com.ft.ftchinese.ui.validator.ValidationRule
 
@@ -61,6 +65,8 @@ fun TextInput(
     state: InputState,
     enabled: Boolean = true,
     readOnly: Boolean = false,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardType: KeyboardType = KeyboardType.Text,
 ) {
     val isError = remember(state.touched, state.valid) {
@@ -78,13 +84,17 @@ fun TextInput(
                     text = label
                 )
             },
+            trailingIcon = trailingIcon,
             isError = isError.value,
+            visualTransformation = visualTransformation,
             keyboardOptions = KeyboardOptions(
-                keyboardType = keyboardType
+                keyboardType = keyboardType,
+                autoCorrect = false,
             ),
             modifier = Modifier.fillMaxWidth(),
             readOnly = readOnly,
             enabled = enabled,
+            singleLine = true,
         )
         if (isError.value) {
             Text(
@@ -95,4 +105,41 @@ fun TextInput(
             )
         }
     }
+}
+
+@Composable
+fun PasswordInput(
+    label: String,
+    state: InputState,
+    enabled: Boolean = true,
+    readOnly: Boolean = false,
+) {
+    var (visible, setVisible) = rememberSaveable { mutableStateOf(false) }
+
+    TextInput(
+        label = label,
+        state = state,
+        enabled = enabled,
+        readOnly = readOnly,
+        keyboardType = KeyboardType.Password,
+        visualTransformation = if (visible) {
+            VisualTransformation.None
+        } else {
+            PasswordVisualTransformation()
+        },
+        trailingIcon = {
+            val image = if (visible) {
+                Icons.Filled.Visibility
+            } else {
+                Icons.Filled.VisibilityOff
+            }
+
+            val desc = if (visible) "Hide password" else "Show password"
+            IconButton(
+                onClick = { setVisible(!visible) }
+            ) {
+                Icon(imageVector = image, contentDescription = desc)
+            }
+        }
+    )
 }
