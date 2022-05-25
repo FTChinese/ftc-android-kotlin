@@ -10,13 +10,10 @@ import com.ft.ftchinese.databinding.ActivityUpdateAccountBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.account.address.AddressViewModel
 import com.ft.ftchinese.ui.account.address.UpdateAddressFragment
-import com.ft.ftchinese.ui.account.name.NameViewModel
-import com.ft.ftchinese.ui.account.name.UpdateNameFragment
 import com.ft.ftchinese.ui.account.password.PasswordViewModel
 import com.ft.ftchinese.ui.account.password.UpdatePasswordFragment
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
-import com.ft.ftchinese.ui.email.EmailViewModel
 import com.ft.ftchinese.ui.mobile.MobileFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 
@@ -25,8 +22,6 @@ class UpdateActivity : ScopedAppActivity() {
     private lateinit var sessionManager: SessionManager
 
     private lateinit var addressViewModel: AddressViewModel
-    private lateinit var emailViewModel: EmailViewModel
-    private lateinit var nameViewModel: NameViewModel
     private lateinit var passwordViewModel: PasswordViewModel
     private lateinit var mobileViewModel: MobileViewModel
     private lateinit var deleteViewModel: DeleteAccountViewModel
@@ -46,10 +41,6 @@ class UpdateActivity : ScopedAppActivity() {
 
         sessionManager = SessionManager.getInstance(this)
 
-        emailViewModel = ViewModelProvider(this)[EmailViewModel::class.java]
-
-        nameViewModel = ViewModelProvider(this)[NameViewModel::class.java]
-
         passwordViewModel = ViewModelProvider(this)[PasswordViewModel::class.java]
 
         addressViewModel = ViewModelProvider(this)[AddressViewModel::class.java]
@@ -59,8 +50,6 @@ class UpdateActivity : ScopedAppActivity() {
         deleteViewModel = ViewModelProvider(this)[DeleteAccountViewModel::class.java]
 
         connectionLiveData.observe(this) {
-            emailViewModel.isNetworkAvailable.value = it
-            nameViewModel.isNetworkAvailable.value = it
             passwordViewModel.isNetworkAvailable.value = it
             addressViewModel.isNetworkAvailable.value = it
             // MobileViewModel's network is configured in the its fragment.
@@ -68,8 +57,6 @@ class UpdateActivity : ScopedAppActivity() {
         }
 
         isConnected.let {
-            emailViewModel.isNetworkAvailable.value = it
-            nameViewModel.isNetworkAvailable.value = it
             passwordViewModel.isNetworkAvailable.value = it
             addressViewModel.isNetworkAvailable.value = it
             deleteViewModel.isNetworkAvailable.value = it
@@ -79,10 +66,6 @@ class UpdateActivity : ScopedAppActivity() {
                 .beginTransaction()
 
         when (intent.getSerializableExtra(TARGET_FRAG)) {
-            AccountRowId.USER_NAME -> {
-                supportActionBar?.setTitle(R.string.title_change_username)
-                fm.replace(R.id.first_frag, UpdateNameFragment.newInstance())
-            }
             AccountRowId.PASSWORD -> {
                 supportActionBar?.setTitle(R.string.title_change_password)
                 fm.replace(R.id.first_frag, UpdatePasswordFragment.newInstance())
@@ -107,14 +90,6 @@ class UpdateActivity : ScopedAppActivity() {
     }
 
     private fun setupViewModel() {
-
-        emailViewModel.progressLiveData.observe(this) {
-            binding.inProgress = it
-        }
-
-        nameViewModel.progressLiveData.observe(this) {
-            binding.inProgress = it
-        }
 
         passwordViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
