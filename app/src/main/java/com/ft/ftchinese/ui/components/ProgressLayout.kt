@@ -2,6 +2,7 @@ package com.ft.ftchinese.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,7 +22,12 @@ fun ProgressLayout(
         content()
 
         if (loading) {
-            LinearProgressIndicator(color = OColor.claret)
+            LinearProgressIndicator(
+                color = OColor.claret,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopStart)
+            )
         }
     }
 }
