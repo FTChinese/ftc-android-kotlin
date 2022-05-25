@@ -1,0 +1,65 @@
+package com.ft.ftchinese.ui.account
+
+import android.content.res.Resources
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.rememberScaffoldState
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import com.ft.ftchinese.model.reader.Account
+import com.ft.ftchinese.ui.base.ConnectionState
+import com.ft.ftchinese.ui.base.connectivityState
+import com.ft.ftchinese.ui.components.BaseState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+
+class FtcAccountState(
+    scaffoldState: ScaffoldState,
+    scope: CoroutineScope,
+    resources: Resources,
+    connState: State<ConnectionState>,
+) : BaseState(scaffoldState, scope, resources, connState) {
+    var refreshing by mutableStateOf(false)
+        private set
+
+    var alertDelete by mutableStateOf(false)
+        private set
+
+    var alertMobileEmail by mutableStateOf(false)
+        private set
+
+    fun showDeleteAlert(show: Boolean) {
+        alertDelete = show
+    }
+
+    fun showMobileAlert(show: Boolean) {
+        alertMobileEmail = show
+    }
+
+    fun refresh(account: Account) {
+        if (!ensureConnected()) {
+            return
+        }
+
+        refreshing = true
+
+        scope.launch {
+            asyncRefresh(account)
+            refreshing = false
+        }
+    }
+}
+
+@Composable
+fun rememberFtcAccountState(
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    scope: CoroutineScope = rememberCoroutineScope(),
+    resources: Resources = LocalContext.current.resources,
+    connState: State<ConnectionState> = connectivityState()
+) = remember(scaffoldState, resources) {
+    FtcAccountState(
+        scaffoldState = scaffoldState,
+        scope = scope,
+        resources = resources,
+        connState = connState
+    )
+}

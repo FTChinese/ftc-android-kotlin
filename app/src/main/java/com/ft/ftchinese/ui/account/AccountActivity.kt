@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,7 +20,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ft.ftchinese.ui.components.Toolbar
 import com.ft.ftchinese.ui.theme.OTheme
-import kotlinx.coroutines.launch
+import com.ft.ftchinese.viewmodel.UserViewModel
 
 /**
  * Show user's account details.
@@ -30,11 +31,16 @@ import kotlinx.coroutines.launch
  */
 class AccountActivity : ComponentActivity() {
 
+    private lateinit var userViewModel: UserViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        userViewModel = ViewModelProvider(this)[UserViewModel::class.java]
+
         setContent {
             AccountApp(
+                userViewModel = userViewModel,
                 onExit = { finish() }
             )
         }
@@ -52,6 +58,7 @@ class AccountActivity : ComponentActivity() {
 
 @Composable
 fun AccountApp(
+    userViewModel: UserViewModel,
     onExit: () -> Unit
 ) {
     val scaffold = rememberScaffoldState()
@@ -88,24 +95,21 @@ fun AccountApp(
                     route = AccountAppScreen.Overview.name
                 ) {
                     AccountActivityScreen(
-                        showSnackBar = {
-                           scope.launch {
-                               scaffold.snackbarHostState.showSnackbar(it)
-                           }
-                        },
-                        onNavigateTo = { screen ->
-                            navigateToScreen(
-                                navController,
-                                screen,
-                            )
-                        }
-                    )
+                        userViewModel = userViewModel,
+                        scaffold = scaffold,
+                    ) { screen ->
+                        navigateToScreen(
+                            navController,
+                            screen,
+                        )
+                    }
                 }
 
                 composable(
                     route = AccountAppScreen.Email.name
                 ) {
                     UpdateEmailActivityScreen(
+                        userViewModel = userViewModel,
                         scaffold = scaffold,
                     )
                 }
@@ -114,6 +118,7 @@ fun AccountApp(
                     route = AccountAppScreen.UserName.name
                 ) {
                     UpdateNameActivityScreen(
+                        userViewModel = userViewModel,
                         scaffold = scaffold,
                     )
                 }
