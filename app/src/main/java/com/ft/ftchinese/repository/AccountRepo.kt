@@ -110,6 +110,37 @@ object AccountRepo {
             .body
     }
 
+    suspend fun asyncUpdateEmail(ftcId: String, email: String): FetchResult<BaseAccount> {
+        try {
+            val baseAccount = withContext(Dispatchers.IO) {
+                updateEmail(ftcId, email)
+            }
+
+            return if (baseAccount == null) {
+                FetchResult.LocalizedError(R.string.error_unknown)
+            } else {
+                FetchResult.Success(baseAccount)
+            }
+        } catch (e: APIError) {
+            return when (e.statusCode) {
+                422 -> {
+                    if (e.error == null) {
+                        FetchResult.fromApi(e)
+                    } else {
+                        when {
+                            e.error.isFieldAlreadyExists("email") -> FetchResult.LocalizedError(R.string.signup_email_taken)
+                            e.error.isFieldInvalid("email") -> FetchResult.LocalizedError(R.string.signup_invalid_email)
+                            else -> FetchResult.fromApi(e)
+                        }
+                    }
+                }
+                else -> FetchResult.fromApi(e)
+            }
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
+    }
+
     fun updateUserName(ftcId: String, name: String): BaseAccount? {
         return Fetch().patch(Endpoint.userName)
             .noCache()
@@ -144,6 +175,31 @@ object AccountRepo {
             .endText()
 
         return resp.code == 204
+    }
+
+    suspend fun asyncRequestVerification(ftcId: String): FetchResult<Boolean> {
+        try {
+            val done = withContext(Dispatchers.IO) {
+                requestVerification(ftcId)
+            }
+
+            return FetchResult.Success(done)
+        } catch (e: APIError) {
+            return when (e.statusCode) {
+                404 -> FetchResult.LocalizedError(R.string.account_not_found)
+                422 -> if (e.error?.isResourceMissing("email_server") == true) {
+                    FetchResult.LocalizedError(R.string.api_email_server_down)
+                } else {
+                    FetchResult.fromApi(e)
+                }
+                else -> {
+                    FetchResult.fromApi(e)
+                }
+            }
+
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
     }
 
     fun requestSMSCode(account: Account, params: SMSCodeParams): Boolean {
