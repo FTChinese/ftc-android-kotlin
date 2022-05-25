@@ -3,13 +3,12 @@ package com.ft.ftchinese.ui.account
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ft.ftchinese.ui.components.ProgressLayout
 import com.ft.ftchinese.viewmodel.UserViewModel
 
 @Composable
 fun UpdateNameActivityScreen(
-    userViewModel: UserViewModel = viewModel(),
+    userViewModel: UserViewModel,
     scaffold: ScaffoldState
 ) {
     val accountState = userViewModel.accountLiveData.observeAsState()
