@@ -109,6 +109,14 @@ fun AccountApp(
                         scaffold = scaffold,
                     )
                 }
+
+                composable(
+                    route = AccountAppScreen.UserName.name
+                ) {
+                    UpdateNameActivityScreen(
+                        scaffold = scaffold,
+                    )
+                }
             }
         }
     }

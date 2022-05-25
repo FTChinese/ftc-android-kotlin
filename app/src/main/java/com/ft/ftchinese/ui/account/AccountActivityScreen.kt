@@ -150,6 +150,9 @@ fun AccountActivityScreen(
                         AccountRowId.EMAIL -> {
                             onNavigateTo(AccountAppScreen.Email)
                         }
+                        AccountRowId.USER_NAME -> {
+                            onNavigateTo(AccountAppScreen.UserName)
+                        }
                         else -> {
                             launchUpdateActivity(
                                 launcher = launcher,
