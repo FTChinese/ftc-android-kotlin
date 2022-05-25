@@ -137,6 +137,15 @@ fun AccountApp(
                 }
 
                 composable(
+                    route = AccountAppScreen.Address.name
+                ) {
+                    AddressActivityScreen(
+                        userViewModel = userViewModel,
+                        scaffoldState = scaffold,
+                    )
+                }
+
+                composable(
                     route = AccountAppScreen.Wechat.name
                 ) {
                     WxInfoActivityScreen(

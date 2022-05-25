@@ -8,8 +8,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpdateAccountBinding
 import com.ft.ftchinese.store.SessionManager
-import com.ft.ftchinese.ui.account.address.AddressViewModel
-import com.ft.ftchinese.ui.account.address.UpdateAddressFragment
 import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.mobile.MobileFragment
@@ -19,7 +17,6 @@ class UpdateActivity : ScopedAppActivity() {
 
     private lateinit var sessionManager: SessionManager
 
-    private lateinit var addressViewModel: AddressViewModel
     private lateinit var mobileViewModel: MobileViewModel
     private lateinit var deleteViewModel: DeleteAccountViewModel
 
@@ -38,20 +35,18 @@ class UpdateActivity : ScopedAppActivity() {
 
         sessionManager = SessionManager.getInstance(this)
 
-        addressViewModel = ViewModelProvider(this)[AddressViewModel::class.java]
-
         mobileViewModel = ViewModelProvider(this)[MobileViewModel::class.java]
 
         deleteViewModel = ViewModelProvider(this)[DeleteAccountViewModel::class.java]
 
         connectionLiveData.observe(this) {
-            addressViewModel.isNetworkAvailable.value = it
+            mobileViewModel.isNetworkAvailable.value = it
             // MobileViewModel's network is configured in the its fragment.
             deleteViewModel.isNetworkAvailable.value = it
         }
 
         isConnected.let {
-            addressViewModel.isNetworkAvailable.value = it
+            mobileViewModel.isNetworkAvailable.value = it
             deleteViewModel.isNetworkAvailable.value = it
         }
 
@@ -59,10 +54,6 @@ class UpdateActivity : ScopedAppActivity() {
                 .beginTransaction()
 
         when (intent.getSerializableExtra(TARGET_FRAG)) {
-            AccountRowId.Address -> {
-                supportActionBar?.title = "设置地址"
-                fm.replace(R.id.first_frag, UpdateAddressFragment.newInstance())
-            }
             AccountRowId.MOBILE -> {
                 supportActionBar?.title = "关联手机号码"
                 fm.replace(R.id.first_frag, MobileFragment.newInstanceForUpdate())
@@ -79,11 +70,6 @@ class UpdateActivity : ScopedAppActivity() {
     }
 
     private fun setupViewModel() {
-
-        addressViewModel.progressLiveData.observe(this) {
-            binding.inProgress = it
-        }
-
         deleteViewModel.progressLiveData.observe(this) {
             binding.inProgress = it
         }

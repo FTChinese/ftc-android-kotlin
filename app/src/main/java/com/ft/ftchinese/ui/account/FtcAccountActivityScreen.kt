@@ -97,6 +97,9 @@ fun FtcAccountActivityScreen(
                     AccountRowId.PASSWORD -> {
                         onNavigateTo(AccountAppScreen.Password)
                     }
+                    AccountRowId.Address -> {
+                        onNavigateTo(AccountAppScreen.Address)
+                    }
                     AccountRowId.MOBILE -> {
                         if (account.isMobileEmail) {
                             uiState.showMobileAlert(true)
@@ -116,13 +119,6 @@ fun FtcAccountActivityScreen(
                     }
                     AccountRowId.DELETE -> {
                         uiState.showDeleteAlert(true)
-                    }
-                    else -> {
-                        launchUpdateActivity(
-                            launcher = launcher,
-                            context = context,
-                            rowId = rowId,
-                        )
                     }
                 }
             }

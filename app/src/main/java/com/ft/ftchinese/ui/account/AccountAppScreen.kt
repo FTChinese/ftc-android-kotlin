@@ -37,7 +37,10 @@ enum class AccountAppScreen(@StringRes val titleId: Int) {
                 Email.name -> Email
                 UserName.name -> UserName
                 Password.name -> Password
+                Address.name -> Address
+                Stripe.name -> Stripe
                 Wechat.name -> Wechat
+                Mobile.name -> Mobile
                 null -> Overview
                 else -> throw IllegalArgumentException("Route $route is not recognized")
             }
