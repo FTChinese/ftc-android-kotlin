@@ -2,19 +2,11 @@ package com.ft.ftchinese.ui.account.address
 
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
-import com.ft.ftchinese.R
-import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
-import com.ft.ftchinese.repository.AccountRepo
 import com.ft.ftchinese.ui.base.BaseViewModel
-import com.ft.ftchinese.model.fetch.FetchResult
 import com.ft.ftchinese.ui.validator.LiveDataValidator
 import com.ft.ftchinese.ui.validator.LiveDataValidatorResolver
 import com.ft.ftchinese.ui.validator.Validator
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class AddressViewModel : BaseViewModel() {
 
@@ -100,46 +92,6 @@ class AddressViewModel : BaseViewModel() {
         isFormValid.value = false
     }
 
-    val addressRetrieved: MutableLiveData<FetchResult<Address>> by lazy {
-        MutableLiveData<FetchResult<Address>>()
-    }
-
-    fun loadAddress(account: Account) {
-        if (isNetworkAvailable.value != true) {
-            addressRetrieved.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        progressLiveData.value = true
-
-        viewModelScope.launch {
-            try {
-                val address = withContext(Dispatchers.IO) {
-                    AccountRepo.loadAddress(account.id)
-                } ?: return@launch
-
-                current = address
-
-                provinceLiveData.value = address.province
-                cityLiveData.value = address.city
-                districtLiveData.value = address.district
-                streetLiveData.value = address.street
-                postCodeLiveData.value = address.postcode
-
-                progressLiveData.value = false
-
-                addressRetrieved.value = FetchResult.Success(address)
-            } catch (e: Exception) {
-                addressRetrieved.value = FetchResult.fromException(e)
-                progressLiveData.value = false
-            }
-        }
-    }
-
-    val addressUpdated: MutableLiveData<FetchResult<Boolean>> by lazy {
-        MutableLiveData<FetchResult<Boolean>>()
-    }
-
     private fun hasChanged(): Boolean {
         return current.province != provinceLiveData.value
             || current.city != cityLiveData.value
@@ -148,32 +100,4 @@ class AddressViewModel : BaseViewModel() {
             || current.postcode != postCodeLiveData.value
     }
 
-    fun updateAddress(account: Account) {
-
-        if (!hasChanged()) {
-            addressUpdated.value = FetchResult.Success(true)
-            return
-        }
-
-        if (isNetworkAvailable.value != true) {
-            addressUpdated.value = FetchResult.LocalizedError(R.string.prompt_no_network)
-            return
-        }
-
-        progressLiveData.value = true
-
-        viewModelScope.launch {
-            try {
-                val ok = withContext(Dispatchers.IO) {
-                    AccountRepo.updateAddress(account.id, updated)
-                }
-
-                addressUpdated.value = FetchResult.Success(ok != null)
-                progressLiveData.value = false
-            } catch (e: Exception) {
-                addressUpdated.value = FetchResult.fromException(e)
-                progressLiveData.value = false
-            }
-        }
-    }
 }
