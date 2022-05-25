@@ -9,10 +9,7 @@ import com.ft.ftchinese.model.reader.Account
 import com.ft.ftchinese.model.reader.Address
 import com.ft.ftchinese.model.reader.BaseAccount
 import com.ft.ftchinese.model.reader.WxSession
-import com.ft.ftchinese.model.request.EmailPasswordParams
-import com.ft.ftchinese.model.request.MobileFormParams
-import com.ft.ftchinese.model.request.PasswordUpdateParams
-import com.ft.ftchinese.model.request.SMSCodeParams
+import com.ft.ftchinese.model.request.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -183,9 +180,38 @@ object AccountRepo {
             .setApiKey()
             .setUserId(ftcId)
             .sendJson(params)
-            .endText()
+            .endOrThrow()
 
         return resp.code == 204
+    }
+
+    suspend fun asyncUpdatePassword(ftcId: String, params: PasswordUpdateParams): FetchResult<PwUpdateResult> {
+        try {
+            val done = withContext(Dispatchers.IO) {
+                updatePassword(ftcId, params)
+            }
+
+            return if (done) {
+                FetchResult.Success(PwUpdateResult.Done)
+            } else {
+                FetchResult.loadingFailed
+            }
+        } catch (e: APIError) {
+
+            return when (e.statusCode) {
+                403 -> FetchResult.Success(PwUpdateResult.Mismatched)
+                404 -> FetchResult.LocalizedError(R.string.account_not_found)
+                422 -> when {
+                    e.error == null -> FetchResult.fromApi(e)
+                    e.error.isFieldInvalid("password") -> FetchResult.LocalizedError(R.string.signup_invalid_password)
+                    else -> FetchResult.fromApi(e)
+                }
+                else -> FetchResult.fromApi(e)
+            }
+
+        } catch (e: Exception) {
+            return FetchResult.fromException(e)
+        }
     }
 
     fun requestVerification(ftcId: String): Boolean {
