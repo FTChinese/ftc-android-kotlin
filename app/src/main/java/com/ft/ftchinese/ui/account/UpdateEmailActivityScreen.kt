@@ -15,7 +15,7 @@ fun UpdateEmailActivityScreen(
     val accountState = userViewModel.accountLiveData.observeAsState()
     val account = accountState.value
 
-    val updateEmailState = rememberUpdateEmailState(
+    val emailState = rememberUpdateEmailState(
         scaffoldState = scaffold
     )
 
@@ -23,22 +23,22 @@ fun UpdateEmailActivityScreen(
         return
     }
 
-    updateEmailState.updated.value?.let {
+    emailState.updated.value?.let {
         userViewModel.saveAccount(account.withBaseAccount(it))
     }
 
     ProgressLayout(
-        loading = updateEmailState.progress.value
+        loading = emailState.progress.value
     ) {
         UpdateEmailScreen(
             email = account.email,
             isVerified = account.isVerified,
-            loading = updateEmailState.progress.value,
+            loading = emailState.progress.value,
             onVerify = {
-                updateEmailState.requestVrfLetter(account.id)
+                emailState.requestVrfLetter(account.id)
             },
             onSave = { newEmail ->
-                updateEmailState.updateEmail(
+                emailState.updateEmail(
                     ftcId = account.id,
                     newEmail
                 )
