@@ -49,7 +49,7 @@ fun SecondaryButton(
         colors = ButtonDefaults.outlinedButtonColors(
             backgroundColor = backgroundColor,
             contentColor = contentColor,
-            disabledContentColor = backgroundColor.copy(alpha = 0.4f)
+            disabledContentColor = contentColor.copy(alpha = 0.4f)
         ),
         content = content,
     )
@@ -61,6 +61,38 @@ fun PreviewPrimaryButton() {
     PrimaryButton(
         onClick = {  }
     ) {
-        Text(text = "Button")
+        Text(text = "Primary Button")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPrimaryButtonDisabled() {
+    PrimaryButton(
+        onClick = {  },
+        enabled = false
+    ) {
+        Text(text = "Primary Button Disabled")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewSecondaryButton() {
+    SecondaryButton(
+        onClick = {}
+    ) {
+       Text(text = "Secondary Button")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewSecondaryButtonDisabled() {
+    SecondaryButton(
+        onClick = {},
+        enabled = false
+    ) {
+        Text(text = "Secondary Button")
     }
 }
