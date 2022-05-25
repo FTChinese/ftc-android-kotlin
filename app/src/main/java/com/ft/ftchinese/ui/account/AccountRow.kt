@@ -5,12 +5,12 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.model.reader.Account
 
 data class AccountRow(
-    val id: AccountRowType,
+    val id: AccountRowId,
     val primary: String,
     val secondary: String
 )
 
-enum class AccountRowType {
+enum class AccountRowId {
     EMAIL,
     MOBILE,
     USER_NAME,
@@ -25,7 +25,7 @@ fun buildAccountRows(ctx: Context, account: Account): List<AccountRow> {
 
     return listOf(
         AccountRow(
-            id = AccountRowType.EMAIL,
+            id = AccountRowId.EMAIL,
 
             primary = when {
                 // For mobile-created account, or verified real email
@@ -42,7 +42,7 @@ fun buildAccountRows(ctx: Context, account: Account): List<AccountRow> {
             }
         ),
         AccountRow(
-            id = AccountRowType.USER_NAME,
+            id = AccountRowId.USER_NAME,
             primary = ctx.getString(R.string.label_user_name),
             secondary = if (account.userName.isNullOrBlank()) {
                 ctx.getString(R.string.default_not_set)
@@ -51,22 +51,22 @@ fun buildAccountRows(ctx: Context, account: Account): List<AccountRow> {
             }
         ),
         AccountRow(
-            id = AccountRowType.PASSWORD,
+            id = AccountRowId.PASSWORD,
             primary = ctx.getString(R.string.label_password),
             secondary = "********",
         ),
         AccountRow(
-            id = AccountRowType.Address,
+            id = AccountRowId.Address,
             primary = "地址",
             secondary = "设置或更改地址",
         ),
         AccountRow(
-            id = AccountRowType.STRIPE,
+            id = AccountRowId.STRIPE,
             primary = "Stripe钱包",
             secondary = "添加银行卡或设置默认支付方式"
         ),
         AccountRow(
-            id = AccountRowType.WECHAT,
+            id = AccountRowId.WECHAT,
             primary = ctx.getString(R.string.label_wechat),
             secondary = if (account.isLinked) {
                 ctx.getString(R.string.account_linked)
@@ -75,7 +75,7 @@ fun buildAccountRows(ctx: Context, account: Account): List<AccountRow> {
             }
         ),
         AccountRow(
-            id = AccountRowType.MOBILE,
+            id = AccountRowId.MOBILE,
             primary = "手机号",
             secondary = account.mobile ?: ctx.getString(R.string.default_not_set)
         ),
