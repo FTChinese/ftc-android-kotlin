@@ -7,71 +7,79 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ft.ftchinese.BuildConfig
 import com.ft.ftchinese.model.reader.WxOAuth
 import com.ft.ftchinese.model.reader.WxOAuthIntent
-import com.ft.ftchinese.ui.components.ShowToast
+import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.wxlink.LinkFtcActivity
 import com.ft.ftchinese.ui.wxlink.UnlinkActivity
+import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.tencent.mm.opensdk.modelmsg.SendAuth
 import com.tencent.mm.opensdk.openapi.IWXAPI
+import com.tencent.mm.opensdk.openapi.WXAPIFactory
 
 @Composable
 fun WxInfoActivityScreen(
-    wxApi: IWXAPI,
-    modifier: Modifier = Modifier,
-    wxInfoViewModel: WxInfoViewModel = viewModel(),
-    showSnackBar: (String) -> Unit,
-    onUpdated: () -> Unit,
+    userViewModel: UserViewModel,
+    scaffold: ScaffoldState,
 ) {
     val context = LocalContext.current
-    val refreshing by wxInfoViewModel.refreshingLiveData.observeAsState(false)
-    val messageState = wxInfoViewModel.toastLiveData.observeAsState(null)
-    val reAuth by wxInfoViewModel.reAuthLiveData.observeAsState(false)
+    val accountState = userViewModel.accountLiveData.observeAsState()
+    val account = accountState.value
+
+    val uiState = rememberWxInfoState(
+        scaffoldState = scaffold
+    )
+
+    val sessionStore = remember {
+        SessionManager.getInstance(context)
+    }
+
+    val wxApi = remember {
+        WXAPIFactory.createWXAPI(
+            context,
+            BuildConfig.WX_SUBS_APPID
+        )
+    }
+
+    val (reAuth, setReAuth) = remember {
+        mutableStateOf(false)
+    }
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
         when (result.resultCode) {
             Activity.RESULT_OK -> {
-                wxInfoViewModel.reloadAccount()
-                // When hosted inside AccountActivity, notify it to reload account.
-                onUpdated()
+                userViewModel.reloadAccount()
             }
             Activity.RESULT_CANCELED -> {}
         }
     }
 
-    val accountState = wxInfoViewModel.accountLiveData.observeAsState()
-    val account = accountState.value
-
     if (account == null) {
-        showSnackBar("Not logged in")
+        uiState.showSnackBar("Not logged in")
         return
     }
 
     if (reAuth) {
         AlertWxLoginExpired(
             onDismiss = {
-                wxInfoViewModel.clearReAuth()
+                setReAuth(false)
             },
             onConfirm = {
                 launchWxOAuth(wxApi)
-                wxInfoViewModel.clearReAuth()
+                setReAuth(false)
             }
         )
-    }
-
-    ShowToast(
-        toast = messageState.value
-    ) {
-        wxInfoViewModel.resetToast()
     }
 
     if (account.isEmailOnly) {
@@ -83,12 +91,16 @@ fun WxInfoActivityScreen(
     } else {
         SwipeRefresh(
             state = rememberSwipeRefreshState(
-                isRefreshing = refreshing
+                isRefreshing = uiState.refreshing
             ),
             onRefresh = {
-                wxInfoViewModel.refreshWxInfo(account)
+                val wxSession = sessionStore.loadWxSession()
+                if (wxSession == null) {
+                    setReAuth(true)
+                    return@SwipeRefresh
+                }
+                uiState.refresh(account, wxSession)
             },
-            modifier = modifier,
         ) {
             WxInfoScreen(
                 wechat = account.wechat,
