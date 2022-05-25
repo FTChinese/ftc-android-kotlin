@@ -54,7 +54,8 @@ class LinkState(
                     showSnackBar(doneResult.text)
                 }
                 is FetchResult.Success -> {
-                    refresh(account)
+                    asyncRefresh(account)
+                    progress.value = false
                 }
             }
         }
@@ -93,7 +94,8 @@ class LinkState(
                     showSnackBar(doneResult.text)
                 }
                 is FetchResult.Success -> {
-                    refresh(account)
+                    asyncRefresh(account)
+                    progress.value = false
                 }
             }
         }

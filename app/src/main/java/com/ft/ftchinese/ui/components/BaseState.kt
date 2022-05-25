@@ -52,20 +52,20 @@ open class BaseState(
         showSnackBar(resources.getString(R.string.prompt_no_network))
     }
 
-    suspend fun refresh(account: Account) {
+    suspend fun asyncRefresh(account: Account): Boolean {
         accountRefreshed.value = null
-        when (val refreshed = AccountRepo.asyncRefresh(account)) {
+        return when (val refreshed = AccountRepo.asyncRefresh(account)) {
             is FetchResult.LocalizedError -> {
-                progress.value = false
                 showSnackBar(refreshed.msgId)
+                false
             }
             is FetchResult.TextError -> {
-                progress.value = false
                 showSnackBar(refreshed.text)
+                false
             }
             is FetchResult.Success -> {
-                progress.value = false
                 accountRefreshed.value = refreshed.data
+                true
             }
         }
     }
