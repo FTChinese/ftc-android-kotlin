@@ -198,30 +198,36 @@ class Fetch {
      */
     inline fun <reified T> endJson(withRaw: Boolean = false): HttpResp<T> {
 
-        val resp = end()
+        val resp = endOrThrow()
 
         /**
          * Success response.
          * @throws IOException when reading body.
          */
-        if (resp.code in 200 until 400) {
-            return resp.body?.string()?.let {
-                HttpResp(
-                    message = resp.message,
-                    code = resp.code,
-                    body = marshaller.decodeFromString<T>(it),
-                    raw = if (withRaw) {
-                        it
-                    } else {
-                        ""
-                    }
-                )
-            } ?: HttpResp(
+        return resp.body?.string()?.let {
+            HttpResp(
                 message = resp.message,
                 code = resp.code,
-                body = null,
-                raw = "",
+                body = marshaller.decodeFromString<T>(it),
+                raw = if (withRaw) {
+                    it
+                } else {
+                    ""
+                }
             )
+        } ?: HttpResp(
+            message = resp.message,
+            code = resp.code,
+            body = null,
+            raw = "",
+        )
+    }
+
+    fun endOrThrow(): Response {
+        val resp = end()
+
+        if (resp.code in 200 until 400) {
+            return resp
         }
 
         throw APIError.from(resp)
