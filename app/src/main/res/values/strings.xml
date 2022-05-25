@@ -43,7 +43,7 @@
 
     <!--  Forgot password  -->
     <string name="forgot_password_link">忘记密码?</string>
-    <string name="forgot_password_title">找回密码</string>
+    <string name="title_forgot_password">找回密码</string>
     <string name="forgot_password_guide">我们会向您的登录邮箱发送一封包含验证码的邮件，验证通过后可以重置密码</string>
     <string name="forgot_password_letter_sent">请检查您的邮件，输入邮件中的验证码，验证通过后可以重置密码。如果几分钟内没有看到邮件，请检查是否被放进了垃圾邮件列表。</string>
     <string name="forgot_password_code_not_found">您似乎使用了无效的验证码，请重新获取重置密码邮件</string>
