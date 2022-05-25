@@ -168,7 +168,7 @@ class AddressViewModel : BaseViewModel() {
                     AccountRepo.updateAddress(account.id, updated)
                 }
 
-                addressUpdated.value = FetchResult.Success(ok)
+                addressUpdated.value = FetchResult.Success(ok != null)
                 progressLiveData.value = false
             } catch (e: Exception) {
                 addressUpdated.value = FetchResult.fromException(e)
