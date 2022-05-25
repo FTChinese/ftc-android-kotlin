@@ -16,7 +16,6 @@ import com.ft.ftchinese.ui.base.ScopedFragment
 import com.ft.ftchinese.ui.base.isConnected
 import org.jetbrains.anko.support.v4.toast
 
-@kotlinx.coroutines.ExperimentalCoroutinesApi
 class UpdateNameFragment : ScopedFragment() {
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: FragmentUpdateUsernameBinding
