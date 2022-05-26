@@ -10,16 +10,15 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
@@ -46,20 +45,20 @@ import com.ft.ftchinese.ui.base.ScopedAppActivity
 import com.ft.ftchinese.ui.base.connectivityState
 import com.ft.ftchinese.ui.checkout.BuyerInfoActivity
 import com.ft.ftchinese.ui.checkout.LatestInvoiceActivity
-import com.ft.ftchinese.ui.components.PrimaryButton
 import com.ft.ftchinese.ui.components.TextInput
+import com.ft.ftchinese.ui.components.Timer
 import com.ft.ftchinese.ui.components.rememberInputState
+import com.ft.ftchinese.ui.components.rememberTimerState
 import com.ft.ftchinese.ui.login.AuthActivity
 import com.ft.ftchinese.ui.login.SignInFragment
 import com.ft.ftchinese.ui.login.SignUpFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 import com.ft.ftchinese.ui.theme.Dimens
 import com.ft.ftchinese.ui.theme.OTheme
-import com.ft.ftchinese.ui.validator.ValidationRule
-import com.ft.ftchinese.ui.validator.Validator
 import com.ft.ftchinese.ui.webpage.WebpageActivity
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
+import okhttp3.internal.toLongOrDefault
 import org.jetbrains.anko.alert
 import org.jetbrains.anko.appcompat.v7.Appcompat
 import org.jetbrains.anko.toast
@@ -88,10 +87,9 @@ class TestActivity : ScopedAppActivity() {
         setContent {
             OTheme {
 
-                var skipHalfExpanded by remember { mutableStateOf(false) }
                 val state = rememberModalBottomSheetState(
                     initialValue = ModalBottomSheetValue.Hidden,
-                    skipHalfExpanded = skipHalfExpanded
+                    skipHalfExpanded = true
                 )
                 val scope = rememberCoroutineScope()
                 ModalBottomSheetLayout(
@@ -118,92 +116,78 @@ class TestActivity : ScopedAppActivity() {
                         }
                     ) { innerPadding ->
 
-                        Column {
-                            Row(
-                                Modifier
-                                    .toggleable(
-                                        value = skipHalfExpanded,
-                                        role = Role.Checkbox,
-                                        onValueChange = { checked -> skipHalfExpanded = checked }
-                                    )
-                            ) {
-                                Checkbox(checked = skipHalfExpanded, onCheckedChange = null)
-                                Spacer(Modifier.width(16.dp))
-                                Text("Skip Half Expanded State")
-
-                            }
-                            Spacer(Modifier.height(20.dp))
-                            Button(onClick = { scope.launch { state.show() } }) {
-                                Text("Click to show sheet")
-                            }
-                        }
-
                         Column(
-                            modifier = Modifier.padding(innerPadding).fillMaxWidth()
+                            modifier = Modifier
+                                .verticalScroll(rememberScrollState())
+                                .padding(innerPadding)
                         ) {
 
+                            NetworkStatus()
+
+                            Button(
+                                onClick = {
+                                    scope.launch { state.show() }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Click to show sheet")
+                            }
+
+                            Spacer(modifier = Modifier.height(Dimens.dp16))
+
+                            TestCountDown()
+
+                            TestTimer()
+
+                            PaywallButton()
+
+                            WxMiniButton()
+
+                            PostPurchaseButton()
+
+                            FullScreenDialog()
+
+                            ShowSignInUp()
+
+                            SignInFragment()
+
+                            SignUpFragment()
+
+                            MobileLinkEmail()
+
+                            PostPurchaseButton()
+
+                            FreeUser()
+
+                            WxOnlyFreeUser()
+
+                            LinkedWithAutoRenew()
+
+                            LinkedWithOneOff()
+
+                            VIPUser()
+                            StandardUser()
+                            PremiumUser()
+
+                            StripeStandardUser()
+
+                            StripeStandardMonth()
+
+                            StripeAutoRenewOff()
+
+                            StripeAutoRenewOffWithAddOn()
+
+                            StripePremium()
+
+                            IAPStandard()
+
+                            IAPPremium()
+                            IAPAddOn()
+                            IAPAutoRenewOff()
+                            IAPExpiredWithAddOn()
                         }
-                        //                        LazyColumn(
-//                            modifier = Modifier.padding(innerPadding)
-//                        ) {
-//
-//                            item { NetworkStatus() }
-//
-//                            item { EmailChecker() }
-//
-//                            item { PaywallButton() }
-//
-//                            item { WxMiniButton() }
-//
-//                            item { PostPurchaseButton() }
-//
-//                            item { FullScreenDialog() }
-//
-//                            item { ShowSignInUp() }
-//                            item { SignInFragment() }
-//                            item { SignUpFragment() }
-//
-//                            item { MobileLinkEmail() }
-//
-//                            item { PostPurchaseButton() }
-//
-//                            item { FreeUser() }
-//                            item { WxOnlyFreeUser() }
-//                            item { LinkedWithAutoRenew() }
-//                            item { LinkedWithOneOff() }
-//                            item { VIPUser() }
-//
-//                            item { StandardUser() }
-//                            item { PremiumUser() }
-//
-//                            item { StripeStandardUser() }
-//                            item { StripeStandardMonth() }
-//                            item { StripeAutoRenewOff() }
-//                            item { StripeAutoRenewOffWithAddOn() }
-//                            item { StripePremium() }
-//
-//                            item { IAPStandard() }
-//                            item { IAPPremium() }
-//                            item { IAPAddOn() }
-//                            item { IAPAutoRenewOff() }
-//                            item { IAPExpiredWithAddOn() }
-//                        }
-
-
-
-//                    ScreenshotPreview(
-//                        screenshot = ScreenshotMeta(
-//                            imageUri = Uri.parse("content://media/external_primary/images/media/1942"),
-//                            title = "Test",
-//                            description = "",
-//                        ),
-//                        modifier = Modifier.padding(innerPadding),
-//                        onShareTo = { _, _, -> }
-//                    )
                     }
                 }
-
-
             }
         }
 
@@ -214,50 +198,52 @@ class TestActivity : ScopedAppActivity() {
             }
         }
     }
-    
+
     @Composable
-    fun EmailChecker() {
-        val (alert, setAlert) = remember {
+    fun TestCountDown() {
+        val (running, setRunning) = remember {
             mutableStateOf(false)
         }
 
-        val emailState = rememberInputState(
-            rules = listOf(
-                ValidationRule(
-                    predicate = Validator::isEmail,
-                    message = "请输入完整的邮箱"
-                )
-            )
+        val inputState = rememberInputState(
+            initialValue = "10"
         )
-
         TextInput(
-            label = stringResource(id = R.string.label_email),
-            state = emailState
+            label = "Timer length in seconds",
+            state = inputState,
+            keyboardType = KeyboardType.Number
         )
-
-        Spacer(modifier = Modifier.height(Dimens.dp16))
-
-        PrimaryButton(
+        Button(
             onClick = {
-                setAlert(true)
+                setRunning(true)
             },
-            enabled = emailState.valid.value,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(text = stringResource(id = R.string.btn_next))
-        }
-
-        if (alert) {
-            Alert(
-                title = "Your Email",
-                body = emailState.field.value,
-                onConfirm = { setAlert(false) },
-                onDismiss = { setAlert(false) }
+            Timer(
+                totalTime = inputState.field.value.toLongOrDefault(60),
+                isRunning = running,
+                initialText = "获取短信",
+                onFinish = { setRunning(false) }
             )
         }
     }
+
+    @Composable
+    fun TestTimer() {
+        val timerState = rememberTimerState(
+            totalTime = 10, 
+            initialText = "Start Timer"
+        )
+        
+        Button(
+            onClick = timerState::start,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = timerState.text.value)
+        }
+    }
     
-    @Composable 
+    @Composable
     fun Alert(
         title: String,
         body: String,
