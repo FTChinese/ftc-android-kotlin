@@ -66,10 +66,28 @@ object AuthClient {
             .setApiKey()
             .setClient()
             .sendJson(params)
-            .endText()
+            .endOrThrow()
 
         return resp.code == 204
     }
+
+    suspend fun asyncSMSAuthCode(params: SMSCodeParams): FetchResult<Boolean> {
+        return try {
+            val ok = withContext(Dispatchers.IO) {
+                requestSMSCode(params)
+            }
+
+            if (ok) {
+                FetchResult.Success(true)
+            } else {
+                FetchResult.loadingFailed
+            }
+        } catch (e: Exception) {
+            FetchResult.fromException(e)
+        }
+    }
+
+
 
     fun verifySMSCode(params: MobileAuthParams): UserFound? {
         return Fetch()
