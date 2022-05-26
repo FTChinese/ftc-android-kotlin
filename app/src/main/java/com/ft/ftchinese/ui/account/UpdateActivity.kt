@@ -9,7 +9,6 @@ import com.ft.ftchinese.R
 import com.ft.ftchinese.databinding.ActivityUpdateAccountBinding
 import com.ft.ftchinese.store.SessionManager
 import com.ft.ftchinese.ui.base.ScopedAppActivity
-import com.ft.ftchinese.ui.base.isConnected
 import com.ft.ftchinese.ui.mobile.MobileFragment
 import com.ft.ftchinese.ui.mobile.MobileViewModel
 
@@ -18,7 +17,6 @@ class UpdateActivity : ScopedAppActivity() {
     private lateinit var sessionManager: SessionManager
 
     private lateinit var mobileViewModel: MobileViewModel
-    private lateinit var deleteViewModel: DeleteAccountViewModel
 
     private lateinit var binding: ActivityUpdateAccountBinding
 
@@ -37,19 +35,6 @@ class UpdateActivity : ScopedAppActivity() {
 
         mobileViewModel = ViewModelProvider(this)[MobileViewModel::class.java]
 
-        deleteViewModel = ViewModelProvider(this)[DeleteAccountViewModel::class.java]
-
-        connectionLiveData.observe(this) {
-            mobileViewModel.isNetworkAvailable.value = it
-            // MobileViewModel's network is configured in the its fragment.
-            deleteViewModel.isNetworkAvailable.value = it
-        }
-
-        isConnected.let {
-            mobileViewModel.isNetworkAvailable.value = it
-            deleteViewModel.isNetworkAvailable.value = it
-        }
-
         val fm = supportFragmentManager
                 .beginTransaction()
 
@@ -58,21 +43,9 @@ class UpdateActivity : ScopedAppActivity() {
                 supportActionBar?.title = "关联手机号码"
                 fm.replace(R.id.first_frag, MobileFragment.newInstanceForUpdate())
             }
-            AccountRowId.DELETE -> {
-                supportActionBar?.setTitle(R.string.title_delete_account)
-                fm.replace(R.id.first_frag, DeleteAccountFragment.newInstance())
-            }
         }
 
         fm.commit()
-
-        setupViewModel()
-    }
-
-    private fun setupViewModel() {
-        deleteViewModel.progressLiveData.observe(this) {
-            binding.inProgress = it
-        }
     }
 
     companion object {
