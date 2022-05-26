@@ -55,11 +55,7 @@ fun FtcAccountActivityScreen(
             },
             onConfirm = {
                 uiState.showDeleteAlert(false)
-                launchUpdateActivity(
-                    launcher = launcher,
-                    context = context,
-                    rowId = AccountRowId.DELETE,
-                )
+                onNavigateTo(AccountAppScreen.DeleteAccount)
             }
         )
     }
@@ -136,11 +132,3 @@ private fun launchUpdateActivity(
     )
 }
 
-private fun launchWxInfoActivity(
-    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-    context: Context,
-) {
-    launcher.launch(
-        WxInfoActivity.newIntent(context)
-    )
-}
