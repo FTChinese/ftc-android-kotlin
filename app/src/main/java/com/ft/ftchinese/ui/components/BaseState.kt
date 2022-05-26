@@ -52,6 +52,14 @@ open class BaseState(
         showSnackBar(resources.getString(R.string.prompt_no_network))
     }
 
+    fun showRefreshed() {
+        showSnackBar(R.string.refresh_success)
+    }
+
+    fun showSaved() {
+        showSnackBar(R.string.prompt_saved)
+    }
+
     suspend fun asyncRefresh(account: Account): Boolean {
         accountRefreshed.value = null
         return when (val refreshed = AccountRepo.asyncRefresh(account)) {
