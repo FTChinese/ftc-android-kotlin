@@ -2,6 +2,8 @@ package com.ft.ftchinese.ui.components
 
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.res.stringResource
+import com.ft.ftchinese.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -74,8 +76,8 @@ class TimerState(
 
 @Composable
 fun rememberTimerState(
-    totalTime: Long,
-    initialText: String,
+    totalTime: Long = 60,
+    initialText: String = stringResource(id = R.string.mobile_request_code),
     scope: CoroutineScope = rememberCoroutineScope()
 ) = remember(totalTime, initialText, scope) {
     TimerState(
