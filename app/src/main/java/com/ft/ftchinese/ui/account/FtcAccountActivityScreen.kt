@@ -1,21 +1,17 @@
 package com.ft.ftchinese.ui.account
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import androidx.activity.compose.ManagedActivityResultLauncher
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import android.util.Log
 import androidx.compose.material.ScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import com.ft.ftchinese.ui.stripewallet.StripeWalletActivity
-import com.ft.ftchinese.ui.wxinfo.WxInfoActivity
 import com.ft.ftchinese.viewmodel.UserViewModel
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+
+private const val TAG = "FtcAccount"
 
 @Composable
 fun FtcAccountActivityScreen(
@@ -37,14 +33,10 @@ fun FtcAccountActivityScreen(
         return
     }
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-    ) { result ->
-        when (result.resultCode) {
-            Activity.RESULT_OK -> {
-                userViewModel.reloadAccount()
-            }
-            Activity.RESULT_CANCELED -> {}
+    LaunchedEffect(key1 = uiState.accountRefreshed.value) {
+        uiState.accountRefreshed.value?.let {
+            Log.i(TAG, "Save refreshed account")
+            userViewModel.saveAccount(it)
         }
     }
 
@@ -96,22 +88,18 @@ fun FtcAccountActivityScreen(
                     AccountRowId.Address -> {
                         onNavigateTo(AccountAppScreen.Address)
                     }
-                    AccountRowId.MOBILE -> {
-                        if (account.isMobileEmail) {
-                            uiState.showMobileAlert(true)
-                        } else {
-                            launchUpdateActivity(
-                                launcher = launcher,
-                                context = context,
-                                rowId = rowId,
-                            )
-                        }
-                    }
                     AccountRowId.STRIPE -> {
                         StripeWalletActivity.start(context)
                     }
                     AccountRowId.WECHAT -> {
                         onNavigateTo(AccountAppScreen.Wechat)
+                    }
+                    AccountRowId.MOBILE -> {
+                        if (account.isMobileEmail) {
+                            uiState.showMobileAlert(true)
+                        } else {
+                            onNavigateTo(AccountAppScreen.Mobile)
+                        }
                     }
                     AccountRowId.DELETE -> {
                         uiState.showDeleteAlert(true)
@@ -120,15 +108,5 @@ fun FtcAccountActivityScreen(
             }
         )
     }
-}
-
-private fun launchUpdateActivity(
-    launcher: ManagedActivityResultLauncher<Intent, ActivityResult>,
-    context: Context,
-    rowId: AccountRowId,
-) {
-    launcher.launch(
-        UpdateActivity.intent(context, rowId)
-    )
 }
 
