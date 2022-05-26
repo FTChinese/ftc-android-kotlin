@@ -72,6 +72,42 @@ fun SaveButton(
     }
 }
 
+enum class ButtonVariant {
+    Primary,
+    Outline;
+}
+
+@Composable
+fun BlockButton(
+    enabled: Boolean,
+    onClick: () -> Unit,
+    text: String = stringResource(id = R.string.btn_save),
+    variant: ButtonVariant = ButtonVariant.Primary,
+) {
+    val modifier = Modifier.fillMaxWidth()
+
+    when (variant) {
+        ButtonVariant.Primary -> {
+            PrimaryButton(
+                onClick = onClick,
+                enabled = enabled,
+                modifier = modifier
+            ) {
+                Text(text = text)
+            }
+        }
+        ButtonVariant.Outline -> {
+            OutlinedButton(
+                onClick = onClick,
+                enabled = enabled,
+                modifier = modifier,
+            ) {
+                Text(text = text)
+            }
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewPrimaryButton() {
